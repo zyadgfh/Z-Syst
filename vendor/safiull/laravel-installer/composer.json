@@ -1,0 +1,36 @@
+{
+    "name": "safiull/laravel-installer",
+    "description": "It's a simple laravel project installer with envato product validation ",
+    "type": "library",
+    "license": "MIT",
+    "version": "3.5.4",
+    "authors": [
+        {
+            "name": "Safiull Alam",
+            "email": "safiullalam9931@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Laravel\\LaravelInstaller\\": "src/"
+        },
+        "files": [
+            "src/Helpers/functions.php"
+        ]
+    },
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.0.0"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Laravel\\LaravelInstaller\\Providers\\LaravelInstallerServiceProvider"
+            ]
+        }
+    },
+    "prefer-stable": true
+}
