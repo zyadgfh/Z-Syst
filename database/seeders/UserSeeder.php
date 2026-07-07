@@ -9,13 +9,19 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::factory()->create([
-            'name' => 'Super Admin',
-            'email' => 'admin@example.com',
-            'password' => bcrypt('password'),
-            'role' => 'super_admin',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Super Admin',
+                'password' => bcrypt('password'),
+                'role' => 'super_admin',
+            ]
+        );
 
-        User::factory()->count(10)->create();
+        // create additional demo users only if they don't already exist
+        $existingCount = User::count();
+        if ($existingCount < 20) {
+            User::factory()->count(10)->create();
+        }
     }
 }

@@ -49,7 +49,14 @@ class AuthService extends BaseService
             throw ApiException::unauthorized('Invalid email or password');
         }
 
-        if (! $user->is_active) {
+        $isActive = true;
+        if (isset($user->is_active)) {
+            $isActive = (bool) $user->is_active;
+        } elseif (isset($user->status)) {
+            $isActive = $user->status === 'active';
+        }
+
+        if (! $isActive) {
             throw ApiException::forbidden('Account is deactivated');
         }
 
