@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
 
 class Branch extends Model
@@ -44,6 +45,16 @@ class Branch extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function transfersFrom(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class, 'from_branch_id');
+    }
+
+    public function transfersTo(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class, 'to_branch_id');
     }
 
     protected static function clearCompanyBranchCountCache(int $companyId): void

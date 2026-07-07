@@ -12,6 +12,11 @@ class Product extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected static function newFactory()
+    {
+        return \Database\Factories\ProductFactory::new();
+    }
+
     protected $fillable = [
         'company_id',
         'product_category_id',
@@ -49,5 +54,10 @@ class Product extends Model
     public function stocks(): HasMany
     {
         return $this->hasMany(ProductStock::class);
+    }
+
+    public function transferItems(): HasMany
+    {
+        return $this->hasMany(StockTransferItem::class);
     }
 }

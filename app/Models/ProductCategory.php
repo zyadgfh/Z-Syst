@@ -12,6 +12,11 @@ class ProductCategory extends Model
 {
     use HasFactory;
 
+    protected static function newFactory()
+    {
+        return \Database\Factories\ProductCategoryFactory::new();
+    }
+
     protected $fillable = [
         'company_id',
         'parent_id',

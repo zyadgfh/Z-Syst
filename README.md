@@ -42,6 +42,14 @@ A production-grade, enterprise-level Laravel 12 application with advanced Branch
 - CDN support structure
 - Distributed file storage ready
 
+### PharmaSync Product Feature List
+For the complete pharmacy-focused offering, see [docs/pharmasync-feature-list.md](docs/pharmasync-feature-list.md).
+
+## Public Pages
+- `/` — PharmaSync marketing landing page.
+- `/features` — Full PharmaSync feature list page.
+- `/docs` — PharmaSync documentation index page.
+
 ## System Requirements
 
 - PHP >= 8.2

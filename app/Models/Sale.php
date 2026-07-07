@@ -9,6 +9,11 @@ class Sale extends Model
 {
     use HasFactory;
 
+    protected static function newFactory()
+    {
+        return \Database\Factories\SaleFactory::new();
+    }
+
     protected $fillable = [
         'invoice_number', 'customer_id', 'branch_id', 'user_id', 'subtotal', 'discount_amount', 'tax_amount', 'total_amount', 'amount_paid', 'change_amount', 'payment_method', 'payment_status', 'sale_type', 'prescription_id', 'notes', 'company_id',
     ];

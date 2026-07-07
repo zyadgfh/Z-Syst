@@ -12,8 +12,8 @@ class Kernel extends ConsoleKernel
         // Check branch limits daily at midnight
         $schedule->command('branches:check-limits')->dailyAt('00:00');
 
-        // Clear branch limit cache every hour
-        $schedule->command('cache:clear')->hourly();
+        // Calculate daily analytics metrics
+        $schedule->command('analytics:calculate-daily-metrics')->dailyAt('01:00');
     }
 
     protected function commands(): void
