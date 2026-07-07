@@ -2,11 +2,13 @@
 
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\CompanyBranchLimitController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductCategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductStockController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\StockTransferController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TwoFactorController;
@@ -35,6 +37,38 @@ Route::prefix('v1')->group(function () {
         Route::post('/two-factor/confirm', [TwoFactorController::class, 'confirm'])->middleware(['auth:sanctum', 'throttle:10,1']);
         Route::post('/two-factor/disable', [TwoFactorController::class, 'disable'])->middleware(['auth:sanctum', 'throttle:10,1']);
         Route::post('/sales', [\App\Http\Controllers\Api\SaleController::class, 'store'])->middleware(['auth:sanctum','throttle:20,1']);
+
+        // Dashboard & Analytics (for regular authenticated users)
+        Route::prefix('dashboard')->group(function () {
+            // KPIs
+            Route::get('/kpis', [DashboardController::class, 'getKPIs'])->middleware('throttle:60,1');
+            
+            // Sales Analytics
+            Route::get('/sales-trends', [DashboardController::class, 'getSalesTrends'])->middleware('throttle:60,1');
+            Route::get('/top-selling-products', [DashboardController::class, 'getTopSellingProducts'])->middleware('throttle:60,1');
+            Route::get('/sales-by-category', [DashboardController::class, 'getSalesByCategory'])->middleware('throttle:60,1');
+            Route::get('/sales-by-branch', [DashboardController::class, 'getSalesByBranch'])->middleware('throttle:60,1');
+            Route::get('/payment-method-breakdown', [DashboardController::class, 'getPaymentMethodBreakdown'])->middleware('throttle:60,1');
+            
+            // Inventory Analytics
+            Route::get('/inventory-summary', [DashboardController::class, 'getInventorySummary'])->middleware('throttle:60,1');
+            Route::get('/low-stock-products', [DashboardController::class, 'getLowStockProducts'])->middleware('throttle:60,1');
+            Route::get('/out-of-stock-products', [DashboardController::class, 'getOutOfStockProducts'])->middleware('throttle:60,1');
+            Route::get('/expiring-products', [DashboardController::class, 'getExpiringProducts'])->middleware('throttle:60,1');
+            Route::get('/dead-stock', [DashboardController::class, 'getDeadStock'])->middleware('throttle:60,1');
+            Route::get('/fast-moving-products', [DashboardController::class, 'getFastMovingProducts'])->middleware('throttle:60,1');
+            Route::get('/stock-turnover', [DashboardController::class, 'getStockTurnover'])->middleware('throttle:60,1');
+            
+            // Cache Management
+            Route::post('/clear-cache', [DashboardController::class, 'clearCache'])->middleware('throttle:30,1');
+            
+            // Report Exports
+            Route::get('/export/sales', [DashboardController::class, 'exportSalesReport'])->middleware('throttle:10,1');
+            Route::get('/export/inventory', [DashboardController::class, 'exportInventoryReport'])->middleware('throttle:10,1');
+            Route::get('/export/expiring-products', [DashboardController::class, 'exportExpiringProductsReport'])->middleware('throttle:10,1');
+            Route::get('/export/top-selling-products', [DashboardController::class, 'exportTopSellingProductsReport'])->middleware('throttle:10,1');
+            Route::get('/export/stock-turnover', [DashboardController::class, 'exportStockTurnoverReport'])->middleware('throttle:10,1');
+        });
     });
 
     Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
@@ -96,6 +130,20 @@ Route::prefix('v1')->group(function () {
             Route::get('/product-stocks/{product_stock}', [ProductStockController::class, 'show'])->middleware('throttle:60,1');
             Route::put('/product-stocks/{product_stock}', [ProductStockController::class, 'update'])->middleware('throttle:30,1');
             Route::delete('/product-stocks/{product_stock}', [ProductStockController::class, 'destroy'])->middleware('throttle:30,1');
+
+            // Stock transfers
+            Route::get('/stock-transfers', [StockTransferController::class, 'index'])->middleware('throttle:60,1');
+            Route::post('/stock-transfers', [StockTransferController::class, 'store'])->middleware('throttle:30,1');
+            Route::get('/stock-transfers/statistics', [StockTransferController::class, 'statistics'])->middleware('throttle:60,1');
+            Route::get('/stock-transfers/{stockTransfer}', [StockTransferController::class, 'show'])->middleware('throttle:60,1');
+            Route::put('/stock-transfers/{stockTransfer}', [StockTransferController::class, 'update'])->middleware('throttle:30,1');
+            Route::delete('/stock-transfers/{stockTransfer}', [StockTransferController::class, 'destroy'])->middleware('throttle:30,1');
+            Route::get('/stock-transfers/{stockTransfer}/items', [StockTransferController::class, 'items'])->middleware('throttle:60,1');
+            Route::post('/stock-transfers/{stockTransfer}/approve', [StockTransferController::class, 'approve'])->middleware('throttle:30,1');
+            Route::post('/stock-transfers/{stockTransfer}/reject', [StockTransferController::class, 'reject'])->middleware('throttle:30,1');
+            Route::post('/stock-transfers/{stockTransfer}/ship', [StockTransferController::class, 'ship'])->middleware('throttle:30,1');
+            Route::post('/stock-transfers/{stockTransfer}/receive', [StockTransferController::class, 'receive'])->middleware('throttle:30,1');
+            Route::post('/stock-transfers/{stockTransfer}/cancel', [StockTransferController::class, 'cancel'])->middleware('throttle:30,1');
         });
     });
 });

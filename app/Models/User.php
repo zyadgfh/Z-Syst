@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -50,27 +51,27 @@ class User extends Authenticatable implements \Illuminate\Contracts\Auth\MustVer
         'status' => 'string',
     ];
 
-    public function company()
+    public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
-    public function branch()
+    public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class, 'branch_id');
     }
 
-    public function department()
+    public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
 
-    public function createdBy()
+    public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function updatedBy()
+    public function updatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
@@ -93,6 +94,26 @@ class User extends Authenticatable implements \Illuminate\Contracts\Auth\MustVer
     public function activityLogs(): HasMany
     {
         return $this->hasMany(ActivityLog::class);
+    }
+
+    public function transfersRequested(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class, 'requested_by');
+    }
+
+    public function transfersApproved(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class, 'approved_by');
+    }
+
+    public function transfersShipped(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class, 'shipped_by');
+    }
+
+    public function transfersReceived(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class, 'received_by');
     }
 
     public function isSuperAdmin(): bool

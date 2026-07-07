@@ -1,0 +1,32 @@
+# Laravel
+/vendor
+/node_modules
+/.idea
+/.vscode
+/.env
+/.phpunit.result.cache
+Homestead.yaml
+Homestead.json
+/.vagrant
+
+# Storage
+/storage/*.key
+/storage/debugbar
+/storage/framework/cache/data
+/storage/framework/sessions
+/storage/framework/testing
+/storage/framework/views
+/storage/logs
+
+# Public
+/public/hot
+/public/storage
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+*.sublime-project
+*.sublime-workspace
+*.code-workspace

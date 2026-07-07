@@ -32,6 +32,11 @@ class Company extends Model
         return $this->hasMany(Branch::class);
     }
 
+    public function stockTransfers(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class);
+    }
+
     public function branchLimitUpdatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'branch_limit_updated_by');

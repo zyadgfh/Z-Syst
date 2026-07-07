@@ -9,6 +9,11 @@ class SaleItem extends Model
 {
     use HasFactory;
 
+    protected static function newFactory()
+    {
+        return \Database\Factories\SaleItemFactory::new();
+    }
+
     protected $fillable = ['sale_id', 'product_id', 'batch_number', 'quantity', 'unit_price', 'discount', 'tax', 'total'];
 
     public function sale()
@@ -20,4 +25,6 @@ class SaleItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+
 }
