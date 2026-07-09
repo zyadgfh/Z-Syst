@@ -3,7 +3,7 @@
         'name' => 'z-syst/laravel-app',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '67bf3b853699aa01c309dea42cb164b11b1db578',
+        'reference' => 'b1426c55297112c1b36121d0c98ed334aee6dd3d',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -627,6 +627,15 @@
             'install_path' => __DIR__ . '/../phpoption/phpoption',
             'aliases' => array(),
             'dev_requirement' => false,
+        ),
+        'phpstan/phpstan' => array(
+            'pretty_version' => '2.2.5',
+            'version' => '2.2.5.0',
+            'reference' => '909c1e5fef7989ac0d0c1c5c42e32a5c4f6198a0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../phpstan/phpstan',
+            'aliases' => array(),
+            'dev_requirement' => true,
         ),
         'phpunit/php-code-coverage' => array(
             'pretty_version' => '11.0.12',
@@ -1325,7 +1334,7 @@
         'z-syst/laravel-app' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '67bf3b853699aa01c309dea42cb164b11b1db578',
+            'reference' => 'b1426c55297112c1b36121d0c98ed334aee6dd3d',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
