@@ -16,6 +16,10 @@ return new class extends Migration
             $table->string('status')->default('draft')->index();
             $table->decimal('total', 14, 2)->default(0);
             $table->string('currency', 10)->default('USD');
+            $table->string('customer_name')->nullable();
+            $table->string('customer_phone')->nullable();
+            $table->text('notes')->nullable();
+            $table->unsignedBigInteger('created_by')->nullable()->index();
             $table->timestamps();
         });
     }

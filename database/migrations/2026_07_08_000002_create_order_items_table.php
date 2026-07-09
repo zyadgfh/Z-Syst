@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('drug_id')->nullable()->index();
             $table->integer('quantity')->default(1);
             $table->decimal('price', 12, 2)->default(0);
+            $table->decimal('total', 14, 2)->default(0);
             $table->timestamps();
         });
     }

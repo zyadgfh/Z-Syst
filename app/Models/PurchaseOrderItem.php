@@ -4,26 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\HasCompany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PurchaseOrderItem extends Model
 {
-    use HasFactory, HasCompany;
+    use HasFactory;
 
     protected $fillable = [
         'purchase_order_id',
-        'company_id',
         'product_id',
-        'drug_id',
         'quantity_ordered',
         'quantity_received',
         'unit_cost',
         'discount',
         'tax',
         'total',
-        'quantity',
-        'price',
     ];
 
     protected $casts = [
@@ -33,8 +28,6 @@ class PurchaseOrderItem extends Model
         'discount' => 'decimal:2',
         'tax' => 'decimal:2',
         'total' => 'decimal:2',
-        'quantity' => 'decimal:2',
-        'price' => 'decimal:2',
     ];
 
     public function purchaseOrder(): BelongsTo

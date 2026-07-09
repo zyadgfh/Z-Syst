@@ -24,6 +24,7 @@ return new class extends Migration
             $table->text('covered_items')->nullable();
             $table->text('exclusions')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

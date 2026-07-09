@@ -25,6 +25,7 @@ final class PurchaseOrderService
                 'company_id' => $companyId,
                 'supplier_id' => $data['supplier_id'],
                 'branch_id' => $data['branch_id'],
+                'uuid' => (string) Str::uuid(),
                 'po_number' => $this->generatePoNumber(),
                 'status' => 'draft',
                 'subtotal' => $totals['subtotal'],

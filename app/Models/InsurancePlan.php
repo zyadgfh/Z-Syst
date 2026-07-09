@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\HasCompany;
 
 class InsurancePlan extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasCompany;
 
     protected $fillable = [
         'company_id',
@@ -27,6 +28,7 @@ class InsurancePlan extends Model
         'covered_items',
         'exclusions',
         'is_active',
+        'created_by',
     ];
 
     protected $casts = [

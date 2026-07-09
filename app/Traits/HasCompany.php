@@ -24,4 +24,13 @@ trait HasCompany
     {
         return $query->withoutGlobalScope(TenantScope::class);
     }
+
+    /**
+     * Scope a query to a specific company id.
+     */
+    public function scopeForCompany($query, $companyId)
+    {
+        return $query->withoutGlobalScope(TenantScope::class)->where('company_id', $companyId);
+    }
 }
+

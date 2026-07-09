@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\ProductCategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductStockController;
 use App\Http\Controllers\Admin\PurchaseOrderController;
+use App\Http\Controllers\Admin\PurchaseOrderReturnController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\StockTransferController;
 use App\Http\Controllers\Admin\SupplierController;
@@ -105,9 +106,9 @@ Route::prefix('v1')->group(function () {
         // Phase-2: Orders & Procurement
         Route::get('/orders', [\App\Http\Controllers\Api\V1\Admin\OrderController::class, 'index'])->middleware('throttle:60,1');
         Route::post('/orders', [\App\Http\Controllers\Api\V1\Admin\OrderController::class, 'store'])->middleware('throttle:30,1');
-
-        Route::get('/purchase-orders', [\App\Http\Controllers\Api\V1\Admin\PurchaseOrderController::class, 'index'])->middleware('throttle:60,1');
-        Route::post('/purchase-orders', [\App\Http\Controllers\Api\V1\Admin\PurchaseOrderController::class, 'store'])->middleware('throttle:30,1');
+        Route::get('/orders/{order}', [\App\Http\Controllers\Api\V1\Admin\OrderController::class, 'show'])->middleware('throttle:60,1');
+        Route::put('/orders/{order}', [\App\Http\Controllers\Api\V1\Admin\OrderController::class, 'update'])->middleware('throttle:30,1');
+        Route::delete('/orders/{order}', [\App\Http\Controllers\Api\V1\Admin\OrderController::class, 'destroy'])->middleware('throttle:30,1');
 
         // Role Management
         Route::middleware(['can:super-admin'])->group(function () {
@@ -209,67 +210,81 @@ Route::prefix('v1')->group(function () {
             Route::get('/suppliers/{supplier}', [SupplierController::class, 'show'])->middleware('throttle:60,1');
             Route::put('/suppliers/{supplier}', [SupplierController::class, 'update'])->middleware('throttle:30,1');
             Route::delete('/suppliers/{supplier}', [SupplierController::class, 'destroy'])->middleware('throttle:30,1');
-
-            // Purchase Orders
-            Route::get('/purchase-orders', [PurchaseOrderController::class, 'index'])->middleware('throttle:60,1');
-            Route::post('/purchase-orders', [PurchaseOrderController::class, 'store'])->middleware('throttle:30,1');
-            Route::get('/purchase-orders/{purchaseOrder}', [PurchaseOrderController::class, 'show'])->middleware('throttle:60,1');
-            Route::put('/purchase-orders/{purchaseOrder}', [PurchaseOrderController::class, 'update'])->middleware('throttle:30,1');
-            Route::delete('/purchase-orders/{purchaseOrder}', [PurchaseOrderController::class, 'destroy'])->middleware('throttle:30,1');
-            Route::post('/purchase-orders/{purchaseOrder}/approve', [PurchaseOrderController::class, 'approve'])->middleware('throttle:30,1');
-            Route::post('/purchase-orders/{purchaseOrder}/send', [PurchaseOrderController::class, 'send'])->middleware('throttle:30,1');
-            Route::post('/purchase-orders/{purchaseOrder}/cancel', [PurchaseOrderController::class, 'cancel'])->middleware('throttle:30,1');
-
-            // Goods Received Notes
-            Route::get('/goods-received-notes', [GoodsReceivedNoteController::class, 'index'])->middleware('throttle:60,1');
-            Route::post('/goods-received-notes', [GoodsReceivedNoteController::class, 'store'])->middleware('throttle:30,1');
-            Route::get('/goods-received-notes/{goodsReceivedNote}', [GoodsReceivedNoteController::class, 'show'])->middleware('throttle:60,1');
-            Route::delete('/goods-received-notes/{goodsReceivedNote}', [GoodsReceivedNoteController::class, 'destroy'])->middleware('throttle:30,1');
-
-            // Prescriptions
-            Route::get('/prescriptions', [PrescriptionController::class, 'index'])->middleware('throttle:60,1');
-            Route::post('/prescriptions', [PrescriptionController::class, 'store'])->middleware('throttle:30,1');
-            Route::get('/prescriptions/{prescription}', [PrescriptionController::class, 'show'])->middleware('throttle:60,1');
-            Route::put('/prescriptions/{prescription}', [PrescriptionController::class, 'update'])->middleware('throttle:30,1');
-            Route::delete('/prescriptions/{prescription}', [PrescriptionController::class, 'destroy'])->middleware('throttle:30,1');
-            Route::post('/prescriptions/{prescription}/dispense', [PrescriptionController::class, 'dispense'])->middleware('throttle:30,1');
-
-            
-
-            // Expense Categories
-            Route::get('/expense-categories', [ExpenseCategoryController::class, 'index'])->middleware('throttle:60,1');
-            Route::post('/expense-categories', [ExpenseCategoryController::class, 'store'])->middleware('throttle:30,1');
-            Route::get('/expense-categories/{expenseCategory}', [ExpenseCategoryController::class, 'show'])->middleware('throttle:60,1');
-            Route::put('/expense-categories/{expenseCategory}', [ExpenseCategoryController::class, 'update'])->middleware('throttle:30,1');
-            Route::delete('/expense-categories/{expenseCategory}', [ExpenseCategoryController::class, 'destroy'])->middleware('throttle:30,1');
-
-            // Expenses
-            Route::get('/expenses', [ExpenseController::class, 'index'])->middleware('throttle:60,1');
-            Route::post('/expenses', [ExpenseController::class, 'store'])->middleware('throttle:30,1');
-            Route::get('/expenses/{expense}', [ExpenseController::class, 'show'])->middleware('throttle:60,1');
-            Route::put('/expenses/{expense}', [ExpenseController::class, 'update'])->middleware('throttle:30,1');
-            Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->middleware('throttle:30,1');
-
-            // Cash Registers
-            Route::get('/cash-registers', [CashRegisterController::class, 'index'])->middleware('throttle:60,1');
-            Route::post('/cash-registers', [CashRegisterController::class, 'store'])->middleware('throttle:30,1');
-            Route::get('/cash-registers/{cashRegister}', [CashRegisterController::class, 'show'])->middleware('throttle:60,1');
-            Route::post('/cash-registers/{cashRegister}/close', [CashRegisterController::class, 'close'])->middleware('throttle:30,1');
-
-            // Insurance Companies
-            Route::get('/insurance-companies', [InsuranceCompanyController::class, 'index'])->middleware('throttle:60,1');
-            Route::post('/insurance-companies', [InsuranceCompanyController::class, 'store'])->middleware('throttle:30,1');
-            Route::get('/insurance-companies/{insuranceCompany}', [InsuranceCompanyController::class, 'show'])->middleware('throttle:60,1');
-            Route::put('/insurance-companies/{insuranceCompany}', [InsuranceCompanyController::class, 'update'])->middleware('throttle:30,1');
-            Route::delete('/insurance-companies/{insuranceCompany}', [InsuranceCompanyController::class, 'destroy'])->middleware('throttle:30,1');
-
-            // Insurance Plans
-            Route::get('/insurance-plans', [InsurancePlanController::class, 'index'])->middleware('throttle:60,1');
-            Route::post('/insurance-plans', [InsurancePlanController::class, 'store'])->middleware('throttle:30,1');
-            Route::get('/insurance-plans/{insurancePlan}', [InsurancePlanController::class, 'show'])->middleware('throttle:60,1');
-            Route::put('/insurance-plans/{insurancePlan}', [InsurancePlanController::class, 'update'])->middleware('throttle:30,1');
-            Route::delete('/insurance-plans/{insurancePlan}', [InsurancePlanController::class, 'destroy'])->middleware('throttle:30,1');
         });
+
+        // Purchase Orders
+        Route::get('/purchase-orders', [PurchaseOrderController::class, 'index'])->middleware('throttle:60,1');
+        Route::post('/purchase-orders', [PurchaseOrderController::class, 'store'])->middleware('throttle:30,1');
+        Route::get('/purchase-orders/{purchaseOrder}', [PurchaseOrderController::class, 'show'])->middleware('throttle:60,1');
+        Route::put('/purchase-orders/{purchaseOrder}', [PurchaseOrderController::class, 'update'])->middleware('throttle:30,1');
+        Route::delete('/purchase-orders/{purchaseOrder}', [PurchaseOrderController::class, 'destroy'])->middleware('throttle:30,1');
+        Route::post('/purchase-orders/{purchaseOrder}/approve', [PurchaseOrderController::class, 'approve'])->middleware('throttle:30,1');
+        Route::post('/purchase-orders/{purchaseOrder}/send', [PurchaseOrderController::class, 'send'])->middleware('throttle:30,1');
+        Route::post('/purchase-orders/{purchaseOrder}/cancel', [PurchaseOrderController::class, 'cancel'])->middleware('throttle:30,1');
+
+        // Purchase Order Returns
+        Route::get('/purchase-order-returns', [PurchaseOrderReturnController::class, 'index'])->middleware('throttle:60,1');
+        Route::post('/purchase-order-returns', [PurchaseOrderReturnController::class, 'store'])->middleware('throttle:30,1');
+        Route::get('/purchase-order-returns/{purchaseOrderReturn}', [PurchaseOrderReturnController::class, 'show'])->middleware('throttle:60,1');
+        Route::delete('/purchase-order-returns/{purchaseOrderReturn}', [PurchaseOrderReturnController::class, 'destroy'])->middleware('throttle:30,1');
+
+        // Goods Received Notes
+        Route::get('/goods-received-notes', [GoodsReceivedNoteController::class, 'index'])->middleware('throttle:60,1');
+        Route::post('/goods-received-notes', [GoodsReceivedNoteController::class, 'store'])->middleware('throttle:30,1');
+        Route::get('/goods-received-notes/{goodsReceivedNote}', [GoodsReceivedNoteController::class, 'show'])->middleware('throttle:60,1');
+        Route::delete('/goods-received-notes/{goodsReceivedNote}', [GoodsReceivedNoteController::class, 'destroy'])->middleware('throttle:30,1');
+
+        // Prescriptions
+        Route::get('/prescriptions', [PrescriptionController::class, 'index'])->middleware('throttle:60,1');
+        Route::post('/prescriptions', [PrescriptionController::class, 'store'])->middleware('throttle:30,1');
+        Route::get('/prescriptions/{prescription}', [PrescriptionController::class, 'show'])->middleware('throttle:60,1');
+        Route::put('/prescriptions/{prescription}', [PrescriptionController::class, 'update'])->middleware('throttle:30,1');
+        Route::delete('/prescriptions/{prescription}', [PrescriptionController::class, 'destroy'])->middleware('throttle:30,1');
+        Route::post('/prescriptions/{prescription}/dispense', [PrescriptionController::class, 'dispense'])->middleware('throttle:30,1');
+
+        // Expense Categories
+        Route::get('/expense-categories', [ExpenseCategoryController::class, 'index'])->middleware('throttle:60,1');
+        Route::post('/expense-categories', [ExpenseCategoryController::class, 'store'])->middleware('throttle:30,1');
+        Route::get('/expense-categories/{expenseCategory}', [ExpenseCategoryController::class, 'show'])->middleware('throttle:60,1');
+        Route::put('/expense-categories/{expenseCategory}', [ExpenseCategoryController::class, 'update'])->middleware('throttle:30,1');
+        Route::delete('/expense-categories/{expenseCategory}', [ExpenseCategoryController::class, 'destroy'])->middleware('throttle:30,1');
+
+        // Expenses
+        Route::get('/expenses', [ExpenseController::class, 'index'])->middleware('throttle:60,1');
+        Route::post('/expenses', [ExpenseController::class, 'store'])->middleware('throttle:30,1');
+        Route::get('/expenses/{expense}', [ExpenseController::class, 'show'])->middleware('throttle:60,1');
+        Route::put('/expenses/{expense}', [ExpenseController::class, 'update'])->middleware('throttle:30,1');
+        Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->middleware('throttle:30,1');
+
+        // Cash Registers
+        Route::get('/cash-registers', [CashRegisterController::class, 'index'])->middleware('throttle:60,1');
+        Route::post('/cash-registers', [CashRegisterController::class, 'store'])->middleware('throttle:30,1');
+        Route::get('/cash-registers/{cashRegister}', [CashRegisterController::class, 'show'])->middleware('throttle:60,1');
+        Route::post('/cash-registers/{cashRegister}/close', [CashRegisterController::class, 'close'])->middleware('throttle:30,1');
+
+        // Insurance Companies
+        Route::get('/insurance-companies', [InsuranceCompanyController::class, 'index'])->middleware('throttle:60,1');
+        Route::post('/insurance-companies', [InsuranceCompanyController::class, 'store'])->middleware('throttle:30,1');
+        Route::get('/insurance-companies/{insuranceCompany}', [InsuranceCompanyController::class, 'show'])->middleware('throttle:60,1');
+        Route::put('/insurance-companies/{insuranceCompany}', [InsuranceCompanyController::class, 'update'])->middleware('throttle:30,1');
+        Route::delete('/insurance-companies/{insuranceCompany}', [InsuranceCompanyController::class, 'destroy'])->middleware('throttle:30,1');
+
+        // Insurance Plans
+        Route::get('/insurance-plans', [InsurancePlanController::class, 'index'])->middleware('throttle:60,1');
+        Route::post('/insurance-plans', [InsurancePlanController::class, 'store'])->middleware('throttle:30,1');
+        Route::get('/insurance-plans/{insurancePlan}', [InsurancePlanController::class, 'show'])->middleware('throttle:60,1');
+        Route::put('/insurance-plans/{insurancePlan}', [InsurancePlanController::class, 'update'])->middleware('throttle:30,1');
+        Route::delete('/insurance-plans/{insurancePlan}', [InsurancePlanController::class, 'destroy'])->middleware('throttle:30,1');
+
+        // Insurance Claims
+        Route::get('/insurance-claims', [InsuranceClaimController::class, 'index'])->middleware('throttle:60,1');
+        Route::post('/insurance-claims', [InsuranceClaimController::class, 'store'])->middleware('throttle:30,1');
+        Route::get('/insurance-claims/{insuranceClaim}', [InsuranceClaimController::class, 'show'])->middleware('throttle:60,1');
+        Route::put('/insurance-claims/{insuranceClaim}', [InsuranceClaimController::class, 'update'])->middleware('throttle:30,1');
+        Route::delete('/insurance-claims/{insuranceClaim}', [InsuranceClaimController::class, 'destroy'])->middleware('throttle:30,1');
+        Route::post('/insurance-claims/{insuranceClaim}/submit', [InsuranceClaimController::class, 'submit'])->middleware('throttle:30,1');
+        Route::post('/insurance-claims/{insuranceClaim}/approve', [InsuranceClaimController::class, 'approve'])->middleware('throttle:30,1');
+        Route::post('/insurance-claims/{insuranceClaim}/reject', [InsuranceClaimController::class, 'reject'])->middleware('throttle:30,1');
     });
 });
 

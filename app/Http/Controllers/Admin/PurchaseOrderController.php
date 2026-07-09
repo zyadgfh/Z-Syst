@@ -94,6 +94,10 @@ final class PurchaseOrderController extends BaseController
             return $this->error('Forbidden', 403);
         }
 
+        if (!in_array($purchaseOrder->status, ['draft', 'pending'])) {
+            return $this->error('Cannot delete a processed purchase order', 422);
+        }
+
         $purchaseOrder->delete();
 
         return $this->success(null, 'Purchase order deleted successfully');

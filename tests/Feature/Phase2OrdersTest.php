@@ -30,7 +30,7 @@ class Phase2OrdersTest extends TestCase
         ];
 
         $resp = $this->postJson('/api/v1/admin/orders', $payload);
-        $resp->assertStatus(201)->assertJsonStructure(['id','items']);
+        $resp->assertStatus(201)->assertJsonStructure(['data' => ['id','items']]);
 
         // model-level: create purchase order (respect test schema differences)
         $poData = [];
