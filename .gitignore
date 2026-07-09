@@ -5,6 +5,8 @@
 /.vscode
 /.env
 /.phpunit.result.cache
+/.phpunit.cache
+/build
 Homestead.yaml
 Homestead.json
 /.vagrant
