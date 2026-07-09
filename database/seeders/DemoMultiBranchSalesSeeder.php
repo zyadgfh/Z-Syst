@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Company;
 
 class DemoMultiBranchSalesSeeder extends Seeder
 {

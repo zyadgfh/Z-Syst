@@ -19,7 +19,7 @@ class SampleSaleSeeder extends Seeder
         $company = Company::first() ?? Company::create(['name' => 'Demo Company']);
 
         $branch = Branch::first();
-        if (!$branch) {
+        if (! $branch) {
             $branch = Branch::create([
                 'company_id' => $company->id,
                 'name' => 'Main Branch',
@@ -30,7 +30,7 @@ class SampleSaleSeeder extends Seeder
         $product = Product::create([
             'company_id' => $company->id,
             'product_category_id' => null,
-            'sku' => 'TEST-' . strtoupper(Str::random(6)),
+            'sku' => 'TEST-'.strtoupper(Str::random(6)),
             'name' => 'Sample Painkiller',
             'slug' => 'sample-painkiller',
             'description' => 'Sample product for testing sales',
@@ -53,7 +53,7 @@ class SampleSaleSeeder extends Seeder
         ]);
 
         $user = User::where('email', 'cashier+test@example.com')->first();
-        if (!$user) {
+        if (! $user) {
             $user = User::create([
                 'name' => 'Test Cashier',
                 'email' => 'cashier+test@example.com',
@@ -65,7 +65,7 @@ class SampleSaleSeeder extends Seeder
         }
 
         $role = Role::where('slug', 'cashier')->first();
-        if (!$role) {
+        if (! $role) {
             $role = Role::create([
                 'name' => 'Cashier',
                 'slug' => 'cashier',
@@ -78,7 +78,7 @@ class SampleSaleSeeder extends Seeder
         }
 
         $permission = Permission::where('slug', 'sales.create')->first();
-        if (!$permission) {
+        if (! $permission) {
             $permission = Permission::create([
                 'name' => 'Create Sale',
                 'slug' => 'sales.create',
@@ -90,7 +90,7 @@ class SampleSaleSeeder extends Seeder
         }
 
         // Attach permission to role if not attached
-        if (!$role->hasPermission('sales.create')) {
+        if (! $role->hasPermission('sales.create')) {
             $role->permissions()->syncWithoutDetaching([$permission->id]);
         }
 
@@ -99,9 +99,9 @@ class SampleSaleSeeder extends Seeder
 
         $token = $user->createToken('sample-sales-token');
 
-        $this->command->info('Seeded sample product: ID=' . $product->id);
-        $this->command->info('Seeded sample stock: ID=' . $stock->id . ' qty=' . $stock->quantity);
-        $this->command->info('Created test user: ' . $user->email . ' password: password');
-        $this->command->info('SANCTUM_TOKEN: ' . $token->plainTextToken);
+        $this->command->info('Seeded sample product: ID='.$product->id);
+        $this->command->info('Seeded sample stock: ID='.$stock->id.' qty='.$stock->quantity);
+        $this->command->info('Created test user: '.$user->email.' password: password');
+        $this->command->info('SANCTUM_TOKEN: '.$token->plainTextToken);
     }
 }

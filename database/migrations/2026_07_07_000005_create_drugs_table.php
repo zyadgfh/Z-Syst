@@ -24,8 +24,8 @@ class CreateDrugsTable extends Migration
                 $table->softDeletes();
 
                 $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
-                $table->index(['company_id','barcode']);
-                $table->unique(['company_id','name']);
+                $table->index(['company_id', 'barcode']);
+                $table->unique(['company_id', 'name']);
             });
         }
     }

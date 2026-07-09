@@ -6,8 +6,8 @@ use App\Models\Company;
 use Database\Seeders\DemoDrugSeeder;
 use Database\Seeders\DemoInventorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class DemoInventoryTest extends TestCase

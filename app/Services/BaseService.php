@@ -98,7 +98,7 @@ abstract class BaseService
     protected function toggle(Model $model, string $field = 'is_active'): Model
     {
         $model->update([
-            $field => !$model->{$field},
+            $field => ! $model->{$field},
         ]);
 
         return $model->fresh();

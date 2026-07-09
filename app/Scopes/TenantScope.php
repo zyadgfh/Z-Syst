@@ -2,9 +2,9 @@
 
 namespace App\Scopes;
 
-use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Scope;
 
 class TenantScope implements Scope
 {
@@ -17,7 +17,7 @@ class TenantScope implements Scope
         }
 
         if ($companyId) {
-            $builder->where($model->getTable() . '.company_id', $companyId);
+            $builder->where($model->getTable().'.company_id', $companyId);
         }
     }
 

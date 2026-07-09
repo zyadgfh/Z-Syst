@@ -10,14 +10,14 @@ return new class extends Migration
     {
         if (! Schema::hasTable('purchase_order_items')) {
             Schema::create('purchase_order_items', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('purchase_order_id')->index();
-            $table->unsignedBigInteger('company_id')->index();
-            $table->unsignedBigInteger('product_id')->nullable()->index();
-            $table->unsignedBigInteger('drug_id')->nullable()->index();
-            $table->integer('quantity')->default(1);
-            $table->decimal('price', 12, 2)->default(0);
-            $table->timestamps();
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('purchase_order_id')->index();
+                $table->unsignedBigInteger('company_id')->index();
+                $table->unsignedBigInteger('product_id')->nullable()->index();
+                $table->unsignedBigInteger('drug_id')->nullable()->index();
+                $table->integer('quantity')->default(1);
+                $table->decimal('price', 12, 2)->default(0);
+                $table->timestamps();
             });
         }
     }

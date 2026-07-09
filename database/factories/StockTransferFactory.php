@@ -2,14 +2,14 @@
 
 namespace Database\Factories;
 
-use App\Models\StockTransfer;
-use App\Models\Company;
 use App\Models\Branch;
+use App\Models\Company;
+use App\Models\StockTransfer;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\StockTransfer>
+ * @extends Factory<StockTransfer>
  */
 class StockTransferFactory extends Factory
 {
@@ -36,7 +36,7 @@ class StockTransferFactory extends Factory
             'from_branch_id' => $branches[0]->id,
             'to_branch_id' => $branches[1]->id,
             'requested_by' => $user->id,
-            'transfer_number' => 'STF-' . str_pad($company->id, 4, '0', STR_PAD_LEFT) . '-' . now()->format('Ymd') . '-TEST',
+            'transfer_number' => 'STF-'.str_pad($company->id, 4, '0', STR_PAD_LEFT).'-'.now()->format('Ymd').'-TEST',
             'status' => 'pending',
             'notes' => $this->faker->optional()->sentence(),
             'requested_at' => now(),
@@ -48,8 +48,6 @@ class StockTransferFactory extends Factory
 
     /**
      * Indicate that the transfer is approved.
-     *
-     * @return \Database\Factories\StockTransferFactory
      */
     public function approved(): self
     {
@@ -62,8 +60,6 @@ class StockTransferFactory extends Factory
 
     /**
      * Indicate that the transfer is in transit.
-     *
-     * @return \Database\Factories\StockTransferFactory
      */
     public function inTransit(): self
     {
@@ -78,8 +74,6 @@ class StockTransferFactory extends Factory
 
     /**
      * Indicate that the transfer is received.
-     *
-     * @return \Database\Factories\StockTransferFactory
      */
     public function received(): self
     {
@@ -96,8 +90,6 @@ class StockTransferFactory extends Factory
 
     /**
      * Indicate that the transfer is rejected.
-     *
-     * @return \Database\Factories\StockTransferFactory
      */
     public function rejected(): self
     {
@@ -111,8 +103,6 @@ class StockTransferFactory extends Factory
 
     /**
      * Indicate that the transfer is cancelled.
-     *
-     * @return \Database\Factories\StockTransferFactory
      */
     public function cancelled(): self
     {

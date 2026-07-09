@@ -2,12 +2,17 @@
 
 namespace Tests\Unit;
 
-use App\Models\StockTransfer;
-use App\Models\StockTransferItem;
-use App\Models\Product;
-use App\Models\ProductStock;
+use App\Events\StockTransferApproved;
+use App\Events\StockTransferCancelled;
+use App\Events\StockTransferReceived;
+use App\Events\StockTransferRejected;
+use App\Events\StockTransferShipped;
 use App\Models\Branch;
 use App\Models\Company;
+use App\Models\Product;
+use App\Models\ProductStock;
+use App\Models\StockTransfer;
+use App\Models\StockTransferItem;
 use App\Models\User;
 use App\Services\StockTransferService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,7 +21,7 @@ use Tests\TestCase;
 
 /**
  * StockTransferServiceTest
- * 
+ *
  * Unit tests for the StockTransferService.
  * Tests the business logic for stock transfer operations.
  */
@@ -25,18 +30,24 @@ class StockTransferServiceTest extends TestCase
     use RefreshDatabase;
 
     protected StockTransferService $stockTransferService;
+
     protected Company $company;
+
     protected Branch $fromBranch;
+
     protected Branch $toBranch;
+
     protected User $user;
+
     protected Product $product;
+
     protected ProductStock $productStock;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->stockTransferService = new StockTransferService();
+        $this->stockTransferService = new StockTransferService;
 
         // Create test data
         $this->company = Company::factory()->create();
@@ -116,7 +127,7 @@ class StockTransferServiceTest extends TestCase
         $this->assertEquals($this->user->id, $approvedTransfer->approved_by);
         $this->assertNotNull($approvedTransfer->approved_at);
 
-        Event::assertDispatched(\App\Events\StockTransferApproved::class);
+        Event::assertDispatched(StockTransferApproved::class);
     }
 
     /**
@@ -145,7 +156,7 @@ class StockTransferServiceTest extends TestCase
         $this->assertEquals('Insufficient stock', $rejectedTransfer->rejection_reason);
         $this->assertNotNull($rejectedTransfer->rejected_at);
 
-        Event::assertDispatched(\App\Events\StockTransferRejected::class);
+        Event::assertDispatched(StockTransferRejected::class);
     }
 
     /**
@@ -193,7 +204,7 @@ class StockTransferServiceTest extends TestCase
         // Verify stock was deducted
         $this->assertEquals(50, $this->productStock->fresh()->quantity);
 
-        Event::assertDispatched(\App\Events\StockTransferShipped::class);
+        Event::assertDispatched(StockTransferShipped::class);
     }
 
     /**
@@ -242,11 +253,11 @@ class StockTransferServiceTest extends TestCase
         $destinationStock = ProductStock::where('product_id', $this->product->id)
             ->where('branch_id', $this->toBranch->id)
             ->first();
-        
+
         $this->assertNotNull($destinationStock);
         $this->assertEquals(50, $destinationStock->quantity);
 
-        Event::assertDispatched(\App\Events\StockTransferReceived::class);
+        Event::assertDispatched(StockTransferReceived::class);
     }
 
     /**
@@ -269,7 +280,7 @@ class StockTransferServiceTest extends TestCase
         $this->assertEquals('cancelled', $cancelledTransfer->status);
         $this->assertNotNull($cancelledTransfer->cancelled_at);
 
-        Event::assertDispatched(\App\Events\StockTransferCancelled::class);
+        Event::assertDispatched(StockTransferCancelled::class);
     }
 
     /**
@@ -310,7 +321,7 @@ class StockTransferServiceTest extends TestCase
         // Verify stock was restored
         $this->assertEquals(100, $this->productStock->fresh()->quantity);
 
-        Event::assertDispatched(\App\Events\StockTransferCancelled::class);
+        Event::assertDispatched(StockTransferCancelled::class);
     }
 
     /**

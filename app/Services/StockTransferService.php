@@ -2,23 +2,30 @@
 
 namespace App\Services;
 
+use App\Events\StockTransferApproved;
+use App\Events\StockTransferCancelled;
+use App\Events\StockTransferReceived;
+use App\Events\StockTransferRejected;
+use App\Events\StockTransferShipped;
+use App\Models\ActivityLog;
+use App\Models\Product;
+use App\Models\ProductStock;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
-use App\Models\ProductStock;
-use App\Models\Product;
-use App\Exceptions\BranchLimitExceededException;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 /**
  * StockTransferService
- * 
+ *
  * Service layer for managing stock transfer operations.
  * Handles business logic for the complete transfer workflow:
  * - Request → Approve → Ship → Receive
- * 
+ *
  * @author Z-Syst Development Team
+ *
  * @version 1.0.0
  */
 class StockTransferService extends BaseService
@@ -26,16 +33,13 @@ class StockTransferService extends BaseService
     /**
      * Create a new stock transfer request.
      *
-     * @param array $data
-     * @param int $userId
-     * @return StockTransfer
      * @throws \Exception
      */
     public function createTransfer(array $data, int $userId): StockTransfer
     {
         return DB::transaction(function () use ($data, $userId) {
             $company = auth()->user()->company;
-            
+
             // Create the stock transfer
             $transfer = StockTransfer::create([
                 'company_id' => $company->id,
@@ -97,14 +101,11 @@ class StockTransferService extends BaseService
     /**
      * Approve a stock transfer.
      *
-     * @param StockTransfer $transfer
-     * @param int $approverId
-     * @return StockTransfer
      * @throws \Exception
      */
     public function approveTransfer(StockTransfer $transfer, int $approverId): StockTransfer
     {
-        if (!$transfer->canBeApproved()) {
+        if (! $transfer->canBeApproved()) {
             throw new \Exception("Cannot approve transfer with status: {$transfer->status}");
         }
 
@@ -116,7 +117,7 @@ class StockTransferService extends BaseService
             ]);
 
             // Dispatch approval event
-            event(new \App\Events\StockTransferApproved($transfer));
+            event(new StockTransferApproved($transfer));
 
             // Clear cache
             $this->clearTransferCache($transfer->company_id);
@@ -128,15 +129,11 @@ class StockTransferService extends BaseService
     /**
      * Reject a stock transfer.
      *
-     * @param StockTransfer $transfer
-     * @param int $rejecterId
-     * @param string $reason
-     * @return StockTransfer
      * @throws \Exception
      */
     public function rejectTransfer(StockTransfer $transfer, int $rejecterId, string $reason): StockTransfer
     {
-        if (!$transfer->canBeRejected()) {
+        if (! $transfer->canBeRejected()) {
             throw new \Exception("Cannot reject transfer with status: {$transfer->status}");
         }
 
@@ -149,7 +146,7 @@ class StockTransferService extends BaseService
             ]);
 
             // Dispatch rejection event
-            event(new \App\Events\StockTransferRejected($transfer));
+            event(new StockTransferRejected($transfer));
 
             // Clear cache
             $this->clearTransferCache($transfer->company_id);
@@ -161,15 +158,11 @@ class StockTransferService extends BaseService
     /**
      * Ship a stock transfer (deduct stock from source branch).
      *
-     * @param StockTransfer $transfer
-     * @param int $shipperId
-     * @param array $itemsData
-     * @return StockTransfer
      * @throws \Exception
      */
     public function shipTransfer(StockTransfer $transfer, int $shipperId, array $itemsData): StockTransfer
     {
-        if (!$transfer->canBeShipped()) {
+        if (! $transfer->canBeShipped()) {
             throw new \Exception("Cannot ship transfer with status: {$transfer->status}");
         }
 
@@ -177,7 +170,7 @@ class StockTransferService extends BaseService
             // Update transfer items with shipping details
             foreach ($itemsData as $itemData) {
                 $transferItem = $transfer->items()->findOrFail($itemData['id']);
-                
+
                 $transferItem->update([
                     'quantity_sent' => $itemData['quantity_sent'],
                     'batch_number' => $itemData['batch_number'] ?? $transferItem->batch_number,
@@ -201,7 +194,7 @@ class StockTransferService extends BaseService
             ]);
 
             // Dispatch shipping event
-            event(new \App\Events\StockTransferShipped($transfer));
+            event(new StockTransferShipped($transfer));
 
             // Clear cache
             $this->clearTransferCache($transfer->company_id);
@@ -213,16 +206,11 @@ class StockTransferService extends BaseService
     /**
      * Receive a stock transfer (add stock to destination branch).
      *
-     * @param StockTransfer $transfer
-     * @param int $receiverId
-     * @param array $itemsData
-     * @param string|null $notes
-     * @return StockTransfer
      * @throws \Exception
      */
     public function receiveTransfer(StockTransfer $transfer, int $receiverId, array $itemsData, ?string $notes = null): StockTransfer
     {
-        if (!$transfer->canBeReceived()) {
+        if (! $transfer->canBeReceived()) {
             throw new \Exception("Cannot receive transfer with status: {$transfer->status}");
         }
 
@@ -230,7 +218,7 @@ class StockTransferService extends BaseService
             // Update transfer items with receiving details
             foreach ($itemsData as $itemData) {
                 $transferItem = $transfer->items()->findOrFail($itemData['id']);
-                
+
                 $transferItem->update([
                     'quantity_received' => $itemData['quantity_received'],
                 ]);
@@ -255,7 +243,7 @@ class StockTransferService extends BaseService
             ]);
 
             // Dispatch receiving event
-            event(new \App\Events\StockTransferReceived($transfer));
+            event(new StockTransferReceived($transfer));
 
             // Clear cache
             $this->clearTransferCache($transfer->company_id);
@@ -267,19 +255,15 @@ class StockTransferService extends BaseService
     /**
      * Cancel a stock transfer.
      *
-     * @param StockTransfer $transfer
-     * @param int $cancellerId
-     * @param string|null $reason
-     * @return StockTransfer
      * @throws \Exception
      */
     public function cancelTransfer(StockTransfer $transfer, int $cancellerId, ?string $reason = null): StockTransfer
     {
-        if (!$transfer->canBeCancelled()) {
+        if (! $transfer->canBeCancelled()) {
             throw new \Exception("Cannot cancel transfer with status: {$transfer->status}");
         }
 
-        return DB::transaction(function () use ($transfer, $cancellerId, $reason) {
+        return DB::transaction(function () use ($transfer, $reason) {
             // If transfer was already shipped, restore stock to source branch
             if ($transfer->status === 'in_transit') {
                 foreach ($transfer->items as $item) {
@@ -299,11 +283,11 @@ class StockTransferService extends BaseService
             $transfer->update([
                 'status' => 'cancelled',
                 'cancelled_at' => now(),
-                'notes' => $reason ? $transfer->notes . "\n\nCancellation: " . $reason : $transfer->notes,
+                'notes' => $reason ? $transfer->notes."\n\nCancellation: ".$reason : $transfer->notes,
             ]);
 
             // Dispatch cancellation event
-            event(new \App\Events\StockTransferCancelled($transfer));
+            event(new StockTransferCancelled($transfer));
 
             // Clear cache
             $this->clearTransferCache($transfer->company_id);
@@ -315,11 +299,6 @@ class StockTransferService extends BaseService
     /**
      * Deduct stock from a branch.
      *
-     * @param int $productId
-     * @param int $branchId
-     * @param float $quantity
-     * @param string|null $batchNumber
-     * @return void
      * @throws \Exception
      */
     protected function deductStock(int $productId, int $branchId, float $quantity, ?string $batchNumber = null): void
@@ -334,7 +313,7 @@ class StockTransferService extends BaseService
 
         $stock = $query->first();
 
-        if (!$stock) {
+        if (! $stock) {
             // Try fallback to any stock record for the same branch if batch lookup failed
             $stock = ProductStock::where('product_id', $productId)
                 ->where('branch_id', $branchId)
@@ -342,7 +321,7 @@ class StockTransferService extends BaseService
                 ->first();
         }
 
-        if (!$stock) {
+        if (! $stock) {
             throw new \Exception("Stock record not found for product {$productId} at branch {$branchId}");
         }
 
@@ -357,14 +336,6 @@ class StockTransferService extends BaseService
 
     /**
      * Add stock to a branch.
-     *
-     * @param int $productId
-     * @param int $branchId
-     * @param float $quantity
-     * @param string|null $batchNumber
-     * @param \Carbon\Carbon|null $expiryDate
-     * @param float $unitCost
-     * @return void
      */
     protected function addStock(int $productId, int $branchId, float $quantity, ?string $batchNumber = null, ?Carbon $expiryDate = null, float $unitCost = 0): void
     {
@@ -389,7 +360,7 @@ class StockTransferService extends BaseService
             $stock->save();
         } else {
             $product = Product::findOrFail($productId);
-            
+
             ProductStock::create([
                 'company_id' => $product->company_id,
                 'product_id' => $productId,
@@ -409,20 +380,12 @@ class StockTransferService extends BaseService
 
     /**
      * Log stock movement (placeholder for future integration).
-     *
-     * @param int $productId
-     * @param int $branchId
-     * @param string $movementType
-     * @param float $quantity
-     * @param string $referenceType
-     * @param string|null $batchNumber
-     * @return void
      */
     protected function logStockMovement(int $productId, int $branchId, string $movementType, float $quantity, string $referenceType, ?string $batchNumber = null): void
     {
         // This would integrate with a StockMovementService when implemented
         // For now, we'll create a basic log entry
-        \App\Models\ActivityLog::create([
+        ActivityLog::create([
             'company_id' => auth()->user()->company_id,
             'user_id' => auth()->id(),
             'action' => 'stock_movement',
@@ -436,9 +399,7 @@ class StockTransferService extends BaseService
     /**
      * Get transfers for a company with optional filters.
      *
-     * @param int $companyId
-     * @param array $filters
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @return LengthAwarePaginator
      */
     public function getTransfers(int $companyId, array $filters = [])
     {
@@ -461,7 +422,7 @@ class StockTransferService extends BaseService
         if (isset($filters['branch_id'])) {
             $query->where(function ($q) use ($filters) {
                 $q->where('from_branch_id', $filters['branch_id'])
-                  ->orWhere('to_branch_id', $filters['branch_id']);
+                    ->orWhere('to_branch_id', $filters['branch_id']);
             });
         }
 
@@ -483,24 +444,19 @@ class StockTransferService extends BaseService
 
         // Paginate
         $perPage = $filters['per_page'] ?? 25;
-        
+
         return $query->paginate($perPage);
     }
 
     /**
      * Get transfer statistics for a company.
-     *
-     * @param int $companyId
-     * @param int|null $branchId
-     * @param string $period
-     * @return array
      */
     public function getTransferStatistics(int $companyId, ?int $branchId = null, string $period = 'month'): array
     {
         $cacheKey = "company:{$companyId}:transfer_stats:{$branchId}:{$period}";
-        
+
         return Cache::remember($cacheKey, 300, function () use ($companyId, $branchId, $period) {
-            $startDate = match($period) {
+            $startDate = match ($period) {
                 'today' => Carbon::now()->startOfDay(),
                 'week' => Carbon::now()->startOfWeek(),
                 'month' => Carbon::now()->startOfMonth(),
@@ -514,7 +470,7 @@ class StockTransferService extends BaseService
             if ($branchId) {
                 $query->where(function ($q) use ($branchId) {
                     $q->where('from_branch_id', $branchId)
-                      ->orWhere('to_branch_id', $branchId);
+                        ->orWhere('to_branch_id', $branchId);
                 });
             }
 
@@ -536,9 +492,6 @@ class StockTransferService extends BaseService
 
     /**
      * Clear transfer-related cache.
-     *
-     * @param int $companyId
-     * @return void
      */
     protected function clearTransferCache(int $companyId): void
     {

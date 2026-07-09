@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Api\V1\Admin;
+namespace App\Http\Controllers\API\V1\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Models\Order;
 use App\Models\OrderItem;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -21,8 +21,8 @@ class OrderController extends Controller
     {
         $orders = Order::forCompany($request->user()->company_id)
             ->with(['items', 'branch'])
-            ->when($request->status, fn($q, $v) => $q->where('status', $v))
-            ->when($request->branch_id, fn($q, $v) => $q->where('branch_id', $v))
+            ->when($request->status, fn ($q, $v) => $q->where('status', $v))
+            ->when($request->branch_id, fn ($q, $v) => $q->where('branch_id', $v))
             ->orderByDesc('created_at')
             ->paginate($request->per_page ?? 25);
 
@@ -57,7 +57,7 @@ class OrderController extends Controller
             'customer_name' => $data['customer_name'] ?? null,
             'customer_phone' => $data['customer_phone'] ?? null,
             'notes' => $data['notes'] ?? null,
-            'total' => collect($data['items'])->sum(fn($item) => $item['quantity'] * $item['price']),
+            'total' => collect($data['items'])->sum(fn ($item) => $item['quantity'] * $item['price']),
             'created_by' => $request->user()->id,
         ]);
 
@@ -91,7 +91,7 @@ class OrderController extends Controller
             return $this->forbidden();
         }
 
-        if (!in_array($order->status, ['pending'])) {
+        if (! in_array($order->status, ['pending'])) {
             return $this->error('Cannot modify a processed order', 422);
         }
 
@@ -107,6 +107,7 @@ class OrderController extends Controller
         }
 
         $order->update($validator->validated());
+
         return $this->success($order->load(['items', 'branch']));
     }
 
@@ -116,11 +117,12 @@ class OrderController extends Controller
             return $this->forbidden();
         }
 
-        if (!in_array($order->status, ['pending'])) {
+        if (! in_array($order->status, ['pending'])) {
             return $this->error('Cannot delete a processed order', 422);
         }
 
         $order->delete();
+
         return $this->success(null, 'Order deleted successfully');
     }
 }

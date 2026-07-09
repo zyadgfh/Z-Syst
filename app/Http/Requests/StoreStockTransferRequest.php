@@ -2,14 +2,17 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Models\Branch;
+use App\Models\ProductStock;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 
 /**
  * StoreStockTransferRequest
- * 
+ *
  * Form request for creating a new stock transfer.
  * Validates that the requesting user has permission to create transfers,
  * that both branches belong to the same company, and that stock is available.
@@ -18,8 +21,6 @@ class StoreStockTransferRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -29,7 +30,7 @@ class StoreStockTransferRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -74,9 +75,6 @@ class StoreStockTransferRequest extends FormRequest
 
     /**
      * Configure the validator instance.
-     *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
-     * @return void
      */
     protected function withValidator(Validator $validator): void
     {
@@ -88,16 +86,13 @@ class StoreStockTransferRequest extends FormRequest
 
     /**
      * Validate that both branches belong to the same company.
-     *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
-     * @return void
      */
     protected function validateBranchesBelongToSameCompany(Validator $validator): void
     {
-        $fromBranch = \App\Models\Branch::find($this->from_branch_id);
-        $toBranch = \App\Models\Branch::find($this->to_branch_id);
+        $fromBranch = Branch::find($this->from_branch_id);
+        $toBranch = Branch::find($this->to_branch_id);
 
-        if (!$fromBranch || !$toBranch) {
+        if (! $fromBranch || ! $toBranch) {
             return;
         }
 
@@ -112,30 +107,28 @@ class StoreStockTransferRequest extends FormRequest
 
     /**
      * Validate that sufficient stock is available for transfer.
-     *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
-     * @return void
      */
     protected function validateStockAvailability(Validator $validator): void
     {
-        if (!$this->items) {
+        if (! $this->items) {
             return;
         }
 
         foreach ($this->items as $index => $item) {
-            $productStock = \App\Models\ProductStock::where('product_id', $item['product_id'])
+            $productStock = ProductStock::where('product_id', $item['product_id'])
                 ->where('branch_id', $this->from_branch_id)
                 ->where('is_active', true)
                 ->first();
 
-            if (!$productStock) {
-                $validator->errors()->add("items.{$index}.quantity_requested", 
+            if (! $productStock) {
+                $validator->errors()->add("items.{$index}.quantity_requested",
                     "No stock available for product ID {$item['product_id']} in the source branch.");
+
                 continue;
             }
 
             if ($productStock->quantity < $item['quantity_requested']) {
-                $validator->errors()->add("items.{$index}.quantity_requested", 
+                $validator->errors()->add("items.{$index}.quantity_requested",
                     "Insufficient stock. Available: {$productStock->quantity}, Requested: {$item['quantity_requested']}.");
             }
         }
@@ -144,10 +137,8 @@ class StoreStockTransferRequest extends FormRequest
     /**
      * Handle a failed validation attempt.
      *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
-     * @return void
      *
-     * @throws \Illuminate\Http\Exceptions\HttpResponseException
+     * @throws HttpResponseException
      */
     protected function failedValidation(Validator $validator): void
     {

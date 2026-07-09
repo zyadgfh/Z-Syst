@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Cache;
 class Branch extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'name',
         'company_id',

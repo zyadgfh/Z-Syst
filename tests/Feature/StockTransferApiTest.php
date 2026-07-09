@@ -2,22 +2,21 @@
 
 namespace Tests\Feature;
 
-use App\Models\StockTransfer;
-use App\Models\StockTransferItem;
-use App\Models\Product;
-use App\Models\ProductStock;
 use App\Models\Branch;
 use App\Models\Company;
-use App\Models\User;
+use App\Models\Product;
+use App\Models\ProductStock;
 use App\Models\Role;
-use App\Models\Permission;
+use App\Models\StockTransfer;
+use App\Models\StockTransferItem;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 /**
  * StockTransferApiTest
- * 
+ *
  * Feature tests for stock transfer API endpoints.
  * Tests authentication, authorization, validation, and complete workflows.
  */
@@ -26,11 +25,17 @@ class StockTransferApiTest extends TestCase
     use RefreshDatabase;
 
     protected Company $company;
+
     protected Branch $fromBranch;
+
     protected Branch $toBranch;
+
     protected User $user;
+
     protected User $adminUser;
+
     protected Product $product;
+
     protected ProductStock $productStock;
 
     protected function setUp(): void
@@ -41,20 +46,20 @@ class StockTransferApiTest extends TestCase
         $this->company = Company::factory()->create();
         $this->fromBranch = Branch::factory()->create(['company_id' => $this->company->id]);
         $this->toBranch = Branch::factory()->create(['company_id' => $this->company->id]);
-        
+
         // Create regular user
         $this->user = User::factory()->create([
             'company_id' => $this->company->id,
             'branch_id' => $this->fromBranch->id,
         ]);
-        
+
         // Create admin user with super admin role
         $this->adminUser = User::factory()->create([
             'company_id' => $this->company->id,
             'branch_id' => $this->fromBranch->id,
             'role' => 'super_admin',
         ]);
-        
+
         $this->product = Product::factory()->create(['company_id' => $this->company->id]);
         $this->productStock = ProductStock::factory()->create([
             'company_id' => $this->company->id,
@@ -128,7 +133,7 @@ class StockTransferApiTest extends TestCase
         ];
 
         $response = $this->postJson('/api/v1/admin/stock-transfers', $data);
-        
+
         $response->assertStatus(201)
             ->assertJsonStructure([
                 'message',
@@ -163,7 +168,7 @@ class StockTransferApiTest extends TestCase
         ];
 
         $response = $this->postJson('/api/v1/admin/stock-transfers', $data);
-        
+
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['to_branch_id', 'items']);
     }
@@ -182,7 +187,7 @@ class StockTransferApiTest extends TestCase
         ]);
 
         $response = $this->getJson("/api/v1/admin/stock-transfers/{$transfer->id}");
-        
+
         $response->assertStatus(200)
             ->assertJson([
                 'data' => [
@@ -207,7 +212,7 @@ class StockTransferApiTest extends TestCase
         ]);
 
         $response = $this->postJson("/api/v1/admin/stock-transfers/{$transfer->id}/approve");
-        
+
         $response->assertStatus(200)
             ->assertJson([
                 'message' => 'Stock transfer approved successfully.',
@@ -241,7 +246,7 @@ class StockTransferApiTest extends TestCase
         ];
 
         $response = $this->postJson("/api/v1/admin/stock-transfers/{$transfer->id}/reject", $data);
-        
+
         $response->assertStatus(200)
             ->assertJson([
                 'message' => 'Stock transfer rejected successfully.',
@@ -292,7 +297,7 @@ class StockTransferApiTest extends TestCase
         ];
 
         $response = $this->postJson("/api/v1/admin/stock-transfers/{$transfer->id}/ship", $data);
-        
+
         $response->assertStatus(200)
             ->assertJson([
                 'message' => 'Stock transfer shipped successfully.',
@@ -342,7 +347,7 @@ class StockTransferApiTest extends TestCase
         ];
 
         $response = $this->postJson("/api/v1/admin/stock-transfers/{$transfer->id}/receive", $data);
-        
+
         $response->assertStatus(200)
             ->assertJson([
                 'message' => 'Stock transfer received successfully.',
@@ -376,7 +381,7 @@ class StockTransferApiTest extends TestCase
         ];
 
         $response = $this->postJson("/api/v1/admin/stock-transfers/{$transfer->id}/cancel", $data);
-        
+
         $response->assertStatus(200)
             ->assertJson([
                 'message' => 'Stock transfer cancelled successfully.',
@@ -406,7 +411,7 @@ class StockTransferApiTest extends TestCase
         ]);
 
         $response = $this->getJson('/api/v1/admin/stock-transfers/statistics');
-        
+
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
@@ -516,7 +521,7 @@ class StockTransferApiTest extends TestCase
         ];
 
         $response = $this->putJson("/api/v1/admin/stock-transfers/{$transfer->id}", $data);
-        
+
         $response->assertStatus(200)
             ->assertJson([
                 'message' => 'Stock transfer updated successfully.',
@@ -541,7 +546,7 @@ class StockTransferApiTest extends TestCase
         ]);
 
         $response = $this->deleteJson("/api/v1/admin/stock-transfers/{$transfer->id}");
-        
+
         $response->assertStatus(200)
             ->assertJson([
                 'message' => 'Stock transfer deleted successfully.',

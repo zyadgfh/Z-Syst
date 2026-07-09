@@ -12,7 +12,7 @@ class InventorySummaryResource extends JsonResource
     public function toArray($request): array
     {
         $data = is_object($this->resource) ? $this->resource : (object) $this->resource;
-        
+
         return [
             'total_products' => $data->total_products ?? 0,
             'total_stock_items' => $data->total_stock_items ?? 0,

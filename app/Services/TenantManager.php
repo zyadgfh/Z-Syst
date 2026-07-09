@@ -48,6 +48,7 @@ class TenantManager
         $routeCompany = $request->route('company');
         if ($routeCompany instanceof Company) {
             $this->company = $routeCompany;
+
             return $this->company;
         }
 

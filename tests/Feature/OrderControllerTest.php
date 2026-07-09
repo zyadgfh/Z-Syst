@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\User;
-use App\Models\Product;
 use App\Models\Branch;
+use App\Models\Company;
+use App\Models\Order;
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,14 +15,16 @@ class OrderControllerTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+
     protected Branch $branch;
+
     protected Product $product;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $company = \App\Models\Company::factory()->create();
+        $company = Company::factory()->create();
         $this->user = User::factory()->create([
             'company_id' => $company->id,
             'role' => 'admin',
@@ -115,7 +117,7 @@ class OrderControllerTest extends TestCase
 
     public function test_cannot_access_order_from_different_company()
     {
-        $otherCompany = \App\Models\Company::factory()->create();
+        $otherCompany = Company::factory()->create();
         $otherUser = User::factory()->create([
             'company_id' => $otherCompany->id,
         ]);

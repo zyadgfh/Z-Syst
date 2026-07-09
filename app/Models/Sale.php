@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\SaleFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,7 +12,7 @@ class Sale extends Model
 
     protected static function newFactory()
     {
-        return \Database\Factories\SaleFactory::new();
+        return SaleFactory::new();
     }
 
     protected $fillable = [

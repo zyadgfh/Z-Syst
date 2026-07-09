@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Company;
 
 class DemoInventorySeeder extends Seeder
 {
@@ -45,7 +44,7 @@ class DemoInventorySeeder extends Seeder
                     $priceTargetCol => $targetId,
                     'branch_id' => null,
                 ], [
-                    'price' =>  rand(100, 1000) / 10,
+                    'price' => rand(100, 1000) / 10,
                     'currency' => 'USD',
                     'created_at' => now(),
                     'updated_at' => now(),

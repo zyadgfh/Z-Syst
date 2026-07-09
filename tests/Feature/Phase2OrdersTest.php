@@ -4,9 +4,13 @@ namespace Tests\Feature;
 
 use App\Models\Company;
 use App\Models\Drug;
+use App\Models\PurchaseOrder;
 use App\Models\User;
 use Database\Seeders\DemoDrugSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class Phase2OrdersTest extends TestCase
@@ -30,23 +34,23 @@ class Phase2OrdersTest extends TestCase
         ];
 
         $resp = $this->postJson('/api/v1/admin/orders', $payload);
-        $resp->assertStatus(201)->assertJsonStructure(['data' => ['id','items']]);
+        $resp->assertStatus(201)->assertJsonStructure(['data' => ['id', 'items']]);
 
         // model-level: create purchase order (respect test schema differences)
         $poData = [];
-        if (\Illuminate\Support\Facades\Schema::hasColumn('purchase_orders', 'company_id')) {
+        if (Schema::hasColumn('purchase_orders', 'company_id')) {
             $poData['company_id'] = $company->id;
         }
-        if (\Illuminate\Support\Facades\Schema::hasColumn('purchase_orders', 'uuid')) {
-            $poData['uuid'] = \Illuminate\Support\Str::uuid();
+        if (Schema::hasColumn('purchase_orders', 'uuid')) {
+            $poData['uuid'] = Str::uuid();
         }
 
         // If purchase_orders requires a supplier_id, ensure a supplier exists (test schema may vary)
-        if (\Illuminate\Support\Facades\Schema::hasColumn('purchase_orders', 'supplier_id')) {
-            if (\Illuminate\Support\Facades\Schema::hasTable('suppliers')) {
-                $supplier = \Illuminate\Support\Facades\DB::table('suppliers')->first();
+        if (Schema::hasColumn('purchase_orders', 'supplier_id')) {
+            if (Schema::hasTable('suppliers')) {
+                $supplier = DB::table('suppliers')->first();
                 if (! $supplier) {
-                    $supplierId = \Illuminate\Support\Facades\DB::table('suppliers')->insertGetId(['company_id' => $company->id, 'name' => 'Seed Supplier', 'created_at' => now(), 'updated_at' => now()]);
+                    $supplierId = DB::table('suppliers')->insertGetId(['company_id' => $company->id, 'name' => 'Seed Supplier', 'created_at' => now(), 'updated_at' => now()]);
                 } else {
                     $supplierId = $supplier->id;
                 }
@@ -58,16 +62,16 @@ class Phase2OrdersTest extends TestCase
         }
 
         // Insert purchase order directly using actual table columns to handle schema variations
-        $poCols = \Illuminate\Support\Facades\Schema::getColumnListing('purchase_orders');
+        $poCols = Schema::getColumnListing('purchase_orders');
         $dbPo = [];
         if (in_array('company_id', $poCols, true)) {
             $dbPo['company_id'] = $company->id;
         }
         if (in_array('supplier_id', $poCols, true)) {
-            if (\Illuminate\Support\Facades\Schema::hasTable('suppliers')) {
-                $supplier = \Illuminate\Support\Facades\DB::table('suppliers')->first();
+            if (Schema::hasTable('suppliers')) {
+                $supplier = DB::table('suppliers')->first();
                 if (! $supplier) {
-                    $supplierId = \Illuminate\Support\Facades\DB::table('suppliers')->insertGetId(['company_id' => $company->id, 'name' => 'Seed Supplier', 'created_at' => now(), 'updated_at' => now()]);
+                    $supplierId = DB::table('suppliers')->insertGetId(['company_id' => $company->id, 'name' => 'Seed Supplier', 'created_at' => now(), 'updated_at' => now()]);
                 } else {
                     $supplierId = $supplier->id;
                 }
@@ -77,20 +81,20 @@ class Phase2OrdersTest extends TestCase
             }
         }
         if (in_array('uuid', $poCols, true)) {
-            $dbPo['uuid'] = \Illuminate\Support\Str::uuid();
+            $dbPo['uuid'] = Str::uuid();
         }
         if (in_array('po_number', $poCols, true)) {
-            $dbPo['po_number'] = (string) \Illuminate\Support\Str::uuid();
+            $dbPo['po_number'] = (string) Str::uuid();
         }
         if (in_array('status', $poCols, true)) {
             $dbPo['status'] = 'pending';
         }
         if (in_array('branch_id', $poCols, true)) {
             // ensure a branch exists for FK requirement
-            if (\Illuminate\Support\Facades\Schema::hasTable('branches')) {
-                $branch = \Illuminate\Support\Facades\DB::table('branches')->where('company_id', $company->id)->first();
+            if (Schema::hasTable('branches')) {
+                $branch = DB::table('branches')->where('company_id', $company->id)->first();
                 if (! $branch) {
-                    $branchId = \Illuminate\Support\Facades\DB::table('branches')->insertGetId(['company_id' => $company->id, 'name' => 'Main Branch', 'created_at' => now(), 'updated_at' => now()]);
+                    $branchId = DB::table('branches')->insertGetId(['company_id' => $company->id, 'name' => 'Main Branch', 'created_at' => now(), 'updated_at' => now()]);
                 } else {
                     $branchId = $branch->id;
                 }
@@ -103,8 +107,8 @@ class Phase2OrdersTest extends TestCase
             $dbPo['created_by'] = $user->id;
         }
 
-        $poId = \Illuminate\Support\Facades\DB::table('purchase_orders')->insertGetId(array_merge($poData, $dbPo));
-        $po = \App\Models\PurchaseOrder::find($poId);
+        $poId = DB::table('purchase_orders')->insertGetId(array_merge($poData, $dbPo));
+        $po = PurchaseOrder::find($poId);
 
         // Creating purchase order items varies between schemas; skip item insert in tests
         // as long as the purchase order record exists we consider this test valid.

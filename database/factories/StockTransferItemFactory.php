@@ -2,14 +2,14 @@
 
 namespace Database\Factories;
 
-use App\Models\StockTransferItem;
-use App\Models\StockTransfer;
 use App\Models\Product;
 use App\Models\ProductStock;
+use App\Models\StockTransfer;
+use App\Models\StockTransferItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\StockTransferItem>
+ * @extends Factory<StockTransferItem>
  */
 class StockTransferItemFactory extends Factory
 {
@@ -55,8 +55,6 @@ class StockTransferItemFactory extends Factory
 
     /**
      * Indicate that the item has been sent.
-     *
-     * @return \Database\Factories\StockTransferItemFactory
      */
     public function sent(): self
     {
@@ -67,8 +65,6 @@ class StockTransferItemFactory extends Factory
 
     /**
      * Indicate that the item has been received.
-     *
-     * @return \Database\Factories\StockTransferItemFactory
      */
     public function received(): self
     {
@@ -80,8 +76,6 @@ class StockTransferItemFactory extends Factory
 
     /**
      * Indicate that the item has a partial send.
-     *
-     * @return \Database\Factories\StockTransferItemFactory
      */
     public function partiallySent(): self
     {
@@ -92,8 +86,6 @@ class StockTransferItemFactory extends Factory
 
     /**
      * Indicate that the item has a partial receive.
-     *
-     * @return \Database\Factories\StockTransferItemFactory
      */
     public function partiallyReceived(): self
     {

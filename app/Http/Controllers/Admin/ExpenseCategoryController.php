@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Api\BaseController;
+use App\Http\Controllers\API\BaseController;
 use App\Models\ExpenseCategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,7 +15,7 @@ class ExpenseCategoryController extends BaseController
     public function index(Request $request): JsonResponse
     {
         $categories = ExpenseCategory::forCompany($request->user()->company_id)
-            ->when($request->search, fn($q, $v) => $q->where('name', 'like', "%{$v}%"))
+            ->when($request->search, fn ($q, $v) => $q->where('name', 'like', "%{$v}%"))
             ->orderBy('name')
             ->paginate($request->per_page ?? 15);
 
@@ -47,6 +47,7 @@ class ExpenseCategoryController extends BaseController
         if ($expenseCategory->company_id !== $request->user()->company_id) {
             return $this->error('Forbidden', 403);
         }
+
         return $this->success($expenseCategory->load('expenses'));
     }
 
@@ -67,6 +68,7 @@ class ExpenseCategoryController extends BaseController
         }
 
         $expenseCategory->update($validator->validated());
+
         return $this->success($expenseCategory, 'Expense category updated successfully');
     }
 
@@ -76,6 +78,7 @@ class ExpenseCategoryController extends BaseController
             return $this->error('Forbidden', 403);
         }
         $expenseCategory->delete();
+
         return $this->success(null, 'Expense category deleted successfully');
     }
 }

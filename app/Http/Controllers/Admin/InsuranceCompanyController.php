@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Api\BaseController;
+use App\Http\Controllers\API\BaseController;
 use App\Models\InsuranceCompany;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,7 +17,7 @@ class InsuranceCompanyController extends BaseController
     {
         $companies = InsuranceCompany::forCompany($request->user()->company_id)
             ->withCount(['plans', 'claims'])
-            ->when($request->search, fn($q, $v) => $q->where('name', 'like', "%{$v}%"))
+            ->when($request->search, fn ($q, $v) => $q->where('name', 'like', "%{$v}%"))
             ->orderBy('name')
             ->paginate($request->per_page ?? 15);
 
@@ -42,7 +42,7 @@ class InsuranceCompanyController extends BaseController
         }
 
         $data = $validator->validated();
-        $data['code'] = strtoupper(Str::slug($data['name'])) . '-' . Str::random(4);
+        $data['code'] = strtoupper(Str::slug($data['name'])).'-'.Str::random(4);
         $data['company_id'] = $request->user()->company_id;
         $data['created_by'] = $request->user()->id;
 
@@ -56,6 +56,7 @@ class InsuranceCompanyController extends BaseController
         if ($insuranceCompany->company_id !== $request->user()->company_id) {
             return $this->error('Forbidden', 403);
         }
+
         return $this->success($insuranceCompany->load(['plans', 'claims']));
     }
 
@@ -82,6 +83,7 @@ class InsuranceCompanyController extends BaseController
         }
 
         $insuranceCompany->update(array_merge($validator->validated(), ['updated_by' => $request->user()->id]));
+
         return $this->success($insuranceCompany, 'Insurance company updated successfully');
     }
 
@@ -91,6 +93,7 @@ class InsuranceCompanyController extends BaseController
             return $this->error('Forbidden', 403);
         }
         $insuranceCompany->delete();
+
         return $this->success(null, 'Insurance company deleted successfully');
     }
 }

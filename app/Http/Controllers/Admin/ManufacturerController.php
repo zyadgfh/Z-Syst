@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Api\BaseController;
+use App\Http\Controllers\API\BaseController;
 use App\Models\Manufacturer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,8 +15,8 @@ class ManufacturerController extends BaseController
     public function index(Request $request): JsonResponse
     {
         $manufacturers = Manufacturer::forCompany($request->user()->company_id)
-            ->when($request->search, fn($q, $v) => $q->where('name', 'like', "%{$v}%"))
-            ->when($request->is_active !== null, fn($q) => $q->where('is_active', $request->is_active))
+            ->when($request->search, fn ($q, $v) => $q->where('name', 'like', "%{$v}%"))
+            ->when($request->is_active !== null, fn ($q) => $q->where('is_active', $request->is_active))
             ->orderBy('name')
             ->paginate($request->per_page ?? 15);
 
@@ -52,6 +52,7 @@ class ManufacturerController extends BaseController
         if ($manufacturer->company_id !== $request->user()->company_id) {
             return $this->error('Forbidden', 403);
         }
+
         return $this->success($manufacturer->load('products'));
     }
 
@@ -89,6 +90,7 @@ class ManufacturerController extends BaseController
             return $this->error('Forbidden', 403);
         }
         $manufacturer->delete();
+
         return $this->success(null, 'Manufacturer deleted successfully');
     }
 }

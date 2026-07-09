@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Api\BaseController;
+use App\Http\Controllers\API\BaseController;
 use App\Models\Patient;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,10 +15,10 @@ class PatientController extends BaseController
     public function index(Request $request): JsonResponse
     {
         $patients = Patient::forCompany($request->user()->company_id)
-            ->when($request->search, fn($q, $v) => $q->where(function($q) use ($v) {
+            ->when($request->search, fn ($q, $v) => $q->where(function ($q) use ($v) {
                 $q->where('name', 'like', "%{$v}%")
-                  ->orWhere('phone', 'like', "%{$v}%")
-                  ->orWhere('email', 'like', "%{$v}%");
+                    ->orWhere('phone', 'like', "%{$v}%")
+                    ->orWhere('email', 'like', "%{$v}%");
             }))
             ->orderBy('name')
             ->paginate($request->per_page ?? 15);
@@ -60,6 +60,7 @@ class PatientController extends BaseController
         if ($patient->company_id !== $request->user()->company_id) {
             return $this->error('Forbidden', 403);
         }
+
         return $this->success($patient->load('prescriptions'));
     }
 
@@ -89,6 +90,7 @@ class PatientController extends BaseController
         }
 
         $patient->update(array_merge($validator->validated(), ['updated_by' => $request->user()->id]));
+
         return $this->success($patient, 'Patient updated successfully');
     }
 
@@ -98,6 +100,7 @@ class PatientController extends BaseController
             return $this->error('Forbidden', 403);
         }
         $patient->delete();
+
         return $this->success(null, 'Patient deleted successfully');
     }
 }

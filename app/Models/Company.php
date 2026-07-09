@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Cache;
 class Company extends Model
 {
     use HasFactory, Notifiable;
+
     protected $fillable = [
         'name',
         'max_branches',

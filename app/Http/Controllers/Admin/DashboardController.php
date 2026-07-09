@@ -4,21 +4,22 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DashboardKPIsResource;
+use App\Http\Resources\ExpiringProductResource;
 use App\Http\Resources\InventorySummaryResource;
 use App\Http\Resources\LowStockProductResource;
-use App\Http\Resources\ExpiringProductResource;
 use App\Http\Resources\SalesTrendResource;
-use App\Http\Resources\TopSellingProductResource;
 use App\Http\Resources\StockTurnoverResource;
+use App\Http\Resources\TopSellingProductResource;
 use App\Services\AnalyticsService;
 use App\Services\ReportExportService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
     protected $analyticsService;
+
     protected $reportExportService;
 
     public function __construct(AnalyticsService $analyticsService, ReportExportService $reportExportService)
@@ -43,8 +44,8 @@ class DashboardController extends Controller
                 'period' => [
                     'start' => $startDate?->format('Y-m-d') ?? Carbon::now()->startOfMonth()->format('Y-m-d'),
                     'end' => $endDate?->format('Y-m-d') ?? Carbon::now()->format('Y-m-d'),
-                ]
-            ]
+                ],
+            ],
         ]);
     }
 
@@ -66,8 +67,8 @@ class DashboardController extends Controller
                 'date_range' => [
                     'start' => $startDate?->format('Y-m-d') ?? Carbon::now()->startOfMonth()->format('Y-m-d'),
                     'end' => $endDate?->format('Y-m-d') ?? Carbon::now()->format('Y-m-d'),
-                ]
-            ]
+                ],
+            ],
         ]);
     }
 
@@ -89,8 +90,8 @@ class DashboardController extends Controller
                 'date_range' => [
                     'start' => $startDate?->format('Y-m-d') ?? Carbon::now()->startOfMonth()->format('Y-m-d'),
                     'end' => $endDate?->format('Y-m-d') ?? Carbon::now()->format('Y-m-d'),
-                ]
-            ]
+                ],
+            ],
         ]);
     }
 
@@ -110,8 +111,8 @@ class DashboardController extends Controller
                 'date_range' => [
                     'start' => $startDate?->format('Y-m-d') ?? Carbon::now()->startOfMonth()->format('Y-m-d'),
                     'end' => $endDate?->format('Y-m-d') ?? Carbon::now()->format('Y-m-d'),
-                ]
-            ]
+                ],
+            ],
         ]);
     }
 
@@ -131,8 +132,8 @@ class DashboardController extends Controller
                 'date_range' => [
                     'start' => $startDate?->format('Y-m-d') ?? Carbon::now()->startOfMonth()->format('Y-m-d'),
                     'end' => $endDate?->format('Y-m-d') ?? Carbon::now()->format('Y-m-d'),
-                ]
-            ]
+                ],
+            ],
         ]);
     }
 
@@ -152,8 +153,8 @@ class DashboardController extends Controller
                 'date_range' => [
                     'start' => $startDate?->format('Y-m-d') ?? Carbon::now()->startOfMonth()->format('Y-m-d'),
                     'end' => $endDate?->format('Y-m-d') ?? Carbon::now()->format('Y-m-d'),
-                ]
-            ]
+                ],
+            ],
         ]);
     }
 
@@ -167,8 +168,8 @@ class DashboardController extends Controller
         return response()->json([
             'data' => new InventorySummaryResource($summary),
             'meta' => [
-                'generated_at' => Carbon::now()->format('Y-m-d H:i:s')
-            ]
+                'generated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            ],
         ]);
     }
 
@@ -185,8 +186,8 @@ class DashboardController extends Controller
             'data' => LowStockProductResource::collection($products),
             'meta' => [
                 'limit' => $limit,
-                'total_count' => count($products)
-            ]
+                'total_count' => count($products),
+            ],
         ]);
     }
 
@@ -203,8 +204,8 @@ class DashboardController extends Controller
             'data' => $products,
             'meta' => [
                 'limit' => $limit,
-                'total_count' => count($products)
-            ]
+                'total_count' => count($products),
+            ],
         ]);
     }
 
@@ -223,8 +224,8 @@ class DashboardController extends Controller
             'meta' => [
                 'days' => $days,
                 'limit' => $limit,
-                'total_count' => count($products)
-            ]
+                'total_count' => count($products),
+            ],
         ]);
     }
 
@@ -243,8 +244,8 @@ class DashboardController extends Controller
             'meta' => [
                 'days' => $days,
                 'limit' => $limit,
-                'total_count' => count($products)
-            ]
+                'total_count' => count($products),
+            ],
         ]);
     }
 
@@ -263,8 +264,8 @@ class DashboardController extends Controller
             'meta' => [
                 'days' => $days,
                 'limit' => $limit,
-                'total_count' => count($products)
-            ]
+                'total_count' => count($products),
+            ],
         ]);
     }
 
@@ -281,8 +282,8 @@ class DashboardController extends Controller
             'data' => StockTurnoverResource::collection($turnover),
             'meta' => [
                 'days' => $days,
-                'total_count' => count($turnover)
-            ]
+                'total_count' => count($turnover),
+            ],
         ]);
     }
 
@@ -294,7 +295,7 @@ class DashboardController extends Controller
         $this->analyticsService->clearCache();
 
         return response()->json([
-            'message' => 'Analytics cache cleared successfully.'
+            'message' => 'Analytics cache cleared successfully.',
         ]);
     }
 
@@ -310,7 +311,7 @@ class DashboardController extends Controller
 
         return response()->json([
             'message' => 'Sales report exported successfully.',
-            'data' => $export
+            'data' => $export,
         ]);
     }
 
@@ -323,7 +324,7 @@ class DashboardController extends Controller
 
         return response()->json([
             'message' => 'Inventory report exported successfully.',
-            'data' => $export
+            'data' => $export,
         ]);
     }
 
@@ -338,7 +339,7 @@ class DashboardController extends Controller
 
         return response()->json([
             'message' => 'Expiring products report exported successfully.',
-            'data' => $export
+            'data' => $export,
         ]);
     }
 
@@ -355,7 +356,7 @@ class DashboardController extends Controller
 
         return response()->json([
             'message' => 'Top selling products report exported successfully.',
-            'data' => $export
+            'data' => $export,
         ]);
     }
 
@@ -370,7 +371,7 @@ class DashboardController extends Controller
 
         return response()->json([
             'message' => 'Stock turnover report exported successfully.',
-            'data' => $export
+            'data' => $export,
         ]);
     }
 }

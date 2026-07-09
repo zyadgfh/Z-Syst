@@ -27,7 +27,7 @@ final class PurchaseOrderReturnService
                 'purchase_order_id' => $purchaseOrder->id,
                 'supplier_id' => $data['supplier_id'],
                 'branch_id' => $data['branch_id'],
-                'return_number' => 'POR-' . strtoupper(Str::random(8)),
+                'return_number' => 'POR-'.strtoupper(Str::random(8)),
                 'notes' => $data['notes'] ?? null,
                 'created_by' => $userId,
             ]);

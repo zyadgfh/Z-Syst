@@ -12,7 +12,7 @@ class DashboardKPIsResource extends JsonResource
     public function toArray($request): array
     {
         $data = is_object($this->resource) ? $this->resource : (object) $this->resource;
-        
+
         return [
             'total_sales' => $data->total_sales ?? 0,
             'total_revenue' => $data->total_revenue ?? 0,

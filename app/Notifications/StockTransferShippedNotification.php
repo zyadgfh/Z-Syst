@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notification;
 
 /**
  * StockTransferShippedNotification
- * 
+ *
  * Notification sent when a stock transfer is shipped.
  */
 class StockTransferShippedNotification extends Notification
@@ -18,15 +18,12 @@ class StockTransferShippedNotification extends Notification
 
     /**
      * The stock transfer instance.
-     *
-     * @var \App\Models\StockTransfer
      */
     protected StockTransfer $transfer;
 
     /**
      * Create a new notification instance.
      *
-     * @param  \App\Models\StockTransfer  $transfer
      * @return void
      */
     public function __construct(StockTransfer $transfer)
@@ -49,21 +46,20 @@ class StockTransferShippedNotification extends Notification
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
      */
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Stock Transfer Shipped - ' . $this->transfer->transfer_number)
-            ->greeting('Hello ' . $notifiable->name . ',')
+            ->subject('Stock Transfer Shipped - '.$this->transfer->transfer_number)
+            ->greeting('Hello '.$notifiable->name.',')
             ->line('A stock transfer has been shipped to your branch.')
-            ->line('Transfer Number: ' . $this->transfer->transfer_number)
-            ->line('From: ' . $this->transfer->fromBranch->name)
-            ->line('To: ' . $this->transfer->toBranch->name)
-            ->line('Total Items: ' . $this->transfer->total_items)
-            ->line('Total Quantity: ' . $this->transfer->total_quantity)
-            ->line('Shipped At: ' . $this->transfer->shipped_at->format('Y-m-d H:i:s'))
-            ->action('View Transfer', url('/api/v1/stock-transfers/' . $this->transfer->id))
+            ->line('Transfer Number: '.$this->transfer->transfer_number)
+            ->line('From: '.$this->transfer->fromBranch->name)
+            ->line('To: '.$this->transfer->toBranch->name)
+            ->line('Total Items: '.$this->transfer->total_items)
+            ->line('Total Quantity: '.$this->transfer->total_quantity)
+            ->line('Shipped At: '.$this->transfer->shipped_at->format('Y-m-d H:i:s'))
+            ->action('View Transfer', url('/api/v1/stock-transfers/'.$this->transfer->id))
             ->line('Please prepare to receive the items.')
             ->line('Thank you for using our application!');
     }

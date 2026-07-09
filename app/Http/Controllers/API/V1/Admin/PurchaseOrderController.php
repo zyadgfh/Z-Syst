@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Api\V1\Admin;
+namespace App\Http\Controllers\API\V1\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PurchaseOrder;
 use App\Services\PurchaseOrderService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class PurchaseOrderController extends Controller
@@ -21,9 +21,9 @@ class PurchaseOrderController extends Controller
     {
         $orders = PurchaseOrder::forCompany($request->user()->company_id)
             ->with(['supplier', 'branch', 'items.product'])
-            ->when($request->status, fn($q, $v) => $q->where('status', $v))
-            ->when($request->supplier_id, fn($q, $v) => $q->where('supplier_id', $v))
-            ->when($request->branch_id, fn($q, $v) => $q->where('branch_id', $v))
+            ->when($request->status, fn ($q, $v) => $q->where('status', $v))
+            ->when($request->supplier_id, fn ($q, $v) => $q->where('supplier_id', $v))
+            ->when($request->branch_id, fn ($q, $v) => $q->where('branch_id', $v))
             ->orderByDesc('created_at')
             ->paginate($request->per_page ?? 25);
 
@@ -66,6 +66,7 @@ class PurchaseOrderController extends Controller
         }
 
         $purchaseOrder = $this->purchaseOrderService->approve($purchaseOrder, $request->user()->id);
+
         return response()->json($purchaseOrder);
     }
 
@@ -76,6 +77,7 @@ class PurchaseOrderController extends Controller
         }
 
         $purchaseOrder = $this->purchaseOrderService->send($purchaseOrder);
+
         return response()->json($purchaseOrder);
     }
 
@@ -86,6 +88,7 @@ class PurchaseOrderController extends Controller
         }
 
         $purchaseOrder = $this->purchaseOrderService->cancel($purchaseOrder);
+
         return response()->json($purchaseOrder);
     }
 
@@ -104,7 +107,7 @@ class PurchaseOrderController extends Controller
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
-        if (!in_array($purchaseOrder->status, ['draft', 'pending'])) {
+        if (! in_array($purchaseOrder->status, ['draft', 'pending'])) {
             return response()->json(['message' => 'Cannot modify a non-draft purchase order'], 422);
         }
 
@@ -119,6 +122,7 @@ class PurchaseOrderController extends Controller
         }
 
         $purchaseOrder->update($validator->validated());
+
         return response()->json($purchaseOrder);
     }
 
@@ -128,11 +132,12 @@ class PurchaseOrderController extends Controller
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
-        if (!in_array($purchaseOrder->status, ['draft', 'pending'])) {
+        if (! in_array($purchaseOrder->status, ['draft', 'pending'])) {
             return response()->json(['message' => 'Cannot delete a non-draft purchase order'], 422);
         }
 
         $purchaseOrder->delete();
+
         return response()->json(['message' => 'Purchase order deleted successfully']);
     }
 }

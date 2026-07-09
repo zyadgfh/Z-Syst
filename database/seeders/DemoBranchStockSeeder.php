@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Company;
 
 class DemoBranchStockSeeder extends Seeder
 {
@@ -25,7 +25,7 @@ class DemoBranchStockSeeder extends Seeder
 
         foreach ($branches as $branch) {
             foreach ($drugs as $drug) {
-                $productIdCol = Schema::hasColumn('product_stocks','drug_id') ? 'drug_id' : (Schema::hasColumn('product_stocks','product_id') ? 'product_id' : null);
+                $productIdCol = Schema::hasColumn('product_stocks', 'drug_id') ? 'drug_id' : (Schema::hasColumn('product_stocks', 'product_id') ? 'product_id' : null);
                 if (! $productIdCol) {
                     continue;
                 }

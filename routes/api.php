@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\CashRegisterController;
 use App\Http\Controllers\Admin\CompanyBranchLimitController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DoctorController;
 use App\Http\Controllers\Admin\ExpenseCategoryController;
 use App\Http\Controllers\Admin\ExpenseController;
+use App\Http\Controllers\Admin\GoodsReceivedNoteController;
 use App\Http\Controllers\Admin\InsuranceClaimController;
 use App\Http\Controllers\Admin\InsuranceCompanyController;
 use App\Http\Controllers\Admin\InsurancePlanController;
@@ -22,12 +24,13 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\StockTransferController;
 use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\CashRegisterController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\SaleController;
 use App\Http\Controllers\Api\TwoFactorController;
+use App\Http\Controllers\Api\V1\Admin\DrugAdminController;
+use App\Http\Controllers\Api\V1\Admin\OrderController;
+use App\Http\Controllers\Api\V1\Admin\ProductImportController;
 use App\Http\Controllers\Api\V1\DrugController;
-use App\Http\Controllers\Admin\GoodsReceivedNoteController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -55,20 +58,20 @@ Route::prefix('v1')->group(function () {
         Route::post('/two-factor/setup', [TwoFactorController::class, 'setup'])->middleware(['auth:sanctum', 'throttle:10,1']);
         Route::post('/two-factor/confirm', [TwoFactorController::class, 'confirm'])->middleware(['auth:sanctum', 'throttle:10,1']);
         Route::post('/two-factor/disable', [TwoFactorController::class, 'disable'])->middleware(['auth:sanctum', 'throttle:10,1']);
-        Route::post('/sales', [\App\Http\Controllers\Api\SaleController::class, 'store'])->middleware(['auth:sanctum','throttle:20,1']);
+        Route::post('/sales', [SaleController::class, 'store'])->middleware(['auth:sanctum', 'throttle:20,1']);
 
         // Dashboard & Analytics (for regular authenticated users)
         Route::prefix('dashboard')->group(function () {
             // KPIs
             Route::get('/kpis', [DashboardController::class, 'getKPIs'])->middleware('throttle:60,1');
-            
+
             // Sales Analytics
             Route::get('/sales-trends', [DashboardController::class, 'getSalesTrends'])->middleware('throttle:60,1');
             Route::get('/top-selling-products', [DashboardController::class, 'getTopSellingProducts'])->middleware('throttle:60,1');
             Route::get('/sales-by-category', [DashboardController::class, 'getSalesByCategory'])->middleware('throttle:60,1');
             Route::get('/sales-by-branch', [DashboardController::class, 'getSalesByBranch'])->middleware('throttle:60,1');
             Route::get('/payment-method-breakdown', [DashboardController::class, 'getPaymentMethodBreakdown'])->middleware('throttle:60,1');
-            
+
             // Inventory Analytics
             Route::get('/inventory-summary', [DashboardController::class, 'getInventorySummary'])->middleware('throttle:60,1');
             Route::get('/low-stock-products', [DashboardController::class, 'getLowStockProducts'])->middleware('throttle:60,1');
@@ -77,10 +80,10 @@ Route::prefix('v1')->group(function () {
             Route::get('/dead-stock', [DashboardController::class, 'getDeadStock'])->middleware('throttle:60,1');
             Route::get('/fast-moving-products', [DashboardController::class, 'getFastMovingProducts'])->middleware('throttle:60,1');
             Route::get('/stock-turnover', [DashboardController::class, 'getStockTurnover'])->middleware('throttle:60,1');
-            
+
             // Cache Management
             Route::post('/clear-cache', [DashboardController::class, 'clearCache'])->middleware('throttle:30,1');
-            
+
             // Report Exports
             Route::get('/export/sales', [DashboardController::class, 'exportSalesReport'])->middleware('throttle:10,1');
             Route::get('/export/inventory', [DashboardController::class, 'exportInventoryReport'])->middleware('throttle:10,1');
@@ -90,25 +93,25 @@ Route::prefix('v1')->group(function () {
         });
 
         // Admin drug CRUD (tenant-enforced) - available to authenticated admin users
-        Route::post('/drugs', [\App\Http\Controllers\Api\V1\Admin\DrugAdminController::class, 'store'])->middleware('throttle:30,1');
-        Route::put('/drugs/{drug}', [\App\Http\Controllers\Api\V1\Admin\DrugAdminController::class, 'update'])->middleware('throttle:30,1');
-        Route::delete('/drugs/{drug}', [\App\Http\Controllers\Api\V1\Admin\DrugAdminController::class, 'destroy'])->middleware('throttle:30,1');
+        Route::post('/drugs', [DrugAdminController::class, 'store'])->middleware('throttle:30,1');
+        Route::put('/drugs/{drug}', [DrugAdminController::class, 'update'])->middleware('throttle:30,1');
+        Route::delete('/drugs/{drug}', [DrugAdminController::class, 'destroy'])->middleware('throttle:30,1');
 
     });
 
     Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
         // Admin drug CRUD (tenant-enforced) - admin-prefixed endpoints
-        Route::get('/drugs', [\App\Http\Controllers\Api\V1\Admin\DrugAdminController::class, 'index'])->middleware('throttle:60,1');
-        Route::post('/drugs', [\App\Http\Controllers\Api\V1\Admin\DrugAdminController::class, 'store'])->middleware('throttle:30,1');
-        Route::put('/drugs/{drug}', [\App\Http\Controllers\Api\V1\Admin\DrugAdminController::class, 'update'])->middleware('throttle:30,1');
-        Route::delete('/drugs/{drug}', [\App\Http\Controllers\Api\V1\Admin\DrugAdminController::class, 'destroy'])->middleware('throttle:30,1');
-        Route::post('/import/products/json', [\App\Http\Controllers\Api\V1\Admin\ProductImportController::class, 'importJson'])->middleware('throttle:10,1');
+        Route::get('/drugs', [DrugAdminController::class, 'index'])->middleware('throttle:60,1');
+        Route::post('/drugs', [DrugAdminController::class, 'store'])->middleware('throttle:30,1');
+        Route::put('/drugs/{drug}', [DrugAdminController::class, 'update'])->middleware('throttle:30,1');
+        Route::delete('/drugs/{drug}', [DrugAdminController::class, 'destroy'])->middleware('throttle:30,1');
+        Route::post('/import/products/json', [ProductImportController::class, 'importJson'])->middleware('throttle:10,1');
         // Phase-2: Orders & Procurement
-        Route::get('/orders', [\App\Http\Controllers\Api\V1\Admin\OrderController::class, 'index'])->middleware('throttle:60,1');
-        Route::post('/orders', [\App\Http\Controllers\Api\V1\Admin\OrderController::class, 'store'])->middleware('throttle:30,1');
-        Route::get('/orders/{order}', [\App\Http\Controllers\Api\V1\Admin\OrderController::class, 'show'])->middleware('throttle:60,1');
-        Route::put('/orders/{order}', [\App\Http\Controllers\Api\V1\Admin\OrderController::class, 'update'])->middleware('throttle:30,1');
-        Route::delete('/orders/{order}', [\App\Http\Controllers\Api\V1\Admin\OrderController::class, 'destroy'])->middleware('throttle:30,1');
+        Route::get('/orders', [OrderController::class, 'index'])->middleware('throttle:60,1');
+        Route::post('/orders', [OrderController::class, 'store'])->middleware('throttle:30,1');
+        Route::get('/orders/{order}', [OrderController::class, 'show'])->middleware('throttle:60,1');
+        Route::put('/orders/{order}', [OrderController::class, 'update'])->middleware('throttle:30,1');
+        Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->middleware('throttle:30,1');
 
         // Role Management
         Route::middleware(['can:super-admin'])->group(function () {
@@ -287,5 +290,3 @@ Route::prefix('v1')->group(function () {
         Route::post('/insurance-claims/{insuranceClaim}/reject', [InsuranceClaimController::class, 'reject'])->middleware('throttle:30,1');
     });
 });
-
-

@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\ProductStock;
-use App\Models\Product;
 use App\Models\Branch;
 use App\Models\Company;
+use App\Models\Product;
+use App\Models\ProductStock;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ProductStockFactory extends Factory

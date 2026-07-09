@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notification;
 
 /**
  * StockTransferReceivedNotification
- * 
+ *
  * Notification sent when a stock transfer is received.
  */
 class StockTransferReceivedNotification extends Notification
@@ -18,15 +18,12 @@ class StockTransferReceivedNotification extends Notification
 
     /**
      * The stock transfer instance.
-     *
-     * @var \App\Models\StockTransfer
      */
     protected StockTransfer $transfer;
 
     /**
      * Create a new notification instance.
      *
-     * @param  \App\Models\StockTransfer  $transfer
      * @return void
      */
     public function __construct(StockTransfer $transfer)
@@ -49,22 +46,21 @@ class StockTransferReceivedNotification extends Notification
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
      */
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Stock Transfer Received - ' . $this->transfer->transfer_number)
-            ->greeting('Hello ' . $notifiable->name . ',')
+            ->subject('Stock Transfer Received - '.$this->transfer->transfer_number)
+            ->greeting('Hello '.$notifiable->name.',')
             ->line('A stock transfer has been successfully received.')
-            ->line('Transfer Number: ' . $this->transfer->transfer_number)
-            ->line('From: ' . $this->transfer->fromBranch->name)
-            ->line('To: ' . $this->transfer->toBranch->name)
-            ->line('Total Items: ' . $this->transfer->total_items)
-            ->line('Total Quantity: ' . $this->transfer->total_quantity)
-            ->line('Total Value: ' . number_format($this->transfer->total_value, 2))
-            ->line('Received At: ' . $this->transfer->received_at->format('Y-m-d H:i:s'))
-            ->action('View Transfer', url('/api/v1/stock-transfers/' . $this->transfer->id))
+            ->line('Transfer Number: '.$this->transfer->transfer_number)
+            ->line('From: '.$this->transfer->fromBranch->name)
+            ->line('To: '.$this->transfer->toBranch->name)
+            ->line('Total Items: '.$this->transfer->total_items)
+            ->line('Total Quantity: '.$this->transfer->total_quantity)
+            ->line('Total Value: '.number_format($this->transfer->total_value, 2))
+            ->line('Received At: '.$this->transfer->received_at->format('Y-m-d H:i:s'))
+            ->action('View Transfer', url('/api/v1/stock-transfers/'.$this->transfer->id))
             ->line('The stock has been added to your inventory.')
             ->line('Thank you for using our application!');
     }

@@ -2,14 +2,16 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Models\StockTransfer;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 
 /**
  * ReceiveStockTransferRequest
- * 
+ *
  * Form request for receiving a stock transfer.
  * Validates that received quantities match sent quantities and handles discrepancies.
  */
@@ -17,14 +19,12 @@ class ReceiveStockTransferRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
         $transfer = $this->route('stock_transfer') ?? $this->route('stockTransfer');
-        
-        if (!$transfer) {
+
+        if (! $transfer) {
             return false;
         }
 
@@ -40,7 +40,7 @@ class ReceiveStockTransferRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -70,29 +70,27 @@ class ReceiveStockTransferRequest extends FormRequest
 
     /**
      * Configure the validator instance.
-     *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
-     * @return void
      */
     protected function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
             $transfer = $this->route('stock_transfer') ?? $this->route('stockTransfer');
-            
-            if (!$transfer) {
+
+            if (! $transfer) {
                 $validator->errors()->add('stock_transfer', 'Transfer not found.');
+
                 return;
             }
 
             // Can only receive in-transit transfers
-            if (!$transfer->canBeReceived()) {
-                $validator->errors()->add('status', 
+            if (! $transfer->canBeReceived()) {
+                $validator->errors()->add('status',
                     "Cannot receive transfer with status: {$transfer->status}. Only in-transit transfers can be received.");
             }
 
             // Verify user belongs to the destination branch
-            if (auth()->user()->branch_id !== $transfer->to_branch_id && !auth()->user()->isSuperAdmin()) {
-                $validator->errors()->add('authorization', 
+            if (auth()->user()->branch_id !== $transfer->to_branch_id && ! auth()->user()->isSuperAdmin()) {
+                $validator->errors()->add('authorization',
                     'You must belong to the destination branch to receive this transfer.');
             }
 
@@ -106,24 +104,23 @@ class ReceiveStockTransferRequest extends FormRequest
     /**
      * Validate that received quantities don't exceed sent quantities.
      *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
-     * @param  \App\Models\StockTransfer  $transfer
-     * @return void
+     * @param  StockTransfer  $transfer
      */
     protected function validateReceivingQuantities(Validator $validator, $transfer): void
     {
         foreach ($this->items as $itemData) {
             $transferItem = $transfer->items()->find($itemData['id']);
-            
-            if (!$transferItem) {
-                $validator->errors()->add("items.{$itemData['id']}", 
+
+            if (! $transferItem) {
+                $validator->errors()->add("items.{$itemData['id']}",
                     "Item ID {$itemData['id']} does not belong to this transfer.");
+
                 continue;
             }
 
             // Check if quantity received exceeds sent
             if ($itemData['quantity_received'] > $transferItem->quantity_sent) {
-                $validator->errors()->add("items.{$itemData['id']}.quantity_received", 
+                $validator->errors()->add("items.{$itemData['id']}.quantity_received",
                     "Quantity received ({$itemData['quantity_received']}) cannot exceed sent quantity ({$transferItem->quantity_sent}).");
             }
         }
@@ -132,10 +129,8 @@ class ReceiveStockTransferRequest extends FormRequest
     /**
      * Handle a failed validation attempt.
      *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
-     * @return void
      *
-     * @throws \Illuminate\Http\Exceptions\HttpResponseException
+     * @throws HttpResponseException
      */
     protected function failedValidation(Validator $validator): void
     {

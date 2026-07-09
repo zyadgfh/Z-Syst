@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleItem;
-use App\Models\Product;
+use Illuminate\Database\DatabaseManager;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Illuminate\Database\DatabaseManager;
 
 class SaleService
 {
@@ -64,8 +64,9 @@ class SaleService
 
     protected function generateInvoiceNumber($branchId = null): string
     {
-        $prefix = $branchId ? 'B' . str_pad($branchId, 3, '0', STR_PAD_LEFT) . '-' : '';
-        return $prefix . strtoupper(Str::random(10));
+        $prefix = $branchId ? 'B'.str_pad($branchId, 3, '0', STR_PAD_LEFT).'-' : '';
+
+        return $prefix.strtoupper(Str::random(10));
     }
 
     protected function deductStock(Product $product, int $qty)
@@ -75,7 +76,9 @@ class SaleService
         $stocks = $product->stocks()->where('quantity', '>', 0)->orderBy('created_at')->get();
 
         foreach ($stocks as $stock) {
-            if ($remaining <= 0) break;
+            if ($remaining <= 0) {
+                break;
+            }
 
             $take = min($stock->quantity, $remaining);
             $stock->quantity -= $take;
@@ -86,7 +89,7 @@ class SaleService
 
         if ($remaining > 0) {
             // negative stock allowed? For now, throw
-            throw new \RuntimeException('Insufficient stock for product ID: ' . $product->id);
+            throw new \RuntimeException('Insufficient stock for product ID: '.$product->id);
         }
     }
 }

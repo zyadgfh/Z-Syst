@@ -15,6 +15,7 @@ use App\Policies\RolePolicy;
 use App\Policies\StockTransferPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -30,11 +31,11 @@ class AuthServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
-        
+
         // Define a simple gate that maps the 'super-admin' ability
         // to the User::isSuperAdmin() helper. This powers the
         // route-level `can:super-admin` middleware used in routes/api.php.
-        \Illuminate\Support\Facades\Gate::define('super-admin', function (User $user) {
+        Gate::define('super-admin', function (User $user) {
             return $user->isSuperAdmin();
         });
     }

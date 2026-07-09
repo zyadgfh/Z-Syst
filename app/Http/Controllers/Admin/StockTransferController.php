@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreStockTransferRequest;
-use App\Http\Requests\UpdateStockTransferRequest;
 use App\Http\Requests\ApproveStockTransferRequest;
+use App\Http\Requests\CancelStockTransferRequest;
+use App\Http\Requests\ReceiveStockTransferRequest;
 use App\Http\Requests\RejectStockTransferRequest;
 use App\Http\Requests\ShipStockTransferRequest;
-use App\Http\Requests\ReceiveStockTransferRequest;
-use App\Http\Requests\CancelStockTransferRequest;
-use App\Http\Resources\StockTransferResource;
+use App\Http\Requests\StoreStockTransferRequest;
+use App\Http\Requests\UpdateStockTransferRequest;
 use App\Http\Resources\StockTransferItemResource;
+use App\Http\Resources\StockTransferResource;
 use App\Models\StockTransfer;
 use App\Services\StockTransferService;
 use Illuminate\Http\JsonResponse;
@@ -21,26 +21,24 @@ use Illuminate\Support\Facades\Auth;
 
 /**
  * StockTransferController
- * 
+ *
  * Controller for managing stock transfer operations.
  * Handles the complete workflow: Request → Approve → Ship → Receive
- * 
+ *
  * @author Z-Syst Development Team
+ *
  * @version 1.0.0
  */
 class StockTransferController extends Controller
 {
     /**
      * The stock transfer service instance.
-     *
-     * @var \App\Services\StockTransferService
      */
     protected StockTransferService $stockTransferService;
 
     /**
      * Create a new controller instance.
      *
-     * @param  \App\Services\StockTransferService  $stockTransferService
      * @return void
      */
     public function __construct(StockTransferService $stockTransferService)
@@ -50,9 +48,6 @@ class StockTransferController extends Controller
 
     /**
      * Display a listing of stock transfers.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -79,9 +74,6 @@ class StockTransferController extends Controller
 
     /**
      * Store a newly created stock transfer in storage.
-     *
-     * @param  \App\Http\Requests\StoreStockTransferRequest  $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreStockTransferRequest $request): JsonResponse
     {
@@ -100,9 +92,6 @@ class StockTransferController extends Controller
 
     /**
      * Display the specified stock transfer.
-     *
-     * @param  \App\Models\StockTransfer  $stockTransfer
-     * @return \Illuminate\Http\JsonResponse
      */
     public function show(StockTransfer $stockTransfer): JsonResponse
     {
@@ -117,10 +106,6 @@ class StockTransferController extends Controller
 
     /**
      * Update the specified stock transfer in storage.
-     *
-     * @param  \App\Http\Requests\UpdateStockTransferRequest  $request
-     * @param  \App\Models\StockTransfer  $stockTransfer
-     * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateStockTransferRequest $request, StockTransfer $stockTransfer): JsonResponse
     {
@@ -136,9 +121,6 @@ class StockTransferController extends Controller
 
     /**
      * Remove the specified stock transfer from storage (soft delete).
-     *
-     * @param  \App\Models\StockTransfer  $stockTransfer
-     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(StockTransfer $stockTransfer): JsonResponse
     {
@@ -153,10 +135,6 @@ class StockTransferController extends Controller
 
     /**
      * Approve the specified stock transfer.
-     *
-     * @param  \App\Http\Requests\ApproveStockTransferRequest  $request
-     * @param  \App\Models\StockTransfer  $stockTransfer
-     * @return \Illuminate\Http\JsonResponse
      */
     public function approve(ApproveStockTransferRequest $request, StockTransfer $stockTransfer): JsonResponse
     {
@@ -175,10 +153,6 @@ class StockTransferController extends Controller
 
     /**
      * Reject the specified stock transfer.
-     *
-     * @param  \App\Http\Requests\RejectStockTransferRequest  $request
-     * @param  \App\Models\StockTransfer  $stockTransfer
-     * @return \Illuminate\Http\JsonResponse
      */
     public function reject(RejectStockTransferRequest $request, StockTransfer $stockTransfer): JsonResponse
     {
@@ -198,10 +172,6 @@ class StockTransferController extends Controller
 
     /**
      * Ship the specified stock transfer.
-     *
-     * @param  \App\Http\Requests\ShipStockTransferRequest  $request
-     * @param  \App\Models\StockTransfer  $stockTransfer
-     * @return \Illuminate\Http\JsonResponse
      */
     public function ship(ShipStockTransferRequest $request, StockTransfer $stockTransfer): JsonResponse
     {
@@ -221,10 +191,6 @@ class StockTransferController extends Controller
 
     /**
      * Receive the specified stock transfer.
-     *
-     * @param  \App\Http\Requests\ReceiveStockTransferRequest  $request
-     * @param  \App\Models\StockTransfer  $stockTransfer
-     * @return \Illuminate\Http\JsonResponse
      */
     public function receive(ReceiveStockTransferRequest $request, StockTransfer $stockTransfer): JsonResponse
     {
@@ -245,10 +211,6 @@ class StockTransferController extends Controller
 
     /**
      * Cancel the specified stock transfer.
-     *
-     * @param  \App\Http\Requests\CancelStockTransferRequest  $request
-     * @param  \App\Models\StockTransfer  $stockTransfer
-     * @return \Illuminate\Http\JsonResponse
      */
     public function cancel(CancelStockTransferRequest $request, StockTransfer $stockTransfer): JsonResponse
     {
@@ -268,9 +230,6 @@ class StockTransferController extends Controller
 
     /**
      * Get stock transfer statistics.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function statistics(Request $request): JsonResponse
     {
@@ -292,9 +251,6 @@ class StockTransferController extends Controller
 
     /**
      * Get items for a specific stock transfer.
-     *
-     * @param  \App\Models\StockTransfer  $stockTransfer
-     * @return \Illuminate\Http\JsonResponse
      */
     public function items(StockTransfer $stockTransfer): JsonResponse
     {

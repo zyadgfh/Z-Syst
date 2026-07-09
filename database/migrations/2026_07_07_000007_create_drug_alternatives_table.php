@@ -21,7 +21,7 @@ class CreateDrugAlternativesTable extends Migration
                 $table->foreign('drug_id')->references('id')->on('drugs')->onDelete('cascade');
                 $table->foreign('alternative_drug_id')->references('id')->on('drugs')->onDelete('cascade');
 
-                $table->unique(['company_id','drug_id','alternative_drug_id']);
+                $table->unique(['company_id', 'drug_id', 'alternative_drug_id']);
             });
         }
     }

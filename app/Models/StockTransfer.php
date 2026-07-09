@@ -2,19 +2,21 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Prunable;
+use Illuminate\Support\Carbon;
 
 /**
  * StockTransfer Model
- * 
+ *
  * Represents a stock transfer between branches within a company.
  * Follows the workflow: pending → approved → in_transit → received
- * 
+ *
  * @property int $id
  * @property int $company_id
  * @property int $from_branch_id
@@ -27,22 +29,22 @@ use Illuminate\Database\Eloquent\Prunable;
  * @property string $status
  * @property string|null $notes
  * @property string|null $rejection_reason
- * @property \Illuminate\Support\Carbon $requested_at
- * @property \Illuminate\Support\Carbon|null $approved_at
- * @property \Illuminate\Support\Carbon|null $rejected_at
- * @property \Illuminate\Support\Carbon|null $shipped_at
- * @property \Illuminate\Support\Carbon|null $received_at
- * @property \Illuminate\Support\Carbon|null $cancelled_at
+ * @property Carbon $requested_at
+ * @property Carbon|null $approved_at
+ * @property Carbon|null $rejected_at
+ * @property Carbon|null $shipped_at
+ * @property Carbon|null $received_at
+ * @property Carbon|null $cancelled_at
  * @property float $total_items
  * @property float $total_quantity
  * @property float $total_value
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property Carbon|null $deleted_at
  */
 class StockTransfer extends Model
 {
-    use HasFactory, SoftDeletes, Prunable;
+    use HasFactory, Prunable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -91,8 +93,6 @@ class StockTransfer extends Model
 
     /**
      * Get the company that owns the stock transfer.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function company(): BelongsTo
     {
@@ -101,8 +101,6 @@ class StockTransfer extends Model
 
     /**
      * Get the branch that is sending the stock.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function fromBranch(): BelongsTo
     {
@@ -111,8 +109,6 @@ class StockTransfer extends Model
 
     /**
      * Get the branch that is receiving the stock.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function toBranch(): BelongsTo
     {
@@ -121,8 +117,6 @@ class StockTransfer extends Model
 
     /**
      * Get the user who requested the transfer.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function requestedBy(): BelongsTo
     {
@@ -131,8 +125,6 @@ class StockTransfer extends Model
 
     /**
      * Get the user who approved the transfer.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function approvedBy(): BelongsTo
     {
@@ -141,8 +133,6 @@ class StockTransfer extends Model
 
     /**
      * Get the user who shipped the transfer.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function shippedBy(): BelongsTo
     {
@@ -151,8 +141,6 @@ class StockTransfer extends Model
 
     /**
      * Get the user who received the transfer.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function receivedBy(): BelongsTo
     {
@@ -161,8 +149,6 @@ class StockTransfer extends Model
 
     /**
      * Get the items in the stock transfer.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function items(): HasMany
     {
@@ -172,9 +158,8 @@ class StockTransfer extends Model
     /**
      * Scope a query to only include transfers with a specific status.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $status
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  Builder  $query
+     * @return Builder
      */
     public function scopeWithStatus($query, string $status)
     {
@@ -184,8 +169,8 @@ class StockTransfer extends Model
     /**
      * Scope a query to only include pending transfers.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  Builder  $query
+     * @return Builder
      */
     public function scopePending($query)
     {
@@ -195,8 +180,8 @@ class StockTransfer extends Model
     /**
      * Scope a query to only include approved transfers.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  Builder  $query
+     * @return Builder
      */
     public function scopeApproved($query)
     {
@@ -206,8 +191,8 @@ class StockTransfer extends Model
     /**
      * Scope a query to only include in-transit transfers.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  Builder  $query
+     * @return Builder
      */
     public function scopeInTransit($query)
     {
@@ -217,8 +202,8 @@ class StockTransfer extends Model
     /**
      * Scope a query to only include received transfers.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  Builder  $query
+     * @return Builder
      */
     public function scopeReceived($query)
     {
@@ -228,24 +213,22 @@ class StockTransfer extends Model
     /**
      * Scope a query to only include transfers for a specific branch.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $branchId
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  Builder  $query
+     * @return Builder
      */
     public function scopeForBranch($query, int $branchId)
     {
         return $query->where(function ($q) use ($branchId) {
             $q->where('from_branch_id', $branchId)
-              ->orWhere('to_branch_id', $branchId);
+                ->orWhere('to_branch_id', $branchId);
         });
     }
 
     /**
      * Scope a query to only include transfers from a specific branch.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $branchId
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  Builder  $query
+     * @return Builder
      */
     public function scopeFromBranch($query, int $branchId)
     {
@@ -255,9 +238,8 @@ class StockTransfer extends Model
     /**
      * Scope a query to only include transfers to a specific branch.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $branchId
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  Builder  $query
+     * @return Builder
      */
     public function scopeToBranch($query, int $branchId)
     {
@@ -267,7 +249,7 @@ class StockTransfer extends Model
     /**
      * Get the prunable model query.
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     public function prunable()
     {
@@ -276,8 +258,6 @@ class StockTransfer extends Model
 
     /**
      * Check if the transfer can be approved.
-     *
-     * @return bool
      */
     public function canBeApproved(): bool
     {
@@ -286,8 +266,6 @@ class StockTransfer extends Model
 
     /**
      * Check if the transfer can be rejected.
-     *
-     * @return bool
      */
     public function canBeRejected(): bool
     {
@@ -296,8 +274,6 @@ class StockTransfer extends Model
 
     /**
      * Check if the transfer can be shipped.
-     *
-     * @return bool
      */
     public function canBeShipped(): bool
     {
@@ -306,8 +282,6 @@ class StockTransfer extends Model
 
     /**
      * Check if the transfer can be received.
-     *
-     * @return bool
      */
     public function canBeReceived(): bool
     {
@@ -316,8 +290,6 @@ class StockTransfer extends Model
 
     /**
      * Check if the transfer can be cancelled.
-     *
-     * @return bool
      */
     public function canBeCancelled(): bool
     {
@@ -340,16 +312,13 @@ class StockTransfer extends Model
 
     /**
      * Generate a unique transfer number.
-     *
-     * @param int $companyId
-     * @return string
      */
     protected static function generateTransferNumber(int $companyId): string
     {
-        $prefix = 'STF-' . str_pad($companyId, 4, '0', STR_PAD_LEFT);
+        $prefix = 'STF-'.str_pad($companyId, 4, '0', STR_PAD_LEFT);
         $timestamp = now()->format('Ymd');
         $random = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 4));
-        
+
         return "{$prefix}-{$timestamp}-{$random}";
     }
 }

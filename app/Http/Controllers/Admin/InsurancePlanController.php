@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Api\BaseController;
+use App\Http\Controllers\API\BaseController;
 use App\Models\InsurancePlan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,8 +17,8 @@ class InsurancePlanController extends BaseController
     {
         $plans = InsurancePlan::forCompany($request->user()->company_id)
             ->with('insuranceCompany')
-            ->when($request->insurance_company_id, fn($q, $v) => $q->where('insurance_company_id', $v))
-            ->when($request->search, fn($q, $v) => $q->where('name', 'like', "%{$v}%"))
+            ->when($request->insurance_company_id, fn ($q, $v) => $q->where('insurance_company_id', $v))
+            ->when($request->search, fn ($q, $v) => $q->where('name', 'like', "%{$v}%"))
             ->orderBy('name')
             ->paginate($request->per_page ?? 15);
 
@@ -44,7 +44,7 @@ class InsurancePlanController extends BaseController
         }
 
         $data = $validator->validated();
-        $data['code'] = strtoupper(Str::slug($data['name'])) . '-' . Str::random(4);
+        $data['code'] = strtoupper(Str::slug($data['name'])).'-'.Str::random(4);
         $data['company_id'] = $request->user()->company_id;
 
         $plan = InsurancePlan::create($data);
@@ -57,6 +57,7 @@ class InsurancePlanController extends BaseController
         if ($insurancePlan->company_id !== $request->user()->company_id) {
             return $this->error('Forbidden', 403);
         }
+
         return $this->success($insurancePlan->load('insuranceCompany'));
     }
 
@@ -83,6 +84,7 @@ class InsurancePlanController extends BaseController
         }
 
         $insurancePlan->update($validator->validated());
+
         return $this->success($insurancePlan, 'Insurance plan updated successfully');
     }
 
@@ -92,6 +94,7 @@ class InsurancePlanController extends BaseController
             return $this->error('Forbidden', 403);
         }
         $insurancePlan->delete();
+
         return $this->success(null, 'Insurance plan deleted successfully');
     }
 }

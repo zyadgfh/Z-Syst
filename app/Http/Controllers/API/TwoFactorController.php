@@ -1,23 +1,19 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Api\BaseController;
 use App\Http\Requests\Auth\TwoFactorSetupRequest;
-use App\Http\Requests\Auth\TwoFactorVerifyRequest;
 use App\Services\AuthService;
 use App\Services\TwoFactorService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class TwoFactorController extends BaseController
 {
     public function __construct(
         private AuthService $authService,
         private TwoFactorService $twoFactorService
-    ) {
-    }
+    ) {}
 
     public function setup(Request $request): JsonResponse
     {

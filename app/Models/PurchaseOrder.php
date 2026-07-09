@@ -2,19 +2,17 @@
 
 namespace App\Models;
 
+use App\Scopes\TenantScope;
+use App\Traits\HasCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasCompany;
-use App\Models\GoodsReceivedNote;
-use App\Models\User;
-use App\Scopes\TenantScope;
 
 class PurchaseOrder extends Model
 {
-    use HasFactory, HasCompany, SoftDeletes;
+    use HasCompany, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'company_id',
@@ -30,7 +28,7 @@ class PurchaseOrder extends Model
         'expected_delivery_date',
         'notes',
         'approved_by',
-        'created_by'
+        'created_by',
     ];
 
     public function items(): HasMany

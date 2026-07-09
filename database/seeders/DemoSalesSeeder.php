@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Company;
 
 class DemoSalesSeeder extends Seeder
 {
@@ -49,10 +49,10 @@ class DemoSalesSeeder extends Seeder
             } catch (\Exception $e) {
                 // Try to supply common required fields that may be missing (invoice_number, reference)
                 if (Schema::hasColumn('sales', 'invoice_number')) {
-                    $saleData['invoice_number'] = 'INV-' . strtoupper(substr(md5(now()), 0, 8));
+                    $saleData['invoice_number'] = 'INV-'.strtoupper(substr(md5(now()), 0, 8));
                 }
                 if (Schema::hasColumn('sales', 'reference')) {
-                    $saleData['reference'] = 'REF-' . strtoupper(substr(md5(now()), 8, 6));
+                    $saleData['reference'] = 'REF-'.strtoupper(substr(md5(now()), 8, 6));
                 }
 
                 try {

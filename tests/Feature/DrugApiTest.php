@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Company;
-use App\Models\Drug;
 use App\Services\TenantManager;
 use Database\Seeders\DemoDrugSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;

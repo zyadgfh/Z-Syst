@@ -12,7 +12,7 @@ class LowStockProductResource extends JsonResource
     public function toArray($request): array
     {
         $data = is_object($this->resource) ? $this->resource : (object) $this->resource;
-        
+
         return [
             'product_id' => $data->product_id,
             'product_name' => $data->product_name,

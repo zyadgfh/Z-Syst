@@ -2,24 +2,27 @@
 
 namespace Tests\Unit;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-use App\Services\AnalyticsService;
-use App\Models\User;
+use App\Models\Branch;
 use App\Models\Company;
 use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\Sale;
 use App\Models\SaleItem;
-use Illuminate\Support\Facades\Cache;
+use App\Models\User;
+use App\Services\AnalyticsService;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Tests\TestCase;
 
 class AnalyticsServiceTest extends TestCase
 {
     use RefreshDatabase;
 
     protected $analyticsService;
+
     protected $user;
+
     protected $company;
 
     protected function setUp(): void
@@ -35,7 +38,7 @@ class AnalyticsServiceTest extends TestCase
         // Authenticate as the test user
         $this->actingAs($this->user);
 
-        $this->analyticsService = new AnalyticsService();
+        $this->analyticsService = new AnalyticsService;
     }
 
     protected function tearDown(): void
@@ -275,8 +278,8 @@ class AnalyticsServiceTest extends TestCase
     /** @test */
     public function it_respects_branch_scoping()
     {
-        $branch1 = \App\Models\Branch::factory()->create(['company_id' => $this->company->id]);
-        $branch2 = \App\Models\Branch::factory()->create(['company_id' => $this->company->id]);
+        $branch1 = Branch::factory()->create(['company_id' => $this->company->id]);
+        $branch2 = Branch::factory()->create(['company_id' => $this->company->id]);
 
         // Create branch-specific user
         $branchUser = User::factory()->create([
@@ -285,7 +288,7 @@ class AnalyticsServiceTest extends TestCase
         ]);
 
         $this->actingAs($branchUser);
-        $branchAnalytics = new AnalyticsService();
+        $branchAnalytics = new AnalyticsService;
 
         $product = Product::factory()->create([
             'company_id' => $this->company->id,

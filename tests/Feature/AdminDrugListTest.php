@@ -30,7 +30,7 @@ class AdminDrugListTest extends TestCase
 
         // search
         $q = substr($first['name'], 0, 4);
-        $search = $this->getJson('/api/v1/admin/drugs?q=' . urlencode($q));
+        $search = $this->getJson('/api/v1/admin/drugs?q='.urlencode($q));
         $search->assertStatus(200)->assertJsonStructure(['data']);
     }
 }

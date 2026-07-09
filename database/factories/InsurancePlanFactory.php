@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\InsurancePlan;
 use App\Models\InsuranceCompany;
+use App\Models\InsurancePlan;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class InsurancePlanFactory extends Factory

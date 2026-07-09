@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Api\BaseController;
+use App\Http\Controllers\API\BaseController;
 use App\Models\GoodsReceivedNote;
 use App\Services\GoodsReceivedNoteService;
 use Illuminate\Http\JsonResponse;

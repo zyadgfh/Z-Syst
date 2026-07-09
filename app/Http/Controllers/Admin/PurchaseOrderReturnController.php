@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Api\BaseController;
+use App\Http\Controllers\API\BaseController;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderReturn;
 use App\Services\PurchaseOrderReturnService;
@@ -94,14 +94,16 @@ final class PurchaseOrderReturnController extends BaseController
 
             if (! $purchaseOrder) {
                 $validator->errors()->add('purchase_order_id', 'Invalid purchase order.');
+
                 return;
             }
 
             foreach ($request->input('items', []) as $index => $item) {
-                $purchaseOrderItem = $purchaseOrder->items->first(fn($poItem) => $poItem->product_id === $item['product_id']);
+                $purchaseOrderItem = $purchaseOrder->items->first(fn ($poItem) => $poItem->product_id === $item['product_id']);
 
                 if (! $purchaseOrderItem) {
                     $validator->errors()->add("items.$index.product_id", 'Product is not part of the purchase order.');
+
                     continue;
                 }
 

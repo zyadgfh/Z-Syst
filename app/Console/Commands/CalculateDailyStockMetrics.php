@@ -2,13 +2,13 @@
 
 namespace App\Console\Commands;
 
-use App\Models\ProductStock;
 use App\Models\Company;
-use App\Notifications\LowStockNotification;
+use App\Models\ProductStock;
 use App\Notifications\ExpiryDateNotification;
+use App\Notifications\LowStockNotification;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Notification;
-use Carbon\Carbon;
 
 class CalculateDailyStockMetrics extends Command
 {
@@ -40,20 +40,20 @@ class CalculateDailyStockMetrics extends Command
 
             // Get low stock products for this company
             $lowStockProducts = $this->getLowStockProducts($company->id);
-            
+
             if ($lowStockProducts->isNotEmpty()) {
                 $this->info("Found {$lowStockProducts->count()} low stock products");
-                
+
                 // Send low stock notifications to company admins
                 $this->sendLowStockNotifications($company, $lowStockProducts);
             }
 
             // Get expiring products for this company
             $expiringProducts = $this->getExpiringProducts($company->id);
-            
+
             if ($expiringProducts->isNotEmpty()) {
                 $this->info("Found {$expiringProducts->count()} expiring products");
-                
+
                 // Send expiry notifications to company admins
                 $this->sendExpiryNotifications($company, $expiringProducts);
             }
@@ -63,7 +63,7 @@ class CalculateDailyStockMetrics extends Command
         }
 
         $this->info('Daily stock metrics calculation completed successfully.');
-        
+
         return Command::SUCCESS;
     }
 
@@ -109,6 +109,7 @@ class CalculateDailyStockMetrics extends Command
 
         if ($admins->isEmpty()) {
             $this->warn("No admins found for company {$company->name}");
+
             return;
         }
 
@@ -133,6 +134,7 @@ class CalculateDailyStockMetrics extends Command
 
         if ($admins->isEmpty()) {
             $this->warn("No admins found for company {$company->name}");
+
             return;
         }
 

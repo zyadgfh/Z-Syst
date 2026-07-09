@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignId('approved_by')->nullable()->constrained('users')->onDelete('restrict');
             $table->foreignId('shipped_by')->nullable()->constrained('users')->onDelete('restrict');
             $table->foreignId('received_by')->nullable()->constrained('users')->onDelete('restrict');
-            
+
             $table->string('transfer_number')->unique();
             $table->enum('status', [
                 'pending',
@@ -28,9 +28,9 @@ return new class extends Migration
                 'rejected',
                 'in_transit',
                 'received',
-                'cancelled'
+                'cancelled',
             ])->default('pending');
-            
+
             $table->text('notes')->nullable();
             $table->text('rejection_reason')->nullable();
             $table->timestamp('requested_at')->useCurrent();
@@ -39,14 +39,14 @@ return new class extends Migration
             $table->timestamp('shipped_at')->nullable();
             $table->timestamp('received_at')->nullable();
             $table->timestamp('cancelled_at')->nullable();
-            
+
             $table->decimal('total_items', 10, 2)->default(0);
             $table->decimal('total_quantity', 10, 2)->default(0);
             $table->decimal('total_value', 15, 2)->default(0);
-            
+
             $table->timestamps();
             $table->softDeletes();
-            
+
             // Indexes for performance
             $table->index(['company_id', 'status']);
             $table->index(['from_branch_id', 'status']);

@@ -10,7 +10,9 @@ use Illuminate\Support\Str;
 class TwoFactorService
 {
     private int $digits = 6;
+
     private int $period = 30;
+
     private string $issuer;
 
     public function __construct()
@@ -140,7 +142,7 @@ class TwoFactorService
         $counter = floor(time() / $this->period) + $window;
         $secretKey = $this->base32Decode($secret);
 
-        $binaryCounter = pack('N*', 0) . pack('N*', $counter);
+        $binaryCounter = pack('N*', 0).pack('N*', $counter);
         $hash = hash_hmac('sha1', $binaryCounter, $secretKey, true);
         $offset = ord($hash[strlen($hash) - 1]) & 0x0F;
         $truncatedHash = substr($hash, $offset, 4);

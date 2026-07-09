@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Api\BaseController;
+use App\Http\Controllers\API\BaseController;
 use App\Models\Prescription;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,11 +18,11 @@ class PrescriptionController extends BaseController
     {
         $prescriptions = Prescription::forCompany($request->user()->company_id)
             ->with(['patient', 'doctor', 'branch', 'createdBy'])
-            ->when($request->status, fn($q, $v) => $q->where('status', $v))
-            ->when($request->patient_id, fn($q, $v) => $q->where('patient_id', $v))
-            ->when($request->doctor_id, fn($q, $v) => $q->where('doctor_id', $v))
-            ->when($request->from_date, fn($q, $v) => $q->whereDate('prescribed_date', '>=', $v))
-            ->when($request->to_date, fn($q, $v) => $q->whereDate('prescribed_date', '<=', $v))
+            ->when($request->status, fn ($q, $v) => $q->where('status', $v))
+            ->when($request->patient_id, fn ($q, $v) => $q->where('patient_id', $v))
+            ->when($request->doctor_id, fn ($q, $v) => $q->where('doctor_id', $v))
+            ->when($request->from_date, fn ($q, $v) => $q->whereDate('prescribed_date', '>=', $v))
+            ->when($request->to_date, fn ($q, $v) => $q->whereDate('prescribed_date', '<=', $v))
             ->orderByDesc('created_at')
             ->paginate($request->per_page ?? 15);
 
@@ -59,7 +59,7 @@ class PrescriptionController extends BaseController
 
             $prescription = Prescription::create(array_merge($data, [
                 'company_id' => $request->user()->company_id,
-                'prescription_number' => 'RX-' . strtoupper(Str::random(8)),
+                'prescription_number' => 'RX-'.strtoupper(Str::random(8)),
                 'status' => 'pending',
                 'created_by' => $request->user()->id,
             ]));
@@ -88,6 +88,7 @@ class PrescriptionController extends BaseController
         if ($prescription->company_id !== $request->user()->company_id) {
             return $this->error('Forbidden', 403);
         }
+
         return $this->success($prescription->load(['patient', 'doctor', 'branch', 'items.product', 'createdBy']));
     }
 
@@ -109,6 +110,7 @@ class PrescriptionController extends BaseController
         }
 
         $prescription->update($validator->validated());
+
         return $this->success($prescription, 'Prescription updated successfully');
     }
 
@@ -118,6 +120,7 @@ class PrescriptionController extends BaseController
             return $this->error('Forbidden', 403);
         }
         $prescription->delete();
+
         return $this->success(null, 'Prescription deleted successfully');
     }
 

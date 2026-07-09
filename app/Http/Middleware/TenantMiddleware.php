@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\TenantManager;
 use Closure;
 use Illuminate\Http\Request;
-use App\Services\TenantManager;
 
 class TenantMiddleware
 {

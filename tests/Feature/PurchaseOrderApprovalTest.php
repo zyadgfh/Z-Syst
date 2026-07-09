@@ -3,9 +3,13 @@
 namespace Tests\Feature;
 
 use App\Models\Company;
+use App\Models\PurchaseOrder;
 use App\Models\User;
+use App\Services\PurchaseOrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class PurchaseOrderApprovalTest extends TestCase
@@ -26,9 +30,9 @@ class PurchaseOrderApprovalTest extends TestCase
         if (in_array('supplier_id', $cols, true)) {
             // ensure supplier exists if table present
             if (Schema::hasTable('suppliers')) {
-                $supplier = \Illuminate\Support\Facades\DB::table('suppliers')->first();
+                $supplier = DB::table('suppliers')->first();
                 if (! $supplier) {
-                    $supplierId = \Illuminate\Support\Facades\DB::table('suppliers')->insertGetId(['company_id' => $company->id, 'name' => 'Supplier']);
+                    $supplierId = DB::table('suppliers')->insertGetId(['company_id' => $company->id, 'name' => 'Supplier']);
                 } else {
                     $supplierId = $supplier->id;
                 }
@@ -39,9 +43,9 @@ class PurchaseOrderApprovalTest extends TestCase
         }
         if (in_array('branch_id', $cols, true)) {
             if (Schema::hasTable('branches')) {
-                $branch = \Illuminate\Support\Facades\DB::table('branches')->where('company_id', $company->id)->first();
+                $branch = DB::table('branches')->where('company_id', $company->id)->first();
                 if (! $branch) {
-                    $branchId = \Illuminate\Support\Facades\DB::table('branches')->insertGetId(['company_id' => $company->id, 'name' => 'Main']);
+                    $branchId = DB::table('branches')->insertGetId(['company_id' => $company->id, 'name' => 'Main']);
                 } else {
                     $branchId = $branch->id;
                 }
@@ -60,27 +64,27 @@ class PurchaseOrderApprovalTest extends TestCase
             $poData['created_by'] = $user->id;
         }
         if (in_array('uuid', $cols, true)) {
-            $poData['uuid'] = (string) \Illuminate\Support\Str::uuid();
+            $poData['uuid'] = (string) Str::uuid();
         }
 
-        $poId = \Illuminate\Support\Facades\DB::table('purchase_orders')->insertGetId($poData);
+        $poId = DB::table('purchase_orders')->insertGetId($poData);
 
         // ensure company_id is set correctly (some schemas may require it)
         if (in_array('company_id', $cols, true)) {
-            \Illuminate\Support\Facades\DB::table('purchase_orders')->where('id', $poId)->update(['company_id' => $company->id]);
+            DB::table('purchase_orders')->where('id', $poId)->update(['company_id' => $company->id]);
         }
 
         // sanity checks to debug potential 403
         $this->assertEquals($company->id, $user->company_id);
-        $poModel = \App\Models\PurchaseOrder::find($poId);
+        $poModel = PurchaseOrder::find($poId);
         $this->assertNotNull($poModel, 'PurchaseOrder model not found');
         if (in_array('company_id', $cols, true)) {
             $this->assertEquals($company->id, $poModel->company_id, 'PurchaseOrder.company_id mismatch');
         }
 
         // call service directly to approve (route binding/middleware may vary across test schemas)
-        $service = app(\App\Services\PurchaseOrderService::class);
-        $poModel = \App\Models\PurchaseOrder::find($poId);
+        $service = app(PurchaseOrderService::class);
+        $poModel = PurchaseOrder::find($poId);
         $service->approve($poModel, $user->id);
 
         $expected = [];

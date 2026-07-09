@@ -12,7 +12,7 @@ class SalesTrendResource extends JsonResource
     public function toArray($request): array
     {
         $data = is_object($this->resource) ? $this->resource : (object) $this->resource;
-        
+
         return [
             'date' => $data->date ?? null,
             'total_sales' => $data->total_sales ?? 0,

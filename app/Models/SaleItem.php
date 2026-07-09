@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\SaleItemFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,7 +12,7 @@ class SaleItem extends Model
 
     protected static function newFactory()
     {
-        return \Database\Factories\SaleItemFactory::new();
+        return SaleItemFactory::new();
     }
 
     protected $fillable = ['sale_id', 'product_id', 'batch_number', 'quantity', 'unit_price', 'discount', 'tax', 'total'];
@@ -25,6 +26,4 @@ class SaleItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
-
-
 }

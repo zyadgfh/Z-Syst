@@ -4,8 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Company;
 use App\Services\TenantManager;
-use Illuminate\Http\Request;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
 class TenantManagerTest extends TestCase

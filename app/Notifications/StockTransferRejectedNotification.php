@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notification;
 
 /**
  * StockTransferRejectedNotification
- * 
+ *
  * Notification sent when a stock transfer is rejected.
  */
 class StockTransferRejectedNotification extends Notification
@@ -18,15 +18,12 @@ class StockTransferRejectedNotification extends Notification
 
     /**
      * The stock transfer instance.
-     *
-     * @var \App\Models\StockTransfer
      */
     protected StockTransfer $transfer;
 
     /**
      * Create a new notification instance.
      *
-     * @param  \App\Models\StockTransfer  $transfer
      * @return void
      */
     public function __construct(StockTransfer $transfer)
@@ -49,19 +46,18 @@ class StockTransferRejectedNotification extends Notification
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
      */
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Stock Transfer Rejected - ' . $this->transfer->transfer_number)
-            ->greeting('Hello ' . $notifiable->name . ',')
+            ->subject('Stock Transfer Rejected - '.$this->transfer->transfer_number)
+            ->greeting('Hello '.$notifiable->name.',')
             ->line('Your stock transfer request has been rejected.')
-            ->line('Transfer Number: ' . $this->transfer->transfer_number)
-            ->line('From: ' . $this->transfer->fromBranch->name)
-            ->line('To: ' . $this->transfer->toBranch->name)
-            ->line('Rejection Reason: ' . ($this->transfer->rejection_reason ?? 'No reason provided'))
-            ->action('View Transfer', url('/api/v1/stock-transfers/' . $this->transfer->id))
+            ->line('Transfer Number: '.$this->transfer->transfer_number)
+            ->line('From: '.$this->transfer->fromBranch->name)
+            ->line('To: '.$this->transfer->toBranch->name)
+            ->line('Rejection Reason: '.($this->transfer->rejection_reason ?? 'No reason provided'))
+            ->action('View Transfer', url('/api/v1/stock-transfers/'.$this->transfer->id))
             ->line('Please review the rejection reason and contact the approver if needed.')
             ->line('Thank you for using our application!');
     }

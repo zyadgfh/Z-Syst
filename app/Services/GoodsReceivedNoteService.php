@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\Models\GoodsReceivedNote;
 use App\Models\ProductStock;
-use App\Models\PurchaseOrder;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Support\Str;
 
@@ -34,7 +33,7 @@ final class GoodsReceivedNoteService
             'purchase_order_id' => $data['purchase_order_id'],
             'supplier_id' => $data['supplier_id'],
             'branch_id' => $data['branch_id'],
-            'grn_number' => 'GRN-' . strtoupper(Str::random(8)),
+            'grn_number' => 'GRN-'.strtoupper(Str::random(8)),
             'notes' => $data['notes'] ?? null,
             'received_by' => $userId,
         ]);

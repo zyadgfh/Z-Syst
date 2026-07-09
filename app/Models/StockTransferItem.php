@@ -5,13 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * StockTransferItem Model
- * 
+ *
  * Represents an individual item in a stock transfer.
  * Tracks requested, sent, and received quantities for each product.
- * 
+ *
  * @property int $id
  * @property int $stock_transfer_id
  * @property int $product_id
@@ -20,12 +21,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float $quantity_sent
  * @property float $quantity_received
  * @property string|null $batch_number
- * @property \Illuminate\Support\Carbon|null $expiry_date
+ * @property Carbon|null $expiry_date
  * @property float $unit_cost
  * @property float $total_cost
  * @property string|null $notes
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class StockTransferItem extends Model
 {
@@ -66,8 +67,6 @@ class StockTransferItem extends Model
 
     /**
      * Get the stock transfer that owns the item.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function stockTransfer(): BelongsTo
     {
@@ -76,8 +75,6 @@ class StockTransferItem extends Model
 
     /**
      * Get the product being transferred.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function product(): BelongsTo
     {
@@ -86,8 +83,6 @@ class StockTransferItem extends Model
 
     /**
      * Get the specific stock record being transferred.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function productStock(): BelongsTo
     {
@@ -96,8 +91,6 @@ class StockTransferItem extends Model
 
     /**
      * Calculate the remaining quantity to be sent.
-     *
-     * @return float
      */
     public function getRemainingToSendAttribute(): float
     {
@@ -106,8 +99,6 @@ class StockTransferItem extends Model
 
     /**
      * Calculate the remaining quantity to be received.
-     *
-     * @return float
      */
     public function getRemainingToReceiveAttribute(): float
     {
@@ -116,8 +107,6 @@ class StockTransferItem extends Model
 
     /**
      * Check if the item has been fully sent.
-     *
-     * @return bool
      */
     public function isFullySent(): bool
     {
@@ -126,8 +115,6 @@ class StockTransferItem extends Model
 
     /**
      * Check if the item has been fully received.
-     *
-     * @return bool
      */
     public function isFullyReceived(): bool
     {
@@ -136,12 +123,10 @@ class StockTransferItem extends Model
 
     /**
      * Check if there are any discrepancies in quantities.
-     *
-     * @return bool
      */
     public function hasDiscrepancy(): bool
     {
-        return $this->quantity_requested !== $this->quantity_sent 
+        return $this->quantity_requested !== $this->quantity_sent
             || $this->quantity_sent !== $this->quantity_received;
     }
 }

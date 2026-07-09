@@ -7,7 +7,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * StockTransferResource
- * 
+ *
  * API resource for transforming StockTransfer models to JSON responses.
  * Follows the JSON:API specification for consistent API responses.
  */
@@ -16,7 +16,6 @@ class StockTransferResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
@@ -25,7 +24,7 @@ class StockTransferResource extends JsonResource
             'id' => $this->id,
             'transfer_number' => $this->transfer_number,
             'status' => $this->status,
-            
+
             // Relationships
             'company' => [
                 'id' => $this->company_id,
@@ -41,7 +40,7 @@ class StockTransferResource extends JsonResource
                 'name' => $this->toBranch->name ?? null,
                 'address' => $this->toBranch->address ?? null,
             ],
-            
+
             // User references
             'requested_by' => [
                 'id' => $this->requested_by,
@@ -63,11 +62,11 @@ class StockTransferResource extends JsonResource
                 'name' => $this->receivedBy->name ?? null,
                 'email' => $this->receivedBy->email ?? null,
             ] : null,
-            
+
             // Transfer details
             'notes' => $this->notes,
             'rejection_reason' => $this->rejection_reason,
-            
+
             // Timestamps
             'requested_at' => $this->requested_at ? $this->requested_at->format('Y-m-d H:i:s') : null,
             'approved_at' => $this->approved_at ? $this->approved_at->format('Y-m-d H:i:s') : null,
@@ -75,22 +74,22 @@ class StockTransferResource extends JsonResource
             'shipped_at' => $this->shipped_at ? $this->shipped_at->format('Y-m-d H:i:s') : null,
             'received_at' => $this->received_at ? $this->received_at->format('Y-m-d H:i:s') : null,
             'cancelled_at' => $this->cancelled_at ? $this->cancelled_at->format('Y-m-d H:i:s') : null,
-            
+
             // Totals
             'total_items' => (float) $this->total_items,
             'total_quantity' => (float) $this->total_quantity,
             'total_value' => (float) $this->total_value,
-            
+
             // Items (nested resource)
             'items' => StockTransferItemResource::collection($this->whenLoaded('items')),
-            
+
             // Status flags
             'can_be_approved' => $this->canBeApproved(),
             'can_be_rejected' => $this->canBeRejected(),
             'can_be_shipped' => $this->canBeShipped(),
             'can_be_received' => $this->canBeReceived(),
             'can_be_cancelled' => $this->canBeCancelled(),
-            
+
             // Metadata
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
@@ -100,7 +99,6 @@ class StockTransferResource extends JsonResource
     /**
      * Get additional data that should be returned with the resource array.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return array<string, mixed>
      */
     public function with(Request $request): array

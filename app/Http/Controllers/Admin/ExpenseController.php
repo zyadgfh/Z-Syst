@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Api\BaseController;
+use App\Http\Controllers\API\BaseController;
 use App\Models\Expense;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,10 +16,10 @@ class ExpenseController extends BaseController
     {
         $expenses = Expense::forCompany($request->user()->company_id)
             ->with(['category', 'branch', 'createdBy'])
-            ->when($request->branch_id, fn($q, $v) => $q->where('branch_id', $v))
-            ->when($request->category_id, fn($q, $v) => $q->where('expense_category_id', $v))
-            ->when($request->from_date, fn($q, $v) => $q->whereDate('expense_date', '>=', $v))
-            ->when($request->to_date, fn($q, $v) => $q->whereDate('expense_date', '<=', $v))
+            ->when($request->branch_id, fn ($q, $v) => $q->where('branch_id', $v))
+            ->when($request->category_id, fn ($q, $v) => $q->where('expense_category_id', $v))
+            ->when($request->from_date, fn ($q, $v) => $q->whereDate('expense_date', '>=', $v))
+            ->when($request->to_date, fn ($q, $v) => $q->whereDate('expense_date', '<=', $v))
             ->orderByDesc('expense_date')
             ->paginate($request->per_page ?? 15);
 
@@ -56,6 +56,7 @@ class ExpenseController extends BaseController
         if ($expense->company_id !== $request->user()->company_id) {
             return $this->error('Forbidden', 403);
         }
+
         return $this->success($expense->load(['category', 'branch', 'createdBy']));
     }
 
@@ -78,6 +79,7 @@ class ExpenseController extends BaseController
         }
 
         $expense->update($validator->validated());
+
         return $this->success($expense, 'Expense updated successfully');
     }
 
@@ -87,6 +89,7 @@ class ExpenseController extends BaseController
             return $this->error('Forbidden', 403);
         }
         $expense->delete();
+
         return $this->success(null, 'Expense deleted successfully');
     }
 }

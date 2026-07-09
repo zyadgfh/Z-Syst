@@ -2,19 +2,21 @@
 
 namespace App\Services;
 
+use App\Models\Branch;
+use App\Models\ProductCategory;
+use App\Models\ProductStock;
 use App\Models\Sale;
 use App\Models\SaleItem;
-use App\Models\Product;
-use App\Models\ProductStock;
-use App\Models\Branch;
 use App\Models\StockTransfer;
+use App\Models\StockTransferItem;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class AnalyticsService
 {
     protected $companyId;
+
     protected $branchId;
 
     public function __construct()
@@ -32,7 +34,7 @@ class AnalyticsService
         $endDate = $endDate ?? Carbon::now()->endOfDay();
 
         $cacheKey = "company:{$this->companyId}:kpis:{$startDate->format('Y-m-d')}:{$endDate->format('Y-m-d')}";
-        
+
         return Cache::remember($cacheKey, 300, function () use ($startDate, $endDate) {
             $query = Sale::where('company_id', $this->companyId)
                 ->whereBetween('created_at', [$startDate, $endDate]);
@@ -65,7 +67,7 @@ class AnalyticsService
         $endDate = $endDate ?? Carbon::now()->endOfDay();
 
         $cacheKey = "company:{$this->companyId}:sales_trends:{$period}:{$startDate->format('Y-m-d')}:{$endDate->format('Y-m-d')}";
-        
+
         return Cache::remember($cacheKey, 600, function () use ($period, $startDate, $endDate) {
             $query = Sale::where('company_id', $this->companyId)
                 ->whereBetween('created_at', [$startDate, $endDate]);
@@ -74,21 +76,21 @@ class AnalyticsService
                 $query->where('branch_id', $this->branchId);
             }
 
-                $driver = DB::getDriverName();
-            $groupBy = match($period) {
+            $driver = DB::getDriverName();
+            $groupBy = match ($period) {
                 'hourly' => $driver === 'sqlite' ? "strftime('%Y-%m-%d %H:00', created_at)" : "DATE_FORMAT(created_at, '%Y-%m-%d %H:00')",
-                'daily' => $driver === 'sqlite' ? "date(created_at)" : "DATE(created_at)",
+                'daily' => $driver === 'sqlite' ? 'date(created_at)' : 'DATE(created_at)',
                 'weekly' => $driver === 'sqlite' ? "strftime('%Y-%W', created_at)" : "DATE_FORMAT(created_at, '%Y-%u')",
                 'monthly' => $driver === 'sqlite' ? "strftime('%Y-%m', created_at)" : "DATE_FORMAT(created_at, '%Y-%m')",
-                default => $driver === 'sqlite' ? "date(created_at)" : "DATE(created_at)",
+                default => $driver === 'sqlite' ? 'date(created_at)' : 'DATE(created_at)',
             };
 
             return $query->select([
-                    DB::raw("{$groupBy} as date"),
-                    DB::raw('COUNT(*) as total_sales'),
-                    DB::raw('SUM(total_amount) as total_revenue'),
-                    DB::raw('AVG(total_amount) as average_transaction_value'),
-                ])
+                DB::raw("{$groupBy} as date"),
+                DB::raw('COUNT(*) as total_sales'),
+                DB::raw('SUM(total_amount) as total_revenue'),
+                DB::raw('AVG(total_amount) as average_transaction_value'),
+            ])
                 ->groupBy(DB::raw($groupBy))
                 ->orderBy('date')
                 ->get()
@@ -105,18 +107,18 @@ class AnalyticsService
         $endDate = $endDate ?? Carbon::now()->endOfDay();
 
         $cacheKey = "company:{$this->companyId}:top_products:{$limit}:{$startDate->format('Y-m-d')}:{$endDate->format('Y-m-d')}";
-        
+
         return Cache::remember($cacheKey, 600, function () use ($limit, $startDate, $endDate) {
             $query = SaleItem::select([
-                    'product_id',
-                    DB::raw('SUM(quantity) as total_quantity'),
-                    DB::raw('SUM(total) as total_revenue'),
-                    DB::raw('COUNT(DISTINCT sale_id) as total_sales'),
-                ])
+                'product_id',
+                DB::raw('SUM(quantity) as total_quantity'),
+                DB::raw('SUM(total) as total_revenue'),
+                DB::raw('COUNT(DISTINCT sale_id) as total_sales'),
+            ])
                 ->whereHas('sale', function ($q) use ($startDate, $endDate) {
                     $q->where('company_id', $this->companyId)
                         ->whereBetween('created_at', [$startDate, $endDate]);
-                    
+
                     if ($this->branchId) {
                         $q->where('branch_id', $this->branchId);
                     }
@@ -149,18 +151,18 @@ class AnalyticsService
         $endDate = $endDate ?? Carbon::now()->endOfDay();
 
         $cacheKey = "company:{$this->companyId}:sales_by_category:{$startDate->format('Y-m-d')}:{$endDate->format('Y-m-d')}";
-        
+
         return Cache::remember($cacheKey, 600, function () use ($startDate, $endDate) {
             $query = SaleItem::select([
-                    'products.product_category_id as category_id',
-                    DB::raw('SUM(sale_items.quantity) as total_quantity'),
-                    DB::raw('SUM(sale_items.total) as total_revenue'),
-                ])
+                'products.product_category_id as category_id',
+                DB::raw('SUM(sale_items.quantity) as total_quantity'),
+                DB::raw('SUM(sale_items.total) as total_revenue'),
+            ])
                 ->join('products', 'sale_items.product_id', '=', 'products.id')
                 ->whereHas('sale', function ($q) use ($startDate, $endDate) {
                     $q->where('company_id', $this->companyId)
                         ->whereBetween('created_at', [$startDate, $endDate]);
-                    
+
                     if ($this->branchId) {
                         $q->where('branch_id', $this->branchId);
                     }
@@ -170,7 +172,8 @@ class AnalyticsService
                 ->get();
 
             return $query->map(function ($item) {
-                $category = \App\Models\ProductCategory::find($item->category_id);
+                $category = ProductCategory::find($item->category_id);
+
                 return [
                     'category_id' => $item->category_id,
                     'category_name' => $category->name ?? 'Uncategorized',
@@ -190,14 +193,14 @@ class AnalyticsService
         $endDate = $endDate ?? Carbon::now()->endOfDay();
 
         $cacheKey = "company:{$this->companyId}:sales_by_branch:{$startDate->format('Y-m-d')}:{$endDate->format('Y-m-d')}";
-        
+
         return Cache::remember($cacheKey, 600, function () use ($startDate, $endDate) {
             return Sale::select([
-                    'branch_id',
-                    DB::raw('COUNT(*) as total_sales'),
-                    DB::raw('SUM(total_amount) as total_revenue'),
-                    DB::raw('AVG(total_amount) as average_transaction_value'),
-                ])
+                'branch_id',
+                DB::raw('COUNT(*) as total_sales'),
+                DB::raw('SUM(total_amount) as total_revenue'),
+                DB::raw('AVG(total_amount) as average_transaction_value'),
+            ])
                 ->where('company_id', $this->companyId)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->groupBy('branch_id')
@@ -225,7 +228,7 @@ class AnalyticsService
         $endDate = $endDate ?? Carbon::now()->endOfDay();
 
         $cacheKey = "company:{$this->companyId}:payment_methods:{$startDate->format('Y-m-d')}:{$endDate->format('Y-m-d')}";
-        
+
         return Cache::remember($cacheKey, 600, function () use ($startDate, $endDate) {
             $query = Sale::where('company_id', $this->companyId)
                 ->whereBetween('created_at', [$startDate, $endDate]);
@@ -235,10 +238,10 @@ class AnalyticsService
             }
 
             return $query->select([
-                    'payment_method',
-                    DB::raw('COUNT(*) as count'),
-                    DB::raw('SUM(total_amount) as total_amount'),
-                ])
+                'payment_method',
+                DB::raw('COUNT(*) as count'),
+                DB::raw('SUM(total_amount) as total_amount'),
+            ])
                 ->groupBy('payment_method')
                 ->get()
                 ->map(function ($item) {
@@ -315,7 +318,7 @@ class AnalyticsService
         $soldProductIds = SaleItem::whereHas('sale', function ($q) use ($ninetyDaysAgo) {
             $q->where('company_id', $this->companyId)
                 ->where('created_at', '>=', $ninetyDaysAgo);
-            
+
             if ($this->branchId) {
                 $q->where('branch_id', $this->branchId);
             }
@@ -363,7 +366,7 @@ class AnalyticsService
     public function getInventorySummary()
     {
         $cacheKey = "company:{$this->companyId}:inventory_summary";
-        
+
         return Cache::remember($cacheKey, 300, function () {
             $query = ProductStock::where('company_id', $this->companyId)
                 ->where('is_active', true);
@@ -401,7 +404,7 @@ class AnalyticsService
     public function getLowStockProducts($limit = 20)
     {
         $cacheKey = "company:{$this->companyId}:low_stock:{$limit}";
-        
+
         return Cache::remember($cacheKey, 300, function () use ($limit) {
             $query = ProductStock::where('company_id', $this->companyId)
                 ->where('is_active', true)
@@ -440,7 +443,7 @@ class AnalyticsService
     public function getOutOfStockProducts($limit = 20)
     {
         $cacheKey = "company:{$this->companyId}:out_of_stock:{$limit}";
-        
+
         return Cache::remember($cacheKey, 300, function () use ($limit) {
             $query = ProductStock::where('company_id', $this->companyId)
                 ->where('is_active', true)
@@ -474,7 +477,7 @@ class AnalyticsService
     public function getExpiringProducts($days = 30, $limit = 20)
     {
         $cacheKey = "company:{$this->companyId}:expiring:{$days}:{$limit}";
-        
+
         return Cache::remember($cacheKey, 300, function () use ($days, $limit) {
             $endDate = Carbon::now()->addDays($days);
 
@@ -514,14 +517,14 @@ class AnalyticsService
     public function getDeadStock($days = 90, $limit = 20)
     {
         $cacheKey = "company:{$this->companyId}:dead_stock:{$days}:{$limit}";
-        
+
         return Cache::remember($cacheKey, 1800, function () use ($days, $limit) {
             $cutoffDate = Carbon::now()->subDays($days);
 
             $soldProductIds = SaleItem::whereHas('sale', function ($q) use ($cutoffDate) {
                 $q->where('company_id', $this->companyId)
                     ->where('created_at', '>=', $cutoffDate);
-                
+
                 if ($this->branchId) {
                     $q->where('branch_id', $this->branchId);
                 }
@@ -561,19 +564,19 @@ class AnalyticsService
     public function getFastMovingProducts($days = 30, $limit = 20)
     {
         $cacheKey = "company:{$this->companyId}:fast_moving:{$days}:{$limit}";
-        
+
         return Cache::remember($cacheKey, 600, function () use ($days, $limit) {
             $startDate = Carbon::now()->subDays($days);
 
             $query = SaleItem::select([
-                    'product_id',
-                    DB::raw('SUM(quantity) as total_quantity'),
-                    DB::raw('COUNT(DISTINCT sale_id) as total_sales'),
-                ])
+                'product_id',
+                DB::raw('SUM(quantity) as total_quantity'),
+                DB::raw('COUNT(DISTINCT sale_id) as total_sales'),
+            ])
                 ->whereHas('sale', function ($q) use ($startDate) {
                     $q->where('company_id', $this->companyId)
                         ->where('created_at', '>=', $startDate);
-                    
+
                     if ($this->branchId) {
                         $q->where('branch_id', $this->branchId);
                     }
@@ -603,7 +606,7 @@ class AnalyticsService
     public function getStockTurnover($days = 90)
     {
         $cacheKey = "company:{$this->companyId}:stock_turnover:{$days}";
-        
+
         return Cache::remember($cacheKey, 1800, function () use ($days) {
             $startDate = Carbon::now()->subDays($days);
 
@@ -619,13 +622,13 @@ class AnalyticsService
             $stocks = $query->get();
 
             $soldQuantities = SaleItem::select([
-                    'product_id',
-                    DB::raw('SUM(quantity) as total_sold'),
-                ])
+                'product_id',
+                DB::raw('SUM(quantity) as total_sold'),
+            ])
                 ->whereHas('sale', function ($q) use ($startDate) {
                     $q->where('company_id', $this->companyId)
                         ->where('created_at', '>=', $startDate);
-                    
+
                     if ($this->branchId) {
                         $q->where('branch_id', $this->branchId);
                     }
@@ -693,7 +696,7 @@ class AnalyticsService
         $endDate = $endDate ?? Carbon::now()->endOfDay();
 
         $cacheKey = "company:{$this->companyId}:transfer_trends:{$period}:{$startDate->format('Y-m-d')}:{$endDate->format('Y-m-d')}";
-        
+
         return Cache::remember($cacheKey, 600, function () use ($period, $startDate, $endDate) {
             $query = StockTransfer::where('company_id', $this->companyId)
                 ->whereBetween('created_at', [$startDate, $endDate]);
@@ -701,11 +704,11 @@ class AnalyticsService
             if ($this->branchId) {
                 $query->where(function ($q) {
                     $q->where('from_branch_id', $this->branchId)
-                      ->orWhere('to_branch_id', $this->branchId);
+                        ->orWhere('to_branch_id', $this->branchId);
                 });
             }
 
-            $groupBy = match($period) {
+            $groupBy = match ($period) {
                 'hourly' => DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d %H:00")'),
                 'daily' => DB::raw('DATE(created_at)'),
                 'weekly' => DB::raw('DATE_FORMAT(created_at, "%Y-%u")'),
@@ -714,13 +717,13 @@ class AnalyticsService
             };
 
             return $query->select([
-                    $groupBy . ' as date',
-                    DB::raw('COUNT(*) as total_transfers'),
-                    DB::raw('SUM(total_value) as total_value'),
-                    DB::raw('SUM(total_quantity) as total_quantity'),
-                    DB::raw('SUM(CASE WHEN status = "received" THEN 1 ELSE 0 END) as completed_transfers'),
-                    DB::raw('SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending_transfers'),
-                ])
+                $groupBy.' as date',
+                DB::raw('COUNT(*) as total_transfers'),
+                DB::raw('SUM(total_value) as total_value'),
+                DB::raw('SUM(total_quantity) as total_quantity'),
+                DB::raw('SUM(CASE WHEN status = "received" THEN 1 ELSE 0 END) as completed_transfers'),
+                DB::raw('SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending_transfers'),
+            ])
                 ->groupBy($groupBy)
                 ->orderBy('date')
                 ->get();
@@ -736,7 +739,7 @@ class AnalyticsService
         $endDate = $endDate ?? Carbon::now()->endOfDay();
 
         $cacheKey = "company:{$this->companyId}:transfers_by_branch:{$startDate->format('Y-m-d')}:{$endDate->format('Y-m-d')}";
-        
+
         return Cache::remember($cacheKey, 600, function () use ($startDate, $endDate) {
             $query = StockTransfer::where('company_id', $this->companyId)
                 ->whereBetween('created_at', [$startDate, $endDate]);
@@ -744,18 +747,18 @@ class AnalyticsService
             if ($this->branchId) {
                 $query->where(function ($q) {
                     $q->where('from_branch_id', $this->branchId)
-                      ->orWhere('to_branch_id', $this->branchId);
+                        ->orWhere('to_branch_id', $this->branchId);
                 });
             }
 
             return $query->select([
-                    'from_branch_id',
-                    'to_branch_id',
-                    DB::raw('COUNT(*) as total_transfers'),
-                    DB::raw('SUM(total_value) as total_value'),
-                    DB::raw('SUM(total_quantity) as total_quantity'),
-                    DB::raw('SUM(CASE WHEN status = "received" THEN 1 ELSE 0 END) as completed_transfers'),
-                ])
+                'from_branch_id',
+                'to_branch_id',
+                DB::raw('COUNT(*) as total_transfers'),
+                DB::raw('SUM(total_value) as total_value'),
+                DB::raw('SUM(total_quantity) as total_quantity'),
+                DB::raw('SUM(CASE WHEN status = "received" THEN 1 ELSE 0 END) as completed_transfers'),
+            ])
                 ->with(['fromBranch', 'toBranch'])
                 ->groupBy('from_branch_id', 'to_branch_id')
                 ->orderBy('total_value', 'desc')
@@ -784,24 +787,24 @@ class AnalyticsService
         $endDate = $endDate ?? Carbon::now()->endOfDay();
 
         $cacheKey = "company:{$this->companyId}:most_transferred:{$limit}:{$startDate->format('Y-m-d')}:{$endDate->format('Y-m-d')}";
-        
+
         return Cache::remember($cacheKey, 600, function () use ($limit, $startDate, $endDate) {
-            $query = \App\Models\StockTransferItem::select([
-                    'product_id',
-                    DB::raw('SUM(quantity_requested) as total_quantity_requested'),
-                    DB::raw('SUM(quantity_sent) as total_quantity_sent'),
-                    DB::raw('SUM(quantity_received) as total_quantity_received'),
-                    DB::raw('SUM(total_cost) as total_value'),
-                    DB::raw('COUNT(DISTINCT stock_transfer_id) as total_transfers'),
-                ])
+            $query = StockTransferItem::select([
+                'product_id',
+                DB::raw('SUM(quantity_requested) as total_quantity_requested'),
+                DB::raw('SUM(quantity_sent) as total_quantity_sent'),
+                DB::raw('SUM(quantity_received) as total_quantity_received'),
+                DB::raw('SUM(total_cost) as total_value'),
+                DB::raw('COUNT(DISTINCT stock_transfer_id) as total_transfers'),
+            ])
                 ->whereHas('stockTransfer', function ($q) use ($startDate, $endDate) {
                     $q->where('company_id', $this->companyId)
-                      ->whereBetween('created_at', [$startDate, $endDate]);
-                    
+                        ->whereBetween('created_at', [$startDate, $endDate]);
+
                     if ($this->branchId) {
                         $q->where(function ($query) {
                             $query->where('from_branch_id', $this->branchId)
-                                  ->orWhere('to_branch_id', $this->branchId);
+                                ->orWhere('to_branch_id', $this->branchId);
                         });
                     }
                 })
@@ -835,7 +838,7 @@ class AnalyticsService
         $endDate = $endDate ?? Carbon::now()->endOfDay();
 
         $cacheKey = "company:{$this->companyId}:transfer_performance:{$startDate->format('Y-m-d')}:{$endDate->format('Y-m-d')}";
-        
+
         return Cache::remember($cacheKey, 600, function () use ($startDate, $endDate) {
             $query = StockTransfer::where('company_id', $this->companyId)
                 ->whereBetween('created_at', [$startDate, $endDate]);
@@ -843,7 +846,7 @@ class AnalyticsService
             if ($this->branchId) {
                 $query->where(function ($q) {
                     $q->where('from_branch_id', $this->branchId)
-                      ->orWhere('to_branch_id', $this->branchId);
+                        ->orWhere('to_branch_id', $this->branchId);
                 });
             }
 
@@ -863,8 +866,8 @@ class AnalyticsService
                 'completed_transfers' => $completedTransfers->count(),
                 'pending_transfers' => $pendingTransfers->count(),
                 'in_transit_transfers' => $inTransitTransfers->count(),
-                'completion_rate' => $transfers->count() > 0 
-                    ? round(($completedTransfers->count() / $transfers->count()) * 100, 2) 
+                'completion_rate' => $transfers->count() > 0
+                    ? round(($completedTransfers->count() / $transfers->count()) * 100, 2)
                     : 0,
                 'average_completion_time_hours' => $completionTimes->avg() ?: 0,
                 'total_value_transferred' => $completedTransfers->sum('total_value'),

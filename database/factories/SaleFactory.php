@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Sale;
 use App\Models\Branch;
 use App\Models\Company;
+use App\Models\Sale;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

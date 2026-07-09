@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Api\BaseController;
+use App\Http\Controllers\API\BaseController;
 use App\Models\CashRegister;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,9 +16,9 @@ class CashRegisterController extends BaseController
     {
         $registers = CashRegister::forCompany($request->user()->company_id)
             ->with(['branch', 'user'])
-            ->when($request->branch_id, fn($q, $v) => $q->where('branch_id', $v))
-            ->when($request->status, fn($q, $v) => $q->where('status', $v))
-            ->when($request->user_id, fn($q, $v) => $q->where('user_id', $v))
+            ->when($request->branch_id, fn ($q, $v) => $q->where('branch_id', $v))
+            ->when($request->status, fn ($q, $v) => $q->where('status', $v))
+            ->when($request->user_id, fn ($q, $v) => $q->where('user_id', $v))
             ->orderByDesc('created_at')
             ->paginate($request->per_page ?? 15);
 
@@ -63,6 +63,7 @@ class CashRegisterController extends BaseController
         if ($cashRegister->company_id !== $request->user()->company_id) {
             return $this->error('Forbidden', 403);
         }
+
         return $this->success($cashRegister->load(['branch', 'user']));
     }
 
@@ -92,7 +93,7 @@ class CashRegisterController extends BaseController
             'closing_balance' => $request->closing_balance,
             'expected_balance' => $expectedBalance,
             'difference' => $difference,
-            'notes' => $request->notes ? $cashRegister->notes . "\n" . $request->notes : $cashRegister->notes,
+            'notes' => $request->notes ? $cashRegister->notes."\n".$request->notes : $cashRegister->notes,
             'status' => 'closed',
             'closed_at' => now(),
         ]);

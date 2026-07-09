@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Traits\HasCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasCompany;
 
 class InsuranceClaim extends Model
 {
-    use HasFactory, SoftDeletes, HasCompany;
+    use HasCompany, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'company_id',

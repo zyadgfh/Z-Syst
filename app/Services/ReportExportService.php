@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Storage;
+use App\Models\Sale;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class ReportExportService
 {
@@ -24,13 +25,13 @@ class ReportExportService
 
         $data = [
             ['Sales Report'],
-            ['Period', $startDate->format('Y-m-d') . ' to ' . $endDate->format('Y-m-d')],
+            ['Period', $startDate->format('Y-m-d').' to '.$endDate->format('Y-m-d')],
             ['Generated', Carbon::now()->format('Y-m-d H:i:s')],
             [],
-            ['Date', 'Invoice Number', 'Total Amount', 'Payment Method', 'Payment Status']
+            ['Date', 'Invoice Number', 'Total Amount', 'Payment Method', 'Payment Status'],
         ];
 
-        $sales = \App\Models\Sale::where('company_id', auth()->user()->company_id)
+        $sales = Sale::where('company_id', auth()->user()->company_id)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->orderBy('created_at')
             ->get();
@@ -70,7 +71,7 @@ class ReportExportService
             ['Overstock Count', $summary['overstock_count']],
             [],
             ['Low Stock Products'],
-            ['Product Name', 'SKU', 'Branch', 'Current Quantity', 'Reorder Level', 'Reorder Quantity', 'Urgency']
+            ['Product Name', 'SKU', 'Branch', 'Current Quantity', 'Reorder Level', 'Reorder Quantity', 'Urgency'],
         ];
 
         $lowStockProducts = $this->analyticsService->getLowStockProducts(100);
@@ -97,10 +98,10 @@ class ReportExportService
     {
         $data = [
             ['Expiring Products Report'],
-            ['Expiring Within', $days . ' days'],
+            ['Expiring Within', $days.' days'],
             ['Generated', Carbon::now()->format('Y-m-d H:i:s')],
             [],
-            ['Product Name', 'SKU', 'Branch', 'Batch Number', 'Quantity', 'Expiry Date', 'Days Until Expiry', 'Value']
+            ['Product Name', 'SKU', 'Branch', 'Batch Number', 'Quantity', 'Expiry Date', 'Days Until Expiry', 'Value'],
         ];
 
         $expiringProducts = $this->analyticsService->getExpiringProducts($days, 100);
@@ -131,10 +132,10 @@ class ReportExportService
 
         $data = [
             ['Top Selling Products Report'],
-            ['Period', $startDate->format('Y-m-d') . ' to ' . $endDate->format('Y-m-d')],
+            ['Period', $startDate->format('Y-m-d').' to '.$endDate->format('Y-m-d')],
             ['Generated', Carbon::now()->format('Y-m-d H:i:s')],
             [],
-            ['Product Name', 'SKU', 'Total Quantity Sold', 'Total Revenue', 'Total Sales']
+            ['Product Name', 'SKU', 'Total Quantity Sold', 'Total Revenue', 'Total Sales'],
         ];
 
         $products = $this->analyticsService->getTopSellingProducts($limit, $startDate, $endDate);
@@ -159,10 +160,10 @@ class ReportExportService
     {
         $data = [
             ['Stock Turnover Report'],
-            ['Period', 'Last ' . $days . ' days'],
+            ['Period', 'Last '.$days.' days'],
             ['Generated', Carbon::now()->format('Y-m-d H:i:s')],
             [],
-            ['Product Name', 'SKU', 'Current Stock', 'Sold in Period', 'Turnover Rate', 'Days of Supply', 'Category']
+            ['Product Name', 'SKU', 'Current Stock', 'Sold in Period', 'Turnover Rate', 'Days of Supply', 'Category'],
         ];
 
         $turnover = $this->analyticsService->getStockTurnover($days);
@@ -187,8 +188,8 @@ class ReportExportService
      */
     protected function generateCSV($data, $filename)
     {
-        $filename = $filename . '_' . Carbon::now()->format('Y-m-d_His') . '.csv';
-        $filepath = 'exports/' . $filename;
+        $filename = $filename.'_'.Carbon::now()->format('Y-m-d_His').'.csv';
+        $filepath = 'exports/'.$filename;
 
         $csv = fopen('php://temp', 'r+');
 

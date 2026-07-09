@@ -50,7 +50,7 @@ class Setting extends Model
 
         $setting = $query->first();
 
-        if (!$setting) {
+        if (! $setting) {
             return $default;
         }
 

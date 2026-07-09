@@ -2,13 +2,14 @@
 
 namespace Tests\Feature;
 
-use App\Models\InsuranceClaim;
-use App\Models\User;
-use App\Models\Patient;
 use App\Models\Branch;
+use App\Models\Company;
+use App\Models\InsuranceClaim;
 use App\Models\InsuranceCompany;
 use App\Models\InsurancePlan;
+use App\Models\Patient;
 use App\Models\Sale;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,17 +18,22 @@ class InsuranceClaimControllerTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+
     protected Branch $branch;
+
     protected Patient $patient;
+
     protected InsuranceCompany $insuranceCompany;
+
     protected InsurancePlan $insurancePlan;
+
     protected Sale $sale;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $company = \App\Models\Company::factory()->create();
+        $company = Company::factory()->create();
         $this->user = User::factory()->create([
             'company_id' => $company->id,
             'role' => 'admin',
@@ -133,7 +139,7 @@ class InsuranceClaimControllerTest extends TestCase
 
     public function test_cannot_access_insurance_claim_from_different_company()
     {
-        $otherCompany = \App\Models\Company::factory()->create();
+        $otherCompany = Company::factory()->create();
         $otherUser = User::factory()->create([
             'company_id' => $otherCompany->id,
         ]);

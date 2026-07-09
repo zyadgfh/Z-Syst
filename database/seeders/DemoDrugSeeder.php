@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Drug;
 use App\Models\Company;
+use App\Models\Drug;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 

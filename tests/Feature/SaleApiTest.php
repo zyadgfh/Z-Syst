@@ -25,7 +25,7 @@ class SaleApiTest extends TestCase
         $product = Product::create([
             'company_id' => $company->id,
             'product_category_id' => null,
-            'sku' => 'TEST-' . now()->timestamp,
+            'sku' => 'TEST-'.now()->timestamp,
             'name' => 'Test Product',
             'slug' => 'test-product',
             'description' => 'A test product for sales API.',

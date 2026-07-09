@@ -2,18 +2,18 @@
 
 namespace App\Notifications;
 
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Notifications\Messages\DatabaseMessage;
-use Carbon\Carbon;
 
 class ExpiryDateNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
     protected $company;
+
     protected $expiringProducts;
 
     /**
@@ -41,25 +41,32 @@ class ExpiryDateNotification extends Notification implements ShouldQueue
         $message = (new MailMessage)
             ->subject("Product Expiry Alert - {$this->company->name}")
             ->greeting("Hello {$notifiable->name},")
-            ->line("The following products are expiring within the next 30 days and need attention:");
+            ->line('The following products are expiring within the next 30 days and need attention:');
 
         foreach ($this->expiringProducts as $branchId => $products) {
             $branch = $products->first()->branch;
             $message->line("**Branch: {$branch->name}**");
-            
+
             foreach ($products->take(10) as $stock) {
                 $daysUntilExpiry = Carbon::now()->diffInDays($stock->expiry_date, false);
                 $urgency = $daysUntilExpiry <= 7 ? 'URGENT' : 'Warning';
-                $message->line("- {$stock->product->name} (Batch: {$stock->batch_number}) - Expires: {$stock->expiry_date->format('Y-m-d')} ({$daysUntilExpiry} days) [{$urgency}]");
+                $message->line(sprintf(
+                    '- %s (Batch: %s) - Expires: %s (%d days) [%s]',
+                    $stock->product->name,
+                    $stock->batch_number,
+                    $stock->expiry_date->format('Y-m-d'),
+                    $daysUntilExpiry,
+                    $urgency
+                ));
             }
-            
+
             if ($products->count() > 10) {
-                $message->line("... and {$products->count() - 10} more products");
+                $message->line('... and '.($products->count() - 10).' more products');
             }
         }
 
         $message->action('View Expiring Products', url('/admin/inventory/expiring'))
-                ->line('Please review and take appropriate action (discount, return, or dispose).');
+            ->line('Please review and take appropriate action (discount, return, or dispose).');
 
         return $message;
     }
@@ -71,7 +78,7 @@ class ExpiryDateNotification extends Notification implements ShouldQueue
     {
         $totalProducts = $this->expiringProducts->flatten()->count();
         $affectedBranches = $this->expiringProducts->keys()->count();
-        
+
         // Count urgent items (expiring within 7 days)
         $urgentCount = $this->expiringProducts->flatten()->filter(function ($stock) {
             return Carbon::now()->diffInDays($stock->expiry_date, false) <= 7;
@@ -90,7 +97,7 @@ class ExpiryDateNotification extends Notification implements ShouldQueue
                     $urgentInBranch = $products->filter(function ($stock) {
                         return Carbon::now()->diffInDays($stock->expiry_date, false) <= 7;
                     })->count();
-                    
+
                     return [
                         'branch_id' => $branchId,
                         'branch_name' => $products->first()->branch->name,

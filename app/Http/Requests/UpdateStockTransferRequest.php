@@ -2,14 +2,15 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 
 /**
  * UpdateStockTransferRequest
- * 
+ *
  * Form request for updating stock transfer details.
  * Currently only allows updating notes when status is pending.
  */
@@ -17,14 +18,12 @@ class UpdateStockTransferRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
         $transfer = $this->route('stock_transfer') ?? $this->route('stockTransfer');
-        
-        if (!$transfer) {
+
+        if (! $transfer) {
             return false;
         }
 
@@ -35,12 +34,12 @@ class UpdateStockTransferRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         $transfer = $this->route('stock_transfer') ?? $this->route('stockTransfer');
-        
+
         return [
             'notes' => 'nullable|string|max:1000',
         ];
@@ -60,15 +59,12 @@ class UpdateStockTransferRequest extends FormRequest
 
     /**
      * Configure the validator instance.
-     *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
-     * @return void
      */
     protected function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
             $transfer = $this->route('stock_transfer') ?? $this->route('stockTransfer');
-            
+
             // Only allow updating notes if transfer is still pending
             if ($transfer && $transfer->status !== 'pending') {
                 $validator->errors()->add('status', 'Can only update notes when transfer status is pending.');
@@ -79,10 +75,8 @@ class UpdateStockTransferRequest extends FormRequest
     /**
      * Handle a failed validation attempt.
      *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
-     * @return void
      *
-     * @throws \Illuminate\Http\Exceptions\HttpResponseException
+     * @throws HttpResponseException
      */
     protected function failedValidation(Validator $validator): void
     {

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\PurchaseOrder;
-use App\Models\PurchaseOrderItem;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -56,27 +55,29 @@ final class PurchaseOrderService
     public function send(PurchaseOrder $purchaseOrder): PurchaseOrder
     {
         $purchaseOrder->update(['status' => 'sent']);
+
         return $purchaseOrder->fresh();
     }
 
     public function cancel(PurchaseOrder $purchaseOrder): PurchaseOrder
     {
         $purchaseOrder->update(['status' => 'cancelled']);
+
         return $purchaseOrder->fresh();
     }
 
     private function generatePoNumber(): string
     {
-        return 'PO-' . strtoupper(Str::random(8));
+        return 'PO-'.strtoupper(Str::random(8));
     }
 
     private function calculateTotals(Collection|array $items): array
     {
         $items = collect($items);
 
-        $subtotal = $items->sum(fn(array $item): float => $item['quantity_ordered'] * $item['unit_cost']);
-        $discount = $items->sum(fn(array $item): float => $item['discount'] ?? 0);
-        $tax = $items->sum(fn(array $item): float => $item['tax'] ?? 0);
+        $subtotal = $items->sum(fn (array $item): float => $item['quantity_ordered'] * $item['unit_cost']);
+        $discount = $items->sum(fn (array $item): float => $item['discount'] ?? 0);
+        $tax = $items->sum(fn (array $item): float => $item['tax'] ?? 0);
 
         return [
             'subtotal' => $subtotal,

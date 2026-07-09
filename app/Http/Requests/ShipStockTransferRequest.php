@@ -2,14 +2,17 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Models\ProductStock;
+use App\Models\StockTransfer;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 
 /**
  * ShipStockTransferRequest
- * 
+ *
  * Form request for shipping a stock transfer.
  * Validates that items have been properly allocated and quantities are set.
  */
@@ -17,14 +20,12 @@ class ShipStockTransferRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
         $transfer = $this->route('stock_transfer') ?? $this->route('stockTransfer');
-        
-        if (!$transfer) {
+
+        if (! $transfer) {
             return false;
         }
 
@@ -40,7 +41,7 @@ class ShipStockTransferRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -72,29 +73,27 @@ class ShipStockTransferRequest extends FormRequest
 
     /**
      * Configure the validator instance.
-     *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
-     * @return void
      */
     protected function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
             $transfer = $this->route('stock_transfer') ?? $this->route('stockTransfer');
-            
-            if (!$transfer) {
+
+            if (! $transfer) {
                 $validator->errors()->add('stock_transfer', 'Transfer not found.');
+
                 return;
             }
 
             // Can only ship approved transfers
-            if (!$transfer->canBeShipped()) {
-                $validator->errors()->add('status', 
+            if (! $transfer->canBeShipped()) {
+                $validator->errors()->add('status',
                     "Cannot ship transfer with status: {$transfer->status}. Only approved transfers can be shipped.");
             }
 
             // Verify user belongs to the source branch
-            if (auth()->user()->branch_id !== $transfer->from_branch_id && !auth()->user()->isSuperAdmin()) {
-                $validator->errors()->add('authorization', 
+            if (auth()->user()->branch_id !== $transfer->from_branch_id && ! auth()->user()->isSuperAdmin()) {
+                $validator->errors()->add('authorization',
                     'You must belong to the source branch to ship this transfer.');
             }
 
@@ -109,36 +108,35 @@ class ShipStockTransferRequest extends FormRequest
      * Validate that shipping quantities don't exceed requested quantities
      * and that sufficient stock is still available.
      *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
-     * @param  \App\Models\StockTransfer  $transfer
-     * @return void
+     * @param  StockTransfer  $transfer
      */
     protected function validateShippingQuantities(Validator $validator, $transfer): void
     {
         foreach ($this->items as $itemData) {
             $transferItem = $transfer->items()->find($itemData['id']);
-            
-            if (!$transferItem) {
-                $validator->errors()->add("items.{$itemData['id']}", 
+
+            if (! $transferItem) {
+                $validator->errors()->add("items.{$itemData['id']}",
                     "Item ID {$itemData['id']} does not belong to this transfer.");
+
                 continue;
             }
 
             // Check if quantity sent exceeds requested
             if ($itemData['quantity_sent'] > $transferItem->quantity_requested) {
-                $validator->errors()->add("items.{$itemData['id']}.quantity_sent", 
+                $validator->errors()->add("items.{$itemData['id']}.quantity_sent",
                     "Quantity sent ({$itemData['quantity_sent']}) cannot exceed requested quantity ({$transferItem->quantity_requested}).");
             }
 
             // Check if sufficient stock is still available
-            $productStock = \App\Models\ProductStock::where('product_id', $transferItem->product_id)
+            $productStock = ProductStock::where('product_id', $transferItem->product_id)
                 ->where('branch_id', $transfer->from_branch_id)
                 ->where('is_active', true)
                 ->first();
 
-            if (!$productStock || $productStock->quantity < $itemData['quantity_sent']) {
+            if (! $productStock || $productStock->quantity < $itemData['quantity_sent']) {
                 $available = $productStock ? $productStock->quantity : 0;
-                $validator->errors()->add("items.{$itemData['id']}.quantity_sent", 
+                $validator->errors()->add("items.{$itemData['id']}.quantity_sent",
                     "Insufficient stock. Available: {$available}, Attempting to ship: {$itemData['quantity_sent']}.");
             }
         }
@@ -147,10 +145,8 @@ class ShipStockTransferRequest extends FormRequest
     /**
      * Handle a failed validation attempt.
      *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
-     * @return void
      *
-     * @throws \Illuminate\Http\Exceptions\HttpResponseException
+     * @throws HttpResponseException
      */
     protected function failedValidation(Validator $validator): void
     {

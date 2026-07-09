@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin;
+namespace App\Http\Controllers\API\V1\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Drug;
@@ -38,7 +38,8 @@ class DrugAdminController extends Controller
         }
 
         $perPage = (int) $request->query('per_page', 25);
-        $data = $query->select('id','uuid','name','generic_name','barcode')->paginate($perPage);
+        $data = $query->select('id', 'uuid', 'name', 'generic_name', 'barcode')->paginate($perPage);
+
         return response()->json($data);
     }
 
@@ -59,6 +60,7 @@ class DrugAdminController extends Controller
     public function destroy(Drug $drug)
     {
         $drug->delete();
+
         return response()->noContent();
     }
 }

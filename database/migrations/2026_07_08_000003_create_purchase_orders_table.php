@@ -10,14 +10,14 @@ return new class extends Migration
     {
         if (! Schema::hasTable('purchase_orders')) {
             Schema::create('purchase_orders', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('company_id')->index();
-            $table->unsignedBigInteger('branch_id')->nullable()->index();
-            $table->string('uuid', 36)->unique();
-            $table->string('status')->default('pending')->index();
-            $table->decimal('total', 14, 2)->default(0);
-            $table->string('currency', 10)->default('USD');
-            $table->timestamps();
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('company_id')->index();
+                $table->unsignedBigInteger('branch_id')->nullable()->index();
+                $table->string('uuid', 36)->unique();
+                $table->string('status')->default('pending')->index();
+                $table->decimal('total', 14, 2)->default(0);
+                $table->string('currency', 10)->default('USD');
+                $table->timestamps();
             });
         }
     }

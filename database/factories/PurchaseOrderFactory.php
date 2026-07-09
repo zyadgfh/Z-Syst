@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\PurchaseOrder;
 use App\Models\Branch;
+use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -18,7 +18,7 @@ class PurchaseOrderFactory extends Factory
             'supplier_id' => Supplier::factory(),
             'branch_id' => Branch::factory(),
             'uuid' => fake()->uuid(),
-            'po_number' => 'PO-' . strtoupper(fake()->bothify('????####')),
+            'po_number' => 'PO-'.strtoupper(fake()->bothify('????####')),
             'status' => 'draft',
             'subtotal' => fake()->randomFloat(2, 100, 10000),
             'discount' => fake()->randomFloat(2, 0, 500),

@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Company;
 
 class DemoInventoryMovementsSeeder extends Seeder
 {
@@ -29,7 +29,7 @@ class DemoInventoryMovementsSeeder extends Seeder
                 'drug_id' => $drug->id,
                 'quantity' => rand(1, 50),
                 'type' => 'in',
-                'reference' => 'seed-' . now()->format('YmdHis'),
+                'reference' => 'seed-'.now()->format('YmdHis'),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

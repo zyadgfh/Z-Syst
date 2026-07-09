@@ -2,14 +2,15 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 
 /**
  * RejectStockTransferRequest
- * 
+ *
  * Form request for rejecting a stock transfer.
  * Requires a rejection reason.
  */
@@ -17,14 +18,12 @@ class RejectStockTransferRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
         $transfer = $this->route('stock_transfer') ?? $this->route('stockTransfer');
-        
-        if (!$transfer) {
+
+        if (! $transfer) {
             return false;
         }
 
@@ -40,7 +39,7 @@ class RejectStockTransferRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -65,30 +64,28 @@ class RejectStockTransferRequest extends FormRequest
 
     /**
      * Configure the validator instance.
-     *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
-     * @return void
      */
     protected function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
             $transfer = $this->route('stock_transfer') ?? $this->route('stockTransfer');
-            
-            if (!$transfer) {
+
+            if (! $transfer) {
                 $validator->errors()->add('stock_transfer', 'Transfer not found.');
+
                 return;
             }
 
             // Can only reject pending transfers
-            if (!$transfer->canBeRejected()) {
-                $validator->errors()->add('status', 
+            if (! $transfer->canBeRejected()) {
+                $validator->errors()->add('status',
                     "Cannot reject transfer with status: {$transfer->status}. Only pending transfers can be rejected.");
             }
 
             // Verify user belongs to the source branch (for branch-level rejection)
             // or has company-wide permission
-            if (auth()->user()->branch_id !== $transfer->from_branch_id && !auth()->user()->isSuperAdmin()) {
-                $validator->errors()->add('authorization', 
+            if (auth()->user()->branch_id !== $transfer->from_branch_id && ! auth()->user()->isSuperAdmin()) {
+                $validator->errors()->add('authorization',
                     'You must belong to the source branch to reject this transfer.');
             }
         });
@@ -97,10 +94,8 @@ class RejectStockTransferRequest extends FormRequest
     /**
      * Handle a failed validation attempt.
      *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
-     * @return void
      *
-     * @throws \Illuminate\Http\Exceptions\HttpResponseException
+     * @throws HttpResponseException
      */
     protected function failedValidation(Validator $validator): void
     {

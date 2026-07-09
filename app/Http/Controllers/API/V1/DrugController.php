@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\API\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Drug;
@@ -10,7 +10,8 @@ class DrugController extends Controller
 {
     public function index(Request $request)
     {
-        $drugs = Drug::select('id','uuid','name','generic_name','barcode')->paginate(25);
+        $drugs = Drug::select('id', 'uuid', 'name', 'generic_name', 'barcode')->paginate(25);
+
         return response()->json($drugs);
     }
 

@@ -33,4 +33,3 @@ trait HasCompany
         return $query->withoutGlobalScope(TenantScope::class)->where('company_id', $companyId);
     }
 }
-

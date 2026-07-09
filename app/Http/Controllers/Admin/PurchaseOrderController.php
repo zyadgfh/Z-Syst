@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Api\BaseController;
+use App\Http\Controllers\API\BaseController;
 use App\Models\PurchaseOrder;
 use App\Services\PurchaseOrderService;
 use Illuminate\Http\JsonResponse;
@@ -21,10 +21,10 @@ final class PurchaseOrderController extends BaseController
     {
         $purchaseOrders = PurchaseOrder::forCompany($request->user()->company_id)
             ->with(['supplier', 'branch', 'createdBy'])
-            ->when($request->status, fn($query, $status) => $query->where('status', $status))
-            ->when($request->supplier_id, fn($query, $id) => $query->where('supplier_id', $id))
-            ->when($request->from_date, fn($query, $date) => $query->whereDate('created_at', '>=', $date))
-            ->when($request->to_date, fn($query, $date) => $query->whereDate('created_at', '<=', $date))
+            ->when($request->status, fn ($query, $status) => $query->where('status', $status))
+            ->when($request->supplier_id, fn ($query, $id) => $query->where('supplier_id', $id))
+            ->when($request->from_date, fn ($query, $date) => $query->whereDate('created_at', '>=', $date))
+            ->when($request->to_date, fn ($query, $date) => $query->whereDate('created_at', '<=', $date))
             ->orderByDesc('created_at')
             ->paginate($request->integer('per_page', 15));
 
@@ -69,7 +69,7 @@ final class PurchaseOrderController extends BaseController
             return $this->error('Forbidden', 403);
         }
 
-        if (!in_array($purchaseOrder->status, ['draft', 'pending'])) {
+        if (! in_array($purchaseOrder->status, ['draft', 'pending'])) {
             return $this->error('Cannot modify a non-draft purchase order', 422);
         }
 
@@ -94,7 +94,7 @@ final class PurchaseOrderController extends BaseController
             return $this->error('Forbidden', 403);
         }
 
-        if (!in_array($purchaseOrder->status, ['draft', 'pending'])) {
+        if (! in_array($purchaseOrder->status, ['draft', 'pending'])) {
             return $this->error('Cannot delete a processed purchase order', 422);
         }
 

@@ -8,7 +8,7 @@ use Illuminate\Queue\SerializesModels;
 
 /**
  * StockTransferRejected Event
- * 
+ *
  * Fired when a stock transfer is rejected.
  * Triggers notifications to the requester.
  */
@@ -18,15 +18,12 @@ class StockTransferRejected
 
     /**
      * The stock transfer instance.
-     *
-     * @var \App\Models\StockTransfer
      */
     public StockTransfer $transfer;
 
     /**
      * Create a new event instance.
      *
-     * @param  \App\Models\StockTransfer  $transfer
      * @return void
      */
     public function __construct(StockTransfer $transfer)
