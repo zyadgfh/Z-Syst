@@ -47,8 +47,7 @@ class AnalyticsServiceTest extends TestCase
         parent::tearDown();
     }
 
-    /** @test */
-    public function it_can_get_dashboard_kpis()
+    public function test_it_can_get_dashboard_kpis()
     {
         // Create test data
         $product = Product::factory()->create([
@@ -87,8 +86,7 @@ class AnalyticsServiceTest extends TestCase
         $this->assertGreaterThanOrEqual(150, $kpis['total_revenue']);
     }
 
-    /** @test */
-    public function it_can_get_inventory_summary()
+    public function test_it_can_get_inventory_summary()
     {
         $product = Product::factory()->create([
             'company_id' => $this->company->id,
@@ -117,8 +115,7 @@ class AnalyticsServiceTest extends TestCase
         $this->assertEquals(1500, $summary['total_retail_value']); // 100 * 15
     }
 
-    /** @test */
-    public function it_can_identify_low_stock_products()
+    public function test_it_can_identify_low_stock_products()
     {
         $product = Product::factory()->create([
             'company_id' => $this->company->id,
@@ -139,8 +136,7 @@ class AnalyticsServiceTest extends TestCase
         $this->assertEquals('high', $lowStockProducts[0]['urgency']);
     }
 
-    /** @test */
-    public function it_can_identify_out_of_stock_products()
+    public function test_it_can_identify_out_of_stock_products()
     {
         $product = Product::factory()->create([
             'company_id' => $this->company->id,
@@ -160,8 +156,7 @@ class AnalyticsServiceTest extends TestCase
         $this->assertEquals(0, $outOfStockProducts[0]['current_quantity']);
     }
 
-    /** @test */
-    public function it_can_identify_expiring_products()
+    public function test_it_can_identify_expiring_products()
     {
         $product = Product::factory()->create([
             'company_id' => $this->company->id,
@@ -182,8 +177,7 @@ class AnalyticsServiceTest extends TestCase
         $this->assertEquals(500, $expiringProducts[0]['value']); // 50 * 10
     }
 
-    /** @test */
-    public function it_can_get_sales_trends()
+    public function test_it_can_get_sales_trends()
     {
         $product = Product::factory()->create([
             'company_id' => $this->company->id,
@@ -211,8 +205,7 @@ class AnalyticsServiceTest extends TestCase
         $this->assertGreaterThan(0, count($trends));
     }
 
-    /** @test */
-    public function it_can_get_top_selling_products()
+    public function test_it_can_get_top_selling_products()
     {
         $product1 = Product::factory()->create([
             'company_id' => $this->company->id,
@@ -253,8 +246,7 @@ class AnalyticsServiceTest extends TestCase
         $this->assertEquals($product1->id, $topProducts[0]['product_id']); // Product 1 should be first
     }
 
-    /** @test */
-    public function it_caches_kpis_results()
+    public function test_it_caches_kpis_results()
     {
         $product = Product::factory()->create([
             'company_id' => $this->company->id,
@@ -275,8 +267,7 @@ class AnalyticsServiceTest extends TestCase
         $this->assertEquals($kpis1, $kpis2);
     }
 
-    /** @test */
-    public function it_respects_branch_scoping()
+    public function test_it_respects_branch_scoping()
     {
         $branch1 = Branch::factory()->create(['company_id' => $this->company->id]);
         $branch2 = Branch::factory()->create(['company_id' => $this->company->id]);
