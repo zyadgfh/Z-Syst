@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'PharmaSync' }}</title>
+    <title>{{ $title ?? 'Z-Syst' }}</title>
     <style>
         :root {
             color-scheme: light;
@@ -31,8 +31,8 @@
     <main class="page">
         <header class="header">
             <a class="brand" href="/">
-                <span class="brand-mark">P</span>
-                <span>PharmaSync</span>
+                <span class="brand-mark">Z</span>
+                <span>Z-Syst</span>
             </a>
             <nav class="nav">
                 <a href="/">Home</a>

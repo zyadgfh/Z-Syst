@@ -22,7 +22,7 @@ use PhpParser\NodeVisitor;
 final class ConstraintVisitor extends AbstractVisitor implements NodeVisitor
 {
     public function __construct(
-        private readonly array $constraintClassNames = [],
+        private readonly array $constraintClassNames = []
     ) {
     }
 
@@ -78,6 +78,7 @@ final class ConstraintVisitor extends AbstractVisitor implements NodeVisitor
             $messages = [];
             $options = $arg->value;
 
+            /** @var Node\Expr\ArrayItem $item */
             foreach ($options->items as $item) {
                 if (!$item->key instanceof Node\Scalar\String_) {
                     continue;

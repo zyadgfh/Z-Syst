@@ -12,6 +12,6 @@ class DocsIndexTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Documentation');
-        $response->assertSee('PharmaSync Feature List');
+        $response->assertSee('Z-Syst Feature List');
     }
 }

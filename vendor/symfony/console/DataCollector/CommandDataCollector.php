@@ -37,13 +37,12 @@ final class CommandDataCollector extends DataCollector
         $application = $command->getApplication();
 
         $this->data = [
-            'command' => $command->invokableCommandInfo ?? $this->cloneVar($command->command),
+            'command' => $this->cloneVar($command->command),
             'exit_code' => $command->exitCode,
             'interrupted_by_signal' => $command->interruptedBySignal,
             'duration' => $command->duration,
             'max_memory_usage' => $command->maxMemoryUsage,
             'verbosity_level' => match ($command->output->getVerbosity()) {
-                OutputInterface::VERBOSITY_SILENT => 'silent',
                 OutputInterface::VERBOSITY_QUIET => 'quiet',
                 OutputInterface::VERBOSITY_NORMAL => 'normal',
                 OutputInterface::VERBOSITY_VERBOSE => 'verbose',
@@ -96,10 +95,6 @@ final class CommandDataCollector extends DataCollector
      */
     public function getCommand(): array
     {
-        if (\is_array($this->data['command'])) {
-            return $this->data['command'];
-        }
-
         $class = $this->data['command']->getType();
         $r = new \ReflectionMethod($class, 'execute');
 
@@ -123,7 +118,7 @@ final class CommandDataCollector extends DataCollector
     public function getInterruptedBySignal(): ?string
     {
         if (isset($this->data['interrupted_by_signal'])) {
-            return \sprintf('%s (%d)', SignalMap::getSignalName($this->data['interrupted_by_signal']), $this->data['interrupted_by_signal']);
+            return sprintf('%s (%d)', SignalMap::getSignalName($this->data['interrupted_by_signal']), $this->data['interrupted_by_signal']);
         }
 
         return null;
@@ -209,7 +204,7 @@ final class CommandDataCollector extends DataCollector
     public function getSignalable(): array
     {
         return array_map(
-            static fn (int $signal): string => \sprintf('%s (%d)', SignalMap::getSignalName($signal), $signal),
+            static fn (int $signal): string => sprintf('%s (%d)', SignalMap::getSignalName($signal), $signal),
             $this->data['signalable']
         );
     }
@@ -217,7 +212,7 @@ final class CommandDataCollector extends DataCollector
     public function getHandledSignals(): array
     {
         $keys = array_map(
-            static fn (int $signal): string => \sprintf('%s (%d)', SignalMap::getSignalName($signal), $signal),
+            static fn (int $signal): string => sprintf('%s (%d)', SignalMap::getSignalName($signal), $signal),
             array_keys($this->data['handled_signals'])
         );
 

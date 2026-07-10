@@ -2,127 +2,158 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use App\Exports\UserExport;
 use App\Models\User;
-use Illuminate\Http\JsonResponse;
+use App\Helpers\HasUploader;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
+use Spatie\Permission\Models\Role;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-    public function index(Request $request): JsonResponse
-    {
-        $users = User::query()
-            ->select(['id', 'name', 'username', 'email', 'phone', 'status', 'job_title', 'branch_id', 'department_id', 'created_at'])
-            ->with(['roles', 'branch', 'department'])
-            ->paginate(25);
+    use HasUploader;
 
-        return response()->json($users);
+    public function __construct()
+    {
+        $this->middleware('permission:users-create')->only('create', 'store');
+        $this->middleware('permission:users-read')->only('index', 'show');
+        $this->middleware('permission:users-update')->only('edit', 'update');
+        $this->middleware('permission:users-delete')->only('destroy');
     }
 
-    public function store(Request $request): JsonResponse
+    public function index(Request $request)
     {
-        $validated = $request->validate([
+        $users = User::whereNotIn('role', ['superadmin', 'staff', 'shop-owner'])->latest()->paginate(10);
+        return view('admin.users.index', compact('users'));
+    }
+
+    public function acnooFilter(Request $request)
+    {
+        $users = User::whereNotIn('role', ['superadmin', 'staff', 'shop-owner'])->when(request('search'), function ($q) {
+            $q->where(function ($q) {
+                $q->where('name', 'like', '%' . request('search') . '%')
+                    ->orWhere('email', 'like', '%' . request('search') . '%')
+                    ->orWhere('role', 'like', '%' . request('search') . '%')
+                    ->orWhere('phone', 'like', '%' . request('search') . '%');
+            });
+        })
+            ->latest()
+            ->paginate($request->per_page ?? 10);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'data' => view('admin.users.datas', compact('users'))->render()
+            ]);
+        }
+
+        return redirect(url()->previous());
+    }
+
+    public function create()
+    {
+        $roles = Role::where('name', '!=', 'superadmin')->latest()->get();
+        return view('admin.users.create', compact('roles'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
             'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users,username',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'nullable|string|max:20',
-            'password' => 'required|string|min:8|confirmed',
-            'profile_photo' => 'nullable|string',
-            'status' => 'required|string|in:active,inactive,suspended',
-            'branch_id' => 'nullable|exists:branches,id',
-            'department_id' => 'nullable|exists:departments,id',
-            'job_title' => 'nullable|string|max:255',
-            'company_id' => 'nullable|exists:companies,id',
-            'role_ids' => 'nullable|array',
-            'role_ids.*' => 'integer|exists:roles,id',
+            'role' => 'required|string',
+            'phone' => 'nullable|string',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|string|confirmed',
+            'image' => 'nullable|image',
         ]);
 
-        $validated['password'] = bcrypt($validated['password']);
-        $roleIds = $validated['role_ids'] ?? [];
-        unset($validated['role_ids'], $validated['password_confirmation']);
-
-        $user = User::create($validated);
-
-        if (! empty($roleIds)) {
-            $user->roles()->attach($roleIds);
-        }
-
-        return response()->json(['message' => 'User created successfully.', 'data' => $user->load('roles')], 201);
-    }
-
-    public function show(User $user): JsonResponse
-    {
-        $user->load('roles', 'branch', 'department', 'company');
-
-        return response()->json($user);
-    }
-
-    public function update(Request $request, User $user): JsonResponse
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users,username,'.$user->id,
-            'email' => 'required|email|unique:users,email,'.$user->id,
-            'phone' => 'nullable|string|max:20',
-            'password' => 'nullable|string|min:8|confirmed',
-            'profile_photo' => 'nullable|string',
-            'status' => 'required|string|in:active,inactive,suspended',
-            'branch_id' => 'nullable|exists:branches,id',
-            'department_id' => 'nullable|exists:departments,id',
-            'job_title' => 'nullable|string|max:255',
-            'company_id' => 'nullable|exists:companies,id',
-            'role_ids' => 'nullable|array',
-            'role_ids.*' => 'integer|exists:roles,id',
+        $user = User::create($request->except('image', 'password') + [
+            'image' => $request->image ? $this->upload($request, 'image') : null,
+            'password' => Hash::make($request->password),
         ]);
 
-        if (isset($validated['password'])) {
-            $validated['password'] = bcrypt($validated['password']);
-        } else {
-            unset($validated['password']);
-        }
+        $role = Role::where('name', $request->role)->first();
+        $user->roles()->sync($role->id);
 
-        $roleIds = $validated['role_ids'] ?? [];
-        unset($validated['role_ids'], $validated['password_confirmation']);
-
-        $user->update($validated);
-
-        if (! empty($roleIds)) {
-            $user->roles()->sync($roleIds);
-        }
-
-        Cache::forget("user:{$user->id}:permissions");
-
-        return response()->json(['message' => 'User updated successfully.', 'data' => $user->load('roles')]);
+        sendNotification($user->id, route('admin.users.index', ['users' => $request->role]), __(ucfirst($request->role) . ' has been created.'), 'action', null, null, true);
+        return response()->json([
+            'message' => __(ucfirst($request->role) . ' created successfully'),
+            'redirect' => route('admin.users.index', ['users' => $request->role])
+        ]);
     }
 
-    public function destroy(User $user): JsonResponse
+    public function edit(User $user)
     {
+        if ($user->role == 'superadmin') {
+            abort(403);
+        }
+        $roles = Role::where('name', '!=', 'superadmin')->latest()->get();
+        return view('admin.users.edit', compact('user', 'roles'));
+    }
+
+    public function update(Request $request, User $user)
+    {
+        if ($user->role == 'superadmin') {
+            return response()->json(__('You can not update a superadmin.'), 400);
+        }
+        $request->validate([
+            'role' => 'required|string',
+            'phone' => 'nullable|string',
+            'country' => 'nullable|string',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|confirmed',
+            'image' => 'nullable|image',
+        ]);
+
+        $role = Role::where('name', $request->role)->first();
+        $user->roles()->sync($role->id);
+        $user->update($request->except('image', 'password') + [
+            'image' => $request->image ? $this->upload($request, 'image', $user->image) : $user->image,
+            'password' => $request->password ? Hash::make($request->password) : $user->password,
+        ]);
+
+        return response()->json([
+            'message' => __('Staff updated successfully'),
+            'redirect' => route('admin.users.index')
+        ]);
+    }
+
+    public function destroy(User $user)
+    {
+        if ($user->role == 'superadmin') {
+            return response()->json(__('You can not delete a superadmin.'), 400);
+        }
+
+        if (file_exists($user->image)) {
+            Storage::delete($user->image);
+        }
+
         $user->delete();
-
-        return response()->json(['message' => 'User deleted successfully.']);
-    }
-
-    public function assignRoles(Request $request, User $user): JsonResponse
-    {
-        $validated = $request->validate([
-            'roles' => 'required|array',
-            'roles.*' => 'integer|exists:roles,id',
+        return response()->json([
+            'message' => __('Staff deleted successfully'),
+            'redirect' => route('admin.users.index')
         ]);
-
-        $user->roles()->sync($validated['roles']);
-
-        Cache::forget("user:{$user->id}:permissions");
-
-        return response()->json(['message' => 'Roles assigned successfully.', 'data' => $user->load('roles')]);
     }
 
-    public function removeRole(Request $request, User $user, Role $role): JsonResponse
+    public function deleteAll(Request $request)
     {
-        $user->roles()->detach($role->id);
+        User::whereIn('id', $request->ids)->delete();
+        return response()->json([
+            'message' => __('Selected Staff deleted successfully'),
+            'redirect' => route('admin.users.index')
+        ]);
+    }
 
-        Cache::forget("user:{$user->id}:permissions");
+    public function exportExcel()
+    {
+        return Excel::download(new UserExport, 'users.xlsx');
+    }
 
-        return response()->json(['message' => 'Role removed successfully.']);
+    public function exportCsv()
+    {
+        return Excel::download(new UserExport, 'users.csv');
     }
 }

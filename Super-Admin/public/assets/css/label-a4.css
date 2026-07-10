@@ -1,0 +1,66 @@
+@page {
+    margin: 0;
+    size: 50mm 25mm;
+}
+body {
+    margin: 0;
+    padding: 0;
+}
+.print-label {
+    width: 50mm !important;
+    height: 25mm !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-direction: column !important;
+    font-family: sans-serif !important;
+    font-size: 10px !important;
+    box-sizing: border-box !important;
+    margin: auto;
+}
+.print-label p {
+    font-size: 10px;
+    line-height: 11px;
+}
+.print-label span {
+    font-size: 10px;
+    line-height: 11px;
+}
+.print-label .product-name {
+    font-weight: 600;
+    color: black;
+    padding-bottom: 2px;
+}
+.print-label .product-price {
+    color: black;
+    padding-bottom: 2px;
+    font-weight: 400;
+}
+.print-label .product-price span {
+    color: black;
+    font-weight: 600;
+}
+img.barcode {
+    height: 5mm;
+    margin-top: 1mm;
+}
+.barcode-print-container {
+    display: grid;
+    max-width: 800px;
+    margin: auto;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 1rem;
+}
+
+@media (max-width: 768px) {
+    .barcode-print-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .barcode-print-container {
+        grid-template-columns: 1fr;
+    }
+}

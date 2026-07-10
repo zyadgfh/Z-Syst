@@ -11,7 +11,7 @@ class LandingPageTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertSee('PharmaSync');
+        $response->assertSee('Z-Syst');
         $response->assertSee('View full feature list');
     }
 
@@ -20,7 +20,7 @@ class LandingPageTest extends TestCase
         $response = $this->get('/features');
 
         $response->assertStatus(200);
-        $response->assertSeeText('PharmaSync Features');
+        $response->assertSeeText('Z-Syst Features');
         $response->assertSeeText('Offline & Remote Access', false);
         $response->assertSeeText('Inventory & Product Intelligence', false);
     }

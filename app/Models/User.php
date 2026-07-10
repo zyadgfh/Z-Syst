@@ -2,170 +2,60 @@
 
 namespace App\Models;
 
-use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements \Illuminate\Contracts\Auth\MustVerifyEmail
+class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, MustVerifyEmail, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
+        'business_id',
         'name',
-        'username',
-        'email',
-        'password',
-        'phone',
-        'profile_photo',
-        'status',
-        'last_login_at',
-        'last_activity_at',
-        'two_factor_secret',
-        'two_factor_recovery_codes',
-        'two_factor_confirmed_at',
-        'branch_id',
-        'department_id',
-        'job_title',
-        'company_id',
         'role',
-        'created_by',
-        'updated_by',
+        'email',
+        'phone',
+        'image',
+        'lang',
+        'status',
+        'password',
+        'visibility',
+        'remember_token',
+        'email_verified_at',
     ];
 
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
     protected $hidden = [
         'password',
-        'two_factor_secret',
-        'two_factor_recovery_codes',
         'remember_token',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
+        'password' => 'hashed',
+        'visibility' => 'json',
         'email_verified_at' => 'datetime',
-        'last_login_at' => 'datetime',
-        'last_activity_at' => 'datetime',
-        'two_factor_confirmed_at' => 'datetime',
-        'status' => 'string',
     ];
 
-    public function company(): BelongsTo
+    public function business(): BelongsTo
     {
-        return $this->belongsTo(Company::class);
-    }
-
-    public function branch(): BelongsTo
-    {
-        return $this->belongsTo(Branch::class, 'branch_id');
-    }
-
-    public function department(): BelongsTo
-    {
-        return $this->belongsTo(Department::class, 'department_id');
-    }
-
-    public function createdBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function updatedBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
-
-    public function managedCompanies()
-    {
-        return $this->hasMany(Company::class, 'branch_limit_updated_by');
-    }
-
-    public function branches()
-    {
-        return $this->hasMany(Branch::class);
-    }
-
-    public function roles(): BelongsToMany
-    {
-        return $this->belongsToMany(Role::class, 'user_has_roles');
-    }
-
-    public function activityLogs(): HasMany
-    {
-        return $this->hasMany(ActivityLog::class);
-    }
-
-    public function transfersRequested(): HasMany
-    {
-        return $this->hasMany(StockTransfer::class, 'requested_by');
-    }
-
-    public function transfersApproved(): HasMany
-    {
-        return $this->hasMany(StockTransfer::class, 'approved_by');
-    }
-
-    public function transfersShipped(): HasMany
-    {
-        return $this->hasMany(StockTransfer::class, 'shipped_by');
-    }
-
-    public function transfersReceived(): HasMany
-    {
-        return $this->hasMany(StockTransfer::class, 'received_by');
-    }
-
-    public function isSuperAdmin(): bool
-    {
-        return $this->role === 'super_admin';
-    }
-
-    public function hasRole(string $roleSlug): bool
-    {
-        return $this->roles()
-            ->where('slug', $roleSlug)
-            ->where('status', true)
-            ->exists();
-    }
-
-    public function hasPermission(string $permissionSlug): bool
-    {
-        return $this->roles()
-            ->whereHas('permissions', function ($query) use ($permissionSlug) {
-                $query->where('slug', $permissionSlug)
-                    ->where('status', true);
-            })
-            ->where('status', true)
-            ->exists();
-    }
-
-    public function getAllPermissions()
-    {
-        return Permission::whereHas('roles', function ($query) {
-            $query->whereIn('roles.id', $this->roles()->pluck('roles.id'));
-        })->distinct()->get();
-    }
-
-    public function assignRole(Role $role): void
-    {
-        $this->roles()->syncWithoutDetaching([$role->id]);
-    }
-
-    public function removeRole(Role $role): void
-    {
-        $this->roles()->detach($role->id);
-    }
-
-    public function getPermissionsAttribute(): array
-    {
-        return $this->getAllPermissions()->pluck('slug')->toArray();
-    }
-
-    public function validatePassword(string $password): bool
-    {
-        return Hash::check($password, $this->password);
+        return $this->belongsTo(Business::class);
     }
 }

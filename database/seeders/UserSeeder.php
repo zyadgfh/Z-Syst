@@ -7,21 +7,15 @@ use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        User::updateOrCreate(
-            ['email' => 'admin@example.com'],
-            [
-                'name' => 'Super Admin',
-                'password' => bcrypt('password'),
-                'role' => 'super_admin',
-            ]
+        $users = array(
+            array('business_id' => 1,'email' => 'acnooteam@gmail.com','name' => 'Acnoo Team','role' => 'shop-owner','phone' => '+8801712022529','image' => NULL,'lang' => 'en','visibility' => NULL,'status' => NULL,'password' => bcrypt('123456'),'email_verified_at' => NULL,'remember_token' => NULL,'created_at' => now(),'updated_at' => now()),
         );
 
-        // create additional demo users only if they don't already exist
-        $existingCount = User::count();
-        if ($existingCount < 20) {
-            User::factory()->count(10)->create();
-        }
+        User::insert($users);
     }
 }

@@ -1,0 +1,31 @@
+{
+    "name": "nwidart/hrmaddon",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\HrmAddon\\": "",
+            "Modules\\HrmAddon\\App\\": "app/",
+            "Modules\\HrmAddon\\Database\\Factories\\": "database/factories/",
+            "Modules\\HrmAddon\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\HrmAddon\\Tests\\": "tests/"
+        }
+    }
+}

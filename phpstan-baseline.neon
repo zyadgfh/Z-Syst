@@ -13134,59 +13134,6 @@ parameters:
 			count: 1
 			path: tests/Unit/AnalyticsServiceTest.php
 
-		-
-			message: '#^Method Tests\\Unit\\AnalyticsServiceTest\:\:it_caches_kpis_results\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Unit/AnalyticsServiceTest.php
-
-		-
-			message: '#^Method Tests\\Unit\\AnalyticsServiceTest\:\:it_can_get_dashboard_kpis\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Unit/AnalyticsServiceTest.php
-
-		-
-			message: '#^Method Tests\\Unit\\AnalyticsServiceTest\:\:it_can_get_inventory_summary\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Unit/AnalyticsServiceTest.php
-
-		-
-			message: '#^Method Tests\\Unit\\AnalyticsServiceTest\:\:it_can_get_sales_trends\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Unit/AnalyticsServiceTest.php
-
-		-
-			message: '#^Method Tests\\Unit\\AnalyticsServiceTest\:\:it_can_get_top_selling_products\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Unit/AnalyticsServiceTest.php
-
-		-
-			message: '#^Method Tests\\Unit\\AnalyticsServiceTest\:\:it_can_identify_expiring_products\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Unit/AnalyticsServiceTest.php
-
-		-
-			message: '#^Method Tests\\Unit\\AnalyticsServiceTest\:\:it_can_identify_low_stock_products\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Unit/AnalyticsServiceTest.php
-
-		-
-			message: '#^Method Tests\\Unit\\AnalyticsServiceTest\:\:it_can_identify_out_of_stock_products\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Unit/AnalyticsServiceTest.php
-
-		-
-			message: '#^Method Tests\\Unit\\AnalyticsServiceTest\:\:it_respects_branch_scoping\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Unit/AnalyticsServiceTest.php
 
 		-
 			message: '#^Parameter \#1 \$user of method Illuminate\\Foundation\\Testing\\TestCase\:\:actingAs\(\) expects Illuminate\\Contracts\\Auth\\Authenticatable, Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\|Illuminate\\Database\\Eloquent\\Model given\.$#'

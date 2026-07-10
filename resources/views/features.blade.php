@@ -1,7 +1,7 @@
-<x-layouts.app title="PharmaSync Feature List">
+<x-layouts.app title="Z-Syst Feature List">
     <div style="display:grid; gap:32px;">
         <section>
-            <h1 style="margin:0 0 14px; font-size:clamp(2.4rem,4vw,3.4rem);">PharmaSync Features</h1>
+            <h1 style="margin:0 0 14px; font-size:clamp(2.4rem,4vw,3.4rem);">Z-Syst Features</h1>
             <p style="margin:0;color:#475569;line-height:1.85;max-width:860px;">A complete pharmacy management system built to operate offline, manage multiple branches, and handle every core pharmacy workflow from sales to inventory, finance, CRM, and reporting.</p>
         </section>
 
@@ -78,8 +78,8 @@
         </section>
 
         <section style="display:grid; gap:26px;">
-            <h2 style="margin:0; font-size:1.8rem;">Why PharmaSync?</h2>
-            <p style="margin:0; color:#475569; line-height:1.85;">PharmaSync is built for pharmacies that need powerful offline operation, multi-branch coordination, and a modern experience across desktop and mobile. It reduces manual work, keeps inventory accurate, and creates visibility for supervisors and branch managers.</p>
+            <h2 style="margin:0; font-size:1.8rem;">Why Z-Syst?</h2>
+            <p style="margin:0; color:#475569; line-height:1.85;">Z-Syst is built for pharmacies that need powerful offline operation, multi-branch coordination, and a modern experience across desktop and mobile. It reduces manual work, keeps inventory accurate, and creates visibility for supervisors and branch managers.</p>
             <a class="button" href="/">Back to home</a>
         </section>
     </div>

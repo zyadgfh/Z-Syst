@@ -48,21 +48,19 @@ final class DocBlock
     private readonly string $docComment;
 
     /**
-     * @var array<string, array<int, string>> pre-parsed annotations indexed by name and occurrence index
+     * @psalm-var array<string, array<int, string>> pre-parsed annotations indexed by name and occurrence index
      */
     private readonly array $symbolAnnotations;
 
     /**
-     * @psalm-var null|(array<
-     *   string,
-     *   array<int|string, string>|array{constraint: string}|array{version: string, operator: string}|string
-     * >&array{
+     * @psalm-var null|(array{
      *   __OFFSET: array<string, int>&array{__FILE: string},
      *   setting?: array<string, string>,
      *   extension_versions?: array<string, array{version: string, operator: string}>
-     * })
-     *
-     * @phpstan-ignore missingType.iterableValue
+     * }&array<
+     *   string,
+     *   string|array{version: string, operator: string}|array{constraint: string}|array<int|string, string>
+     * >)
      */
     private ?array $parsedRequirements = null;
     private readonly int $startLine;
@@ -70,8 +68,6 @@ final class DocBlock
 
     /**
      * @throws AnnotationsAreNotSupportedForInternalClassesException
-     *
-     * @phpstan-ignore missingType.generics
      */
     public static function ofClass(ReflectionClass $class): self
     {
@@ -127,7 +123,7 @@ final class DocBlock
      *   string|array{version: string, operator: string}|array{constraint: string}|array<int|string, string>
      * >
      *
-     * @phpstan-ignore missingType.iterableValue
+     * @throws InvalidVersionRequirementException
      */
     public function requirements(): array
     {
@@ -224,16 +220,13 @@ final class DocBlock
         );
     }
 
-    /**
-     * @return array<string, array<int, string>>
-     */
     public function symbolAnnotations(): array
     {
         return $this->symbolAnnotations;
     }
 
     /**
-     * @return array<string, array<int, string>>
+     * @psalm-return array<string, array<int, string>>
      */
     private static function parseDocBlock(string $docBlock): array
     {
@@ -252,9 +245,6 @@ final class DocBlock
         return $annotations;
     }
 
-    /**
-     * @phpstan-ignore missingType.iterableValue, missingType.generics
-     */
     private static function extractAnnotationsFromReflector(ReflectionClass|ReflectionFunctionAbstract $reflector): array
     {
         $annotations = [];

@@ -10,15 +10,39 @@ use Laravel\Sanctum\Events\TokenAuthenticated;
 class Guard
 {
     /**
+     * The authentication factory implementation.
+     *
+     * @var \Illuminate\Contracts\Auth\Factory
+     */
+    protected $auth;
+
+    /**
+     * The number of minutes tokens should be allowed to remain valid.
+     *
+     * @var int
+     */
+    protected $expiration;
+
+    /**
+     * The provider name.
+     *
+     * @var string
+     */
+    protected $provider;
+
+    /**
      * Create a new guard instance.
      *
-     * @param  \Illuminate\Contracts\Auth\Factory  $auth  The authentication factory implementation.
-     * @param  int  $expiration  The number of minutes tokens should be allowed to remain valid.
-     * @param  string  $provider  The provider name.
-     * @param  bool  $trackLastUsedAt  Whether to track the last used timestamp.
+     * @param  \Illuminate\Contracts\Auth\Factory  $auth
+     * @param  int  $expiration
+     * @param  string  $provider
+     * @return void
      */
-    public function __construct(protected AuthFactory $auth, protected $expiration = null, protected $provider = null, protected $trackLastUsedAt = true)
+    public function __construct(AuthFactory $auth, $expiration = null, $provider = null)
     {
+        $this->auth = $auth;
+        $this->expiration = $expiration;
+        $this->provider = $provider;
     }
 
     /**
@@ -53,8 +77,15 @@ class Guard
 
             event(new TokenAuthenticated($accessToken));
 
-            if ($this->trackLastUsedAt) {
-                $this->updateLastUsedAt($accessToken);
+            if (method_exists($accessToken->getConnection(), 'hasModifiedRecords') &&
+                method_exists($accessToken->getConnection(), 'setRecordModificationState')) {
+                tap($accessToken->getConnection()->hasModifiedRecords(), function ($hasModifiedRecords) use ($accessToken) {
+                    $accessToken->forceFill(['last_used_at' => now()])->save();
+
+                    $accessToken->getConnection()->setRecordModificationState($hasModifiedRecords);
+                });
+            } else {
+                $accessToken->forceFill(['last_used_at' => now()])->save();
             }
 
             return $tokenable;
@@ -97,7 +128,7 @@ class Guard
      * @param  string|null  $token
      * @return bool
      */
-    protected function isValidBearerToken(?string $token = null)
+    protected function isValidBearerToken(string $token = null)
     {
         if (! is_null($token) && str_contains($token, '|')) {
             $model = new Sanctum::$personalAccessTokenModel;
@@ -151,24 +182,5 @@ class Guard
         $model = config("auth.providers.{$this->provider}.model");
 
         return $tokenable instanceof $model;
-    }
-
-    /**
-     * Store the time the token was last used.
-     *
-     * @param  \Laravel\Sanctum\PersonalAccessToken  $accessToken
-     * @return void
-     */
-    protected function updateLastUsedAt($accessToken)
-    {
-        if (method_exists($accessToken->getConnection(), 'hasModifiedRecords') &&
-            method_exists($accessToken->getConnection(), 'setRecordModificationState')) {
-            $hasModifiedRecords = $accessToken->getConnection()->hasModifiedRecords();
-            $accessToken->forceFill(['last_used_at' => now()])->save();
-
-            $accessToken->getConnection()->setRecordModificationState($hasModifiedRecords);
-        } else {
-            $accessToken->forceFill(['last_used_at' => now()])->save();
-        }
     }
 }

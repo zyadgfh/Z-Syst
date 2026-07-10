@@ -1,8 +1,8 @@
-<x-layouts.app title="PharmaSync — Pharmacy Management System">
+<x-layouts.app title="Z-Syst — Pharmacy Management System">
     <div style="display:grid; gap:32px;">
         <section style="display:grid; gap:26px; padding-bottom:24px; border-bottom:1px solid #e5e7eb;">
             <div style="max-width:760px;">
-                <p style="text-transform:uppercase; letter-spacing:.2em; color:#2563eb; font-weight:700; margin:0 0 10px;">PharmaSync</p>
+                <p style="text-transform:uppercase; letter-spacing:.2em; color:#2563eb; font-weight:700; margin:0 0 10px;">Z-Syst</p>
                 <h1 style="margin:0; font-size:clamp(2.8rem,4vw,4.6rem); line-height:1.03; letter-spacing:-.05em;">Offline pharmacy operations, remote monitoring, and intelligent branch management.</h1>
                 <p style="margin:20px 0 0; color:#475569; font-size:1.06rem; line-height:1.8; max-width:720px;">Run the full pharmacy system without internet access, monitor every branch from mobile or desktop, and manage inventory, sales, purchases, finance, and alerts in one modern platform.</p>
             </div>

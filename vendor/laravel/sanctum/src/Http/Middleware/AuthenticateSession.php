@@ -14,12 +14,21 @@ use Symfony\Component\HttpFoundation\Response;
 class AuthenticateSession
 {
     /**
+     * The authentication factory implementation.
+     *
+     * @var \Illuminate\Contracts\Auth\Factory
+     */
+    protected $auth;
+
+    /**
      * Create a new middleware instance.
      *
-     * @param  \Illuminate\Contracts\Auth\Factory  $auth  The authentication factory implementation.
+     * @param  \Illuminate\Contracts\Auth\Factory  $auth
+     * @return void
      */
-    public function __construct(protected AuthFactory $auth)
+    public function __construct(AuthFactory $auth)
     {
+        $this->auth = $auth;
     }
 
     /**
@@ -42,11 +51,8 @@ class AuthenticateSession
         $shouldLogout = $guards->filter(
             fn ($guard, $driver) => $request->session()->has('password_hash_'.$driver)
         )->filter(
-            fn ($guard, $driver) => ! $this->validatePasswordHash(
-                $guard,
-                $request->user()->getAuthPassword(),
-                $request->session()->get('password_hash_'.$driver)
-            )
+            fn ($guard, $driver) => $request->session()->get('password_hash_'.$driver) !==
+                                    $request->user()->getAuthPassword()
         );
 
         if ($shouldLogout->isNotEmpty()) {
@@ -58,25 +64,9 @@ class AuthenticateSession
         }
 
         return tap($next($request), function () use ($request, $guards) {
-            if (! is_null($guard = $this->getFirstGuardWithUser($guards->keys()))) {
-                $this->storePasswordHashInSession($request, $guard);
+            if (! is_null($request->user())) {
+                $this->storePasswordHashInSession($request, $guards->keys()->first());
             }
-        });
-    }
-
-    /**
-     * Get the first authentication guard that has a user.
-     *
-     * @param  \Illuminate\Support\Collection  $guards
-     * @return string|null
-     */
-    protected function getFirstGuardWithUser(Collection $guards)
-    {
-        return $guards->first(function ($guard) {
-            $guardInstance = $this->auth->guard($guard);
-
-            return method_exists($guardInstance, 'hasUser') &&
-                   $guardInstance->hasUser();
         });
     }
 
@@ -89,33 +79,12 @@ class AuthenticateSession
      */
     protected function storePasswordHashInSession($request, string $guard)
     {
-        $guardInstance = $this->auth->guard($guard);
-
-        $request->session()->put([
-            "password_hash_{$guard}" => method_exists($guardInstance, 'hashPasswordForCookie')
-                ? $guardInstance->hashPasswordForCookie($guardInstance->user()->getAuthPassword())
-                : $guardInstance->user()->getAuthPassword(),
-        ]);
-    }
-
-    /**
-     * Validate the password hash against the stored value.
-     *
-     * @param  \Illuminate\Auth\SessionGuard  $guard
-     * @param  string|null  $passwordHash
-     * @param  string  $storedValue
-     * @return bool
-     */
-    protected function validatePasswordHash(SessionGuard $guard, ?string $passwordHash, string $storedValue): bool
-    {
-        // Try new HMAC format first (Laravel 12.45.0+)...
-        if (method_exists($guard, 'hashPasswordForCookie')) {
-            if (hash_equals($guard->hashPasswordForCookie($passwordHash), $storedValue)) {
-                return true;
-            }
+        if (! $request->user()) {
+            return;
         }
 
-        // Fall back to raw password hash format for backward compatibility...
-        return hash_equals($passwordHash ?? '', $storedValue);
+        $request->session()->put([
+            "password_hash_{$guard}" => $request->user()->getAuthPassword(),
+        ]);
     }
 }

@@ -2,63 +2,83 @@
 
 namespace App\Models;
 
-use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
-    protected static function newFactory()
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'productName',
+        'business_id',
+        'category_id',
+        'unit_id',
+        'type_id',
+        'manufacturer_id',
+        'box_size_id',
+        'purchase_without_tax',
+        'purchase_with_tax',
+        'profit_percent',
+        'sales_price',
+        'alert_qty',
+        'wholesale_price',
+        'productCode',
+        'images',
+        'meta',
+        'tax_id',
+        'tax_type',
+    ];
+
+    public function stocks(): HasMany
     {
-        return ProductFactory::new();
+        return $this->hasMany(Stock::class)->where('productStock', '>', 0);
     }
 
-    protected $fillable = [
-        'company_id',
-        'product_category_id',
-        'sku',
-        'name',
-        'slug',
-        'description',
-        'cost_price',
-        'retail_price',
-        'wholesale_price',
-        'track_inventory',
-        'is_active',
-        'created_by',
-        'updated_by',
-    ];
-
-    protected $casts = [
-        'cost_price' => 'decimal:2',
-        'retail_price' => 'decimal:2',
-        'wholesale_price' => 'decimal:2',
-        'track_inventory' => 'boolean',
-        'is_active' => 'boolean',
-    ];
-
-    public function company(): BelongsTo
+    public function expiring_item()
     {
-        return $this->belongsTo(Company::class);
+        return $this->hasOne(Stock::class, 'product_id');
+    }
+
+    public function tax(): BelongsTo
+    {
+        return $this->belongsTo(Tax::class);
+    }
+
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
     }
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(ProductCategory::class, 'product_category_id');
+        return $this->belongsTo(Category::class);
     }
 
-    public function stocks(): HasMany
+    public function manufacterer(): BelongsTo
     {
-        return $this->hasMany(ProductStock::class);
+        return $this->belongsTo(Manufacturer::class, 'manufacturer_id');
     }
 
-    public function transferItems(): HasMany
+    public function medicine_type(): BelongsTo
     {
-        return $this->hasMany(StockTransferItem::class);
+        return $this->belongsTo(MedicineType::class, 'type_id');
     }
+
+    public function box_size(): BelongsTo
+    {
+        return $this->belongsTo(BoxSize::class);
+    }
+
+    protected $casts = [
+        'meta' => 'json',
+        'images' => 'json',
+    ];
 }

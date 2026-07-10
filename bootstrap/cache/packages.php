@@ -1,13 +1,16 @@
 <?php return array (
-  'laravel/horizon' => 
+  'dipesh79/laravel-phonepe' => 
   array (
-    'aliases' => 
-    array (
-      'Horizon' => 'Laravel\\Horizon\\Horizon',
-    ),
     'providers' => 
     array (
-      0 => 'Laravel\\Horizon\\HorizonServiceProvider',
+      0 => 'Dipesh79\\LaravelPhonePe\\LaravelPhonePeServiceProvider',
+    ),
+  ),
+  'laravel/breeze' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Laravel\\Breeze\\BreezeServiceProvider',
     ),
   ),
   'laravel/sail' => 
@@ -24,18 +27,22 @@
       0 => 'Laravel\\Sanctum\\SanctumServiceProvider',
     ),
   ),
-  'laravel/sentinel' => 
+  'laravel/tinker' => 
   array (
     'providers' => 
     array (
-      0 => 'Laravel\\Sentinel\\SentinelServiceProvider',
+      0 => 'Laravel\\Tinker\\TinkerServiceProvider',
     ),
   ),
-  'laravel/telescope' => 
+  'maatwebsite/excel' => 
   array (
+    'aliases' => 
+    array (
+      'Excel' => 'Maatwebsite\\Excel\\Facades\\Excel',
+    ),
     'providers' => 
     array (
-      0 => 'Laravel\\Telescope\\TelescopeServiceProvider',
+      0 => 'Maatwebsite\\Excel\\ExcelServiceProvider',
     ),
   ),
   'nesbot/carbon' => 
@@ -45,11 +52,47 @@
       0 => 'Carbon\\Laravel\\ServiceProvider',
     ),
   ),
+  'nunomaduro/collision' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
+    ),
+  ),
   'nunomaduro/termwind' => 
   array (
     'providers' => 
     array (
       0 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    ),
+  ),
+  'nwidart/laravel-modules' => 
+  array (
+    'aliases' => 
+    array (
+      'Module' => 'Nwidart\\Modules\\Facades\\Module',
+    ),
+    'providers' => 
+    array (
+      0 => 'Nwidart\\Modules\\LaravelModulesServiceProvider',
+    ),
+  ),
+  'safiull/laravel-installer' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Laravel\\LaravelInstaller\\Providers\\LaravelInstallerServiceProvider',
+    ),
+  ),
+  'spatie/laravel-ignition' => 
+  array (
+    'aliases' => 
+    array (
+      'Flare' => 'Spatie\\LaravelIgnition\\Facades\\Flare',
+    ),
+    'providers' => 
+    array (
+      0 => 'Spatie\\LaravelIgnition\\IgnitionServiceProvider',
     ),
   ),
   'spatie/laravel-permission' => 

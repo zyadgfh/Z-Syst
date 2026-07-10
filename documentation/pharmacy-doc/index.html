@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; chaModaet=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Acnoo Pharmacy - Pharmacy Management Software SAAS App with Admin panel </title>
+    <link rel="icon" type="image/x-icon" href="assets/img/favicon.png">
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/styles.css" rel="stylesheet">
+</head>
+
+<body>
+<nav class="navbar bg-body-tertiary fixed-top" id="header-container">
+    <div class="container">
+        <div class="w-100 d-flex align-items-center justify-content-between">
+            <a href="assets/img/logo.svg" target="_blank" class="navbar-brand d-flex align-items-center">
+                <img class="nav-logo" src="assets/img/logo.svg" alt="">
+            </a>
+            <ul class="nav d-flex align-items-center">
+                <li>
+                    <a href="https://acnoopharmacy.acnoo.com/" target="_blank">Live Demos</a>
+                </li>
+                <li>
+                    <a href="https://codecanyon.net/user/acnoo/portfolio" target="_blank">PURCHASE NOW</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div id="masthead">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1 class="mb-0">Acnoo Pharmacy - Pharmacy Management Software SAAS App with Admin panel</h1>
+                <p>This document provides general information and step-by-step guidelines on installing the Admin Panel & App on your local or live server. Additionally, you'll learn about the functionalities of the admin panel.</p>
+                <span class="cta-button"><a href="#getting-started">Get started</a></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--main-->
+
+<div id="mainContent" class="container">
+    <div class="row">
+        <div class="col-md-3" id="leftCol">
+            <div id="sidebar">
+                <div class="accordion accordion-flush" id="sidebarAccordion">
+                
+                    <div class="accordion-item">
+                        <a href="" class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#chatGPT-admin-panel" aria-expanded="false" aria-controls="chatGPT-admin-panel">Admin Panel</a>
+                        <div id="chatGPT-admin-panel" class="accordion-collapse collapse show" data-bs-parent="#sidebarAccordion">
+                            <div class="accordion-body">
+                                <div class="accordion accordion-flush" id="sidebarMenuAccordion">
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#getting-started" class="active accordion-button" type="button">Getting started</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#requirements" class="accordion-button" type="button">Requirements</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#download" class="accordion-button" type="button">Download from Envato</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#database" class="accordion-button" type="button">Creating Database</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#upload" class="accordion-button" type="button">Uploading Files</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#install" class="accordion-button" type="button">Installation Wizard</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#password" class="accordion-button" type="button">Default Password</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#super-dashboard" class="accordion-button" type="button">Dashboard</a>
+                                    </div>
+                                   
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#super-business" class="accordion-button" type="button">Store List</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#super-business-category" class="accordion-button" type="button">Category List</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#super-advertising" class="accordion-button" type="button">Advertising</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#super-plan" class="accordion-button" type="button">Subscription Plans</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#super-report" class="accordion-button" type="button">Reports</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#super-staff" class="accordion-button" type="button">Staff Management</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#super-permission" class="accordion-button" type="button">Roles & Permissions</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#super-cms-manage" class="accordion-button" type="button">Frontend Module</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#super-setting" class="accordion-button" type="button">Settings</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#change-logs" class="accordion-button" type="button">Change Logs</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+             
+
+                    <div class="accordion-item">
+                        <a href="" class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                           data-bs-target="#chatGPT-app" aria-expanded="false" aria-controls="chatGPT-app">Acnoo Pharmacy
+                            App</a>
+                        <div id="chatGPT-app" class="accordion-collapse collapse" data-bs-parent="#sidebarAccordion">
+                            <div class="accordion-body">
+                                <div class="accordion accordion-flush" id="sidebarMenuAccordion">
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#tool-setup" class="accordion-button" type="button">Tools & Setup</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#android-studio" class="accordion-button" type="button">Android Studio
+                                            – Windows</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#android-studio-mac" class="accordion-button" type="button">Android
+                                            Studio – macOS</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#android-studio-linux" class="accordion-button" type="button">Android
+                                            Studio – Linux</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#getting-start-app" class="accordion-button" type="button">Build &
+                                            Run</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#project-feature" class="accordion-button" type="button">Structure &
+                                            Features</a>
+                                    </div>
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#mobile-setup" class="accordion-button" type="button">Mobile
+                                            Application Setup</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <a href="" class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#support" aria-expanded="false" aria-controls="support">Help & Support</a>
+                        <div id="support" class="accordion-collapse collapse" data-bs-parent="#sidebarAccordion">
+                            <div class="accordion-body">
+                                <div class="accordion accordion-flush" id="sidebarMenuAccordion">
+                                    <div class="accordion-item remove-show-class">
+                                        <a href="#help-support" class="accordion-button" type="button">Help & Support</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--/left-->
+
+        <!--right-->
+        <div class="col-md-9">
+            <div class="ContentWrapper">
+                <section id="getting-started">
+                    <h1>Getting Started</h1>
+                    <h3>Acnoo Pharmacy - Admin Panel</h3>
+                    <hr class="my-0">
+                    <ul>
+                        <li>Uploaded Date: 05-March-2025</li>
+                        <li>Project: Acnoo Pharmacy</li>
+                        <li>Author: Acnoo</li>
+                        <li>Email: <a href="mailto:acnooteam@gmail.com">acnooteam@gmail.com</a></li>
+                    </ul>
+                    <p class="important">Thank you for purchasing our product. If you have any questions that are beyond
+                        the scope of this documentation
+                        file, please feel free to email us via our user page contact form or directly to email at <a
+                                href="mailto:acnooteam@gmail.com">acnooteam@gmail.com</a></p>
+                </section>
+
+                <div class="theme-requirements">
+                    <section id="requirements">
+                        <div class="page-header">
+                            <h3 class="mb-0">Requirements</h3>
+                        </div>
+                        <div>We are using <b>laravel 10</b> So these are the minimum server requirements, the installer
+                            will check if your server meets these or alternatively you can contact your hosting provider
+                            in order to make sure your server meets them.
+                        </div>
+                        <br>
+                        <ul>
+                            <li>PHP >= 8.2</li>
+                            <li>Ctype PHP Extension</li>
+                            <li>cURL PHP Extension</li>
+                            <li>DOM PHP Extension</li>
+                            <li>Fileinfo PHP Extension</li>
+                            <li>Filter PHP Extension</li>
+                            <li>Hash PHP Extension</li>
+                            <li>Mbstring PHP Extension</li>
+                            <li>OpenSSL PHP Extension</li>
+                            <li>PCRE PHP Extension</li>
+                            <li>PDO PHP Extension</li>
+                            <li>Session PHP Extension</li>
+                            <li>Tokenizer PHP Extension</li>
+                            <li>XML PHP Extension</li>
+                        </ul>
+
+                        <p class="info">For more information about deployment see the Laravel documentation here <a
+                                href="https://laravel.com/docs/10.x/deployment">https://laravel.com/docs/10.x/deployment</a>
+                        </p>
+                        <p> &nbsp;</p>
+                    </section>
+
+                    <section id="download">
+                        <div class="page-header">
+                            <h3 class="m-0">Download Project from Envato</h3>
+                        </div>
+                        <p class="m-0">After successfully purchase Acnoo Pharmacy, download the project from <a
+                                href="https://codecanyon.net/downloads">Envato download page</a></p>
+
+                        <a href="assets/img/download.png" target="_blank">
+                            <img src="assets/img/download.png" class="border">
+                        </a>
+
+                        <p>Extract the downloaded file. You will have another zip file named <em>Super-Admin.zip</em>
+                            containing the main project's files and a documentation folder. You are reading this
+                            documentation, that means you already have theme both.</p>
+                    </section>
+
+                    <section id="database">
+                        <div class="page-header"><h3>Creating Database</h3></div>
+                        <p>Before installing, you will need to create a new database. If you already know how to do this
+                            or have already created one, skip to the next step.</p>
+                        <p class="important"><b>Note: </b> Please use empty database. In most cases you should be able
+                            to create a database from your cpanel.</p>
+
+                        <p>Login to your cPanel by entering this in your browser url</p>
+                        <p class="important">yourdomian.com/cpanel</p>
+
+                        <a href="assets/img/cpanel_login.png" target="_blank">
+                            <img src="assets/img/cpanel_login.png" alt="" class="border">
+                        </a>
+                        <h5>Step: 1</h5>
+                        <a href="assets/img/create-database.png" target="_blank">
+                            <img src="assets/img/create-database.png" alt="" class="border">
+                        </a>
+                        <h5>Step: 2</h5>
+                        <a href="assets/img/create-new-db.jpg" target="_blank">
+                            <img src="assets/img/create-new-db.jpg" alt="" class="border">
+                        </a>
+                        <h5>Step: 3</h5>
+                        <p>Now you need to create a new user. On the same page go to create a new database user</p>
+                        <a href="assets/img/create-user.png" target="_blank">
+                            <img src="assets/img/create-user.png" alt="" class="border">
+                        </a>
+                        <h5>Step: 4</h5>
+                        <p>Now add the user to the database</p>
+                        <a href="assets/img/db-user.jpg" target="_blank">
+                            <img src="assets/img/db-user.jpg" alt="" class="border">
+                        </a>
+                        <h5>Step: 5</h5>
+                        <p>And select full permissions on the database to that user</p>
+                        <a href="assets/img/all-permissions.jpg" target="_blank">
+                            <img src="assets/img/all-permissions.jpg" alt="" class="border">
+                        </a>
+                    </section>
+
+                    <section id="upload">
+                        <div class="page-header"><h3>Uploading Files</h3></div>
+
+                        <p class="important">On some operating systems, the dotfiles are hidden by default. Before
+                            starting to upload the files, please make sure your file explorer has the option to view
+                            hidden files turned on.</p>
+
+                        <p>After creating a database, Upload the <b>Super-Admin.zip</b> file on the web root folder of
+                            your domain. This folder is generally called public_html, html, or example.com, but
+                            depending on your server's configuration, it might be named differently.</p>
+
+                        <a href="assets/img/file-manager.png" target="_blank">
+                            <img src="assets/img/file-manager.png" alt="" class="border">
+                        </a>
+                        <a href="assets/img/public-html.png" target="_blank">
+                            <img src="assets/img/public-html.png" alt="" class="border">
+                        </a>
+                        <p>After that in the public_html directory upload the downloaded file.</p>
+                        <a href="assets/img/upload3.png" target="_blank">
+                            <img src="assets/img/upload3.png" alt="" class="border">
+                        </a>
+                        <a href="assets/img/upload4.png" target="_blank">
+                            <img src="assets/img/upload4.png" alt="" class="border">
+                        </a>
+
+                        <p class="important"><b>Note: </b> Important Make sure that you have .env file in your folder.
+                        </p>
+
+                        <p class="important"><b>Note: </b> Make sure that .htaccess file got copied properly from the
+                            download to your server. </p>
+                    </section>
+
+                    <section id="install">
+                        <div class="page-header">
+                            <h3>Installation Wizard</h3>
+                        </div>
+                        <div>
+                            <p>Go to your website address, then you'll see an installation wizard. To open the
+                                installer. Visit</p>
+                        </div>
+                        <p class="important">yourdomain.com/install</p>
+                        <p>Now the installer will show up.The First screen will be Welcome Screen</p>
+                        <a href="assets/img/installer.png" target="_blank">
+                            <img src="assets/img/installer.png" alt="" width="448" class="border">
+                        </a>
+
+                        <p class="warning">Note : If you are not able to access the website by accessing
+                            yourdomain.com/install, but
+                            you are able to access it via yourdomain.com/index.php/install, this means that you probably
+                            don't have
+                            Apache mod_rewrite installed and enabled. </p>
+
+                        <h3>Server Requirements</h3>
+                        <p>After clicking on "Check requirement" button, you will be redirected to System Requirements
+                            step during
+                            the installation wizard, System Requirements.</p>
+                        <a href="assets/img/requirements-check.png" target="_blank">
+                            <img src="assets/img/requirements-check.png" alt="" width="443" class="border">
+                        </a>
+
+                        <h3>Verify Code</h3>
+                        <p> Here enter your Envato Purchase Code to proceed.</p>
+                        <a href="assets/img/verify_code.png" target="_blank">
+                            <img src="assets/img/verify_code.png" alt="" width="443" class="border">
+                        </a>
+
+                        <h3>Database/Environment Setting</h3>
+                        <p>If your code is verified, simply click 'Next' to proceed to the next step.</p>
+                        <a href="assets/img/environment_setting.png" target="_blank">
+                            <img src="assets/img/environment_setting.png" alt="" width="443" class="border">
+                        </a>
+
+                        <p>Please enter your database credentials and click 'Install' to continue.</p>
+                        <a href="assets/img/environment_setup_1.png" target="_blank">
+                            <img src="assets/img/environment_setup_1.png" alt="" width="447" class="border">
+                        </a>
+                        <a href="assets/img/environment_setup_2.png" target="_blank">
+                            <img src="assets/img/environment_setup_2.png" alt="" width="447" class="border">
+                        </a>
+
+                        <h3>Exit</h3>
+
+                        <p>The last step is exit step.</p>
+
+                        <a href="assets/img/success_1.png" target="_blank">
+                            <img src="assets/img/success_1.png" alt="" width="445" class="border">
+                        </a>
+                        <a href="assets/img/success_2.png" target="_blank">
+                            <img src="assets/img/success_2.png" alt="" width="445" class="border">
+                        </a>
+                        <p class="important">Congratulations you have successfully installed this project on your server. 😀</p>
+                        <p> &nbsp;</p>
+                    </section>
+
+                    <section id="password">
+                        <div class="page-header">
+                            <h3>Default Password</h3>
+                        </div>
+                        <p>You can login using several methods depending on your role.</p>
+
+                        <h3>Super Admin</h3>
+                        <p class="mb-0">superadmin@superadmin.com</p>
+                        <p class="mb-0">superadmin</p>
+
+                        <h3 class="mt-3">Admin</h3>
+                        <p class="mb-0">admin@admin.com</p>
+                        <p class="mb-0">admin</p>
+
+                        <h3 class="mt-3">Manager</h3>
+                        <p class="mb-0">manager@manager.com</p>
+                        <p class="mb-0">manager</p>
+
+                        <!--Should be changed-->
+                        <a href="assets/img/login.png" target="_blank">
+                            <img src="assets/img/login.png" class="border">
+                        </a>
+                        <p class="mt-2">In this project, different modules are assigned based on user roles: Super Admin, Admin, Manager. Each role has distinct responsibilities tailored to their specific tasks and
+                            permissions. Below, we will discuss how each user role operates within the system.</p>
+                    </section>
+                </div>
+
+                <section id="super-dashboard">
+                    <div class="page-header">
+                        <h3 class="mt-4">Dashboard</h3>
+                    </div>
+                    <p class="m-0">The Acoo Pharmacy Admin Dashboard provides an intuitive interface for administrators to manage various aspects of the platform. It includes metrics on total shops, expired businesses, categories, subscription plans, financial overviews, and user registrations.</p>
+                    <a href="assets/img/super_dashboard.png" target="_blank">
+                        <img src="assets/img/super_dashboard.png" class="border">
+                    </a>
+                </section>
+
+
+                <hr class="mt-4">
+                <section id="super-business">
+                    <h3>Store List</h3>
+                    <p class="m-0">This appears to be a screenshot of a business list page. Business list functionalities typically allow users to collect and organize information about businesses. By clicking the "View" button, you can see the details of each business. You can also create a new business by clicking the "Add Store" button. Below, we'll describe how you can create a new store.</p>
+                    <a href="assets/img/business_list.png" target="_blank">
+                        <img src="assets/img/business_list.png" class="border">
+                    </a>
+                    <h3>Upgrade Plan</h3>
+                    <p class="m-0">If you need to upgrade the plan for any business, click on the "Upgrade Plan" button. You will likely see a popup for this. Here, you can update the plan, gateway, price, and notes. When you select a plan, the price input field will automatically fill in according to the selected plan, but you can also change the price manually. If desired, you can add a note by filling in the notes input field.</p>
+                    <a href="assets/img/upgrade_plan.png" target="_blank">
+                        <img src="assets/img/upgrade_plan.png" class="border">
+                    </a>
+
+                    <h3>Add New Store</h3>
+                    <p class="m-0">By clicking on the "Add Store" button, you can create a new business. You will need to fill in the necessary fields. Here is the screenshot of the create business page.</p>
+                    <a href="assets/img/create_business.png" target="_blank">
+                        <img src="assets/img/create_business.png" class="border">
+                    </a>
+                </section>
+
+                <hr class="mt-4">
+                <section id="super-business-category">
+                    <div class="page-header">
+                        <h3 class="m-0">Business Category List</h3>
+                    </div>
+                    <p class="m-0">This appears to be a screenshot of a business categories list. Here, you can filter business categories, as well as edit, delete, or multi-delete them. There is also an "Add New Category" button for adding new business categories. To add a new business category, fill in the necessary fields. You need to enter the business name, and the description field is optional. You can also update the status from this page.</p>
+                    <a href="assets/img/business_category_list.png" target="_blank">
+                        <img src="assets/img/business_category_list.png" class="border">
+                    </a>
+
+                    <div class="page-header">
+                        <h3 class="m-0">Add New Category</h3>
+                    </div>
+                    <p class="m-0">This section outlines the procedure for adding new business categories within the Acnoo Pharmacy system. Business categories are used to classify and organize different types of businesses listed in the system.</p>
+                    <a href="assets/img/create_business_category.png" target="_blank">
+                        <img src="assets/img/create_business_category.png" class="border">
+                    </a>
+                </section>
+
+                <hr class="mt-4">
+                <section id="super-advertising">
+                    <div class="page-header">
+                        <h3 class="m-0">Advertising Section</h3>
+                    </div>
+                    <p class="m-0">This list allows you to see the current advertising campaigns with status. To create a new advertise, you can click on the "Create Banner" button at the top right of the screenshot. A pop-up window will open, where you can add an image and change the status.Click the three dot menu where you can edit and delete</p>
+                    <a href="assets/img/advertising_list.png" target="_blank">
+                        <img src="assets/img/advertising_list.png" class="border">
+                    </a>
+
+                    <div class="page-header">
+                        <h3 class="m-0">Add Advertising</h3>
+                    </div>
+                    <p class="m-0">This section describes the process of adding new advertisements to the Acnoo pharmacy store's system. Advertisements are used to promote products, services, or special offers to customers.</p>
+                    <a href="assets/img/create_advertising.png" target="_blank">
+                        <img src="assets/img/create_advertising.png" class="border">
+                    </a>
+                </section>
+                
+                <hr class="mt-4">
+                <section id="super-plan">
+                    <div class="page-header">
+                        <h3 class="m-0">Plan List</h3>
+                    </div>
+                    <p class="m-0">Here, you can view a list of available plans with filtering options. You can also change the plan status from this page. Additionally, options to view, edit, delete, and multi-delete plans are available.</p>
+                    <a href="assets/img/manage_plans.png" target="_blank">
+                        <img src="assets/img/manage_plans.png" class="border">
+                    </a>
+                    <h3>Add New Plan</h3>
+                    <p class="m-0">Here, you have the option to create a plan according to your preferences. You can also add multiple features using the "Add New Feature" input field. Once you have completed filling out the form, simply click the "Save" button.</p>
+                    <a href="assets/img/create_plans.png" target="_blank">
+                        <img src="assets/img/create_plans.png" class="border">
+                    </a>
+                </section>
+
+                <hr class="mt-4">
+                <section id="super-report">
+                    <div class="page-header">
+                        <h3 class="m-0">Subscription List</h3>
+                    </div>
+                    <p class="m-0">The Subscription reports section allows users to track their current subscriptions.In the action column, clicking on the three dots (...) will display options to mark as "Accept" or "Reject." Clicking either option will allow you to change the status accordingly.Provides access to the invoice associated with the subscription.</p>
+                    <a href="assets/img/subscription_report.png" target="_blank">
+                        <img src="assets/img/subscription_report.png" class="border">
+                    </a>
+                    <a href="assets/img/subscription_invoice.png" target="_blank">
+                        <img src="assets/img/subscription_invoice.png" class="border">
+                    </a>
+
+                    <div class="page-header">
+                        <h3 class="m-0">Manual Payment List</h3>
+                    </div>
+                    <p class="m-0">The Manual Payment List provides a comprehensive view of all manual payment requests, including details about the store, subscription plan, payment status, and available actions. This list is essential for tracking and processing payments made outside the automated system.</p>
+                    <a href="assets/img/manual_payment_list.png" target="_blank">
+                        <img src="assets/img/manual_payment_list.png" class="border">
+                    </a>
+                    <a href="assets/img/manual_invoice.png" target="_blank">
+                        <img src="assets/img/manual_invoice.png" class="border">
+                    </a>
+
+                    <div class="page-header">
+                        <h3 class="m-0">Active Store List</h3>
+                    </div>
+                    <p class="m-0">The Active Store List page is designed to provide a streamlined view of all active stores. Users can search, filter, and export store information while keeping track of enrollment and expiration dates. With intuitive navigation and dynamic data management, this page enhances administrative efficiency within the Acnoo Pharmacy system.</p>
+                    <a href="assets/img/active_store.png" target="_blank">
+                        <img src="assets/img/active_store.png" class="border">
+                    </a>
+
+                    <div class="page-header">
+                        <h3 class="m-0">Expired Store List</h3>
+                    </div>
+                    <p class="m-0">The "Expired Store List" page displays a list of stores whose subscriptions have expired. This allows administrators to easily identify and manage stores that need renewal or follow-up. The page is part of the "Reports" section of the Acnoo Pharmacy system.</p>
+                    <a href="assets/img/expired_store.png" target="_blank">
+                        <img src="assets/img/expired_store.png" class="border">
+                    </a>
+                </section>
+
+                <hr class="mt-4">
+                <section id="super-staff">
+                    <div class="page-header">
+                        <h3 class="m-0">Staff List</h3>
+                    </div>
+                    <p class="m-0">Here, you can view the list of staff members along with a search filter. Additionally, you have the option to edit, delete individual entries, and perform multi-delete operations.</p>
+                    <a href="assets/img/staff_list.png" target="_blank">
+                        <img src="assets/img/staff_list.png" class="border">
+                    </a>
+                    <h3>Add New Staff</h3>
+                    <p class="m-0">You can create a staff member here by completing the necessary fields.</p>
+                    <a href="assets/img/create_staff.png" target="_blank">
+                        <img src="assets/img/create_staff.png" class="border">
+                    </a>
+                </section>
+
+                <hr class="mt-4">
+                <section id="super-permission">
+                    <div class="page-header">
+                        <h3 class="m-0">Roles & Permissions</h3>
+                    </div>
+                    <p class="mb-3">In this section, you have the ability to define roles and allocate specific permissions to different users as needed.</p>
+                    <h3>Roles</h3>
+                    <p>In this section, you have the capability to create new roles and update existing ones. When updating roles, you can configure their specific role permissions, granting or restricting access to various features and functionalities as required. This allows you to tailor user roles to your organizational needs and security requirements.</p>
+                    <a href="assets/img/roles_1.png" target="_blank">
+                        <img src="assets/img/roles_1.png" class="border">
+                    </a>
+                    <a href="assets/img/roles_2.png" target="_blank">
+                        <img src="assets/img/roles_2.png" class="border">
+                    </a>
+                    <h3>Permissions</h3>
+                    <p>In this section, you have the capability to set role-specific permissions, allowing you to fine-tune and control access rights for each role according to your organization's needs and security requirements.</p>
+                    <a href="assets/img/permission.png" target="_blank">
+                        <img src="assets/img/permission.png" class="border">
+                    </a>
+                </section>
+
+                <hr class="mt-4">
+                <section id="super-cms-manage">
+                    <div class="page-header">
+                        <h3 class="m-0">Frontend Module</h3>
+                    </div>
+                    <p class="m-0">Here you have the ability to perform various actions including handling  Manage Pages, Features, Blogs, Testimonials, Interface, Terms & Condition, Privacy & Policy and Message.</p>
+                    <h3 class="mt-2">Manage Pages</h3>
+                    <p class="m-0">You can modify various sections of the pages, including the slider,header,features, interface, watch, testimonial, blog, about us contuct us, pricing, footer, socila media and etc.</p><br>
+
+                    <p class="m-0">You can update the Slider section and its link of your landing page.</p>
+                    <a href="assets/img/slider.png" target="_blank">
+                        <img src="assets/img/slider.png" class="border">
+                    </a>
+                    <p class="m-0">You can update the header "button" and its link of your landing page.</p>
+                    <a href="assets/img/header.png" target="_blank">
+                        <img src="assets/img/header.png" class="border">
+                    </a>
+                    <p class="m-0">Here, you can update the feature title of the Landing page.</p>
+                    <a href="assets/img/feature.png" target="_blank">
+                        <img src="assets/img/feature.png" class="border">
+                    </a>
+                    <p class="m-0">Here, you can update the interface title and description of the Home Page.</p>
+                    <a href="assets/img/interface.png" target="_blank">
+                        <img src="assets/img/interface.png" class="border">
+                    </a>
+                    <p class="m-0">The "Get App" section allows you to customize the information and links related to downloading the mobile app. The following fields are available:</p>
+                    <a href="assets/img/get_app.png" target="_blank">
+                        <img src="assets/img/get_app.png" class="border">
+                    </a>
+                    <p class="m-0">The "Pricing" section allows you to customize the information and details related to the pricing plans offered. The following fields are available:</p>
+                    <a href="assets/img/pricing_section.png" target="_blank">
+                        <img src="assets/img/pricing_section.png" class="border">
+                    </a>
+                    <p class="m-0">The "Watch" section appears to be designed for showcasing a video, likely a tutorial or promotional video about the app or pharmacy services.  The following fields are available:</p>
+                    <a href="assets/img/watch.png" target="_blank">
+                        <img src="assets/img/watch.png" class="border">
+                    </a>
+                    <p class="m-0">The "Payment" section allows you to customize the information and details related to the payment methods accepted. The following fields are available.This will open the "Landing Module" page, displaying various sections that can be edited.</p>
+                    <a href="assets/img/payment_section.png" target="_blank">
+                        <img src="assets/img/payment_section.png" class="border">
+                    </a>
+                    <p class="m-0">Here, you can update the testimonial section's title of the Home page.</p>
+                    <a href="assets/img/testimonial.png" target="_blank">
+                        <img src="assets/img/testimonial.png" class="border">
+                    </a>
+                    <p class="m-0">Here, you can update some information of your Blog page.</p>
+                    <a href="assets/img/blog.png" target="_blank">
+                        <img src="assets/img/blog.png" class="border">
+                    </a>
+                    <p class="m-0">This document describes how to edit the "About Us" page content using the "Landing Module" within the Acnoo Pharmacy system, as shown in the provided image.<br>
+                        The "About Us" page typically provides information about the pharmacy, its mission, history, team, or other relevant details. The following fields are available.</p>
+                    <a href="assets/img/about_us.png" target="_blank">
+                        <img src="assets/img/about_us.png" class="border">
+                    </a>
+
+                    <p class="m-0">You can update your term and condition "title" in this section.</p>
+                    <a href="assets/img/pages_term_condition.png" target="_blank">
+                        <img src="assets/img/pages_term_condition.png" class="border">
+                    </a>
+                    <p class="m-0">You can update your privacy and policy "title" in this section.</p>
+                    <a href="assets/img/pages_privacy_policy.png" target="_blank">
+                        <img src="assets/img/pages_privacy_policy.png" class="border">
+                    </a>
+                    <p class="m-0">The "Contact Us" page typically provides information and a form for visitors to get in touch with the pharmacy. The following fields are available:</p>
+                    <a href="assets/img/pages_contuct_us.png" target="_blank">
+                        <img src="assets/img/pages_contuct_us.png" class="border">
+                    </a>
+                    <p class="m-0">Here, you can view all parts of the footer section of the landing page. You can update them according to your needs.</p>
+                    <a href="assets/img/footer.png" target="_blank">
+                        <img src="assets/img/footer.png" class="border">
+                    </a>
+                   
+                    <a href="assets/img/middle_footer.png" target="_blank">
+                        <img src="assets/img/middle_footer.png" class="border">
+                    </a>
+                    <a href="assets/img/left_footer.png" target="_blank">
+                        <img src="assets/img/left_footer.png" class="border">
+                    </a>
+                    <p class="m-0">You can update social icon for footer section of landing page according to your needs.</p>
+                    <a href="assets/img/social_footer.png" target="_blank">
+                        <img src="assets/img/social_footer.png" class="border">
+                    </a>
+                   
+                    <div class="page-header">
+                        <h3 class="m-0">Features List</h3>
+                    </div>
+                    <p class="m-0">The features section appears to be a list of features in a software application.Users can add new features by clicking the "Create New" Feature button.The Action column may allow users to perform actions on features, such as "editing" or "deleting" them.</p>
+                    <a href="assets/img/features_list.png" target="_blank">
+                        <img src="assets/img/features_list.png" class="border">
+                    </a>
+
+                    <div class="page-header">
+                        <h3 class="m-0">Add New Feature</h3>
+                    </div>
+                    <p class="m-0">Here you can see some fields, such as 'Title,' 'Status,' and others, for creating new features.</p>
+                    <a href="assets/img/create_features.png" target="_blank">
+                        <img src="assets/img/create_features.png" class="border">
+                    </a>
+
+                    <div class="page-header">
+                        <h3 class="m-0">Blog List</h3>
+                    </div>
+                    <p class="m-0">Here you have the option to view the blog and comment lists. Additionally, editing and updating options are available. You can also search for specific items, and multi-delete functionality is also provided.</p>
+                    <a href="assets/img/blog_list.png" target="_blank">
+                        <img src="assets/img/blog_list.png" class="border">
+                    </a>
+                    <div class="page-header">
+                        <h3 class="m-0">Create Blog</h3>
+                    </div>
+                    <p class="m-0">Feel free to utilize this platform to generate a blog post and complete the necessary fields. As you input your content, you'll notice the inclusion of multiple tags. Additionally, you can craft meta titles and meta descriptions for enhanced SEO purposes.</p>
+                    <a href="assets/img/create_blog.png" target="_blank">
+                        <img src="assets/img/create_blog.png" class="border">
+                    </a>
+
+                    <div class="page-header">
+                        <h3 class="m-0">Testimonial List</h3>
+                    </div>
+                    <p class="m-0">Here, you have the option to view the testimonial list with update and delete options available. Search and multi-delete options are also provided. After clicking the "Create New" button, you will be taken to a new page where you can add a testimonial by filling in the necessary fields.Here, you can provide the client's name, their workplace, the review, and select a star rating from the existing list. You can also add an image.</p>
+                    <a href="assets/img/testimonial_list.png" target="_blank">
+                        <img src="assets/img/testimonial_list.png" class="border">
+                    </a>
+                    <div class="page-header">
+                        <h3 class="m-0">Add New Testimonial</h3>
+                    </div>
+                    <p class="m-0">Here you create Testimonial to fill required field.</p>
+                    <a href="assets/img/create_testimonial.png" target="_blank">
+                        <img src="assets/img/create_testimonial.png" class="border">
+                    </a>
+
+                    <div class="page-header">
+                        <h3 class="m-0">Interface List</h3>
+                    </div>
+                    <p class="m-0">Here, you can view the Interfaces List with filtering options. You can change the status for each interface, as well as edit, delete, or multi-delete them.</p>
+                    <a href="assets/img/interface_list.png" target="_blank">
+                        <img src="assets/img/interface_list.png" class="border">
+                    </a>
+
+                    <div class="page-header">
+                        <h3 class="m-0">Create Interface</h3>
+                    </div>
+                    <p class="m-0">Use images to create a visual representation of the interface within the landing page. </p>
+                    <a href="assets/img/create_interface.png" target="_blank">
+                        <img src="assets/img/create_interface.png" class="border">
+                    </a>
+
+                    <div class="page-header">
+                        <h3 class="m-0">Term & Condition Settings</h3>
+                    </div>
+                    <p class="m-0">The "Terms & Conditions" page outlines the rules and regulations that users must agree to when using the pharmacy's services or app. The following fields are available.Where you can update the term and condition</p>
+                    <a href="assets/img/term_and_condition.png" target="_blank">
+                        <img src="assets/img/term_and_condition.png" class="border">
+                    </a>
+
+                    <div class="page-header">
+                        <h3 class="m-0">Privacy & Policy Settings</h3>
+                    </div>
+                    <p class="m-0">The "Privacy & Policy" page details how the pharmacy collects, uses, and protects user data. The following fields are available.Where you can update the privacy and policy.</p>
+                    <a href="assets/img/privacy_and_policy.png" target="_blank">
+                        <img src="assets/img/privacy_and_policy.png" class="border">
+                    </a>
+
+                    <div class="page-header">
+                        <h3 class="m-0">Message List</h3>
+                    </div>
+                    <p class="m-0">Here you can view messages sent to users from the website. You can filter messages and use options to delete or delete multiple messages simultaneously.</p>
+                    <a href="assets/img/message_list.png" target="_blank">
+                        <img src="assets/img/message_list.png" class="border">
+                    </a>
+                    
+                </section>
+
+                <hr class="mt-4">
+                <section id="super-setting">
+                    <div class="page-header">
+                        <h3 class="">Setting</h3>
+                    </div>
+                    <p class="m-0">In the Setting section, you have the capability to configure the fundamental aspects or core elements of this project.</p>
+                    <h3 class="mt-2">Currency list</h3>
+                    <p class="m-0">Here, you can view a list of currencies with filtering options. Additionally, there is an option to edit currencies, and you can also set a default currency.</p>
+                    <a href="assets/img/currency_list.png" target="_blank">
+                        <img src="assets/img/currency_list.png" class="border">
+                    </a>
+                    <h3 class="mt-2">Create Currency</h3>
+                    <p class="m-0">You have the option to include currency from this location.</p>
+                    <a href="assets/img/create_currency.png" target="_blank">
+                        <img src="assets/img/create_currency.png" class="border">
+                    </a>
+                    <h3>Notification</h3>
+                    <p class="m-0">Here, you can view a list of various notifications. You also have the option to filter these notifications based on available criteria.In each list, clicking the "View" button allows you to see detailed information.</p>
+                    <a href="assets/img/notification_setting.png" target="_blank">
+                        <img src="assets/img/notification_setting.png" class="border">
+                    </a>
+                    <h3>Payment Gateway Settings</h3>
+                    <p class="m-0">Here, you can modify various payment gateways like Stripe, PayPal, SSLCommerz, manual and many others options.</p>
+                    <h3>Stripe</h3>
+                    <a href="assets/img/stripe.png" target="_blank">
+                        <img src="assets/img/stripe.png" class="border">
+                    </a>
+                    <h3>Mobile</h3>
+                    <a href="assets/img/mobile.png" target="_blank">
+                        <img src="assets/img/mobile.png" class="border">
+                    </a>
+                    <h3>Paypal</h3>
+                    <a href="assets/img/paypal.png" target="_blank">
+                        <img src="assets/img/paypal.png" class="border">
+                    </a>
+                    <h3>Paystack</h3>
+                    <a href="assets/img/paystack.png" target="_blank">
+                        <img src="assets/img/paystack.png" class="border">
+                    </a>
+                    <h3>Razorpay</h3>
+                    <a href="assets/img/razorpay.png" target="_blank">
+                        <img src="assets/img/razorpay.png" class="border">
+                    </a>
+                    <h3>Instamojo</h3>
+                    <a href="assets/img/instamojo.png" target="_blank">
+                        <img src="assets/img/instamojo.png" class="border">
+                    </a>
+                    <h3>Toyyibpay</h3>
+                    <a href="assets/img/toyyibpay.png" target="_blank">
+                        <img src="assets/img/toyyibpay.png" class="border">
+                    </a>
+                    <h3>Flutter Wave</h3>
+                    <a href="assets/img/flutter_wave.png" target="_blank">
+                        <img src="assets/img/flutter_wave.png" class="border">
+                    </a>
+                    <h3>Thawani</h3>
+                    <a href="assets/img/thawani.png" target="_blank">
+                        <img src="assets/img/thawani.png" class="border">
+                    </a>
+                    <h3>Mercadopago</h3>
+                    <a href="assets/img/mercadopago.png" target="_blank">
+                        <img src="assets/img/mercadopago.png" class="border">
+                    </a>
+                    <h3>Paytm</h3>
+                    <a href="assets/img/paytm.png" target="_blank">
+                        <img src="assets/img/paytm.png" class="border">
+                    </a>
+                    <h3>Tap Payment</h3>
+                    <a href="assets/img/tap_payment.png" target="_blank">
+                        <img src="assets/img/tap_payment.png" class="border">
+                    </a>
+                    <h3>Sslcommerz</h3>
+                    <a href="assets/img/sslecomerce.png" target="_blank">
+                        <img src="assets/img/sslecomerce.png" class="border">
+                    </a>
+                    <h3>Manual</h3>
+                    <a href="assets/img/manual.png" target="_blank">
+                        <img src="assets/img/manual.png" class="border">
+                    </a>
+                    <h3>System Settings</h3>
+                    <p class="m-0">In this section, you can configure various backend settings for the project, including application setup, driver configurations, mail settings, storage configurations, and other essential components. It's crucial to handle these configurations with care as they impact the functionality and security of the system.</p>
+                    <h3>App</h3>
+                    <a href="assets/img/app_setting.png" target="_blank">
+                        <img src="assets/img/app_setting.png" class="border">
+                    </a>
+                    <h3>Drivers</h3>
+                    <a href="assets/img/driver.png" target="_blank">
+                        <img src="assets/img/driver.png" class="border">
+                    </a>
+                    <h3>Storage Settings</h3>
+                    <a href="assets/img/storage.png" target="_blank">
+                        <img src="assets/img/storage.png" class="border">
+                    </a>
+                    <h3>Mail Configuration</h3>
+                    <a href="assets/img/mail.png" target="_blank">
+                        <img src="assets/img/mail.png" class="border">
+                    </a>
+                    <p class="important"><b>Note:</b> Please note that if you change QUEUE_MAIL from false to true, you need to run the following command: <code>php artisan queue:work</code>. <strong>Remember:</strong> The command path should be: <code>/home/u186958312/domains/yourdomain.com/public_html</code>. Make sure you're in the correct path.</p>
+
+                    <p class="important"><b>Note:</b> If you're not familiar with running the command, there's another option. Simply visit <code>yourdomain.com/queue-work</code> and it will be executed automatically.</p>
+
+                    <p class="important"><b>Note:</b> If you select QUEUE_MAIL as true but do not run the command or visit the URL, email functionality will not work properly.</p>
+
+
+                    <h3>Others</h3>
+                    <a href="assets/img/other.png" target="_blank">
+                        <img src="assets/img/other.png" class="border">
+                    </a>
+                    <h3>General Settings</h3>
+                    <p class="m-0">You have the capability to modify the general project information.</p>
+                    <a href="assets/img/general_setting.png" target="_blank">
+                        <img src="assets/img/general_setting.png" class="border">
+                    </a>
+                </section>
+
+                <hr class="mt-5">
+
+                <div class="tool-setup-section" id="change-logs">
+                    <h1 style="margin-top: 35px;">Admin Change Logs & Update Guide</h1>
+                    <p class="important"><b>Note: </b> Before updating to the new version, please ensure you have a database and full project backup, and that your project is already updated to the latest version. This is extremely important!</p>
+
+                    <h5 class=""><strong>Version:</strong> 1.1</h5>
+                    
+                    <ol>
+                        <li>New package added for laravel module.</li>
+                        <li>Landing pages added.</li>
+                        <li>Landing page dynamic from the admin panel.</li>
+
+                        <br>
+                        
+                        <p class="important"><b>Note: </b> Please replace the following folders and files: <b>config</b>, <b>Modules</b>, <b>routes</b>, <b>resources</b>, <b>vendor</b>, <b>composer.json</b> and <b>modules_statuses.json</b>. After replacing them, visit <b>yourdomain.com/update</b> to install the new version. Without visiting the URL, your project will not function correctly, so ensure you complete this step.</p>
+
+                        <p class="important"><b>Note: </b> If you face any issues with the update, please contact us.</p>
+                    </ol>
+                    <br>
+                    <h5 class=""><strong>Version:</strong> 1.0.0 ( 6 March 2025 )</h5>
+                    <ol>
+                        <li>Initial Release</li>
+                    </ol>
+                </div>
+                
+                <hr class="mt-5">
+
+                <div class="ContentWrapper">
+                    <div class="page-header mb-5">
+                        <h1 style="font-size:40px">Flutter App Installation Setup Start</h1>
+                    </div>
+                    <div class="tool-setup-section mt-4" id="tool-setup">
+                        <h1>Tools & Setup</h1>
+                        <div class="theme-requirements">
+                            <div class="page-header">
+                                <h3 class="mb-0">Prerequisite</h3>
+                            </div>
+                            <ul class="app-list" style="list-style: disc; padding-left: 20px">
+                                <li><b>Android Studio: 2023.3.1</b></li>
+                                <li><b>Flutter: 3.27.3</b></li>
+                                <li>Flutter & Dart <a target="_blank" href="https://flutter.dev/docs/get-started/install">SDK</a>
+                                </li>
+                                <li>Anyone IDE Android Studio (Recommended), <a target="_blank"
+                                                                                href="https://code.visualstudio.com/">Visual
+                                    Studio Code</a> or <a target="_blank" href="https://www.jetbrains.com/idea/">IntelliJ
+                                    IDEA</a></li>
+                                <li>To edit this project you must have Flutter and Dart installed and configured
+                                    successfully on your computer.
+                                </li>
+                                <li>Set up your editor - Install the <a target="_blank"
+                                                                        href="https://flutter.dev/docs/get-started/editor?tab=androidstudio">Flutter
+                                    and Dart plugins.</a></li>
+                                <li>If you have got Android SDK installed and configured, to install Flutter you only need
+                                    to:
+                                    <ul style="padding-left: 30px; list-style: disc; margin-top:15px">
+                                        <li>Download Flutter SDK from official website and extract it.</li>
+                                        <li>Add path to previously extracted SDK to your PATH variable</li>
+                                        <li>Run flutter doctor tool to check if everything is configured correctly.</li>
+                                        <li>All above steps are mentioned here: <a target="_blank"
+                                                                                   href="https://flutter.dev/docs/get-started/install/">https://flutter.dev/docs/get-started/install/</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                            <h3 class="mb-0">Make sure you have added the purchase code inside the app</h3>
+                            <a href="assets/img/app/18.png" target="_blank">
+                                <img src="assets/img/app/18.png" class="border">
+                            </a>
+                            <small>Directory: /lib/app_config/app_config.dart</small>
+                        </div>
+                        
+                    </div>
+                    <div class="tool-setup-section" id="android-studio">
+                        <h1 style="margin-top: 40px;">Android Studio – Windows</h1>
+                        <div class="theme-requirements">
+                            <ul class="app-list" style="list-style: disc; padding-left: 20px">
+                                <li>Download Android Studio - <a target="_blank"
+                                                                 href="https://developer.android.com/studio/">https://developer.android.com/studio/</a>
+                                </li>
+                                <li>Get the Flutter SDK - <a target="_blank"
+                                                             href="https://flutter.dev/docs/get-started/install">https://flutter.dev/docs/get-started/install</a>
+                                </li>
+                                <li>Learn more about Android Studio - <a target="_blank"
+                                                                         href="https://developer.android.com/studio/intro/">https://developer.android.com/studio/intro/</a>
+                                </li>
+                            </ul>
+                            <div class="page-header">
+                                <h3 class="mb-0">Step 1 : Get the Flutter SDK</h3>
+                            </div>
+                            <ul style="list-style: numeric; padding-left: 20px">
+                                <li class="mb-1"> Download the following installation bundle to get the latest stable
+                                    release of the Flutter
+                                    SDK:
+                                </li>
+                                <li> Extract the zip file and place the contained flutter in the desired installation
+                                    location for
+                                    the Flutter SDK (for example, C:\src\flutter; do not install Flutter in a directory like
+                                    C:\Program Files\ that requires elevated privileges)
+                                </li>
+                            </ul>
+                            <div class="page-header">
+                                <h3 class="mb-0">Step 2 : Update your path</h3>
+                            </div>
+                            <p>If you wish to run Flutter commands in the regular Windows console, take these steps to
+                                add Flutter to the PATH environment variable: From the Start search bar, enter ‘env’ and
+                                select <b>Edit environment variables for your account.</b> Under <b>User variables</b> check
+                                if there is
+                                an entry called <b>Path:</b></p>
+                            <ul style="list-style: disc; padding-left: 20px">
+                                <li> If the entry exists, append the full path to <b>flutter\bin</b> using ; as a separator
+                                    from
+                                    existing values.
+                                </li>
+                                <li> If the entry doesn’t exist, create a new user variable named Path with the full path to
+                                    <b>flutter\bin</b> as its value
+                                </li>
+                            </ul>
+                            <div class="page-header">
+                                <h3 class="mb-0">Important</h3>
+                            </div>
+                            <p>Note that you have to close and reopen any existing console windows for these changes to
+                                take effect. <b>You are now ready to run Flutter commands in the Flutter Console!</b></p>
+
+                            <div class="page-header">
+                                <h3 class="mb-0">Step 3 : Run flutter doctor</h3>
+                            </div>
+                            <p>From a console window that has the Flutter directory in the path (see above), run the
+                                following command to see if there are any platform dependencies you need to complete the
+                                setup:</p>
+                            <div class="bg-black-shape">c:\src\flutter>flutter doctor</div>
+                        </div>
+                    </div>
+                    <div class="tool-setup-section" id="android-studio-mac">
+                        <h1 style="margin-top: 40px;">Android Studio – macOS</h1>
+                        <div class="theme-requirements">
+                            <ul class="app-list" style="list-style: disc; padding-left: 20px">
+                                <li>Download Android Studio - <a target="_blank"
+                                                                 href="https://developer.android.com/studio/">https://developer.android.com/studio/</a>
+                                </li>
+                                <li>Download Xcode - <a href="https://apps.apple.com/us/app/xcode/id497799835?mt=12">https://apps.apple.com/us/app/xcode/id497799835?mt=12</a>
+                                </li>
+                                <li>Get the Flutter SDK - <a href="https://flutter.dev/docs/get-started/install">https://flutter.dev/docs/get-started/install</a>
+                                </li>
+                                <li>Learn more about Android Studio - <a href="https://developer.android.com/studio/intro/">https://developer.android.com/studio/intro/</a>
+                                </li>
+                            </ul>
+                            <div class="page-header">
+                                <h3 class="mb-0">Step 1 : Get the Flutter SDK</h3>
+                            </div>
+                            <ul style="list-style: numeric; padding-left: 20px">
+                                <li class="mb-1"> Download the following installation bundle to get the latest stable
+                                    release of the Flutter
+                                    SDK:
+                                </li>
+                                <li> Download SDK and extract downloaded file, just double click on that. and just copy
+                                    extracted folder and paste it to your desired location (for example, Documents\flutter).
+                                </li>
+                            </ul>
+                            <div class="page-header">
+                                <h3 class="mb-0">Step 2 : Update your path</h3>
+                            </div>
+                            <h4>Important</h4>
+                            <p>Path variable needs to be updated to access “flutter” command from terminal. you can just
+                                update path variable for current terminal window only. and if you want to access flutter
+                                commands from anywhere in terminal, we need to update SDK path permanently.</p>
+                            <p>To update PATH variable, we need to open terminal.</p>
+                            <p>To update PATH variable for current terminal window only, then enter this command <b>"export
+                                PATH="$PATH:`pwd`/flutter/bin""</b> and hit enter key.</p>
+                            <p>To update PATH variable permanently, then Open or create <b>.bash_profile</b> file. to open
+                                or
+                                create that file, then enter <b>"sudo open -e $HOME/.bash_profile"</b> and hit enter
+                                key.Append
+                                below line to bash_profile file at bottom of all other content. <b>"export PATH="$PATH:
+                                    [PATH_TO_FLUTTER_GIT_DIRECTORY]/flutter/bin""</b> as <br>
+                                [PATH_TO_FLUTTER_GIT_DIRECTORY] is actual path of SDK folder.</p>
+
+                            <p>Run this command on terminal <b>"source $HOME/.bash_profile"</b> to refresh PATH variables.
+                            </p>
+                            <p>Then check whether our SDK is successfully installed or not.</p>
+
+                            <h5>You are now ready to run Flutter commands in the Flutter Console!</h5>
+                            <p>Run <b>"flutter doctor"</b> into terminal, If you are getting check list of flutter sdk
+                                requirements, it
+                                means SDK is successfully installed on your machine. and you can start building flutter
+                                apps on your machine.</p>
+                        </div>
+                    </div>
+
+                    <div class="tool-setup-section" id="android-studio-linux">
+                        <h1 style="margin-top: 40px;">Android Studio – Linux</h1>
+                        <div class="theme-requirements">
+                            <ul class="app-list" style="list-style: disc; padding-left: 20px">
+                                <li>Download Android Studio - <a target="_blank"
+                                                                 href="https://developer.android.com/studio/">https://developer.android.com/studio/</a>
+                                </li>
+                                <li>Get the Flutter SDK - <a href="https://flutter.dev/docs/get-started/install/linux">https://flutter.dev/docs/get-started/install/linux</a>
+                                </li>
+                                <li>Learn more about Android Studio - <a href="https://developer.android.com/studio/intro/">https://developer.android.com/studio/intro/</a>
+                                </li>
+                            </ul>
+                            <div class="page-header">
+                                <h3 class="mb-0">Step 1 : Get the Flutter SDK</h3>
+                            </div>
+                            <ul style="list-style: numeric; padding-left: 20px">
+                                <li class="mb-1"> Download the following installation bundle to get the latest stable
+                                    release of the Flutter
+                                    SDK:
+                                </li>
+                                <li> Download SDK and extract downloaded file, just double click on that. and just copy
+                                    extracted folder and paste it to your desired location (for example, Documents\flutter).
+                                </li>
+                            </ul>
+                            <div class="page-header">
+                                <h3 class="mb-0">Step 2 : Update your path</h3>
+                            </div>
+                            <h4>Important</h4>
+                            <p>Path variable needs to be updated to access “flutter” command from terminal. you can just
+                                update path variable for current terminal window only. and if you want to access flutter
+                                commands from anywhere in terminal, we need to update SDK path permanently.</p>
+                            <p>You’ll <code>probably</code> want to update this variable permanently, so you can run flutter
+                                commands in any terminal session. To update PATH variable, we need to open terminal.</p>
+
+                            <ul style="list-style: numeric; padding-left: 20px">
+                                <li class="mb-1"> Run <code>source $HOME/.</code> to refresh the current window, or open a
+                                    new terminal window to
+                                    automatically source the file.
+                                </li>
+                                <li> Verify that the <code>flutter/bin</code> directory is now in your PATH by running:</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="tool-setup-section" id="getting-start-app">
+                        <h1 style="margin-top: 40px;">GETTING STARTED (BUILD & RUN)</h1>
+                        <div class="theme-requirements">
+                            <h3>Important</h3>
+                            <p class="mb-3">All below steps are must be followed to build and run application</p>
+                        </div>
+                        <div class="theme-requirements">
+                            <h3>Download Project</h3>
+                            <p class="mb-3">Download and find the your project folder, use your preferred IDE <b>(Android
+                                Studio / Visual
+                                Studio Code / IntelliJ IDEA)</b> to run the project</p>
+                            <a href="assets/img/app/1.png" target="_blank">
+                                <img src="assets/img/app/1.png" alt="">
+                            </a>
+                        </div>
+                        <div class="theme-requirements mb-3">
+                            <h3>Get Dependencies</h3>
+                            <p class="mb-3">After you loaded project successfully, run the following command in the terminal
+                                to install
+                                all the dependencies listed in the <code>pubspec.yaml</code> file in the project's root
+                                directory or just
+                                click on Pub get in pubspec.yaml file if you don't want to use command.</p>
+                            <div class="bg-black-shape">flutter pub get</div>
+                        </div>
+                        <div class="theme-requirements">
+                            <h3>Important</h3>
+                            <p class="mb-3">All below steps are must be followed to build and run application</p>
+                            <a href="assets/img/app/2.png" target="_blank">
+                                <img src="assets/img/app/2.png" alt="">
+                            </a>
+                        </div>
+                        <div class="theme-requirements mb-3">
+                            <h3>Build and Run App</h3>
+                            <ul style="padding-left:20px; list-style: numeric;">
+                                <li>Locate the main Android Studio toolbar.</li>
+                                <li>In the target selector, select an Android device for running the app. If none are listed
+                                    as available, select Tools > Android > AVD Manager and create one there. For details,
+                                    see <a href="https://developer.android.com/studio/run/managing-avds">Managing AVDs</a>
+                                </li>
+                                <li>Click the run icon in the toolbar, or invoke the menu item Run > Run.</li>
+                            </ul>
+                            <a href="assets/img/app/3.png" target="_blank">
+                                <img src="assets/img/app/3.png" alt="">
+                            </a>
+                            <p>After the app build completes, you’ll see the app on your device.</p>
+                            <p>If you don’t use Android Studio or IntelliJ you can use the command line to run your
+                                application using the following command</p>
+                        </div>
+                        <div class="theme-requirements mb-3">
+                            <h3>Important</h3>
+                            <p class="mb-3">Below step requires flutter path to be set in your Environment variables. See
+                                https://flutter.dev/docs/get-started/install/windows</p>
+                            <div class="bg-black-shape mb-3">flutter run</div>
+                            <p>You will see below like screen after you have build your app successfully.</p>
+                            <a href="assets/img/app/4.png" target="_blank">
+                                <img src="assets/img/app/4.png" alt="">
+                            </a>
+                        </div>
+                        <div class="theme-requirements mb-3">
+                            <h3>Try hot reload</h3>
+                            <p class="mb-3">Flutter offers a fast development cycle with Stateful Hot Reload, the ability to
+                                reload the
+                                code of a live running app without restarting or losing app state. Make a change to app
+                                source, tell your IDE or command-line tool that you want to hot reload, and see the change
+                                in your simulator, emulator, or device.</p>
+                        </div>
+                        <div class="theme-requirements mb-3">
+                            <h3>Important</h3>
+                            <p class="mb-3">Do not stop your app. let your app run.</p>
+                        </div>
+                    </div>
+                    <div class="tool-setup-section" id="project-feature">
+                        <h1 style="margin-top: 40px;">PROJECT STRUCTURE & FEATURES</h1>
+                        <div class="theme-requirements mb-3">
+                            <ul style="list-style: disc; padding-left:20px">
+                                <li><b>images:</b> apps/widgets/snippets images as well as appIcon are stored here.</li>
+                                <li><b>lib:</b> Application main file and folder are located here.
+                                    <ul style="list-style: disc; padding-left:20px">
+                                        <li><b>Screens:</b> Full Apps UI Code can be found here.</li>
+                                        <li><b>Conts:</b> Api configuration can be found here</li>
+                                        <li><b>Constant:</b> All constant value are located here</li>
+                                        <li><b>Main:</b> All the routes are been declared here.</li>
+                                    </ul>
+                                </li>
+                                <li><b>Pubspec.yaml:</b> Application name and other project dependencies can be found here
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="theme-requirements mb-3">
+                            <h3>Application Features</h3>
+                            <ul style="list-style: disc; padding-left:20px">
+                                <li>Clean Code and a well structured project</li>
+                                <li>Single code base for both Android & iOS</li>
+                                <li>60 FPS Support for both Android & iOS</li>
+                                <li>Fully responsive UI</li>
+                                <li>Best UI & UX</li>
+                                <li>Great animation</li>
+                                <li>Easy to customize</li>
+                                <li>Free life time updates & stunning customer support</li>
+                                <li>Easy to integrate in your project</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="tool-setup-section" id="mobile-setup">
+                        <h1 style="margin-top: 40px;">Mobile Application Setup:</h1>
+                        <div class="theme-requirements mb-3">
+                            <p class="mb-3">You’ll need to modify the <strong class="text-success">api_config.dart</strong> file to replace the existing domain with your new one. Here’s 
+                                how you can do it:<br><br>
+                                1. Open the api_config.dart file located in the <strong class="text-success">/lib/app_config/api_config.dart</strong> directory.<br>
+                                2. Replace <strong>'https://acnoopharmacy.acnoo.com/'</strong> with your new domain: <br>
+                                3. Make sure the new URL is correctly formatted and includes the proper protocol (https:// or 
+                                http://).
+                            </p>
+                            <a href="assets/img/app/19.png" target="_blank">
+                                <img src="assets/img/app/19.png" alt="">
+                            </a>
+                            <h3 class="text-bold">Now:</h3>
+                            <p>Please open the <strong class="text-success">constant.dart</strong>  file and update the app name, company name, and app 
+                                version with the desired values, ensuring they are written correctly.</p>
+                            <a href="assets/img/app/20.png" target="_blank">
+                                <img src="assets/img/app/20.png" alt="">
+                            </a>
+                            <h3 class="text-bold">Change package name:</h3>
+                            <p>➢ Find the current package name, which is <strong>com.example.acnoo_pharmacy_app</strong></p>
+                            <p> <strong>path:/android/app/src/main/kotlin/com/example/acnoo_pharmacy_app/MainActivity.kt</strong></p>
+                            <a href="assets/img/app/21.png" target="_blank">
+                                <img src="assets/img/app/21.png" alt="">
+                            </a>
+                            <p>➢ Select the project file & Press <strong class="text-primary">Ctrl + Shift + R</strong> to replace the old package name with your new one 
+                                throughout the entire codebase.</strong></p>
+                            <a href="assets/img/app/22.png" target="_blank">
+                                <img src="assets/img/app/22.png" alt="">
+                            </a>
+                            <p>➢ Now in the first box paste the current package name <strong>(com.example.acnoo_pharmacy_app)</strong> and 
+                                in the second box write the new name and press <strong>Replace All</strong> button.Please consider assigning a 
+                                meaningful package name and try to follow the structure. 
+                             </p>
+                            <h3 class="text-bold">Run Flutter Project:</h3>
+                            <p>➢ For first-time users, enable Dart support for the project. Afterward, navigate to the <strong>pubspec.yaml</strong> file 
+                                and retrieve the packages by clicking on "Pub Get" located at the top right corner, as illustrated in the 
+                                image. 
+                            </p>
+
+                            <a href="assets/img/app/23.png" target="_blank">
+                                <img src="assets/img/app/23.png" alt="">
+                            </a>
+
+                            <p>➢ After enabling Dart support and fetching packages, select a device or run an emulator. Click the 
+                                'Play' icon in the upper-right corner to launch the app. For physical devices, enable 'Developer 
+                                Options' and 'USB Debugging' on your phone.
+                            </p>
+                            <a href="assets/img/app/24.png" target="_blank">
+                                <img src="assets/img/app/24.png" alt="">
+                            </a>
+
+                            <h3 class="text-bold">How to change application name:</h3>
+                            <p>
+                                ➢ To change the app name you have to go to the <strong class="text-primary">AndroidManifest.xml file.</strong><br>
+                                ➢  path: <strong class="text-primary">android/app/src/main/AndroidManifest.xml</strong>
+                            </p>
+                            <a href="assets/img/app/25.png" target="_blank">
+                                <img src="assets/img/app/25.png" alt="">
+                            </a>
+                            <small>After opening the file change the <strong>android:label =”AppName”</strong> & replace your current name. 
+                                And build the app. The App name will be changed.</span><br><br>
+
+                            <h3 class="text-bold">How to change application version</h3>
+                            <p>➢ Navigate to the pubspec.yaml file and modify the 'version' field. For instance, if the previous version 
+                                is 1.0.0+1, update it to 1.0.1+2. <br>
+                                ➢ IMPORTANT: Ensure to execute 'flutter pub get' and 'flutter run' after making this adjustment. 
+                            </p>
+                            <a href="assets/img/app/26.png" target="_blank">
+                                <img src="assets/img/app/26.png" alt="">
+                            </a>
+
+                            <h3 class="text-bold">How to change application version</h3><br>
+                            <h3 class="text-bold">Select Images:</h3>
+                            <p>● Choose three images that you want to use for icons.<br>
+                               ● Ensure the images are appropriate and formatted correctly for the app's display requirements.
+                            </p>
+
+                            <h3 class="text-bold">Rename Images:</h3>
+                            <p>● Rename the selected images with the following filenames: <br>
+                                <span>○ icon: <strong>app_icon.png</strong></small><br>
+                               ● Make sure to keep the file extension as <strong>.png</strong> 
+                            </p>
+                            <a href="assets/img/app/27.png" target="_blank">
+                                <img src="assets/img/app/27.png" alt="">
+                            </a>
+                            <p>Now replace the existing image with a new one. </p>
+                            <h3 class="text-bold">Replace Existing Images:</h3>
+                            <p>
+                                ● Locate the folder where the current icon image is stored. This is typically named assets  <br>
+                                ● Copy and paste your newly renamed image inside this folder named <strong>“appIcon”.</strong>  <br>
+                                ● If prompted, allow the new images to replace the existing ones. 
+                            </p>
+                            <p>Now from the terminal run the command:</p>
+                            <p><strong>flutter pub get</strong></p> 
+                            <p><strong>dart run icons_launcher:create</strong></p>  
+                            <h3 class="text-bold">Restart the App:</h3>
+                            <p>● Close the app completely to ensure all changes take effect.</p>
+                            <p>Restart the app and verify that the new onboarding images are displayed correctly.</p>
+
+                            <h3 class="text-bold">Project Structure </h3>\
+                            <a href="assets/img/app/28.png" target="_blank">
+                                <img src="assets/img/app/28.png" alt="">
+                            </a>
+                            <p>If you want to modify any of these screens, you can do so from these directory. Each directory name 
+                                corresponds to the title of the respective apps screen, making it easy for you to locate and identify the files 
+                                you need to edit.</p>
+
+                                <p>app_config: Here you can find the API setup option & app setup option.</p> 
+                                <p>Screen: Here you can find the screens of the total app.</p>
+                                <p>l10n: Here you can find all the language files.</p>
+                                
+                            <h3 class="text-bold">Change Splash logo & logo inside the App. </h3>
+                            <a href="assets/img/app/29.png" target="_blank">
+                                <img src="assets/img/app/29.png" alt="">
+                            </a>
+
+                            <h3 class="text-bold">Select Images:</h3>
+                            <p>● Choose the image that you want to use for the main logo. <br>
+                                ● Ensure the image is appropriate and formatted correctly for the app's display requirements. 
+                            </p>
+
+                            <h3 class="text-bold">Rename Images:</h3>
+                            <p>● Rename the selected images with the following filenames: <br>
+                                <span>○ splashLogo: <strong> logo.png </strong></small><br>
+                                <span>○ Others: <strong> mainLogo.png </strong></small><br>
+                               Make sure to keep the file extension as <strong>.png</strong> 
+                            </p>
+
+                            <h3 class="text-bold">Replace Existing Images:</h3>
+                            <p>● Locate the folder where the current logo & avatar images are stored. This is typically named <strong>assets/app_logo</strong><br>
+                            <p>● Copy and paste your newly renamed images into this folder <strong>(app_logo)</strong><br>
+                            <p>● If prompted, allow the new images to replace the existing ones.
+                            </p>
+
+                            <h3 class="text-bold">Restart the App:</h3>
+                            <p>● Close the app completely to ensure all changes take effect.<br>
+                             Restart the app and verify that the new onboarding images are displayed correctly.<br><br>
+
+
+                            <h3 class="text-bold">Change Onboarding App:</h3>
+                            <a href="assets/img/app/30.png" target="_blank">
+                                <img src="assets/img/app/30.png" alt="">
+                            </a>
+                            <a href="assets/img/app/31.png" target="_blank">
+                                <img src="assets/img/app/31.png" alt="">
+                            </a>
+                            <p>Open app_logo folder.</p>
+                            <p>path: <strong>assets/app_logo</strong>  
+                            </p>
+
+                            <a href="assets/img/app/32.png" target="_blank">
+                                <img src="assets/img/app/32.png" alt="">
+                            </a>
+
+                            <h3 class="text-bold">Select Images:</h3>
+                            <p>● Choose three images that you want to use for the onboarding screens. <br>
+                               ● Ensure the images are appropriate and formatted correctly for the app's display requirements.  
+                            </p>
+
+                            <h3 class="text-bold">Rename Images:</h3>
+                            <p>● Rename the selected images with the following filenames: <br>
+                                <span>○ First Image: onbord1.png </strong></small><br>
+                                <span>○ Second Image: onbord2.png </strong></small><br>
+                                <span>○ Third Image: onbord3.png </strong></small><br>
+                               Make sure to keep the file extension as <strong>.png</strong> 
+                            </p>
+
+                            <h3 class="text-bold">Replace Existing Images:</h3>
+                            <p>● Locate the folder where the current onboarding images are stored. This is typically named <strong>app_logo.</strong><br>
+                            <p>● Copy and paste your newly renamed images into this folder <strong>(assets/app_logo)</strong><br>
+                            <p>● If prompted, allow the new images to replace the existing ones.
+                            </p>
+
+                            <h3 class="text-bold">Restart the App:</h3>
+                            <p>● Close the app completely to ensure all changes take effect.<br>
+                             Restart the app and verify that the new onboarding images are displayed correctly.<br><br>
+
+
+                            <h3>Theme Change:</h3>
+                            <p>You can change the app theme color for the <strong>constant.dart</strong> file. Here you can find all the colors, widgets, 
+                                global gradients, which are used in many places inside the apps. 
+                                path: <strong>lib/constant.dart</strong>  
+                            </p><br>
+                            Here the primary color is MainColor. 
+                            <a href="assets/img/app/33.png" target="_blank">
+                                <img src="assets/img/app/33.png" alt="">
+                            </a>
+
+                            <h3>Change  Language:</h3>
+                            <p>This guide explains how to add or edit localization (translation) files in the app. If you want to 
+                                support a new language or modify existing translations, follow the steps below. 
+                            </p>
+
+                            <h3>1. Understanding the Localization Structure</h3>
+                            <p>The app uses ARB (Application Resource Bundle) files to manage translations. These files 
+                                are located in the lib/l10n directory. Each language has its own file, e.g.:
+                            </p>
+                           <strong>app_en.arb</strong> for English <br>
+                           <strong>app_es.arb</strong> for Spanish <br>
+                           <strong>app_fr.arb</strong> for French <br><br>
+
+                           <h3>2. Adding a New Language</h3>
+                           To add support for a new language: 
+                           <h3>Create a New ARB File</h3>
+                           <p>Duplicate an existing ARB file (e.g., app_en.arb) and rename it to match the language code 
+                            you want to add. For example, for French, create app_fr.arb. 
+                           </p>
+                           <p>
+                            Translate the Strings  Replace the values in the new ARB file with the translated strings. For example: 
+                           </p>
+                           <strong>app_fr.arb</strong>
+                           <pre>
+                            {
+                                "helloWorld": "¡Hola a todos!"
+                            }
+                          </pre>
+                        <p>And just add a new parameter and value. And use it where you want to use it.</p>
+                        <h3>3. Editing Existing Translations </h3>
+                        <p>To edit an existing translation:</p>
+                        <p>Open the corresponding ARB file (e.g., app_es.arb for Spanish). </p>
+                        <p>Modify the value of the string you want to change. For example: </p>
+                        <strong>app_es.arb</strong>
+                        <pre>
+                            { 
+                            "helloWorld": "¡Hola a todos!",  // Updated the translation only, not the parameter.
+                            } 
+                        </pre>
+                        <p>Then just hot reload. It will be created automatically.</p>
+
+                        <h3>4. Delete Language</h3>
+                        <h3>Remove references to the language from the code:</h3>
+                        <p>● If any part of the app was using keys specific to the removed language (e.g., 
+                           <strong class="text-success">lang.of(context)!.someKey)</strong> , you can either: </p>
+                           <p>○ Replace the reference with a static string, or <br>
+                              ○ Use the default language for those strings.</p>
+                        <p>For example, if you were using:</p>
+                        <p><code>lang.of(context)!.hello</code></p>
+                        <p>You can replace it with a static string like:</p>
+                        <p><code>"Hello"</code></p>
+
+                        <h3>5. Common Issues</h3>
+                        <h3>Missing Translations</h3>
+                        <p>If a translation is missing for a specific language, the app will fall back to the default language (English).</p>
+                        <p>So when you create, keep in mind that you have to create that parameter for all the locales. Otherwise, just edit the one you want to modify.</p>
+                        <p>And you can find the supported locales from here:<a href="https://api.flutter.dev/flutter/flutter_localizations/flutter_localizations-library.html" target="_blank">Click Here</a></p>
+                        <p>https://api.flutter.dev/flutter/flutter_localizations/flutter_localizations-library.html</p>
+
+                            
+                        <h3 style="margin-top: 30px;">How to build release apk</h3>
+                        <p>To build a release APK for your Flutter project, follow these steps: </p>
+                        <p><strong>1.Open Your Project:</strong> Launch Android Studio and open your Flutter project.</p>   
+                        <a href="assets/img/app/34.png" target="_blank">
+                            <img src="assets/img/app/34.png" alt="">
+                        </a>
+                        <strong>2.Access the Terminal:</strong>
+                        <p>○ In the bottom left corner of the Android Studio interface, locate the navigation bar. <br>
+                            ○ Click on the Terminal icon to open the terminal window. 
+                        </p>
+                        <strong>3.Run the Build Command:</strong>
+                        <p>○ In the terminal, enter the following command:<br>
+                            <div class="code-block">
+                                flutter build apk --release
+                            </div> 
+                        </p><br>
+
+
+                        <h3>Locate the APK:</h3>
+                        <p>○ Once the build process completes, you can find your release APK in the following directory:</p>
+                        <strong class="text-success">build/app/outputs/flutter-apk/app-release.apk</strong><br><br>
+                        <p>To build a release APK for your Flutter project using the Android Studio top menu, follow these steps: </p>
+                            <ol>
+                                <li>
+                                    <strong>Open Your Project:</strong>  
+                                    Launch Android Studio and load your Flutter project.
+                                </li>
+                                <li>
+                                    <strong>Access the Build Menu:</strong>
+                                    <ul class="submenu">
+                                        <li>In the top menu bar, click on <strong>Build</strong>.</li>
+                                        <li>Hover your cursor over <strong>Flutter</strong> in the dropdown menu.</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <strong>Select Build APK:</strong>
+                                    <ul class="submenu">
+                                        <li>Click on <strong>Build APK</strong> from the submenu.</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                        <a href="assets/img/app/35.png" target="_blank">
+                            <img src="assets/img/app/35.png" alt="">
+                        </a>
+
+
+                        <ol>
+                            <li>
+                                <strong>Monitor the Progress:</strong>
+                                <ul class="submenu">
+                                    <li>A progress window will appear at the bottom of the screen, displaying the build status.</li>
+                                    <li>The build process may take some time, depending on your project size and system performance.</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Locate the APK:</strong>
+                                <ul class="submenu">
+                                    <li>Once the build is complete, you can find the release APK in the following directory:</li>
+                                </ul>
+                            </li>
+                        </ol>
+                        <div class="code-block">
+                            build/app/outputs/flutter-apk/app-release.apk
+                        </div> 
+                        
+                    </div>
+                </div>
+                
+                <div class="tool-setup-section" id="help-support">
+                    <h1 style="margin-top: 40px;">HELP & SUPPORT</h1>
+                    <div class="theme-requirements mb-3">
+                        <p class="mb-3">Free support policy includes troubleshooting, technical assistance with the
+                            product only. It
+                            does not include any customization, additional features integration or concerns about third-
+                            party plugins compatibility. But, support is applied to plugin(s) we have developed and
+                            integrated ourselves. We appreciate your understanding!</p>
+                        <p>If you need assistance and information on purchased product that is not covered in
+                            documentation, mail them on our support at</p>
+                        <p class="important"><a href="mailto:acnooteam@gmail.com">acnooteam@gmail.com</a></p>
+                        <p class="mb-3">You can expect answer within 24-48 hours, usually as soon as possible in the
+                            order they
+                            were received.</p>
+                        <p>Additionally, if any email has no response from the item owner for more than 7 days, that
+                            support email will be archived by default. However, if you need further assistance, you can
+                            mail us again.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--/right-->
+    </div>
+    <!--/row-->
+</div>
+<!--/container-->
+<div class="back-to-top" id="scrollToTopButton">
+		<span class="icon">
+			<svg viewBox="0 0 451.8 451.8">
+				<path d="M225.8,97.1c8.1,0,16.2,3.1,22.4,9.3l194.3,194.2c12.4,12.4,12.4,32.4,0,44.8c-12.4,12.4-32.4,12.4-44.7,0L225.9,173.6L54,345.4c-12.4,12.4-32.4,12.4-44.7,0C-3.1,333-3.1,313,9.3,300.8l194.3-194.3C209.6,100.2,217.8,97.1,225.8,97.1z"></path>
+			</svg>
+		</span>
+</div>
+
+<!-- Javascript -->
+<script src="assets/js/jquery-3.7.1.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/scripts.js"></script>
+</body>
+
+</html>

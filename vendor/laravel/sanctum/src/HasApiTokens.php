@@ -5,22 +5,19 @@ namespace Laravel\Sanctum;
 use DateTimeInterface;
 use Illuminate\Support\Str;
 
-/**
- * @template TToken of \Laravel\Sanctum\Contracts\HasAbilities = \Laravel\Sanctum\PersonalAccessToken
- */
 trait HasApiTokens
 {
     /**
      * The access token the user is using for the current request.
      *
-     * @var TToken
+     * @var \Laravel\Sanctum\Contracts\HasAbilities
      */
     protected $accessToken;
 
     /**
      * Get the access tokens that belong to model.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany<TToken, $this>
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function tokens()
     {
@@ -39,17 +36,6 @@ trait HasApiTokens
     }
 
     /**
-     * Determine if the current API token does not have a given scope.
-     *
-     * @param  string  $ability
-     * @return bool
-     */
-    public function tokenCant(string $ability)
-    {
-        return ! $this->tokenCan($ability);
-    }
-
-    /**
      * Create a new personal access token for the user.
      *
      * @param  string  $name
@@ -57,7 +43,7 @@ trait HasApiTokens
      * @param  \DateTimeInterface|null  $expiresAt
      * @return \Laravel\Sanctum\NewAccessToken
      */
-    public function createToken(string $name, array $abilities = ['*'], ?DateTimeInterface $expiresAt = null)
+    public function createToken(string $name, array $abilities = ['*'], DateTimeInterface $expiresAt = null)
     {
         $plainTextToken = $this->generateTokenString();
 
@@ -89,7 +75,7 @@ trait HasApiTokens
     /**
      * Get the access token currently associated with the user.
      *
-     * @return TToken
+     * @return \Laravel\Sanctum\Contracts\HasAbilities
      */
     public function currentAccessToken()
     {
@@ -99,7 +85,7 @@ trait HasApiTokens
     /**
      * Set the current access token for the user.
      *
-     * @param  TToken  $accessToken
+     * @param  \Laravel\Sanctum\Contracts\HasAbilities  $accessToken
      * @return $this
      */
     public function withAccessToken($accessToken)

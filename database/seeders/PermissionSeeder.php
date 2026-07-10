@@ -2,79 +2,128 @@
 
 namespace Database\Seeders;
 
-use App\Models\Permission;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class PermissionSeeder extends Seeder
 {
-    public function run(): void
+        /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
     {
-        $permissions = [
-            // Dashboard
-            ['name' => 'View Dashboard', 'slug' => 'dashboard.view', 'module' => 'Dashboard', 'group' => 'View', 'sort_order' => 1],
+        $rolesStructure = [
+            'Super Admin' => [
+                'dashboard' => 'r',
+                'users' => 'r,c,u,d',
+                'banners' => 'r,c,u,d',
+                'business' => 'r,c,u,d',
+                'business-categories' => 'r,c,u,d',
+                'plans' => 'r,c,u,d',
+                'subscription-reports' => 'r',
+                'blogs' => 'r,c,u,d',
+                'testimonials' => 'r,c,u,d',
+                'interfaces' => 'r,c,u,d',
+                'features' => 'r,c,u,d',
+                'term-condition' => 'r,u',
+                'privacy-policy' => 'r,u',
+                'messages' => 'r,c,u,d',
+                'manual-payment-reports' => 'r',
+                'active-store-reports' => 'r',
+                'expired-store-reports' => 'r',
 
-            // Users
-            ['name' => 'View Users', 'slug' => 'users.view', 'module' => 'Users', 'group' => 'Management', 'sort_order' => 1],
-            ['name' => 'Create User', 'slug' => 'users.create', 'module' => 'Users', 'group' => 'Management', 'sort_order' => 2],
-            ['name' => 'Edit User', 'slug' => 'users.edit', 'module' => 'Users', 'group' => 'Management', 'sort_order' => 3],
-            ['name' => 'Delete User', 'slug' => 'users.delete', 'module' => 'Users', 'group' => 'Management', 'sort_order' => 4],
+                // settings
+                'sms-settings' => 'r,u',
+                'gateways' => 'r,u',
+                'currencies' => 'r,c,u,d',
+                'settings' => 'r,u',
+                'web-settings' => 'r,u',
+                'roles' => 'r,c,u,d',
+                'permissions' => 'r,c',
+                'notifications' => 'r,u',
+            ],
 
-            // Roles
-            ['name' => 'View Roles', 'slug' => 'roles.view', 'module' => 'Roles', 'group' => 'Management', 'sort_order' => 1],
-            ['name' => 'Create Role', 'slug' => 'roles.create', 'module' => 'Roles', 'group' => 'Management', 'sort_order' => 2],
-            ['name' => 'Edit Role', 'slug' => 'roles.edit', 'module' => 'Roles', 'group' => 'Management', 'sort_order' => 3],
-            ['name' => 'Delete Role', 'slug' => 'roles.delete', 'module' => 'Roles', 'group' => 'Management', 'sort_order' => 4],
-            ['name' => 'Assign Permissions', 'slug' => 'roles.assign-permissions', 'module' => 'Roles', 'group' => 'Management', 'sort_order' => 5],
+            'Admin' => [
+                'dashboard' => 'r',
+                'users' => 'r,c,u,d',
+                'banners' => 'r,c,u,d',
+                'business' => 'r,c,u,d',
+                'business-categories' => 'r,c,u,d',
+                'plans' => 'r,c,u,d',
+                'subscription-reports' => 'r',
 
-            // Permissions
-            ['name' => 'View Permissions', 'slug' => 'permissions.view', 'module' => 'Permissions', 'group' => 'Management', 'sort_order' => 1],
-            ['name' => 'Create Permission', 'slug' => 'permissions.create', 'module' => 'Permissions', 'group' => 'Management', 'sort_order' => 2],
-            ['name' => 'Edit Permission', 'slug' => 'permissions.edit', 'module' => 'Permissions', 'group' => 'Management', 'sort_order' => 3],
-            ['name' => 'Delete Permission', 'slug' => 'permissions.delete', 'module' => 'Permissions', 'group' => 'Management', 'sort_order' => 4],
+                // settings
+                'sms-settings' => 'r,u',
+                'addons' => 'r,c',
+                'gateways' => 'r,u',
+                'currencies' => 'r,c,u,d',
+                'notifications' => 'r,u',
+            ],
 
-            // Branches
-            ['name' => 'View Branches', 'slug' => 'branches.view', 'module' => 'Branches', 'group' => 'Management', 'sort_order' => 1],
-            ['name' => 'Create Branch', 'slug' => 'branches.create', 'module' => 'Branches', 'group' => 'Management', 'sort_order' => 2],
-            ['name' => 'Edit Branch', 'slug' => 'branches.edit', 'module' => 'Branches', 'group' => 'Management', 'sort_order' => 3],
-            ['name' => 'Delete Branch', 'slug' => 'branches.delete', 'module' => 'Branches', 'group' => 'Management', 'sort_order' => 4],
-
-            // Products
-            ['name' => 'View Products', 'slug' => 'products.view', 'module' => 'Products', 'group' => 'Management', 'sort_order' => 1],
-            ['name' => 'Create Product', 'slug' => 'products.create', 'module' => 'Products', 'group' => 'Management', 'sort_order' => 2],
-            ['name' => 'Edit Product', 'slug' => 'products.edit', 'module' => 'Products', 'group' => 'Management', 'sort_order' => 3],
-            ['name' => 'Delete Product', 'slug' => 'products.delete', 'module' => 'Products', 'group' => 'Management', 'sort_order' => 4],
-            ['name' => 'Import Products', 'slug' => 'products.import', 'module' => 'Products', 'group' => 'Operations', 'sort_order' => 5],
-            ['name' => 'Export Products', 'slug' => 'products.export', 'module' => 'Products', 'group' => 'Operations', 'sort_order' => 6],
-
-            // Sales
-            ['name' => 'View Sales', 'slug' => 'sales.view', 'module' => 'Sales', 'group' => 'Management', 'sort_order' => 1],
-            ['name' => 'Create Sale', 'slug' => 'sales.create', 'module' => 'Sales', 'group' => 'Operations', 'sort_order' => 2],
-            ['name' => 'Edit Sale', 'slug' => 'sales.edit', 'module' => 'Sales', 'group' => 'Operations', 'sort_order' => 3],
-            ['name' => 'Delete Sale', 'slug' => 'sales.delete', 'module' => 'Sales', 'group' => 'Operations', 'sort_order' => 4],
-            ['name' => 'Process Refund', 'slug' => 'sales.refund', 'module' => 'Sales', 'group' => 'Operations', 'sort_order' => 5],
-
-            // Reports
-            ['name' => 'View Reports', 'slug' => 'reports.view', 'module' => 'Reports', 'group' => 'Reporting', 'sort_order' => 1],
-            ['name' => 'Export Reports', 'slug' => 'reports.export', 'module' => 'Reports', 'group' => 'Reporting', 'sort_order' => 2],
-
-            // Settings
-            ['name' => 'View Settings', 'slug' => 'settings.view', 'module' => 'Settings', 'group' => 'Management', 'sort_order' => 1],
-            ['name' => 'Edit Settings', 'slug' => 'settings.edit', 'module' => 'Settings', 'group' => 'Management', 'sort_order' => 2],
-
-            // Activity Logs
-            ['name' => 'View Activity Logs', 'slug' => 'activity-logs.view', 'module' => 'Activity Logs', 'group' => 'Audit', 'sort_order' => 1],
-
-            // Subscriptions
-            ['name' => 'View Subscriptions', 'slug' => 'subscriptions.view', 'module' => 'Subscriptions', 'group' => 'Management', 'sort_order' => 1],
-            ['name' => 'Manage Subscriptions', 'slug' => 'subscriptions.manage', 'module' => 'Subscriptions', 'group' => 'Management', 'sort_order' => 2],
-
-            // Branch Limits
-            ['name' => 'View Branch Limits', 'slug' => 'branch-limits.view', 'module' => 'Branch Limits', 'group' => 'Management', 'sort_order' => 1],
-            ['name' => 'Manage Branch Limits', 'slug' => 'branch-limits.manage', 'module' => 'Branch Limits', 'group' => 'Management', 'sort_order' => 2],
+            'Manager' => [
+                'dashboard' => 'r',
+                'users' => 'r,c,u,d',
+                'banners' => 'r,c,u,d',
+                'business' => 'r,c,u,d',
+                'business-categories' => 'r,c,u,d',
+                'plans' => 'r,c,u,d',
+                'subscription-reports' => 'r',
+            ],
         ];
 
-        foreach ($permissions as $permissionData) {
-            Permission::create($permissionData);
+        foreach ($rolesStructure as $key => $modules) {
+            // Create a new role
+            $role = Role::firstOrCreate([
+                'name' => str($key)->remove(' ')->lower(),
+                'guard_name' => 'web'
+            ]);
+            $permissions = [];
+
+            $this->command->info('Creating Role '. strtoupper($key));
+
+            // Reading role permission modules
+            foreach ($modules as $module => $value) {
+
+                foreach (explode(',', $value) as $perm) {
+
+                    $permissionValue = $this->permissionMap()->get($perm);
+
+                    $permissions[] = Permission::firstOrCreate([
+                        'name' => $module . '-' . $permissionValue,
+                        'guard_name' => 'web'
+                    ])->id;
+
+                    $this->command->info('Creating Permission to '.$permissionValue.' for '. $module);
+                }
+            }
+
+            // Attach all permissions to the role
+            $role->permissions()->sync($permissions);
+
+            $this->command->info("Creating '{$key}' user");
+            // Create default user for each role
+            $user = User::create([
+                'role' => str($key)->remove(' ')->lower(),
+                'name' => ucwords(str_replace('_', ' ', $key)),
+                'password' => bcrypt(str($key)->remove(' ')->lower()),
+                'email' => str($key)->remove(' ')->lower().'@acnoo.com',
+                'image' => 'assets/images/profile/'.str($key)->remove(' ')->lower().'.svg',
+            ]);
+
+            $user->assignRole($role);
         }
+    }
+
+    private function permissionMap() {
+        return collect([
+            'c' => 'create',
+            'r' => 'read',
+            'u' => 'update',
+            'd' => 'delete',
+        ]);
     }
 }

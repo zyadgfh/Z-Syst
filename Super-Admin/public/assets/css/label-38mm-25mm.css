@@ -1,0 +1,53 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+@page {
+    margin: 0;
+    size: 38mm 25mm;
+}
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", sans-serif !important;
+}
+.print-label {
+    width: 38mm !important;
+    height: 25mm !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-direction: column !important;
+    font-family: sans-serif !important;
+    font-size: 10px !important;
+    box-sizing: border-box !important;
+    margin: auto;
+    font-family: "Inter", sans-serif !important;
+}
+.print-label p {
+    font-size: 10px;
+    line-height: 14px;
+    font-family: "Inter", sans-serif !important;
+}
+.print-label span {
+    line-height: 11px;
+    font-family: "Inter", sans-serif !important;
+}
+.print-label .product-name {
+    font-weight: 600;
+    color: black;
+    padding-bottom: 3px;
+    font-family: "Inter", sans-serif !important;
+}
+.print-label .product-price {
+    color: black;
+    padding-bottom: 2px;
+    font-weight: 400;
+    font-family: "Inter", sans-serif !important;
+}
+.print-label .product-price span {
+    color: black;
+    font-weight: 600;
+    font-family: "Inter", sans-serif !important;
+}
+img.barcode {
+    height: 4mm;
+    margin-top: 1mm;
+}

@@ -246,7 +246,7 @@ class Email extends Message
             $priority = 1;
         }
 
-        return $this->setHeaderBody('Text', 'X-Priority', \sprintf('%d (%s)', $priority, self::PRIORITY_MAP[$priority]));
+        return $this->setHeaderBody('Text', 'X-Priority', sprintf('%d (%s)', $priority, self::PRIORITY_MAP[$priority]));
     }
 
     /**
@@ -270,7 +270,7 @@ class Email extends Message
     public function text($body, string $charset = 'utf-8'): static
     {
         if (null !== $body && !\is_string($body) && !\is_resource($body)) {
-            throw new \TypeError(\sprintf('The body must be a string, a resource or null (got "%s").', get_debug_type($body)));
+            throw new \TypeError(sprintf('The body must be a string, a resource or null (got "%s").', get_debug_type($body)));
         }
 
         $this->cachedBody = null;
@@ -301,7 +301,7 @@ class Email extends Message
     public function html($body, string $charset = 'utf-8'): static
     {
         if (null !== $body && !\is_string($body) && !\is_resource($body)) {
-            throw new \TypeError(\sprintf('The body must be a string, a resource or null (got "%s").', get_debug_type($body)));
+            throw new \TypeError(sprintf('The body must be a string, a resource or null (got "%s").', get_debug_type($body)));
         }
 
         $this->cachedBody = null;
@@ -362,6 +362,18 @@ class Email extends Message
 
     /**
      * @return $this
+     *
+     * @deprecated since Symfony 6.2, use addPart() instead
+     */
+    public function attachPart(DataPart $part): static
+    {
+        @trigger_deprecation('symfony/mime', '6.2', 'The "%s()" method is deprecated, use "addPart()" instead.', __METHOD__);
+
+        return $this->addPart($part);
+    }
+
+    /**
+     * @return $this
      */
     public function addPart(DataPart $part): static
     {
@@ -388,7 +400,10 @@ class Email extends Message
         return $this->generateBody();
     }
 
-    public function ensureValidity(): void
+    /**
+     * @return void
+     */
+    public function ensureValidity()
     {
         $this->ensureBodyValid();
 
@@ -492,10 +507,10 @@ class Email extends Message
                 }
 
                 if ($name !== $part->getContentId()) {
-                    $html = str_replace('cid:'.$name, 'cid:'.$part->getContentId(), $html);
+                    $html = str_replace('cid:'.$name, 'cid:'.$part->getContentId(), $html, $count);
                 }
                 $relatedParts[$name] = $part;
-                $part->setName($part->getName() ?? $part->getContentId())->asInline();
+                $part->setName($part->getContentId())->asInline();
 
                 continue 2;
             }
@@ -569,10 +584,6 @@ class Email extends Message
      */
     public function __unserialize(array $data): void
     {
-        if (($data[1] ?? null) instanceof \Stringable || ($data[3] ?? null) instanceof \Stringable) {
-            throw new \BadMethodCallException('Cannot unserialize '.self::class);
-        }
-
         [$this->text, $this->textCharset, $this->html, $this->htmlCharset, $this->attachments, $parentData] = $data;
 
         parent::__unserialize($parentData);

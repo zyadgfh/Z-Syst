@@ -1,0 +1,10 @@
+{
+    "name": "HrmAddon",
+    "alias": "hrmaddon",
+    "version": "1.0",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": ["Modules\\HrmAddon\\App\\Providers\\HrmAddonServiceProvider"],
+    "files": []
+}

@@ -1,0 +1,72 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:http/http.dart' as http;
+
+import '../../../app_config/api_config.dart';
+import '../../../Repository/constant_functions.dart';
+import '../model/PurchaseListModel.dart';
+import '../model/purchase_details_model.dart';
+
+class PurchaseListRepo {
+  // -----Purchase list
+  Future<PurchaseListModel?> getPurchaseList({
+    String? nextPage,
+    String? search,
+  }) async {
+    try {
+      String token = await getAuthToken() ?? '';
+
+      if (token.isEmpty) {
+        throw Exception('Auth token is empty');
+      }
+      final url = Uri.parse('${APIConfig.url}/purchase?search=${search ?? ''}&page=$nextPage');
+      final headers = {'Accept': 'application/json', 'Authorization': token};
+      http.Response _response = await http.get(url, headers: headers);
+
+      if (_response.statusCode == 200) {
+        final data = PurchaseListModel.fromJson(jsonDecode(_response.body));
+
+        return data;
+      }
+
+      return null;
+    } on http.ClientException catch (e) {
+      print(e.message);
+      return null;
+    } on SocketException catch (e) {
+      print(e.message);
+      return null;
+    }
+  }
+
+  //----- Purchase details
+  Future<PurchaseDetailsModel?> getPurchaseDetails({required num id}) async {
+    try {
+      String token = await getAuthToken() ?? '';
+      if (token.isEmpty) {
+        throw Exception('Auth token is empty');
+      }
+      final url = Uri.parse('${APIConfig.url}/purchase/$id');
+
+      final headers = {'Accept': 'application/json', 'Authorization': token};
+
+      http.Response _response = await http.get(url, headers: headers);
+      print(_response.statusCode);
+      print('rrrrrrr${_response.body}');
+      if (_response.statusCode == 200) {
+        final _data = PurchaseDetailsModel.fromJson(jsonDecode(_response.body));
+
+        return _data;
+      }
+
+      return null;
+    } on http.ClientException catch (e) {
+      print(e.message);
+      return null;
+    } on SocketException catch (e) {
+      print(e.message);
+      return null;
+    }
+  }
+}
