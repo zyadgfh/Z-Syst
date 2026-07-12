@@ -16,7 +16,6 @@ class ResetPasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'token' => ['required', 'string'],
             'email' => ['required', 'string', 'email', 'max:255', 'exists:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
@@ -25,7 +24,6 @@ class ResetPasswordRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'token.required' => __('validation.required', ['attribute' => 'token']),
             'email.required' => __('validation.required', ['attribute' => 'email']),
             'email.email' => __('validation.email'),
             'password.required' => __('validation.required', ['attribute' => 'password']),

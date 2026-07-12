@@ -14,12 +14,12 @@ Route::prefix('v1')->group(function () {
     Route::post('/verify-reset-code',[Api\Auth\AcnooForgotPasswordController::class, 'verifyResetCode']);
     Route::post('/password-reset',[Api\Auth\AcnooForgotPasswordController::class, 'resetPassword']);
 
-    Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::group(['middleware' => ['auth:sanctum', 'tenant']], function () {
 
         Route::get('summary', [Api\StatisticsController::class, 'summary']);
         Route::get('dashboard', [Api\StatisticsController::class, 'dashboard']);
 
-        Route::post('stock-update/{id}',[Api\AcnooProductController::class, 'updateStock']);
+        Route::post('stock-update/{id}', [Api\AcnooProductController::class, 'updateStock']);
         Route::get('stocks-with-product', [Api\AcnooProductController::class, 'stocksWithProduct']);
         Route::get('dues-list', [Api\AcnooDueController::class, 'duesList']);
 
@@ -28,7 +28,6 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('units', Api\UnitController::class)->except('show');
         Route::apiResource('categories', Api\AcnooCategoryController::class)->except('show');
         Route::apiResource('manufacturer', Api\AcnooManufacturerController::class)->except('show');
-        Route::apiResource('parties', Api\PartyController::class);
         Route::apiResource('products', Api\AcnooProductController::class);
         Route::apiResource('stocks', Api\StockController::class)->only('index');
         Route::apiResource('business-categories', Api\BusinessCategoryController::class)->only('index');
