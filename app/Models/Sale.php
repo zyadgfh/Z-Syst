@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Sale extends Model
 {
-    use HasFactory;
+    use HasFactory, HasCompany;
 
     /**
      * The attributes that are mass assignable.
@@ -16,7 +17,7 @@ class Sale extends Model
      * @var array
      */
     protected $fillable = [
-        'business_id',
+        'company_id',
         'party_id',
         'user_id',
         'tax_id',
@@ -64,7 +65,8 @@ class Sale extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            $id = Sale::where('business_id', auth()->user()->business_id)->count() + 1;
+            $companyId = app()->bound('tenant.company_id') ? app('tenant.company_id') : auth()->user()->company_id;
+            $id = Sale::where('company_id', $companyId)->count() + 1;
             $model->invoiceNumber = "S-" . str_pad($id, 5, '0', STR_PAD_LEFT);
         });
     }

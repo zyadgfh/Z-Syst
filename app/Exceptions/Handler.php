@@ -30,7 +30,8 @@ class Handler extends ExceptionHandler
         $this->renderable(function (ValidationException $e, $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
-                    'message' => 'The given data was invalid.',
+                    'success' => false,
+                    'message' => 'Validation failed',
                     'errors' => $e->errors(),
                 ], 422);
             }
@@ -39,7 +40,8 @@ class Handler extends ExceptionHandler
         $this->renderable(function (AuthenticationException $e, $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
-                    'message' => $e->getMessage() ?: 'Unauthenticated.',
+                    'success' => false,
+                    'message' => $e->getMessage() ?: 'Unauthenticated',
                 ], 401);
             }
         });
@@ -47,7 +49,8 @@ class Handler extends ExceptionHandler
         $this->renderable(function (AuthorizationException $e, $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
-                    'message' => $e->getMessage() ?: 'Forbidden.',
+                    'success' => false,
+                    'message' => $e->getMessage() ?: 'Forbidden',
                 ], 403);
             }
         });
@@ -55,8 +58,29 @@ class Handler extends ExceptionHandler
         $this->renderable(function (HttpException $e, $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
-                    'message' => $e->getMessage() ?: 'Http error.',
+                    'success' => false,
+                    'message' => $e->getMessage() ?: 'HTTP Error',
                 ], $e->getStatusCode());
+            }
+        });
+
+        $this->renderable(function (Throwable $e, $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                if (config('app.debug')) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $e->getMessage(),
+                        'exception' => get_class($e),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                        'trace' => $e->getTrace(),
+                    ], 500);
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Server Error',
+                ], 500);
             }
         });
 

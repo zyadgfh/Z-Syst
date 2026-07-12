@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class DueCollect extends Model
 {
-    use HasFactory;
+    use HasFactory, HasCompany;
 
     /**
      * The attributes that are mass assignable.
@@ -16,7 +17,7 @@ class DueCollect extends Model
      * @var array
      */
     protected $fillable = [
-        'business_id',
+        'company_id',
         'party_id',
         'user_id',
         'sale_id',
@@ -34,7 +35,8 @@ class DueCollect extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            $id = DueCollect::where('business_id', auth()->user()->business_id)->count() + 1;
+            $companyId = app()->bound('tenant.company_id') ? app('tenant.company_id') : auth()->user()->company_id;
+            $id = DueCollect::where('company_id', $companyId)->count() + 1;
             $model->invoiceNumber = "D-" . str_pad($id, 5, '0', STR_PAD_LEFT);
         });
     }

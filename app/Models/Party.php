@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Party extends Model
 {
-    use HasFactory;
+    use HasFactory, HasCompany;
 
     /**
      * The attributes that are mass assignable.
@@ -24,7 +25,7 @@ class Party extends Model
         'image',
         'status',
         'address',
-        'business_id',
+        'company_id',
         'opening_balance',
     ];
 

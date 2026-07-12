@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\HasCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class BoxSize extends Model
 {
-    use HasFactory;
+    use HasFactory, HasCompany;
 
     protected $fillable = [
         'name',
-        'business_id',
+        'company_id',
         'status'
     ];
 }

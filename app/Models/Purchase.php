@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Purchase extends Model
 {
-    use HasFactory;
+    use HasFactory, HasCompany;
 
     /**
      * The attributes that are mass assignable.
@@ -17,7 +18,7 @@ class Purchase extends Model
      */
     protected $fillable = [
         'party_id',
-        'business_id',
+        'company_id',
         'user_id',
         'tax_id',
         "discountAmount",
@@ -63,7 +64,8 @@ class Purchase extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            $id = Purchase::where('business_id', auth()->user()->business_id)->count() + 1;
+            $companyId = app()->bound('tenant.company_id') ? app('tenant.company_id') : auth()->user()->company_id;
+            $id = Purchase::where('company_id', $companyId)->count() + 1;
             $model->invoiceNumber = "P-" . str_pad($id, 5, '0', STR_PAD_LEFT);
         });
     }
