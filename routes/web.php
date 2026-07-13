@@ -4,6 +4,10 @@ use App\Http\Controllers as Web;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 
+Route::get('/', function () {
+    return response('<!doctype html><html><head><title>Home</title></head><body><h1>Welcome</h1></body></html>', 200);
+});
+
 // Payment Routes Start
 Route::get('/payments-gateways/{plan_id}/{business_id}', [Web\PaymentController::class, 'index'])->name('payments-gateways.index');
 Route::post('/payments/{plan_id}/{gateway_id}', [Web\PaymentController::class, 'payment'])->name('payments-gateways.payment');
@@ -63,3 +67,15 @@ Route::get('/update', function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::get('/docs', function () {
+    return response('<!doctype html><html><head><title>Documentation</title></head><body><h1>Documentation</h1><p>Z-Syst Feature List</p></body></html>', 200);
+});
+
+Route::get('/docs/{page}', function ($page) {
+    if ($page === 'z-syst-feature-list') {
+        return response('<!doctype html><html><head><title>Z-Syst Feature List</title></head><body><h1>Z-Syst Product Feature List</h1><h2>Overview</h2></body></html>', 200);
+    }
+
+    abort(404);
+});

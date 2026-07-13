@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('gateways', function (Blueprint $table) {
+        if (! Schema::hasTable('gateways')) {
+            Schema::create('gateways', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->foreignId('currency_id')->constrained()->cascadeOnDelete();
@@ -27,7 +28,8 @@ return new class extends Migration
             $table->integer('phone_required')->default(0);
             $table->text('instructions')->nullable();
             $table->timestamps();
-        });
+            });
+        }
     }
 
     /**

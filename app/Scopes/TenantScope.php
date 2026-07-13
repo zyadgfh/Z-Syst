@@ -21,9 +21,28 @@ class TenantScope implements Scope
         }
     }
 
-    // optional remove - left intentionally simple
+    /**
+     * Remove the tenant scope from the query.
+     * This allows queries to access all tenants when needed.
+     */
     public function remove(Builder $builder, Model $model)
     {
-        // Not implemented: removal depends on query grammar internals
+        $column = $model->getTable().'.company_id';
+
+        // Get the current query's wheres and remove tenant-scope related ones
+        $wheres = $builder->getQuery()->wheres;
+
+        $builder->getQuery()->wheres = array_values(
+            array_filter($wheres, function ($where) use ($column) {
+                // Remove where clauses that reference the company_id column
+                if (isset($where['column']) && $where['column'] === $column) {
+                    // Only remove if it matches a simple equality where (our tenant scope)
+                    if (isset($where['type']) && $where['type'] === 'Basic') {
+                        return false;
+                    }
+                }
+                return true;
+            })
+        );
     }
 }

@@ -19,7 +19,16 @@ function cache_remember(string $key, callable $callback, int $ttl = 1800): mixed
 
 function get_option($key) {
     return cache_remember($key, function () use ($key) {
-        return Option::where('key', $key)->first()->value ?? [];
+        try {
+            if (! Schema::hasTable('options')) {
+                return null;
+            }
+
+            $opt = Option::where('key', $key)->first();
+            return $opt ? $opt->value : null;
+        } catch (\Exception $e) {
+            return null;
+        }
     });
 }
 
@@ -36,8 +45,22 @@ function sendNotification($id, $url, $message, $user = null) {
         'message' => $message,
     ];
 
-    $notify_user = User::where('role', 'superadmin')->first();
-    Notification::send($notify_user, new SendNotification($notify));
+    // Send to all admin/superadmin users instead of just one
+    $admins = User::whereIn('role', ['superadmin', 'super-admin', 'admin'])
+        ->orWhere(function ($q) {
+            if (trait_exists(\Spatie\Permission\Traits\HasRoles::class)) {
+                try {
+                    $q->role('super-admin');
+                } catch (\Throwable $e) {
+                    // Role check may fail if table doesn't exist yet
+                }
+            }
+        })
+        ->get();
+
+    if ($admins->isNotEmpty()) {
+        Notification::send($admins, new SendNotification($notify));
+    }
 }
 
 function currency_format($amount, $type = "icon", $decimals = 2, $currency = null)

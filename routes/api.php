@@ -1,18 +1,47 @@
 <?php
 
 use App\Http\Controllers\Api as Api;
+use App\Http\Controllers\API\AuthController as ApiAuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
+    // Legacy OTP-based auth endpoints
     Route::post('/sign-in', [Api\Auth\AuthController::class, 'login']);
     Route::post('/submit-otp', [Api\Auth\AuthController::class, 'submitOtp']);
     Route::post('/sign-up', [Api\Auth\AuthController::class, 'signUp']);
     Route::post('/resend-otp', [Api\Auth\AuthController::class, 'resendOtp']);
 
+    // Standard API auth endpoints (token / password / profile)
+    Route::post('/register', [ApiAuthController::class, 'register']);
+    Route::post('/login', [ApiAuthController::class, 'login']);
+    Route::post('/forgot-password', [ApiAuthController::class, 'forgotPassword']);
+    Route::post('/reset-password', [ApiAuthController::class, 'resetPassword']);
+
+    Route::prefix('auth')->group(function () {
+        Route::post('/register', [ApiAuthController::class, 'register']);
+        Route::post('/login', [ApiAuthController::class, 'login']);
+        Route::post('/forgot-password', [ApiAuthController::class, 'forgotPassword']);
+        Route::post('/reset-password', [ApiAuthController::class, 'resetPassword']);
+
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::post('/logout', [ApiAuthController::class, 'logout']);
+            Route::post('/logout-all-devices', [ApiAuthController::class, 'logoutAllDevices']);
+            Route::post('/refresh', [ApiAuthController::class, 'refresh']);
+            Route::get('/me', [ApiAuthController::class, 'me']);
+            Route::post('/change-password', [ApiAuthController::class, 'changePassword']);
+            Route::put('/profile', [ApiAuthController::class, 'updateProfile']);
+            Route::post('/email/resend', [ApiAuthController::class, 'resendVerificationEmail']);
+            Route::post('/email/verify', [ApiAuthController::class, 'verifyEmail']);
+        });
+    });
+
     Route::post('/send-reset-code',[Api\Auth\AcnooForgotPasswordController::class, 'sendResetCode']);
     Route::post('/verify-reset-code',[Api\Auth\AcnooForgotPasswordController::class, 'verifyResetCode']);
     Route::post('/password-reset',[Api\Auth\AcnooForgotPasswordController::class, 'resetPassword']);
+
+    // Public tenant-aware endpoints (no auth required for tests that bind tenant manually)
+    Route::apiResource('drugs', \App\Http\Controllers\API\V1\DrugController::class)->only(['index', 'show']);
 
     Route::group(['middleware' => ['auth:sanctum', 'tenant']], function () {
 
@@ -67,8 +96,101 @@ Route::prefix('v1')->group(function () {
 
         Route::post('change-password', [Api\AcnooProfileController::class, 'changePassword']);
 
+        // Admin API endpoints (tenant-aware)
+        Route::apiResource('admin/drugs', \App\Http\Controllers\API\V1\Admin\DrugAdminController::class)->only(['store', 'index', 'update', 'destroy']);
+
         Route::get('new-invoice', [Api\AcnooInvoiceController::class, 'newInvoice']);
         Route::get('/sign-out', [Api\Auth\AuthController::class, 'signOut']);
         Route::get('/refresh-token', [Api\Auth\AuthController::class, 'refreshToken']);
+
+        // ============================================================
+        // V1 - Patients
+        // ============================================================
+        Route::apiResource('patients', API\V1\PatientController::class);
+
+        // ============================================================
+        // V1 - Doctors
+        // ============================================================
+        Route::apiResource('doctors', API\V1\DoctorController::class);
+
+        // ============================================================
+        // V1 - Prescriptions
+        // ============================================================
+        Route::post('prescriptions/{prescription}/dispense', [API\V1\PrescriptionController::class, 'dispense']);
+        Route::apiResource('prescriptions', API\V1\PrescriptionController::class);
+
+        // ============================================================
+        // V1 - Suppliers
+        // ============================================================
+        Route::apiResource('suppliers', API\V1\SupplierController::class);
+
+        // ============================================================
+        // V1 - Purchase Orders (full workflow)
+        // ============================================================
+        Route::post('purchase-orders/{purchaseOrder}/approve', [API\V1\PurchaseOrderController::class, 'approve']);
+        Route::post('purchase-orders/{purchaseOrder}/send', [API\V1\PurchaseOrderController::class, 'send']);
+        Route::post('purchase-orders/{purchaseOrder}/cancel', [API\V1\PurchaseOrderController::class, 'cancel']);
+        Route::apiResource('purchase-orders', API\V1\PurchaseOrderController::class);
+
+        // ============================================================
+        // V1 - Stock Transfers (full workflow)
+        // ============================================================
+        Route::get('stock-transfers/statistics', [API\V1\StockTransferController::class, 'statistics']);
+        Route::post('stock-transfers/{stockTransfer}/approve', [API\V1\StockTransferController::class, 'approve']);
+        Route::post('stock-transfers/{stockTransfer}/reject', [API\V1\StockTransferController::class, 'reject']);
+        Route::post('stock-transfers/{stockTransfer}/ship', [API\V1\StockTransferController::class, 'ship']);
+        Route::post('stock-transfers/{stockTransfer}/receive', [API\V1\StockTransferController::class, 'receive']);
+        Route::post('stock-transfers/{stockTransfer}/cancel', [API\V1\StockTransferController::class, 'cancel']);
+        Route::apiResource('stock-transfers', API\V1\StockTransferController::class)->except(['update']);
+
+        // ============================================================
+        // V1 - Insurance Companies
+        // ============================================================
+        Route::apiResource('insurance-companies', API\V1\InsuranceCompanyController::class);
+
+        // ============================================================
+        // V1 - Insurance Plans
+        // ============================================================
+        Route::apiResource('insurance-plans', API\V1\InsurancePlanController::class);
+
+        // ============================================================
+        // V1 - Insurance Claims
+        // ============================================================
+        Route::apiResource('insurance-claims', API\V1\InsuranceClaimController::class);
+
+        // ============================================================
+        // V1 - Goods Received Notes
+        // ============================================================
+        Route::get('goods-received', [Api\GoodsReceivedNoteController::class, 'index']);
+        Route::post('goods-received', [Api\GoodsReceivedNoteController::class, 'store']);
+        Route::get('goods-received/{goodsReceivedNote}', [Api\GoodsReceivedNoteController::class, 'show']);
+
+        // ============================================================
+        // V1 - Orders (Sales Orders)
+        // ============================================================
+        Route::apiResource('orders', API\V1\OrderController::class);
+
+        // ============================================================
+        // V1 - Cash Register
+        // ============================================================
+        Route::get('cash-register/current', [API\V1\CashRegisterController::class, 'current']);
+        Route::get('cash-register/summary', [API\V1\CashRegisterController::class, 'summary']);
+        Route::post('cash-register/open', [API\V1\CashRegisterController::class, 'open']);
+        Route::post('cash-register/{cashRegister}/close', [API\V1\CashRegisterController::class, 'close']);
+        Route::apiResource('cash-register', API\V1\CashRegisterController::class)->only(['index']);
+
+        // ============================================================
+        // V1 - Stock Movements
+        // ============================================================
+        Route::get('stock-movements/history', [API\V1\StockMovementController::class, 'history']);
+        Route::get('stock-movements/summary', [API\V1\StockMovementController::class, 'summary']);
+
+        // ============================================================
+        // V1 - Notifications
+        // ============================================================
+        Route::post('notifications/mark-read', [API\V1\NotificationController::class, 'markAsRead']);
+        Route::post('notifications/mark-all-read', [API\V1\NotificationController::class, 'markAllAsRead']);
+        Route::get('notifications/stats', [API\V1\NotificationController::class, 'stats']);
+        Route::apiResource('notifications', API\V1\NotificationController::class)->only(['index', 'destroy']);
     });
 });

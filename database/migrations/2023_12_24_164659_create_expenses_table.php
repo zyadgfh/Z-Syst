@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('expenses', function (Blueprint $table) {
+        if (! Schema::hasTable('expenses')) {
+            Schema::create('expenses', function (Blueprint $table) {
             $table->id();
             $table->double('amount', 10, 2);
             $table->foreignId('expense_category_id')->nullable()->constrained()->nullOnDelete();
@@ -23,7 +24,8 @@ return new class extends Migration
             $table->text('note')->nullable();
             $table->timestamp('expenseDate')->nullable();
             $table->timestamps();
-        });
+            });
+        }
     }
 
     /**

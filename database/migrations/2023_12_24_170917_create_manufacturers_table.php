@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('manufacturers', function (Blueprint $table) {
+        if (! Schema::hasTable('manufacturers')) {
+            Schema::create('manufacturers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('description')->nullable();
             $table->boolean('status')->default(1);
             $table->timestamps();
-        });
+            });
+        }
     }
 
     /**

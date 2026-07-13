@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('plans', function (Blueprint $table) {
+        if (! Schema::hasTable('plans')) {
+            Schema::create('plans', function (Blueprint $table) {
             $table->id();
             $table->string('subscriptionName');
             $table->integer('duration')->default(0); // Duration in days
@@ -20,7 +21,8 @@ return new class extends Migration
             $table->boolean('status')->default(1);
             $table->longText('features')->nullable();
             $table->timestamps();
-        });
+            });
+        }
     }
 
     /**

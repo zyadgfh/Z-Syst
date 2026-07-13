@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Branch;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Schema;
 
 class CompanyFactory extends Factory
 {
@@ -14,6 +15,7 @@ class CompanyFactory extends Factory
             'max_branches' => fake()->numberBetween(1, 20),
             'is_unlimited_branches' => fake()->boolean(20),
             'default_branch_limit' => fake()->numberBetween(1, 20),
+            'slug' => Schema::hasColumn('companies', 'slug') ? fake()->slug() : null,
         ];
     }
 

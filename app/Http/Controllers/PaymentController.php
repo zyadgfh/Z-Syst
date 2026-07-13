@@ -7,9 +7,11 @@ use App\Models\User;
 use App\Models\Gateway;
 use App\Models\Business;
 use App\Helpers\HasUploader;
+use App\Notifications\SendNotification;
 use Illuminate\Http\Request;
 use App\Models\PlanSubscribe;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Session;
 
 class PaymentController extends Controller
@@ -73,7 +75,7 @@ class PaymentController extends Controller
                     ],
                 ]);
 
-                sendNotification($subscribe->id, route('admin.subscription-reports.index', ['id' => $subscribe->id]), __('New subscription purchased requested.'));
+                $this->notifyAdmins($subscribe->id, __('New subscription purchased requested.'));
 
                 DB::commit();
                 return redirect(route('order.status', ['status' => 'success']))->with('message', __('New subscription purchased requested.'));
@@ -235,5 +237,28 @@ class PaymentController extends Controller
     public function orderStatus()
     {
         return request('status');
+    }
+
+    /**
+     * Notify all admin users about a new subscription request.
+     */
+    protected function notifyAdmins(int $subscribeId, string $message): void
+    {
+        $url = route('admin.subscription-reports.index', ['id' => $subscribeId]);
+
+        // Notify all admin/superadmin users instead of just one hardcoded user
+        $admins = User::whereIn('role', ['superadmin', 'super-admin', 'admin'])
+            ->orWhere(function ($q) {
+                $q->role('super-admin');
+            })
+            ->get();
+
+        $notify = [
+            'id' => $subscribeId,
+            'url' => $url,
+            'message' => $message,
+        ];
+
+        Notification::send($admins, new SendNotification($notify));
     }
 }

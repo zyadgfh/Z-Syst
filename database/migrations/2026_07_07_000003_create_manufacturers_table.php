@@ -10,7 +10,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('manufacturers', function (Blueprint $table) {
+        if (! Schema::hasTable('manufacturers')) {
+            Schema::create('manufacturers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained()->cascadeOnDelete();
             $table->string('name');
@@ -28,7 +29,8 @@ return new class extends Migration
 
             $table->index('name');
             $table->index('is_active');
-        });
+            });
+        }
     }
 
     public function down(): void

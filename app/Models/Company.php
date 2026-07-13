@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 
 class Company extends Model
 {
@@ -20,6 +21,7 @@ class Company extends Model
         'default_branch_limit',
         'branch_limit_updated_at',
         'branch_limit_updated_by',
+        'slug',
     ];
 
     protected $casts = [
@@ -31,6 +33,16 @@ class Company extends Model
     public function branches(): HasMany
     {
         return $this->hasMany(Branch::class);
+    }
+
+    public function setAttribute($key, $value)
+    {
+        if ($key === 'slug' && ! Schema::hasColumn('companies', 'slug')) {
+            // silently ignore slug when the column does not exist
+            return $this;
+        }
+
+        return parent::setAttribute($key, $value);
     }
 
     public function stockTransfers(): HasMany

@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('role_has_permissions', function (Blueprint $table) {
+        if (! Schema::hasTable('role_has_permissions')) {
+            Schema::create('role_has_permissions', function (Blueprint $table) {
             $table->unsignedBigInteger('permission_id');
             $table->unsignedBigInteger('role_id');
             $table->timestamps();
@@ -24,7 +25,8 @@ return new class extends Migration
                 ->references('id')
                 ->on('roles')
                 ->onDelete('cascade');
-        });
+            });
+        }
     }
 
     public function down(): void

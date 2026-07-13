@@ -7,7 +7,6 @@ use App\Events\StockTransferCancelled;
 use App\Events\StockTransferReceived;
 use App\Events\StockTransferRejected;
 use App\Events\StockTransferShipped;
-use App\Models\ActivityLog;
 use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\StockTransfer;
@@ -24,12 +23,61 @@ use Illuminate\Support\Facades\DB;
  * Handles business logic for the complete transfer workflow:
  * - Request → Approve → Ship → Receive
  *
- * @author Z-Syst Development Team
+ * Integrates with StockMovementService for centralized stock logging
+ * and uses proper cache tagging for efficient invalidation.
  *
- * @version 1.0.0
+ * @version 2.0.0
  */
 class StockTransferService extends BaseService
 {
+    /**
+     * The StockMovementService instance.
+     */
+    protected StockMovementService $stockMovementService;
+
+    /**
+     * StockTransferService constructor.
+     */
+    public function __construct(StockMovementService $stockMovementService)
+    {
+        $this->stockMovementService = $stockMovementService;
+    }
+
+    /**
+     * Get a unique cache key prefix for a company.
+     */
+    protected function getCachePrefix(int $companyId): string
+    {
+        return "stock_transfer:{$companyId}";
+    }
+
+    /**
+     * Invalidate all transfer-related cache for a company.
+     */
+    protected function clearTransferCache(int $companyId): void
+    {
+        $prefix = $this->getCachePrefix($companyId);
+
+        // Use tagged cache keys with a version-based approach for reliable invalidation
+        $cacheVersionKey = "{$prefix}:version";
+        $version = Cache::get($cacheVersionKey, 1);
+        Cache::forever($cacheVersionKey, $version + 1);
+
+        // Also clear specific known cache keys
+        Cache::forget("{$prefix}:stats:*");
+        Cache::forget("company:{$companyId}:transfer_stats:*");
+        Cache::forget("company:{$companyId}:transfers:*");
+    }
+
+    /**
+     * Get cache key with version.
+     */
+    protected function getCacheKey(int $companyId, string $suffix): string
+    {
+        $version = Cache::get($this->getCachePrefix($companyId) . ':version', 1);
+        return "{$this->getCachePrefix($companyId)}:{$suffix}:v{$version}";
+    }
+
     /**
      * Create a new stock transfer request.
      *
@@ -65,7 +113,7 @@ class StockTransferService extends BaseService
                 $unitCost = $itemData['unit_cost'];
                 $totalCost = $quantity * $unitCost;
 
-                $transferItem = StockTransferItem::create([
+                StockTransferItem::create([
                     'stock_transfer_id' => $transfer->id,
                     'product_id' => $itemData['product_id'],
                     'product_stock_id' => $itemData['product_stock_id'] ?? null,
@@ -93,6 +141,20 @@ class StockTransferService extends BaseService
 
             // Clear relevant cache
             $this->clearTransferCache($company->id);
+
+            // Log stock movement (reservation)
+            foreach ($data['items'] as $itemData) {
+                $this->stockMovementService->logMovement(
+                    $itemData['product_id'],
+                    $data['from_branch_id'],
+                    'out',
+                    $itemData['quantity_requested'],
+                    'stock_transfer_request',
+                    $transfer->id,
+                    $itemData['batch_number'] ?? null,
+                    ['transfer_number' => $transfer->transfer_number, 'status' => 'pending']
+                );
+            }
 
             return $transfer->load(['items.product', 'fromBranch', 'toBranch', 'requestedBy']);
         });
@@ -182,7 +244,8 @@ class StockTransferService extends BaseService
                     $transferItem->product_id,
                     $transfer->from_branch_id,
                     $itemData['quantity_sent'],
-                    $transferItem->batch_number
+                    $transferItem->batch_number,
+                    $transfer->id
                 );
             }
 
@@ -230,7 +293,8 @@ class StockTransferService extends BaseService
                     $itemData['quantity_received'],
                     $transferItem->batch_number,
                     $transferItem->expiry_date,
-                    $transferItem->unit_cost
+                    $transferItem->unit_cost,
+                    $transfer->id
                 );
             }
 
@@ -274,7 +338,8 @@ class StockTransferService extends BaseService
                             $item->quantity_sent,
                             $item->batch_number,
                             $item->expiry_date,
-                            $item->unit_cost
+                            $item->unit_cost,
+                            $transfer->id
                         );
                     }
                 }
@@ -301,7 +366,7 @@ class StockTransferService extends BaseService
      *
      * @throws \Exception
      */
-    protected function deductStock(int $productId, int $branchId, float $quantity, ?string $batchNumber = null): void
+    protected function deductStock(int $productId, int $branchId, float $quantity, ?string $batchNumber = null, ?int $transferId = null): void
     {
         $query = ProductStock::where('product_id', $productId)
             ->where('branch_id', $branchId)
@@ -331,13 +396,22 @@ class StockTransferService extends BaseService
 
         $stock->decrement('quantity', $quantity);
 
-        $this->logStockMovement($productId, $branchId, 'out', $quantity, 'stock_transfer', $stock->batch_number);
+        // Use centralized StockMovementService
+        $this->stockMovementService->logMovement(
+            $productId,
+            $branchId,
+            'out',
+            $quantity,
+            'stock_transfer_ship',
+            $transferId,
+            $stock->batch_number
+        );
     }
 
     /**
      * Add stock to a branch.
      */
-    protected function addStock(int $productId, int $branchId, float $quantity, ?string $batchNumber = null, ?Carbon $expiryDate = null, float $unitCost = 0): void
+    protected function addStock(int $productId, int $branchId, float $quantity, ?string $batchNumber = null, ?Carbon $expiryDate = null, float $unitCost = 0, ?int $transferId = null): void
     {
         // Find existing branch-level stock record for the product.
         $stock = ProductStock::where('product_id', $productId)
@@ -374,26 +448,16 @@ class StockTransferService extends BaseService
             ]);
         }
 
-        // Log stock movement
-        $this->logStockMovement($productId, $branchId, 'in', $quantity, 'stock_transfer', $batchNumber);
-    }
-
-    /**
-     * Log stock movement (placeholder for future integration).
-     */
-    protected function logStockMovement(int $productId, int $branchId, string $movementType, float $quantity, string $referenceType, ?string $batchNumber = null): void
-    {
-        // This would integrate with a StockMovementService when implemented
-        // For now, we'll create a basic log entry
-        ActivityLog::create([
-            'company_id' => auth()->user()->company_id,
-            'user_id' => auth()->id(),
-            'action' => 'stock_movement',
-            'description' => "Stock {$movementType}: {$quantity} units of product {$productId} at branch {$branchId} (Batch: {$batchNumber})",
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'performed_at' => now(),
-        ]);
+        // Use centralized StockMovementService
+        $this->stockMovementService->logMovement(
+            $productId,
+            $branchId,
+            'in',
+            $quantity,
+            'stock_transfer_receive',
+            $transferId,
+            $batchNumber
+        );
     }
 
     /**
@@ -403,49 +467,54 @@ class StockTransferService extends BaseService
      */
     public function getTransfers(int $companyId, array $filters = [])
     {
-        $query = StockTransfer::where('company_id', $companyId)
-            ->with(['fromBranch', 'toBranch', 'requestedBy', 'items.product']);
+        $cacheKey = $this->getCacheKey($companyId, 'transfers:' . md5(json_encode($filters)));
 
-        // Apply filters
-        if (isset($filters['status'])) {
-            $query->where('status', $filters['status']);
-        }
+        // Use a short cache TTL for listing operations
+        return Cache::remember($cacheKey, 60, function () use ($companyId, $filters) {
+            $query = StockTransfer::where('company_id', $companyId)
+                ->with(['fromBranch:id,name', 'toBranch:id,name', 'requestedBy:id,name', 'items.product:id,name,sku']);
 
-        if (isset($filters['from_branch_id'])) {
-            $query->where('from_branch_id', $filters['from_branch_id']);
-        }
+            // Apply filters
+            if (isset($filters['status'])) {
+                $query->where('status', $filters['status']);
+            }
 
-        if (isset($filters['to_branch_id'])) {
-            $query->where('to_branch_id', $filters['to_branch_id']);
-        }
+            if (isset($filters['from_branch_id'])) {
+                $query->where('from_branch_id', $filters['from_branch_id']);
+            }
 
-        if (isset($filters['branch_id'])) {
-            $query->where(function ($q) use ($filters) {
-                $q->where('from_branch_id', $filters['branch_id'])
-                    ->orWhere('to_branch_id', $filters['branch_id']);
-            });
-        }
+            if (isset($filters['to_branch_id'])) {
+                $query->where('to_branch_id', $filters['to_branch_id']);
+            }
 
-        if (isset($filters['date_from'])) {
-            $query->where('requested_at', '>=', $filters['date_from']);
-        }
+            if (isset($filters['branch_id'])) {
+                $query->where(function ($q) use ($filters) {
+                    $q->where('from_branch_id', $filters['branch_id'])
+                        ->orWhere('to_branch_id', $filters['branch_id']);
+                });
+            }
 
-        if (isset($filters['date_to'])) {
-            $query->where('requested_at', '<=', $filters['date_to']);
-        }
+            if (isset($filters['date_from'])) {
+                $query->where('requested_at', '>=', $filters['date_from']);
+            }
 
-        // Search by transfer number
-        if (isset($filters['search'])) {
-            $query->where('transfer_number', 'like', "%{$filters['search']}%");
-        }
+            if (isset($filters['date_to'])) {
+                $query->where('requested_at', '<=', $filters['date_to']);
+            }
 
-        // Order by latest
-        $query->orderBy('created_at', 'desc');
+            // Search by transfer number
+            if (isset($filters['search'])) {
+                $query->where('transfer_number', 'like', "%{$filters['search']}%");
+            }
 
-        // Paginate
-        $perPage = $filters['per_page'] ?? 25;
+            // Order by latest
+            $query->orderBy('created_at', 'desc');
 
-        return $query->paginate($perPage);
+            // Paginate
+            $perPage = $filters['per_page'] ?? 25;
+
+            return $query->paginate($perPage);
+        });
     }
 
     /**
@@ -453,7 +522,7 @@ class StockTransferService extends BaseService
      */
     public function getTransferStatistics(int $companyId, ?int $branchId = null, string $period = 'month'): array
     {
-        $cacheKey = "company:{$companyId}:transfer_stats:{$branchId}:{$period}";
+        $cacheKey = $this->getCacheKey($companyId, "stats:{$branchId}:{$period}");
 
         return Cache::remember($cacheKey, 300, function () use ($companyId, $branchId, $period) {
             $startDate = match ($period) {
@@ -488,22 +557,5 @@ class StockTransferService extends BaseService
                 'total_quantity_transferred' => $transfers->where('status', 'received')->sum('total_quantity'),
             ];
         });
-    }
-
-    /**
-     * Clear transfer-related cache.
-     */
-    protected function clearTransferCache(int $companyId): void
-    {
-        $patterns = [
-            "company:{$companyId}:transfer_stats:*",
-            "company:{$companyId}:transfers:*",
-        ];
-
-        foreach ($patterns as $pattern) {
-            // Note: Cache::forget doesn't support wildcards in all drivers
-            // This is a simplified implementation
-            Cache::forget($pattern);
-        }
     }
 }

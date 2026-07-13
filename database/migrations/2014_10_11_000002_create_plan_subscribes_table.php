@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('plan_subscribes', function (Blueprint $table) {
+        if (! Schema::hasTable('plan_subscribes')) {
+            Schema::create('plan_subscribes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('plan_id')->constrained()->cascadeOnDelete();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
@@ -21,7 +22,8 @@ return new class extends Migration
             $table->integer('duration')->default(0);
             $table->text('notes')->nullable();
             $table->timestamps();
-        });
+            });
+        }
     }
 
     /**

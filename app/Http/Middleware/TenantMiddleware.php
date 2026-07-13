@@ -16,6 +16,15 @@ class TenantMiddleware
 
         if ($company) {
             $tenantManager->bindTenant($company);
+
+            return $next($request);
+        }
+
+        if ($request->user() || $request->header('X-Company-Id') || $request->route('company')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tenant not found or user is not assigned to a company.',
+            ], 404);
         }
 
         return $next($request);

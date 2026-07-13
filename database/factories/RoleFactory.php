@@ -11,10 +11,13 @@ class RoleFactory extends Factory
 
     public function definition(): array
     {
+        $slug = fake()->unique()->slug();
+
         return [
-            'name' => fake()->unique()->jobTitle(),
-            'slug' => fake()->unique()->slug(),
+            'name' => $slug,
+            'slug' => $slug,
             'description' => fake()->sentence(),
+            'guard_name' => 'web',
             'color_badge' => fake()->hexColor(),
             'priority' => fake()->numberBetween(0, 100),
             'is_system' => false,

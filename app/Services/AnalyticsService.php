@@ -15,14 +15,37 @@ use Illuminate\Support\Facades\DB;
 
 class AnalyticsService
 {
-    protected $companyId;
+    protected ?int $companyId = null;
 
-    protected $branchId;
+    protected ?int $branchId = null;
 
-    public function __construct()
+    /**
+     * Initialize with optional company/branch context.
+     * Allows setting context manually for console commands and background jobs.
+     */
+    public function __construct(?int $companyId = null, ?int $branchId = null)
     {
-        $this->companyId = auth()->user()->company_id ?? null;
-        $this->branchId = auth()->user()->branch_id ?? null;
+        $this->companyId = $companyId ?? (auth()->check() ? auth()->user()->company_id : null);
+        $this->branchId = $branchId ?? (auth()->check() ? auth()->user()->branch_id : null);
+    }
+
+    /**
+     * Set company context manually (useful for console commands).
+     */
+    public function setContext(int $companyId, ?int $branchId = null): self
+    {
+        $this->companyId = $companyId;
+        $this->branchId = $branchId;
+
+        return $this;
+    }
+
+    /**
+     * Get current company ID.
+     */
+    public function getCompanyId(): ?int
+    {
+        return $this->companyId;
     }
 
     /**

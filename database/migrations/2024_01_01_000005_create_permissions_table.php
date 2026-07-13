@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('permissions', function (Blueprint $table) {
+        if (! Schema::hasTable('permissions')) {
+            Schema::create('permissions', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('slug')->unique();
@@ -23,7 +24,8 @@ return new class extends Migration
             $table->index('module');
             $table->index('group');
             $table->index('status');
-        });
+            });
+        }
     }
 
     public function down(): void

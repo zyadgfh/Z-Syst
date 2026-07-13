@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
+        if (! Schema::hasTable('roles')) {
+            Schema::create('roles', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('slug')->unique();
@@ -22,7 +23,8 @@ return new class extends Migration
             $table->index('slug');
             $table->index('status');
             $table->index('priority');
-        });
+            });
+        }
     }
 
     public function down(): void

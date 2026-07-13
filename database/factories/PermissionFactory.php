@@ -15,6 +15,7 @@ class PermissionFactory extends Factory
             'name' => fake()->unique()->words(3, true),
             'slug' => fake()->unique()->slug(),
             'description' => fake()->sentence(),
+            'guard_name' => 'web',
             'module' => fake()->randomElement(['Dashboard', 'Users', 'Roles', 'Branches', 'Products', 'Sales', 'Reports']),
             'group' => fake()->randomElement(['Management', 'Operations', 'Reporting']),
             'sort_order' => fake()->numberBetween(0, 100),

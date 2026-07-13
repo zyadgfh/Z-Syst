@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
+        if (! Schema::hasTable('products')) {
+            Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_category_id')->nullable()->constrained()->nullOnDelete();
@@ -29,7 +30,8 @@ return new class extends Migration
             $table->index(['company_id', 'product_category_id']);
             $table->index('sku');
             $table->index('slug');
-        });
+            });
+        }
     }
 
     public function down(): void

@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('branches', function (Blueprint $table) {
+        if (! Schema::hasTable('branches')) {
+            Schema::create('branches', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->foreignId('company_id')->constrained()->cascadeOnDelete();
@@ -23,7 +24,8 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->boolean('is_main')->default(false);
             $table->timestamps();
-        });
+            });
+        }
     }
 
     public function down(): void
