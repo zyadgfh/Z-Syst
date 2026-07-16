@@ -14,7 +14,7 @@ return new class extends Migration
         if (! Schema::hasTable('manufacturers')) {
             Schema::create('manufacturers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('business_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('business_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('description')->nullable();
             $table->boolean('status')->default(1);

@@ -25,18 +25,18 @@ class RouteServiceProvider extends ServiceProvider
         Route::prefix('api/zsyst')
             ->middleware(['api'])
             ->namespace($this->moduleNamespace)
-            ->group(module_path('ZSyst', '/routes/api.php'));
+            ->group(base_path('/Modules/ZSyst/routes/api.php'));
 
         Route::prefix('api/z-syst')
             ->middleware(['api'])
             ->namespace($this->moduleNamespace)
-            ->group(module_path('ZSyst', '/routes/api.php'));
+            ->group(base_path('/Modules/ZSyst/routes/api.php'));
     }
 
     protected function mapWebRoutes(): void
     {
         Route::middleware(['web'])
             ->namespace($this->moduleNamespace)
-            ->group(module_path('ZSyst', '/routes/web.php'));
+            ->group(base_path('/Modules/ZSyst/routes/web.php'));
     }
 }

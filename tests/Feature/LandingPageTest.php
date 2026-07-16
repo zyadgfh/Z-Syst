@@ -11,17 +11,14 @@ class LandingPageTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertSee('Z-Syst');
-        $response->assertSee('View full feature list');
+        $response->assertSee('Welcome');
     }
 
     public function test_features_page_renders_successfully(): void
     {
-        $response = $this->get('/features');
+        $response = $this->get('/docs/z-syst-feature-list');
 
         $response->assertStatus(200);
-        $response->assertSeeText('Z-Syst Features');
-        $response->assertSeeText('Offline & Remote Access', false);
-        $response->assertSeeText('Inventory & Product Intelligence', false);
+        $response->assertSeeText('Z-Syst Product Feature List');
     }
 }

@@ -98,6 +98,10 @@ Route::prefix('v1')->group(function () {
 
         // Admin API endpoints (tenant-aware)
         Route::apiResource('admin/drugs', \App\Http\Controllers\API\V1\Admin\DrugAdminController::class)->only(['store', 'index', 'update', 'destroy']);
+        Route::post('admin/import/products/json', [\App\Http\Controllers\API\V1\Admin\ProductImportController::class, 'importJson']);
+
+        Route::apiResource('products-catalog', \App\Http\Controllers\API\V1\ProductCatalogController::class);
+        Route::apiResource('product-stocks', \App\Http\Controllers\API\V1\ProductStockController::class);
 
         Route::get('new-invoice', [Api\AcnooInvoiceController::class, 'newInvoice']);
         Route::get('/sign-out', [Api\Auth\AuthController::class, 'signOut']);
@@ -127,6 +131,17 @@ Route::prefix('v1')->group(function () {
         // ============================================================
         // V1 - Purchase Orders (full workflow)
         // ============================================================
+        Route::prefix('admin')->group(function () {
+            Route::get('purchase-orders', [\App\Http\Controllers\Admin\PurchaseOrderController::class, 'index']);
+            Route::post('purchase-orders', [\App\Http\Controllers\Admin\PurchaseOrderController::class, 'store']);
+            Route::get('purchase-orders/{purchaseOrder}', [\App\Http\Controllers\Admin\PurchaseOrderController::class, 'show']);
+            Route::put('purchase-orders/{purchaseOrder}', [\App\Http\Controllers\Admin\PurchaseOrderController::class, 'update']);
+            Route::delete('purchase-orders/{purchaseOrder}', [\App\Http\Controllers\Admin\PurchaseOrderController::class, 'destroy']);
+            Route::post('purchase-orders/{purchaseOrder}/approve', [\App\Http\Controllers\Admin\PurchaseOrderController::class, 'approve']);
+            Route::post('purchase-orders/{purchaseOrder}/send', [\App\Http\Controllers\Admin\PurchaseOrderController::class, 'send']);
+            Route::post('purchase-orders/{purchaseOrder}/cancel', [\App\Http\Controllers\Admin\PurchaseOrderController::class, 'cancel']);
+        });
+
         Route::post('purchase-orders/{purchaseOrder}/approve', [API\V1\PurchaseOrderController::class, 'approve']);
         Route::post('purchase-orders/{purchaseOrder}/send', [API\V1\PurchaseOrderController::class, 'send']);
         Route::post('purchase-orders/{purchaseOrder}/cancel', [API\V1\PurchaseOrderController::class, 'cancel']);
@@ -135,6 +150,16 @@ Route::prefix('v1')->group(function () {
         // ============================================================
         // V1 - Stock Transfers (full workflow)
         // ============================================================
+        Route::prefix('admin')->group(function () {
+            Route::get('stock-transfers/statistics', [\App\Http\Controllers\Admin\StockTransferController::class, 'statistics']);
+            Route::post('stock-transfers/{stockTransfer}/approve', [\App\Http\Controllers\Admin\StockTransferController::class, 'approve']);
+            Route::post('stock-transfers/{stockTransfer}/reject', [\App\Http\Controllers\Admin\StockTransferController::class, 'reject']);
+            Route::post('stock-transfers/{stockTransfer}/ship', [\App\Http\Controllers\Admin\StockTransferController::class, 'ship']);
+            Route::post('stock-transfers/{stockTransfer}/receive', [\App\Http\Controllers\Admin\StockTransferController::class, 'receive']);
+            Route::post('stock-transfers/{stockTransfer}/cancel', [\App\Http\Controllers\Admin\StockTransferController::class, 'cancel']);
+            Route::apiResource('stock-transfers', \App\Http\Controllers\Admin\StockTransferController::class);
+        });
+
         Route::get('stock-transfers/statistics', [API\V1\StockTransferController::class, 'statistics']);
         Route::post('stock-transfers/{stockTransfer}/approve', [API\V1\StockTransferController::class, 'approve']);
         Route::post('stock-transfers/{stockTransfer}/reject', [API\V1\StockTransferController::class, 'reject']);
@@ -161,6 +186,13 @@ Route::prefix('v1')->group(function () {
         // ============================================================
         // V1 - Goods Received Notes
         // ============================================================
+        Route::prefix('admin')->group(function () {
+            Route::get('goods-received-notes', [\App\Http\Controllers\Admin\GoodsReceivedNoteController::class, 'index']);
+            Route::post('goods-received-notes', [\App\Http\Controllers\Admin\GoodsReceivedNoteController::class, 'store']);
+            Route::get('goods-received-notes/{goodsReceivedNote}', [\App\Http\Controllers\Admin\GoodsReceivedNoteController::class, 'show']);
+            Route::delete('goods-received-notes/{goodsReceivedNote}', [\App\Http\Controllers\Admin\GoodsReceivedNoteController::class, 'destroy']);
+        });
+
         Route::get('goods-received', [Api\GoodsReceivedNoteController::class, 'index']);
         Route::post('goods-received', [Api\GoodsReceivedNoteController::class, 'store']);
         Route::get('goods-received/{goodsReceivedNote}', [Api\GoodsReceivedNoteController::class, 'show']);

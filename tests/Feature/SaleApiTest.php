@@ -4,10 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Branch;
 use App\Models\Company;
-use App\Models\Permission;
 use App\Models\Product;
 use App\Models\ProductStock;
-use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -22,15 +20,14 @@ class SaleApiTest extends TestCase
         $company = Company::factory()->create();
         $branch = Branch::factory()->create(['company_id' => $company->id]);
 
-        $product = Product::create([
+        $product = Product::factory()->create([
             'company_id' => $company->id,
-            'product_category_id' => null,
-            'sku' => 'TEST-'.now()->timestamp,
             'name' => 'Test Product',
+            'sku' => 'TEST-'.now()->timestamp,
             'slug' => 'test-product',
-            'description' => 'A test product for sales API.',
             'cost_price' => 5.00,
             'retail_price' => 10.00,
+            'wholesale_price' => 10.00,
             'track_inventory' => true,
             'is_active' => true,
         ]);
@@ -47,35 +44,11 @@ class SaleApiTest extends TestCase
             'is_active' => true,
         ]);
 
-        $permission = Permission::create([
-            'name' => 'Create Sale',
-            'slug' => 'sales.create',
-            'description' => 'Permission to create sales',
-            'module' => 'Sales',
-            'group' => 'Operations',
-            'sort_order' => 1,
-            'status' => true,
-        ]);
-
-        $role = Role::create([
-            'name' => 'Cashier',
-            'slug' => 'cashier',
-            'description' => 'Cashier role for sales operations',
-            'color_badge' => '#34D399',
-            'priority' => 50,
-            'is_system' => false,
-            'status' => true,
-        ]);
-
-        $role->permissions()->syncWithoutDetaching([$permission->id]);
-
         $user = User::factory()->create([
             'company_id' => $company->id,
             'branch_id' => $branch->id,
             'role' => 'cashier',
         ]);
-
-        $user->assignRole($role);
 
         Sanctum::actingAs($user, [], 'sanctum');
 

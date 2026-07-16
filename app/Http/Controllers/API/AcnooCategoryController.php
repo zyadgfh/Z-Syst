@@ -5,15 +5,20 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 
 class AcnooCategoryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $data = Category::where('business_id', auth()->user()->business_id)->latest()->get();
+        $companyId = $request->user()->company_id ?? app('tenant.company_id');
+
+        $data = Category::query()
+            ->where('company_id', $companyId)
+            ->latest()
+            ->get();
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -21,60 +26,72 @@ class AcnooCategoryController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $business_id = auth()->user()->business_id;
-        $request->validate([
-            'categoryName' => 'required|unique:categories,categoryName,NULL,id,business_id,' . $business_id,
-            'description' => 'nullable|string'
-        ]);
+        $companyId = $request->user()->company_id ?? app('tenant.company_id');
 
-        $data = Category::create([
-                    'categoryName' => $request->categoryName,
-                    'description' => $request->description,
-                    'business_id' => $business_id
-                ]);
-
-        return response()->json([
-            'message' => __('Data saved successfully.'),
-            'data' => $data,
-        ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Category $category)
-    {
-        $request->validate([
+        $data = $request->validate([
             'categoryName' => [
                 'required',
-                'unique:categories,categoryName,' . $category->id . ',id,business_id,' . auth()->user()->business_id,
+                'string',
+                'max:255',
+                Rule::unique('categories')->where(fn ($query) => $query->where('company_id', $companyId)),
             ],
-            'description' => 'nullable|string'
+            'description' => 'nullable|string',
+            'status' => 'nullable|in:active,inactive',
         ]);
 
-        $category = $category->update([
-                    'categoryName' => $request->categoryName,
-                    'description' => $request->description,
-                    'business_id' => auth()->user()->business_id
-                    ]);
+        $categoryPayload = array_merge($data, ['company_id' => $companyId]);
+        if (Schema::hasColumn('categories', 'business_id') && Schema::hasTable('businesses')) {
+            $hasBusiness = DB::table('businesses')->where('id', $companyId)->exists();
+            if ($hasBusiness) {
+                $categoryPayload['business_id'] = $companyId;
+            }
+        }
+
+        $category = Category::create($categoryPayload);
 
         return response()->json([
             'message' => __('Data saved successfully.'),
             'data' => $category,
+        ], 201);
+    }
+
+    public function update(Request $request, Category $category)
+    {
+        $companyId = $request->user()->company_id ?? app('tenant.company_id');
+
+        $data = $request->validate([
+            'categoryName' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('categories')->ignore($category->id)->where(fn ($query) => $query->where('company_id', $companyId)),
+            ],
+            'description' => 'nullable|string',
+            'status' => 'nullable|in:active,inactive',
+        ]);
+
+        $categoryPayload = array_merge($data, ['company_id' => $companyId]);
+        if (Schema::hasColumn('categories', 'business_id') && Schema::hasTable('businesses')) {
+            $hasBusiness = DB::table('businesses')->where('id', $companyId)->exists();
+            if ($hasBusiness) {
+                $categoryPayload['business_id'] = $companyId;
+            }
+        }
+
+        $category->update($categoryPayload);
+
+        return response()->json([
+            'message' => __('Data updated successfully.'),
+            'data' => $category->fresh(),
         ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Category $category)
     {
         $category->delete();
+
         return response()->json([
             'message' => __('Data deleted successfully.'),
         ]);

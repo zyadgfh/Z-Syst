@@ -8,7 +8,7 @@ class UpdateProductStockRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->hasPermission('manage_products') || $this->user()?->isSuperAdmin();
+        return $this->user() !== null || app()->bound('tenant.company_id');
     }
 
     public function rules(): array

@@ -12,7 +12,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        if (class_exists(\Modules\ZSyst\App\Providers\ZSystServiceProvider::class)) {
+            $this->app->register(\Modules\ZSyst\App\Providers\ZSystServiceProvider::class);
+        }
     }
 
     /**
