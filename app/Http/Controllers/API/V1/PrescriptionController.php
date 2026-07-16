@@ -6,12 +6,20 @@ namespace App\Http\Controllers\API\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Prescription;
+use App\Models\Product;
+use App\Models\Stock;
+use App\Services\StockMovementService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class PrescriptionController extends Controller
 {
+    public function __construct(private readonly StockMovementService $stockMovementService)
+    {
+    }
+
     public function index(Request $request): JsonResponse
     {
         $prescriptions = Prescription::where('company_id', $request->user()->company_id)
@@ -159,7 +167,8 @@ class PrescriptionController extends Controller
 
         $validator = Validator::make($request->all(), [
             'items' => 'required|array|min:1',
-            'items.*.id' => 'required|exists:prescription_items,id',
+            'items.*.id' => 'required_without:items.*.barcode|exists:prescription_items,id',
+            'items.*.barcode' => 'required_without:items.*.id|string',
             'items.*.dispensed_quantity' => 'required|integer|min:0',
         ]);
 
@@ -169,7 +178,28 @@ class PrescriptionController extends Controller
 
         $allFullyDispensed = true;
         foreach ($request->items as $itemData) {
-            $item = $prescription->items()->findOrFail($itemData['id']);
+            $item = null;
+
+            if (!empty($itemData['id'])) {
+                $item = $prescription->items()->findOrFail($itemData['id']);
+            } else {
+                $barcode = trim((string) ($itemData['barcode'] ?? ''));
+                $product = Product::query()
+                    ->where('company_id', $prescription->company_id)
+                    ->where('barcode', $barcode)
+                    ->first();
+
+                if (! $product) {
+                    return response()->json(['message' => 'Barcode not found'], 404);
+                }
+
+                $item = $prescription->items()->where('product_id', $product->id)->first();
+
+                if (! $item) {
+                    return response()->json(['message' => 'This barcode does not belong to a prescribed item'], 422);
+                }
+            }
+
             $item->update(['dispensed_quantity' => $itemData['dispensed_quantity']]);
 
             if ($itemData['dispensed_quantity'] < $item->quantity) {
@@ -182,5 +212,206 @@ class PrescriptionController extends Controller
         ]);
 
         return response()->json($prescription->fresh()->load(['items']));
+    }
+
+    public function dispenseByBarcode(Request $request, Prescription $prescription): JsonResponse
+    {
+        if ($prescription->company_id !== $request->user()->company_id) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'barcode' => 'required|string',
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
+        $product = Product::query()
+            ->where('company_id', $prescription->company_id)
+            ->where('barcode', $request->input('barcode'))
+            ->first();
+
+        if (! $product) {
+            return response()->json(['message' => 'Barcode not found'], 404);
+        }
+
+        $item = $prescription->items()->where('product_id', $product->id)->first();
+
+        if (! $item) {
+            return response()->json(['message' => 'This barcode does not belong to a prescribed item'], 422);
+        }
+
+        $newDispensed = min((int) $request->input('quantity'), (int) $item->quantity);
+        $currentDispensed = (int) $item->dispensed_quantity;
+        $updatedDispensed = min($item->quantity, $currentDispensed + $newDispensed);
+        $item->update(['dispensed_quantity' => $updatedDispensed]);
+
+        $stock = Stock::query()
+            ->where('product_id', $product->id)
+            ->whereHas('product', function ($query) use ($prescription) {
+                $query->where('company_id', $prescription->company_id);
+            })
+            ->first();
+
+        if ($stock) {
+            $stock->update(['productStock' => max(0, (int) $stock->productStock - $newDispensed)]);
+        }
+
+        $this->stockMovementService->logMovement(
+            (int) $product->id,
+            (int) $prescription->branch_id,
+            'out',
+            (float) $newDispensed,
+            'prescription_dispense',
+            (int) $prescription->id,
+            null,
+            [
+                'prescription_number' => $prescription->prescription_number,
+                'barcode' => $request->input('barcode'),
+            ]
+        );
+
+        $allFullyDispensed = $prescription->items()
+            ->whereColumn('dispensed_quantity', '<', 'quantity')
+            ->doesntExist();
+
+        $prescription->update([
+            'status' => $allFullyDispensed ? 'dispensed' : 'partially_dispensed',
+        ]);
+
+        return response()->json($prescription->fresh()->load(['items']));
+    }
+
+    public function demandForecast(Request $request): JsonResponse
+    {
+        $companyId = $request->user()->company_id ?? app('tenant.company_id');
+        $windowDays = (int) ($request->input('window_days') ?? 30);
+        $windowDays = max(7, min(90, $windowDays));
+
+        // We forecast based on REAL dispensed history (actual fulfillment), not prescribed quantities.
+        // If prescription-item has no dedicated dispensed timestamp, we use `updated_at` as a proxy.
+        $from = now()->subDays($windowDays);
+
+        // Load dispensed lines from prescriptions that were updated within the window.
+        $dispensedLines = \App\Models\PrescriptionItem::query()
+            ->whereHas('prescription', function ($q) use ($companyId, $from) {
+                $q->where('company_id', $companyId)
+                    ->where('updated_at', '>=', $from);
+            })
+            ->with(['product:id,productName,barcode'])
+            ->where('dispensed_quantity', '>', 0)
+            ->get(['prescription_id', 'product_id', 'dispensed_quantity', 'updated_at']);
+
+        $bucketDays = 7; // weekly buckets
+        $bucketsCount = (int) ceil($windowDays / $bucketDays);
+
+        $byProduct = $dispensedLines
+            ->groupBy('product_id')
+            ->map(function ($lines, $productId) use ($bucketsCount, $bucketDays, $windowDays, $from) {
+                $productName = $lines->first()?->product?->productName;
+                $barcode = $lines->first()?->product?->barcode;
+
+                // bucket index based on updated_at
+                $bucketTotals = array_fill(0, $bucketsCount, 0.0);
+                foreach ($lines as $line) {
+                    /** @var \App\Models\PrescriptionItem $line */
+                    $ts = $line->updated_at;
+                    if (! $ts) continue;
+
+                    $deltaDays = max(0, (int) $from->diffInDays($ts));
+                    $idx = (int) floor($deltaDays / $bucketDays);
+                    $idx = max(0, min($bucketsCount - 1, $idx));
+                    $bucketTotals[$idx] += (float) $line->dispensed_quantity;
+                }
+
+                $totalDispensed = (float) array_sum($bucketTotals);
+                $averageDailyDemand = $windowDays > 0 ? round($totalDispensed / $windowDays, 2) : 0.0;
+
+                // Simple trend: compare last half vs previous half of buckets.
+                $half = max(1, intdiv($bucketsCount, 2));
+                $prevBuckets = array_slice($bucketTotals, 0, $half);
+                $lastBuckets = array_slice($bucketTotals, $bucketsCount - $half);
+                $prevAvgDaily = max(0.0001, array_sum($prevBuckets) / (count($prevBuckets) * $bucketDays));
+                $lastAvgDaily = array_sum($lastBuckets) / (count($lastBuckets) * $bucketDays);
+
+                $trendRatio = $lastAvgDaily / $prevAvgDaily;
+                $trend = abs($trendRatio - 1.0) < 0.08 ? 'flat' : ($trendRatio > 1.0 ? 'up' : 'down');
+
+                // Apply a small trend adjustment on reorder.
+                $trendMultiplier = $trend === 'up' ? 1.15 : ($trend === 'down' ? 0.9 : 1.0);
+
+                $buffer = max(1, (int) round($averageDailyDemand * 0.25));
+                $reorderBase = $averageDailyDemand + $buffer;
+                $recommendedReorder = max(1, (int) ceil($reorderBase * $trendMultiplier));
+
+                // Safety stock as % of average demand + volatility proxy (non-zero buckets)
+                $nonZeroBuckets = count(array_filter($bucketTotals, fn($v) => $v > 0));
+                $volatilityFactor = $bucketsCount > 0 ? ($nonZeroBuckets / $bucketsCount) : 0;
+                $safetyStock = max(1, (int) round($averageDailyDemand * (0.35 + 0.4 * $volatilityFactor)));
+
+                // Confidence based on both total volume and coverage across buckets.
+                $confidenceScore = ($totalDispensed >= 60 ? 2 : ($totalDispensed >= 25 ? 1 : 0)) + ($nonZeroBuckets >= max(2, intdiv($bucketsCount, 2)) ? 1 : 0);
+                $confidence = $confidenceScore >= 2 ? 'high' : ($confidenceScore >= 1 ? 'medium' : 'low');
+
+                return [
+                    'product_id' => (int) $productId,
+                    'product_name' => $productName,
+                    'barcode' => $barcode,
+                    'forecast_window_days' => $windowDays,
+                    'average_daily_demand' => $averageDailyDemand,
+                    'recommended_reorder_quantity' => $recommendedReorder,
+                    'safety_stock' => $safetyStock,
+                    'confidence' => $confidence,
+                    'trend' => $trend,
+                ];
+            })
+            ->sortByDesc('average_daily_demand')
+            ->take(10)
+            ->values();
+
+        return response()->json([
+            'forecast_window_days' => $windowDays,
+            'items' => $byProduct,
+        ]);
+    }
+
+
+
+
+    public function posSummary(Request $request): JsonResponse
+    {
+        $companyId = $request->user()->company_id ?? app('tenant.company_id');
+
+        $pendingPrescriptions = Prescription::query()
+            ->where('company_id', $companyId)
+            ->whereIn('status', ['pending', 'partially_dispensed'])
+            ->count();
+
+        $lowStockProducts = Stock::query()
+            ->join('products', 'products.id', '=', 'stocks.product_id')
+            ->where('products.company_id', $companyId)
+            ->whereColumn('stocks.productStock', '<=', 'products.alert_qty')
+            ->select('stocks.*', 'products.alert_qty')
+            ->with('product:id,productName')
+            ->limit(10)
+            ->get();
+
+        $forecast = $this->demandForecast($request)->getData(true)['items'] ?? [];
+
+
+        return response()->json([
+            'pending_prescriptions_count' => $pendingPrescriptions,
+            'low_stock_products' => $lowStockProducts->map(fn ($stock) => [
+                'product_id' => $stock->product_id,
+                'name' => $stock->product?->productName ?? 'Unknown',
+                'stock' => (int) $stock->productStock,
+                'alert_qty' => (int) ($stock->alert_qty ?? 0),
+            ])->values(),
+            'forecast' => $forecast,
+            'generated_at' => now()->toDateTimeString(),
+        ]);
     }
 }
