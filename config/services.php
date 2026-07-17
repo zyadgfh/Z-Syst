@@ -31,4 +31,20 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | WhatsApp Business API
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for WhatsApp Business API to send invoices
+    | Get your credentials from Facebook Business Manager
+    |
+    */
+    'whatsapp_api' => [
+        'url' => env('WHATSAPP_API_URL', 'https://graph.facebook.com/v17.0'),
+        'key' => env('WHATSAPP_API_KEY'),
+        'phone_number' => env('WHATSAPP_PHONE_NUMBER'), // Format: 14155238886 (without +)
+        'api_version' => env('WHATSAPP_API_VERSION', 'v17.0'),
+    ],
+
 ];

@@ -55,4 +55,25 @@ class DrugController
     {
         return response()->json($drug->load('alternatives'));
     }
+
+    public function findByBarcode(string $barcode): JsonResponse
+    {
+        $drug = Drug::where('barcode', $barcode)->where('is_active', true)->first();
+        
+        if (!$drug) {
+            return response()->json(['message' => 'Drug not found'], 404);
+        }
+
+        return response()->json([
+            'id' => $drug->id,
+            'name' => $drug->name,
+            'barcode' => $drug->barcode,
+            'sale_price' => $drug->sale_price,
+            'stock' => $drug->current_stock,
+            'scientific_name' => $drug->scientific_name,
+            'generic_name' => $drug->generic_name,
+            'strength' => $drug->strength,
+            'form' => $drug->form,
+        ]);
+    }
 }

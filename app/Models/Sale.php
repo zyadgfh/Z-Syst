@@ -18,12 +18,14 @@ class Sale extends Model
      */
     protected $fillable = [
         'company_id',
+        'business_id',
         'party_id',
         'user_id',
         'tax_id',
         'discountAmount',
         'dueAmount',
         'isPaid',
+        'status',
         "tax_amount",
         'paidAmount',
         'totalAmount',

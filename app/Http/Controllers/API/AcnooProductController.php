@@ -15,7 +15,7 @@ class AcnooProductController extends Controller
 {
     protected ProductService $productService;
 
-    public function __construct(ProductService $productService)
+public function __construct(ProductService $productService)
     {
         $this->productService = $productService;
     }
@@ -27,6 +27,7 @@ class AcnooProductController extends Controller
     {
         $filters = [
             'search' => request('search'),
+            'barcode' => request('barcode'),
             'expire_date' => request('expire_date'),
             'expired' => request('expired'),
         ];

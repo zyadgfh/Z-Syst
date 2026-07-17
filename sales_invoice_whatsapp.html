@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تصميم فاتورة مبيعات عبر الواتساب</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .illustration-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="illustration-container">
+        <svg width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+            <!-- خلفية عامة -->
+            <rect width="800" height="500" fill="#f8f9fa" rx="15"/>
+            
+            <!-- الواتساب - هاتف -->
+            <g id="whatsapp-phone">
+                <!-- هاتف اقتصادي -->
+                <rect x="50" y="80" width="200" height="350" rx="20" fill="#2d3748" stroke="#1a202c" stroke-width="2"/>
+                <rect x="60" y="100" width="180" height="310" rx="10" fill="#ffffff"/>
+                
+                <!-- شاشة الواتساب -->
+                <rect x="60" y="100" width="180" height="40" fill="#25D366"/>
+                <text x="150" y="125" font-size="14" fill="white" text-anchor="middle" font-weight="bold">واتساب</text>
+                
+                <!-- محادثة الواتساب -->
+                <rect x="70" y="150" width="120" height="60" rx="10" fill="#dcf8c6"/>
+                <text x="130" y="180" font-size="10" fill="#333">مرحباً! إليكم فاتورتكم</text>
+                
+                <!-- أيقونة المرفق كصورة -->
+                <rect x="80" y="220" width="100" height="120" rx="8" fill="#e2e8f0" stroke="#cbd5e0"/>
+                <rect x="80" y="220" width="100" height="80" fill="#4a5568"/>
+                <text x="130" y="250" font-size="8" fill="white" text-anchor="middle">فاتورة</text>
+                <text x="130" y="265" font-size="8" fill="white" text-anchor="middle">مبيعات</text>
+                <text x="130" y="285" font-size="7" fill="#e2e8f0" text-anchor="middle">شركة النور</text>
+                <text x="130" y="310" font-size="10" fill="#4a5568" text-anchor="middle">📎 JPG</text>
+                
+                <!-- زر الإرسال -->
+                <circle cx="170" cy="360" r="15" fill="#25D366"/>
+                <path d="M165 360 L175 350 L165 360 L170 355 L165 360" stroke="white" stroke-width="2" fill="none"/>
+            </g>
+            
+            <!-- الفاتورة - ورقة -->
+            <g id="invoice">
+                <!-- ورقة الفاتورة -->
+                <rect x="300" y="100" width="200" height="250" rx="5" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+                <rect x="300" y="100" width="200" height="50" fill="#667eea"/>
+                
+                <!-- محتوى الفاتورة -->
+                <text x="400" y="130" font-size="16" fill="white" text-anchor="middle" font-weight="bold">فاتورة مبيعات</text>
+                
+                <!-- تفاصيل الفاتورة -->
+                <text x="320" y="160" font-size="10" fill="#333">:التاريخ</text>
+                <text x="380" y="160" font-size="10" fill="#667eea">2026-07-16</text>
+                
+                <text x="320" y="180" font-size="10" fill="#333">:رقم الفاتورة</text>
+                <text x="380" y="180" font-size="10" fill="#667eea">#INV-00123</text>
+                
+                <text x="320" y="200" font-size="10" fill="#333">:العميل</text>
+                <text x="380" y="200" font-size="10" fill="#667eea">شركة النور</text>
+                
+                <line x1="310" y1="215" x2="490" y2="215" stroke="#e2e8f0"/>
+                
+                <!-- بنود الفاتورة -->
+                <text x="320" y="240" font-size="10" fill="#333">أثاث مكتبي</text>
+                <text x="470" y="240" font-size="10" fill="#333">500.00 ج.م</text>
+                
+                <text x="320" y="260" font-size="10" fill="#333">خدمات توصيل</text>
+                <text x="470" y="260" font-size="10" fill="#333">100.00 ج.م</text>
+                
+                <line x1="380" y1="275" x2="490" y2="275" stroke="#333"/>
+                
+                <text x="380" y="295" font-size="12" fill="#667eea" font-weight="bold">الإجمالي</text>
+                <text x="470" y="295" font-size="12" fill="#667eea" font-weight="bold">600.00 ج.م</text>
+            </g>
+            
+            <!-- الطابعة -->
+            <g id="printer">
+                <!-- جانب الطابعة -->
+                <rect x="580" y="180" width="120" height="80" rx="5" fill="#4a5568"/>
+                <rect x="590" y="150" width="100" height="40" rx="3" fill="#4a5568"/>
+                
+                <!-- وسادة الطابعة -->
+                <rect x="585" y="160" width="110" height="15" fill="#718096"/>
+                
+                <!-- فتحة الورق -->
+                <rect x="590" y="185" width="100" height="5" fill="#a0aec0"/>
+                
+                <!-- زر التشغيل -->
+                <circle cx="640" cy="230" r="8" fill="#e53e3e"/>
+                <text x="640" y="233" font-size="8" fill="white" text-anchor="middle">⏹</text>
+                
+                <!-- ورقة خارج من الطابعة -->
+                <rect x="695" y="190" width="50" height="70" rx="3" fill="#fff" transform="rotate(15 695 190)" stroke="#e2e8f0"/>
+                <rect x="695" y="190" width="50" height="20" fill="#667eea" transform="rotate(15 695 190)"/>
+                <text x="720" y="205" font-size="6" fill="white" text-anchor="middle" transform="rotate(15 720 205)">فاتورة</text>
+            </g>
+            
+            <!-- سهم يوضح الإرسال -->
+            <g id="arrow">
+                <path d="M250 220 C280 220 280 280 300 280" stroke="#25D366" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#25D366"/>
+                    </marker>
+                </defs>
+                <text x="270" y="210" font-size="12" fill="#25D366" font-weight="bold">إرسال</text>
+            </g>
+            
+            <!-- سهم يوضح الطباعة -->
+            <g id="print-arrow">
+                <path d="M500 280 C540 280 540 280 580 280" stroke="#667eea" stroke-width="3" fill="none" marker-end="url(#arrowhead2)"/>
+                <defs>
+                    <marker id="arrowhead2" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#667eea"/>
+                    </marker>
+                </defs>
+                <text x="530" y="270" font-size="12" fill="#667eea" font-weight="bold">طباعة</text>
+            </g>
+            
+            <!-- العنوان التوضيحي -->
+            <text x="400" y="420" font-size="24" fill="#2d3748" text-anchor="middle" font-weight="bold">إرسال فاتورة مبيعات عبر الواتساب</text>
+            <text x="400" y="450" font-size="16" fill="#4a5568" text-anchor="middle">مع إمكانية الطباعة للنسخ المادية</text>
+        </svg>
+    </div>
+</body>
+</html>

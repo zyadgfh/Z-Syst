@@ -48,20 +48,21 @@ class OrderController extends Controller
         }
 
         $data = $validator->validated();
+        $items = $data['items'];
 
         $order = Order::create([
             'company_id' => $request->user()->company_id,
-            'branch_id' => $data['branch_id'],
+            'branch_id' => $data['branch_id'] ?? null,
             'uuid' => (string) Str::uuid(),
             'status' => 'pending',
             'customer_name' => $data['customer_name'] ?? null,
             'customer_phone' => $data['customer_phone'] ?? null,
             'notes' => $data['notes'] ?? null,
-            'total' => collect($data['items'])->sum(fn ($item) => $item['quantity'] * $item['price']),
+            'total' => collect($items)->sum(fn ($item) => $item['quantity'] * $item['price']),
             'created_by' => $request->user()->id,
         ]);
 
-        foreach ($data['items'] as $item) {
+        foreach ($items as $item) {
             OrderItem::create([
                 'order_id' => $order->id,
                 'company_id' => $order->company_id,

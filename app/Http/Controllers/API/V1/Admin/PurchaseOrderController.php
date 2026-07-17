@@ -49,9 +49,12 @@ class PurchaseOrderController extends Controller
             return response()->json(['message' => $validator->errors()->first()], 422);
         }
 
+        $data = $validator->validated();
+        $items = $data['items'];
+
         $purchaseOrder = $this->purchaseOrderService->create(
-            $validator->validated(),
-            $request->items,
+            $data,
+            $items,
             $request->user()->company_id,
             $request->user()->id
         );

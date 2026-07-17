@@ -70,7 +70,7 @@ class CalculateDailyStockMetrics extends Command
     /**
      * Get low stock products for a company
      */
-    protected function getLowStockProducts($companyId)
+    protected function getLowStockProducts(int $companyId): \Illuminate\Support\Collection
     {
         return ProductStock::where('company_id', $companyId)
             ->where('is_active', true)
@@ -85,7 +85,7 @@ class CalculateDailyStockMetrics extends Command
     /**
      * Get expiring products for a company
      */
-    protected function getExpiringProducts($companyId)
+    protected function getExpiringProducts(int $companyId): \Illuminate\Support\Collection
     {
         $thirtyDaysFromNow = Carbon::now()->addDays(30);
 
@@ -100,7 +100,7 @@ class CalculateDailyStockMetrics extends Command
     /**
      * Send low stock notifications
      */
-    protected function sendLowStockNotifications($company, $products)
+    protected function sendLowStockNotifications(Company $company, \Illuminate\Support\Collection $products): void
     {
         // Get company admins (users with super-admin role or appropriate permissions)
         $admins = $company->users()->whereHas('roles', function ($query) {
@@ -125,7 +125,7 @@ class CalculateDailyStockMetrics extends Command
     /**
      * Send expiry notifications
      */
-    protected function sendExpiryNotifications($company, $products)
+    protected function sendExpiryNotifications(Company $company, \Illuminate\Support\Collection $products): void
     {
         // Get company admins
         $admins = $company->users()->whereHas('roles', function ($query) {
@@ -150,7 +150,7 @@ class CalculateDailyStockMetrics extends Command
     /**
      * Clear company analytics cache
      */
-    protected function clearCompanyCache($companyId)
+    protected function clearCompanyCache(int $companyId): void
     {
         // This would need to be implemented based on your cache implementation
         // For now, we'll just log it

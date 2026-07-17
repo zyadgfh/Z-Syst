@@ -11,7 +11,7 @@ class ProductService
 {
     public function index(array $filters = [])
     {
-        $query = Product::select('id', 'productName', 'productCode', 'purchase_with_tax', 'sales_price')
+        $query = Product::select('id', 'productName', 'productCode', 'purchase_with_tax', 'sales_price', 'barcode')
             ->withSum('stocks', 'productStock')
             ->with(['expiring_item' => function ($query) {
                 $query->select('expire_date', 'product_id')
@@ -22,6 +22,10 @@ class ProductService
         if (!empty($filters['search'])) {
             $query->where('productName', 'like', '%' . $filters['search'] . '%')
                 ->orWhere('productCode', 'like', '%' . $filters['search'] . '%');
+        }
+
+        if (!empty($filters['barcode'])) {
+            $query->where('barcode', $filters['barcode']);
         }
 
         if (!empty($filters['expire_date'])) {

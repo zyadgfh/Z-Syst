@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Quick Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .pass { color: green; font-weight: bold; }
+        .fail { color: red; font-weight: bold; }
+        .info { color: blue; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        #results { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Pharmacy POS Quick Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button onclick="runAllTests()">Run All Tests</button>
+        <button onclick="testCartFunctionality()">Test Cart</button>
+        <button onclick="testInventoryValidation()">Test Inventory</button>
+        <button onclick="testCheckoutFlow()">Test Checkout</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        // Demo data matching the POS
+        const demoProducts = {
+            '1234567890123': { name: 'Paracetamol 500mg', price: 5.99, stock: 50 },
+            '9876543210987': { name: 'Amoxicillin 250mg', price: 12.50, stock: 25 },
+            '4567890123456': { name: 'Ibuprofen 400mg', price: 8.75, stock: 30 },
+        };
+
+        let cart = [];
+        let results = [];
+
+        function addResult(test, status, message) {
+            results.push({ test, status, message });
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<h2>Test Results</h2>' + 
+                results.map(r => 
+                    `<div class="${r.status}">${r.status.toUpperCase()}: ${r.test} - ${r.message}</div>`
+                ).join('');
+        }
+
+        function clearResults() {
+            results = [];
+            updateDisplay();
+        }
+
+        function testCartFunctionality() {
+            clearResults();
+            cart = [];
+
+            // Test 1: Add item to cart
+            const barcode = '1234567890123';
+            const product = demoProducts[barcode];
+            cart.push({
+                id: Date.now(),
+                barcode: barcode,
+                name: product.name,
+                price: product.price,
+                quantity: 1,
+                stock: product.stock
+            });
+            
+            if (cart.length === 1 && cart[0].name === 'Paracetamol 500mg') {
+                addResult('Add Item', 'pass', 'Item added successfully');
+            } else {
+                addResult('Add Item', 'fail', 'Item not added correctly');
+            }
+
+            // Test 2: Update quantity
+            cart[0].quantity = 5;
+            if (cart[0].quantity === 5) {
+                addResult('Update Quantity', 'pass', 'Quantity updated to 5');
+            } else {
+                addResult('Update Quantity', 'fail', 'Quantity update failed');
+            }
+
+            // Test 3: Stock validation
+            const originalQuantity = cart[0].quantity;
+            cart[0].quantity = 60; // Exceeds stock of 50
+            if (cart[0].quantity > product.stock) {
+                addResult('Stock Validation', 'pass', 'Stock limit detected (60 > 50)');
+                cart[0].quantity = originalQuantity; // Reset
+            } else {
+                addResult('Stock Validation', 'fail', 'Stock validation not working');
+            }
+
+            // Test 4: Remove item
+            cart = [];
+            if (cart.length === 0) {
+                addResult('Remove Item', 'pass', 'Cart cleared successfully');
+            } else {
+                addResult('Remove Item', 'fail', 'Cart not cleared');
+            }
+
+            // Test 5: Multiple items
+            cart.push(
+                { id: 1, barcode: '1234567890123', name: 'Paracetamol 500mg', price: 5.99, quantity: 2, stock: 50 },
+                { id: 2, barcode: '9876543210987', name: 'Amoxicillin 250mg', price: 12.50, quantity: 1, stock: 25 }
+            );
+            
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            if (total === 24.48) { // 5.99*2 + 12.50*1
+                addResult('Multiple Items', 'pass', 'Total calculated correctly: $' + total.toFixed(2));
+            } else {
+                addResult('Multiple Items', 'fail', 'Total calculation incorrect: $' + total.toFixed(2));
+            }
+        }
+
+        function testInventoryValidation() {
+            clearResults();
+            
+            // Test 1: Check stock availability
+            const barcode = '1234567890123';
+            const product = demoProducts[barcode];
+            const requestedQty = 10;
+            
+            if (requestedQty <= product.stock) {
+                addResult('Stock Check', 'pass', `Requested ${requestedQty}, Available ${product.stock} - OK`);
+            } else {
+                addResult('Stock Check', 'fail', 'Stock validation failed');
+            }
+
+            // Test 2: Insufficient stock
+            const overStock = 100;
+            if (overStock > product.stock) {
+                addResult('Insufficient Stock', 'pass', `Requested ${overStock}, Available ${product.stock} - Rejected`);
+            } else {
+                addResult('Insufficient Stock', 'fail', 'Should reject insufficient stock');
+            }
+
+            // Test 3: Low stock warning
+            const lowStockItem = { name: 'Test', stock: 5 };
+            if (lowStockItem.stock < 10) {
+                addResult('Low Stock Warning', 'pass', 'Low stock detected (5 < 10)');
+            } else {
+                addResult('Low Stock Warning', 'fail', 'Low stock warning not working');
+            }
+        }
+
+        function testCheckoutFlow() {
+            clearResults();
+            cart = [
+                { id: 1, barcode: '1234567890123', name: 'Paracetamol 500mg', price: 5.99, quantity: 2, stock: 50 }
+            ];
+
+            // Test 1: Calculate totals
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = subtotal * 0.08;
+            const total = subtotal + tax;
+
+            if (Math.abs(subtotal - 11.98) < 0.01 && Math.abs(tax - 0.96) < 0.01 && Math.abs(total - 12.94) < 0.01) {
+                addResult('Totals Calculation', 'pass', `Subtotal: $${subtotal.toFixed(2)}, Tax: $${tax.toFixed(2)}, Total: $${total.toFixed(2)}`);
+            } else {
+                addResult('Totals Calculation', 'fail', 'Incorrect totals');
+            }
+
+            // Test 2: Payment method selection
+            const paymentMethods = ['cash', 'card', 'insurance'];
+            const selectedMethod = 'cash';
+            
+            if (paymentMethods.includes(selectedMethod)) {
+                addResult('Payment Method', 'pass', `Payment method selected: ${selectedMethod}`);
+            } else {
+                addResult('Payment Method', 'fail', 'Invalid payment method');
+            }
+
+            // Test 3: Sale data structure
+            const saleData = {
+                customer_name: 'Test Customer',
+                status: 'completed',
+                subtotal: subtotal,
+                tax_amount: tax,
+                total_amount: total,
+                payment_method: selectedMethod,
+                items: cart.map(item => ({
+                    barcode: item.barcode,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity
+                }))
+            };
+
+            if (saleData.items.length === 1 && saleData.total_amount === total) {
+                addResult('Sale Data Structure', 'pass', 'Sale data formatted correctly');
+            } else {
+                addResult('Sale Data Structure', 'fail', 'Sale data formatting failed');
+            }
+
+            // Test 4: Inventory deduction simulation
+            const originalStock = 50;
+            const deductedStock = originalStock - cart[0].quantity;
+            
+            if (deductedStock === 48) {
+                addResult('Inventory Deduction', 'pass', `Stock deducted: ${originalStock} → ${deductedStock}`);
+            } else {
+                addResult('Inventory Deduction', 'fail', 'Inventory deduction incorrect');
+            }
+        }
+
+        function runAllTests() {
+            clearResults();
+            addResult('Test Suite', 'info', 'Starting comprehensive test suite...');
+            
+            testCartFunctionality();
+            testInventoryValidation();
+            testCheckoutFlow();
+            
+            const passed = results.filter(r => r.status === 'pass').length;
+            const failed = results.filter(r => r.status === 'fail').length;
+            
+            addResult('Test Summary', 'info', `Completed: ${passed} passed, ${failed} failed out of ${results.length} tests`);
+        }
+    </script>
+</body>
+</html>

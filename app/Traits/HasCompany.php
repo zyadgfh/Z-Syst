@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Scopes\TenantScope;
+use Illuminate\Support\Facades\Schema;
 
 trait HasCompany
 {
@@ -11,10 +12,27 @@ trait HasCompany
         static::addGlobalScope(new TenantScope);
 
         static::creating(function ($model) {
-            if (empty($model->company_id) && app()->bound('tenant.company_id')) {
-                $model->company_id = app('tenant.company_id');
+            $column = $model->getCompanyColumn();
+
+            if (empty($model->{$column}) && app()->bound('tenant.company_id')) {
+                $model->{$column} = app('tenant.company_id');
             }
         });
+    }
+
+    protected function getCompanyColumn(): string
+    {
+        $table = $this->getTable();
+
+        if (Schema::hasColumn($table, 'company_id')) {
+            return 'company_id';
+        }
+
+        if (Schema::hasColumn($table, 'business_id')) {
+            return 'business_id';
+        }
+
+        return 'company_id';
     }
 
     /**
@@ -30,6 +48,8 @@ trait HasCompany
      */
     public function scopeForCompany($query, $companyId)
     {
-        return $query->withoutGlobalScope(TenantScope::class)->where('company_id', $companyId);
+        $column = (new static)->getCompanyColumn();
+
+        return $query->withoutGlobalScope(TenantScope::class)->where($column, $companyId);
     }
 }

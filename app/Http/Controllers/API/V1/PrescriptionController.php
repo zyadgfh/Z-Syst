@@ -285,6 +285,81 @@ class PrescriptionController extends Controller
         return response()->json($prescription->fresh()->load(['items']));
     }
 
+    public function checkout(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'items' => 'required|array|min:1',
+            'items.*.barcode' => 'required|string',
+            'items.*.quantity' => 'required|integer|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
+        $companyId = $request->user()->company_id ?? app('tenant.company_id');
+        $items = [];
+
+        foreach ($request->input('items', []) as $entry) {
+            $product = Product::query()
+                ->where('company_id', $companyId)
+                ->where('barcode', trim((string) ($entry['barcode'] ?? '')))
+                ->first();
+
+            if (! $product) {
+                return response()->json(['message' => 'Barcode not found'], 404);
+            }
+
+            $stock = Stock::query()
+                ->where('product_id', $product->id)
+                ->whereHas('product', function ($query) use ($companyId) {
+                    $query->where('company_id', $companyId);
+                })
+                ->first();
+
+            if (! $stock) {
+                return response()->json(['message' => 'No stock record found for this product'], 404);
+            }
+
+            $quantity = (int) $entry['quantity'];
+            if ($stock->productStock < $quantity) {
+                return response()->json(['message' => 'Insufficient stock for this item'], 422);
+            }
+
+            $stock->update(['productStock' => max(0, (int) $stock->productStock - $quantity)]);
+
+            $this->stockMovementService->logMovement(
+                (int) $product->id,
+                (int) ($request->input('branch_id') ?? 1),
+                'out',
+                (float) $quantity,
+                'pos_checkout',
+                null,
+                null,
+                [
+                    'barcode' => $product->barcode,
+                    'checkout_source' => 'pos',
+                ]
+            );
+
+            $items[] = [
+                'product_id' => $product->id,
+                'barcode' => $product->barcode,
+                'name' => $product->productName,
+                'quantity' => $quantity,
+                'unit_price' => (float) ($product->sales_price ?? 0),
+                'line_total' => (float) (($product->sales_price ?? 0) * $quantity),
+            ];
+        }
+
+        return response()->json([
+            'message' => 'Checkout completed successfully',
+            'items' => $items,
+            'total_items' => count($items),
+            'generated_at' => now()->toDateTimeString(),
+        ]);
+    }
+
     public function demandForecast(Request $request): JsonResponse
     {
         $companyId = $request->user()->company_id ?? app('tenant.company_id');
@@ -292,11 +367,13 @@ class PrescriptionController extends Controller
         $windowDays = max(7, min(90, $windowDays));
 
         // We forecast based on REAL dispensed history (actual fulfillment), not prescribed quantities.
-        // If prescription-item has no dedicated dispensed timestamp, we use `updated_at` as a proxy.
+        // IMPORTANT: This forecasting is based on prescription-item dispensed_quantity only.
+
         $from = now()->subDays($windowDays);
 
-        // Load dispensed lines from prescriptions that were updated within the window.
-        $dispensedLines = \App\Models\PrescriptionItem::query()
+        $dispensedLines = collect();
+
+        $prescriptionItemLines = \App\Models\PrescriptionItem::query()
             ->whereHas('prescription', function ($q) use ($companyId, $from) {
                 $q->where('company_id', $companyId)
                     ->where('updated_at', '>=', $from);
@@ -305,7 +382,25 @@ class PrescriptionController extends Controller
             ->where('dispensed_quantity', '>', 0)
             ->get(['prescription_id', 'product_id', 'dispensed_quantity', 'updated_at']);
 
+        $dispensedLines = $dispensedLines->merge($prescriptionItemLines->map(function ($line) {
+            return (object) [
+                'product_id' => $line->product_id,
+                'quantity' => (float) $line->dispensed_quantity,
+                'ts' => $line->updated_at,
+                'source' => 'prescription_item',
+                'product' => $line->product,
+            ];
+        }));
+
+        // NOTE:
+        // We intentionally do NOT merge stock-movement logs here, because the requirement is to
+        // forecast strictly from prescription dispensed_quantity history.
+
+        // We also bucket strictly based on the dispensed history timestamps we used above
+        // (PrescriptionItem.updated_at in the current schema).
+
         $bucketDays = 7; // weekly buckets
+
         $bucketsCount = (int) ceil($windowDays / $bucketDays);
 
         $byProduct = $dispensedLines
@@ -317,14 +412,13 @@ class PrescriptionController extends Controller
                 // bucket index based on updated_at
                 $bucketTotals = array_fill(0, $bucketsCount, 0.0);
                 foreach ($lines as $line) {
-                    /** @var \App\Models\PrescriptionItem $line */
-                    $ts = $line->updated_at;
+                    $ts = $line->ts;
                     if (! $ts) continue;
 
                     $deltaDays = max(0, (int) $from->diffInDays($ts));
                     $idx = (int) floor($deltaDays / $bucketDays);
                     $idx = max(0, min($bucketsCount - 1, $idx));
-                    $bucketTotals[$idx] += (float) $line->dispensed_quantity;
+                    $bucketTotals[$idx] += (float) $line->quantity;
                 }
 
                 $totalDispensed = (float) array_sum($bucketTotals);

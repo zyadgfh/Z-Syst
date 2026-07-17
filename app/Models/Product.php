@@ -20,6 +20,7 @@ class Product extends Model
     protected $fillable = [
         'productName',
         'company_id',
+        'business_id',
         'category_id',
         'unit_id',
         'type_id',
@@ -32,6 +33,8 @@ class Product extends Model
         'alert_qty',
         'wholesale_price',
         'productCode',
+        'barcode',
+        'generic_name',
         'images',
         'meta',
         'tax_id',

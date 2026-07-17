@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\API\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreDoctorRequest;
+use App\Http\Requests\UpdateDoctorRequest;
+use App\Http\Resources\DoctorResource;
 use App\Models\Doctor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class DoctorController extends Controller
 {
@@ -29,32 +31,18 @@ class DoctorController extends Controller
             ->orderByDesc('created_at')
             ->paginate($request->per_page ?? 25);
 
-        return response()->json($doctors);
+        return DoctorResource::collection($doctors);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreDoctorRequest $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'specialization' => 'required|string|max:255',
-            'license_number' => 'required|string|max:100|unique:doctors,license_number',
-            'clinic_name' => 'nullable|string|max:255',
-            'phone' => 'required|string|max:50',
-            'email' => 'nullable|email|max:255',
-            'address' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors()->first()], 422);
-        }
-
-        $doctor = Doctor::create($validator->validated() + [
+        $doctor = Doctor::create($request->validated() + [
             'company_id' => $request->user()->company_id,
             'is_active' => true,
             'created_by' => $request->user()->id,
         ]);
 
-        return response()->json($doctor->load(['createdBy:id,name']), 201);
+        return response()->json(new DoctorResource($doctor), 201);
     }
 
     public function show(Request $request, Doctor $doctor): JsonResponse
@@ -63,35 +51,20 @@ class DoctorController extends Controller
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
-        return response()->json($doctor->load(['createdBy:id,name', 'prescriptions']));
+        return new DoctorResource($doctor->load(['createdBy:id,name', 'prescriptions']));
     }
 
-    public function update(Request $request, Doctor $doctor): JsonResponse
+    public function update(UpdateDoctorRequest $request, Doctor $doctor): JsonResponse
     {
         if ($doctor->company_id !== $request->user()->company_id) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
-        $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|string|max:255',
-            'specialization' => 'sometimes|string|max:255',
-            'license_number' => 'sometimes|string|max:100|unique:doctors,license_number,' . $doctor->id,
-            'clinic_name' => 'nullable|string|max:255',
-            'phone' => 'sometimes|string|max:50',
-            'email' => 'nullable|email|max:255',
-            'address' => 'nullable|string',
-            'is_active' => 'sometimes|boolean',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors()->first()], 422);
-        }
-
-        $doctor->update($validator->validated() + [
+        $doctor->update($request->validated() + [
             'updated_by' => $request->user()->id,
         ]);
 
-        return response()->json($doctor->fresh());
+        return new DoctorResource($doctor->fresh());
     }
 
     public function destroy(Request $request, Doctor $doctor): JsonResponse

@@ -27,4 +27,18 @@ class DrugController extends Controller
     {
         return (new DrugResource($drug))->response();
     }
+
+    public function byBarcode(Request $request, string $barcode)
+    {
+        $drug = Drug::query()
+            ->where('barcode', $barcode)
+            ->where('company_id', $request->user()->company_id ?? app('tenant.company_id'))
+            ->first();
+
+        if (! $drug) {
+            return response()->json(['message' => 'Drug not found'], 404);
+        }
+
+        return (new DrugResource($drug))->response();
+    }
 }

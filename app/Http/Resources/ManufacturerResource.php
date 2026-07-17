@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
@@ -12,10 +14,12 @@ class ManufacturerResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'description' => $this->description,
-            'status' => $this->status,
+            'contact_person' => $this->contact_person,
+            'phone' => $this->phone,
+            'email' => $this->email,
+            'address' => $this->address,
+            'is_active' => $this->is_active,
             'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ];
     }
 }

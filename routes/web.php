@@ -68,6 +68,49 @@ Route::get('/update', function () {
 
 require __DIR__.'/auth.php';
 
+Route::get('/pharmacy', function () {
+    return view('pharmacy-operations');
+});
+
+Route::get('/pharmacy/barcode-scanner', function () {
+    return view('barcode-scanner');
+});
+
+Route::get('/pharmacy/pos', function () {
+    return view('pharmacy-pos');
+});
+
+// Admin Routes - Linked to Admin Views
+Route::prefix('admin')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
+    
+    Route::get('/patients', function () {
+        return view('admin.patients');
+    })->name('admin.patients');
+    
+    Route::get('/doctors', function () {
+        return view('admin.doctors');
+    })->name('admin.doctors');
+    
+    Route::get('/products', function () {
+        return view('admin.products');
+    })->name('admin.products');
+    
+    Route::get('/purchase-orders', function () {
+        return view('admin.purchase-orders');
+    })->name('admin.purchase-orders');
+    
+    Route::get('/stock-transfers', function () {
+        return view('admin.stock-transfers');
+    })->name('admin.stock-transfers');
+    
+    Route::get('/insurance-claims', function () {
+        return view('admin.insurance-claims');
+    })->name('admin.insurance-claims');
+});
+
 Route::get('/docs', function () {
     return response('<!doctype html><html><head><title>Documentation</title></head><body><h1>Documentation</h1><p>Z-Syst Feature List</p></body></html>', 200);
 });
