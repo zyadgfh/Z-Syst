@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
@@ -53,6 +54,14 @@ class Company extends Model
     public function branchLimitUpdatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'branch_limit_updated_by');
+    }
+
+    /**
+     * Get the latest subscription for the company.
+     */
+    public function subscriptionLatest(): HasOne
+    {
+        return $this->hasOne(PlanSubscribe::class, 'company_id')->latestOfMany();
     }
 
     public function getCurrentBranchesCountAttribute(): int

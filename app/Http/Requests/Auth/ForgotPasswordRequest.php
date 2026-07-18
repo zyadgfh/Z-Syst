@@ -1,10 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class ForgotPasswordRequest extends FormRequest
 {
@@ -16,16 +16,18 @@ class ForgotPasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email', 'max:255', 'exists:users,email'],
+            'email' => ['required', 'email'],
         ];
     }
 
-    public function messages(): array
+    protected function failedValidation(Validator $validator)
     {
-        return [
-            'email.required' => __('validation.required', ['attribute' => 'email']),
-            'email.email' => __('validation.email'),
-            'email.exists' => __('validation.exists', ['attribute' => 'email']),
-        ];
+        throw new HttpResponseException(
+            response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422)
+        );
     }
 }

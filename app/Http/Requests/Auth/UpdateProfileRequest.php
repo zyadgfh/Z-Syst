@@ -1,40 +1,37 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UpdateProfileRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return auth()->check();
     }
 
     public function rules(): array
     {
-        $userId = Auth::id();
-
         return [
             'name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'string', 'email', 'max:255', "unique:users,email,{$userId}"],
+            'email' => ['sometimes', 'email', 'max:255', 'unique:users,email,' . auth()->id()],
             'phone' => ['nullable', 'string', 'max:20'],
-            'username' => ['nullable', 'string', 'max:255', "unique:users,username,{$userId}"],
-            'profile_photo' => ['nullable', 'string', 'max:2048'],
-            'job_title' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable', 'image', 'max:2048'],
+            'lang' => ['sometimes', 'string', 'in:ar,en'],
         ];
     }
 
-    public function messages(): array
+    protected function failedValidation(Validator $validator)
     {
-        return [
-            'name.string' => __('validation.string', ['attribute' => 'name']),
-            'email.email' => __('validation.email'),
-            'email.unique' => __('validation.unique', ['attribute' => 'email']),
-            'username.unique' => __('validation.unique', ['attribute' => 'username']),
-        ];
+        throw new HttpResponseException(
+            response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422)
+        );
     }
 }

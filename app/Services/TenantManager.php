@@ -62,7 +62,27 @@ class TenantManager
             app()->instance('tenant.company_id', $id);
             config(['tenant.company_id' => $id]);
             $this->company = $company;
+
+            // Log tenant context
+            \Log::info('Tenant bound', [
+                'company_id' => $id,
+                'company_name' => $company->name,
+            ]);
         }
+    }
+
+    public function switchTenant(Company $company): void
+    {
+        $this->bindTenant($company);
+    }
+
+    public function clearTenant(): void
+    {
+        app()->forgetInstance('tenant.company_id');
+        config(['tenant.company_id' => null]);
+        $this->company = null;
+
+        \Log::info('Tenant cleared');
     }
 
     public function getCompanyId(): ?int

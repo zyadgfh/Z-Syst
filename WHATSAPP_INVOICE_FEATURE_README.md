@@ -1,127 +1,191 @@
-# ميزة إرسال الفاتورة عبر الواتساب
+# نظام إرسال الفواتير عبر الواتساب والإشعارات المتقدمة
 
-## نظرة عامة
-تم إضافة ميزة تلقائية لإرسال فاتورة البيع إلى العميل عبر الواتساب كصورة بمجرد حفظ الفاتورة، مع إمكانية الطباعة للنسخ المادية.
+## 📋 نظرة عامة
 
-## الملفات المُنشأة
+يوفر هذا النظام إمكانية إرسال الفواتير تلقائياً أو يدوياً عبر الواتساب بعد إتمام عملية البيع، مع دعم متعدد القنوات (SMS, Email, Print).
 
-### 1. الخدمات (Services)
-- `app/Services/WhatsAppService.php` - خدمة إرسال الرسائل عبر WhatsApp Business API
-- `app/Services/InvoiceImageService.php` - خدمة تحويل الفاتورة إلى صورة
+## ✨ الميزات الرئيسية
 
-### 2. المتحكمات (Controllers)
-- `Modules/ZSyst/App/Http/Controllers/PosSaleController.php` - مُعدل لإضافة إرسال الواتساب
-- `app/Http/Controllers/API/InvoiceWhatsAppController.php` - متحكم API لإرسال الفاتورة
+### 1. إرسال الفاتورة عبر الواتساب
+- إرسال الفاتورة كصورة (Image)
+- إرسال الفاتورة كملف PDF
+- إرسال الاثنين معاً
+- رسائل مخصصة مع دعم المتغيرات
 
-### 3. القوالب (Views)
-- `resources/views/invoices/sale-print.blade.php` - قالب الفاتورة القابل للطباعة والإرسال
+### 2. نافذة الخيارات بعد الحفظ
+- نافذة منبثقة تظهر بعد حفظ الفاتورة
+- خيارات طباعة متعددة (حرارية, A4)
+- حفظ الإعدادات كافتراضية
+- تخطي العملية
 
-### 4. المسارات (Routes)
-- `routes/api.php` - مُضيف للمسار `send-invoice-whatsapp`
+### 3. سجل الإشعارات
+- تتبع جميع الإشعارات المرسلة
+- عرض حالة كل إشعار (مرسل, مُسلم, فاشل)
+- إعادة الإرسال للإشعارات الفاشلة
 
-### 5. الإعدادات (Config)
-- `config/services.php` - مُضيف إعدادات WhatsApp API
+### 4. الإرسال التلقائي
+- إرسال تلقائي للفواتير بعد الحفظ (اختياري)
+- Queue للمعالجة الخلفية
 
-## طريقة الاستخدام
+## 📁 بنية الملفات
 
-### 1. طريقة API (الإرسال التلقائي)
-```javascript
-// عند إنشاء فاتورة جديدة، أضف الخانتين التاليتين:
-{
-    "customer_name": "العميل",
-    "customer_phone": "01234567890", // رقم هاتف العميل
-    "send_whatsapp": true, // إرسال تلقائي
-    "items": [...],
-    "total_amount": 100.00
-}
+```
+app/
+├── Models/
+│   ├── InvoiceNotification.php     # نموذج الإشعارات
+│   └── Sale.php                    # محدث بالعلاقات
+├── Services/
+│   ├── WhatsAppService.php         # محسن لإرسال PDF
+│   └── Invoice/
+│       ├── InvoiceNotificationService.php  # الخدمة الرئيسية
+│       ├── InvoicePDFGenerator.php       # توليد ملفات PDF
+│       └── InvoiceImageGenerator.php     # توليد الصور (مُعاد تسميتها)
+├── Http/Controllers/API/
+│   ├── InvoiceNotificationController.php   # وحدة التحكم
+│   └── InvoiceWhatsAppController.php       # محكم للإرسال الجديد
+├── Jobs/
+│   ├── AutoSendInvoiceJob.php            # Job للإرسال التلقائي
+│   └── PrintInvoiceJob.php               # Job للطباعة
+└── ...
+
+database/
+└── migrations/
+    └── 2024_12_01_000000_create_invoice_notifications_table.php
+
+resources/
+└── views/
+    └── components/
+        └── invoice-action-modal.blade.php  # نافذة الخيارات
 ```
 
-### 2. طريقة الواجهة (الإرسال اليدوي)
-افتح الفاتورة في المتصفح وستجد زرين:
-- **🖨️ طباعة الفاتورة** - للطباعة المباشرة
-- **📱 إرسال عبر الواتساب** - لإرسال الفاتورة كصورة
+## 🚀 طريقة الاستخدام
 
-## الخطوات المطلوبة للإكمال
+### 1. تفعيل النظام
 
-### 1. الحصول على WhatsApp Business API
-1. اذهب إلى [Facebook Business Manager](https://business.facebook.com)
-2. أنشئ حساب WhatsApp Business
-3. احصل على:
-   - `WHATSAPP_API_KEY` (Access Token)
-   - `WHATSAPP_PHONE_NUMBER` (رقم الهاتف بدون +)
-
-### 2. إضافة المتغيرات إلى ملف .env
 ```env
+# في ملف .env
 WHATSAPP_API_URL=https://graph.facebook.com/v17.0
 WHATSAPP_API_KEY=your_whatsapp_business_api_key
-WHATSAPP_PHONE_NUMBER=14155238886
-WHATSAPP_API_VERSION=v17.0
+WHATSAPP_PHONE_NUMBER=your_phone_number_id
 ```
 
-### 3. تثبيت المكتبات المطلوبة (اختياري للإنتاج)
+### 2. تشغيل Migration
+
 ```bash
-# لتحويل HTML إلى PDF
-composer require barryvdh/laravel-dompdf
-
-# لتحويل PDF إلى صورة (إذا لزم الأمر)
-# تأكد من تثبيت ImageMagick على الخادم
+php artisan migrate
 ```
 
-### 4. ربط العلاقات في نموذج PosSale
-أضف حقل الهاتف في قاعدة البيانات:
-```sql
-ALTER TABLE pos_sales ADD COLUMN customer_phone VARCHAR(20) NULL;
-```
+### 3. استخدام الخدمة في الكود
 
-## أمثلة الاستخدام
-
-### مثال 1: إرسال فاتورة جديدة مع الواتساب
 ```php
-// في الواجهة الأمامية
-const saleData = {
-    customer_name: 'محمد أحمد',
-    customer_phone: '01234567890',
-    send_whatsapp: true,
-    items: [
-        { barcode: '123456', name: 'دواء', price: 50, quantity: 2 }
-    ],
-    total_amount: 100
-};
+use App\Services\Invoice\InvoiceNotificationService;
+use App\Models\Sale;
 
-fetch('/api/v1/sales', {
+// بعد حفظ الفاتورة
+$sale = Sale::create($saleData);
+
+// إرسال الفاتورة عبر الواتساب
+$service = app(InvoiceNotificationService::class);
+$result = $service->sendInvoice(
+    sale: $sale,
+    channels: [
+        'whatsapp' => [
+            'sendImage' => true,
+            'sendPDF' => false,
+            'customMessage' => 'شكراً لتسوقكم من صيدليتنا!'
+        ]
+    ]
+);
+```
+
+### 4. استخدام الـ API
+
+```javascript
+// بعد حفظ الفاتورة
+const response = await fetch(`/api/v1/sales/${saleId}/send-notifications`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(saleData)
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken
+    },
+    body: JSON.stringify({
+        channels: {
+            whatsapp: {
+                sendImage: true,
+                sendPDF: false,
+                customMessage: 'رسالة مخصصة'
+            }
+        }
+    })
 });
 ```
 
-### مثال 2: إرسال فاتورة موجودة
-```javascript
-// من صفحة الفاتورة
-function sendExistingInvoice(invoiceId, phone) {
-    fetch(`/api/v1/sales/${invoiceId}`)
-        .then(response => response.json())
-        .then(sale => {
-            // استخدم html2canvas لتحويل الفاتورة إلى صورة
-            // ثم أرسلها عبر الواتساب
-        });
+## 🔧 الإعدادات المتقدمة
+
+### إعدادات الشركة (تُخزن في جدول companies)
+
+```php
+// invoice_notification_settings في جدول companies
+[
+    'whatsapp_enabled' => true,
+    'send_as_image' => true,
+    'send_as_pdf' => false,
+    'default_invoice_message' => 'مرحباً {customer_name}، فاتورتك رقم {invoice_number}',
+    'auto_send_invoice' => true, // تفعيل الإرسال التلقائي
+]
+```
+
+### إعدادات العميل (تُخزن في جدول parties)
+
+```php
+// notification_preferences في جدول parties
+[
+    'whatsapp' => true,
+    'sms' => false,
+    'email' => true,
+    'preferred_language' => 'ar'
+]
+```
+
+## 📊 متغيرات الرسالة
+
+| المتغير | الوصف | مثال |
+|---------|-------|------|
+| `{customer_name}` | اسم العميل | "محمد أحمد" |
+| `{invoice_number}` | رقم الفاتورة | "S-00001" |
+| `{total_amount}` | المبلغ الإجمالي | "150.00" |
+| `{date}` | التاريخ | "2024-12-01" |
+| `{time}` | الوقت | "14:30" |
+| `{company_name}` | اسم الشركة | "صيدلية النور" |
+| `{branch_name}` | اسم الفرع | "الفرع الرئيسي" |
+
+## 🔄 الإرسال التلقائي
+
+لتمكين الإرسال التلقائي بعد الحفظ:
+
+```php
+// في SaleController بعد الحفظ
+if ($company->invoice_notification_settings['auto_send_invoice'] ?? false) {
+    AutoSendInvoiceJob::dispatch($sale, ['whatsapp' => ['sendImage' => true]]);
 }
 ```
 
-## ملاحظات مهمة
+## 🛠️ التوافقية
 
-1. **الأمان**: تأكد من إعداد رمز WhatsApp API الخاص بك في ملف .env
-2. **التنظيف**: قم بتنظيف ملفات الفواتير في `storage/app/invoices` دورياً
-3. **النسخة الموجودة**: تم تعديل `PosSaleController.php` لإضافة الإرسال التلقائي
-4. **التوثيق**: راجع [وثائق WhatsApp Business API](https://developers.facebook.com/docs/whatsapp/business-management-api) للحصول على تفاصيل إضافية
+- Laravel 9+
+- PHP 8.1+
+- WhatsApp Business API (Meta/Facebook)
+- اختياري: barryvdh/laravel-dompdf لتوليد PDF
+- اختياري: spatie/browsershot لتوليد الصور
 
-## المزايا
-- ✅ إرسال تلقائي للفواتير عند الحفظ
-- ✅ دعم الطباعة المباشرة
-- ✅ تحويل الفاتورة إلى صورة عالية الجودة
-- ✅ تنسيق الملف الدولي E.164 لأرقام الهواتف
-- ✅ تسجيل الأخطاء للمراجعة لاحقاً
+## 📝 ملاحظات مهمة
 
-## الملفات الإضافية
-- `sales_invoice_whatsapp.html` - تصميم توضيحي للميزة
-- `IMPLEMENTATION_PLAN_WHATSAPP_INVOICE.md` - خطة التنفيذ التفصيلية
+1. النظام يدعم الآن الإرسال كـ PDF بالإضافة للصورة
+2. تم تحسين WhatsAppService لإرجاع بيانات مفصلة (message_id, status)
+3. InvoiceImageService تم تحويله إلى فئة InvoiceImageGenerator
+4. النظام يدعم حفظ الإعدادات كافتراضية في localStorage
+5. يدعم إعادة الإرسال للإشعارات الفاشلة (حتى 3 مرات)
+
+## 🆘 الدعم
+
+لأي استفسارات أو مشاكل، يرجى التواصل مع فريق التطوير.

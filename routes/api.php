@@ -2,7 +2,13 @@
 
 use App\Http\Controllers\Api as Api;
 use App\Http\Controllers\API\AuthController as ApiAuthController;
+use App\Http\Controllers\API\HealthController;
 use Illuminate\Support\Facades\Route;
+
+// Health Check Endpoints (No Auth Required)
+Route::get('/health', HealthController::class);
+Route::get('/health/ready', [HealthController::class, 'ready']);
+Route::get('/health/live', [HealthController::class, 'live']);
 
 Route::prefix('v1')->group(function () {
 
@@ -17,12 +23,14 @@ Route::prefix('v1')->group(function () {
     Route::post('/login', [ApiAuthController::class, 'login']);
     Route::post('/forgot-password', [ApiAuthController::class, 'forgotPassword']);
     Route::post('/reset-password', [ApiAuthController::class, 'resetPassword']);
+    Route::post('/barcode-login', [ApiAuthController::class, 'barcodeLogin']);
 
     Route::prefix('auth')->group(function () {
         Route::post('/register', [ApiAuthController::class, 'register']);
         Route::post('/login', [ApiAuthController::class, 'login']);
         Route::post('/forgot-password', [ApiAuthController::class, 'forgotPassword']);
         Route::post('/reset-password', [ApiAuthController::class, 'resetPassword']);
+        Route::post('/barcode-login', [ApiAuthController::class, 'barcodeLogin']);
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('/logout', [ApiAuthController::class, 'logout']);
@@ -33,6 +41,12 @@ Route::prefix('v1')->group(function () {
             Route::put('/profile', [ApiAuthController::class, 'updateProfile']);
             Route::post('/email/resend', [ApiAuthController::class, 'resendVerificationEmail']);
             Route::post('/email/verify', [ApiAuthController::class, 'verifyEmail']);
+            
+            // Two-Factor Authentication
+            Route::post('/two-factor/setup', [ApiAuthController::class, 'setupTwoFactor']);
+            Route::post('/two-factor/enable', [ApiAuthController::class, 'enableTwoFactor']);
+            Route::post('/two-factor/disable', [ApiAuthController::class, 'disableTwoFactor']);
+            Route::post('/two-factor/recovery-codes', [ApiAuthController::class, 'regenerateRecoveryCodes']);
         });
     });
 
@@ -66,6 +80,8 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('sales', Api\AcnooSaleController::class);
             Route::post('pos/sales/validate-inventory', [Api\AcnooSaleController::class, 'validateInventory']);
             Route::post('send-invoice-whatsapp', [Api\InvoiceWhatsAppController::class, 'sendInvoice']);
+            Route::post('{sale}/send-notifications', [Api\InvoiceNotificationController::class, 'send']);
+            Route::get('{sale}/notifications', [Api\InvoiceNotificationController::class, 'index']);
         Route::apiResource('sales-return', Api\SaleReturnController::class)->only('index', 'store', 'show');
         Route::apiResource('purchases-return', Api\PurchaseReturnController::class)->only('index', 'store', 'show');
         Route::apiResource('invoices', Api\AcnooInvoiceController::class)->only('index');
@@ -105,6 +121,7 @@ Route::prefix('v1')->group(function () {
 
         Route::apiResource('products-catalog', \App\Http\Controllers\API\V1\ProductCatalogController::class);
         Route::apiResource('product-stocks', \App\Http\Controllers\API\V1\ProductStockController::class);
+        Route::get('product-stocks/search-across-branches', [API\V1\ProductStockController::class, 'searchAcrossBranches']);
 
         Route::get('new-invoice', [Api\AcnooInvoiceController::class, 'newInvoice']);
         Route::get('/sign-out', [Api\Auth\AuthController::class, 'signOut']);
@@ -210,5 +227,59 @@ Route::prefix('v1')->group(function () {
         Route::post('notifications/mark-all-read', [API\V1\NotificationController::class, 'markAllAsRead']);
         Route::get('notifications/stats', [API\V1\NotificationController::class, 'stats']);
         Route::apiResource('notifications', API\V1\NotificationController::class)->only(['index', 'destroy']);
+
+        // ============================================================
+        // V1 - Attendance (Pharmacy Staff)
+        // ============================================================
+        Route::post('attendance/check-in', [API\V1\AttendanceController::class, 'checkIn']);
+        Route::post('attendance/check-out', [API\V1\AttendanceController::class, 'checkOut']);
+        Route::get('attendance/history', [API\V1\AttendanceController::class, 'history']);
+        Route::get('attendance/statistics', [API\V1\AttendanceController::class, 'statistics']);
+        Route::get('attendance/qr-token', [API\V1\AttendanceController::class, 'generateQrToken']);
+
+        // ============================================================
+        // V1 - Expiry Alerts & Demand Forecast
+        // ============================================================
+        Route::get('expiry-alerts', [API\V1\ExpiryAlertController::class, 'index']);
+        Route::get('expiry-alerts/statistics', [API\V1\ExpiryAlertController::class, 'statistics']);
+        Route::post('expiry-alerts/send', [API\V1\ExpiryAlertController::class, 'sendAlerts']);
+        Route::get('reorder-suggestions', [API\V1\ExpiryAlertController::class, 'reorderSuggestions']);
+        Route::get('demand-forecast', [API\V1\ExpiryAlertController::class, 'forecast']);
+
+        // ============================================================
+        // V1 - Fraud Detection
+        // ============================================================
+        Route::get('fraud/alerts', [API\V1\FraudDetectionController::class, 'index']);
+        Route::get('fraud/suspicious-transactions', [API\V1\FraudDetectionController::class, 'suspiciousTransactions']);
+
+        // ============================================================
+        // V1 - Invoice OCR Processing
+        // ============================================================
+        Route::post('invoice-ocr/upload', [API\V1\InvoiceOcrController::class, 'upload']);
+        Route::post('invoice-ocr/approve', [API\V1\InvoiceOcrController::class, 'approve']);
+
+        // ============================================================
+        // Payments - Digital Wallets & InstaPay
+        // ============================================================
+        Route::prefix('payments')->group(function () {
+            Route::get('/methods', [Api\PaymentController::class, 'availableMethods']);
+            Route::post('/initiate', [Api\PaymentController::class, 'initiate']);
+            Route::post('/verify', [Api\PaymentController::class, 'verify']);
+            Route::post('/refund', [Api\PaymentController::class, 'refund']);
+            Route::get('/{payment}', [Api\PaymentController::class, 'show']);
+            Route::get('/', [Api\PaymentController::class, 'index']);
+            
+            // POS-specific payment endpoints
+            Route::post('/pos/quick-pay', [Api\PosPaymentController::class, 'quickPay']);
+            Route::post('/pos/split-payment', [Api\PosPaymentController::class, 'splitPayment']);
+        });
     });
+});
+
+// ============================================================
+// Payment Webhooks (No Auth - Verified via HMAC)
+// ============================================================
+Route::prefix('webhooks/payments')->group(function () {
+    Route::post('/paymob', [Api\PaymentWebhookController::class, 'handlePaymob']);
+    Route::post('/{gateway}', [Api\PaymentWebhookController::class, 'handle'])->middleware('throttle:webhooks');
 });

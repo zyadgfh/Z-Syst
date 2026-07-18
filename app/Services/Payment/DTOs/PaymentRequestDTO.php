@@ -29,6 +29,29 @@ class PaymentRequestDTO
     ) {}
 
     /**
+     * Create from array data
+     */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            companyId: $data['company_id'] ?? null,
+            paymentMethod: PaymentMethodType::from($data['payment_method_type']),
+            amount: (float) ($data['amount'] ?? 0),
+            currency: $data['currency'] ?? 'EGP',
+            merchantReference: $data['merchant_reference'] ?? uniqid('payment_'),
+            payableType: $data['payable_type'] ?? null,
+            payableId: $data['payable_id'] ?? null,
+            customerId: $data['customer_id'] ?? null,
+            userId: $data['user_id'] ?? auth()->id(),
+            branchId: $data['branch_id'] ?? null,
+            paymentMethodDetails: $data['payment_method_details'] ?? null,
+            description: $data['description'] ?? null,
+            callbackUrl: $data['callback_url'] ?? null,
+            metadata: $data['metadata'] ?? null,
+        );
+    }
+
+    /**
      * Create from sale data
      */
     public static function fromSale(

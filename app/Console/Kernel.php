@@ -13,6 +13,20 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('demo:restore-public-images')->everyThirtyMinutes();
+        
+        // Expiry alerts - run daily at 8 AM
+        $schedule->command('pharmacy:check-expiry --days=30')
+            ->dailyAt('08:00')
+            ->withoutOverlapping();
+            
+        // Expiry alerts for upcoming 60 and 90 days
+        $schedule->command('pharmacy:check-expiry --days=60')
+            ->dailyAt('08:30')
+            ->withoutOverlapping();
+            
+        $schedule->command('pharmacy:check-expiry --days=90')
+            ->dailyAt('09:00')
+            ->withoutOverlapping();
     }
 
     /**

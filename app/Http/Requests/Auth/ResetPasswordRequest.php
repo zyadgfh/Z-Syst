@@ -1,10 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rules\Password;
 
 class ResetPasswordRequest extends FormRequest
 {
@@ -16,19 +17,20 @@ class ResetPasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email', 'max:255', 'exists:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'token' => ['required'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'confirmed', Password::defaults()],
         ];
     }
 
-    public function messages(): array
+    protected function failedValidation(Validator $validator)
     {
-        return [
-            'email.required' => __('validation.required', ['attribute' => 'email']),
-            'email.email' => __('validation.email'),
-            'password.required' => __('validation.required', ['attribute' => 'password']),
-            'password.min' => __('validation.min.string', ['attribute' => 'password', 'min' => 8]),
-            'password.confirmed' => __('validation.confirmed', ['attribute' => 'password']),
-        ];
+        throw new HttpResponseException(
+            response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422)
+        );
     }
 }

@@ -104,4 +104,40 @@ class PaymentException extends Exception
             gatewayName: $gateway,
         );
     }
+
+    public static function authenticationFailed(?string $gateway = null): self
+    {
+        return new self(
+            message: 'Authentication failed with payment gateway.',
+            code: 500,
+            gatewayName: $gateway,
+        );
+    }
+
+    public static function initiationFailed(?string $gateway = null, $data = null): self
+    {
+        $reason = $data['message'] ?? 'Payment initiation failed.';
+        return new self(
+            message: $reason,
+            code: 400,
+            gatewayName: $gateway,
+        );
+    }
+
+    public static function invalidTransaction(?string $reason = null): self
+    {
+        return new self(
+            message: $reason ?? 'Invalid transaction.',
+            code: 400,
+        );
+    }
+
+    public static function cannotRefund(?string $gateway = null, ?string $reason = null): self
+    {
+        return new self(
+            message: $reason ?? 'Cannot process refund for this transaction.',
+            code: 400,
+            gatewayName: $gateway,
+        );
+    }
 }

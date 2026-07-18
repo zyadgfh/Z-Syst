@@ -18,6 +18,15 @@ trait HasCompany
                 $model->{$column} = app('tenant.company_id');
             }
         });
+
+        static::updating(function ($model) {
+            $column = $model->getCompanyColumn();
+
+            // Prevent tenant switching
+            if ($model->isDirty($column) && $model->getOriginal($column) !== $model->{$column}) {
+                throw new \Exception('Cannot change company_id - tenant switching is not allowed');
+            }
+        });
     }
 
     protected function getCompanyColumn(): string

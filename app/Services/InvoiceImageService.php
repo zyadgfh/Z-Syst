@@ -2,140 +2,147 @@
 
 namespace App\Services;
 
+use App\Models\Sale;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Storage;
 
 class InvoiceImageService
 {
     /**
-     * Generate invoice HTML content for display/print/save
+     * Generate invoice image from sale model
+     *
+     * @param Sale $sale The sale model
+     * @return string Path to generated image
      */
-    public function generateInvoiceHtml($sale): string
+    public function generate(Sale $sale): string
     {
-        $invoiceNumber = 'S-' . str_pad($sale->id, 5, '0', STR_PAD_LEFT);
-        
-        $data = [
+        $invoiceNumber = $sale->invoiceNumber;
+        $filename = "invoices/invoice-{$invoiceNumber}.png";
+        $path = "public/{$filename}";
+
+        // Ensure directory exists
+        if (!Storage::exists('public/invoices')) {
+            Storage::makeDirectory('public/invoices');
+        }
+
+        // Get invoice details
+        $details = $sale->details ?? collect([]);
+        $items = $details->map(function ($detail) {
+            return [
+                'name' => $detail->product->name ?? 'منتج',
+                'quantity' => $detail->quantity ?? 1,
+                'unit_price' => $detail->unit_price ?? 0,
+                'line_total' => $detail->line_total ?? ($detail->quantity * $detail->unit_price),
+            ];
+        })->toArray();
+
+        // Generate HTML first
+        $html = View::make('invoices.sale-print', [
             'sale' => $sale,
             'invoice_number' => $invoiceNumber,
             'date' => $sale->created_at->format('Y-m-d'),
-            'customer' => $sale->customer_name,
-            'customer_phone' => $sale->customer_phone ?? null,
-            'items' => $sale->saleItems ?? $sale->items,
-            'subtotal' => $sale->subtotal,
-            'tax_amount' => $sale->tax_amount,
-            'total_amount' => $sale->total_amount,
-            'payment_method' => $sale->payment_method,
-            'notes' => $sale->notes,
-            'company' => $sale->company ?? null,
-        ];
-        
-        return View::make('invoices.sale-print', $data)->render();
+            'customer' => $sale->party->name ?? 'عميلنا العزيز',
+            'customer_phone' => $sale->party->phone ?? null,
+            'items' => $items,
+            'subtotal' => $sale->totalAmount / 1.14 ?? $sale->totalAmount,
+            'tax_amount' => $sale->totalAmount * 0.14 ?? 0,
+            'total_amount' => $sale->totalAmount,
+            'payment_method' => $sale->paymentType ?? 'نقداً',
+            'company' => $sale->company,
+            'branch' => $sale->branch,
+        ])->render();
+
+        // Try browsershot if available (puppeteer)
+        if (class_exists(\Spatie\Browsershot\Browsershot::class)) {
+            $fullPath = storage_path("app/{$path}");
+            \Spatie\Browsershot\Browsershot::html($html)
+                ->windowSize(800, 1200)
+                ->deviceScaleFactor(2)
+                ->save($fullPath);
+            return $filename;
+        }
+
+        // Fallback: Generate using GD
+        return $this->generateWithGD($sale, $invoiceNumber);
     }
 
     /**
-     * Generate invoice image (base64) from sale data
-     * Using html2canvas frontend approach - generates a simple image for demo
+     * Generate invoice image using GD library (fallback)
      */
-    public function generateInvoiceImage($sale): string
+    protected function generateWithGD(Sale $sale, string $invoiceNumber): string
     {
-        // For production: Use barryvdh/laravel-dompdf to generate PDF
-        // Then convert PDF to image using imagemagick
-        
-        // Generate a simple invoice image using GD
-        $invoiceNumber = 'S-' . str_pad($sale->id, 5, '0', STR_PAD_LEFT);
-        
+        $filename = "invoices/invoice-{$invoiceNumber}.jpg";
+        $path = "public/{$filename}";
+
         // Create invoice image
         $width = 600;
         $height = 800;
         $image = imagecreate($width, $height);
-        
+
         // Colors
         $white = imagecolorallocate($image, 255, 255, 255);
         $blue = imagecolorallocate($image, 102, 118, 234);
         $dark = imagecolorallocate($image, 45, 55, 72);
         $gray = imagecolorallocate($image, 160, 174, 192);
-        
+
         // Fill background
         imagefilledrectangle($image, 0, 0, $width, $height, $white);
-        
+
         // Header
         imagefilledrectangle($image, 0, 0, $width, 60, $blue);
         imagestring($image, 5, 200, 20, "فاتورة مبيعات", $white);
         imagestring($image, 4, 200, 40, "#" . $invoiceNumber, $white);
-        
+
         // Invoice details
         $y = 80;
         imagestring($image, 3, 30, $y, "التاريخ: " . $sale->created_at->format('Y-m-d'), $dark);
-        imagestring($image, 3, 30, $y + 20, "العميل: " . ($sale->customer_name ?? 'غير محدد'), $dark);
-        imagestring($image, 3, 30, $y + 40, "طريقة الدفع: " . ($sale->payment_method ?? 'نقداً'), $dark);
-        
+        imagestring($image, 3, 30, $y + 20, "العميل: " . ($sale->party->name ?? 'غير محدد'), $dark);
+        imagestring($image, 3, 30, $y + 40, "طريقة الدفع: " . ($sale->paymentType ?? 'نقداً'), $dark);
+
         // Items table header
         $y = 140;
         imagefilledrectangle($image, 30, $y, 570, $y + 30, $gray);
         imagestring($image, 3, 40, $y + 8, "الصنف", $dark);
-        imagestring($image, 3, 350, $y + 8, "الكمية", $dark);
-        imagestring($image, 3, 450, $y + 8, "السعر", $dark);
-        imagestring($image, 3, 520, $y + 8, "الإجمالي", $dark);
-        
+        imagestring($image, 3, 250, $y + 8, "الكمية", $dark);
+        imagestring($image, 3, 350, $y + 8, "السعر", $dark);
+        imagestring($image, 3, 450, $y + 8, "الإجمالي", $dark);
+
         // Items
-        $items = $sale->saleItems ?? $sale->items;
+        $details = $sale->details ?? collect([]);
         $itemY = $y + 40;
-        if (is_array($items)) {
-            foreach ($items as $index => $item) {
-                if ($itemY > 650) break; // Prevent overflow
-                $itemName = is_object($item) ? $item->name : ($item['name'] ?? 'منتج');
-                $itemQty = is_object($item) ? $item->quantity : ($item['quantity'] ?? 1);
-                $itemPrice = is_object($item) ? $item->unit_price : ($item['price'] ?? 0);
-                $itemTotal = is_object($item) ? $item->line_total : ($item['line_total'] ?? 0);
-                
-                imagestring($image, 3, 40, $itemY, substr($itemName, 0, 30), $dark);
-                imagestring($image, 3, 350, $itemY, $itemQty, $dark);
-                imagestring($image, 3, 450, $itemY, $itemPrice . " ج.م", $dark);
-                imagestring($image, 3, 520, $itemY, $itemTotal . " ج.م", $dark);
-                $itemY += 25;
-            }
+        foreach ($details as $index => $detail) {
+            if ($itemY > 650) break;
+            $itemName = $detail->product->name ?? 'منتج';
+            $itemQty = $detail->quantity ?? 1;
+            $itemPrice = $detail->unit_price ?? 0;
+            $itemTotal = $detail->line_total ?? ($itemQty * $itemPrice);
+
+            imagestring($image, 3, 40, $itemY, substr($itemName, 0, 25), $dark);
+            imagestring($image, 3, 250, $itemY, $itemQty, $dark);
+            imagestring($image, 3, 350, $itemY, number_format($itemPrice, 2), $dark);
+            imagestring($image, 3, 450, $itemY, number_format($itemTotal, 2), $dark);
+            $itemY += 25;
         }
-        
+
         // Total
         $y = 700;
-        imagestring($image, 4, 400, $y, "الإجمالي الكلي:", $blue);
-        imagestring($image, 4, 500, $y, number_format($sale->total_amount ?? 0, 2) . " ج.م", $blue);
-        
+        imagestring($image, 4, 350, $y, "الإجمالي الكلي:", $blue);
+        imagestring($image, 4, 450, $y, number_format($sale->totalAmount ?? 0, 2) . " ج.م", $blue);
+
         // Save image
-        $imagePath = storage_path("app/invoices/invoice_{$sale->id}.jpg");
-        if (!file_exists(storage_path('app/invoices'))) {
-            mkdir(storage_path('app/invoices'), 0755, true);
-        }
-        
-        ob_start();
-        imagejpeg($image, null, 90);
-        $imageData = ob_get_clean();
-        
+        $fullPath = storage_path("app/{$path}");
+        imagejpeg($image, $fullPath, 90);
         imagedestroy($image);
-        
-        // Save to file
-        imagejpeg(imagecreatefromstring($imageData), $imagePath);
-        
-        return base64_encode($imageData);
+
+        return $filename;
     }
 
     /**
-     * Generate PDF invoice for download/print
+     * Get image URL
      */
-    public function generateInvoicePdf($sale): string
+    public function getImageUrl(Sale $sale, ?string $path = null): string
     {
-        if (!file_exists(storage_path('app/invoices'))) {
-            mkdir(storage_path('app/invoices'), 0755, true);
-        }
-        
-        $invoiceNumber = 'S-' . str_pad($sale->id, 5, '0', STR_PAD_LEFT);
-        $pdfPath = storage_path("app/invoices/invoice_{$sale->id}.pdf");
-        
-        $html = $this->generateInvoiceHtml($sale);
-        
-        // For production: use barryvdh/laravel-dompdf
-        file_put_contents($pdfPath, $html); // Placeholder - stores HTML temporarily
-        
-        return $pdfPath;
+        $imagePath = $path ?? $this->generate($sale);
+        return asset('storage/' . $imagePath);
     }
 }

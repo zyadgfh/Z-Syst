@@ -24,6 +24,17 @@ class TenantScope implements Scope
         }
     }
 
+    public function applyForUser(Builder $builder, Model $model, $user)
+    {
+        // Super-admins can see all tenants
+        if ($user && $user->isSuperAdmin()) {
+            return $builder;
+        }
+
+        // Regular users only see their tenant
+        return $this->apply($builder, $model);
+    }
+
     /**
      * Remove the tenant scope from the query.
      * This allows queries to access all tenants when needed.

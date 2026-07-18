@@ -1,176 +1,131 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Services;
 
-use App\Exceptions\ApiException;
 use App\Models\User;
-use Illuminate\Auth\Events\PasswordReset;
+use App\Models\Company;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Auth\Events\Lockout;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
-use Laravel\Sanctum\NewAccessToken;
+use Illuminate\Validation\ValidationException;
 
-class AuthService extends BaseService
+class AuthService
 {
-    /**
-     * Register a new user.
-     */
-    public function register(array $data): User
+    public function register(array $data): array
     {
-        $existingUser = User::where('email', $data['email'])->first();
+        // Create company first
+        $company = Company::create([
+            'name' => $data['company_name'],
+            'slug' => Str::slug($data['company_name']),
+            'email' => $data['email'],
+            'currency' => 'EGP',
+            'timezone' => 'Africa/Cairo',
+            'is_active' => true,
+        ]);
 
-        if ($existingUser) {
-            throw ApiException::conflict('Email already registered');
-        }
+        // Create user
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'phone' => $data['phone'] ?? null,
+            'company_id' => $company->id,
+            'status' => true,
+            'lang' => 'ar',
+        ]);
 
-        $data['password'] = Hash::make($data['password']);
-        $data['role'] = $data['role'] ?? 'user';
-        $data['is_active'] = true;
-
-        /** @var User $user */
-        $user = User::query()->create($data);
+        // Assign super-admin role
+        $user->assignRole('super-admin');
 
         event(new Registered($user));
 
-        return $user;
-    }
-
-    /**
-     * Authenticate a user and return token.
-     */
-    public function login(array $credentials): array
-    {
-        $user = User::where('email', $credentials['email'])->first();
-
-        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
-            throw ApiException::unauthorized('Invalid email or password');
-        }
-
-        $isActive = true;
-        if (isset($user->is_active)) {
-            $isActive = (bool) $user->is_active;
-        } elseif (isset($user->status)) {
-            $isActive = $user->status === 'active';
-        }
-
-        if (! $isActive) {
-            throw ApiException::forbidden('Account is deactivated');
-        }
-
-        if ($user->two_factor_confirmed_at) {
-            if (empty($credentials['two_factor_code'])) {
-                throw ApiException::unauthorized('Two-factor authentication code is required.');
-            }
-
-            $twoFactorService = app(TwoFactorService::class);
-
-            if (! $twoFactorService->verify($user, $credentials['two_factor_code'])) {
-                throw ApiException::unauthorized('Invalid two-factor authentication code.');
-            }
-        }
-
-        $token = $user->createToken(
-            $credentials['device_name'] ?? request()->userAgent() ?? 'api-token',
-            $credentials['abilities'] ?? ['*']
-        );
-
-        $user->update([
-            'last_login_at' => now(),
-            'last_activity_at' => now(),
-        ]);
+        // Create token
+        $token = $user->createToken('auth-token')->plainTextToken;
 
         return [
-            'user' => $user->load(['company', 'branch', 'department']),
-            'token' => $token->plainTextToken,
-            'abilities' => $token->accessToken->abilities,
+            'user' => $user->load('roles.permissions'),
+            'token' => $token,
+            'company' => $company,
         ];
     }
 
-    public function loginWithTwoFactor(array $credentials): array
+    public function login(array $data): array
     {
-        return $this->login($credentials);
+        $user = User::where('email', $data['email'])->first();
+
+        if (! $user || ! Hash::check($data['password'], $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['The provided credentials are incorrect.'],
+            ]);
+        }
+
+        if (! $user->status) {
+            throw ValidationException::withMessages([
+                'email' => ['Your account has been deactivated.'],
+            ]);
+        }
+
+        // Check 2FA
+        if ($user->two_factor_secret && ! isset($data['two_factor_code'])) {
+            return [
+                'requires_two_factor' => true,
+                'message' => 'Two-factor authentication code required.',
+            ];
+        }
+
+        if ($user->two_factor_secret && isset($data['two_factor_code'])) {
+            if (! $this->verifyTwoFactor($user, $data['two_factor_code'])) {
+                throw ValidationException::withMessages([
+                    'two_factor_code' => ['The provided two-factor code is invalid.'],
+                ]);
+            }
+        }
+
+        // Delete existing tokens
+        $user->tokens()->delete();
+
+        // Create new token
+        $token = $user->createToken('auth-token')->plainTextToken;
+
+        return [
+            'user' => $user->load('roles.permissions', 'company', 'branch', 'department'),
+            'token' => $token,
+        ];
     }
 
-    public function findByEmail(string $email): ?User
-    {
-        return User::where('email', $email)->first();
-    }
-
-    /**
-     * Logout the user (revoke current token).
-     */
     public function logout(User $user): void
     {
         $user->currentAccessToken()->delete();
     }
 
-    /**
-     * Logout from all devices (revoke all tokens).
-     */
     public function logoutAllDevices(User $user): void
     {
         $user->tokens()->delete();
     }
 
-    /**
-     * Get authenticated user with relations.
-     */
-    public function me(User $user): User
+    public function refreshToken(User $user)
     {
-        return $user->load([
-            'company',
-            'branch',
-            'department',
-            'roles.permissions',
-        ]);
+        $user->currentAccessToken()->delete();
+        return $user->createToken('auth-token');
     }
 
-    /**
-     * Update user profile.
-     */
-    public function updateProfile(User $user, array $data): User
+    public function me(User $user): array
     {
-        $user->update($data);
-
-        return $user->fresh()->load(['company', 'branch', 'department']);
+        return $user->load('roles.permissions', 'company', 'branch', 'department');
     }
 
-    /**
-     * Change user password.
-     */
-    public function changePassword(User $user, string $currentPassword, string $newPassword): User
-    {
-        if (! Hash::check($currentPassword, $user->password)) {
-            throw ApiException::badRequest('Current password is incorrect');
-        }
-
-        $user->update([
-            'password' => Hash::make($newPassword),
-        ]);
-
-        return $user->fresh();
-    }
-
-    /**
-     * Send password reset link.
-     */
     public function sendPasswordResetLink(string $email): string
     {
         $status = Password::sendResetLink(['email' => $email]);
 
-        if ($status !== Password::RESET_LINK_SENT) {
-            throw ApiException::badRequest(__($status));
-        }
-
-        return __($status);
+        return $status;
     }
 
-    /**
-     * Reset password with token.
-     */
     public function resetPassword(array $data): string
     {
         $status = Password::reset(
@@ -186,20 +141,34 @@ class AuthService extends BaseService
             }
         );
 
-        if ($status !== Password::PASSWORD_RESET) {
-            throw ApiException::badRequest(__($status));
-        }
-
-        return __($status);
+        return $status;
     }
 
-    /**
-     * Refresh token (create new, delete old).
-     */
-    public function refreshToken(User $user): NewAccessToken
+    public function updateProfile(User $user, array $data): User
     {
-        $user->currentAccessToken()->delete();
+        $user->update($data);
 
-        return $user->createToken('api-token');
+        return $user->fresh();
+    }
+
+    public function changePassword(User $user, string $currentPassword, string $newPassword): User
+    {
+        if (! Hash::check($currentPassword, $user->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => ['The current password is incorrect.'],
+            ]);
+        }
+
+        $user->update([
+            'password' => Hash::make($newPassword),
+        ]);
+
+        return $user->fresh();
+    }
+
+    protected function verifyTwoFactor(User $user, string $code): bool
+    {
+        $twoFactorService = app(TwoFactorService::class);
+        return $twoFactorService->verify($user, $code);
     }
 }

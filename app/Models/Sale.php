@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\InvoiceNotification;
 use App\Traits\HasCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -62,6 +63,22 @@ class Sale extends Model
         return $this->hasMany(SaleReturn::class, 'sale_id');
     }
 
+    /**
+     * العلاقة مع الإشعارات
+     */
+    public function notifications()
+    {
+        return $this->hasMany(InvoiceNotification::class, 'sale_id');
+    }
+
+    /**
+     * العلاقة مع الفروع
+     */
+    public function branch() : BelongsTo
+    {
+        return $this->belongsTo(Branch::class, 'branch_id');
+    }
+
     public static function boot()
     {
         parent::boot();
@@ -89,4 +106,30 @@ class Sale extends Model
         'meta' => 'json',
         'sale_data' => 'json',
     ];
+
+    /**
+     * Get total items count
+     */
+    public function getTotalItemsAttribute(): int
+    {
+        return $this->details->sum('quantities') ?? 0;
+    }
+
+    /**
+     * Check if customer has WhatsApp preference
+     */
+    public function customerWantsWhatsApp(): bool
+    {
+        $preferences = $this->party->notification_preferences ?? [];
+        return $preferences['whatsapp'] ?? true;
+    }
+
+    /**
+     * Get invoice PDF URL
+     */
+    public function getPdfUrlAttribute(): string
+    {
+        $pdfPath = "invoices/invoice-{$this->invoiceNumber}.pdf";
+        return asset('storage/' . $pdfPath);
+    }
 }
