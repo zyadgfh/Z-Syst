@@ -1,3 +1,46 @@
+# IMPLEMENTATION ROADMAP — Phase 1 (Foundation Fixes)
+
+هذا الملف يحدد المهام التفصيلية للمرحلة الأولى مع أوامر تنفيذية للبيئة المحلية.
+
+الأهداف الرئيسية:
+- إصلاح الهجرات الأساسية وإضافة أي مفقودات
+- إعداد Tenant middleware وTenantManager
+- تنفيذ نظام المصادقة الكامل (AuthController + AuthService)
+- إعداد Global Exception Handler بصيغة JSON
+- تحضير seeders لبيئة الـ demo
+
+خطوات التنفيذ المُقترحة (ترتيب عملي):
+
+1) فحص المتطلبات المحلية
+   - تأكد أن `php`, `composer`, `node`, `npm`/`pnpm` مثبتين
+
+2) تثبيت الاعتمادات
+   - `composer install --no-dev --optimize-autoloader`
+   - `npm install` (أو `pnpm install`)
+
+3) ضبط ملف البيئة
+   - انسخ `.env.example` إلى `.env` واملأ إعدادات قاعدة البيانات
+   - `php artisan key:generate`
+
+4) تشغيل الهجرات والـ seeders
+   - `php artisan migrate --force`
+   - `php artisan db:seed --class=DemoSeeder`
+
+5) تحقق سريع
+   - افتح: `GET /api/v1/health`
+   - سجّل الدخول باستخدام `demo@local` / `secret`
+
+مخرجات متوقعة بعد الانتهاء:
+- قاعدة بيانات مهيأة بهجرة كاملة
+- حساب تجريبي جاهز (Demo Admin)
+- نقاط نهاية المصادقة جاهزة للاختبار
+
+المخاطر والملاحظات:
+- بيئة Windows قد تتطلب تثبيت إضافات (PHP extensions). راجع سجل الأخطاء عند الفشل.
+- إذا كانت بيئة الـ PHP غير متاحة على جهاز العمل، يمكنك تشغيل الهجرات على خادم محلي/حاوية Docker.
+
+---
+Next: شغّل سكربت الإعداد `scripts/setup-dev.ps1` أو اتبع الأوامر أعلاه محليًا.
 # 🗺️ خطة التنفيذ المفصلة - Z-Syst Pharmacy Management SaaS (PharmaSync)
 
 ## 📅 الجدول الزمني الإجمالي

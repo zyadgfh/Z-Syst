@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\Customer;
 use App\Models\DrugInteraction;
-use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\ProductPriceHistory;
 use App\Models\ProductVariant;
-use App\Models\StockMovement;
+use App\Models\Stock;
+use App\Models\Manufacturer;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -40,7 +38,7 @@ class ProductService
             'tax:id,name,rate',
             'variants:id,product_id,variant_name,barcode,sales_price',
         ])
-            ->withSum('inventory', 'quantity');
+            ->withSum('stocks', 'productStock');
 
         // Text search (name, barcode, generic, brand)
         if (!empty($filters['search'])) {
@@ -56,7 +54,7 @@ class ProductService
 
         // Barcode exact match
         if (!empty($filters['barcode'])) {
-            $query->where('barcode', $filters['search']);
+            $query->where('barcode', $filters['barcode']);
         }
 
         // Category filter
@@ -86,23 +84,23 @@ class ProductService
 
         // Low stock filter
         if (!empty($filters['low_stock'])) {
-            $query->whereRaw('COALESCE((SELECT SUM(quantity) FROM inventory WHERE product_id = products.id), 0) <= reorder_level');
+            $query->whereRaw('COALESCE((SELECT SUM(productStock) FROM stocks WHERE product_id = products.id), 0) <= reorder_level');
         }
 
         // Expired products filter
         if (!empty($filters['expired'])) {
-            $query->whereHas('inventory', function ($q) {
-                $q->where('expiry_date', '<', now()->toDateString())
-                    ->where('quantity', '>', 0);
+            $query->whereHas('stocks', function ($q) {
+                $q->where('expire_date', '<', now()->toDateString())
+                    ->where('productStock', '>', 0);
             });
         }
 
         // Expiring soon filter
         if (!empty($filters['expiring_soon'])) {
             $days = (int) ($filters['expiring_soon_days'] ?? 90);
-            $query->whereHas('inventory', function ($q) use ($days) {
-                $q->whereBetween('expiry_date', [now(), now()->addDays($days)])
-                    ->where('quantity', '>', 0);
+            $query->whereHas('stocks', function ($q) use ($days) {
+                $q->whereBetween('expire_date', [now(), now()->addDays($days)])
+                    ->where('productStock', '>', 0);
             });
         }
 
@@ -115,9 +113,9 @@ class ProductService
     public function getByBarcode(string $barcode): ?Product
     {
         return Product::where('barcode', $barcode)
-            ->with(['category', 'manufacturer', 'variants', 'inventory' => function ($q) {
-                $q->where('quantity', '>', 0)
-                    ->orderBy('expiry_date', 'asc');
+            ->with(['category', 'manufacturer', 'variants', 'stocks' => function ($q) {
+                $q->where('productStock', '>', 0)
+                    ->orderBy('expire_date', 'asc');
             }])
             ->first();
     }
@@ -194,12 +192,12 @@ class ProductService
                 'updated_by' => $userId,
             ]);
 
-            // Create initial inventory if batch/qty provided
-            if (!empty($data['batch_number']) || !empty($data['quantity'])) {
-                $this->createInventory($product, [
-                    'batch_number' => $data['batch_number'] ?? $this->generateBatchNumber(),
-                    'expiry_date' => $data['expiry_date'] ?? null,
-                    'quantity' => $data['quantity'] ?? 0,
+            // Create initial stock if batch/qty provided
+            if (!empty($data['batch_no']) || !empty($data['qty'])) {
+                $this->createStock($product, [
+                    'batch_no' => $data['batch_no'] ?? $this->generateBatchNumber(),
+                    'expire_date' => $data['expire_date'] ?? null,
+                    'productStock' => $data['qty'] ?? 0,
                     'purchase_price' => $data['purchase_price'] ?? $product->purchase_price,
                 ]);
             }
@@ -377,22 +375,20 @@ class ProductService
     }
 
     /**
-     * Create inventory record for a product.
+     * Create stock record for a product.
      */
-    protected function createInventory(Product $product, array $data): Inventory
+    protected function createStock(Product $product, array $data): Stock
     {
         $companyId = app('tenant.company_id');
         
         // Apply FEFO logic - use earliest expiry first
-        return Inventory::create([
+        return Stock::create([
             'company_id' => $companyId,
-            'branch_id' => $product->branch_id,
             'product_id' => $product->id,
-            'batch_number' => $data['batch_number'],
-            'expiry_date' => $data['expiry_date'],
-            'quantity' => $data['quantity'],
-            'purchase_price' => $data['purchase_price'],
-            'location' => $data['location'] ?? null,
+            'batch_no' => $data['batch_no'],
+            'expire_date' => $data['expire_date'],
+            'productStock' => $data['quantity'],
+            'purchase_price' => $data['purchase_price'] ?? null,
         ]);
     }
 

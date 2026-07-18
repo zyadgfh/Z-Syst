@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers as Web;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 
@@ -80,32 +81,61 @@ Route::get('/pharmacy/pos', function () {
     return view('pharmacy-pos');
 });
 
+Route::get('/pharmacy/medicines', function () {
+    return view('pharmacy-medicines', [
+        'medicines' => [
+            ['name' => 'باراسيتامول', 'stock' => 120, 'minimum_stock' => 20],
+            ['name' => 'أموكسيسيلين', 'stock' => 40, 'minimum_stock' => 10],
+        ],
+    ]);
+});
+
+Route::get('/pharmacy/sales', function () {
+    return view('pharmacy-sales', [
+        'sales' => [
+            ['invoice_number' => 'INV-1001', 'customer' => 'أحمد', 'total_amount' => 180],
+            ['invoice_number' => 'INV-1002', 'customer' => 'سارة', 'total_amount' => 320],
+        ],
+    ]);
+});
+
+Route::get('/pharmacy/purchases', function () {
+    return view('pharmacy-purchases', [
+        'purchases' => [
+            ['order_number' => 'PO-2001', 'supplier' => 'شركة الأدوية', 'total_amount' => 5400],
+            ['order_number' => 'PO-2002', 'supplier' => 'مورد صحي', 'total_amount' => 2900],
+        ],
+    ]);
+});
+
+Route::get('/pharmacy-dashboard', [DashboardController::class, 'index']);
+
 // Admin Routes - Linked to Admin Views
 Route::prefix('admin')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
-    
+
     Route::get('/patients', function () {
         return view('admin.patients');
     })->name('admin.patients');
-    
+
     Route::get('/doctors', function () {
         return view('admin.doctors');
     })->name('admin.doctors');
-    
+
     Route::get('/products', function () {
         return view('admin.products');
     })->name('admin.products');
-    
+
     Route::get('/purchase-orders', function () {
         return view('admin.purchase-orders');
     })->name('admin.purchase-orders');
-    
+
     Route::get('/stock-transfers', function () {
         return view('admin.stock-transfers');
     })->name('admin.stock-transfers');
-    
+
     Route::get('/insurance-claims', function () {
         return view('admin.insurance-claims');
     })->name('admin.insurance-claims');

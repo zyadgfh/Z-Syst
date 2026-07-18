@@ -8,7 +8,18 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        // Detect existing index names (SQLite)
+        $existingIndexNames = [];
+        try {
+            $indexes = \DB::select("PRAGMA index_list('users')");
+            foreach ($indexes as $idx) {
+                $existingIndexNames[] = $idx->name ?? null;
+            }
+        } catch (\Exception $e) {
+            // ignore if pragma not available
+        }
+
+        Schema::table('users', function (Blueprint $table) use ($existingIndexNames) {
             // Add missing fields if they don't exist
             if (! Schema::hasColumn('users', 'business_id')) {
                 $table->unsignedBigInteger('business_id')->nullable()->after('company_id');
@@ -52,11 +63,22 @@ return new class extends Migration
                 $table->timestamp('two_factor_confirmed_at')->nullable()->after('two_factor_recovery_codes');
             }
 
-            // Add indexes
-            $table->index('business_id');
-            $table->index('branch_id');
-            $table->index('department_id');
-            $table->index('status');
+            // Add indexes (guarded to avoid duplicate index errors)
+            if (! in_array('users_business_id_index', $existingIndexNames, true)) {
+                try { $table->index('business_id'); } catch (\Exception $e) {}
+            }
+
+            if (! in_array('users_branch_id_index', $existingIndexNames, true)) {
+                try { $table->index('branch_id'); } catch (\Exception $e) {}
+            }
+
+            if (! in_array('users_department_id_index', $existingIndexNames, true)) {
+                try { $table->index('department_id'); } catch (\Exception $e) {}
+            }
+
+            if (! in_array('users_status_index', $existingIndexNames, true)) {
+                try { $table->index('status'); } catch (\Exception $e) {}
+            }
         });
     }
 

@@ -57,6 +57,7 @@ class DatabaseSeeder extends Seeder
             NotificationSeeder::class,
             OptionSeeder::class,
             PlanFeatureSeeder::class,
+            DemoSeeder::class,
         ]);
     }
 }

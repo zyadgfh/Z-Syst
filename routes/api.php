@@ -3,6 +3,12 @@
 use App\Http\Controllers\Api as Api;
 use App\Http\Controllers\API\AuthController as ApiAuthController;
 use App\Http\Controllers\API\HealthController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\MedicineController;
+use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SaleController;
+use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 
 // Health Check Endpoints (No Auth Required)
@@ -41,7 +47,7 @@ Route::prefix('v1')->group(function () {
             Route::put('/profile', [ApiAuthController::class, 'updateProfile']);
             Route::post('/email/resend', [ApiAuthController::class, 'resendVerificationEmail']);
             Route::post('/email/verify', [ApiAuthController::class, 'verifyEmail']);
-            
+
             // Two-Factor Authentication
             Route::post('/two-factor/setup', [ApiAuthController::class, 'setupTwoFactor']);
             Route::post('/two-factor/enable', [ApiAuthController::class, 'enableTwoFactor']);
@@ -56,6 +62,21 @@ Route::prefix('v1')->group(function () {
 
     // Public tenant-aware endpoints (no auth required for tests that bind tenant manually)
     Route::apiResource('drugs', \App\Http\Controllers\API\V1\DrugController::class)->only(['index', 'show']);
+
+    Route::group(['middleware' => ['tenant']], function () {
+        Route::get('/medicines', [MedicineController::class, 'index']);
+        Route::post('/medicines', [MedicineController::class, 'store']);
+        Route::get('/suppliers', [SupplierController::class, 'index']);
+        Route::post('/suppliers', [SupplierController::class, 'store']);
+        Route::get('/customers', [CustomerController::class, 'index']);
+        Route::post('/customers', [CustomerController::class, 'store']);
+        Route::get('/purchases', [PurchaseController::class, 'index']);
+        Route::post('/purchases', [PurchaseController::class, 'store']);
+        Route::get('/sales', [SaleController::class, 'index']);
+        Route::post('/sales', [SaleController::class, 'store']);
+        Route::get('/reports/stock', [ReportController::class, 'stock']);
+        Route::get('/reports/sales', [ReportController::class, 'sales']);
+    });
 
     Route::group(['middleware' => ['auth:sanctum', 'tenant']], function () {
         Route::get('drugs/barcode/{barcode}', [\App\Http\Controllers\API\V1\DrugController::class, 'byBarcode']);
@@ -268,7 +289,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/refund', [Api\PaymentController::class, 'refund']);
             Route::get('/{payment}', [Api\PaymentController::class, 'show']);
             Route::get('/', [Api\PaymentController::class, 'index']);
-            
+
             // POS-specific payment endpoints
             Route::post('/pos/quick-pay', [Api\PosPaymentController::class, 'quickPay']);
             Route::post('/pos/split-payment', [Api\PosPaymentController::class, 'splitPayment']);

@@ -1,3 +1,123 @@
+# ARCHITECTURE — Z-Syst PharmaSync
+
+ملخص سريع (Caveman):
+- فهمت المشروع بالكامل. نبني نظام SaaS متعدد مستأجرين، Offline-first، مع AI/ML، وتطبيقات Desktop & Mobile.
+
+1. نظرة عامة
+----------------
+- هدف: نظام إدارة صيدليات متكامل (SaaS) يدعم آلاف الفروع، يعمل دون اتصال، ويعتمد AI/ML للتحسين.
+- نطاق الطبقة الأولى: Backend (Laravel 11), Frontend (Next.js 14+), Desktop (Electron/Tauri), Mobile (React Native/Flutter), ML (FastAPI).
+
+2. المكونات الأساسية
+---------------------
+- Backend (API)
+  - Laravel 11+, PHP 8.3
+  - PostgreSQL 16 (primary), Redis (cache/queues)
+  - Sanctum auth, Spatie Permission, Activitylog
+  - Queue workers (Horizon), Job retries, Rate limiting per-tenant
+  - API Versioning: /api/v1/
+
+- Frontend (Web)
+  - Next.js 14 (App Router), TypeScript strict
+  - TailwindCSS + shadcn/ui
+  - PWA, Service Worker, IndexedDB (Dexie.js) for POS offline
+  - TanStack Query + Zustand for sync + optimistic updates
+
+- Desktop
+  - Electron 28+ (أو Tauri) + React/Next UI
+  - Local SQLite DB, hardware drivers (ESC/POS), auto-update
+  - Full Offline-first POS + sync queue
+
+- Mobile
+  - React Native (TypeScript) أو Flutter
+  - Local storage (AsyncStorage / Hive), background sync
+
+- ML/AI Microservice
+  - Python FastAPI، models في PyTorch/TF
+  - OCR: Tesseract / Google Vision
+  - OpenAI / Local LLM for NL search and recommendations
+
+3. Tenant Isolation & Multitenancy
+----------------------------------
+- Strategy: hybrid multi-tenant
+  - Logical tenancy: every tenant (company) scoped by `company_id` on models
+  - Global middleware to inject `company_id` from auth token / session
+  - Shared schema (single DB) with strict row-level filters for scale
+  - Option: per-tenant schema or DB for high-tier customers (future)
+
+4. Data Flow (high level)
+-------------------------
+1. Client → API (HTTPS/TLS) → Auth Guard (Sanctum) → Tenant middleware → Controllers/Actions
+2. Heavy work → Jobs → Queues (Redis) → Workers (Horizon)
+3. ML tasks → Events → ML service (FastAPI) → callbacks/webhooks
+4. Desktop/Mobile offline flow: write to local DB → enqueue sync tasks → server conflict resolution
+
+5. Offline-first Strategy & Sync
+--------------------------------
+- Local stores:
+  - Desktop: SQLite (local authoritative for offline sales until sync)
+  - Web PWA: IndexedDB via Dexie.js for POS cache
+  - Mobile: AsyncStorage/Hive
+- Sync queue:
+  - Local operations stored with causal metadata (operation_id, client_id, timestamp, base_version)
+  - Background sync worker sends batched operations to /sync endpoint
+  - Server applies operations in order, returns ack + server_version
+  - Client performs reconciliation; on conflict, server returns conflict object
+- Conflict resolution policy:
+  - Domain-specific rules (FEFO for inventory, last-write-wins unacceptable for stock)
+  - Use CRDT-lite for UI state where appropriate; otherwise, server-driven merge with human review workflow for critical conflicts (e.g., controlled substances)
+
+6. Inventory & FEFO
+---------------------
+- Inventory modeled with batches: batch_number, expiry_date, qty_available, location
+- Stock deduction uses FEFO (first-expiry-first-out) on sales and transfers
+- Reservations for pending sales to avoid oversell in offline scenarios
+
+7. Security & Compliance
+------------------------
+- TLS1.3, strong cipher suites
+- Passwords: Argon2id or bcrypt
+- 2FA (TOTP + SMS backup)
+- Audit logs (Spatie Activitylog) for all financial operations
+- Controlled-substance ledger with immutable entries and export for regulators
+
+8. Observability & DevOps
+-------------------------
+- Logs: structured JSON → centralized (Logstash/Cloudwatch)
+- Metrics: Prometheus + Grafana
+- Tracing: OpenTelemetry
+- CI/CD: GitHub Actions → build/test → deploy (staging → canary → prod)
+- Docker compose for local dev; Kubernetes for prod
+
+9. ADRs (Key Decisions)
+------------------------
+1. Single shared DB with tenant row scoping (start) — simpler ops and analytics.
+2. Offline-first: client-side authoritative for POS until ack — improves availability.
+3. Use Redis queues + Horizon to decouple ML and heavy imports.
+4. ML as separate service (FastAPI) to allow Python ML stack and independent scaling.
+
+10. Security & Privacy Notes
+----------------------------
+- Encrypt sensitive columns (e.g., patient identifiers) at rest when required
+- GDPR-like exports and deletion endpoints per tenant
+- Rate-limit sensitive endpoints per tenant
+
+11. Initial Implementation Roadmap (Phase 1 — Foundation Fixes)
+------------------------------------------------------------
+1. Audit & fix missing migrations (companies, branches, departments, users)
+2. Implement Tenant Injection Middleware (global) — enforce `company_id` filter
+3. Implement AuthController: login, register, logout, forgot/reset password, verify-email, 2FA
+4. Global Exception Handler: JSON API format
+5. Add API versioning and base `/api/v1` routes
+
+12. Next Steps (immediate)
+-------------------------
+- Create IMPLEMENTATION_ROADMAP.md (detailed tasks per sprint)
+- Start Phase 1: run migration audit and scaffold AuthController
+- Prepare seeders for demo data and a sandbox tenant
+
+---
+Created by: Principal Software Architect (assistant)
 # 🏗️ توثيق البنية التقنية - Z-Syst Pharmacy Management SaaS (PharmaSync)
 
 ## 📐 البنية العامة (Architecture Overview)

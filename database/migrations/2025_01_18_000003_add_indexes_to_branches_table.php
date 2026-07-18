@@ -8,11 +8,29 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('branches', function (Blueprint $table) {
-            // Add missing indexes
-            $table->index('company_id');
-            $table->index('is_active');
-            $table->index('is_main');
+        // Detect existing index names (SQLite)
+        $existingIndexNames = [];
+        try {
+            $indexes = \DB::select("PRAGMA index_list('branches')");
+            foreach ($indexes as $idx) {
+                $existingIndexNames[] = $idx->name ?? null;
+            }
+        } catch (\Exception $e) {
+            // ignore
+        }
+
+        Schema::table('branches', function (Blueprint $table) use ($existingIndexNames) {
+            if (! in_array('branches_company_id_index', $existingIndexNames, true)) {
+                try { $table->index('company_id'); } catch (\Exception $e) {}
+            }
+
+            if (! in_array('branches_is_active_index', $existingIndexNames, true)) {
+                try { $table->index('is_active'); } catch (\Exception $e) {}
+            }
+
+            if (! in_array('branches_is_main_index', $existingIndexNames, true)) {
+                try { $table->index('is_main'); } catch (\Exception $e) {}
+            }
         });
     }
 

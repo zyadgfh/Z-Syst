@@ -8,8 +8,11 @@
   "devDependencies": {
     "axios": "^1.1.2",
     "laravel-vite-plugin": "^0.7.5",
-    "sass": "^1.69.5",
     "postcss": "^8.3.7",
+    "sass": "^1.69.5",
     "vite": "^4.0.0"
+  },
+  "dependencies": {
+    "@dataconnect/generated": "file:src/dataconnect-generated"
   }
 }

@@ -1,0 +1,55 @@
+connectorId: example
+generate:
+  dartSdk:
+    - outputDir: ..\..\third_party\pospro-app-codecanyon-Codecanyon_6.1\lib\dataconnect_generated
+      package: dataconnect_generated/generated.dart
+      clientCache: {}
+    - outputDir: ..\..\third_party\pharmacy-store-app-codecanyon-main\lib\dataconnect_generated
+      package: dataconnect_generated/generated.dart
+      clientCache: {}
+    - outputDir: ..\..\Mobile App\flutter\lib\dataconnect_generated
+      package: dataconnect_generated/generated.dart
+      clientCache: {}
+  javascriptSdk:
+    - outputDir: ..\..\src\dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ..\..
+      react: false
+      angular: false
+      clientCache: {}
+    - outputDir: ..\..\Super-Admin\src\dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ..\..\Super-Admin
+      react: false
+      angular: false
+      clientCache: {}
+    - outputDir: ..\..\HrmAddon\src\dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ..\..\HrmAddon
+      react: false
+      angular: false
+      clientCache: {}
+    - outputDir: ..\..\Modules\Landing\src\dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ..\..\Modules\Landing
+      react: false
+      angular: false
+      clientCache: {}
+    - outputDir: ..\..\vendor\laravel\telescope\src\dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ..\..\vendor\laravel\telescope
+      react: false
+      angular: false
+      clientCache: {}
+    - outputDir: ..\..\third_party\Cody\vscode-extension\src\dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ..\..\third_party\Cody\vscode-extension
+      react: false
+      angular: false
+      clientCache: {}
+    - outputDir: ..\..\third_party\Cody\frontend\src\dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ..\..\third_party\Cody\frontend
+      react: true
+      angular: false
+      clientCache: {}

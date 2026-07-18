@@ -8,110 +8,129 @@ use App\Http\Controllers\Controller;
 use App\Models\Supplier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
+/**
+ * Supplier Controller for Pharmacy Management
+ */
 class SupplierController extends Controller
 {
+    /**
+     * Display a listing of suppliers.
+     */
     public function index(Request $request): JsonResponse
     {
-        $suppliers = Supplier::forCompany($request->user()->company_id)
-            ->with(['createdBy:id,name'])
-            ->when($request->search, function ($q, $v) {
-                $q->where(function ($sub) use ($v) {
-                    $sub->where('name', 'like', "%{$v}%")
-                        ->orWhere('phone', 'like', "%{$v}%")
-                        ->orWhere('email', 'like', "%{$v}%")
-                        ->orWhere('contact_person', 'like', "%{$v}%");
-                });
-            })
-            ->when($request->is_active, fn($q, $v) => $q->where('is_active', $v === 'true' || $v === '1'))
-            ->orderByDesc('created_at')
-            ->paginate($request->per_page ?? 25);
+        $query = Supplier::query();
 
-        return response()->json($suppliers);
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'ilike', "%{$search}%")
+                    ->orWhere('contact_person', 'ilike', "%{$search}%")
+                    ->orWhere('email', 'ilike', "%{$search}%")
+                    ->orWhere('phone', 'ilike', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('is_active')) {
+            $query->where('is_active', $request->boolean('is_active'));
+        }
+
+        $suppliers = $query->latest()->paginate(15);
+
+        return response()->json([
+            'success' => true,
+            'data' => $suppliers->items(),
+            'meta' => [
+                'current_page' => $suppliers->currentPage(),
+                'last_page' => $suppliers->lastPage(),
+                'per_page' => $suppliers->perPage(),
+                'total' => $suppliers->total(),
+            ],
+        ]);
     }
 
+    /**
+     * Store a new supplier.
+     */
     public function store(Request $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'contact_person' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
-            'phone' => 'required|string|max:50',
+            'phone' => 'nullable|string|max:50',
             'address' => 'nullable|string',
             'tax_id' => 'nullable|string|max:100',
-            'payment_terms' => 'nullable|string|max:255',
+            'payment_terms' => 'nullable|string',
             'credit_limit' => 'nullable|numeric|min:0',
-            'notes' => 'nullable|string',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors()->first()], 422);
-        }
+        $validated['company_id'] = app('tenant.company_id');
+        $validated['created_by'] = auth()->id();
 
-        $supplier = Supplier::create($validator->validated() + [
-            'company_id' => $request->user()->company_id,
-            'balance' => 0,
-            'is_active' => true,
-            'created_by' => $request->user()->id,
-        ]);
+        $supplier = Supplier::create($validated);
 
-        return response()->json($supplier->load(['createdBy:id,name']), 201);
+        return response()->json([
+            'success' => true,
+            'data' => $supplier,
+            'message' => 'تم إنشاء المورد بنجاح',
+        ], 201);
     }
 
-    public function show(Request $request, Supplier $supplier): JsonResponse
+    /**
+     * Display a single supplier.
+     */
+    public function show(Supplier $supplier): JsonResponse
     {
-        if ($supplier->company_id !== $request->user()->company_id) {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
+        $supplier->load([
+            'purchaseOrders' => function ($q) {
+                $q->latest()->limit(10);
+            },
+        ]);
 
-        return response()->json($supplier->load(['createdBy:id,name', 'purchaseOrders' => function ($q) {
-            $q->latest()->limit(10);
-        }]));
+        return response()->json([
+            'success' => true,
+            'data' => $supplier,
+        ]);
     }
 
+    /**
+     * Update a supplier.
+     */
     public function update(Request $request, Supplier $supplier): JsonResponse
     {
-        if ($supplier->company_id !== $request->user()->company_id) {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
-
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'contact_person' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
-            'phone' => 'sometimes|string|max:50',
+            'phone' => 'nullable|string|max:50',
             'address' => 'nullable|string',
-            'tax_id' => 'nullable|string|max:100',
-            'payment_terms' => 'nullable|string|max:255',
+            'payment_terms' => 'nullable|string',
             'credit_limit' => 'nullable|numeric|min:0',
-            'notes' => 'nullable|string',
-            'is_active' => 'sometimes|boolean',
+            'is_active' => 'boolean',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors()->first()], 422);
-        }
+        $validated['updated_by'] = auth()->id();
 
-        $supplier->update($validator->validated() + [
-            'updated_by' => $request->user()->id,
+        $supplier->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'data' => $supplier,
+            'message' => 'تم تحديث المورد بنجاح',
         ]);
-
-        return response()->json($supplier->fresh());
     }
 
-    public function destroy(Request $request, Supplier $supplier): JsonResponse
+    /**
+     * Delete a supplier.
+     */
+    public function destroy(Supplier $supplier): JsonResponse
     {
-        if ($supplier->company_id !== $request->user()->company_id) {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
+        $supplier->update(['is_active' => false]);
 
-        if ($supplier->purchaseOrders()->exists()) {
-            return response()->json(['message' => 'Cannot delete supplier with existing purchase orders'], 422);
-        }
-
-        $supplier->delete();
-
-        return response()->json(['message' => 'Supplier deleted successfully']);
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حذف المورد بنجاح',
+        ]);
     }
 }
