@@ -44,3 +44,4 @@ class ModuleServiceProvider extends ServiceProvider
         // Module booting logic
     }
 }
+

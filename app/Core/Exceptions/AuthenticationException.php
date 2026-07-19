@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exceptions;
+namespace App\Core\Exceptions;
 
 use Exception;
 
@@ -11,3 +11,4 @@ class AuthenticationException extends ApiException
         parent::__construct($message, 401);
     }
 }
+

@@ -74,3 +74,4 @@ class BusinessException extends BaseException
         parent::__construct($message, $statusCode, $previous);
     }
 }
+

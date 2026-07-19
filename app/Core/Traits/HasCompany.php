@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits;
+namespace App\Core\Traits;
 
 use App\Scopes\TenantScope;
 use Illuminate\Support\Facades\Schema;

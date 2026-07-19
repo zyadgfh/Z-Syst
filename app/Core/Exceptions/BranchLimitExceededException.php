@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exceptions;
+namespace App\Core\Exceptions;
 
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -23,3 +23,4 @@ class BranchLimitExceededException extends Exception
         ], $this->getCode());
     }
 }
+

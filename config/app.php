@@ -191,9 +191,10 @@ return [
          */
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
-        App\Providers\EventServiceProvider::class,
-        App\Providers\RouteServiceProvider::class,
+        // App\Shared\Providers\BroadcastServiceProvider::class,
+        App\Shared\Providers\EventServiceProvider::class,
+        App\Shared\Providers\RouteServiceProvider::class,
+        App\Shared\Providers\ModuleServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
     ],
 

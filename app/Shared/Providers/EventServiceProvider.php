@@ -2,18 +2,18 @@
 
 namespace App\Providers;
 
-use App\Events\StockTransferApproved;
-use App\Events\StockTransferCancelled;
-use App\Events\StockTransferReceived;
-use App\Events\StockTransferRejected;
-use App\Events\StockTransferShipped;
-use App\Events\SubscriptionChanged;
-use App\Listeners\ResetBranchLimitOnSubscriptionChange;
-use App\Listeners\SendStockTransferApprovedNotification;
-use App\Listeners\SendStockTransferCancelledNotification;
-use App\Listeners\SendStockTransferReceivedNotification;
-use App\Listeners\SendStockTransferRejectedNotification;
-use App\Listeners\SendStockTransferShippedNotification;
+use App\Core\Events\StockTransferApproved;
+use App\Core\Events\StockTransferCancelled;
+use App\Core\Events\StockTransferReceived;
+use App\Core\Events\StockTransferRejected;
+use App\Core\Events\StockTransferShipped;
+use App\Core\Events\SubscriptionChanged;
+use App\Shared\Listeners\ResetBranchLimitOnSubscriptionChange;
+use App\Shared\Listeners\SendStockTransferApprovedNotification;
+use App\Shared\Listeners\SendStockTransferCancelledNotification;
+use App\Shared\Listeners\SendStockTransferReceivedNotification;
+use App\Shared\Listeners\SendStockTransferRejectedNotification;
+use App\Shared\Listeners\SendStockTransferShippedNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -70,3 +70,4 @@ class EventServiceProvider extends ServiceProvider
         return false;
     }
 }
+
