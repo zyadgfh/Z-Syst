@@ -1,5 +1,21 @@
 # ARCHITECTURE — Z-Syst PharmaSync
 
+## Frontend Architecture Alignment
+
+هذا المستند الآن مدعوم بخطة واجهة موجهة لاحتياجات Z-Syst:
+- واجهة SaaS احترافية ومخصصة لصيدليات ومراكز الرعاية الصحية
+- دعم كامل للعربية والإنجليزية مع RTL-first
+- تركيز على POS السريع، واللوحات الإدارية، وإدارة المخزون
+- Accessibility وPerformance باعتبارهما متطلبات أساسية
+- بنية قابلة للتوسع مع Next.js + TypeScript + Tailwind + Shadcn/ui
+
+### Frontend Core Principles
+- Mobile-first وresponsive من البداية
+- Component-driven architecture مع Design Tokens
+- State separation بين server state وclient state
+- Testing وStorybook لكل component أساسي
+- Clear UX for multi-role users: owner, manager, pharmacist, cashier, accountant, super admin
+
 ملخص سريع (Caveman):
 - فهمت المشروع بالكامل. نبني نظام SaaS متعدد مستأجرين، Offline-first، مع AI/ML، وتطبيقات Desktop & Mobile.
 
