@@ -87,6 +87,12 @@ class Handler extends ExceptionHandler
         $this->renderable(function (Throwable $e, $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 // Log the error
+                $companyId = null;
+
+                if (app()->bound('tenant.company_id')) {
+                    $companyId = app('tenant.company_id');
+                }
+
                 \Log::error('API Error', [
                     'message' => $e->getMessage(),
                     'exception' => get_class($e),
@@ -95,7 +101,7 @@ class Handler extends ExceptionHandler
                     'url' => $request->fullUrl(),
                     'method' => $request->method(),
                     'user_id' => auth()->id(),
-                    'company_id' => app('tenant.company_id') ?? null,
+                    'company_id' => $companyId,
                 ]);
 
                 if (config('app.debug')) {

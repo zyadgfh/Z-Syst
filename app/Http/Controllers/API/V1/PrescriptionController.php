@@ -5,9 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers\API\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StorePrescriptionRequest;
+use App\Http\Requests\DispensePrescriptionRequest;
+use App\Http\Resources\PrescriptionResource;
 use App\Models\Prescription;
 use App\Models\Product;
 use App\Models\Stock;
+use App\Services\ForecastingService;
+use App\Services\PrescriptionService;
 use App\Services\StockMovementService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,8 +21,10 @@ use Illuminate\Support\Facades\Validator;
 
 class PrescriptionController extends Controller
 {
-    public function __construct(private readonly StockMovementService $stockMovementService)
-    {
+    public function __construct(
+        private readonly PrescriptionService $prescriptionService,
+        private readonly ForecastingService $forecastingService
+    ) {
     }
 
     public function index(Request $request): JsonResponse
@@ -364,112 +371,10 @@ class PrescriptionController extends Controller
     {
         $companyId = $request->user()->company_id ?? app('tenant.company_id');
         $windowDays = (int) ($request->input('window_days') ?? 30);
-        $windowDays = max(7, min(90, $windowDays));
 
-        // We forecast based on REAL dispensed history (actual fulfillment), not prescribed quantities.
-        // IMPORTANT: This forecasting is based on prescription-item dispensed_quantity only.
+        $forecast = $this->forecastingService->generateDemandForecast($companyId, $windowDays);
 
-        $from = now()->subDays($windowDays);
-
-        $dispensedLines = collect();
-
-        $prescriptionItemLines = \App\Models\PrescriptionItem::query()
-            ->whereHas('prescription', function ($q) use ($companyId, $from) {
-                $q->where('company_id', $companyId)
-                    ->where('updated_at', '>=', $from);
-            })
-            ->with(['product:id,productName,barcode'])
-            ->where('dispensed_quantity', '>', 0)
-            ->get(['prescription_id', 'product_id', 'dispensed_quantity', 'updated_at']);
-
-        $dispensedLines = $dispensedLines->merge($prescriptionItemLines->map(function ($line) {
-            return (object) [
-                'product_id' => $line->product_id,
-                'quantity' => (float) $line->dispensed_quantity,
-                'ts' => $line->updated_at,
-                'source' => 'prescription_item',
-                'product' => $line->product,
-            ];
-        }));
-
-        // NOTE:
-        // We intentionally do NOT merge stock-movement logs here, because the requirement is to
-        // forecast strictly from prescription dispensed_quantity history.
-
-        // We also bucket strictly based on the dispensed history timestamps we used above
-        // (PrescriptionItem.updated_at in the current schema).
-
-        $bucketDays = 7; // weekly buckets
-
-        $bucketsCount = (int) ceil($windowDays / $bucketDays);
-
-        $byProduct = $dispensedLines
-            ->groupBy('product_id')
-            ->map(function ($lines, $productId) use ($bucketsCount, $bucketDays, $windowDays, $from) {
-                $productName = $lines->first()?->product?->productName;
-                $barcode = $lines->first()?->product?->barcode;
-
-                // bucket index based on updated_at
-                $bucketTotals = array_fill(0, $bucketsCount, 0.0);
-                foreach ($lines as $line) {
-                    $ts = $line->ts;
-                    if (! $ts) continue;
-
-                    $deltaDays = max(0, (int) $from->diffInDays($ts));
-                    $idx = (int) floor($deltaDays / $bucketDays);
-                    $idx = max(0, min($bucketsCount - 1, $idx));
-                    $bucketTotals[$idx] += (float) $line->quantity;
-                }
-
-                $totalDispensed = (float) array_sum($bucketTotals);
-                $averageDailyDemand = $windowDays > 0 ? round($totalDispensed / $windowDays, 2) : 0.0;
-
-                // Simple trend: compare last half vs previous half of buckets.
-                $half = max(1, intdiv($bucketsCount, 2));
-                $prevBuckets = array_slice($bucketTotals, 0, $half);
-                $lastBuckets = array_slice($bucketTotals, $bucketsCount - $half);
-                $prevAvgDaily = max(0.0001, array_sum($prevBuckets) / (count($prevBuckets) * $bucketDays));
-                $lastAvgDaily = array_sum($lastBuckets) / (count($lastBuckets) * $bucketDays);
-
-                $trendRatio = $lastAvgDaily / $prevAvgDaily;
-                $trend = abs($trendRatio - 1.0) < 0.08 ? 'flat' : ($trendRatio > 1.0 ? 'up' : 'down');
-
-                // Apply a small trend adjustment on reorder.
-                $trendMultiplier = $trend === 'up' ? 1.15 : ($trend === 'down' ? 0.9 : 1.0);
-
-                $buffer = max(1, (int) round($averageDailyDemand * 0.25));
-                $reorderBase = $averageDailyDemand + $buffer;
-                $recommendedReorder = max(1, (int) ceil($reorderBase * $trendMultiplier));
-
-                // Safety stock as % of average demand + volatility proxy (non-zero buckets)
-                $nonZeroBuckets = count(array_filter($bucketTotals, fn($v) => $v > 0));
-                $volatilityFactor = $bucketsCount > 0 ? ($nonZeroBuckets / $bucketsCount) : 0;
-                $safetyStock = max(1, (int) round($averageDailyDemand * (0.35 + 0.4 * $volatilityFactor)));
-
-                // Confidence based on both total volume and coverage across buckets.
-                $confidenceScore = ($totalDispensed >= 60 ? 2 : ($totalDispensed >= 25 ? 1 : 0)) + ($nonZeroBuckets >= max(2, intdiv($bucketsCount, 2)) ? 1 : 0);
-                $confidence = $confidenceScore >= 2 ? 'high' : ($confidenceScore >= 1 ? 'medium' : 'low');
-
-                return [
-                    'product_id' => (int) $productId,
-                    'product_name' => $productName,
-                    'barcode' => $barcode,
-                    'forecast_window_days' => $windowDays,
-                    'average_daily_demand' => $averageDailyDemand,
-                    'recommended_reorder_quantity' => $recommendedReorder,
-                    'safety_stock' => $safetyStock,
-                    'confidence' => $confidence,
-                    'trend' => $trend,
-                ];
-            })
-            ->sortByDesc('average_daily_demand')
-            ->take(10)
-            ->values();
-
-        return response()->json([
-            'forecast_window_days' => $windowDays,
-            'items' => $byProduct,
-        ]);
+        return response()->json($forecast);
     }
 
 

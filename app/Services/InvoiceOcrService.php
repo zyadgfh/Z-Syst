@@ -56,7 +56,7 @@ class InvoiceOcrService
     protected function extractText(string $filePath, string $mimeType): string
     {
         // Check if Tesseract OCR is available
-        if (class_exists(\ thién\TesseractOCR\TesseractOCR::class)) {
+        if (class_exists('Thién\TesseractOCR\TesseractOCR')) {
             return $this->extractWithTesseract($filePath);
         }
 
@@ -90,7 +90,7 @@ class InvoiceOcrService
     protected function extractPdfText(string $filePath): string
     {
         $content = file_get_contents($filePath);
-        
+
         // Basic PDF text extraction - in production use smalot/pdfparser
         if (preg_match('/\((.*?)\)/s', $content, $matches)) {
             return $matches[1] ?? '';
@@ -205,7 +205,7 @@ class InvoiceOcrService
 
             try {
                 $product = Product::findOrFail($item['product_id']);
-                
+
                 // Update or create stock
                 $stock = \App\Models\Stock::where('product_id', $product->id)
                     ->where('batch_no', $item['batch_number'])

@@ -11,11 +11,28 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        $companyId = app()->bound('tenant.company_id') ? app('tenant.company_id') : null;
+
         return view('pharmacy-dashboard', [
-            'medicineCount' => Medicine::count(),
-            'supplierCount' => Supplier::count(),
-            'customerCount' => Customer::count(),
-            'purchaseCount' => PurchaseOrder::count(),
+            'medicineCount' => Medicine::query()->when($companyId, fn ($query) => $query->where('company_id', $companyId))->count(),
+            'supplierCount' => Supplier::query()->when($companyId, fn ($query) => $query->where('company_id', $companyId))->count(),
+            'customerCount' => $this->safeCount(Customer::class),
+            'purchaseCount' => $this->safeCount(PurchaseOrder::class),
         ]);
+    }
+
+    protected function safeCount(string $model): int
+    {
+        try {
+            $query = app($model)::query();
+
+            if (app()->bound('tenant.company_id')) {
+                $query->where('company_id', app('tenant.company_id'));
+            }
+
+            return $query->count();
+        } catch (\Throwable $e) {
+            return 0;
+        }
     }
 }

@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', function () {
-    return response('<!doctype html><html><head><title>Home</title></head><body><h1>Welcome</h1></body></html>', 200);
+    return view('welcome');
 });
 
 // Payment Routes Start
@@ -81,13 +81,17 @@ Route::get('/pharmacy/pos', function () {
     return view('pharmacy-pos');
 });
 
-Route::get('/pharmacy/medicines', function () {
-    return view('pharmacy-medicines', [
-        'medicines' => [
-            ['name' => 'باراسيتامول', 'stock' => 120, 'minimum_stock' => 20],
-            ['name' => 'أموكسيسيلين', 'stock' => 40, 'minimum_stock' => 10],
-        ],
-    ]);
+// Medicine Routes
+Route::prefix('pharmacy/medicines')->group(function () {
+    Route::get('/', [Web\MedicineController::class, 'index'])->name('pharmacy.medicines.index');
+    Route::get('/create', [Web\MedicineController::class, 'create'])->name('pharmacy.medicines.create');
+    Route::post('/', [Web\MedicineController::class, 'store'])->name('pharmacy.medicines.store');
+    Route::get('/{id}', [Web\MedicineController::class, 'show'])->name('pharmacy.medicines.show');
+    Route::get('/{id}/edit', [Web\MedicineController::class, 'edit'])->name('pharmacy.medicines.edit');
+    Route::put('/{id}', [Web\MedicineController::class, 'update'])->name('pharmacy.medicines.update');
+    Route::delete('/{id}', [Web\MedicineController::class, 'destroy'])->name('pharmacy.medicines.destroy');
+    Route::get('/reports', [Web\MedicineController::class, 'reports'])->name('pharmacy.medicines.reports');
+    Route::get('/search', [Web\MedicineController::class, 'search'])->name('pharmacy.medicines.search');
 });
 
 Route::get('/pharmacy/sales', function () {

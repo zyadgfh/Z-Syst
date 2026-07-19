@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
-use App\Models\SubscriptionPlan;
+use App\Models\Subscription;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\RateLimiter;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -13,107 +16,68 @@ class SubscriptionRateLimit
     /**
      * Handle an incoming request.
      *
-     * @param  string  $maxAttempts
+     * @param Request $request
+     * @param Closure $next
+     * @param string|null $key Key for rate limiting (e.g., 'api', 'pos')
+     * @return Response
      */
-    public function handle(Request $request, Closure $next, $maxAttempts = null): Response
+    public function handle(Request $request, Closure $next, ?string $key = 'api'): Response
     {
         $user = $request->user();
-        
-        if (! $user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthenticated',
-            ], 401);
-        }
+        $companyId = $user->company_id ?? app('tenant.company_id');
 
-        // Get rate limit based on subscription plan or company settings
-        $attempts = $this->getRateLimitForTenant($user);
+        // Get subscription plan for the company
+        $subscription = Subscription::where('company_id', $companyId)->first();
+        $plan = $subscription?->plan;
 
-        // Skip rate limiting for unlimited plans
-        if ($attempts === -1) {
-            return $next($request);
-        }
-
-        $key = $this->getRateLimitKey($request);
-
-        if (RateLimiter::tooManyAttempts($key, $attempts)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Too many requests. Please try again later.',
-                'retry_after' => RateLimiter::availableIn($key),
-            ], 429);
-        }
-
-        RateLimiter::hit($key);
-
-        $response = $next($request);
-
-        return $this->setHeaders($response, $key, $attempts);
-    }
-
-    /**
-     * Get rate limit based on subscription plan.
-     */
-    protected function getRateLimitForTenant($user): int
-    {
-        $company = $user->company;
-        
-        if (! $company) {
-            return config('api.rate_limits.free', 100); // Default: 100 requests per minute
-        }
-
-        // Check subscription plan for rate limit
-        $subscription = $company->subscriptionLatest;
-        
-        if ($subscription && $subscription->plan) {
-            return $subscription->plan->rate_limit ?? config('api.rate_limits.free', 100);
-        }
-
-        // Use config-based limits
-        $rateLimits = config('api.rate_limits', [
+        // Define rate limits per plan (requests per minute)
+        $rateLimits = [
             'free' => 100,
             'starter' => 1000,
             'professional' => 10000,
-            'enterprise' => -1, // unlimited
+            'enterprise' => 100000,
+        ];
+
+        $planName = $plan?->name?->toLowerCase() ?? 'free';
+        $maxAttempts = $rateLimits[$planName] ?? $rateLimits['free'];
+
+        // Create a unique key for this user/company
+        $rateKey = "subscription:{$key}:{$companyId}";
+
+        // Check if rate limit exceeded
+        if (RateLimiter::tooManyAttempts($rateKey, $maxAttempts)) {
+            $retryAfter = RateLimiter::availableIn($rateKey);
+
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Rate limit exceeded',
+                'retry_after' => $retryAfter,
+                'limit' => $maxAttempts,
+            ], 429);
+        }
+
+        // Increment the rate limit counter
+        RateLimiter::hit($rateKey, 60); // 60 seconds
+
+        $response = $next($request);
+
+        // Add rate limit headers
+        return $this->addRateLimitHeaders($response, $rateKey, $maxAttempts);
+    }
+
+    /**
+     * Add rate limit headers to response.
+     */
+    private function addRateLimitHeaders(Response $response, string $rateKey, int $maxAttempts): Response
+    {
+        $remaining = $maxAttempts - RateLimiter::attempts($rateKey);
+        $retryAfter = RateLimiter::availableIn($rateKey);
+
+        return $response->withHeaders([
+            'X-RateLimit-Limit' => $maxAttempts,
+            'X-RateLimit-Remaining' => max(0, $remaining),
+            'X-RateLimit-Reset' => $retryAfter,
+            'X-Subscription-Plan' => $response->headers->get('X-Subscription-Plan', 'free'),
         ]);
-
-        // Return dynamic rate limit based on company's branch count or plan
-        if ($company->is_unlimited_branches) {
-            return $rateLimits['enterprise'];
-        }
-
-        $branchCount = $company->current_branches_count ?? 0;
-        
-        if ($branchCount >= 50) {
-            return $rateLimits['enterprise'];
-        } elseif ($branchCount >= 10) {
-            return $rateLimits['professional'];
-        } elseif ($branchCount >= 1) {
-            return $rateLimits['starter'];
-        }
-
-        return $rateLimits['free'];
-    }
-
-    /**
-     * Get rate limit key for the request.
-     */
-    protected function getRateLimitKey(Request $request): string
-    {
-        $user = $request->user();
-
-        return 'api.v1.'.$user->company_id.'.'.$user->id;
-    }
-
-    /**
-     * Set rate limit headers on response.
-     */
-    protected function setHeaders(Response $response, string $key, int $maxAttempts): Response
-    {
-        $response->headers->set('X-RateLimit-Limit', $maxAttempts);
-        $response->headers->set('X-RateLimit-Remaining', max(0, $maxAttempts - RateLimiter::attempts($key)));
-        $response->headers->set('X-RateLimit-Reset', RateLimiter::availableIn($key));
-
-        return $response;
     }
 }
