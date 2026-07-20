@@ -23,11 +23,11 @@ class ProductServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->user = User::factory()->create();
-        $this->manufacturer = Manufacturer::factory()->create();
-        $this->category = Category::factory()->create();
-        
+        $this->manufacturer = Manufacturer::factory()->create(['company_id' => $this->user->company_id]);
+        $this->category = Category::factory()->create(['company_id' => $this->user->company_id]);
+
         $this->productService = new ProductService();
     }
 

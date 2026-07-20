@@ -8,7 +8,7 @@ use Illuminate\Pagination\Paginator;
 
 /**
  * Base Repository Interface
- * 
+ *
  * Defines contract for all repository implementations.
  */
 interface RepositoryInterface

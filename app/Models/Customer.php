@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Traits\HasCompany;
+use App\Core\Traits\HasCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Customer Model for CRM
- * 
+ *
  * Enhanced customer management with credit control and loyalty system
  */
 class Customer extends Model
@@ -35,31 +35,31 @@ class Customer extends Model
     protected $fillable = [
         'company_id',
         'branch_id',
-        
+
         // Personal Info
         'name',
         'phone',
         'email',
         'address',
-        
+
         // Customer Type
         'customer_type', // individual, pharmacy, clinic, hospital
         'customer_group',
-        
+
         // Credit Control
         'credit_limit',
         'current_balance',
         'outstanding_balance',
-        
+
         // Insurance
         'insurance_company_id',
         'insurance_policy_number',
         'insurance_expiry_date',
-        
+
         // Loyalty
         'loyalty_points',
         'loyalty_tier', // bronze, silver, gold, platinum
-        
+
         // Medical Info (for patients)
         'date_of_birth',
         'gender',
@@ -67,19 +67,19 @@ class Customer extends Model
         'allergies',
         'medical_history',
         'insurance_info',
-        
+
         // Emergency Contact
         'emergency_contact_name',
         'emergency_contact_phone',
-        
+
         // Status
         'is_active',
         'is_tax_exempt',
-        
+
         // Notes & Metadata
         'notes',
         'meta',
-        
+
         // Audit
         'created_by',
         'updated_by',

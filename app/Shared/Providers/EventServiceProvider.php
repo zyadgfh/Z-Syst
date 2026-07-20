@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Providers;
+namespace App\Shared\Providers;
 
 use App\Core\Events\StockTransferApproved;
 use App\Core\Events\StockTransferCancelled;

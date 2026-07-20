@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace App\Shared\Middleware;
 
+use App\Models\Company;
 use App\Services\TenantManager;
 use Closure;
 use Illuminate\Http\Request;
-use App\Models\Company;
 
 class TenantMiddleware
 {

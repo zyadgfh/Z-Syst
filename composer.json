@@ -25,10 +25,18 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
-        ,
+        },
+        "classmap": [
+            "app/Core/Events",
+            "app/Core/Exceptions",
+            "app/Shared/Providers",
+            "app/Shared/Listeners",
+            "app/Shared/Commands",
+            "app/Shared/Jobs",
+            "app/Http/Controllers/API"
+        ],
         "files": [
-            "app/Core/Helpers/Helper.php"
+            "app/Helpers/HasUploader.php"
         ]
     },
     "autoload-dev": {
@@ -39,7 +47,7 @@
     "scripts": {
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --annotation"
+            "@php artisan package:discover"
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"

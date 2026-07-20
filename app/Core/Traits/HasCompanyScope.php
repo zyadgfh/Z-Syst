@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * HasCompanyScope Trait
- * 
+ *
  * Automatically scopes queries to current tenant company.
  * Applied to all multi-tenant models.
  */

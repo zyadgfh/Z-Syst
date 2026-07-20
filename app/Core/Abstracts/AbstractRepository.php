@@ -8,7 +8,7 @@ use Illuminate\Pagination\Paginator;
 
 /**
  * Base Repository Class
- * 
+ *
  * Provides common repository operations for all domain repositories.
  * Implements Data Access abstraction layer.
  */

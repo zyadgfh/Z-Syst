@@ -10,6 +10,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('model_has_permissions')) {
+            return;
+        }
+
         Schema::create('model_has_permissions', function (Blueprint $table) {
             $table->foreignId('permission_id')->constrained()->onDelete('cascade');
             $table->string('model_type', 255);

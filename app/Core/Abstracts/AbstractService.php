@@ -4,7 +4,7 @@ namespace App\Core\Abstracts;
 
 /**
  * Base Service Class
- * 
+ *
  * Provides common service operations and dependency injection.
  * All domain services should extend this class.
  */

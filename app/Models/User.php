@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Traits\HasCompany;
+use App\Core\Traits\HasCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
