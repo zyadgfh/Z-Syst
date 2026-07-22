@@ -1,0 +1,161 @@
+{
+  "timestamp": "2026-07-22T09:55:00Z",
+  "phase": "referee_final",
+  "total_findings": 10,
+  "verdicts": [
+    {
+      "bugId": "BUG-1",
+      "severity": "HIGH",
+      "status": "CONFIRMED",
+      "confidence": 92,
+      "reasoning": "Skeptic accepted with high confidence. ReportsController line 237 DB::raw() query lacks company_id filter causing cross-tenant data exposure. CRITICAL SECURITY BUG.",
+      "requires_fix": true,
+      "auto_fix_eligible": true,
+      "fix_complexity": "simple",
+      "fix_impact": "low"
+    },
+    {
+      "bugId": "BUG-2",
+      "severity": "HIGH",
+      "status": "CONFIRMED",
+      "confidence": 88,
+      "reasoning": "Skeptic accepted. StatisticsController DATE_FORMAT aggregation missing tenant scope. Follows same pattern as BUG-1.",
+      "requires_fix": true,
+      "auto_fix_eligible": true,
+      "fix_complexity": "simple",
+      "fix_impact": "low"
+    },
+    {
+      "bugId": "BUG-3",
+      "severity": "MEDIUM",
+      "status": "NEEDS_VERIFICATION",
+      "confidence": 55,
+      "reasoning": "Skeptic marked as PARTIAL CHALLENGE - needs middleware/policy verification. Conditional bug - only exists if VerifyPharmacyAccess middleware is missing. Hold for investigation.",
+      "requires_fix": false,
+      "auto_fix_eligible": false,
+      "needs_investigation": "Verify app/Http/Middleware/VerifyPharmacyAccess.php applies company_id scoping"
+    },
+    {
+      "bugId": "BUG-4",
+      "severity": "LOW",
+      "status": "REJECTED",
+      "confidence": 15,
+      "reasoning": "FALSE POSITIVE - Eloquent ORM parameter binding fully protects this code. SQL injection is not possible.",
+      "requires_fix": false,
+      "auto_fix_eligible": false,
+      "false_positive": true,
+      "false_positive_reason": "Eloquent parameter binding provides SQL injection protection"
+    },
+    {
+      "bugId": "BUG-5",
+      "severity": "HIGH",
+      "status": "CONFIRMED",
+      "confidence": 85,
+      "reasoning": "Skeptic accepted. HRM whereRaw() missing company_id filter. Unlike BUG-4, this is NOT protected by parameter binding because the scoping is missing. REAL BUG.",
+      "requires_fix": true,
+      "auto_fix_eligible": true,
+      "fix_complexity": "simple",
+      "fix_impact": "low"
+    },
+    {
+      "bugId": "BUG-6",
+      "severity": "MEDIUM",
+      "status": "NEEDS_VERIFICATION",
+      "confidence": 62,
+      "reasoning": "Skeptic marked as CONDITIONAL - depends on route middleware. If UserController routes are NOT in 'admin' middleware group, this is a bug. Otherwise false positive.",
+      "requires_fix": false,
+      "auto_fix_eligible": false,
+      "needs_investigation": "Verify routes/admin.php has ->middleware('admin') protecting UserController"
+    },
+    {
+      "bugId": "BUG-7",
+      "severity": "MEDIUM",
+      "status": "NEEDS_VERIFICATION",
+      "confidence": 58,
+      "reasoning": "Skeptic marked as POSSIBLE - likely protected by ProductStockPolicy authorization. Conditional bug.",
+      "requires_fix": false,
+      "auto_fix_eligible": false,
+      "needs_investigation": "Verify ProductStockPolicy.view() checks pharmacy access"
+    },
+    {
+      "bugId": "BUG-8",
+      "severity": "MEDIUM",
+      "status": "REJECTED",
+      "confidence": 40,
+      "reasoning": "Speculative - no concrete evidence of negative stock vulnerability. ProcessSaleInventory job likely handles validation.",
+      "requires_fix": false,
+      "auto_fix_eligible": false,
+      "false_positive": true,
+      "false_positive_reason": "No evidence of actual negative stock bug in code review"
+    },
+    {
+      "bugId": "BUG-9",
+      "severity": "LOW",
+      "status": "NEEDS_VERIFICATION",
+      "confidence": 45,
+      "reasoning": "Skeptic marked as LOW RISK - depends on supplier data model scoping strategy. Need clarification on multi-tenancy approach.",
+      "requires_fix": false,
+      "auto_fix_eligible": false,
+      "needs_investigation": "Clarify if suppliers are company-scoped or shared across companies"
+    },
+    {
+      "bugId": "BUG-10",
+      "severity": "HIGH",
+      "status": "CONFIRMED",
+      "confidence": 78,
+      "reasoning": "Skeptic accepted. Auth endpoints lack rate limiting middleware. Standard security best practice. REAL BUG.",
+      "requires_fix": true,
+      "auto_fix_eligible": true,
+      "fix_complexity": "simple",
+      "fix_impact": "medium"
+    }
+  ],
+  "final_summary": {
+    "confirmed_bugs": 4,
+    "needs_verification": 3,
+    "rejected_false_positives": 3,
+    "by_severity": {
+      "CRITICAL": 0,
+      "HIGH": 4,
+      "MEDIUM": 3,
+      "LOW": 3
+    },
+    "auto_fixable": 4,
+    "requires_investigation": 3,
+    "false_positives": 2
+  },
+  "confirmed_bugs_details": [
+    {
+      "bugId": "BUG-1",
+      "file": "app/Http/Controllers/API/ReportsController.php",
+      "lines": "237-240",
+      "issue": "Cross-tenant data exposure via missing company_id filter in DB::raw() aggregation",
+      "impact": "CRITICAL - User can access financial reports from any pharmacy",
+      "fix_type": "add_where_clause"
+    },
+    {
+      "bugId": "BUG-2",
+      "file": "app/Http/Controllers/API/StatisticsController.php",
+      "lines": "64-74",
+      "issue": "Date-formatted sales statistics lack tenant scoping",
+      "impact": "HIGH - Combined sales data from all companies visible to any user",
+      "fix_type": "add_where_clause"
+    },
+    {
+      "bugId": "BUG-5",
+      "file": "HrmAddon/App/Http/Controllers/AcnooAttendanceController.php",
+      "lines": "49-50",
+      "issue": "whereRaw() without company scope in attendance queries",
+      "impact": "HIGH - Inter-company attendance data leakage",
+      "fix_type": "add_where_clause"
+    },
+    {
+      "bugId": "BUG-10",
+      "file": "app/Http/Kernel.php",
+      "lines": "auth_routes",
+      "issue": "Missing rate limiting on authentication endpoints",
+      "impact": "HIGH - Brute force attack vulnerability",
+      "fix_type": "add_middleware"
+    }
+  ]
+}

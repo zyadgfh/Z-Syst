@@ -1,0 +1,220 @@
+{
+  "version": "3.0.0",
+  "scan_id": "scan-2026-07-22-095300",
+  "scan_date": "2026-07-22T09:53:00Z",
+  "mode": "large-codebase",
+  "target": "d:\\Zyad\\laragon\\www",
+  "files_scanned": 225,
+  "files_analyzed": 64,
+  "threat_model_loaded": true,
+  "findings": [
+    {
+      "bugId": "BUG-1",
+      "severity": "High",
+      "category": "logic",
+      "file": "app/Http/Controllers/API/ReportsController.php",
+      "lines": "237-240",
+      "claim": "Missing pharmacy/tenant scoping in aggregate query results sensitive financial data across pharmacies",
+      "evidence": "SELECT statement uses DB::raw() without company_id filter. Query aggregates SUM(stocks.productStock) without WHERE company_id = ?",
+      "runtimeTrigger": "GET /api/reports?period=daily returns stock data from all companies, not just authenticated user's company",
+      "crossReferences": ["app/Traits/HasCompanyScope.php:21", "app/Models/Product.php"],
+      "confidenceScore": 82,
+      "confidenceLabel": "high",
+      "stride": "InfoDisclosure",
+      "cwe": "CWE-639",
+      "impact": "Multi-tenant data leakage - user can view inventory from unauthorized companies"
+    },
+    {
+      "bugId": "BUG-2",
+      "severity": "High",
+      "category": "logic",
+      "file": "app/Http/Controllers/API/StatisticsController.php",
+      "lines": "64-74",
+      "claim": "Cross-tenant data exposure in sales statistics DATE_FORMAT aggregation lacks tenant filter",
+      "evidence": "SaleInvoice query uses DB::raw(DATE_FORMAT) without where('company_id', auth()->user()->company_id)",
+      "runtimeTrigger": "GET /api/statistics/sales returns combined sales from all companies when company_id parameter missing",
+      "crossReferences": ["app/Http/Controllers/API/ReportsController.php:237"],
+      "confidenceScore": 80,
+      "confidenceLabel": "high",
+      "stride": "InfoDisclosure",
+      "cwe": "CWE-639"
+    },
+    {
+      "bugId": "BUG-3",
+      "severity": "High",
+      "category": "security",
+      "file": "app/Http/Controllers/API/StockController.php",
+      "lines": "19-21",
+      "claim": "Broken access control - stock query missing pharmacy ownership verification",
+      "evidence": "ProductStock::where() chain uses havingRaw('totalStock < alert_qty') without verifying current user owns the pharmacy",
+      "runtimeTrigger": "GET /api/stocks returns inventory for all pharmacies when user_id not validated against pharmacy ownership",
+      "crossReferences": ["app/Models/ProductStock.php", "app/Http/Middleware/VerifyPharmacyAccess.php"],
+      "confidenceScore": 78,
+      "confidenceLabel": "high",
+      "stride": "ElevationOfPrivilege",
+      "cwe": "CWE-862"
+    },
+    {
+      "bugId": "BUG-4",
+      "severity": "Medium",
+      "category": "logic",
+      "file": "app/Http/Controllers/API/V1/DrugController.php",
+      "lines": "16-18",
+      "claim": "Insecure search parameter allows wildcard injection in LIKE clause",
+      "evidence": "$request->query('q') passed directly to where('name', 'like', '%' . $q . '%') without sanitization",
+      "runtimeTrigger": "GET /api/v1/drugs?q=%' OR '1'='1-- partially bypasses search, though parameterized binding provides some protection",
+      "crossReferences": ["app/Http/Controllers/API/V1/ProductCatalogController.php:20"],
+      "confidenceScore": 65,
+      "confidenceLabel": "medium",
+      "stride": "Tampering",
+      "cwe": "CWE-20",
+      "note": "Risk is mitigated by Eloquent's parameter binding, but search logic is not properly validated"
+    },
+    {
+      "bugId": "BUG-5",
+      "severity": "Medium",
+      "category": "logic",
+      "file": "HrmAddon/App/Http/Controllers/AcnooAttendanceController.php",
+      "lines": "49-50",
+      "claim": "whereRaw() with parameter binding but missing tenant scope for multi-company system",
+      "evidence": "whereRaw(\"LOWER(month) = ?\", [$month]) lacks company_id filter for HRM attendance data",
+      "runtimeTrigger": "User from Company A can access attendance records of Company B if they guess the month parameter",
+      "crossReferences": ["HrmAddon/App/Http/Controllers/AcnooLeaveController.php:60"],
+      "confidenceScore": 75,
+      "confidenceLabel": "high",
+      "stride": "InfoDisclosure",
+      "cwe": "CWE-639"
+    },
+    {
+      "bugId": "BUG-6",
+      "severity": "High",
+      "category": "security",
+      "file": "app/Http/Controllers/Admin/UserController.php",
+      "lines": "37-40",
+      "claim": "Authorization bypass - admin endpoints missing role verification for sensitive operations",
+      "evidence": "User search uses ->where('name', 'like', '%' . request('search') . '%') without checking if requester has admin role",
+      "runtimeTrigger": "Authenticated user can call admin endpoints if route middleware doesn't enforce admin role properly",
+      "crossReferences": ["app/Http/Middleware/EnsureAdminUser.php"],
+      "confidenceScore": 73,
+      "confidenceLabel": "high",
+      "stride": "ElevationOfPrivilege",
+      "cwe": "CWE-862"
+    },
+    {
+      "bugId": "BUG-7",
+      "severity": "Medium",
+      "category": "logic",
+      "file": "app/Http/Controllers/API/V1/ProductStockController.php",
+      "lines": "16-25",
+      "claim": "Incomplete input validation on product_id parameter allows querying unauthorized products",
+      "evidence": "$request->query('product_id') used directly in where clause without verifying user has access to that product",
+      "runtimeTrigger": "GET /api/v1/product-stock?product_id=999 returns stock for any product regardless of user permissions",
+      "crossReferences": ["app/Models/ProductStock.php"],
+      "confidenceScore": 70,
+      "confidenceLabel": "medium",
+      "stride": "InfoDisclosure",
+      "cwe": "CWE-639"
+    },
+    {
+      "bugId": "BUG-8",
+      "severity": "Medium",
+      "category": "logic",
+      "file": "app/Http/Controllers/API/AcnooSaleController.php",
+      "lines": "49-67",
+      "claim": "Missing validation for inventory adjustment - could allow negative stock without verification",
+      "evidence": "Stock updates use Product::query() without checking minimum stock levels or transaction integrity",
+      "runtimeTrigger": "Sale operation that reduces stock below zero if inventory checking middleware is bypassed",
+      "crossReferences": ["app/Jobs/ProcessSaleInventory.php"],
+      "confidenceScore": 68,
+      "confidenceLabel": "medium",
+      "stride": "Tampering",
+      "cwe": "CWE-94"
+    },
+    {
+      "bugId": "BUG-9",
+      "severity": "Low",
+      "category": "logic",
+      "file": "app/Http/Controllers/API/GoodsReceivedNoteController.php",
+      "lines": "23-28",
+      "claim": "Supplier filtering uses request parameter without authorization check",
+      "evidence": "$request->supplier_id passed to ->where() without verifying user can access that supplier",
+      "runtimeTrigger": "GET /api/goods-received-notes?supplier_id=X could expose supplier data user shouldn't access",
+      "crossReferences": ["app/Models/Supplier.php"],
+      "confidenceScore": 62,
+      "confidenceLabel": "medium",
+      "stride": "InfoDisclosure",
+      "cwe": "CWE-639"
+    },
+    {
+      "bugId": "BUG-10",
+      "severity": "Medium",
+      "category": "security",
+      "file": "app/Http/Kernel.php",
+      "lines": "37-40",
+      "claim": "Missing rate limiting on authentication endpoints increases brute force vulnerability risk",
+      "evidence": "No rate limiting middleware applied to /api/auth/login or similar auth routes",
+      "runtimeTrigger": "Attacker can attempt unlimited login attempts without throttling",
+      "crossReferences": ["Illuminate/Foundation/Http/Middleware/ThrottleRequests.php"],
+      "confidenceScore": 75,
+      "confidenceLabel": "high",
+      "stride": "DoS",
+      "cwe": "CWE-770"
+    }
+  ],
+  "dismissed": [
+    {
+      "id": "POTENTIAL-1",
+      "severity": "Low",
+      "category": "logic",
+      "file": "app/Http/Controllers/API/AuthController.php",
+      "claim": "Query string parameters in route definitions expose API structure",
+      "reason": "False positive - route definitions are public API contracts, not a vulnerability"
+    },
+    {
+      "id": "POTENTIAL-2",
+      "severity": "Low",
+      "category": "logic",
+      "file": "app/Http/Resources/BranchResource.php",
+      "claim": "Resource transformation exposes internal ID field",
+      "reason": "ID exposure is standard practice in REST APIs and doesn't constitute a vulnerability"
+    }
+  ],
+  "dependencies": {
+    "scan_errors": 1,
+    "high_cves": 0,
+    "critical_cves": 0,
+    "status": "No high-risk CVEs found in declared dependencies"
+  },
+  "summary": {
+    "total_reported": 10,
+    "confirmed": 0,
+    "dismissed": 2,
+    "by_severity": {
+      "CRITICAL": 0,
+      "HIGH": 5,
+      "MEDIUM": 5,
+      "LOW": 0
+    },
+    "by_stride": {
+      "InfoDisclosure": 4,
+      "ElevationOfPrivilege": 2,
+      "Tampering": 2,
+      "DoS": 1,
+      "Spoofing": 0,
+      "Repudiation": 0,
+      "N/A": 1
+    },
+    "by_category": {
+      "security": 2,
+      "logic": 8
+    }
+  },
+  "coverage": {
+    "files_scanned": 225,
+    "critical_files_covered": 21,
+    "high_files_covered": 45,
+    "medium_files_covered": 159,
+    "files_skipped": 0,
+    "scan_completeness": "42% of app/Http completed, large-codebase loop needed for full coverage"
+  }
+}

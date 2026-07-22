@@ -1,0 +1,297 @@
+{
+  "version": "1.0",
+  "generated": "2026-07-22T09:53:00Z",
+  "project": "PharmaMaster Pro",
+  "framework": "Laravel 11",
+  "tech_stack": {
+    "backend": "Laravel PHP",
+    "frontend": ["React", "Vue"],
+    "database": ["MySQL", "Firebase"],
+    "mobile": "React Native / Flutter",
+    "integrations": ["WhatsApp API", "Payment Gateways", "Supplier APIs"]
+  },
+  "severity_thresholds": {
+    "CRITICAL": {
+      "cvss_min": 9.0,
+      "examples": [
+        "SQL injection in production API",
+        "Authentication bypass",
+        "Cross-tenant data leakage",
+        "Hardcoded credentials",
+        "Privilege escalation to admin"
+      ]
+    },
+    "HIGH": {
+      "cvss_min": 7.0,
+      "examples": [
+        "Broken access control",
+        "XSS in user-facing pages",
+        "Missing input validation",
+        "Weak rate limiting",
+        "Unencrypted sensitive data",
+        "Unsafe external API integration"
+      ]
+    },
+    "MEDIUM": {
+      "cvss_min": 5.0,
+      "examples": [
+        "Information disclosure",
+        "Missing audit logging",
+        "Insecure deserialization",
+        "Weak password policies",
+        "Missing CSRF protection"
+      ]
+    },
+    "LOW": {
+      "cvss_min": 3.0,
+      "examples": [
+        "Debug endpoints exposed",
+        "Verbose error messages",
+        "Missing security headers",
+        "Outdated comments in code"
+      ]
+    }
+  },
+  "auth_mechanisms": {
+    "api_jwt": true,
+    "session_based": true,
+    "multi_role": true,
+    "roles": ["admin", "pharmacy_manager", "staff", "vendor", "customer"],
+    "critical_roles": ["admin", "pharmacy_manager"]
+  },
+  "multi_tenancy": {
+    "enabled": true,
+    "isolation_type": "pharmacy_id_based",
+    "shared_resources": ["suppliers", "payment_gateways"],
+    "isolation_critical": true
+  },
+  "sensitive_data_types": {
+    "PII": ["user_name", "phone", "email", "address", "id_number"],
+    "financial": ["invoice_total", "payment_status", "transaction_history", "pricing"],
+    "credentials": ["api_keys", "jwt_tokens", "database_passwords", "api_secrets"],
+    "audit": ["user_actions", "data_changes", "admin_operations"]
+  },
+  "trust_boundaries": [
+    {
+      "name": "Authentication Boundary",
+      "components": ["auth middleware", "JWT validation", "session handlers"],
+      "risk_level": "CRITICAL"
+    },
+    {
+      "name": "Authorization Boundary",
+      "components": ["RBAC system", "permission checks", "feature flags"],
+      "risk_level": "CRITICAL"
+    },
+    {
+      "name": "Data Isolation Boundary",
+      "components": ["pharmacy filtering", "tenant scoping", "relationship access"],
+      "risk_level": "CRITICAL"
+    },
+    {
+      "name": "External Integration Boundary",
+      "components": ["WhatsApp webhook", "payment gateway", "supplier API"],
+      "risk_level": "HIGH"
+    }
+  ],
+  "high_risk_components": {
+    "app_http_controllers": {
+      "risk_tier": "CRITICAL",
+      "file_count": 21,
+      "concerns": [
+        "user input handling",
+        "authorization checks",
+        "sensitive operation execution",
+        "external API calls"
+      ],
+      "scan_priority": 1
+    },
+    "app_models_critical": {
+      "risk_tier": "CRITICAL",
+      "file_count": 2,
+      "concerns": [
+        "business logic",
+        "data validation",
+        "relationship access"
+      ],
+      "scan_priority": 2
+    },
+    "config": {
+      "risk_tier": "CRITICAL",
+      "file_count": 3,
+      "concerns": [
+        "credential exposure",
+        "configuration errors",
+        "security settings"
+      ],
+      "scan_priority": 3
+    },
+    "database_migrations": {
+      "risk_tier": "HIGH",
+      "file_count": 149,
+      "concerns": [
+        "schema vulnerabilities",
+        "default insecure values",
+        "access control bypass"
+      ],
+      "scan_priority": 4
+    },
+    "routes_api": {
+      "risk_tier": "HIGH",
+      "file_count": 74,
+      "concerns": [
+        "endpoint exposure",
+        "missing middleware",
+        "incorrect authentication"
+      ],
+      "scan_priority": 5
+    }
+  },
+  "vulnerable_patterns": [
+    {
+      "name": "SQL Injection via ORM Misuse",
+      "detection": "raw queries with string concatenation",
+      "files_to_check": ["app/Http/Controllers/*", "app/Models/*"],
+      "cwe": "CWE-89"
+    },
+    {
+      "name": "Missing Authorization Check",
+      "detection": "no permission verification before returning data",
+      "files_to_check": ["app/Http/Controllers/*"],
+      "cwe": "CWE-284"
+    },
+    {
+      "name": "Hardcoded Credentials",
+      "detection": "plain-text API keys, passwords in code",
+      "files_to_check": ["config/*", "app/*"],
+      "cwe": "CWE-798"
+    },
+    {
+      "name": "Insufficient Input Validation",
+      "detection": "missing or weak validation before processing",
+      "files_to_check": ["app/Http/Controllers/*", "routes/*"],
+      "cwe": "CWE-20"
+    },
+    {
+      "name": "Cross-Tenant Data Leakage",
+      "detection": "missing tenant/pharmacy scoping in queries",
+      "files_to_check": ["app/Http/Controllers/*", "app/Models/*"],
+      "cwe": "CWE-639"
+    },
+    {
+      "name": "Unsafe External API Integration",
+      "detection": "no signature verification on webhooks",
+      "files_to_check": ["app/Http/Controllers/*"],
+      "cwe": "CWE-347"
+    },
+    {
+      "name": "Weak Rate Limiting",
+      "detection": "missing or easily bypassed rate limits",
+      "files_to_check": ["app/Http/Middleware/*", "routes/*"],
+      "cwe": "CWE-770"
+    },
+    {
+      "name": "Information Disclosure",
+      "detection": "sensitive data in logs, error messages, or comments",
+      "files_to_check": ["app/*", "config/*"],
+      "cwe": "CWE-200"
+    }
+  ],
+  "external_integrations": [
+    {
+      "name": "WhatsApp API",
+      "risk_level": "HIGH",
+      "concerns": [
+        "webhook signature verification",
+        "rate limiting",
+        "message content validation"
+      ],
+      "files": ["app/Http/Controllers/*WhatsApp*", "app/Services/*WhatsApp*"]
+    },
+    {
+      "name": "Payment Gateways",
+      "risk_level": "CRITICAL",
+      "concerns": [
+        "credential management",
+        "PCI compliance",
+        "transaction integrity",
+        "webhook security"
+      ],
+      "files": ["app/Http/Controllers/*Payment*", "app/Services/*Payment*"]
+    },
+    {
+      "name": "Supplier APIs",
+      "risk_level": "HIGH",
+      "concerns": [
+        "data validation",
+        "error handling",
+        "credential exposure"
+      ],
+      "files": ["app/Services/*Supplier*", "app/Jobs/*Supplier*"]
+    }
+  ],
+  "stride_focus": {
+    "S_spoofing": {
+      "priority": "HIGH",
+      "checks": [
+        "JWT token validation",
+        "Session security",
+        "API consumer verification",
+        "Webhook signature verification"
+      ]
+    },
+    "T_tampering": {
+      "priority": "CRITICAL",
+      "checks": [
+        "SQL injection prevention",
+        "Request data integrity",
+        "Business logic validation",
+        "HTTPS enforcement"
+      ]
+    },
+    "R_repudiation": {
+      "priority": "MEDIUM",
+      "checks": [
+        "Audit logging",
+        "Cryptographic signatures",
+        "User action tracking"
+      ]
+    },
+    "I_information_disclosure": {
+      "priority": "HIGH",
+      "checks": [
+        "Sensitive data encryption",
+        "Error message masking",
+        "Field-level access control",
+        "Secret management"
+      ]
+    },
+    "D_denial_of_service": {
+      "priority": "HIGH",
+      "checks": [
+        "Request size limits",
+        "Query complexity limits",
+        "Rate limiting",
+        "Async job processing"
+      ]
+    },
+    "E_elevation_of_privilege": {
+      "priority": "CRITICAL",
+      "checks": [
+        "RBAC enforcement",
+        "Permission verification",
+        "Role separation",
+        "Sensitive permission auditing"
+      ]
+    }
+  },
+  "scanning_rules": {
+    "skip_test_files": false,
+    "include_vendor": false,
+    "include_node_modules": false,
+    "include_dist_build": false,
+    "focus_on_threat_boundaries": true,
+    "verify_external_integrations": true,
+    "check_multi_tenancy_isolation": true,
+    "audit_access_control": true
+  }
+}
