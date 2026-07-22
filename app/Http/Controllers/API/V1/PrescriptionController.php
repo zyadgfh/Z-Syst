@@ -21,10 +21,13 @@ use Illuminate\Support\Facades\Validator;
 
 class PrescriptionController extends Controller
 {
+    private readonly StockMovementService $stockMovementService;
+
     public function __construct(
         private readonly PrescriptionService $prescriptionService,
         private readonly ForecastingService $forecastingService
     ) {
+        $this->stockMovementService = app(StockMovementService::class);
     }
 
     public function index(Request $request): JsonResponse

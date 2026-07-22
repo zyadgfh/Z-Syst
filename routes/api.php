@@ -18,25 +18,25 @@ Route::get('/health/live', [HealthController::class, 'live']);
 
 Route::prefix('v1')->group(function () {
 
-    // Legacy OTP-based auth endpoints
-    Route::post('/sign-in', [Api\Auth\AuthController::class, 'login']);
-    Route::post('/submit-otp', [Api\Auth\AuthController::class, 'submitOtp']);
-    Route::post('/sign-up', [Api\Auth\AuthController::class, 'signUp']);
-    Route::post('/resend-otp', [Api\Auth\AuthController::class, 'resendOtp']);
+    // Legacy OTP-based auth endpoints (with rate limiting)
+    Route::post('/sign-in', [Api\Auth\AuthController::class, 'login'])->middleware('throttle:5,1');
+    Route::post('/submit-otp', [Api\Auth\AuthController::class, 'submitOtp'])->middleware('throttle:10,1');
+    Route::post('/sign-up', [Api\Auth\AuthController::class, 'signUp'])->middleware('throttle:3,1');
+    Route::post('/resend-otp', [Api\Auth\AuthController::class, 'resendOtp'])->middleware('throttle:3,1');
 
-    // Standard API auth endpoints (token / password / profile)
-    Route::post('/register', [ApiAuthController::class, 'register']);
-    Route::post('/login', [ApiAuthController::class, 'login']);
-    Route::post('/forgot-password', [ApiAuthController::class, 'forgotPassword']);
-    Route::post('/reset-password', [ApiAuthController::class, 'resetPassword']);
-    Route::post('/barcode-login', [ApiAuthController::class, 'barcodeLogin']);
+    // Standard API auth endpoints (token / password / profile) with rate limiting
+    Route::post('/register', [ApiAuthController::class, 'register'])->middleware('throttle:3,1');
+    Route::post('/login', [ApiAuthController::class, 'login'])->middleware('throttle:5,1');
+    Route::post('/forgot-password', [ApiAuthController::class, 'forgotPassword'])->middleware('throttle:3,1');
+    Route::post('/reset-password', [ApiAuthController::class, 'resetPassword'])->middleware('throttle:5,1');
+    Route::post('/barcode-login', [ApiAuthController::class, 'barcodeLogin'])->middleware('throttle:5,1');
 
     Route::prefix('auth')->group(function () {
-        Route::post('/register', [ApiAuthController::class, 'register']);
-        Route::post('/login', [ApiAuthController::class, 'login']);
-        Route::post('/forgot-password', [ApiAuthController::class, 'forgotPassword']);
-        Route::post('/reset-password', [ApiAuthController::class, 'resetPassword']);
-        Route::post('/barcode-login', [ApiAuthController::class, 'barcodeLogin']);
+        Route::post('/register', [ApiAuthController::class, 'register'])->middleware('throttle:3,1');
+        Route::post('/login', [ApiAuthController::class, 'login'])->middleware('throttle:5,1');
+        Route::post('/forgot-password', [ApiAuthController::class, 'forgotPassword'])->middleware('throttle:3,1');
+        Route::post('/reset-password', [ApiAuthController::class, 'resetPassword'])->middleware('throttle:5,1');
+        Route::post('/barcode-login', [ApiAuthController::class, 'barcodeLogin'])->middleware('throttle:5,1');
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('/logout', [ApiAuthController::class, 'logout']);
@@ -56,9 +56,9 @@ Route::prefix('v1')->group(function () {
         });
     });
 
-    Route::post('/send-reset-code',[Api\Auth\AcnooForgotPasswordController::class, 'sendResetCode']);
-    Route::post('/verify-reset-code',[Api\Auth\AcnooForgotPasswordController::class, 'verifyResetCode']);
-    Route::post('/password-reset',[Api\Auth\AcnooForgotPasswordController::class, 'resetPassword']);
+    Route::post('/send-reset-code',[Api\Auth\AcnooForgotPasswordController::class, 'sendResetCode'])->middleware('throttle:3,1');
+    Route::post('/verify-reset-code',[Api\Auth\AcnooForgotPasswordController::class, 'verifyResetCode'])->middleware('throttle:10,1');
+    Route::post('/password-reset',[Api\Auth\AcnooForgotPasswordController::class, 'resetPassword'])->middleware('throttle:5,1');
 
     // Public tenant-aware endpoints (no auth required for tests that bind tenant manually)
     Route::apiResource('drugs', \App\Http\Controllers\API\V1\DrugController::class)->only(['index', 'show']);

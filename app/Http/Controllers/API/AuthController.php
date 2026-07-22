@@ -13,6 +13,7 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Requests\Auth\TwoFactorSetupRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
+use App\Models\User;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -158,9 +159,8 @@ class AuthController extends BaseController
 
     public function barcodeLogin(BarcodeLoginRequest $request): JsonResponse
     {
-        // Find user by barcode (assuming barcode is stored in a field or relationship)
-        // For now, we'll use a simple implementation
-        $user = User::where('email', $request->barcode)->first(); // Placeholder - implement actual barcode logic
+        // Find user by their barcode field (not email)
+        $user = User::where('barcode', $request->barcode)->first();
 
         if (! $user) {
             return $this->error('Invalid barcode', 401);

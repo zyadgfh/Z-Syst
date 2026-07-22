@@ -13,10 +13,18 @@ class ProductImportController extends Controller
 {
     public function importJson(Request $request)
     {
+        // Require authentication
+        if (! $request->user()) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
         $data = $request->validate(['rows' => 'required|array']);
-        $company = Company::where('slug', 'demo')->first();
+
+        // Use the authenticated user's company instead of hardcoded demo
+        $companyId = $request->user()->company_id ?? app('tenant.company_id');
+        $company = Company::find($companyId);
         if (! $company) {
-            return response()->json(['message' => 'demo company not found'], 404);
+            return response()->json(['message' => 'Company not found'], 404);
         }
 
         $created = 0;

@@ -25,7 +25,7 @@ class AuthController extends Controller
     public function signUp(RegisterRequest $request)
     {
         $code = random_int(100000, 999999);
-        $expire = now()->addMinutes(env('OTP_VISIBILITY_TIME') ?? 3);
+        $expire = now()->addMinutes((int) (env('OTP_VISIBILITY_TIME') ?? 3));
         $data = [
             'code' => $code,
             'name' => $request->name,
@@ -50,15 +50,23 @@ class AuthController extends Controller
             ], 406);
         }
 
-        $user = User::updateOrCreate(['email' => $request->email], $request->except('password') + [
-                    'remember_token' => $code,
-                    'email_verified_at' => $expire,
-                    'password' => Hash::make($request->password),
-                ]);
+        $user = User::updateOrCreate(
+            ['email' => $request->email],
+            [
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'remember_token' => $code,
+                'email_verified_at' => $expire,
+            ]
+        );
 
         return response()->json([
             'message' => 'An otp code has been sent to your email. Please check and confirm.',
-            'data' => $user,
+            'data' => [
+                'email' => $request->email,
+                'name' => $request->name,
+            ],
         ]);
     }
 
@@ -107,9 +115,21 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request)
     {
-        $request->authenticate();
+        $credentials = $request->only('email', 'password');
+
+        if (!Auth::attempt($credentials)) {
+            return response()->json([
+                'message' => __('Invalid credentials'),
+            ], 401);
+        }
 
         $user = auth()->user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => __('User not found'),
+            ], 404);
+        }
 
         if ($user->role != 'staff' && $user->role != 'shop-owner') {
             return response()->json([

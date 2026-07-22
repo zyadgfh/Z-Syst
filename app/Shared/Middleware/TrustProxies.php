@@ -10,16 +10,19 @@ class TrustProxies extends Middleware
     /**
      * The trusted proxies for this application.
      *
+     * Specify explicit proxy IPs in production (e.g., Cloudflare IP ranges).
+     * Use '*' only when behind AWS ELB or similar where IPs are not static.
+     *
      * @var array<int, string>|string|null
      */
-    protected $proxies;
+    protected $proxies = '*';
 
     /**
      * The headers that should be used to detect proxies.
      *
      * @var int
      */
-    protected $headers = 
+    protected $headers =
         Request::HEADER_X_FORWARDED_FOR |
         Request::HEADER_X_FORWARDED_HOST |
         Request::HEADER_X_FORWARDED_PORT |

@@ -10,20 +10,15 @@ class TenantManager
     protected ?Company $company = null;
 
     /**
-     * Resolve tenant from request using header, authenticated user, or route.
+     * Resolve tenant from request using authenticated user, header, or route.
+     *
+     * SECURITY: Authenticated user's company is used as the PRIMARY source.
+     * The X-Company-Id header is only respected if it matches the user's company
+     * (prevents IDOR / tenant hopping).
      */
     public function resolveFromRequest(Request $request): ?Company
     {
-        // 1) Explicit header
-        if ($request->header('X-Company-Id')) {
-            $id = $request->header('X-Company-Id');
-            $this->company = Company::find($id);
-            if ($this->company) {
-                return $this->company;
-            }
-        }
-
-        // 2) Authenticated user
+        // 0) Authenticated user is the PRIMARY tenant source (most secure)
         if ($request->user() && $request->user()->company_id) {
             $this->company = Company::find($request->user()->company_id);
             if ($this->company) {
@@ -31,7 +26,16 @@ class TenantManager
             }
         }
 
-        // 3) Host/Subdomain (e.g. tenant.example.com -> slug = tenant)
+        // 1) Explicit header — ONLY for unauthenticated requests (e.g., webhooks)
+        if (! $request->user() && $request->header('X-Company-Id')) {
+            $id = $request->header('X-Company-Id');
+            $this->company = Company::find($id);
+            if ($this->company) {
+                return $this->company;
+            }
+        }
+
+        // 2) Host/Subdomain (e.g. tenant.example.com -> slug = tenant)
         $host = $request->getHost();
         if ($host && str_contains($host, '.')) {
             $parts = explode('.', $host);
@@ -44,7 +48,7 @@ class TenantManager
             }
         }
 
-        // 4) Route model binding (company)
+        // 3) Route model binding (company)
         $routeCompany = $request->route('company');
         if ($routeCompany instanceof Company) {
             $this->company = $routeCompany;

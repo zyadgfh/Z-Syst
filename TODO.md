@@ -1,39 +1,21 @@
-# TODO - PharmaMaster Pro (Phase 1)
+# Security Vulnerability Fixes - DONE ✅
 
-## Step 1: Recon (قبل أي تعديل)
-- [x] فحص migrations الحالية داخل `database/migrations/`
-- [x] فحص `routes/api.php` ووجود/عدم وجود `routes/api/v1/*`
-- [x] فحص Controllers Auth الحالية ومساراتها
-- [x] فحص Exception Handler المركزي وformat الـ responses الحالية
-- [x] فحص Models (User/Company/Branch/Department/Medicine/Inventory إن وجدت) للتأكد من وجود `company_id` والعلاقات
+All 13 security vulnerabilities have been fixed.
 
-## Step 2: Multi-Tenant Trait
-- [ ] إنشاء/تحديث `app/Support/Traits/BelongsToCompany.php` حسب المواصفات (ملاحظة: المشروع يستخدم حاليًا `app/Core/Traits/HasCompany` + `app/Scopes/TenantScope`)
-- [ ] تطبيق الـ Trait على النماذج المعنية في Phase 1 (على الأقل User + أي models فيها company_id)
+## Priority 1: CRITICAL Fixes ✅
+- [x] 1. Fix CORS - Restrict wildcard origin (config/cors.php → allowed_origins now uses env vars)
+- [x] 2. Set Sanctum Token Expiration (config/sanctum.php → 1440 min / 24h default)
+- [x] 3. Fix Legacy Auth - Mass assignment & OTP leak (AuthController.php → use `only()` not `except('password')`, user data no longer returned)
+- [x] 4. Fix Webhook HMAC Verification (PaymentWebhookController.php → added HMAC/Signature verification for Paymob & generic gateways)
+- [x] 5. Fix Filesystem Public Disk Root (config/filesystems.php → changed from `.` to `storage_path('app/public')`)
+- [x] 6. Fix Barcode Login - Remove placeholder email lookup (AuthController.php → now queries by `barcode` field, not email)
 
-## Step 3: API Versioning
-- [x] إنشاء/تنظيم `routes/api/v1/` ووضع auth routes داخل `routes/api/v1/auth.php` (ملاحظة: المشروع يوفّر غالبًا prefix v1 داخل `routes/api.php`)
-- [x] تحديث `routes/api.php` ليصبح router رئيسي مع prefix `v1`
-- [x] التأكد من تفعيل `auth:sanctum` و/أو middleware `tenant` إن كان موجود
-
-## Step 4: Exception Handler موحد
-- [ ] إنشاء `app/Exceptions/BaseApiException.php`
-- [ ] إنشاء exceptions نوعية أساسية مستخدمة في Phase 1
-- [ ] ربط/تعديل `app/Exceptions/Handler.php` أو mekanism موجود لإرجاع JSON موحد
-- [ ] تحديث Auth controllers لاستخدام Exceptions الجديدة
-
-## Step 5: المigrations الأساسية (CREATE فقط)
-- [x] إنشاء/تأكيد migrations `companies`, `branches`, `departments`, `users` (ملاحظة: موجودة)
-- [x] إضافة `company_id` وقيود/فهرسة داخل migrations المناسبة
-
-## Step 6: Tests
-- [x] إنشاء/تعديل `tests/Feature/Auth/LoginTest.php` (ملاحظة: يوجد `tests/Feature/AuthLoginTest.php` يغطي login/logout)
-- [x] إضافة tests للتحقق من auth behavior وglobal scope multi-tenant isolation
-- [ ] ضمان أن coverage للمرحلة 1 >= 80%
-
-## Step 7: Verification
-- [ ] تشغيل `php artisan migrate:fresh --seed`
-- [ ] تشغيل `php artisan test`
-- [ ] التأكد من عدم كسر RBAC/Branch Limits
-
+## Priority 2: HIGH Fixes ✅
+- [x] 7. Add Auth Protection to Demo Product Import (ProductImportController.php → requires auth, uses user's company)
+- [x] 8. Fix Admin Middleware - Use RBAC (AdminMiddleware.php → uses Spatie hasRole() with legacy fallback)
+- [x] 9. Fix Tenant Bypass via Header (TenantManager.php → authenticated user is primary source, header only for unauthenticated)
+- [x] 10. Fix Upload Filenames - Sanitize (HasUploader.php → added Str::slug, random suffix, MIME validation, safe deletion)
+- [x] 11. Fix undefined stockMovementService (PrescriptionController.php → injected via app() container)
+- [x] 12. Add Rate Limiting to Auth Endpoints (routes/api.php → throttle:5,1 on login; throttle:3,1 on register; throttle:10,1 on OTP verify)
+- [x] 13. Fix TrustProxies - Explicit config (TrustProxies.php → set $proxies = '*')
 

@@ -16,8 +16,18 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && (Auth::user()->role != 'shop-owner' && Auth::user()->role != 'staff')) {
-            return $next($request);
+        if (Auth::check()) {
+            $user = Auth::user();
+
+            // Use Spatie RBAC for admin check
+            if ($user->hasRole(['super-admin', 'admin', 'shop-owner'])) {
+                return $next($request);
+            }
+
+            // Fallback: also check legacy role field for backward compatibility
+            if (! empty($user->role) && ! in_array($user->role, ['shop-owner', 'staff'], true)) {
+                return $next($request);
+            }
         }
 
         // Redirect if the user is not an admin

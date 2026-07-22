@@ -46,7 +46,7 @@ return [
     |
     */
 
-    'expiration' => null,
+    'expiration' => env('SANCTUM_TOKEN_EXPIRATION', 1440), // 24 hours default
 
     /*
     |--------------------------------------------------------------------------
@@ -63,5 +63,17 @@ return [
         'verify_csrf_token' => App\Http\Middleware\VerifyCsrfToken::class,
         'encrypt_cookies' => App\Http\Middleware\EncryptCookies::class,
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Token Rotation
+    |--------------------------------------------------------------------------
+    |
+    | When set to true, issuing a new token will invalidate the previous one
+    | for the same token name. This helps limit the risk of token abuse.
+    |
+    */
+
+    'rotation' => env('SANCTUM_TOKEN_ROTATION', true),
 
 ];

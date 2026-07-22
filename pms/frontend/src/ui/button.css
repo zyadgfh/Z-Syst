@@ -1,0 +1,34 @@
+.pms-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transform-origin: center;
+  transition: transform 160ms cubic-bezier(.2,.9,.2,1), box-shadow 160ms cubic-bezier(.2,.9,.2,1), opacity 120ms ease;
+  will-change: transform, box-shadow;
+  -webkit-tap-highlight-color: transparent;
+}
+.pms-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.12);
+}
+.pms-btn:active {
+  transform: translateY(0) scale(0.985);
+}
+.pms-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+.pms-btn:focus-visible {
+  outline: 3px solid var(--pms-focus-color, rgba(11,110,253,0.28));
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pms-btn {
+    transition: none !important;
+    transform: none !important;
+  }
+}
