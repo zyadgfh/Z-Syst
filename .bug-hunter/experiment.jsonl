@@ -1,1 +1,2 @@
 {"type":"config","segment":0,"timestamp":1784714084269,"name":"bug-hunt-20260722","maxIterations":15,"metric":{"name":"bugs_confirmed","unit":"count","direction":"higher"}}
+{"type":"result","segment":0,"timestamp":1784714371577,"value":2,"secondaryMetrics":{},"status":"keep","description":"","commit":"c1d4cec8","durationMs":0}
