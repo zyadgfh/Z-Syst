@@ -18,6 +18,13 @@ Route::post('ssl-commerz/payment/success', [Web\PaymentController::class, 'sslCo
 Route::post('ssl-commerz/payment/failed', [Web\PaymentController::class, 'sslCommerzFailed']);
 Route::get('/order-status', [Web\PaymentController::class, 'orderStatus'])->name('order.status');
 
+/*
+| Payment gateway return/callback routes — DISABLED 2026-07-25.
+| The referenced controllers (App\Library\*) were never implemented and
+| broke `php artisan route:list`. The active payment processing pipeline
+| lives at app/Services/Payment/ and is wired in routes/api.php.
+| Restore when actual gateway SDKs (PayPal, Stripe, Razorpay, ...) are
+| integrated and the matching App\Library\* classes are created.
 Route::group([
     'namespace' => 'App\Library',
 ], function () {
@@ -39,6 +46,7 @@ Route::group([
     Route::post('/paytm/status', 'Paytm@status')->name('paytm.status');
     Route::get('/tap-payment/status', 'TapPayment@status')->name('tap-payment.status');
 });
+*/
 // Payment Routes End
 
 Route::get('/cache-clear', function () {

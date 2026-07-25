@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 
-namespace App\Http\Middleware;
+namespace App\Shared\Middleware;
 
 use App\Exceptions\BranchLimitExceededException;
 use App\Services\BranchLimitService;

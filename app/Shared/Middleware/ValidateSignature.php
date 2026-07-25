@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 
-namespace App\Http\Middleware;
+namespace App\Shared\Middleware;
 
 use Illuminate\Routing\Middleware\ValidateSignature as Middleware;
 

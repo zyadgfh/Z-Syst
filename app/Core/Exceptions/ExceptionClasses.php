@@ -5,6 +5,18 @@ namespace App\Core\Exceptions;
 use Exception;
 
 /**
+ * Bundle file kept for backward compatibility with code that imports
+ * the legacy exception hierarchy (BaseException / NotFoundException /
+ * BusinessException). The domain-specific exceptions (ApiException,
+ * AuthenticationException, AuthorizationException, ValidationException,
+ * TenantException, BranchLimitExceededException) live in their own
+ * files under this namespace and extend ApiException.
+ *
+ * If you're adding a new domain exception, create a standalone file
+ * matching PSR-4 — do NOT append a new class here.
+ */
+
+/**
  * Base Exception Class
  */
 class BaseException extends Exception
@@ -35,36 +47,6 @@ class NotFoundException extends BaseException
 }
 
 /**
- * Validation exception
- */
-class ValidationException extends BaseException
-{
-    private array $errors = [];
-
-    public function __construct(array $errors = [], string $message = "Validation failed", Exception $previous = null)
-    {
-        parent::__construct($message, 422, $previous);
-        $this->errors = $errors;
-    }
-
-    public function getErrors(): array
-    {
-        return $this->errors;
-    }
-}
-
-/**
- * Authorization exception
- */
-class AuthorizationException extends BaseException
-{
-    public function __construct(string $message = "Unauthorized action", Exception $previous = null)
-    {
-        parent::__construct($message, 403, $previous);
-    }
-}
-
-/**
  * Business logic exception
  */
 class BusinessException extends BaseException
@@ -74,4 +56,3 @@ class BusinessException extends BaseException
         parent::__construct($message, $statusCode, $previous);
     }
 }
-
