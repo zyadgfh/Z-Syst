@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\Party;
 use App\Models\Stock;
 use App\Models\Purchase;
+use App\Services\Stock\StockAllocationService;
 use Illuminate\Http\Request;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseDetails;
@@ -80,18 +81,11 @@ class PurchaseReturnController extends Controller
             foreach ($request->purchase_detail_id as $key => $detail_id) {
                 $purchase_detail = PurchaseDetails::findOrFail($detail_id);
 
-                // Update stock for the specific batch
-                $batch = Stock::where('product_id', $purchase_detail->product_id)
-                            ->when($purchase_detail->batch_no ?? false, function ($query) use ($purchase_detail) {
-                                return $query->where('batch_no', $purchase_detail->batch_no);
-                            })
-                            ->first();
-
-                if ($batch) {
-                    $batch->decrement('productStock', $request->return_qty[$key]);
-                } else {
-                    return response()->json(['error' => 'Batch not found.'], 404);
-                }
+                // Use StockAllocationService with pessimistic locking to deduct stock on return
+                StockAllocationService::allocate(
+                    $purchase_detail->product_id,
+                    (int) $request->return_qty[$key]
+                );
 
                 // Update PurchaseDetail record
                 $purchase_detail->update([

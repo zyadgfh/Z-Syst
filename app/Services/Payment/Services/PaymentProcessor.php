@@ -9,11 +9,12 @@ use App\Services\Payment\Exceptions\PaymentException;
 use App\Services\Payment\Gateways\CashPaymentGateway;
 use App\Services\Payment\Gateways\VodafoneCashGateway;
 use App\Services\Payment\Models\PaymentTransaction;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Payment Processor - Main payment orchestration service
- * 
+ *
  * مسؤول عن توجيه المدفوعات إلى البوابة المناسبة
  * يدعم: الدفع الفردي والمختلط (Mixed Payment)
  */
@@ -36,10 +37,10 @@ class PaymentProcessor
         $this->gateways = [
             // Egyptian Mobile Wallets
             PaymentMethodType::VODAFONE_CASH->value => VodafoneCashGateway::class,
-            
+
             // Local Payments
             PaymentMethodType::CASH->value => CashPaymentGateway::class,
-            
+
             // More gateways will be registered here as they are implemented:
             // PaymentMethodType::ORANGE_CASH->value => OrangeCashGateway::class,
             // PaymentMethodType::ETISALAT_CASH->value => EtisalatCashGateway::class,
@@ -50,18 +51,44 @@ class PaymentProcessor
 
     /**
      * Get a payment gateway instance by method type.
+     *
+     * BUG-S4 FIX: Enhanced validation to ensure gateway class exists and is instantiable
      */
     public function getGateway(PaymentMethodType|string $methodType): PaymentGatewayInterface
     {
         $type = $methodType instanceof PaymentMethodType ? $methodType->value : $methodType;
-        
+
         if (!isset($this->gateways[$type])) {
             throw PaymentException::gatewayNotAvailable($type);
         }
 
         $gatewayClass = $this->gateways[$type];
-        
-        return app()->make($gatewayClass, ['company' => $this->company]);
+
+        // Validate gateway class exists
+        if (!class_exists($gatewayClass)) {
+            throw new PaymentException(
+                "Gateway class not found: {$gatewayClass}",
+                500
+            );
+        }
+
+        // Validate gateway implements PaymentGatewayInterface
+        if (!in_array(PaymentGatewayInterface::class, class_implements($gatewayClass))) {
+            throw new PaymentException(
+                "Gateway class does not implement PaymentGatewayInterface: {$gatewayClass}",
+                500
+            );
+        }
+
+        try {
+            return app()->make($gatewayClass, ['company' => $this->company]);
+        } catch (\Exception $e) {
+            throw new PaymentException(
+                "Failed to instantiate gateway {$gatewayClass}: {$e->getMessage()}",
+                500,
+                $e
+            );
+        }
     }
 
     /**
@@ -70,7 +97,7 @@ class PaymentProcessor
     public function processSinglePayment(PaymentMethodType $methodType, array $data): PaymentTransaction
     {
         $gateway = $this->getGateway($methodType);
-        
+
         if (!$gateway->isAvailable()) {
             throw PaymentException::invalidConfiguration($gateway->getDisplayName());
         }
@@ -88,58 +115,49 @@ class PaymentProcessor
 
     /**
      * Process a mixed payment (multiple payment methods for one sale).
-     * 
+     * IMPORTANT: Wrapped in DB transaction to ensure atomic operations
+     *
      * مثال: 300 جنيه كاش + 200 جنيه فودافون كاش = 500 جنيه إجمالي
      */
     public function processMixedPayment(array $payments, array $commonData = []): array
     {
-        $transactions = [];
-        $totalProcessed = 0;
-        $expectedTotal = $commonData['total_amount'] ?? array_sum(array_column($payments, 'amount'));
+        return DB::transaction(function () use ($payments, $commonData) {
+            $transactions = [];
+            $totalProcessed = 0;
+            $expectedTotal = $commonData['total_amount'] ?? array_sum(array_column($payments, 'amount'));
 
-        foreach ($payments as $payment) {
-            $methodType = $payment['method_type'] instanceof PaymentMethodType 
-                ? $payment['method_type'] 
-                : PaymentMethodType::from($payment['method_type']);
+            foreach ($payments as $payment) {
+                $methodType = $payment['method_type'] instanceof PaymentMethodType
+                    ? $payment['method_type']
+                    : PaymentMethodType::from($payment['method_type']);
 
-            $paymentData = array_merge($commonData, $payment, [
-                'reference_id' => $commonData['reference_id'] ?? null,
-                'reference_type' => $commonData['reference_type'] ?? null,
-            ]);
+                $paymentData = array_merge($commonData, $payment, [
+                    'reference_id' => $commonData['reference_id'] ?? null,
+                    'reference_type' => $commonData['reference_type'] ?? null,
+                ]);
 
-            try {
-                $transaction = $this->processSinglePayment($methodType, $paymentData);
-                $transactions[] = $transaction;
-                $totalProcessed += $transaction->amount;
-            } catch (\Exception $e) {
-                // If one payment fails, rollback the processed ones
-                foreach ($transactions as $processedTx) {
-                    try {
-                        $gateway = $this->getGateway($processedTx->payment_method_type);
-                        $gateway->refund($processedTx, null, 'Mixed payment rollback due to partial failure');
-                    } catch (\Exception $rollbackError) {
-                        Log::error('Failed to rollback transaction', [
-                            'transaction_id' => $processedTx->id,
-                            'error' => $rollbackError->getMessage(),
-                        ]);
-                    }
+                try {
+                    $transaction = $this->processSinglePayment($methodType, $paymentData);
+                    $transactions[] = $transaction;
+                    $totalProcessed += $transaction->amount;
+                } catch (\Exception $e) {
+                    // DB::transaction will rollback all changes automatically
+                    throw new PaymentException(
+                        "Mixed payment failed at {$methodType->label()}: {$e->getMessage()}",
+                        400,
+                        $e
+                    );
                 }
-
-                throw new PaymentException(
-                    "Mixed payment failed at {$methodType->label()}: {$e->getMessage()}",
-                    400,
-                    $e
-                );
             }
-        }
 
-        return [
-            'success' => true,
-            'transactions' => $transactions,
-            'total_amount' => $totalProcessed,
-            'expected_total' => $expectedTotal,
-            'is_complete' => abs($totalProcessed - $expectedTotal) < 0.01,
-        ];
+            return [
+                'success' => true,
+                'transactions' => $transactions,
+                'total_amount' => $totalProcessed,
+                'expected_total' => $expectedTotal,
+                'is_complete' => abs($totalProcessed - $expectedTotal) < 0.01,
+            ];
+        });
     }
 
     /**
@@ -201,7 +219,7 @@ class PaymentProcessor
     public function getAvailableMethods(): array
     {
         $methods = [];
-        
+
         foreach ($this->gateways as $type => $gatewayClass) {
             try {
                 $gateway = app()->make($gatewayClass, ['company' => $this->company]);

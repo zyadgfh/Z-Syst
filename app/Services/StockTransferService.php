@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
+use App\Services\Stock\StockAllocationService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
@@ -239,13 +240,11 @@ class StockTransferService extends BaseService
                     'expiry_date' => $itemData['expiry_date'] ?? $transferItem->expiry_date,
                 ]);
 
-                // Deduct stock from source branch
-                $this->deductStock(
+                // Deduct stock from source branch using StockAllocationService with pessimistic locking
+                StockAllocationService::allocateToProductStock(
                     $transferItem->product_id,
-                    $transfer->from_branch_id,
-                    $itemData['quantity_sent'],
-                    $transferItem->batch_number,
-                    $transfer->id
+                    (int) $itemData['quantity_sent'],
+                    $transfer->from_branch_id
                 );
             }
 
@@ -286,16 +285,15 @@ class StockTransferService extends BaseService
                     'quantity_received' => $itemData['quantity_received'],
                 ]);
 
-                // Add stock to destination branch
-                $this->addStock(
-                    $transferItem->product_id,
-                    $transfer->to_branch_id,
-                    $itemData['quantity_received'],
-                    $transferItem->batch_number,
-                    $transferItem->expiry_date,
-                    $transferItem->unit_cost,
-                    $transfer->id
-                );
+                // Add stock to destination branch using StockAllocationService with pessimistic locking
+                StockAllocationService::addToProductStock([
+                    'company_id' => $transfer->company_id,
+                    'product_id' => $transferItem->product_id,
+                    'branch_id' => $transfer->to_branch_id,
+                    'quantity' => $itemData['quantity_received'],
+                    'batch_number' => $transferItem->batch_number,
+                    'expiry_date' => $transferItem->expiry_date?->toDateString(),
+                ]);
             }
 
             // Update transfer status
@@ -332,15 +330,15 @@ class StockTransferService extends BaseService
             if ($transfer->status === 'in_transit') {
                 foreach ($transfer->items as $item) {
                     if ($item->quantity_sent > 0) {
-                        $this->addStock(
-                            $item->product_id,
-                            $transfer->from_branch_id,
-                            $item->quantity_sent,
-                            $item->batch_number,
-                            $item->expiry_date,
-                            $item->unit_cost,
-                            $transfer->id
-                        );
+                        // Restore stock using StockAllocationService
+                        StockAllocationService::addToProductStock([
+                            'company_id' => $transfer->company_id,
+                            'product_id' => $item->product_id,
+                            'branch_id' => $transfer->from_branch_id,
+                            'quantity' => $item->quantity_sent,
+                            'batch_number' => $item->batch_number,
+                            'expiry_date' => $item->expiry_date?->toDateString(),
+                        ]);
                     }
                 }
             }
@@ -365,36 +363,15 @@ class StockTransferService extends BaseService
      * Deduct stock from a branch.
      *
      * @throws \Exception
+     * @deprecated Use StockAllocationService::allocateToProductStock() instead
      */
     protected function deductStock(int $productId, int $branchId, float $quantity, ?string $batchNumber = null, ?int $transferId = null): void
     {
-        $query = ProductStock::where('product_id', $productId)
-            ->where('branch_id', $branchId)
-            ->where('is_active', true);
-
-        if ($batchNumber) {
-            $query->where('batch_number', $batchNumber);
-        }
-
-        $stock = $query->first();
-
-        if (! $stock) {
-            // Try fallback to any stock record for the same branch if batch lookup failed
-            $stock = ProductStock::where('product_id', $productId)
-                ->where('branch_id', $branchId)
-                ->where('is_active', true)
-                ->first();
-        }
-
-        if (! $stock) {
-            throw new \Exception("Stock record not found for product {$productId} at branch {$branchId}");
-        }
-
-        if ($stock->quantity < $quantity) {
-            throw new \Exception("Insufficient stock. Available: {$stock->quantity}, Required: {$quantity}");
-        }
-
-        $stock->decrement('quantity', $quantity);
+        StockAllocationService::allocateToProductStock(
+            $productId,
+            (int) $quantity,
+            $branchId
+        );
 
         // Use centralized StockMovementService
         $this->stockMovementService->logMovement(
@@ -404,49 +381,29 @@ class StockTransferService extends BaseService
             $quantity,
             'stock_transfer_ship',
             $transferId,
-            $stock->batch_number
+            $batchNumber
         );
     }
 
     /**
      * Add stock to a branch.
+     *
+     * @deprecated Use StockAllocationService::addToProductStock() instead
      */
     protected function addStock(int $productId, int $branchId, float $quantity, ?string $batchNumber = null, ?Carbon $expiryDate = null, float $unitCost = 0, ?int $transferId = null): void
     {
-        // Find existing branch-level stock record for the product.
-        $stock = ProductStock::where('product_id', $productId)
-            ->where('branch_id', $branchId)
-            ->where('is_active', true)
-            ->first();
+        $product = Product::findOrFail($productId);
 
-        if ($stock) {
-            // Update existing stock quantities.
-            $stock->increment('quantity', $quantity);
-
-            if ($batchNumber) {
-                $stock->batch_number = $batchNumber;
-            }
-
-            if ($expiryDate) {
-                $stock->expiry_date = $expiryDate;
-            }
-
-            $stock->save();
-        } else {
-            $product = Product::findOrFail($productId);
-
-            ProductStock::create([
-                'company_id' => $product->company_id,
-                'product_id' => $productId,
-                'branch_id' => $branchId,
-                'quantity' => $quantity,
-                'reorder_level' => 10,
-                'reorder_quantity' => 50,
-                'batch_number' => $batchNumber,
-                'expiry_date' => $expiryDate,
-                'is_active' => true,
-            ]);
-        }
+        StockAllocationService::addToProductStock([
+            'company_id' => $product->company_id,
+            'product_id' => $productId,
+            'branch_id' => $branchId,
+            'quantity' => $quantity,
+            'batch_number' => $batchNumber,
+            'expiry_date' => $expiryDate?->toDateString(),
+            'reorder_level' => 10,
+            'reorder_quantity' => 50,
+        ]);
 
         // Use centralized StockMovementService
         $this->stockMovementService->logMovement(

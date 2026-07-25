@@ -6,6 +6,8 @@ namespace App\Services;
 
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderReturn;
+use App\Models\ProductStock;
+use App\Services\Stock\StockAllocationService;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Support\Str;
 
@@ -44,6 +46,13 @@ final class PurchaseOrderReturnService
                 $purchaseOrder->items()
                     ->where('product_id', $item['product_id'])
                     ->decrement('quantity_received', $item['quantity_returned']);
+
+                // Deduct stock using StockAllocationService with pessimistic locking
+                StockAllocationService::allocateToProductStock(
+                    $item['product_id'],
+                    (int) $item['quantity_returned'],
+                    $data['branch_id']
+                );
             }
 
             return $return->load(['purchaseOrder', 'items.product', 'supplier', 'branch', 'createdBy']);

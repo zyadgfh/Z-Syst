@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\GoodsReceivedNote;
 use App\Models\ProductStock;
+use App\Services\Stock\StockAllocationService;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Support\Str;
 
@@ -52,16 +53,14 @@ final class GoodsReceivedNoteService
                 'rack_location' => $item['rack_location'] ?? null,
             ]);
 
-            ProductStock::create([
+            // Use StockAllocationService with pessimistic locking
+            StockAllocationService::addToProductStock([
                 'company_id' => $companyId,
                 'product_id' => $item['product_id'],
                 'branch_id' => $branchId,
-                'batch_number' => $item['batch_number'] ?? null,
                 'quantity' => $item['quantity_received'],
-                'unit_cost' => $item['unit_cost'],
+                'batch_number' => $item['batch_number'] ?? null,
                 'expiry_date' => $item['expiry_date'] ?? null,
-                'manufacturing_date' => $item['manufacturing_date'] ?? null,
-                'rack_location' => $item['rack_location'] ?? null,
             ]);
 
             $note->purchaseOrder->items()

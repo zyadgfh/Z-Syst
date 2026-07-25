@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Medicine;
 use App\Models\SaleInvoice;
+use App\Services\Stock\StockAllocationService;
 use Illuminate\Http\Request;
 
 class SaleController extends Controller
@@ -30,7 +31,11 @@ class SaleController extends Controller
         foreach ($items as $item) {
             $medicine = Medicine::find($item['medicine_id'] ?? null);
             if ($medicine) {
-                $medicine->decrement('stock', (int) ($item['quantity'] ?? 0));
+                // Use StockAllocationService with pessimistic locking
+                StockAllocationService::allocate(
+                    $medicine->id,
+                    (int) ($item['quantity'] ?? 0)
+                );
                 $invoice->items()->create([
                     'medicine_id' => $medicine->id,
                     'quantity' => $item['quantity'] ?? 0,

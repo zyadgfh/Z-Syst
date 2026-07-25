@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleItem;
+use App\Models\ProductStock;
+use App\Services\Stock\StockAllocationService;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -46,8 +48,13 @@ class SaleService
                     'total' => $lineTotal,
                 ]);
 
-                // Deduct stock from product stocks (simple FIFO: reduce earliest stock first)
-                $this->deductStock($product, $item['quantity']);
+                // Deduct stock using StockAllocationService with pessimistic locking
+                $branchId = $payload['branch_id'] ?? null;
+                StockAllocationService::allocateToProductStock(
+                    $product->id,
+                    $item['quantity'],
+                    $branchId
+                );
 
                 $subtotal += $lineTotal;
             }
@@ -67,29 +74,5 @@ class SaleService
         $prefix = $branchId ? 'B'.str_pad($branchId, 3, '0', STR_PAD_LEFT).'-' : '';
 
         return $prefix.strtoupper(Str::random(10));
-    }
-
-    protected function deductStock(Product $product, int $qty)
-    {
-        $remaining = $qty;
-
-        $stocks = $product->stocks()->where('quantity', '>', 0)->orderBy('created_at')->get();
-
-        foreach ($stocks as $stock) {
-            if ($remaining <= 0) {
-                break;
-            }
-
-            $take = min($stock->quantity, $remaining);
-            $stock->quantity -= $take;
-            $stock->save();
-
-            $remaining -= $take;
-        }
-
-        if ($remaining > 0) {
-            // negative stock allowed? For now, throw
-            throw new \RuntimeException('Insufficient stock for product ID: '.$product->id);
-        }
     }
 }

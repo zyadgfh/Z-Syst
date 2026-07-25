@@ -1,21 +1,34 @@
-# Security Vulnerability Fixes - DONE ✅
+# Update Controllers/Services to use StockAllocationService
 
-All 13 security vulnerabilities have been fixed.
+## Progress Tracking
 
-## Priority 1: CRITICAL Fixes ✅
-- [x] 1. Fix CORS - Restrict wildcard origin (config/cors.php → allowed_origins now uses env vars)
-- [x] 2. Set Sanctum Token Expiration (config/sanctum.php → 1440 min / 24h default)
-- [x] 3. Fix Legacy Auth - Mass assignment & OTP leak (AuthController.php → use `only()` not `except('password')`, user data no longer returned)
-- [x] 4. Fix Webhook HMAC Verification (PaymentWebhookController.php → added HMAC/Signature verification for Paymob & generic gateways)
-- [x] 5. Fix Filesystem Public Disk Root (config/filesystems.php → changed from `.` to `storage_path('app/public')`)
-- [x] 6. Fix Barcode Login - Remove placeholder email lookup (AuthController.php → now queries by `barcode` field, not email)
+### Phase 1: Enhance StockAllocationService ✅
+- [x] Already extended with ProductStock support
+- [x] Added `addToProductStock()` method for creating/incrementing ProductStock records
+- [x] Added `addToLegacyStock()` method for legacy Stock model
 
-## Priority 2: HIGH Fixes ✅
-- [x] 7. Add Auth Protection to Demo Product Import (ProductImportController.php → requires auth, uses user's company)
-- [x] 8. Fix Admin Middleware - Use RBAC (AdminMiddleware.php → uses Spatie hasRole() with legacy fallback)
-- [x] 9. Fix Tenant Bypass via Header (TenantManager.php → authenticated user is primary source, header only for unauthenticated)
-- [x] 10. Fix Upload Filenames - Sanitize (HasUploader.php → added Str::slug, random suffix, MIME validation, safe deletion)
-- [x] 11. Fix undefined stockMovementService (PrescriptionController.php → injected via app() container)
-- [x] 12. Add Rate Limiting to Auth Endpoints (routes/api.php → throttle:5,1 on login; throttle:3,1 on register; throttle:10,1 on OTP verify)
-- [x] 13. Fix TrustProxies - Explicit config (TrustProxies.php → set $proxies = '*')
+### Phase 2: Update Services ✅
+- [x] **SaleService** - Replaced `deductStock()` FIFO with `StockAllocationService::allocateToProductStock()` - Removed legacy `deductStock()` method
+- [x] **GoodsReceivedNoteService** - Replaced direct `ProductStock::create()` with `StockAllocationService::addToProductStock()` 
+- [x] **PurchaseOrderReturnService** - Added stock deduction via `StockAllocationService::allocateToProductStock()`
+- [x] **StockTransferService** - Replaced `deductStock()`/`addStock()` with `StockAllocationService` methods
 
+### Phase 3: Update Controllers ✅
+- [x] **Controllers/SaleController** - Replaced `Medicine::decrement('stock')` with `StockAllocationService::allocate()`
+- [x] **Api/SaleReturnController** - Replaced `Stock::increment()` with `StockAllocationService::release()`
+- [x] **Api/PurchaseReturnController** - Replaced `Stock::decrement()` with `StockAllocationService::allocate()`
+- [x] **Api/PurchaseController** - Replaced direct Stock CRUD in store/update/destroy with `StockAllocationService` calls
+
+### Phase 4: Integration Tests ✅
+- [x] **tests/Feature/PurchaseReturnControllerTest.php** - 5 tests covering:
+  - Creating purchase return with stock decrease via StockAllocationService::allocate()
+  - Validation of required fields
+  - Listing with date filtering
+  - Showing with relations (purchase, party, details)
+  - Error handling when stock insufficient
+- [x] **tests/Feature/SaleReturnControllerTest.php** - 5 tests covering:
+  - Creating sale return with stock increase via StockAllocationService::release()
+  - Validation of required fields
+  - Listing with date filtering
+  - Showing with relations (sale, party, details)
+  - Error handling when no stock record exists

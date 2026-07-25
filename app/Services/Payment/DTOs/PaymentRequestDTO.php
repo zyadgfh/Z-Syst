@@ -6,7 +6,7 @@ use App\Services\Payment\Enums\PaymentMethodType;
 
 /**
  * Payment Request DTO
- * 
+ *
  * كائن نقل البيانات لبدء عملية الدفع
  */
 class PaymentRequestDTO
@@ -30,13 +30,24 @@ class PaymentRequestDTO
 
     /**
      * Create from array data
+     *
+     * BUG-S5 FIX: Validate amount is positive before creating DTO
      */
     public static function fromArray(array $data): self
     {
+        $amount = (float) ($data['amount'] ?? 0);
+
+        // Validate amount is positive
+        if ($amount <= 0) {
+            throw new \InvalidArgumentException(
+                "Payment amount must be greater than 0. Received: {$amount}"
+            );
+        }
+
         return new self(
             companyId: $data['company_id'] ?? null,
             paymentMethod: PaymentMethodType::from($data['payment_method_type']),
-            amount: (float) ($data['amount'] ?? 0),
+            amount: $amount,
             currency: $data['currency'] ?? 'EGP',
             merchantReference: $data['merchant_reference'] ?? uniqid('payment_'),
             payableType: $data['payable_type'] ?? null,
@@ -53,15 +64,26 @@ class PaymentRequestDTO
 
     /**
      * Create from sale data
+     *
+     * BUG-S5 FIX: Validate amount from sale is positive
      */
     public static function fromSale(
         object $sale,
         array $data
     ): self {
+        $amount = $sale->total_amount ?? 0;
+
+        // Validate amount is positive
+        if ($amount <= 0) {
+            throw new \InvalidArgumentException(
+                "Sale total amount must be greater than 0. Received: {$amount}"
+            );
+        }
+
         return new self(
             companyId: $sale->company_id ?? null,
             paymentMethod: PaymentMethodType::from($data['payment_method_type']),
-            amount: $sale->total_amount,
+            amount: $amount,
             currency: $sale->currency ?? 'EGP',
             merchantReference: $data['merchant_reference'] ?? uniqid('payment_'),
             payableType: get_class($sale),

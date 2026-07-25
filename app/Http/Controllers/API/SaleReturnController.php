@@ -7,6 +7,7 @@ use App\Models\Party;
 use App\Models\Stock;
 use App\Models\SaleReturn;
 use App\Models\SaleDetails;
+use App\Services\Stock\StockAllocationService;
 use Illuminate\Http\Request;
 use App\Models\SaleReturnDetails;
 use Illuminate\Support\Facades\DB;
@@ -78,18 +79,11 @@ class SaleReturnController extends Controller
             foreach ($request->sale_detail_id as $key => $detail_id) {
                 $sale_detail = SaleDetails::findOrFail($detail_id);
 
-                // Update stock for the specific batch
-                $batch = Stock::where('product_id', $sale_detail->product_id)
-                            ->when($sale_detail->batch_no ?? false, function ($query) use ($sale_detail) {
-                                return $query->where('batch_no', $sale_detail->batch_no);
-                            })
-                            ->first();
-
-                if ($batch) {
-                    $batch->increment('productStock', $request->return_qty[$key]);
-                } else {
-                    return response()->json(['error' => 'Batch not found.'], 404);
-                }
+                // Use StockAllocationService with pessimistic locking for stock release (return)
+                StockAllocationService::release(
+                    $sale_detail->product_id,
+                    (int) $request->return_qty[$key]
+                );
 
                 // Update SaleDetail record
                 $sale_detail->update([

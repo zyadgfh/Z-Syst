@@ -1,8 +1,8 @@
 # 📊 التحليل الشامل للفجوات - Z-Syst Pharmacy Management SaaS
 
-> **التاريخ**: 2026-07-20  
+> **التاريخ**: 2026-07-22 (محدث)  
 > **المستند**: تم إنشاؤه من تحليل شامل للمشروع  
-> **الحالة**: Phase 3 مكتملة, Phase 4 قيد التنفيذ
+> **الحالة**: Phase 3 مكتملة, Phase 4 قيد التنفيذ جزئياً
 
 ---
 
@@ -14,7 +14,7 @@
 | **Models** | 87 | في `app/Models/` بدون تنظيم |
 | **Services** | 28 | في `app/Services/` بدون تقسيم |
 | **Controllers** | 50+ | مختلطة بين `Http/Controllers` و `Http/Controllers/API/V1` |
-| **Modules جاهزة** | 1 فقط | `app/Modules/Auth/` موجودة جزئياً |
+| **Modules موجودة الآن** | 3 | `app/Modules/{Auth,Products,Sales}/` |
 | **Migrations** | 92 ملف | بها تكرارات حرجة |
 | **Migrations حديثة (2026)** | 74 ملف | مكررة وغير متسقة |
 
@@ -22,7 +22,7 @@
 - ✅ **Phase 1**: حذف الكود الميت - مكتمل
 - ✅ **Phase 2**: إزالة المكررات - مكتمل  
 - ✅ **Phase 3**: إنشاء البنية - مكتمل (Core/Shared/Infrastructure/Modules)
-- ⏳ **Phase 4**: نقل الكود - لم يبدأ بشكل فعلي
+- ⏳ **Phase 4**: نقل الكود - بدأ جزئياً (3 وحدات من أصل 23)
 - ⏳ **Phase 5**: تحديث التبعيات - معلق
 
 ---
@@ -31,13 +31,15 @@
 
 ### 1️⃣ الفجوات في بنية الوحدات (Modules)
 
-#### الوحدات المُنشأة
+#### الوحدات المُنشأة حالياً
 ```
 app/Modules/
-└── Auth/          ✅ موجودة (لكن غير مكتملة)
+├── Auth/          ⏳ قيد الإنشاء
+├── Products/      ⏳ قيد الإنشاء
+└── Sales/         ⏳ قيد الإنشاء
 ```
 
-#### الوحدات الناقصة (مطلوبة حسب الخطة)
+#### الوحدات الناقصة (مطلوبة حسب الخطة) - 20 وحدة
 ```
 Priority 1 (Core Infrastructure):
 - Companies/      ❌ مفقودة
@@ -47,7 +49,6 @@ Priority 1 (Core Infrastructure):
 - Departments/    ❌ مفقودة
 
 Priority 2 (Pharmacy Domain):
-- Products/       ❌ مفقودة
 - Categories/     ❌ مفقودة
 - Manufacturers/  ❌ مفقودة
 - Inventory/      ❌ مفقودة
@@ -56,7 +57,6 @@ Priority 2 (Pharmacy Domain):
 - Customers/      ❌ مفقودة
 - Doctors/        ❌ مفقودة
 - Prescriptions/  ❌ مفقودة
-- Sales/          ❌ مفقودة
 - POS/            ❌ مفقودة
 
 Priority 3 (Financial & Operations):
@@ -71,16 +71,14 @@ Priority 3 (Financial & Operations):
 ### 2️⃣ الفجوات في Models
 
 #### Models موجودة لكن غير منظمة (87 ملف)
-يجب نقلها إلى Modules حسب النطاق:
-
-| الفئة | Models الحالية | الحالة |
-|-------|---------------|-------|
-| **المنتجات** | Product, Drug, Medicine, ProductCategory, ProductStock, ProductVariant, ProductPriceHistory, DrugInteraction | في `app/Models/` - غير منظمة |
-| **المبيعات** | Sale, SaleDetails, SaleItem, SaleReturn, SaleReturnDetails | في `app/Models/` - غير منظمة |
-| **المشتريات** | Purchase, PurchaseDetails, PurchaseOrder, PurchaseOrderItem, PurchaseReturn, PurchaseOrderReturn | في `app/Models/` - غير منظمة |
-| **المخزون** | Stock, StockTransfer, StockTransferItem, Inventory | في `app/Models/` - غير منظمة |
-| **CRM** | Customer, Patient, Supplier, Doctor, Party | في `app/Models/` - مكررة وغير منظمة |
-| **المالية** | Expense, ExpenseCategory, Income, IncomeCategory, CashRegister | في `app/Models/` - غير منظمة |
+| الفئة | Models | الحالة |
+|-------|--------|-------|
+| **المنتجات** | Product, Drug, Medicine, ProductCategory, ProductStock, ProductVariant, ProductPriceHistory, DrugInteraction | غير منظمة |
+| **المبيعات** | Sale, SaleDetails, SaleItem, SaleReturn, SaleReturnDetails | غير منظمة |
+| **المشتريات** | Purchase, PurchaseDetails, PurchaseOrder, PurchaseOrderItem, PurchaseReturn, PurchaseOrderReturn | غير منظمة |
+| **المخزون** | Stock, StockTransfer, StockTransferItem, Inventory | غير منظمة |
+| **CRM** | Customer, Patient, Supplier, Doctor, Party | مكررة وغير منظمة |
+| **المالية** | Expense, ExpenseCategory, Income, IncomeCategory, CashRegister | غير منظمة |
 
 #### Models مكررة محتملة
 ```
@@ -93,75 +91,37 @@ Priority 3 (Financial & Operations):
 
 ### 3️⃣ الفجوات في Services
 
-#### Services موجودة لكن غير منظمة
+#### Services موجودة لكن غير منظمة (28 ملف)
 | الفئة | Services | الحالة |
 |-------|----------|--------|
-| **Auth** | AuthService, TwoFactorService, RbacService | في `app/Services/` - غير منظمة |
-| **Products** | ProductService, ProductSearchService, ManufacturerService, CategoryService | في `app/Services/Products/` - جزئياً منظمة |
-| **Inventory** | StockMovementService, StockTransferService, ExpiryAlertService | في `app/Services/` - غير منظمة |
-| **Sales** | SaleService | في `app/Services/` - غير منظمة |
-| **Purchases** | PurchaseOrderService, PurchaseOrderReturnService, GoodsReceivedNoteService | في `app/Services/` - غير منظمة |
-| **Prescriptions** | PrescriptionService, DosageInstructionService | في `app/Services/` - غير منظمة |
-| **Financial** | AnalyticsService, ReportExportService | في `app/Services/` - غير منظمة |
+| **Auth** | AuthService, TwoFactorService, RbacService | غير منظمة |
+| **Products** | ProductService, ProductSearchService, ManufacturerService, CategoryService | جزئياً منظمة |
+| **Inventory** | StockMovementService, StockTransferService, ExpiryAlertService | غير منظمة |
+| **Sales** | SaleService | غير منظمة |
+| **Purchases** | PurchaseOrderService, PurchaseOrderReturnService, GoodsReceivedNoteService | غير منظمة |
+| **Prescriptions** | PrescriptionService, DosageInstructionService | غير منظمة |
+| **Financial** | AnalyticsService, ReportExportService | غير منظمة |
 
-### 4️⃣ الفجوات في Controllers
+### 4️⃣ الفجوات في Migrations
 
-#### Controllers موجودة لكن غير منظمة
-| الفئة | Controllers | الحالة |
-|-------|------------|--------|
-| **Auth** | AuthController, TwoFactorController | موزعة بين `app/Http/Controllers/` و `API/` |
-| **Products** | AcnooProductController, DrugController, ManufacturerController, CategoryController | في `app/Http/Controllers/API/` |
-| **Sales** | AcnooSaleController, SaleController, SaleReturnController, PosPaymentController | في `app/Http/Controllers/` |
-| **Purchases** | PurchaseController, PurchaseOrderController, GoodsReceivedNoteController | في `app/Http/Controllers/` |
-| **Inventory** | StockController, ExpiryAlertController | في `app/Http/Controllers/` |
-| **CRM** | CustomerController, DoctorController, PartyController | في `app/Http/Controllers/` |
+#### Migrations مكررة (تحتاج حذف فوري) - 18 ملف
+| الجدول | النسخ المكررة | الحالة |
+|--------|---------------|--------|
+| users | 4 نسخ (0001_01_01, 2014, 2026x2) | مكرر |
+| companies | 2 نسخ | مكرر |
+| branches | 2 نسخ | مكرر |
+| personal_access_tokens | 2 نسخ | مكرر |
+| notifications | 2 نسخ | مكرر |
+| products | 2 نسخ | مكرر |
+| sales | 2 نسخ | مكرر |
+| purchase_orders | 2 نسخ | مكرر |
+| manufacturers | 2 نسخ | مكرر |
+| expense_categories | 2 نسخ | مكرر |
 
-### 5️⃣ الفجوات الحرجة في Migrations
-
-#### Migrations مكررة (تحتاج حذف فوري)
-```
-users_table:
-- 0001_01_01_000001_create_users_table.php (مُعلّق)
-- 0001_01_01_000003_create_users_table.php (مُعلّق)
-- 2014_10_12_000003_create_users_table.php (مُعلّق)
-- 2026_07_18_000002_create_users_table.php (حديث)
-
-companies_table:
-- 0001_01_01_000002_create_companies_table.php (مُعلّق)
-- 2026_07_18_000001_create_companies_table.php (حديث)
-
-branches_table:
-- 0001_01_01_000003_create_branches_table.php (مُعلّق)
-- 2026_07_18_000003_create_branches_table.php (حديث)
-
-personal_access_tokens_table:
-- 0001_01_01_000005_create_personal_access_tokens.php (مُعلّق)
-- 2019_12_14_000001_create_personal_access_tokens_table.php (مُعلّق)
-
-notifications_table:
-- 2023_05_20_040815_create_notifications_table.php (مُعلّق)
-- 2026_07_18_000069_create_notifications_table.php (حديث)
-
-products_table:
-- 2023_12_24_171614_create_products_table.php (مُعلّق)
-- 2026_07_06_000002_create_products_table.php (حديث)
-
-sales_table:
-- 2023_12_26_170106_create_sales_table.php (مُعلّق)
-- 2026_07_06_000004_create_sales_table.php (حديث)
-
-purchase_orders_table:
-- 2026_07_07_000007_create_purchase_orders_table.php (مُعلّق)
-- 2026_07_08_000003_create_purchase_orders_table.php (حديث)
-
-manufacturers_table:
-- 2023_12_24_170917_create_manufacturers_table.php (مُعلّق)
-- 2026_07_07_000003_create_manufacturers_table.php (حديث)
-
-expense_categories_table:
-- 2023_12_24_164558_create_expense_categories_table.php (مُعلّق)
-- 2026_07_18_000054_create_expense_categories_table.php (حديث)
-```
+### 5️⃣ HrmAddon
+- Module منفصل يحتوي `node_modules/` (100+ ملف)
+- يجب حذف `node_modules/` وإضافته لـ `.gitignore`
+- أو دمجه في بنية الـ Modules الرئيسية
 
 ---
 
@@ -201,31 +161,37 @@ app/Modules/{ModuleName}/
 
 ## 🎯 خطة إغلاق الفجوات (Phase 4)
 
-### المرحلة 1: إنشاء البنية الأساسية
-- [ ] إنشاء Core Traits (`HasCompany`, `TenantScope`)
-- [ ] إنشاء Contracts للـ Repositories
-- [ ] إنشاء Base Exceptions
-- [ ] إنشاء ValueObjects/DTOs أساسية
+### المرحلة 1: إنشاء البنية الأساسية ✅
+- [x] Core/Abstracts/AbstractRepository.php
+- [x] Core/Abstracts/AbstractService.php
+- [x] Core/Traits/HasCompany.php
+- [x] Core/Exceptions/ExceptionClasses.php
+- [x] Core/Contracts/Repositories/RepositoryInterface.php
+- [x] Shared/Providers/ModuleServiceProvider.php
 
 ### المرحلة 2: إنشاء الوحدات (Module Creation)
-- [ ] **Auth Module** (أولوية عالية)
-  - [ ] Domain/Models (User, Role, Permission)
-  - [ ] Application/Services (AuthService, TwoFactorService, RbacService)
-  - [ ] Infrastructure/Controllers (AuthController)
-  - [ ] Routes/api.php
-  - [ ] ModuleServiceProvider
-
+- [x] **Auth Module** - بدأ الإنشاء
+- [x] **Products Module** - بدأ الإنشاء
+- [x] **Sales Module** - بدأ الإنشاء
 - [ ] **Companies Module**
-  - [ ] Domain/Models (Company, Branch, Department)
-  - [ ] Application/Services (CompanyService)
-  - [ ] Infrastructure/Controllers
-  - [ ] Routes/api.php
-
-- [ ] **Products Module**
-  - [ ] Domain/Models (Product, Category, Manufacturer)
-  - [ ] Application/Services (ProductService)
-  - [ ] Infrastructure/Controllers
-  - [ ] Routes/api.php
+- [ ] **Branches Module**
+- [ ] **Users Module**
+- [ ] **Roles Module**
+- [ ] **Categories Module**
+- [ ] **Manufacturers Module**
+- [ ] **Inventory Module**
+- [ ] **Suppliers Module**
+- [ ] **Purchases Module**
+- [ ] **Customers Module**
+- [ ] **Doctors Module**
+- [ ] **Prescriptions Module**
+- [ ] **POS Module**
+- [ ] **Insurance Module**
+- [ ] **Financials Module**
+- [ ] **Reports Module**
+- [ ] **Notifications Module**
+- [ ] **Settings Module**
+- [ ] **Subscriptions Module**
 
 ### المرحلة 3: تنظيف Migrations
 - [ ] حذف Migrations المكررة القديمة
@@ -241,7 +207,7 @@ app/Modules/{ModuleName}/
 ### المرحلة 5: الاختبار والتحقق
 - [ ] composer dump-autoload
 - [ ] php artisan route:list
-- [ ] تشغيل الاختبارات
+- [ ] تشغيل الاختباءات
 - [ ] اختبار نقطة نهاية API
 
 ---
@@ -271,14 +237,12 @@ app/Modules/{ModuleName}/
 | الأسبوع | النشاط | الحالة |
 |---------|--------|-------|
 | الأسبوع 1 | Cleanup - حذف ملفات التوثيق المكررة | ⏳ لم يبدأ |
-| الأسبوع 2 | Auth Module - إنشاء ونقل | ⏳ لم يبدأ |
-| الأسبوع 3 | Companies Module - إنشاء ونقل | ⏳ لم يبدأ |
-| الأسبوع 4 | Products Module - إنشاء ونقل | ⏳ لم يبدأ |
-| الأسبوع 5 | Inventory Module - إنشاء ونقل | ⏳ لم يبدأ |
-| الأسبوع 6 | Sales/POS Module - إنشاء ونقل | ⏳ لم يبدأ |
-| الأسبوع 7 | Purchases Module - إنشاء ونقل | ⏳ لم يبدأ |
-| الأسبوع 8 | Prescriptions Module - إنشاء ونقل | ⏳ لم يبدأ |
-| الأسبوع 9 | Testing & Verification | ⏳ لم يبدأ |
+| الأسبوع 2 | Auth/Products/Sales Modules - إكمال الإنشاء | ⏳ قيد التقدم |
+| الأسبوع 3 | Companies/Branches Module | ⏳ لم يبدأ |
+| الأسبوع 4 | Inventory/Purchases Module | ⏳ لم يبدأ |
+| الأسبوع 5 | Prescriptions/CRM Module | ⏳ لم يبدأ |
+| الأسبوع 6 | Financial/Operations Module | ⏳ لم يبدأ |
+| الأسبوع 7 | Testing & Verification | ⏳ لم يبدأ |
 
 ---
 
@@ -286,7 +250,7 @@ app/Modules/{ModuleName}/
 
 ### 1. حذف فوري (قبل Phase 4)
 ```bash
-# ملفات التوثيق المكررة
+# ملفات التوثيق المكررة (13 ملف)
 rm ARCHITECTURE-PHASE1.md
 rm BACKEND_IMPROVEMENTS.md
 rm FRONTEND_IMPROVEMENTS.md
@@ -297,18 +261,20 @@ rm DEVELOP.md
 
 ### 2. Migrations للحذف
 ```bash
-# حذف Migrations المكررة القديمة
-rm 0001_01_01_*_create_users_table.php
-rm 0001_01_01_*_create_companies_table.php
-rm 0001_01_01_*_create_branches_table.php
-rm 2014_10_12_*_create_users_table.php
-rm 2019_12_14_*_create_personal_access_tokens_table.php
-rm 2023_05_20_*_create_notifications_table.php
-rm 2023_12_24_*_create_products_table.php
-rm 2023_12_26_*_create_sales_table.php
-rm 2026_07_06_*_create_sales_table.php
-rm 2026_07_07_*_create_purchase_orders_table.php
-rm 2023_12_24_*_create_manufacturers_table.php
+# حذف Migrations المكررة القديمة (18 ملف)
+rm 0001_01_01_000001_create_users_table.php
+rm 0001_01_01_000003_create_users_table.php
+rm 0001_01_01_000002_create_companies_table.php
+rm 0001_01_01_000003_create_branches_table.php
+rm 2014_10_12_000003_create_users_table.php
+rm 2019_12_14_000001_create_personal_access_tokens_table.php
+rm 2023_05_20_040815_create_notifications_table.php
+rm 2023_12_24_171614_create_products_table.php
+rm 2023_12_26_170106_create_sales_table.php
+rm 2026_07_06_000004_create_sales_table.php
+rm 2026_07_07_000007_create_purchase_orders_table.php
+rm 2023_12_24_170917_create_manufacturers_table.php
+rm 2023_12_24_164558_create_expense_categories_table.php
 ```
 
 ### 3. HrmAddon
@@ -321,32 +287,33 @@ rm -rf HrmAddon/node_modules
 
 ## 📊 مؤشرات الإكمال
 
-| المؤشر | الحالة الحالية | الهدف |
-|--------|---------------|-------|
-| الوحدات المنشأة | 1/23 | 23/23 |
-| Models منقولة | 0/87 | 87/87 |
-| Services منقصلة | 0/28 | 28/28 |
-| Controllers منقصلة | 0/50+ | 50+/50+ |
-| Migrations نظيفة | 18/92 مكررة | 0/92 مكررة |
-| الاختبارات | غير موجود | 85%+ coverage |
+| المؤشر | الحالة الحالية | الهدف | النسبة |
+|--------|---------------|-------|--------|
+| الوحدات المنشأة | 3/23 | 23/23 | 13% |
+| Models منقولة | 0/87 | 87/87 | 0% |
+| Services منقصلة | 0/28 | 28/28 | 0% |
+| Controllers منقصلة | 0/50+ | 50+/50+ | 0% |
+| Migrations نظيفة | 18/92 مكررة | 0/92 مكررة | 80% بحاجة حذف |
+| الاختباءات | غير موجود | 85%+ coverage | 0% |
 
 ---
 
 ## 🔚 الخلاصة
 
-المشروع يتوفر لديه:
+### المشروع الآن يتوفر لديه:
 - ✅ بنية تقنية قوية (Laravel 11, Core/Shared/Infrastructure)
 - ✅ نظام Multi-Tenant مُفهرس (Company/Branch)
 - ✅ نظام RBAC جاهز (Spatie Permission)
+- ✅ 3 Modules بدأ إنشاؤها (Auth/Products/Sales)
 - ✅ 87 Model جاهزة للنقل
 - ✅ 28 Service جاهزة للتنظيم
 - ✅ 50+ Controller جاهزة للنقل
 
-لكن يفتقر إلى:
-- ❌ هيكلة Modules وفق DDD
+### لكن يفتقر إلى:
+- ❌ هيكلة Modules وفق DDD (باقي 20 وحدة)
 - ❌ تنظيم Models حسب النطاق
 - ❌ توحيد Migrations
-- ❌ اختبارات كاملة
+- ❌ اختباءات كاملة
 - ❌ توثيق API
 
-**التقدير الوقتي لإغلاق الفجوات**: 4-6 أسابيع
+**التقدير الوقتي لإغلاق الفجوات**: 4-5 أسابيع (مقارنة بـ 4-6 أسابيع سابقاً)

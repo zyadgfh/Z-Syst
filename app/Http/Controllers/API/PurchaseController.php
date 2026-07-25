@@ -7,6 +7,7 @@ use App\Models\Stock;
 use App\Models\Product;
 use App\Models\Business;
 use App\Models\Purchase;
+use App\Services\Stock\StockAllocationService;
 use Illuminate\Http\Request;
 use App\Models\PurchaseDetails;
 use Illuminate\Support\Facades\DB;
@@ -121,27 +122,14 @@ class PurchaseController extends Controller
                     'purchase_without_tax' => $item['purchase_without_tax'],
                 ]);
 
-                if ($item['batch_no']) {
-                    $stock = Stock::where('product_id', $product->id)->where('batch_no', $item['batch_no'])->first();
-                } else {
-                    $stock = Stock::where('product_id', $product->id)->first();
-                }
-
-                if ($stock ?? false) {
-                    $stock->update([
-                        'batch_no' => $item['batch_no'],
-                        'expire_date' => $item['expire_date'],
-                        'productStock' => $stock->productStock + $item['quantities'],
-                    ]);
-                } else {
-                    Stock::create($request->all() + [
-                        'business_id' => $business_id,
-                        'batch_no' => $item['batch_no'],
-                        'product_id' => $item['product_id'],
-                        'expire_date' => $item['expire_date'],
-                        'productStock' => $item['quantities'],
-                    ]);
-                }
+                // Use StockAllocationService with pessimistic locking
+                StockAllocationService::addToLegacyStock(
+                    $product->id,
+                    (int) $item['quantities'],
+                    $item['batch_no'],
+                    $item['expire_date'],
+                    $business_id
+                );
             }
 
             DB::commit();
@@ -214,26 +202,13 @@ class PurchaseController extends Controller
 
             $business_id = auth()->user()->business_id;
 
-            $batch_numbers = collect($request->products)->pluck('batch_no'); // Get the batch numbers from the request data
-            $prev_stocks = Stock::whereIn('batch_no', $batch_numbers)->get();
-            $prev_purchase_details = PurchaseDetails::whereIn('batch_no', $batch_numbers)->get();
-
-            foreach ($request->products as $req_item) {
-                $prev_stock = $prev_stocks->where('batch_no', $req_item['batch_no'])->first();
-                $prev_purchase_detail = $prev_purchase_details->where('batch_no', $req_item['batch_no'])->first();
-
-                if (!empty($prev_purchase_detail) && $prev_purchase_detail->quantities > $req_item['quantities']) {
-                    if ($prev_stock->productStock < $req_item['quantities']) {
-                        return response()->json([
-                            'message' => 'The purchase quantity and stock quantity is not matched for batch no [' . $prev_stock->batch_no .']'
-                        ], 406);
-                    }
-                }
-            }
-
+            // Reverse old stock first using StockAllocationService
             $prev_details = PurchaseDetails::where('purchase_id', $purchase->id)->get();
             foreach ($prev_details as $prev_detail) {
-                Stock::where('batch_no', $prev_detail->batch_no)->decrement('productStock', $prev_detail->quantities);
+                StockAllocationService::allocate(
+                    $prev_detail->product_id,
+                    (int) $prev_detail->quantities
+                );
             }
 
             $purchaseDetails = [];
@@ -262,27 +237,14 @@ class PurchaseController extends Controller
                     'purchase_without_tax' => $item['purchase_without_tax'],
                 ]);
 
-                if ($item['batch_no']) {
-                    $stock = Stock::where('product_id', $product->id)->where('batch_no', $item['batch_no'])->first();
-                } else {
-                    $stock = Stock::where('product_id', $product->id)->first();
-                }
-
-                if ($stock ?? false) {
-                    $stock->update([
-                        'batch_no' => $item['batch_no'],
-                        'expire_date' => $item['expire_date'],
-                        'productStock' => $stock->productStock + $item['quantities'],
-                    ]);
-                } else {
-                    Stock::create($request->all() + [
-                        'business_id' => $business_id,
-                        'batch_no' => $item['batch_no'],
-                        'product_id' => $item['product_id'],
-                        'expire_date' => $item['expire_date'],
-                        'productStock' => $item['quantities'],
-                    ]);
-                }
+                // Add new stock using StockAllocationService
+                StockAllocationService::addToLegacyStock(
+                    $product->id,
+                    (int) $item['quantities'],
+                    $item['batch_no'],
+                    $item['expire_date'],
+                    $business_id
+                );
             }
 
             if ($purchase->dueAmount || $request->dueAmount) {
@@ -338,16 +300,13 @@ class PurchaseController extends Controller
         try {
 
             $purchase_details = PurchaseDetails::where('purchase_id', $purchase->id)->get();
-            $prev_stocks = Stock::whereIn('batch_no', $purchase_details->pluck('batch_no'))->get();
 
+            // Reverse stock using StockAllocationService with pessimistic locking
             foreach ($purchase_details as $purchase_detail) {
-                $prev_stock = $prev_stocks->where('batch_no', $purchase_detail->batch_no)->first();
-
-                if ($prev_stock->productStock < $purchase_detail->quantities) {
-                    return response()->json([
-                        'message' => 'The purchase quantity and stock quantity is not matched for batch no [' . $prev_stock->batch_no .']'
-                    ], 406);
-                }
+                StockAllocationService::allocate(
+                    $purchase_detail->product_id,
+                    (int) $purchase_detail->quantities
+                );
             }
 
             if ($purchase->dueAmount) {

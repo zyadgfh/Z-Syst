@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Paymob Gateway - Main Egyptian Payment Aggregator
- * 
+ *
  * يدعم: Vodafone Cash, Orange Cash, Etisalat Cash, We Pay, InstaPay, وبطاقات الدفع
  * وثائق API: https://docs.paymob.com
  */
@@ -33,7 +33,7 @@ class PaymobGateway extends BaseGateway
             'iframe_id' => config('payments.gateways.paymob.iframe_id') ?? config('services.paymob.iframe_id'),
             'environment' => config('payments.gateways.paymob.environment', 'sandbox'),
             'webhook_url' => config('payments.gateways.paymob.webhook_url') ?? config('services.paymob.webhook_url'),
-            
+
             'integration_ids' => config('payments.gateways.paymob.integration_ids') ?? [
                 'vodafone_cash' => env('PAYMOB_INTEGRATION_VODAFONE'),
                 'orange_cash' => env('PAYMOB_INTEGRATION_ORANGE'),
@@ -42,7 +42,7 @@ class PaymobGateway extends BaseGateway
                 'instapay' => env('PAYMOB_INTEGRATION_INSTAPAY'),
                 'card' => env('PAYMOB_INTEGRATION_CARD'),
             ],
-            
+
             'min_amount' => config('payments.limits.min_amount', 1),
             'max_amount' => config('payments.limits.max_amount', 50000),
             'timeout' => config('payments.gateways.paymob.timeout', 30),
@@ -77,7 +77,7 @@ class PaymobGateway extends BaseGateway
     {
         $methodType = PaymentMethodType::from($data['payment_method_type'] ?? 'vodafone_cash');
         $amount = (float) $data['amount'];
-        
+
         $this->validateAmount($amount);
 
         // 1. Authenticate with Paymob
@@ -140,10 +140,10 @@ class PaymobGateway extends BaseGateway
 
         if ($response['success']) {
             $orderData = $response['data'];
-            
+
             foreach ($orderData['transactions'] ?? [] as $tx) {
                 $txStatus = $tx['success'] ?? false;
-                
+
                 if ($txStatus) {
                     $transaction->markAsCompleted($tx['id']);
                 } else {
@@ -197,7 +197,7 @@ class PaymobGateway extends BaseGateway
 
         // Update status based on webhook
         $isSuccess = $obj['success'] ?? false;
-        
+
         if ($isSuccess) {
             $transaction->markAsCompleted($transactionId);
         } else {
@@ -219,23 +219,66 @@ class PaymobGateway extends BaseGateway
     }
 
     /**
-     * Verify HMAC signature from Paymob
+     * Verify HMAC signature from Paymob webhook
+     * Uses constant-time comparison to prevent timing attacks
+     *
+     * Important: The HMAC is computed over the request body WITHOUT the hmac field itself
      */
     protected function verifyHmac(string $hmac, array $payload): bool
     {
-        if (empty($hmac) || empty($this->config['hmac_secret'])) {
+        // Validate inputs
+        if (empty($hmac)) {
+            $this->log('warning', 'HMAC verification failed: empty hmac provided');
             return false;
         }
 
-        $computedHmac = hash_hmac('sha512', json_encode($payload), $this->config['hmac_secret']);
-        return hash_equals($computedHmac, $hmac);
+        if (empty($this->config['hmac_secret'])) {
+            $this->log('error', 'HMAC verification failed: hmac_secret not configured');
+            return false;
+        }
+
+        // Remove HMAC field before computing signature
+        $payloadForVerification = $payload;
+        unset($payloadForVerification['hmac']);
+
+        // Compute HMAC using SHA512
+        $computedHmac = hash_hmac(
+            'sha512',
+            json_encode($payloadForVerification, JSON_UNESCAPED_UNICODE),
+            $this->config['hmac_secret'],
+            false // return as hex string
+        );
+
+        // Use constant-time comparison to prevent timing attacks
+        $isValid = hash_equals($computedHmac, $hmac);
+
+        if (!$isValid) {
+            $this->log('warning', 'HMAC verification failed: signature mismatch', [
+                'expected' => substr($hmac, 0, 16) . '...',
+                'received' => substr($computedHmac, 0, 16) . '...',
+            ]);
+        }
+
+        return $isValid;
     }
 
     /**
      * Get authentication token from Paymob
+     * BUG-S6 FIX: Cache token with TTL to avoid excessive API calls and handle expiration
      */
     protected function authenticate(): string
     {
+        $cacheKey = 'paymob_auth_token_' . md5($this->config['api_key']);
+        $cacheTTL = 3590; // Token valid for 1 hour, cache for 59m 50s to be safe
+
+        // Try to get token from cache
+        $cachedToken = \Illuminate\Support\Facades\Cache::get($cacheKey);
+        if (!empty($cachedToken)) {
+            $this->log('debug', 'Using cached Paymob auth token');
+            return $cachedToken;
+        }
+
+        // Get new token from API
         $response = $this->httpRequest('POST', self::API_BASE . '/auth/tokens', [
             'json' => [
                 'api_key' => $this->config['api_key'],
@@ -246,7 +289,14 @@ class PaymobGateway extends BaseGateway
             throw PaymentException::authenticationFailed($this->getDisplayName());
         }
 
-        return $response['data']['token'];
+        $token = $response['data']['token'];
+
+        // Cache the token
+        \Illuminate\Support\Facades\Cache::put($cacheKey, $token, $cacheTTL);
+
+        $this->log('info', 'Successfully obtained and cached Paymob auth token');
+
+        return $token;
     }
 
     /**
@@ -374,8 +424,8 @@ class PaymobGateway extends BaseGateway
     {
         try {
             $authToken = $this->authenticate();
-            
-            $response = $this->httpRequest('GET', 
+
+            $response = $this->httpRequest('GET',
                 self::API_BASE . "/transactions/{$externalTransactionId}",
                 [
                     'headers' => [
@@ -418,14 +468,14 @@ class PaymobGateway extends BaseGateway
         }
 
         $refundAmount = $amount ?? $transaction->amount;
-        
+
         if ($refundAmount > $transaction->amount) {
             throw PaymentException::invalidAmount('Refund amount exceeds original amount');
         }
 
         try {
             $authToken = $this->authenticate();
-            
+
             $response = $this->httpRequest('POST', self::API_BASE . '/ecommerce/orders/refund', [
                 'headers' => [
                     'Authorization' => "Bearer {$authToken}",
@@ -441,7 +491,7 @@ class PaymobGateway extends BaseGateway
             if ($response['success']) {
                 $isFullRefund = $refundAmount >= $transaction->amount;
                 $transaction->markAsRefunded($refundAmount, $reason);
-                
+
                 if (!$isFullRefund) {
                     $transaction->update([
                         'status' => TransactionStatus::PARTIALLY_REFUNDED->value,
