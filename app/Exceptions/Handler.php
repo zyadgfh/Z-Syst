@@ -2,11 +2,13 @@
 
 namespace App\Exceptions;
 
-use Illuminate\Auth\Access\AuthorizationException as LaravelAuthorizationException;
-use Illuminate\Auth\AuthenticationException as LaravelAuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Illuminate\Validation\ValidationException as LaravelValidationException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -27,108 +29,111 @@ class Handler extends ExceptionHandler
      */
     public function register(): void
     {
-        // Custom API exceptions
-        $this->renderable(function (ApiException $e, $request) {
-            return $e->render();
-        });
-
-        // Validation exceptions
-        $this->renderable(function (LaravelValidationException $e, $request) {
+        // Model not found (from findOrFail)
+        $this->renderable(function (ModelNotFoundException $e, $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
+                $model = class_basename($e->getModel());
                 return response()->json([
                     'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $e->errors(),
-                ], 422);
-            }
-        });
-
-        // Authentication exceptions
-        $this->renderable(function (LaravelAuthenticationException $e, $request) {
-            if ($request->expectsJson() || $request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage() ?: 'Unauthenticated',
-                ], 401);
-            }
-        });
-
-        // Authorization exceptions
-        $this->renderable(function (LaravelAuthorizationException $e, $request) {
-            if ($request->expectsJson() || $request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage() ?: 'Forbidden',
-                ], 403);
-            }
-        });
-
-        // HTTP exceptions
-        $this->renderable(function (HttpException $e, $request) {
-            if ($request->expectsJson() || $request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage() ?: 'HTTP Error',
-                ], $e->getStatusCode());
-            }
-        });
-
-        // Tenant exceptions
-        $this->renderable(function (TenantException $e, $request) {
-            if ($request->expectsJson() || $request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage(),
+                    'message' => __('errors.resource_not_found', ['resource' => $model]),
+                    'error_code' => 'NOT_FOUND_RESOURCE',
                 ], 404);
             }
         });
 
-        // General throwable exceptions
-        $this->renderable(function (Throwable $e, $request) {
+        // Route not found (404)
+        $this->renderable(function (NotFoundHttpException $e, $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
-                // Log the error
-                $companyId = null;
-
-                if (app()->bound('tenant.company_id')) {
-                    $companyId = app('tenant.company_id');
-                }
-
-                \Log::error('API Error', [
-                    'message' => $e->getMessage(),
-                    'exception' => get_class($e),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                    'url' => $request->fullUrl(),
-                    'method' => $request->method(),
-                    'user_id' => auth()->id(),
-                    'company_id' => $companyId,
-                ]);
-
-                if (config('app.debug')) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => $e->getMessage(),
-                        'exception' => get_class($e),
-                        'file' => $e->getFile(),
-                        'line' => $e->getLine(),
-                        'trace' => collect($e->getTrace())->map(function ($trace) {
-                            return array_intersect_key($trace, array_flip(['file', 'line', 'function', 'class']));
-                        })->toArray(),
-                    ], 500);
-                }
-
                 return response()->json([
                     'success' => false,
-                    'message' => 'Server Error',
-                ], 500);
+                    'message' => __('errors.route_not_found'),
+                    'error_code' => 'VALIDATION_ROUTE_NOT_FOUND',
+                ], 404);
             }
         });
 
-        // Report exceptions for monitoring
-        $this->reportable(function (Throwable $e) {
-            if (app()->bound('sentry')) {
-                app('sentry')->captureException($e);
+        // Method not allowed
+        $this->renderable(function (MethodNotAllowedHttpException $e, $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('errors.method_not_allowed'),
+                    'error_code' => 'VALIDATION_METHOD_NOT_ALLOWED',
+                ], 405);
+            }
+        });
+
+        // Authentication
+        $this->renderable(function (AuthenticationException $e, $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('errors.unauthenticated'),
+                    'error_code' => 'AUTH_UNAUTHORIZED',
+                ], 401);
+            }
+        });
+
+        // Throttle (rate limit)
+        $this->renderable(function (ThrottleRequestsException $e, $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('errors.too_many_requests'),
+                    'error_code' => 'RATE_LIMIT_EXCEEDED',
+                    'retry_after' => $e->getHeaders()['Retry-After'] ?? null,
+                ], 429);
             }
         });
     }
+
+    public function report(Throwable $e): void
+    {
+        if ($e instanceof RenderableException) {
+            $e->report();
+            return;
+        }
+
+        // Log all unhandled exceptions to errors channel
+        \App\Helpers\Logger::error($e);
+
+        parent::report($e);
+    }
+
+    public function render($request, Throwable $e)
+    {
+        if ($request->expectsJson() || $request->is('api/*')) {
+            // If it's our custom exception, use its render method
+            if ($e instanceof RenderableException) {
+                return $e->render($request);
+            }
+
+            // Fallback for any unhandled exception
+            $status = method_exists($e, 'getStatusCode')
+                ? $e->getStatusCode()
+                : ($e->getCode() > 0 && $e->getCode() < 600 ? $e->getCode() : 500);
+
+            $response = [
+                'success' => false,
+                'message' => $status === 500
+                    ? __('errors.internal_error')
+                    : $e->getMessage(),
+                'error_code' => $status === 500 ? 'SYSTEM_INTERNAL_ERROR' : 'UNKNOWN_ERROR',
+            ];
+
+            if (config('app.debug')) {
+                $response['debug'] = [
+                    'exception' => get_class($e),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString(),
+                ];
+            }
+
+            return response()->json($response, $status);
+        }
+
+        return parent::render($request, $e);
+    }
 }
+

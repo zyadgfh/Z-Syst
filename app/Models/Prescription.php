@@ -1,65 +1,61 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Prescription extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
-        'company_id',
-        'prescription_number',
-        'patient_id',
-        'doctor_id',
-        'branch_id',
-        'status',
-        'prescribed_date',
-        'expiry_date',
+        'business_id',
+        'sale_id',
+        'party_id',
+        'image',
         'notes',
-        'image_path',
-        'created_by',
+        'status',
+        'meta',
     ];
 
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
     protected $casts = [
-        'prescribed_date' => 'date',
-        'expiry_date' => 'date',
+        'meta' => 'json',
     ];
 
-    public function company(): BelongsTo
+    /**
+     * Get the business that owns the prescription.
+     */
+    public function business(): BelongsTo
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(Business::class);
     }
 
-    public function patient(): BelongsTo
+    /**
+     * Get the sale associated with the prescription.
+     */
+    public function sale(): BelongsTo
     {
-        return $this->belongsTo(Patient::class);
+        return $this->belongsTo(Sale::class);
     }
 
-    public function doctor(): BelongsTo
+    /**
+     * Get the party (customer) associated with the prescription.
+     */
+    public function party(): BelongsTo
     {
-        return $this->belongsTo(Doctor::class);
-    }
-
-    public function branch(): BelongsTo
-    {
-        return $this->belongsTo(Branch::class);
-    }
-
-    public function createdBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function items(): HasMany
-    {
-        return $this->hasMany(PrescriptionItem::class);
+        return $this->belongsTo(Party::class);
     }
 }
+

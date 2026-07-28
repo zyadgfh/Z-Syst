@@ -2,18 +2,17 @@
 
 namespace App\Models;
 
-use App\Traits\HasCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Income extends Model
 {
-    use HasFactory, HasCompany;
+    use HasFactory;
 
     protected $fillable = [
         'income_category_id',
-        'company_id',
+        'business_id',
         'user_id',
         'amount',
         'incomeFor',
@@ -36,7 +35,7 @@ class Income extends Model
     protected $casts = [
         'amount' => 'double',
         'user_id' => 'integer',
-        'company_id' => 'integer',
+        'business_id' => 'integer',
         'income_category_id' => 'integer',
     ];
 }

@@ -7,315 +7,61 @@ use App\Models\Party;
 use App\Models\Stock;
 use App\Models\Product;
 use App\Models\Business;
+use App\Models\FefoLog;
+use App\Models\FefoSetting;
 use App\Models\SaleDetails;
+use App\Services\FefoService;
+use App\Exceptions\BusinessRuleException;
+use App\Exceptions\Errors\ErrorCode;
+use App\Exceptions\NotFoundException;
+use App\Exceptions\TransactionException;
+use App\Helpers\TransactionHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use App\Services\Stock\StockAllocationService;
-use App\Services\StockMovementService;
-use Illuminate\Support\Facades\Validator;
 
 class AcnooSaleController extends Controller
 {
-    protected $stockMovementService;
+    protected FefoService $fefoService;
 
-    public function __construct(StockMovementService $stockMovementService)
+    public function __construct(FefoService $fefoService)
     {
-        $this->stockMovementService = $stockMovementService;
+        $this->fefoService = $fefoService;
     }
-
     /**
-     * Validate inventory for POS checkout.
-     * Accepts items with barcode and quantity.
-     */
-    public function validateInventory(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'items' => 'required|array|min:1',
-            'items.*.barcode' => 'required|string',
-            'items.*.quantity' => 'required|integer|min:1',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => $validator->errors()->first(),
-            ], 422);
-        }
-
-        $companyId = $request->user()->company_id ?? app('tenant.company_id');
-        $results = [];
-        $allAvailable = true;
-
-        foreach ($request->items as $index => $item) {
-            $product = Product::query()
-                ->where('company_id', $companyId)
-                ->where('barcode', trim((string) $item['barcode']))
-                ->first();
-
-            if (!$product) {
-                $results[] = [
-                    'barcode' => $item['barcode'],
-                    'available' => false,
-                    'requested_quantity' => $item['quantity'],
-                    'available_quantity' => 0,
-                    'error' => 'Product not found',
-                ];
-                $allAvailable = false;
-                continue;
-            }
-
-            $stock = Stock::query()
-                ->where('product_id', $product->id)
-                ->whereHas('product', function ($query) use ($companyId) {
-                    $query->where('company_id', $companyId);
-                })
-                ->sum('productStock');
-
-            if ($stock < $item['quantity']) {
-                $results[] = [
-                    'barcode' => $item['barcode'],
-                    'product_id' => $product->id,
-                    'name' => $product->productName,
-                    'available' => false,
-                    'requested_quantity' => $item['quantity'],
-                    'available_quantity' => $stock,
-                ];
-                $allAvailable = false;
-            } else {
-                $results[] = [
-                    'barcode' => $item['barcode'],
-                    'product_id' => $product->id,
-                    'name' => $product->productName,
-                    'available' => true,
-                    'requested_quantity' => $item['quantity'],
-                    'available_quantity' => $stock,
-                    'price' => $product->sales_price ?? 0,
-                ];
-            }
-        }
-
-        return response()->json([
-            'all_available' => $allAvailable,
-            'items' => $results,
-        ]);
-    }
-
-    /**
-     * Display a listing of sales for POS (returns array directly for frontend compatibility).
+     * Display a listing of the resource.
      */
     public function index()
     {
-        $companyId = auth()->user()->company_id ?? app('tenant.company_id') ?? null;
+        $data = Sale::select('id', 'party_id', 'invoiceNumber', 'saleDate', 'totalAmount', 'dueAmount', 'paidAmount', 'paymentType')
+                ->with('party:id,name,phone')
+                ->when(request('search'), function ($query) {
+                    $query->where(function ($subQuery) {
+                        $subQuery->where('paymentType', 'like', '%' . request('search') . '%')
+                            ->orWhere('invoiceNumber', 'like', '%' . request('search') . '%')
+                            ->orWhere('meta', 'like', '%' . request('search') . '%')
+                            ->orWhereHas('party', function ($query) {
+                                $query->where('name', 'like', '%' . request('search') . '%')
+                                    ->orWhere('phone', 'like', '%' . request('search') . '%');
+                            });
+                    });
+                })
+                ->withCount('saleReturns')
+                ->where('business_id', auth()->user()->business_id)
+                ->latest()
+                ->paginate(10);
 
-        $sales = Sale::select('id', 'invoiceNumber', 'saleDate', 'totalAmount', 'dueAmount', 'paidAmount', 'paymentType', 'status', 'meta')
-            ->when($companyId, function ($query) use ($companyId) {
-                $query->where('company_id', $companyId);
-            })
-            ->latest()
-            ->limit(20)
-            ->get();
-
-        // Format for POS frontend
-        $formattedSales = $sales->map(function ($sale) {
-            $items = [];
-            // Try to get items from meta first (POS sales store items_json there)
-            if (isset($sale->meta['items_json'])) {
-                $items = $sale->meta['items_json'];
-            } elseif (isset($sale->meta['items'])) {
-                $items = is_array($sale->meta['items']) ? $sale->meta['items'] : json_decode($sale->meta['items'], true);
-            }
-
-            return [
-                'id' => $sale->id,
-                'invoice_number' => $sale->invoiceNumber,
-                'customer_name' => $sale->meta['customer_name'] ?? 'Guest',
-                'payment_method' => $sale->paymentType,
-                'total_amount' => $sale->totalAmount,
-                'created_at' => $sale->created_at->toDateTimeString(),
-                'items' => $items,
-            ];
-        });
-
-        return response()->json($formattedSales->values()->toArray());
-    }
-
-    /**
-     * Store a POS sale using barcode-based items.
-     */
-    protected function storePosSale(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'items' => 'required|array|min:1',
-            'items.*.barcode' => 'required|string',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.name' => 'required|string',
-            'items.*.price' => 'required|numeric',
-            'customer_name' => 'nullable|string',
-            'payment_method' => 'nullable|string|in:cash,card,insurance',
-            'status' => 'nullable|string|in:completed,held,pending',
+        return response()->json([
+            'message' => __('Data fetched successfully.'),
+            'data' => $data,
         ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => $validator->errors()->first(),
-            ], 422);
-        }
-
-        $companyId = $request->user()->company_id ?? app('tenant.company_id');
-        $businessId = $request->user()->business_id ?? app('tenant.business_id') ?? auth()->user()->business_id;
-
-        DB::beginTransaction();
-        try {
-            $subtotal = 0;
-            $items = [];
-            $stockMovements = [];
-
-            foreach ($request->items as $itemData) {
-                $product = Product::query()
-                    ->where('company_id', $companyId)
-                    ->where('barcode', trim((string) $itemData['barcode']))
-                    ->first();
-
-                if (!$product) {
-                    return response()->json([
-                        'message' => "Product not found for barcode: {$itemData['barcode']}",
-                    ], 404);
-                }
-
-                $quantity = (int) $itemData['quantity'];
-                $price = (float) ($itemData['price'] ?? ($product->sales_price ?? 0));
-
-                $stock = Stock::query()
-                    ->where('product_id', $product->id)
-                    ->whereHas('product', function ($query) use ($companyId) {
-                        $query->where('company_id', $companyId);
-                    })
-                    ->first();
-
-                if (!$stock) {
-                    return response()->json([
-                        'message' => "No stock record found for barcode: {$itemData['barcode']}",
-                    ], 404);
-                }
-
-                if ($stock->productStock < $quantity) {
-                    return response()->json([
-                        'message' => "Insufficient stock for {$product->productName}. Available: {$stock->productStock}",
-                    ], 422);
-                }
-
-                // Deduct stock using StockAllocationService
-                StockAllocationService::allocateToProductStock(
-                    $product->id,
-                    $quantity,
-                    $request->input('branch_id', 1)
-                );
-
-                // Log stock movement
-                $this->stockMovementService->logMovement(
-                    $product->id,
-                    $request->input('branch_id', 1),
-                    'out',
-                    $quantity,
-                    'pos_sale',
-                    null,
-                    null,
-                    [
-                        'barcode' => $product->barcode,
-                        'product_name' => $product->productName,
-                    ]
-                );
-
-                $lineTotal = $price * $quantity;
-                $subtotal += $lineTotal;
-
-                $items[] = [
-                    'product_id' => $product->id,
-                    'barcode' => $product->barcode,
-                    'name' => $product->productName,
-                    'price' => $price,
-                    'quantity' => $quantity,
-                    'unit_price' => $price,
-                    'line_total' => $lineTotal,
-                ];
-            }
-
-            $taxAmount = round($subtotal * 0.08, 2);
-            $total = $subtotal + $taxAmount;
-
-            // Create sale record
-            $sale = Sale::create([
-                'user_id' => auth()->id(),
-                'business_id' => $businessId,
-                'company_id' => $companyId,
-                'invoiceNumber' => 'POS-' . strtoupper(uniqid()),
-                'saleDate' => now()->toDateString(),
-                'totalAmount' => $total,
-                'paidAmount' => $total,
-                'paymentType' => $request->input('payment_method', 'cash'),
-                'status' => $request->input('status', 'completed'),
-                'meta' => [
-                    'customer_name' => $request->input('customer_name', 'Guest'),
-                    'payment_method' => $request->input('payment_method', 'cash'),
-                    'source' => 'pos',
-                    'items_json' => $items,
-                ],
-            ]);
-
-            // Create sale details
-            $saleDetails = [];
-            foreach ($items as $key => $item) {
-                $saleDetails[] = [
-                    'sale_id' => $sale->id,
-                    'price' => $item['unit_price'],
-                    'quantities' => $item['quantity'],
-                    'product_id' => $item['product_id'],
-                    'expire_date' => null,
-                    'purchase_price' => $item['unit_price'],
-                ];
-            }
-
-            SaleDetails::insert($saleDetails);
-
-            DB::commit();
-
-            // Return with sale_items relationship
-            return response()->json([
-                'id' => $sale->id,
-                'invoice_number' => $sale->invoiceNumber,
-                'customer_name' => $sale->meta['customer_name'] ?? 'Guest',
-                'payment_method' => $sale->paymentType,
-                'status' => $sale->status,
-                'subtotal' => $subtotal,
-                'tax_amount' => $taxAmount,
-                'total_amount' => $total,
-                'created_at' => $sale->created_at->toDateTimeString(),
-                'sale_items' => $items,
-                'message' => 'Sale completed successfully',
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'message' => 'Sale failed: ' . $e->getMessage(),
-            ], 500);
-        }
     }
 
     /**
      * Store a newly created resource in storage.
-     * Supports both legacy format (products with product_id) and POS format (items with barcode).
      */
     public function store(Request $request)
     {
-        // Detect if this is a POS request (has items array with barcode)
-        $isPosRequest = $request->has('items') && !$request->has('products');
-
-        if ($isPosRequest) {
-            return $this->storePosSale($request);
-        }
-
-        // Legacy format validation
         $request->validate([
             'products' => 'required|array',
             'saleDate' => 'required|string',
@@ -335,32 +81,83 @@ class AcnooSaleController extends Controller
             'products.*.quantities' => 'required|integer',
         ]);
 
-        DB::beginTransaction();
-        try {
+        $sale = TransactionHelper::run(function () use ($request) {
+            $business_id = auth()->user()->business_id;
+            $fefoService = $this->fefoService;
+            $fefoSettings = FefoSetting::getForBusiness($business_id);
 
-            $business_id = $request->user()->business_id ?? app('tenant.business_id') ?? auth()->user()->business_id;
+            // Validate stock availability for all products
+            $batch_numbers = collect($request->products)->pluck('batch_no')->filter()->toArray();
 
-            $batch_numbers = collect($request->products)->pluck('batch_no')->toArray();
-            $stocks = Stock::whereIn('batch_no', $batch_numbers)->where('business_id', $business_id)->get();
-            foreach ($stocks as $key => $stock) {
-                if ($stock->productStock < $request->products[$key]['quantities']) {
-                    return response()->json([
-                        'message' => __($stock->batch_no . ' - stock not available for this batch number. Available quantity is : '. $stock->productStock)
-                    ], 400);
+            // Only validate batch-specific stock if batch_no provided OR FEFO is disabled
+            if (!empty($batch_numbers)) {
+                $stocks = Stock::whereIn('batch_no', $batch_numbers)->where('business_id', $business_id)->get();
+
+                foreach ($stocks as $key => $stock) {
+                    if ($stock->productStock < $request->products[$key]['quantities']) {
+                        throw new BusinessRuleException(
+                            ErrorCode::BUSINESS_INSUFFICIENT_STOCK,
+                            __('errors.insufficient_stock', [
+                                'product' => $request->products[$key]['product_id'],
+                                'batch' => $stock->batch_no,
+                                'available' => $stock->productStock,
+                                'requested' => $request->products[$key]['quantities'],
+                            ]),
+                            [
+                                'product_id' => $request->products[$key]['product_id'],
+                                'batch_no' => $stock->batch_no,
+                                'available_qty' => $stock->productStock,
+                                'requested_qty' => $request->products[$key]['quantities'],
+                            ]
+                        );
+                    }
                 }
+            } elseif ($fefoSettings->fefo_enabled) {
+                // FEFO auto-selection: validate total stock across all batches
+                foreach ($request->products as $productData) {
+                    $totalStock = Stock::where('product_id', $productData['product_id'])
+                        ->where('business_id', $business_id)
+                        ->where('productStock', '>', 0)
+                        ->where(function ($q) {
+                            $q->whereNull('expire_date')
+                              ->orWhere('expire_date', '>=', now()->startOfDay());
+                        })
+                        ->sum('productStock');
+
+                    if ($totalStock < $productData['quantities']) {
+                        throw new BusinessRuleException(
+                            ErrorCode::BUSINESS_INSUFFICIENT_STOCK,
+                            __('errors.insufficient_stock', [
+                                'product' => $productData['product_id'],
+                                'batch' => 'FEFO auto',
+                                'available' => $totalStock,
+                                'requested' => $productData['quantities'],
+                            ]),
+                            [
+                                'product_id' => $productData['product_id'],
+                                'batch_no' => null,
+                                'available_qty' => $totalStock,
+                                'requested_qty' => $productData['quantities'],
+                            ]
+                        );
+                    }
+                }
+            }
+
+            // Validate due sale for walking customers
+            if ($request->dueAmount && !$request->party_id) {
+                throw new BusinessRuleException(
+                    ErrorCode::BUSINESS_DUE_SALE_WALKING_CUSTOMER,
+                    __('errors.due_sale_walking_customer'),
+                    ['due_amount' => $request->dueAmount]
+                );
             }
 
             if ($request->party_id) {
                 $party = Party::findOrFail($request->party_id);
             }
 
-            if ($request->dueAmount) {
-                if (!$request->party_id) {
-                    return response()->json([
-                        'message' => __('You can not sale in due for a walking customer.')
-                    ], 400);
-                }
-
+            if ($request->dueAmount && isset($party)) {
                 $party->update([
                     'due' => $party->due + $request->dueAmount
                 ]);
@@ -377,7 +174,7 @@ class AcnooSaleController extends Controller
             $sale = Sale::create($request->all() + [
                         'user_id' => auth()->id(),
                         'business_id' => $business_id,
-                        'lossProfit' => array_sum($lossProfit) - $request->discountAmount,
+                        'lossProfit' => array_sum($lossProfit) - ($request->discountAmount ?? 0),
                         'meta' => [
                             'notes' => $request->notes,
                             'customer_phone' => $request->customer_phone,
@@ -385,50 +182,113 @@ class AcnooSaleController extends Controller
                     ]);
 
             $saleDetails = [];
-            foreach ($request->products as $key => $productData) {
-                $saleDetails[$key] = [
-                    'sale_id' => $sale->id,
-                    'price' => $productData['price'],
-                    'batch_no' => $productData['batch_no'],
-                    'product_id' => $productData['product_id'],
-                    'lossProfit' => $productData['lossProfit'],
-                    'quantities' => $productData['quantities'] ?? 0,
-                    'expire_date' => $productData['expire_date'] ?? NULL,
-                    'purchase_price' => $productData['purchase_price'] ?? 0,
-                ];
+            $fefoService = $this->fefoService;
+            $fefoSettings = FefoSetting::getForBusiness($business_id);
 
-                StockAllocationService::allocateToProductStock(
-                    $productData['product_id'],
-                    $productData['quantities'],
-                    $request->user()->branch_id ?? $request->input('branch_id', 1)
-                );
+            foreach ($request->products as $key => $productData) {
+                $productId = $productData['product_id'];
+                $quantity = $productData['quantities'] ?? 0;
+
+                // FEFO: If batch_no is not explicitly provided by frontend, use FEFO to auto-select
+                if (empty($productData['batch_no']) && $fefoSettings->fefo_enabled) {
+                    $batches = $fefoService->getBestBatches($productId, $quantity, $business_id);
+                    $totalAllocated = 0;
+
+                    foreach ($batches as $batch) {
+                        if ($totalAllocated >= $quantity) {
+                            break;
+                        }
+
+                        $deductQty = min($batch->productStock, $quantity - $totalAllocated);
+
+                        $saleDetails[] = [
+                            'sale_id' => $sale->id,
+                            'price' => $productData['price'],
+                            'batch_no' => $batch->batch_no,
+                            'product_id' => $productId,
+                            'lossProfit' => $productData['lossProfit'] / count($request->products) ?? 0,
+                            'quantities' => $deductQty,
+                            'expire_date' => $batch->expire_date,
+                            'purchase_price' => $productData['purchase_price'] ?? 0,
+                        ];
+
+                        $batch->decrement('productStock', $deductQty);
+                        $totalAllocated += $deductQty;
+
+                        // Log FEFO deduction
+                        $batch->refresh();
+                        $fefoService->logFefoDeduction(
+                            businessId: $business_id,
+                            productId: $productId,
+                            stockId: $batch->id,
+                            batchNo: $batch->batch_no,
+                            expireDate: $batch->expire_date,
+                            quantityDeducted: $deductQty,
+                            quantityRemaining: $batch->productStock,
+                            saleId: $sale->id,
+                            notes: 'FEFO auto-deduction during sale creation'
+                        );
+                    }
+                } else {
+                    // Manual batch selection (original behavior with FEFO logging)
+                    $saleDetails[$key] = [
+                        'sale_id' => $sale->id,
+                        'price' => $productData['price'],
+                        'batch_no' => $productData['batch_no'],
+                        'product_id' => $productId,
+                        'lossProfit' => $productData['lossProfit'],
+                        'quantities' => $quantity,
+                        'expire_date' => $productData['expire_date'] ?? null,
+                        'purchase_price' => $productData['purchase_price'] ?? 0,
+                    ];
+
+                    $stock = Stock::where('batch_no', $productData['batch_no'])
+                        ->where('product_id', $productId)
+                        ->first();
+
+                    if ($stock) {
+                        $stock->decrement('productStock', $quantity);
+                        $stock->refresh();
+
+                        // Log FEFO deduction for manual selection
+                        $fefoService->logFefoDeduction(
+                            businessId: $business_id,
+                            productId: $productId,
+                            stockId: $stock->id,
+                            batchNo: $stock->batch_no,
+                            expireDate: $stock->expire_date,
+                            quantityDeducted: $quantity,
+                            quantityRemaining: $stock->productStock,
+                            saleId: $sale->id,
+                            notes: 'Manual batch selection during sale'
+                        );
+                    }
+                }
             }
 
             SaleDetails::insert($saleDetails);
 
-            if ($party ?? false && $party->phone) {
+            if (isset($party) && $party->phone) {
                 if (env('MESSAGE_ENABLED')) {
                     sendMessage($party->phone, saleMessage($sale, $party, $business_name));
                 }
             }
 
-            DB::commit();
-
-            return response()->json([
-                'message' => __('Data saved successfully.'),
-                'data' => $sale->load([
-                                'tax:id,name,rate',
-                                'party:id,name,phone',
-                                'details.product:id,productName',
-                                'details:id,sale_id,product_id,price,quantities',
-                            ]),
+            return $sale->load([
+                'tax:id,name,rate',
+                'party:id,name,phone',
+                'details.product:id,productName',
+                'details:id,sale_id,product_id,price,quantities',
             ]);
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'message' => __('Something was wrong.'),
-            ], 406);
-        }
+        }, 'sale:store', [
+            'products_count' => count($request->products ?? []),
+            'party_id' => $request->party_id,
+        ]);
+
+        return response()->json([
+            'message' => __('Data saved successfully.'),
+            'data' => $sale,
+        ]);
     }
 
     public function show($id)
@@ -473,10 +333,8 @@ class AcnooSaleController extends Controller
             'products.*.product_id' => 'required|exists:products,id',
         ]);
 
-        $business_id = auth()->user()->business_id;
-
-        DB::beginTransaction();
-        try {
+        TransactionHelper::run(function () use ($request, $sale) {
+            $business_id = auth()->user()->business_id;
 
             $prevDetails = SaleDetails::where('sale_id', $sale->id)->get();
             $productIds = collect($request->products)->pluck('product_id')->toArray();
@@ -487,9 +345,6 @@ class AcnooSaleController extends Controller
                     return $item->product_id == $product->id;
                 });
 
-                $productStock = 0;
-
-                // Calculate stock by batch_no or fallback to first stock entry
                 $stock = Stock::where('product_id', $product->id)
                             ->where('batch_no', $request->products[$key]['batch_no'] ?? null)
                             ->first();
@@ -498,6 +353,7 @@ class AcnooSaleController extends Controller
                     $stock = Stock::where('product_id', $product->id)->orderBy('id', 'asc')->first();
                 }
 
+                $productStock = 0;
                 if ($prevProduct) {
                     $productStock = $stock ? ($stock->productStock + $prevProduct->quantities) : 0;
                 } else {
@@ -505,9 +361,21 @@ class AcnooSaleController extends Controller
                 }
 
                 if ($productStock < $request->products[$key]['quantities']) {
-                    return response()->json([
-                        'message' => __($product->productName . ' - stock not available for this product. Available quantity is: ' . $productStock)
-                    ], 400);
+                    throw new BusinessRuleException(
+                        ErrorCode::BUSINESS_INSUFFICIENT_STOCK,
+                        __('errors.insufficient_stock', [
+                            'product' => $product->productName,
+                            'batch' => $request->products[$key]['batch_no'] ?? 'N/A',
+                            'available' => $productStock,
+                            'requested' => $request->products[$key]['quantities'],
+                        ]),
+                        [
+                            'product_id' => $product->id,
+                            'batch_no' => $request->products[$key]['batch_no'] ?? null,
+                            'available_qty' => $productStock,
+                            'requested_qty' => $request->products[$key]['quantities'],
+                        ]
+                    );
                 }
             }
 
@@ -518,11 +386,7 @@ class AcnooSaleController extends Controller
                             ->first();
 
                 if ($stock) {
-                    StockAllocationService::releaseFromProductStock(
-                        $prevItem->product_id,
-                        $prevItem->quantities,
-                        $request->user()->branch_id ?? $request->input('branch_id', 1)
-                    );
+                    $stock->increment('productStock', $prevItem->quantities);
                 }
             }
 
@@ -538,7 +402,7 @@ class AcnooSaleController extends Controller
                     'product_id' => $productData['product_id'],
                     'lossProfit' => $productData['lossProfit'],
                     'quantities' => $productData['quantities'] ?? 0,
-                    'expire_date' => $productData['expire_date'] ?? NULL,
+                    'expire_date' => $productData['expire_date'] ?? null,
                     'purchase_price' => $productData['purchase_price'] ?? 0,
                 ];
 
@@ -551,11 +415,7 @@ class AcnooSaleController extends Controller
                 }
 
                 if ($stock) {
-                    StockAllocationService::allocateToProductStock(
-                        $productData['product_id'],
-                        $productData['quantities'],
-                        $request->user()->branch_id ?? $request->input('branch_id', 1)
-                    );
+                    $stock->decrement('productStock', $productData['quantities']);
                 }
             }
 
@@ -586,63 +446,72 @@ class AcnooSaleController extends Controller
             $sale->update($request->all() + [
                 'user_id' => auth()->id(),
                 'business_id' => $business_id,
-                'lossProfit' => array_sum($lossProfit) - $request->discountAmount,
+                'lossProfit' => array_sum($lossProfit) - ($request->discountAmount ?? 0),
                 'meta' => [
                     'notes' => $request->notes,
                     'customer_phone' => $request->customer_phone,
                 ],
             ]);
+        }, 'sale:update', ['sale_id' => $sale->id]);
 
-            DB::commit();
-
-            return response()->json([
-                'message' => __('Data saved successfully.'),
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'message' => __('Something was wrong.'),
-            ], 406);
-        }
+        return response()->json([
+            'message' => __('Data saved successfully.'),
+        ]);
     }
 
-    public function destroy(Request $request, Sale $sale)
+    public function destroy(Sale $sale)
     {
-        foreach ($sale->details as $detail) {
-            $stock = Stock::where('product_id', $detail->product_id)
-                          ->where('batch_no', $detail->batch_no)
-                          ->first();
+        TransactionHelper::run(function () use ($sale) {
+            $business_id = auth()->user()->business_id;
+            $fefoService = $this->fefoService;
 
-            if (!$stock) {
-                $stock = Stock::where('product_id', $detail->product_id)->orderBy('id', 'asc')->first();
+            foreach ($sale->details as $detail) {
+                $stock = Stock::where('product_id', $detail->product_id)
+                              ->where('batch_no', $detail->batch_no)
+                              ->first();
+
+                if (!$stock) {
+                    $stock = Stock::where('product_id', $detail->product_id)->orderBy('id', 'asc')->first();
+                }
+
+                if ($stock) {
+                    $stock->increment('productStock', $detail->quantities);
+
+                    // Log FEFO return (stock restoration)
+                    $stock->refresh();
+                    $fefoService->logFefoDeduction(
+                        businessId: $business_id,
+                        productId: $detail->product_id,
+                        stockId: $stock->id,
+                        batchNo: $stock->batch_no,
+                        expireDate: $stock->expire_date,
+                        quantityDeducted: -$detail->quantities, // negative = restored
+                        quantityRemaining: $stock->productStock,
+                        saleId: $sale->id,
+                        saleDetailId: $detail->id,
+                        notes: 'Stock restored due to sale deletion'
+                    );
+                }
             }
 
-            if ($stock) {
-                StockAllocationService::releaseFromProductStock(
-                    $detail->product_id,
-                    $detail->quantities,
-                    $request->user()->branch_id ?? $request->input('branch_id', 1)
-                );
+            if ($sale->dueAmount) {
+                $party = Party::findOrFail($sale->party_id);
+                $party->update([
+                    'due' => $party->due - $sale->dueAmount
+                ]);
             }
-        }
 
-        if ($sale->dueAmount) {
-            $party = Party::findOrFail($sale->party_id);
-            $party->update([
-                'due' => $party->due - $sale->dueAmount
+            $business = Business::findOrFail(auth()->user()->business_id);
+            $business->update([
+                'shopOpeningBalance' => $business->shopOpeningBalance - $sale->paidAmount
             ]);
-        }
 
-        $business = Business::findOrFail(auth()->user()->business_id);
-        $business->update([
-            'shopOpeningBalance' => $business->shopOpeningBalance - $sale->paidAmount
-        ]);
-
-        $sale->delete();
+            $sale->delete();
+        }, 'sale:destroy', ['sale_id' => $sale->id]);
 
         return response()->json([
             'message' => __('Data deleted successfully.'),
         ]);
     }
 }
+

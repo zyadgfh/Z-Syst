@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\ForgotPasswordRequest;
-use App\Http\Requests\Auth\VerifyResetCodeRequest;
-use App\Http\Requests\Auth\ResetPasswordRequest;
-use App\Mail\PasswordReset;
 use App\Models\User;
+use App\Mail\PasswordReset;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;
 
 class AcnooForgotPasswordController extends Controller
 {
-    public function sendResetCode(ForgotPasswordRequest $request) : JsonResponse
+    public function sendResetCode(Request $request) : JsonResponse
     {
+        $request->validate([
+            'email' => 'required|email|exists:users,email'
+        ]);
 
         $expire = now()->addHour();
         $code = random_int(100000,999999);
@@ -42,8 +43,12 @@ class AcnooForgotPasswordController extends Controller
         }
     }
 
-    public function verifyResetCode(VerifyResetCodeRequest $request)
+    public function verifyResetCode(Request $request)
     {
+        $request->validate([
+            'code' => 'required|integer',
+            'email' => 'required|exists:users,email',
+        ]);
 
         $user = User::where('email', $request->email)->first();
 
@@ -64,8 +69,12 @@ class AcnooForgotPasswordController extends Controller
         }
     }
 
-    public function resetPassword(ResetPasswordRequest $request) : JsonResponse
+    public function resetPassword(Request $request) : JsonResponse
     {
+        $request->validate([
+            'email' => 'required|exists:users,email',
+            'password' => ['required', 'min:4'],
+        ]);
 
         $user = User::where('email', $request->email)->first();
 

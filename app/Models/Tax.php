@@ -2,20 +2,19 @@
 
 namespace App\Models;
 
-use App\Traits\HasCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Tax extends Model
 {
-    use HasFactory, HasCompany;
+    use HasFactory;
 
     protected $fillable = [
         'name',
         'rate',
         'status',
         'sub_tax',
-        'company_id',
+        'business_id',
     ];
 
     /**
@@ -27,6 +26,6 @@ class Tax extends Model
         'rate' => 'double',
         'sub_tax' => 'json',
         'status' => 'boolean',
-        'company_id' => 'integer',
+        'business_id' => 'integer',
     ];
 }

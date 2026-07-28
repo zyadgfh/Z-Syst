@@ -11,15 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (! Schema::hasTable('units')) {
-            Schema::create('units', function (Blueprint $table) {
+        Schema::create('units', function (Blueprint $table) {
             $table->id();
             $table->string('unitName');
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->boolean('status')->default(1);
             $table->timestamps();
-            });
-        }
+        });
     }
 
     /**

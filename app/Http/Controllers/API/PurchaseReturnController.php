@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Models\Party;
 use App\Models\Stock;
 use App\Models\Purchase;
-use App\Services\Stock\StockAllocationService;
+use App\Exceptions\BusinessRuleException;
+use App\Exceptions\Errors\ErrorCode;
+use App\Helpers\TransactionHelper;
 use Illuminate\Http\Request;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseDetails;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\PurchaseReturnDetail;
 
@@ -20,11 +21,15 @@ class PurchaseReturnController extends Controller
      */
     public function index()
     {
-        $data = PurchaseReturn::with('purchase:id,party_id,isPaid,totalAmount,dueAmount,paidAmount,invoiceNumber', 'purchase.party:id,name', 'details')
-                ->whereBetween('return_date', [request()->start_date, request()->end_date])
-                ->where('business_id', auth()->user()->business_id)
-                ->latest()
-                ->get();
+        $data = PurchaseReturn::with(
+                'purchase:id,party_id,isPaid,totalAmount,dueAmount,paidAmount,invoiceNumber',
+                'purchase.party:id,name',
+                'details'
+            )
+            ->whereBetween('return_date', [request()->start_date, request()->end_date])
+            ->where('business_id', auth()->user()->business_id)
+            ->latest()
+            ->get();
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -45,9 +50,7 @@ class PurchaseReturnController extends Controller
             'return_qty' => 'required|array',
         ]);
 
-        DB::beginTransaction();
-        try {
-
+        $purchase_return = TransactionHelper::run(function () use ($request) {
             $business_id = auth()->user()->business_id;
 
             // Create Purchase Return record
@@ -74,18 +77,28 @@ class PurchaseReturnController extends Controller
                 'paidAmount' => $request->paidAmount,
                 'totalAmount' => $request->totalAmount,
                 'discountAmount' => $request->discountAmount,
-                'purchase_data' => $purchase->purchase_data ?? $purchase,
             ]);
 
             $data = [];
             foreach ($request->purchase_detail_id as $key => $detail_id) {
                 $purchase_detail = PurchaseDetails::findOrFail($detail_id);
 
-                // Use StockAllocationService with pessimistic locking to deduct stock on return
-                StockAllocationService::allocate(
-                    $purchase_detail->product_id,
-                    (int) $request->return_qty[$key]
-                );
+                // Update stock for the specific batch
+                $batch = Stock::where('product_id', $purchase_detail->product_id)
+                            ->when($purchase_detail->batch_no ?? false, function ($query) use ($purchase_detail) {
+                                return $query->where('batch_no', $purchase_detail->batch_no);
+                            })
+                            ->first();
+
+                if (!$batch) {
+                    throw new BusinessRuleException(
+                        ErrorCode::NOT_FOUND_BATCH,
+                        __('errors.batch_not_found'),
+                        ['batch_no' => $purchase_detail->batch_no]
+                    );
+                }
+
+                $batch->decrement('productStock', $request->return_qty[$key]);
 
                 // Update PurchaseDetail record
                 $purchase_detail->update([
@@ -103,21 +116,26 @@ class PurchaseReturnController extends Controller
 
             PurchaseReturnDetail::insert($data);
 
-            DB::commit();
+            return $purchase_return;
+        }, 'purchase-return:store', [
+            'purchase_id' => $request->purchase_id,
+            'items_count' => count($request->purchase_detail_id ?? []),
+        ]);
 
-            return response()->json([
-                'message' => __('Data saved successfully.'),
-                'data' => $purchase_return,
-            ]);
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json(['error' => 'Transaction failed: ' . $e->getMessage()], 500);
-        }
+        return response()->json([
+            'message' => __('Data saved successfully.'),
+            'data' => $purchase_return,
+        ]);
     }
 
     public function show($id)
     {
-        $data = PurchaseReturn::with('purchase:id,party_id,isPaid,totalAmount,dueAmount,paidAmount,invoiceNumber', 'purchase.party:id,name', 'details')->findOrFail($id);
+        $data = PurchaseReturn::with(
+                'purchase:id,party_id,isPaid,totalAmount,dueAmount,paidAmount,invoiceNumber',
+                'purchase.party:id,name',
+                'details'
+            )
+            ->findOrFail($id);
 
         return response()->json([
             'message' => __('Data fetched successfully.'),

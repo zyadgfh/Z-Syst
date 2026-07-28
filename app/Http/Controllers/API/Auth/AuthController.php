@@ -2,30 +2,30 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
-use App\Http\Requests\Auth\RegisterRequest;
-use App\Http\Requests\Auth\ResendOtpRequest;
-use App\Http\Requests\Auth\SubmitOtpRequest;
-use App\Http\Requests\Auth\ForgotPasswordRequest;
-use App\Http\Requests\Auth\VerifyResetCodeRequest;
-use App\Http\Requests\Auth\ResetPasswordRequest;
-use App\Mail\WelcomeMail;
 use App\Models\User;
+use App\Mail\WelcomeMail;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Laravel\Sanctum\NewAccessToken;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Laravel\Sanctum\NewAccessToken;
+use Illuminate\Support\Facades\Config;
 
 class AuthController extends Controller
 {
-    public function signUp(RegisterRequest $request)
+    public function signUp(Request $request)
     {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'password' => 'required|min:6|max:100',
+            'email' => 'required|email',
+        ]);
+
         $code = random_int(100000, 999999);
-        $expire = now()->addMinutes((int) (env('OTP_VISIBILITY_TIME') ?? 3));
+        $expire = now()->addMinutes(env('OTP_VISIBILITY_TIME') ?? 3);
         $data = [
             'code' => $code,
             'name' => $request->name,
@@ -50,28 +50,25 @@ class AuthController extends Controller
             ], 406);
         }
 
-        $user = User::updateOrCreate(
-            ['email' => $request->email],
-            [
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'remember_token' => $code,
-                'email_verified_at' => $expire,
-            ]
-        );
+        $user = User::updateOrCreate(['email' => $request->email], $request->except('password') + [
+                    'remember_token' => $code,
+                    'email_verified_at' => $expire,
+                    'password' => Hash::make($request->password),
+                ]);
 
         return response()->json([
             'message' => 'An otp code has been sent to your email. Please check and confirm.',
-            'data' => [
-                'email' => $request->email,
-                'name' => $request->name,
-            ],
+            'data' => $user,
         ]);
     }
 
-    public function submitOtp(SubmitOtpRequest $request)
+    public function submitOtp(Request $request)
     {
+        $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required|min:4|max:15',
+        ]);
+
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
@@ -113,65 +110,63 @@ class AuthController extends Controller
         }
     }
 
-    public function login(LoginRequest $request)
+    public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        $request->validate([
+            'password' => 'required',
+            'email' => 'required|email',
+        ]);
 
-        if (!Auth::attempt($credentials)) {
-            return response()->json([
-                'message' => __('Invalid credentials'),
-            ], 401);
-        }
+        if (auth()->attempt($request->only('email', 'password'))) {
+            $user = auth()->user();
 
-        $user = auth()->user();
-
-        if (!$user) {
-            return response()->json([
-                'message' => __('User not found'),
-            ], 404);
-        }
-
-        if ($user->role != 'staff' && $user->role != 'shop-owner') {
-            return response()->json([
-                'message' => 'You can not login as ' . $user->role . ' from the app!'
-            ], 406);
-        }
-
-        if ($user->remember_token && !$user->business_id) { // If user didn't verify email
-            $code = random_int(100000, 999999);
-            $expire = now()->addMinutes(env('OTP_VISIBILITY_TIME') ?? 3);
-            $data = [
-                'code' => $code,
-                'name' => $user->name,
-            ];
-
-            if (env('MAIL_USERNAME')) {
-                if (env('QUEUE_MAIL')) {
-                    Mail::to($request->input('email'))->queue(new WelcomeMail($data));
-                } else {
-                    Mail::to($request->input('email'))->send(new WelcomeMail($data));
-                }
-            } else {
+            if ($user->role != 'staff' && $user->role != 'shop-owner') {
                 return response()->json([
-                    'message' => __('Mail service is not configured. Please contact your administrator.'),
+                    'message' => 'You can not login as ' .$user->role. ' from the app!'
                 ], 406);
             }
 
-            User::where('email', $request->input('email'))->first()->update(['remember_token' => $code, 'email_verified_at' => $expire]);
+            if ($user->remember_token && !$user->business_id) { // If user didn't verify email
+
+                $code = random_int(100000, 999999);
+                $expire = now()->addMinutes(env('OTP_VISIBILITY_TIME') ?? 3);
+                $data = [
+                    'code' => $code,
+                    'name' => $request->name,
+                ];
+
+                if (env('MAIL_USERNAME')) {
+                    if (env('QUEUE_MAIL')) {
+                        Mail::to($request->email)->queue(new WelcomeMail($data));
+                    } else {
+                        Mail::to($request->email)->send(new WelcomeMail($data));
+                    }
+                } else {
+                    return response()->json([
+                        'message' => __('Mail service is not configured. Please contact your administrator.'),
+                    ], 406);
+                }
+
+                User::where('email', $request->email)->first()->update(['remember_token' => $code, 'email_verified_at' => $expire]);
+
+                return response()->json([
+                    'message' => 'An otp code has been sent to your email. Please check and confirm.',
+                ], 201);
+            }
 
             return response()->json([
-                'message' => 'An otp code has been sent to your email. Please check and confirm.',
-            ], 201);
+                'message' => 'User login successfully!',
+                'data' => [
+                    'message' => 'Logged In successfully!',
+                    'is_setup' => $user->business_id ? true : false,
+                    'token' => $user->createToken('createToken')->plainTextToken,
+                ],
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'Invalid email or password!'
+            ], 404);
         }
-
-        return response()->json([
-            'message' => 'User login successfully!',
-            'data' => [
-                'message' => 'Logged In successfully!',
-                'is_setup' => $user->business_id ? true : false,
-                'token' => $user->createToken('createToken')->plainTextToken,
-            ],
-        ]);
     }
 
     protected function setAccessTokenExpiration(NewAccessToken $accessToken)
@@ -213,8 +208,12 @@ class AuthController extends Controller
         }
     }
 
-    public function resendOtp(ResendOtpRequest $request)
+    public function resendOtp(Request $request)
     {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
         $code = random_int(100000, 999999);
         $expire = now()->addMinutes(env('OTP_VISIBILITY_TIME') ?? 3);
         $data = [

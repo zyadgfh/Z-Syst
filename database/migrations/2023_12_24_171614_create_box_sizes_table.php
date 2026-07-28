@@ -11,15 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (! Schema::hasTable('box_sizes')) {
-            Schema::create('box_sizes', function (Blueprint $table) {
+        Schema::create('box_sizes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->boolean('status')->default(1);
             $table->timestamps();
-            });
-        }
+        });
     }
 
     /**

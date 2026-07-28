@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use App\Traits\HasCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Stock extends Model
 {
-    use HasFactory, HasCompany;
+    use HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -16,7 +15,7 @@ class Stock extends Model
      * @var array
      */
     protected $fillable = [
-        'company_id',
+        'business_id',
         'product_id',
         'productStock',
         'batch_no',

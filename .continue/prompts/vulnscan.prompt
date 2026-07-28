@@ -1,0 +1,15 @@
+name: vulnscan
+description: Run Code-VulnScan vulnerability analysis on the selected code or codebase
+---
+You have the Code-VulnScan vulnerability scanning skill loaded.
+
+{{{ input }}}
+
+Use the full Code-VulnScan workflow:
+1. Identify the scan target from the user's request
+2. Run taint-flow analysis from user-controlled sources to dangerous sinks
+3. Check input validation, business logic, auth, crypto, secrets, dependencies, and IaC
+4. Apply the three-pass false-positive elimination protocol
+5. Report only Confirmed and Likely findings with evidence chains and remediation
+
+Read SKILL.md for the complete multi-phase workflow.

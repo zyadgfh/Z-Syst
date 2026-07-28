@@ -7,6 +7,9 @@ use App\Models\Party;
 use App\Models\Business;
 use App\Models\Purchase;
 use App\Models\DueCollect;
+use App\Exceptions\BusinessRuleException;
+use App\Exceptions\Errors\ErrorCode;
+use App\Exceptions\NotFoundException;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -70,39 +73,57 @@ class AcnooDueController extends Controller
             'invoiceNumber' => 'nullable|exists:' . ($party->type == 'Supplier' ? 'purchases' : 'sales') . ',invoiceNumber',
         ]);
 
+        // Find invoice if invoiceNumber provided
+        $invoice = null;
         if ($request->invoiceNumber) {
             if ($party->type == 'Supplier') {
-                $invoice = Purchase::where('invoiceNumber', $request->invoiceNumber)->where('party_id', $request->party_id)->first();
+                $invoice = Purchase::where('invoiceNumber', $request->invoiceNumber)
+                    ->where('party_id', $request->party_id)
+                    ->first();
             } else {
-                $invoice = Sale::where('invoiceNumber', $request->invoiceNumber)->where('party_id', $request->party_id)->first();
+                $invoice = Sale::where('invoiceNumber', $request->invoiceNumber)
+                    ->where('party_id', $request->party_id)
+                    ->first();
             }
 
             if (!isset($invoice)) {
-                return response()->json([
-                    'message' => 'Invoice Not Found.'
-                ], 404);
+                throw new BusinessRuleException(
+                    ErrorCode::BUSINESS_INVOICE_NOT_FOUND,
+                    __('errors.invoice_not_found'),
+                    ['invoiceNumber' => $request->invoiceNumber, 'party_id' => $request->party_id]
+                );
             }
 
             if ($invoice->dueAmount < $request->payDueAmount) {
-                return response()->json([
-                    'message' => 'Invoice due is ' . $invoice->dueAmount . '. You can not pay more then the invoice due amount.'
-                ], 400);
+                throw new BusinessRuleException(
+                    ErrorCode::BUSINESS_INVOICE_DUE_EXCEEDED,
+                    __('errors.invoice_due_exceeded', ['due' => $invoice->dueAmount]),
+                    [
+                        'invoice_due' => $invoice->dueAmount,
+                        'payment_amount' => $request->payDueAmount,
+                    ]
+                );
             }
         }
 
         if (!$request->invoiceNumber) {
             if ($request->payDueAmount > $party->opening_balance) {
-                return response()->json([
-                    'message' => __('You can pay only '. $party->opening_balance .', without selecting an invoice.')
-                ], 400);
+                throw new BusinessRuleException(
+                    ErrorCode::BUSINESS_OPENING_BALANCE_EXCEEDED,
+                    __('errors.opening_balance_exceeded', ['balance' => $party->opening_balance]),
+                    [
+                        'opening_balance' => $party->opening_balance,
+                        'payment_amount' => $request->payDueAmount,
+                    ]
+                );
             }
         }
 
         $data = DueCollect::create($request->all() + [
                     'user_id' => auth()->id(),
                     'business_id' => auth()->user()->business_id,
-                    'sale_id' => $party->type != 'Supplier' && isset($invoice) ? $invoice->id : NULL,
-                    'purchase_id' => $party->type == 'Supplier' && isset($invoice) ? $invoice->id : NULL,
+                    'sale_id' => $party->type != 'Supplier' && isset($invoice) ? $invoice->id : null,
+                    'purchase_id' => $party->type == 'Supplier' && isset($invoice) ? $invoice->id : null,
                     'totalDue' => isset($invoice) ? $invoice->dueAmount : $party->due,
                     'dueAmountAfterPay' => isset($invoice) ? ($invoice->dueAmount - $request->payDueAmount) : ($party->due - $request->payDueAmount),
                 ]);
@@ -134,3 +155,4 @@ class AcnooDueController extends Controller
         ]);
     }
 }
+

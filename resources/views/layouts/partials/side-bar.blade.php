@@ -110,11 +110,22 @@
                                     <path d="M6.25 10.4167V5.41669" stroke="white" stroke-width="1.5" stroke-linecap="round"
                                         stroke-linejoin="round" />
                                 </svg>
-
-
-
                             </span>
                             {{ __('Advertising') }}
+                        </a>
+                    </li>
+                @endcan
+
+                @can('prescriptions-read')
+                    <li
+                        class="{{ Request::routeIs('admin.prescriptions.index', 'admin.prescriptions.create', 'admin.prescriptions.edit') ? 'active' : '' }}">
+                        <a href="{{ route('admin.prescriptions.index') }}" class="active">
+                            <span class="sidebar-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 12H15M9 16H15M17 21H7C5.89543 21 5 20.1046 5 19V5C5 3.89543 5.89543 3 7 3H12.5858C12.851 3 13.1054 3.10536 13.2929 3.29289L18.7071 8.70711C18.8946 8.89464 19 9.149 19 9.41421V19C19 20.1046 18.1046 21 17 21Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                            {{ __('Prescriptions') }}
                         </a>
                     </li>
                 @endcan
@@ -136,7 +147,6 @@
                                         stroke="white" stroke-width="1.5" stroke-linecap="round"
                                         stroke-linejoin="round" />
                                 </svg>
-
                             </span>
                             {{ __('Subscription Plan') }}
                         </a>
@@ -175,7 +185,6 @@
                                     <path d="M5.81714 14.6997H12.4838" stroke="white" stroke-width="1.5"
                                         stroke-linecap="round" />
                                 </svg>
-
                             </span>
                             {{ __('Reports') }}
                         </a>
@@ -185,25 +194,21 @@
                                         href="{{ route('admin.subscription-reports.index') }}">{{ __('Subscription Report') }}</a>
                                 </li>
                             @endcan
-
                             @can('manual-payment-reports-read')
                             <li><a class="{{ Route::is('admin.manual-payments.index') ? 'active' : '' }}"
                                 href="{{ route('admin.manual-payments.index') }}">{{ __('Manual Payment') }}</a>
                             </li>
                             @endcan
-
                             @can('active-store-reports-read')
                             <li><a class="{{ Route::is('admin.active-stores.index') ? 'active' : '' }}"
                                 href="{{ route('admin.active-stores.index') }}">{{ __('Active Store') }}</a>
                             </li>
                             @endcan
-
                             @can('expired-store-reports-read')
                             <li><a class="{{ Route::is('admin.expired-business.index') ? 'active' : '' }}"
                                 href="{{ route('admin.expired-business.index') }}">{{ __('Expired Store') }}</a>
                             </li>
                             @endcan
-
                         </ul>
                     </li>
                 @endcanany
@@ -229,14 +234,11 @@
                                     d="M12.9166 6.24998C12.9166 7.86081 11.6108 9.16665 9.99994 9.16665C8.3891 9.16665 7.08325 7.86081 7.08325 6.24998C7.08325 4.63915 8.3891 3.33331 9.99994 3.33331C11.6108 3.33331 12.9166 4.63915 12.9166 6.24998Z"
                                     stroke="white" stroke-width="1.5" />
                             </svg>
-
-
                         </span>
                         {{ __('Staff Manage') }} </a>
                     <ul>
                         <li><a class="{{ Request::routeIs('admin.users.create') ? 'active' : '' }}"
                                 href="{{ route('admin.users.create') }}">{{ __('Create Staff') }}</a></li>
-
                         <li><a class="{{ Request::routeIs('admin.users.index', 'admin.users.edit') ? 'active' : '' }}"
                                 href="{{ route('admin.users.index') }}">{{ __('Manage Staff') }}</a></li>
                     </ul>
@@ -274,7 +276,6 @@
                                         </clipPath>
                                     </defs>
                                 </svg>
-
                             </span>
                             {{ __('Roles & Permissions') }}
                         </a>
@@ -282,18 +283,13 @@
                             @can('roles-read')
                                 <li>
                                     <a class="{{ Request::routeIs('admin.roles.index', 'admin.roles.create', 'admin.roles.edit') ? 'active' : '' }}"
-                                        href="{{ route('admin.roles.index') }}">
-                                        {{ __('Roles') }}
-                                    </a>
+                                        href="{{ route('admin.roles.index') }}">{{ __('Roles') }}</a>
                                 </li>
                             @endcan
-
                             @can('permissions-read')
                                 <li>
                                     <a class="{{ Request::routeIs('admin.permissions.index') ? 'active' : '' }}"
-                                        href="{{ route('admin.permissions.index') }}">
-                                        {{ __('Permissions') }}
-                                    </a>
+                                        href="{{ route('admin.permissions.index') }}">{{ __('Permissions') }}</a>
                                 </li>
                             @endcan
                         </ul>
@@ -312,8 +308,7 @@
                                 <path d="M5.83313 5H5.84061" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 <path d="M9.1665 5H9.174" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 <path d="M7.5 7.5V17.9167" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-
+                            </svg>
                         </span>
                         {{ __('Frontend Module') }}
                     </a>
@@ -323,39 +318,31 @@
                             <a class="{{ Request::routeIs('admin.website-settings.index') ? 'active' : '' }}" href="{{ route('admin.website-settings.index') }}">{{ __('Manage Pages') }}</a>
                         </li>
                         @endcan
-
                         @can('features-read')
                         <li><a class="{{ Request::routeIs('admin.features.index', 'admin.features.create', 'admin.features.edit') ? 'active' : '' }}" href="{{ route('admin.features.index') }}">{{ __('Features') }}</a></li>
                         @endcan
-
                         @can('blogs-read')
                         <li><a class="{{ Request::routeIs('admin.blogs.index', 'admin.blogs.filter.comment', 'admin.blogs.create', 'admin.blogs.edit') ? 'active' : '' }}" href="{{ route('admin.blogs.index') }}">{{ __('Blogs') }}</a></li>
                         @endcan
-
                         @can('testimonials-read')
                         <li><a class="{{ Request::routeIs('admin.testimonials.index', 'admin.testimonials.create', 'admin.testimonials.edit') ? 'active' : '' }}" href="{{ route('admin.testimonials.index') }}">{{ __('Testimonials') }}</a></li>
                         @endcan
-
                         @can('interfaces-read')
                         <li><a class="{{ Request::routeIs('admin.interfaces.index', 'admin.interfaces.create', 'admin.interfaces.edit') ? 'active' : '' }}" href="{{ route('admin.interfaces.index') }}">{{ __('Interfaces') }}</a></li>
                         @endcan
-
                         @can('term-condition-read')
                         <li>
                             <a class="{{ Request::routeIs('admin.term-conditions.index') ? 'active' : '' }}" href="{{ route('admin.term-conditions.index') }}">{{ __('Terms & Conditions') }}</a>
                         </li>
                         @endcan
-
                         @can('privacy-policy-read')
                         <li>
                             <a class="{{ Request::routeIs('admin.privacy-policy.index') ? 'active' : '' }}" href="{{ route('admin.privacy-policy.index') }}">{{ __('Privacy & Policy') }}</a>
                         </li>
                         @endcan
-
                         @can('messages-read')
                         <li><a class="{{ Request::routeIs('admin.messages.index') ? 'active' : '' }}" href="{{ route('admin.messages.index') }}">{{ __('Messages') }}</a></li>
                         @endcan
-
                     </ul>
                 </li>
                 @endcanany
@@ -374,7 +361,6 @@
                                         d="M17.5092 11.7471C17.9441 11.6298 18.1616 11.5712 18.2474 11.459C18.3334 11.3469 18.3334 11.1665 18.3334 10.8058V9.19435C18.3334 8.8336 18.3334 8.65318 18.2474 8.5411C18.1615 8.42893 17.9441 8.37026 17.5092 8.253C15.8839 7.81467 14.8666 6.11544 15.2861 4.50074C15.4014 4.05667 15.4591 3.83465 15.404 3.70442C15.3489 3.5742 15.1909 3.48446 14.8748 3.30498L13.4375 2.48896C13.1274 2.31284 12.9723 2.22478 12.8331 2.24353C12.6939 2.26228 12.5369 2.41896 12.2227 2.73229C11.0067 3.94541 8.99469 3.94536 7.77864 2.73221C7.46455 2.41887 7.3075 2.26221 7.16829 2.24345C7.02909 2.2247 6.874 2.31276 6.5638 2.48887L5.12655 3.30491C4.81046 3.48437 4.65241 3.57411 4.59734 3.70431C4.54225 3.83451 4.59991 4.05657 4.71523 4.50068C5.1345 6.11543 4.11645 7.81471 2.49087 8.25301C2.05595 8.37026 1.8385 8.42893 1.75259 8.54101C1.66669 8.65318 1.66669 8.8336 1.66669 9.19435V10.8058C1.66669 11.1665 1.66669 11.3469 1.75259 11.459C1.83848 11.5712 2.05595 11.6298 2.49087 11.7471C4.11619 12.1854 5.13342 13.8847 4.71395 15.4993C4.5986 15.9434 4.54091 16.1654 4.59599 16.2957C4.65107 16.4259 4.80912 16.5157 5.12523 16.6951L6.56248 17.5112C6.8727 17.6873 7.0278 17.7753 7.16702 17.7566C7.30624 17.7378 7.46325 17.5811 7.77728 17.2678C8.99394 16.0537 11.0074 16.0536 12.2241 17.2677C12.5381 17.5811 12.6951 17.7378 12.8344 17.7565C12.9735 17.7753 13.1287 17.6872 13.4389 17.5111L14.8761 16.695C15.1923 16.5156 15.3504 16.4258 15.4054 16.2956C15.4604 16.1653 15.4028 15.9433 15.2874 15.4993C14.8677 13.8847 15.8841 12.1855 17.5092 11.7471Z"
                                         stroke="white" stroke-width="1.5" stroke-linecap="round" />
                                 </svg>
-
                             </span>
                             {{ __('Settings') }}
                         </a>
@@ -383,25 +369,18 @@
                                 <li><a class="{{ Request::routeIs('admin.currencies.index', 'admin.currencies.create', 'admin.currencies.edit') ? 'active' : '' }}"
                                         href="{{ route('admin.currencies.index') }}">{{ __('Currencies') }}</a></li>
                             @endcan
-
                             @can('notifications-read')
                                 <li>
                                     <a class="{{ Request::routeIs('admin.notifications.index') ? 'active' : '' }}"
-                                        href="{{ route('admin.notifications.index') }}">
-                                        {{ __('Notifications') }}
-                                    </a>
+                                        href="{{ route('admin.notifications.index') }}">{{ __('Notifications') }}</a>
                                 </li>
                             @endcan
-
                             @can('gateways-read')
                                 <li>
                                     <a class="{{ Request::routeIs('admin.gateways.index') ? 'active' : '' }}"
-                                        href="{{ route('admin.gateways.index') }}">
-                                        {{ __('Payment Gateway') }}
-                                    </a>
+                                        href="{{ route('admin.gateways.index') }}">{{ __('Payment Gateway') }}</a>
                                 </li>
                             @endcan
-
                             @can('settings-read')
                                 <li>
                                     <a class="{{ Request::routeIs('admin.system-settings.index') ? 'active' : '' }}"

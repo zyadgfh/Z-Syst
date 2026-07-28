@@ -7,9 +7,12 @@ use App\Models\Stock;
 use App\Models\Product;
 use App\Models\Business;
 use App\Models\Purchase;
-use App\Services\Stock\StockAllocationService;
 use Illuminate\Http\Request;
 use App\Models\PurchaseDetails;
+use App\Exceptions\BusinessRuleException;
+use App\Exceptions\Errors\ErrorCode;
+use App\Exceptions\TransactionException;
+use App\Helpers\TransactionHelper;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 
@@ -72,9 +75,7 @@ class PurchaseController extends Controller
             'products.*.quantities' => 'required|integer',
         ]);
 
-        DB::beginTransaction();
-        try {
-
+        $purchase = TransactionHelper::run(function () use ($request) {
             $business_id = auth()->user()->business_id;
 
             if ($request->dueAmount) {
@@ -122,33 +123,44 @@ class PurchaseController extends Controller
                     'purchase_without_tax' => $item['purchase_without_tax'],
                 ]);
 
-                // Use StockAllocationService with pessimistic locking
-                StockAllocationService::addToLegacyStock(
-                    $product->id,
-                    (int) $item['quantities'],
-                    $item['batch_no'],
-                    $item['expire_date'],
-                    $business_id
-                );
+                if ($item['batch_no']) {
+                    $stock = Stock::where('product_id', $product->id)->where('batch_no', $item['batch_no'])->first();
+                } else {
+                    $stock = Stock::where('product_id', $product->id)->first();
+                }
+
+                if ($stock ?? false) {
+                    $stock->update([
+                        'batch_no' => $item['batch_no'],
+                        'expire_date' => $item['expire_date'],
+                        'productStock' => $stock->productStock + $item['quantities'],
+                    ]);
+                } else {
+                    Stock::create($request->all() + [
+                        'business_id' => $business_id,
+                        'batch_no' => $item['batch_no'],
+                        'product_id' => $item['product_id'],
+                        'expire_date' => $item['expire_date'],
+                        'productStock' => $item['quantities'],
+                    ]);
+                }
             }
 
-            DB::commit();
-
-            return response()->json([
-                'message' => __('Data saved successfully.'),
-                'data' => $purchase->load([
-                                'tax:id,name,rate',
-                                'party:id,name,phone',
-                                'details.product:id,productName',
-                                'details:id,purchase_id,product_id,purchase_with_tax,quantities',
-                            ]),
+            return $purchase->load([
+                'tax:id,name,rate',
+                'party:id,name,phone',
+                'details.product:id,productName',
+                'details:id,purchase_id,product_id,purchase_with_tax,quantities',
             ]);
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'message' => __('Something was wrong.'),
-            ], 406);
-        }
+        }, 'purchase:store', [
+            'party_id' => $request->party_id,
+            'products_count' => count($request->products ?? []),
+        ]);
+
+        return response()->json([
+            'message' => __('Data saved successfully.'),
+            'data' => $purchase,
+        ]);
     }
 
     public function show($id)
@@ -197,18 +209,36 @@ class PurchaseController extends Controller
             'products.*.quantities' => 'required|integer',
         ]);
 
-        DB::beginTransaction();
-        try {
-
+        TransactionHelper::run(function () use ($request, $purchase) {
             $business_id = auth()->user()->business_id;
 
-            // Reverse old stock first using StockAllocationService
+            $batch_numbers = collect($request->products)->pluck('batch_no');
+            $prev_stocks = Stock::whereIn('batch_no', $batch_numbers)->get();
+            $prev_purchase_details = PurchaseDetails::whereIn('batch_no', $batch_numbers)->get();
+
+            // Validate stock/batch quantity matches
+            foreach ($request->products as $req_item) {
+                $prev_stock = $prev_stocks->where('batch_no', $req_item['batch_no'])->first();
+                $prev_purchase_detail = $prev_purchase_details->where('batch_no', $req_item['batch_no'])->first();
+
+                if (!empty($prev_purchase_detail) && $prev_purchase_detail->quantities > $req_item['quantities']) {
+                    if ($prev_stock && $prev_stock->productStock < $req_item['quantities']) {
+                        throw new BusinessRuleException(
+                            ErrorCode::BUSINESS_BATCH_QUANTITY_MISMATCH,
+                            __('errors.batch_quantity_mismatch', ['batch_no' => $prev_stock->batch_no]),
+                            [
+                                'batch_no' => $prev_stock->batch_no,
+                                'available_stock' => $prev_stock->productStock,
+                                'requested_qty' => $req_item['quantities'],
+                            ]
+                        );
+                    }
+                }
+            }
+
             $prev_details = PurchaseDetails::where('purchase_id', $purchase->id)->get();
             foreach ($prev_details as $prev_detail) {
-                StockAllocationService::allocate(
-                    $prev_detail->product_id,
-                    (int) $prev_detail->quantities
-                );
+                Stock::where('batch_no', $prev_detail->batch_no)->decrement('productStock', $prev_detail->quantities);
             }
 
             $purchaseDetails = [];
@@ -237,14 +267,27 @@ class PurchaseController extends Controller
                     'purchase_without_tax' => $item['purchase_without_tax'],
                 ]);
 
-                // Add new stock using StockAllocationService
-                StockAllocationService::addToLegacyStock(
-                    $product->id,
-                    (int) $item['quantities'],
-                    $item['batch_no'],
-                    $item['expire_date'],
-                    $business_id
-                );
+                if ($item['batch_no']) {
+                    $stock = Stock::where('product_id', $product->id)->where('batch_no', $item['batch_no'])->first();
+                } else {
+                    $stock = Stock::where('product_id', $product->id)->first();
+                }
+
+                if ($stock ?? false) {
+                    $stock->update([
+                        'batch_no' => $item['batch_no'],
+                        'expire_date' => $item['expire_date'],
+                        'productStock' => $stock->productStock + $item['quantities'],
+                    ]);
+                } else {
+                    Stock::create($request->all() + [
+                        'business_id' => $business_id,
+                        'batch_no' => $item['batch_no'],
+                        'product_id' => $item['product_id'],
+                        'expire_date' => $item['expire_date'],
+                        'productStock' => $item['quantities'],
+                    ]);
+                }
             }
 
             if ($purchase->dueAmount || $request->dueAmount) {
@@ -276,19 +319,11 @@ class PurchaseController extends Controller
 
             PurchaseDetails::where('purchase_id', $purchase->id)->delete();
             PurchaseDetails::insert($empty_qty_items);
+        }, 'purchase:update', ['purchase_id' => $purchase->id]);
 
-            DB::commit();
-
-            return response()->json([
-                'message' => __('Data saved successfully.'),
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'message' => __('Something was wrong.'),
-            ], 406);
-        }
+        return response()->json([
+            'message' => __('Data saved successfully.'),
+        ]);
     }
 
     /**
@@ -296,17 +331,24 @@ class PurchaseController extends Controller
      */
     public function destroy(Purchase $purchase)
     {
-        DB::beginTransaction();
-        try {
-
+        TransactionHelper::run(function () use ($purchase) {
             $purchase_details = PurchaseDetails::where('purchase_id', $purchase->id)->get();
+            $prev_stocks = Stock::whereIn('batch_no', $purchase_details->pluck('batch_no'))->get();
 
-            // Reverse stock using StockAllocationService with pessimistic locking
             foreach ($purchase_details as $purchase_detail) {
-                StockAllocationService::allocate(
-                    $purchase_detail->product_id,
-                    (int) $purchase_detail->quantities
-                );
+                $prev_stock = $prev_stocks->where('batch_no', $purchase_detail->batch_no)->first();
+
+                if ($prev_stock && $prev_stock->productStock < $purchase_detail->quantities) {
+                    throw new BusinessRuleException(
+                        ErrorCode::BUSINESS_BATCH_QUANTITY_MISMATCH,
+                        __('errors.batch_quantity_mismatch', ['batch_no' => $prev_stock->batch_no]),
+                        [
+                            'batch_no' => $prev_stock->batch_no,
+                            'available_stock' => $prev_stock->productStock,
+                            'requested_qty' => $purchase_detail->quantities,
+                        ]
+                    );
+                }
             }
 
             if ($purchase->dueAmount) {
@@ -322,17 +364,11 @@ class PurchaseController extends Controller
             ]);
 
             $purchase->delete();
-            DB::commit();
+        }, 'purchase:destroy', ['purchase_id' => $purchase->id]);
 
-            return response()->json([
-                'message' => __('Data deleted successfully.'),
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'message' => __('Something was wrong.'),
-            ], 406);
-        }
+        return response()->json([
+            'message' => __('Data deleted successfully.'),
+        ]);
     }
 }
+

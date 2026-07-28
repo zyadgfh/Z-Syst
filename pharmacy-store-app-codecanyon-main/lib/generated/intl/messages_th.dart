@@ -1,0 +1,1221 @@
+// DO NOT EDIT. This is code generated via package:intl/generate_localized.dart
+// This is a library that provides messages for a th locale. All the
+// messages from the main program should be duplicated here with the same
+// function name.
+
+// Ignore issues from commonly used lints in this file.
+// ignore_for_file:unnecessary_brace_in_string_interps, unnecessary_new
+// ignore_for_file:prefer_single_quotes,comment_references, directives_ordering
+// ignore_for_file:annotate_overrides,prefer_generic_function_type_aliases
+// ignore_for_file:unused_import, file_names, avoid_escaping_inner_quotes
+// ignore_for_file:unnecessary_string_interpolations, unnecessary_string_escapes
+
+import 'package:intl/intl.dart';
+import 'package:intl/message_lookup_by_library.dart';
+
+final messages = new MessageLookup();
+
+typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
+
+class MessageLookup extends MessageLookupByLibrary {
+  String get localeName => 'th';
+
+  final messages = _notInlinedMessages(_notInlinedMessages);
+  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+    "CustomerDetails": MessageLookupByLibrary.simpleMessage("รายละเอียดลูกค้า"),
+    "action": MessageLookupByLibrary.simpleMessage("การดำเนินการ"),
+    "actions": MessageLookupByLibrary.simpleMessage("การดำเนินการ"),
+    "active": MessageLookupByLibrary.simpleMessage("ใช้งาน"),
+    "add": MessageLookupByLibrary.simpleMessage("เพิ่ม"),
+    "addAPurchase": MessageLookupByLibrary.simpleMessage(
+      "กรุณาเพิ่มการสั่งซื้อ",
+    ),
+    "addBrand": MessageLookupByLibrary.simpleMessage("เพิ่มแบรนด์"),
+    "addCategory": MessageLookupByLibrary.simpleMessage("เพิ่มหมวดหมู่"),
+    "addContact": MessageLookupByLibrary.simpleMessage("เพิ่มผู้ติดต่อ"),
+    "addCustomer": MessageLookupByLibrary.simpleMessage("กรุณาเพิ่มลูกค้า"),
+    "addDelivery": MessageLookupByLibrary.simpleMessage("เพิ่มการจัดส่ง"),
+    "addExpense": MessageLookupByLibrary.simpleMessage("เพิ่มค่าใช้จ่าย"),
+    "addExpenseCat": MessageLookupByLibrary.simpleMessage(
+      "เพิ่มหมวดหมู่ค่าใช้จ่าย",
+    ),
+    "addItems": MessageLookupByLibrary.simpleMessage("เพิ่มรายการ"),
+    "addLeafOrBoxSize": MessageLookupByLibrary.simpleMessage(
+      "เพิ่มขนาดใบ/กล่อง",
+    ),
+    "addManufacturer": MessageLookupByLibrary.simpleMessage("เพิ่มผู้ผลิต"),
+    "addMedicineType": MessageLookupByLibrary.simpleMessage("เพิ่มประเภทยา"),
+    "addNewAddress": MessageLookupByLibrary.simpleMessage("เพิ่มที่อยู่ใหม่"),
+    "addNewProduct": MessageLookupByLibrary.simpleMessage("เพิ่มผลิตภัณฑ์ใหม่"),
+    "addNewPurchase": MessageLookupByLibrary.simpleMessage(
+      "กรุณาเพิ่มการสั่งซื้อ",
+    ),
+    "addNewTax": MessageLookupByLibrary.simpleMessage("เพิ่มภาษีใหม่"),
+    "addNewTaxWithSingle": MessageLookupByLibrary.simpleMessage(
+      "เพิ่มภาษีใหม่ด้วยประเภทภาษีเดียว/หลายประเภท",
+    ),
+    "addNote": MessageLookupByLibrary.simpleMessage("เพิ่มหมายเหตุ"),
+    "addParties": MessageLookupByLibrary.simpleMessage("เพิ่มคู่ค้า"),
+    "addProduct": MessageLookupByLibrary.simpleMessage("กรุณาเพิ่มสินค้า"),
+    "addProductFirst": MessageLookupByLibrary.simpleMessage("เพิ่มสินค้าก่อน"),
+    "addPurchase": MessageLookupByLibrary.simpleMessage("เพิ่มการซื้อ"),
+    "addSale": MessageLookupByLibrary.simpleMessage("กรุณาเพิ่มการขาย"),
+    "addSales": MessageLookupByLibrary.simpleMessage("เพิ่มยอดขาย"),
+    "addStock": MessageLookupByLibrary.simpleMessage("เพิ่มสต็อก"),
+    "addTax": MessageLookupByLibrary.simpleMessage("เพิ่มภาษี"),
+    "addTaxGroup": MessageLookupByLibrary.simpleMessage("เพิ่มกลุ่มภาษี"),
+    "addUnit": MessageLookupByLibrary.simpleMessage("เพิ่มหน่วย"),
+    "addUserRole": MessageLookupByLibrary.simpleMessage("เพิ่มบทบาทผู้ใช้"),
+    "addedToCart": MessageLookupByLibrary.simpleMessage("เพิ่มลงในตะกร้า"),
+    "adding": MessageLookupByLibrary.simpleMessage("กำลังเพิ่ม.."),
+    "address": MessageLookupByLibrary.simpleMessage("ที่อยู่"),
+    "alertQty": MessageLookupByLibrary.simpleMessage("จำนวนที่แจ้งเตือน"),
+    "all": MessageLookupByLibrary.simpleMessage("ทั้งหมด"),
+    "allBusinessSolutions": MessageLookupByLibrary.simpleMessage(
+      "สิ่งที่ PosPro มีให้ทั้งหมด",
+    ),
+    "allBusinessolutionDescrip": MessageLookupByLibrary.simpleMessage(
+      "PosPro เป็นสิ่งที่สมบูรณ์แบบสำหรับธุรกิจด้วยคลังสินค้า บัญชี การขาย ค่าใช้จ่ายและขาดทุน / กำไร",
+    ),
+    "allExpense": MessageLookupByLibrary.simpleMessage("ค่าใช้จ่ายทั้งหมด"),
+    "allIncomes": MessageLookupByLibrary.simpleMessage("รายได้ทั้งหมด"),
+    "allParties": MessageLookupByLibrary.simpleMessage("คู่ค้าทั้งหมด"),
+    "alreadyAdded": MessageLookupByLibrary.simpleMessage("เพิ่มแล้ว"),
+    "alreadyHaveAnAccount": MessageLookupByLibrary.simpleMessage(
+      "มีบัญชีอยู่แล้ว?",
+    ),
+    "amount": MessageLookupByLibrary.simpleMessage("จำนวน"),
+    "anSMSWillBeSentToTheFollowingNumber": MessageLookupByLibrary.simpleMessage(
+      "จะส่ง SMS ไปยังหมายเลขต่อไปนี้:",
+    ),
+    "android": MessageLookupByLibrary.simpleMessage(
+      "การสนับสนุนแอป Android และ iOS",
+    ),
+    "anewUpdateAvailable": MessageLookupByLibrary.simpleMessage(
+      "มีการอัปเดตใหม่\nโปรดอัปเดตแอปของคุณ",
+    ),
+    "appleWatch": MessageLookupByLibrary.simpleMessage("Apple Watch"),
+    "applicableTax": MessageLookupByLibrary.simpleMessage("ภาษีที่ใช้บังคับ"),
+    "apply": MessageLookupByLibrary.simpleMessage("นำไปใช้"),
+    "areYouSure": MessageLookupByLibrary.simpleMessage("คุณแน่ใจหรือไม่?"),
+    "areYouSureYouWant": MessageLookupByLibrary.simpleMessage(
+      "คุณแน่ใจหรือไม่ว่าต้องการลบพรรคนี้?",
+    ),
+    "areYouSureYouWantToCloseTheApp": MessageLookupByLibrary.simpleMessage(
+      "คุณแน่ใจหรือว่าต้องการปิดแอป?",
+    ),
+    "areYouSureYouWantToDeleteThis": MessageLookupByLibrary.simpleMessage(
+      "คุณแน่ใจหรือว่าต้องการลบสิ่งนี้",
+    ),
+    "backToHome": MessageLookupByLibrary.simpleMessage("กลับสู่หน้าหลัก"),
+    "balance": MessageLookupByLibrary.simpleMessage("ยอดคงเหลือ"),
+    "balanceDue": MessageLookupByLibrary.simpleMessage("ยอดคงเหลือที่ต้องชำระ"),
+    "bangladesh": MessageLookupByLibrary.simpleMessage("บังกลาเทศ"),
+    "bank": MessageLookupByLibrary.simpleMessage("ธนาคาร"),
+    "barCode": MessageLookupByLibrary.simpleMessage("บาร์โค้ด"),
+    "barCodeOrQrCode": MessageLookupByLibrary.simpleMessage(
+      "บาร์โค้ด /QR โค้ด",
+    ),
+    "barcodeGenerator": MessageLookupByLibrary.simpleMessage(
+      "เครื่องสร้างบาร์โค้ด",
+    ),
+    "batch": MessageLookupByLibrary.simpleMessage("ชุด"),
+    "batchNo": MessageLookupByLibrary.simpleMessage("หมายเลขชุด"),
+    "billTO": MessageLookupByLibrary.simpleMessage("วางบิลไปยัง"),
+    "boxSize": MessageLookupByLibrary.simpleMessage("ขนาดกล่อง"),
+    "brand": MessageLookupByLibrary.simpleMessage("แบรนด์"),
+    "brandName": MessageLookupByLibrary.simpleMessage("ชื่อแบรนด์"),
+    "brands": MessageLookupByLibrary.simpleMessage("แบรนด์"),
+    "bulkUpload": MessageLookupByLibrary.simpleMessage("อัปโหลดแบบกลุ่ม"),
+    "businessCat": MessageLookupByLibrary.simpleMessage("หมวดหมู่ธุรกิจ"),
+    "businessCategory": MessageLookupByLibrary.simpleMessage("หมวดหมู่ธุรกิจ"),
+    "businessName": MessageLookupByLibrary.simpleMessage("ชื่อบริษัทและธุรกิจ"),
+    "buyNow": MessageLookupByLibrary.simpleMessage("ซื้อเดี๋ยวนี้"),
+    "buyPremium": MessageLookupByLibrary.simpleMessage("ซื้อแผนพรีเมียม"),
+    "call": MessageLookupByLibrary.simpleMessage("โทร"),
+    "camera": MessageLookupByLibrary.simpleMessage("กล้อง"),
+    "cancel": MessageLookupByLibrary.simpleMessage("ยกเลิก"),
+    "cannotPayMoreThanDue": MessageLookupByLibrary.simpleMessage(
+      "ไม่สามารถชำระมากกว่ายอดค้างชำระ",
+    ),
+    "capacity": MessageLookupByLibrary.simpleMessage("ความจุ"),
+    "card": MessageLookupByLibrary.simpleMessage("บัตร"),
+    "cash": MessageLookupByLibrary.simpleMessage("เงินสด"),
+    "categories": MessageLookupByLibrary.simpleMessage("หมวดหมู่"),
+    "category": MessageLookupByLibrary.simpleMessage("หมวดหมู่"),
+    "categoryName": MessageLookupByLibrary.simpleMessage("ชื่อหมวดหมู่"),
+    "change": MessageLookupByLibrary.simpleMessage("เงินทอน"),
+    "changePassword": MessageLookupByLibrary.simpleMessage("เปลี่ยนรหัสผ่าน"),
+    "checkEmail": MessageLookupByLibrary.simpleMessage("ตรวจสอบอีเมล์"),
+    "choose": MessageLookupByLibrary.simpleMessage("เลือก"),
+    "chooseCustomer": MessageLookupByLibrary.simpleMessage("เลือกลูกค้า"),
+    "chooseSupplier": MessageLookupByLibrary.simpleMessage("เลือกซัพพลายเออร์"),
+    "choseYourFeature": MessageLookupByLibrary.simpleMessage(
+      "เลือกคุณสมบัติของคุณ",
+    ),
+    "choseyourfeatureDesciption": MessageLookupByLibrary.simpleMessage(
+      "คุณสมบัติเป็นส่วนสำคัญที่ทำให้ PosPro แตกต่างจากแบบแผนดั้งเดิม",
+    ),
+    "clarence": MessageLookupByLibrary.simpleMessage("คลาร์เรนซ์"),
+    "clear": MessageLookupByLibrary.simpleMessage("ล้าง"),
+    "clickToConnect": MessageLookupByLibrary.simpleMessage(
+      "คลิกเพื่อเชื่อมต่อ",
+    ),
+    "close": MessageLookupByLibrary.simpleMessage("ปิด"),
+    "code": MessageLookupByLibrary.simpleMessage("รหัส"),
+    "collectDue": MessageLookupByLibrary.simpleMessage("รวบรวมครบกำหนด"),
+    "collectDues": MessageLookupByLibrary.simpleMessage("กรุณารวบรวม Due"),
+    "collectedBy": MessageLookupByLibrary.simpleMessage("เก็บโดย:"),
+    "color": MessageLookupByLibrary.simpleMessage("สี"),
+    "combinationOfMultipleTaxes": MessageLookupByLibrary.simpleMessage(
+      "การรวมกันของภาษีหลายประเภท",
+    ),
+    "comingSoon": MessageLookupByLibrary.simpleMessage("เร็วๆ นี้"),
+    "companyAddress": MessageLookupByLibrary.simpleMessage("ที่อยู่ บริษัท"),
+    "companyAndBusinessName": MessageLookupByLibrary.simpleMessage(
+      "ชื่อบริษัทและธุรกิจ",
+    ),
+    "confirmDelete": MessageLookupByLibrary.simpleMessage("ยืนยันการลบ"),
+    "confirmPass": MessageLookupByLibrary.simpleMessage("ยืนยันรหัสผ่าน"),
+    "confirmPassword": MessageLookupByLibrary.simpleMessage("ยืนยันรหัสผ่าน"),
+    "confirmSMSTo": MessageLookupByLibrary.simpleMessage("ยืนยัน SMS ไปยัง"),
+    "congratulation": MessageLookupByLibrary.simpleMessage("ยินดีด้วย"),
+    "connect": MessageLookupByLibrary.simpleMessage("คลิกเพื่อเชื่อมต่อ"),
+    "connectPrinter": MessageLookupByLibrary.simpleMessage(
+      "เชื่อมต่อเครื่องพิมพ์ของคุณ",
+    ),
+    "connectYourPrinter": MessageLookupByLibrary.simpleMessage(
+      "เชื่อมต่อเครื่องพิมพ์ของคุณ",
+    ),
+    "contactDetials": MessageLookupByLibrary.simpleMessage(
+      "รายละเอียดการติดต่อ",
+    ),
+    "contactUs": MessageLookupByLibrary.simpleMessage("ติดต่อเรา"),
+    "continueButton": MessageLookupByLibrary.simpleMessage("ดำเนินการต่อ"),
+    "continueE": MessageLookupByLibrary.simpleMessage("ดำเนินการต่อ"),
+    "cost": MessageLookupByLibrary.simpleMessage("ต้นทุน"),
+    "country": MessageLookupByLibrary.simpleMessage("ประเทศ"),
+    "create": MessageLookupByLibrary.simpleMessage("สร้าง"),
+    "createAFreeAccount": MessageLookupByLibrary.simpleMessage("สร้างบัญชีฟรี"),
+    "createAcc": MessageLookupByLibrary.simpleMessage("สร้างบัญชีฟรี"),
+    "createCategory": MessageLookupByLibrary.simpleMessage("สร้างหมวดหมู่"),
+    "createExpense": MessageLookupByLibrary.simpleMessage("สร้างค่าใช้จ่าย"),
+    "createIncome": MessageLookupByLibrary.simpleMessage("สร้างรายได้"),
+    "createNewPassword": MessageLookupByLibrary.simpleMessage(
+      "สร้างรหัสผ่านใหม่",
+    ),
+    "currency": MessageLookupByLibrary.simpleMessage("สกุลเงิน"),
+    "currentStock": MessageLookupByLibrary.simpleMessage("สต็อกปัจจุบัน"),
+    "customInvoiceBranding": MessageLookupByLibrary.simpleMessage(
+      "การสร้างแบรนด์ใบแจ้งหนี้แบบกำหนดเอง",
+    ),
+    "customer": MessageLookupByLibrary.simpleMessage("ลูกค้า"),
+    "customerDue": MessageLookupByLibrary.simpleMessage("หนี้ลูกค้า"),
+    "customerName": MessageLookupByLibrary.simpleMessage("ชื่อลูกค้า"),
+    "customerPay": MessageLookupByLibrary.simpleMessage("ลูกค้าชำระเงิน"),
+    "customerPhoneNumber": MessageLookupByLibrary.simpleMessage(
+      "หมายเลขโทรศัพท์ลูกค้า",
+    ),
+    "dailyTransaction": MessageLookupByLibrary.simpleMessage("ธุรกรรมประจำวัน"),
+    "dashboard": MessageLookupByLibrary.simpleMessage("แดชบอร์ด"),
+    "dataSavedSuccessfully": MessageLookupByLibrary.simpleMessage(
+      "บันทึกข้อมูลสำเร็จ",
+    ),
+    "date": MessageLookupByLibrary.simpleMessage("วันที่"),
+    "dateAndTime": MessageLookupByLibrary.simpleMessage("วันที่และเวลา"),
+    "dates": MessageLookupByLibrary.simpleMessage("วันที่:"),
+    "days": MessageLookupByLibrary.simpleMessage("วัน"),
+    "daysLeft": MessageLookupByLibrary.simpleMessage("วันที่เหลือ"),
+    "dealer": MessageLookupByLibrary.simpleMessage("ตัวแทนจำหน่าย"),
+    "dealerPrice": MessageLookupByLibrary.simpleMessage("ราคาตัวแทนจำหน่าย"),
+    "defaultPricingPlan": MessageLookupByLibrary.simpleMessage(
+      "แผนราคาพื้นฐาน",
+    ),
+    "delete": MessageLookupByLibrary.simpleMessage("ลบ"),
+    "deletedSuccessfully": MessageLookupByLibrary.simpleMessage(
+      "ลบเรียบร้อยแล้ว",
+    ),
+    "deleting": MessageLookupByLibrary.simpleMessage("กำลังลบ...."),
+    "deliveryAddress": MessageLookupByLibrary.simpleMessage(
+      "ที่อยู่สำหรับจัดส่ง",
+    ),
+    "deliveryCharge": MessageLookupByLibrary.simpleMessage("ค่าจัดส่ง"),
+    "description": MessageLookupByLibrary.simpleMessage("คำอธิบาย"),
+    "details": MessageLookupByLibrary.simpleMessage("รายละเอียด"),
+    "developedBy": MessageLookupByLibrary.simpleMessage("พัฒนาโดย"),
+    "digits": MessageLookupByLibrary.simpleMessage(
+      "รหัส PIN 6 หลักได้ถูกส่งไปยังที่อยู่อีเมลของคุณ:",
+    ),
+    "discount": MessageLookupByLibrary.simpleMessage("การลดราคา"),
+    "discountAmount": MessageLookupByLibrary.simpleMessage("จำนวนส่วนลด"),
+    "doNotDisturb": MessageLookupByLibrary.simpleMessage("รบกวนอย่ารบกวน"),
+    "doYouWantToDeleteTheUser": MessageLookupByLibrary.simpleMessage(
+      "คุณต้องการลบผู้ใช้หรือไม่?",
+    ),
+    "doYouWantToExitTheApp": MessageLookupByLibrary.simpleMessage(
+      "คุณต้องการออกจากแอปหรือไม่?",
+    ),
+    "donNotHaveAnAccount": MessageLookupByLibrary.simpleMessage(
+      "ยังไม่มีบัญชีใช่ไหม?",
+    ),
+    "done": MessageLookupByLibrary.simpleMessage("เสร็จสิ้น"),
+    "downloadExcelFormat": MessageLookupByLibrary.simpleMessage(
+      "ดาวน์โหลดรูปแบบ Excel",
+    ),
+    "due": MessageLookupByLibrary.simpleMessage("เนื่องจาก"),
+    "dueAfterPay": MessageLookupByLibrary.simpleMessage(
+      "ยอดค้างชำระหลังจากชำระ",
+    ),
+    "dueAmount": MessageLookupByLibrary.simpleMessage("จำนวนเงินที่ต้องชำระ: "),
+    "dueCollected": MessageLookupByLibrary.simpleMessage("ยอดที่เก็บได้"),
+    "dueCollectedSuccessfully": MessageLookupByLibrary.simpleMessage(
+      "เก็บยอดค้างชำระเรียบร้อยแล้ว",
+    ),
+    "dueCollection": MessageLookupByLibrary.simpleMessage(
+      "การเก็บเงินค้างชำระ",
+    ),
+    "dueList": MessageLookupByLibrary.simpleMessage("รายการครบกำหนด"),
+    "dueReport": MessageLookupByLibrary.simpleMessage("รายงานครบกำหนด"),
+    "duration": MessageLookupByLibrary.simpleMessage("ระยะเวลา"),
+    "easyToUseThePos": MessageLookupByLibrary.simpleMessage(
+      "ใช้งาน POS บนมือถือได้ง่าย",
+    ),
+    "easytheusedesciption": MessageLookupByLibrary.simpleMessage(
+      "แอป PosPro ฟรีและใช้งานง่าย ในความเป็นจริง เป็นหนึ่งในระบบ POS ที่ดีที่สุดทั่วโลก",
+    ),
+    "edit": MessageLookupByLibrary.simpleMessage("แก้ไข"),
+    "editCategory": MessageLookupByLibrary.simpleMessage("แก้ไขหมวดหมู่"),
+    "editExpense": MessageLookupByLibrary.simpleMessage("แก้ไขค่าใช้จ่าย"),
+    "editExpenseCategory": MessageLookupByLibrary.simpleMessage(
+      "แก้ไขหมวดหมู่ค่าใช้จ่าย",
+    ),
+    "editIncome": MessageLookupByLibrary.simpleMessage("แก้ไขรายได้"),
+    "editLeafOrBoxSize": MessageLookupByLibrary.simpleMessage(
+      "แก้ไขขนาดใบ/กล่อง",
+    ),
+    "editManufacturer": MessageLookupByLibrary.simpleMessage("แก้ไขผู้ผลิต"),
+    "editMedicineType": MessageLookupByLibrary.simpleMessage("แก้ไขประเภทยา"),
+    "editParties": MessageLookupByLibrary.simpleMessage("แก้ไขคู่ค้า"),
+    "editPhone": MessageLookupByLibrary.simpleMessage("แก้ไขหมายเลขโทรศัพท์?"),
+    "editProfile": MessageLookupByLibrary.simpleMessage("แก้ไขโปรไฟล์"),
+    "editPurchaseInvoice": MessageLookupByLibrary.simpleMessage(
+      "แก้ไขใบแจ้งหนี้การซื้อ",
+    ),
+    "editSalesInvoice": MessageLookupByLibrary.simpleMessage(
+      "แก้ไขใบกำกับการขาย",
+    ),
+    "editSocailMedia": MessageLookupByLibrary.simpleMessage("แก้ไขสื่อสังคม"),
+    "editTax": MessageLookupByLibrary.simpleMessage("แก้ไขภาษี"),
+    "editTaxGroup": MessageLookupByLibrary.simpleMessage("แก้ไขกลุ่มภาษี"),
+    "editUnit": MessageLookupByLibrary.simpleMessage("แก้ไขหน่วย"),
+    "email": MessageLookupByLibrary.simpleMessage("ที่อยู่อีเมล"),
+    "emailCannotBeEmpty": MessageLookupByLibrary.simpleMessage(
+      "อีเมลต้องไม่ว่างเปล่า",
+    ),
+    "emailText": MessageLookupByLibrary.simpleMessage("อีเมล"),
+    "endDate": MessageLookupByLibrary.simpleMessage("วันที่สิ้นสุด"),
+    "endYourFreePlan": MessageLookupByLibrary.simpleMessage(
+      "สิ้นสุดแผนฟรีของคุณ",
+    ),
+    "enterABrandName": MessageLookupByLibrary.simpleMessage("กรอกชื่อแบรนด์"),
+    "enterAValidBoxSize": MessageLookupByLibrary.simpleMessage(
+      "กรอกขนาดกล่องที่ถูกต้อง",
+    ),
+    "enterAValidDiscount": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกส่วนลดที่ถูกต้อง",
+    ),
+    "enterAValidNumber": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกหมายเลขที่ถูกต้อง",
+    ),
+    "enterAValidOTP": MessageLookupByLibrary.simpleMessage(
+      "กรอก OTP ที่ถูกต้อง",
+    ),
+    "enterAValidStock": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกสต๊อกที่ถูกต้อง",
+    ),
+    "enterAlertQuantity": MessageLookupByLibrary.simpleMessage(
+      "กรอกจำนวนที่แจ้งเตือน",
+    ),
+    "enterAmount": MessageLookupByLibrary.simpleMessage("ป้อนจำนวน"),
+    "enterBatchNumber": MessageLookupByLibrary.simpleMessage("กรอกหมายเลขชุด"),
+    "enterBusiness": MessageLookupByLibrary.simpleMessage(
+      "กรอกชื่อธุรกิจ/ร้านค้า",
+    ),
+    "enterCapacity": MessageLookupByLibrary.simpleMessage("กรอกความจุ"),
+    "enterCategoryName": MessageLookupByLibrary.simpleMessage(
+      "กรอกชื่อหมวดหมู่",
+    ),
+    "enterColor": MessageLookupByLibrary.simpleMessage("กรอกสี"),
+    "enterCustomerPhoneNumber": MessageLookupByLibrary.simpleMessage(
+      "กรอกหมายเลขโทรศัพท์ลูกค้า",
+    ),
+    "enterDate": MessageLookupByLibrary.simpleMessage("กรอกวันที่"),
+    "enterDealerPrice": MessageLookupByLibrary.simpleMessage("กรอกราคาตัวแทน"),
+    "enterDiscount": MessageLookupByLibrary.simpleMessage("กรอกส่วนลด"),
+    "enterEmail": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกอีเมล์ของคุณด้านล่างเพื่อรับรหัสผ่านรีเซ็ตลิงค์",
+    ),
+    "enterExpanseCategoryName": MessageLookupByLibrary.simpleMessage(
+      "กรอกชื่อหมวดหมู่ค่าใช้จ่าย",
+    ),
+    "enterExpenseDate": MessageLookupByLibrary.simpleMessage(
+      "ป้อนวันที่ค่าใช้จ่าย",
+    ),
+    "enterExpenseName": MessageLookupByLibrary.simpleMessage(
+      "กรอกชื่อค่าใช้จ่าย",
+    ),
+    "enterFullAddress": MessageLookupByLibrary.simpleMessage("ป้อนที่อยู่เต็ม"),
+    "enterGenericName": MessageLookupByLibrary.simpleMessage("กรอกชื่อสามัญ"),
+    "enterIncomeCategoryName": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกชื่อหมวดหมู่รายได้",
+    ),
+    "enterIncomeDate": MessageLookupByLibrary.simpleMessage("กรอกวันที่รายได้"),
+    "enterManufacturerName": MessageLookupByLibrary.simpleMessage(
+      "กรอกชื่อผู้ผลิต",
+    ),
+    "enterMedicineDetails": MessageLookupByLibrary.simpleMessage(
+      "กรอกรายละเอียดยา",
+    ),
+    "enterName": MessageLookupByLibrary.simpleMessage("ป้อนชื่อ"),
+    "enterNote": MessageLookupByLibrary.simpleMessage("กรอกรายละเอียด"),
+    "enterOpeningBalance": MessageLookupByLibrary.simpleMessage(
+      "กรอกยอดเงินเปิด",
+    ),
+    "enterPercent": MessageLookupByLibrary.simpleMessage("กรอกเปอร์เซ็นต์"),
+    "enterProductName": MessageLookupByLibrary.simpleMessage("กรอกชื่อสินค้า"),
+    "enterProfitPercentage": MessageLookupByLibrary.simpleMessage(
+      "กรอกเปอร์เซ็นต์กำไร",
+    ),
+    "enterPurchasePrice": MessageLookupByLibrary.simpleMessage("กรอกราคาซื้อ"),
+    "enterQty": MessageLookupByLibrary.simpleMessage("กรอกจำนวน"),
+    "enterQuantity": MessageLookupByLibrary.simpleMessage("กรอกจำนวน"),
+    "enterRefNumber": MessageLookupByLibrary.simpleMessage(
+      "ป้อนหมายเลขอ้างอิง",
+    ),
+    "enterSalePrice": MessageLookupByLibrary.simpleMessage("กรอกราคาขาย"),
+    "enterSaltingPrice": MessageLookupByLibrary.simpleMessage("กรอกราคาส่ง"),
+    "enterShelf": MessageLookupByLibrary.simpleMessage("กรอกชั้น"),
+    "enterSize": MessageLookupByLibrary.simpleMessage("กรอกขนาด"),
+    "enterStock": MessageLookupByLibrary.simpleMessage("กรอกสต๊อก"),
+    "enterStockQuantity": MessageLookupByLibrary.simpleMessage(
+      "กรอกจำนวนสต็อก",
+    ),
+    "enterStrength": MessageLookupByLibrary.simpleMessage("กรอกความเข้มข้น"),
+    "enterTaxRate": MessageLookupByLibrary.simpleMessage("กรอกอ ัตราภาษี"),
+    "enterType": MessageLookupByLibrary.simpleMessage("กรอกประเภท"),
+    "enterUserTitle": MessageLookupByLibrary.simpleMessage("กรอกชื่อผู้ใช้"),
+    "enterValidOTP": MessageLookupByLibrary.simpleMessage(
+      "กรอกรหัส OTP ที่ถูกต้อง",
+    ),
+    "enterWeight": MessageLookupByLibrary.simpleMessage("กรอกน้ำหนัก"),
+    "enterWholesalePrice": MessageLookupByLibrary.simpleMessage("กรอกราคาส่ง"),
+    "enterYourConfirmPassword": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกยืนยันรหัสผ่านของคุณ",
+    ),
+    "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
+      "ป้อนที่อยู่อีเมลของคุณ",
+    ),
+    "enterYourFullName": MessageLookupByLibrary.simpleMessage(
+      "กรอกชื่อเต็มของคุณ",
+    ),
+    "enterYourName": MessageLookupByLibrary.simpleMessage("ป้อนชื่อของคุณ"),
+    "enterYourPassword": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกรหัสผ่านของคุณ",
+    ),
+    "enterYourPhoneNumber": MessageLookupByLibrary.simpleMessage(
+      "ป้อนหมายเลขโทรศัพท์ของคุณ",
+    ),
+    "excelUploader": MessageLookupByLibrary.simpleMessage("อัปโหลด Excel"),
+    "exit": MessageLookupByLibrary.simpleMessage("ออก"),
+    "expense": MessageLookupByLibrary.simpleMessage("ค่าใช้จ่าย"),
+    "expenseCat": MessageLookupByLibrary.simpleMessage("หมวดค่าใช้จ่าย"),
+    "expenseDate": MessageLookupByLibrary.simpleMessage("วันที่ค่าใช้จ่าย"),
+    "expenseFor": MessageLookupByLibrary.simpleMessage("ค่าใช้จ่ายสำหรับ"),
+    "expenseFrom": MessageLookupByLibrary.simpleMessage("ค่าใช้จ่ายจาก"),
+    "expenseReport": MessageLookupByLibrary.simpleMessage("รายงานค่าใช้จ่าย"),
+    "expire": MessageLookupByLibrary.simpleMessage("หมดอายุ"),
+    "expireDate": MessageLookupByLibrary.simpleMessage("วันหมดอายุ"),
+    "expireIn": MessageLookupByLibrary.simpleMessage("หมดอายุใน"),
+    "expireMedicine": MessageLookupByLibrary.simpleMessage("ยาที่หมดอายุ"),
+    "expireToday": MessageLookupByLibrary.simpleMessage("หมดอายุวันนี้"),
+    "expired": MessageLookupByLibrary.simpleMessage("หมดอายุ"),
+    "expiredList": MessageLookupByLibrary.simpleMessage("รายการที่หมดอายุ"),
+    "expiring": MessageLookupByLibrary.simpleMessage("กำลังหมดอายุ"),
+    "expiryDate": MessageLookupByLibrary.simpleMessage("วันหมดอายุ"),
+    "facebook": MessageLookupByLibrary.simpleMessage("Facebook"),
+    "failedToCollectDue": MessageLookupByLibrary.simpleMessage(
+      "ไม่สามารถเก็บยอดค้างชำระได้",
+    ),
+    "failedToDeleteTheIncome": MessageLookupByLibrary.simpleMessage(
+      "ไม่สามารถลบรายได้ได้",
+    ),
+    "failedToDeleteThisCategory": MessageLookupByLibrary.simpleMessage(
+      "ไม่สามารถลบหมวดหมู่นี้ได้",
+    ),
+    "failedToDeleteThisTax": MessageLookupByLibrary.simpleMessage(
+      "ไม่สามารถลบภาษีนี้ได้",
+    ),
+    "failedToGetPlatformVersion": MessageLookupByLibrary.simpleMessage(
+      "ไม่สามารถดึงเวอร์ชันของแพลตฟอร์มได้",
+    ),
+    "fashions": MessageLookupByLibrary.simpleMessage("แฟชั่น"),
+    "features": MessageLookupByLibrary.simpleMessage("ฟีเจอร์"),
+    "field": MessageLookupByLibrary.simpleMessage("ฟิลด์"),
+    "filter": MessageLookupByLibrary.simpleMessage("กรอง"),
+    "firstName": MessageLookupByLibrary.simpleMessage("ชื่อ"),
+    "folder": MessageLookupByLibrary.simpleMessage(
+      "อาจเป็นไปได้ว่าอีเมลถูกส่งไปที่โฟลเดอร์สแปมของคุณ",
+    ),
+    "forgotPassword": MessageLookupByLibrary.simpleMessage("ลืมรหัสผ่าน"),
+    "freeDataBackup": MessageLookupByLibrary.simpleMessage("สำรองข้อมูลฟรี"),
+    "freeLifetimeUpdate": MessageLookupByLibrary.simpleMessage(
+      "อัปเดตฟรีตลอดชีพ",
+    ),
+    "freePack": MessageLookupByLibrary.simpleMessage("แพ็คเกจฟรี"),
+    "freePlan": MessageLookupByLibrary.simpleMessage("แผนฟรี"),
+    "fromDate": MessageLookupByLibrary.simpleMessage("จากวันที่"),
+    "fullName": MessageLookupByLibrary.simpleMessage("ชื่อเต็ม"),
+    "fullyPaid": MessageLookupByLibrary.simpleMessage("ชำระเต็มจำนวน"),
+    "gallery": MessageLookupByLibrary.simpleMessage("แกลลอรี่"),
+    "genericName": MessageLookupByLibrary.simpleMessage("ชื่อสามัญ"),
+    "getAccessToAll": MessageLookupByLibrary.simpleMessage("เข้าถึงทั้งหมด"),
+    "gotEmail": MessageLookupByLibrary.simpleMessage("คุณได้รับอีเมล"),
+    "gotIt": MessageLookupByLibrary.simpleMessage("เข้าใจแล้ว"),
+    "guest": MessageLookupByLibrary.simpleMessage("แขก"),
+    "haveAcc": MessageLookupByLibrary.simpleMessage("มีบัญชีอยู่แล้ว?"),
+    "hintEmail": MessageLookupByLibrary.simpleMessage("กรอกที่อยู่อีเมล"),
+    "hintPassword": MessageLookupByLibrary.simpleMessage("กรอกรหัสผ่าน"),
+    "home": MessageLookupByLibrary.simpleMessage("หน้าหลัก"),
+    "image": MessageLookupByLibrary.simpleMessage("รูปภาพ"),
+    "inActive": MessageLookupByLibrary.simpleMessage("ไม่ใช้งาน"),
+    "inText": MessageLookupByLibrary.simpleMessage("ในข้อความ"),
+    "income": MessageLookupByLibrary.simpleMessage("รายได้"),
+    "incomeCategories": MessageLookupByLibrary.simpleMessage("หมวดหมู่รายได้"),
+    "incomeCategory": MessageLookupByLibrary.simpleMessage("หมวดหมู่รายได้"),
+    "incomeDate": MessageLookupByLibrary.simpleMessage("วันที่รายได้"),
+    "incomeFrom": MessageLookupByLibrary.simpleMessage("รายได้จาก"),
+    "incomeReport": MessageLookupByLibrary.simpleMessage("รายงานรายได้"),
+    "incomeTitle": MessageLookupByLibrary.simpleMessage("ชื่อรายได้"),
+    "instagram": MessageLookupByLibrary.simpleMessage("Instagram"),
+    "instrucation": MessageLookupByLibrary.simpleMessage("คำแนะนำ"),
+    "inv": MessageLookupByLibrary.simpleMessage("หมายเลขใบแจ้งหนี้"),
+    "invalidExpiryDate": MessageLookupByLibrary.simpleMessage(
+      "วันหมดอายุไม่ถูกต้อง",
+    ),
+    "invoice": MessageLookupByLibrary.simpleMessage("ใบแจ้งหนี้"),
+    "invoiceNumber": MessageLookupByLibrary.simpleMessage("หมายเลขใบแจ้งหนี้"),
+    "invoiceViewr": MessageLookupByLibrary.simpleMessage("ตัวดูใบแจ้งหนี้"),
+    "itemAdded": MessageLookupByLibrary.simpleMessage("เพิ่มรายการแล้ว"),
+    "itemsSales": MessageLookupByLibrary.simpleMessage("ยอดขายสินค้"),
+    "lableEmail": MessageLookupByLibrary.simpleMessage("อีเมล"),
+    "lablePassword": MessageLookupByLibrary.simpleMessage("รหัสผ่าน"),
+    "language": MessageLookupByLibrary.simpleMessage("ภาษา"),
+    "lastName": MessageLookupByLibrary.simpleMessage("นามสกุล"),
+    "leafOrBoxSize": MessageLookupByLibrary.simpleMessage("ขนาดใบ/กล่อง"),
+    "ledger": MessageLookupByLibrary.simpleMessage("บัญชีแยกประเภท"),
+    "link": MessageLookupByLibrary.simpleMessage("ลิงก์"),
+    "linkedIN": MessageLookupByLibrary.simpleMessage("LinkedIn"),
+    "listIsEmpty": MessageLookupByLibrary.simpleMessage("รายการว่างเปล่า"),
+    "loading": MessageLookupByLibrary.simpleMessage("กำลังโหลด"),
+    "logIn": MessageLookupByLibrary.simpleMessage("เข้าสู่ระบบ"),
+    "logInWithMail": MessageLookupByLibrary.simpleMessage(
+      "เข้าสู่ระบบด้วยอีเมล",
+    ),
+    "logOut": MessageLookupByLibrary.simpleMessage("ออกจากระบบ"),
+    "loginWithPhone": MessageLookupByLibrary.simpleMessage(
+      "เข้าสู่ระบบด้วยโทรศัพท์",
+    ),
+    "lorem": MessageLookupByLibrary.simpleMessage(
+      "Lorem ipsum dolor sit amet, consectetur adip gravi iscing elit. Ultricies gravida scelerisque arcu facilisis duis in.",
+    ),
+    "loremIpsumDolor": MessageLookupByLibrary.simpleMessage(
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Natoque aliquet et, cur eget. Tellus sapien odio aliq.",
+    ),
+    "loremIpsumDolorSit": MessageLookupByLibrary.simpleMessage(
+      "Lorem ipsum dolor sit amet, consectetur adi piscing elit. Accumsan vulputate tellus scele risque odio con sectetur tincidunt semper.",
+    ),
+    "loremIpsumDolorSitAmetConsecteturElitInterdumCons":
+        MessageLookupByLibrary.simpleMessage(
+          "Lorem ipsum dolor sit amet, consectetur elit. Interdum cons.",
+        ),
+    "loss": MessageLookupByLibrary.simpleMessage("การสูญเสีย"),
+    "lossAndProfitReport": MessageLookupByLibrary.simpleMessage(
+      "รายงานขาดทุนและกำไร",
+    ),
+    "lossOrProfit": MessageLookupByLibrary.simpleMessage("ขาดทุน / กำไร"),
+    "lossOrProfitOverView": MessageLookupByLibrary.simpleMessage(
+      "ภาพรวมขาดทุน/กำไร",
+    ),
+    "lossOrProfitReport": MessageLookupByLibrary.simpleMessage(
+      "รายงานขาดทุนหรือกำไร",
+    ),
+    "lossProfit": MessageLookupByLibrary.simpleMessage("ขาดทุน/กำไร"),
+    "lossProfitReport": MessageLookupByLibrary.simpleMessage(
+      "รายงานขาดทุน/กำไร",
+    ),
+    "lossTitle": MessageLookupByLibrary.simpleMessage("การสูญเสีย"),
+    "lowStock": MessageLookupByLibrary.simpleMessage("สต็อกต่ำ"),
+    "lp": MessageLookupByLibrary.simpleMessage("ขาดทุน/กำไร"),
+    "lpDetails": MessageLookupByLibrary.simpleMessage(
+      "รายละเอียดการขาดทุน/กำไร",
+    ),
+    "manufacturer": MessageLookupByLibrary.simpleMessage("ผู้ผลิต"),
+    "manufacturerName": MessageLookupByLibrary.simpleMessage("ชื่อผู้ผลิต"),
+    "masterCard": MessageLookupByLibrary.simpleMessage("บัตรมาสเตอร์การ์ด"),
+    "medicineDetails": MessageLookupByLibrary.simpleMessage("รายละเอียดยา"),
+    "medicineType": MessageLookupByLibrary.simpleMessage("ประเภทยา"),
+    "message": MessageLookupByLibrary.simpleMessage("ข้อความ"),
+    "messege": MessageLookupByLibrary.simpleMessage("ข้อความ"),
+    "mobile": MessageLookupByLibrary.simpleMessage("มือถือ:"),
+    "mobilePayment": MessageLookupByLibrary.simpleMessage(
+      "การชำระเงินผ่านมือถือ",
+    ),
+    "monthly": MessageLookupByLibrary.simpleMessage("รายเดือน"),
+    "moreInfo": MessageLookupByLibrary.simpleMessage("ข้อมูลเพิ่มเติม"),
+    "mrp": MessageLookupByLibrary.simpleMessage("MRP"),
+    "mrpPrice": MessageLookupByLibrary.simpleMessage("ราคาขายปลีก"),
+    "myProfile": MessageLookupByLibrary.simpleMessage("โปรไฟล์ของฉัน"),
+    "name": MessageLookupByLibrary.simpleMessage("ชื่อ"),
+    "nameCanNotBeEmpty": MessageLookupByLibrary.simpleMessage(
+      "ชื่อไม่สามารถว่างเปล่า",
+    ),
+    "newPassword": MessageLookupByLibrary.simpleMessage("รหัสผ่านใหม่"),
+    "next": MessageLookupByLibrary.simpleMessage("ถัดไป"),
+    "no": MessageLookupByLibrary.simpleMessage("ไม่"),
+    "noAcc": MessageLookupByLibrary.simpleMessage("ไม่มีบัญชีใด ๆ ?"),
+    "noCategoryFound": MessageLookupByLibrary.simpleMessage("ไม่พบหมวดหมู่"),
+    "noCollectionFound": MessageLookupByLibrary.simpleMessage(
+      "ไม่พบการเก็บเงิน",
+    ),
+    "noData": MessageLookupByLibrary.simpleMessage(
+      "ไม่มีข้อมูลที่สามารถใช้ได้",
+    ),
+    "noDataAvailabe": MessageLookupByLibrary.simpleMessage(
+      "ไม่มีข้อมูลที่ใช้ได้",
+    ),
+    "noDataAvailableForGeneratePdf": MessageLookupByLibrary.simpleMessage(
+      "ไม่มีข้อมูลสำหรับสร้าง PDF",
+    ),
+    "noDataFound": MessageLookupByLibrary.simpleMessage("ไม่พบข้อมูล"),
+    "noDue": MessageLookupByLibrary.simpleMessage("ไม่มียอดค้างชำระ"),
+    "noDueFound": MessageLookupByLibrary.simpleMessage("ไม่พบยอดค้างชำระ"),
+    "noDueSelected": MessageLookupByLibrary.simpleMessage("ไม่มีการเลือกหนี้"),
+    "noExpenseFound": MessageLookupByLibrary.simpleMessage("ไม่พบค่าใช้จ่าย"),
+    "noIncomeFound": MessageLookupByLibrary.simpleMessage("ไม่พบรายได้"),
+    "noItemSelected": MessageLookupByLibrary.simpleMessage(
+      "ไม่มีรายการที่เลือก",
+    ),
+    "noLossOrProfitFound": MessageLookupByLibrary.simpleMessage(
+      "ไม่พบขาดทุนหรือกำไร",
+    ),
+    "noName": MessageLookupByLibrary.simpleMessage("ไม่มีชื่อ"),
+    "noProductFound": MessageLookupByLibrary.simpleMessage("ไม่พบสินค้า"),
+    "noProductSelected": MessageLookupByLibrary.simpleMessage(
+      "ไม่มีผลิตภัณฑ์ที่เลือก",
+    ),
+    "noProductSelectedAddToCart": MessageLookupByLibrary.simpleMessage(
+      "ไม่มีผลิตภัณฑ์ที่เลือกเพื่อเพิ่มในตะกร้า",
+    ),
+    "noProductSelectedToEdit": MessageLookupByLibrary.simpleMessage(
+      "ไม่มีผลิตภัณฑ์ที่เลือกเพื่อแก้ไข",
+    ),
+    "noRoleFound": MessageLookupByLibrary.simpleMessage("ไม่พบบทบาทผู้ใช้"),
+    "noSubTaxSelected": MessageLookupByLibrary.simpleMessage(
+      "ไม่มีภาษีย่อยที่เลือก",
+    ),
+    "noSupplier": MessageLookupByLibrary.simpleMessage("ไม่มีซัพพลายเออร์"),
+    "noTransaction": MessageLookupByLibrary.simpleMessage("ไม่มีธุรกรรม"),
+    "noYetPurchaseAnything": MessageLookupByLibrary.simpleMessage(
+      "ยังไม่มีการซื้อใดๆ",
+    ),
+    "noYetSaleAnyThing": MessageLookupByLibrary.simpleMessage(
+      "ยังไม่มีการขายใดๆ",
+    ),
+    "notFound": MessageLookupByLibrary.simpleMessage("ไม่พบ"),
+    "notMentioned": MessageLookupByLibrary.simpleMessage("ไม่ได้ระบุ"),
+    "note": MessageLookupByLibrary.simpleMessage("บันทึก"),
+    "notification": MessageLookupByLibrary.simpleMessage("การแจ้งเตือน"),
+    "off": MessageLookupByLibrary.simpleMessage("ปิด"),
+    "on": MessageLookupByLibrary.simpleMessage("เปิด"),
+    "openingBalance": MessageLookupByLibrary.simpleMessage("ยอดคงเหลือเปิด"),
+    "outOfStock": MessageLookupByLibrary.simpleMessage("สินค้าหมด"),
+    "overView": MessageLookupByLibrary.simpleMessage("ภาพรวม"),
+    "packFeatures": MessageLookupByLibrary.simpleMessage("คุณสมบัติแพ็คเกจ"),
+    "package": MessageLookupByLibrary.simpleMessage("แพ็กเกจ"),
+    "paid": MessageLookupByLibrary.simpleMessage("จ่าย"),
+    "paidAmount": MessageLookupByLibrary.simpleMessage("จำนวนเงินที่จ่าย"),
+    "parties": MessageLookupByLibrary.simpleMessage("ผู้รับประทาน"),
+    "partyBalance": MessageLookupByLibrary.simpleMessage("ยอดคงเหลือของคู่ค้า"),
+    "partyList": MessageLookupByLibrary.simpleMessage("รายชื่อภาคี"),
+    "partyName": MessageLookupByLibrary.simpleMessage("ชื่อคู่ค้า"),
+    "partyPhone": MessageLookupByLibrary.simpleMessage("โทรศัพท์คู่ค้า"),
+    "password": MessageLookupByLibrary.simpleMessage("รหัสผ่าน"),
+    "passwordAndConfirmPasswordNotMatch": MessageLookupByLibrary.simpleMessage(
+      "รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน",
+    ),
+    "passwordCanNotBeEmpty": MessageLookupByLibrary.simpleMessage(
+      "รหัสผ่านไม่สามารถว่างเปล่าได้",
+    ),
+    "passwordCannotBeEmpty": MessageLookupByLibrary.simpleMessage(
+      "รหัสผ่านต้องไม่ว่างเปล่า",
+    ),
+    "passwordsDoNotMatch": MessageLookupByLibrary.simpleMessage(
+      "รหัสผ่านไม่ตรงกัน",
+    ),
+    "payForSubscribe": MessageLookupByLibrary.simpleMessage(
+      "ชำระเพื่อสมัครสมาชิก",
+    ),
+    "payable": MessageLookupByLibrary.simpleMessage("ต้องชำระ"),
+    "payment": MessageLookupByLibrary.simpleMessage("การชำระเงิน"),
+    "paymentComplete": MessageLookupByLibrary.simpleMessage(
+      "การชำระเงินเสร็จสิ้น",
+    ),
+    "paymentFailed": MessageLookupByLibrary.simpleMessage("การชำระเงินล้มเหลว"),
+    "paymentFailedPleaseTryAgain": MessageLookupByLibrary.simpleMessage(
+      "การชำระเงินล้มเหลว กรุณาลองอีกครั้ง",
+    ),
+    "paymentGateway": MessageLookupByLibrary.simpleMessage(
+      "เกตเวย์การชำระเงิน",
+    ),
+    "paymentMethods": MessageLookupByLibrary.simpleMessage("วิธีการชำระเงิน"),
+    "paymentStatus": MessageLookupByLibrary.simpleMessage("สถานะการชำระเงิน"),
+    "paymentSuccess": MessageLookupByLibrary.simpleMessage("การชำระเงินสำเร็จ"),
+    "paymentTypes": MessageLookupByLibrary.simpleMessage("ประเภทการชำระเงิน"),
+    "paymentWasSuccessful": MessageLookupByLibrary.simpleMessage(
+      "การชำระเงินสำเร็จ!",
+    ),
+    "paymentsAmount": MessageLookupByLibrary.simpleMessage("ยอดเงินชำระ"),
+    "paypalPay": MessageLookupByLibrary.simpleMessage("ชำระเงินด้วย Paypal"),
+    "permissionNotGranted": MessageLookupByLibrary.simpleMessage(
+      "ไม่ได้รับอนุญาต!",
+    ),
+    "personalInfo": MessageLookupByLibrary.simpleMessage("ข้อมูลส่วนตัว"),
+    "phone": MessageLookupByLibrary.simpleMessage("หมายเลขโทรศัพท์"),
+    "phoneNumber": MessageLookupByLibrary.simpleMessage("หมายเลขโทรศัพท์"),
+    "phoneVerification": MessageLookupByLibrary.simpleMessage(
+      "การยืนยันทางโทรศัพท์",
+    ),
+    "phonee": MessageLookupByLibrary.simpleMessage("โทรศัพท์:"),
+    "pickAndUploadFile": MessageLookupByLibrary.simpleMessage(
+      "เลือกและอัปโหลดไฟล์",
+    ),
+    "pickEndDate": MessageLookupByLibrary.simpleMessage("เลือกวันที่สิ้นสุด"),
+    "pickStartDate": MessageLookupByLibrary.simpleMessage(
+      "เลือกวันที่เริ่มต้น",
+    ),
+    "pleaseAddQuantity": MessageLookupByLibrary.simpleMessage(
+      "กรุณาเพิ่มจำนวน",
+    ),
+    "pleaseConnectThePrinterFirst": MessageLookupByLibrary.simpleMessage(
+      "โปรดเชื่อมต่อเครื่องพิมพ์ก่อน",
+    ),
+    "pleaseConnectYourBlutohPrinter": MessageLookupByLibrary.simpleMessage(
+      "โปรดเชื่อมต่อเครื่องพิมพ์บลูทูธของคุณ",
+    ),
+    "pleaseEnterABiggerPassword": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกรหัสผ่านที่ยาวขึ้น",
+    ),
+    "pleaseEnterAConfirmPassword": MessageLookupByLibrary.simpleMessage(
+      "โปรดป้อนรหัสผ่านยืนยัน",
+    ),
+    "pleaseEnterAPassword": MessageLookupByLibrary.simpleMessage(
+      "โปรดป้อนรหัสผ่าน",
+    ),
+    "pleaseEnterAValidBrandName": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกชื่อแบรนด์ที่ถูกต้อง",
+    ),
+    "pleaseEnterAValidBusinessName": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกชื่อธุรกิจที่ถูกต้อง",
+    ),
+    "pleaseEnterAValidEmail": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกอีเมลที่ถูกต้อง",
+    ),
+    "pleaseEnterAValidManufacturerName": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกชื่อผู้ผลิตที่ถูกต้อง",
+    ),
+    "pleaseEnterAValidMedicineType": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกประเภทยาที่ถูกต้อง",
+    ),
+    "pleaseEnterAValidName": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกชื่อที่ถูกต้อง",
+    ),
+    "pleaseEnterAValidPercent": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกเปอร์เซ็นต์ที่ถูกต้อง",
+    ),
+    "pleaseEnterAValidPhoneNumber": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกหมายเลขโทรศัพท์ที่ถูกต้อง",
+    ),
+    "pleaseEnterAValidProductName": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกชื่อสินค้าที่ถูกต้อง",
+    ),
+    "pleaseEnterAValidPurchasePrice": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกราคาซื้อที่ถูกต้อง",
+    ),
+    "pleaseEnterAValidSalePrice": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกราคาขายที่ถูกต้อง",
+    ),
+    "pleaseEnterAValidSupplier": MessageLookupByLibrary.simpleMessage(
+      "กรุณาเลือกผู้จัดหาที่ถูกต้อง",
+    ),
+    "pleaseEnterAValidUnitName": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกชื่อหน่วยที่ถูกต้อง",
+    ),
+    "pleaseEnterAmount": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกจำนวนเงิน",
+    ),
+    "pleaseEnterLeafOrBoxSize": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกขนาดใบ/กล่อง",
+    ),
+    "pleaseEnterManufacturerName": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกชื่อผู้ผลิต",
+    ),
+    "pleaseEnterMedicineType": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกประเภทยา",
+    ),
+    "pleaseEnterName": MessageLookupByLibrary.simpleMessage("กรุณากรอกชื่อ"),
+    "pleaseEnterProductCode": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกรหัสผลิตภัณฑ์",
+    ),
+    "pleaseEnterTheOTP": MessageLookupByLibrary.simpleMessage("กรุณากรอก OTP"),
+    "pleaseEnterUnitName": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกชื่อหน่วย",
+    ),
+    "pleaseEnterValidPhoneAndNameFirst": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกหมายเลขโทรศัพท์และชื่อที่ถูกต้องก่อน",
+    ),
+    "pleaseEnterYourDetails": MessageLookupByLibrary.simpleMessage(
+      "กรุณากรอกรายละเอียดของคุณ",
+    ),
+    "pleaseMakeASaleFirst": MessageLookupByLibrary.simpleMessage(
+      "กรุณาทำการขายก่อน",
+    ),
+    "pleaseSelectACategory": MessageLookupByLibrary.simpleMessage(
+      "กรุณาเลือกหมวดหมู่",
+    ),
+    "pleaseSelectAExpenseCategory": MessageLookupByLibrary.simpleMessage(
+      "กรุณาเลือกหมวดหมู่ค่าใช้จ่าย",
+    ),
+    "pleaseSelectPaymentType": MessageLookupByLibrary.simpleMessage(
+      "กรุณาเลือกประเภทการชำระเงิน",
+    ),
+    "pleaseSelectProduct": MessageLookupByLibrary.simpleMessage(
+      "กรุณาเลือกผลิตภัณฑ์",
+    ),
+    "pleaseSelectTaxType": MessageLookupByLibrary.simpleMessage(
+      "กรุณาเลือกประเภทภาษี",
+    ),
+    "pleaseSelectTaxes": MessageLookupByLibrary.simpleMessage("กรุณาเลือกภาษี"),
+    "powerdedByAcnoo": MessageLookupByLibrary.simpleMessage(
+      "ขับเคลื่อนโดย Acnoo",
+    ),
+    "poweredBy": MessageLookupByLibrary.simpleMessage("พัฒนาโดย"),
+    "premiumCustomerSupport": MessageLookupByLibrary.simpleMessage(
+      "การสนับสนุนแอป Android และ iOS",
+    ),
+    "premiumPlan": MessageLookupByLibrary.simpleMessage("แผนพรีเมียม"),
+    "previewPdf": MessageLookupByLibrary.simpleMessage("ดูตัวอย่าง PDF"),
+    "previousDue": MessageLookupByLibrary.simpleMessage("ก่อนครบกำหนด"),
+    "previousPayAmount": MessageLookupByLibrary.simpleMessage(
+      "จำนวนเงินที่ชำระก่อนหน้า",
+    ),
+    "price": MessageLookupByLibrary.simpleMessage("ราคา"),
+    "priceWithTax": MessageLookupByLibrary.simpleMessage("ราคา รวมภาษี"),
+    "priceWithoutTax": MessageLookupByLibrary.simpleMessage("ราคาไม่รวมภาษี"),
+    "print": MessageLookupByLibrary.simpleMessage("พิมพ์"),
+    "printing": MessageLookupByLibrary.simpleMessage("ตัวเลือกการพิมพ์"),
+    "product": MessageLookupByLibrary.simpleMessage("ผลิตภัณฑ์"),
+    "productAddedSuccessfully": MessageLookupByLibrary.simpleMessage(
+      "เพิ่มผลิตภัณฑ์เรียบร้อยแล้ว",
+    ),
+    "productBrand": MessageLookupByLibrary.simpleMessage("แบรนด์สินค้า"),
+    "productCategory": MessageLookupByLibrary.simpleMessage("หมวดหมู่สินค้า"),
+    "productCode": MessageLookupByLibrary.simpleMessage("รหัสสินค้า"),
+    "productCodeIsRequired": MessageLookupByLibrary.simpleMessage(
+      "ต้องกรอกรหัสสินค้า",
+    ),
+    "productDetails": MessageLookupByLibrary.simpleMessage("รายละเอียดสินค้า"),
+    "productEditedSuccessfully": MessageLookupByLibrary.simpleMessage(
+      "แก้ไขผลิตภัณฑ์เรียบร้อยแล้ว",
+    ),
+    "productList": MessageLookupByLibrary.simpleMessage("รายการสินค้า"),
+    "productName": MessageLookupByLibrary.simpleMessage("ชื่อผลิตภัณฑ์"),
+    "productUnit": MessageLookupByLibrary.simpleMessage("หน่วยสินค้า"),
+    "products": MessageLookupByLibrary.simpleMessage("ผลิตภัณฑ์"),
+    "profile": MessageLookupByLibrary.simpleMessage("ประวัติโดยย่อ"),
+    "profileEdit": MessageLookupByLibrary.simpleMessage("แก้ไขโปรไฟล์"),
+    "profilePictureOptional": MessageLookupByLibrary.simpleMessage(
+      "รูปโปรไฟล์ (ไม่บังคับ)",
+    ),
+    "profit": MessageLookupByLibrary.simpleMessage("กำไร"),
+    "profitPercent": MessageLookupByLibrary.simpleMessage("เปอร์เซ็นต์กำไร"),
+    "profitPercentage": MessageLookupByLibrary.simpleMessage("เปอร์เซ็นต์กำไร"),
+    "promo": MessageLookupByLibrary.simpleMessage("โปรโมชั่น"),
+    "promoCode": MessageLookupByLibrary.simpleMessage("รหัสโปรโมชั่น"),
+    "purchase": MessageLookupByLibrary.simpleMessage("ซื้อ"),
+    "purchaseAlarm": MessageLookupByLibrary.simpleMessage(
+      "การแจ้งเตือนการซื้อ",
+    ),
+    "purchaseAndSale": MessageLookupByLibrary.simpleMessage("การซื้อและการขาย"),
+    "purchaseBy": MessageLookupByLibrary.simpleMessage("ซื้อโดย:"),
+    "purchaseConfirmed": MessageLookupByLibrary.simpleMessage("ยืนยันการซื้อ"),
+    "purchaseDetails": MessageLookupByLibrary.simpleMessage(
+      "รายละเอียดการซื้อ",
+    ),
+    "purchaseExcPrice": MessageLookupByLibrary.simpleMessage(
+      "ราคาซื้อไม่รวมภาษี",
+    ),
+    "purchaseIncPrice": MessageLookupByLibrary.simpleMessage("ราคาซื้อรวมภาษี"),
+    "purchaseIncTax": MessageLookupByLibrary.simpleMessage("ราคาซื้อรวมภาษี"),
+    "purchaseList": MessageLookupByLibrary.simpleMessage("รายการซื้อ"),
+    "purchaseNow": MessageLookupByLibrary.simpleMessage("ซื้อทันที"),
+    "purchaseOrder": MessageLookupByLibrary.simpleMessage("ใบสั่งซื้อ"),
+    "purchasePremium": MessageLookupByLibrary.simpleMessage("ซื้อแผนพรีเมียม"),
+    "purchasePrice": MessageLookupByLibrary.simpleMessage("ราคาซื้อ"),
+    "purchaseReport": MessageLookupByLibrary.simpleMessage("รายงานการซื้อ"),
+    "purchaseReturnReport": MessageLookupByLibrary.simpleMessage(
+      "รายงานการคืนซื้อ",
+    ),
+    "purchased": MessageLookupByLibrary.simpleMessage("ซื้อ"),
+    "purchasedBy": MessageLookupByLibrary.simpleMessage("ซื้อโดย"),
+    "qty": MessageLookupByLibrary.simpleMessage("จำนวน"),
+    "quantity": MessageLookupByLibrary.simpleMessage("ปริมาณ"),
+    "quickAction": MessageLookupByLibrary.simpleMessage("การดำเนินการด่วน"),
+    "quickOverview": MessageLookupByLibrary.simpleMessage("ภาพรวมด่วน"),
+    "receivable": MessageLookupByLibrary.simpleMessage("ต้องรับ"),
+    "received": MessageLookupByLibrary.simpleMessage("ได้รับ"),
+    "receivedPayment": MessageLookupByLibrary.simpleMessage(
+      "ได้รับการชำระเงิน",
+    ),
+    "recentTransaction": MessageLookupByLibrary.simpleMessage(
+      "การทำธุรกรรมล่าสุด",
+    ),
+    "recivethePin": MessageLookupByLibrary.simpleMessage("ได้รับรหัสผ่าน"),
+    "referenceNo": MessageLookupByLibrary.simpleMessage("หมายเลขอ้างอิง"),
+    "register": MessageLookupByLibrary.simpleMessage("ลงทะเบียน"),
+    "registerTitle": MessageLookupByLibrary.simpleMessage(
+      "เราจำเป็นต้องลงทะเบียนโทรศัพท์ของคุณโดยไม่ต้องเริ่มต้น!",
+    ),
+    "remaining": MessageLookupByLibrary.simpleMessage("ที่เหลือ"),
+    "remainingDue": MessageLookupByLibrary.simpleMessage("ยอดคงค้าง"),
+    "rememberMe": MessageLookupByLibrary.simpleMessage("จดจำฉัน"),
+    "rememberMeLater": MessageLookupByLibrary.simpleMessage("ระบุฉันในภายหลัง"),
+    "remove": MessageLookupByLibrary.simpleMessage("ลบ"),
+    "reports": MessageLookupByLibrary.simpleMessage("รายงาน"),
+    "resendIn": MessageLookupByLibrary.simpleMessage("ส่ง OTP อีกครั้งใน"),
+    "resendOTP": MessageLookupByLibrary.simpleMessage("ส่งรหัส OTP อีกครั้ง"),
+    "resendOtpIn": MessageLookupByLibrary.simpleMessage("ส่ง OTP ใหม่ใน"),
+    "reset": MessageLookupByLibrary.simpleMessage(
+      "รีเซ็ตรหัสผ่านโดยใช้ อีเมลหรือหมายเลขโทรศัพท์ของคุณ",
+    ),
+    "resetPassword": MessageLookupByLibrary.simpleMessage(
+      "รีเซ็ตรหัสผ่านของคุณเพื่อกู้คืนและเข้าสู่บัญชีของคุณ",
+    ),
+    "retailer": MessageLookupByLibrary.simpleMessage("ผู้ค้าปลีก"),
+    "returnAmount": MessageLookupByLibrary.simpleMessage("จำนวนคืน"),
+    "returnedQty": MessageLookupByLibrary.simpleMessage("จำนวนที่คืน"),
+    "returns": MessageLookupByLibrary.simpleMessage("การคืน"),
+    "riead": MessageLookupByLibrary.simpleMessage("อ่าน"),
+    "sale": MessageLookupByLibrary.simpleMessage("ขาย"),
+    "saleList": MessageLookupByLibrary.simpleMessage("รายการขาย"),
+    "salePrice": MessageLookupByLibrary.simpleMessage("ลดราคา"),
+    "saleReturnedReport": MessageLookupByLibrary.simpleMessage(
+      "รายงานการคืนขาย",
+    ),
+    "sales": MessageLookupByLibrary.simpleMessage("การขาย"),
+    "salesBy": MessageLookupByLibrary.simpleMessage("ขายโดย:"),
+    "salesDetails": MessageLookupByLibrary.simpleMessage("รายละเอียดการขาย"),
+    "salesList": MessageLookupByLibrary.simpleMessage("รายการขาย"),
+    "salesPurchaseOverview": MessageLookupByLibrary.simpleMessage(
+      "ภาพรวมการขายและการซื้อ",
+    ),
+    "salesReport": MessageLookupByLibrary.simpleMessage("รายงานการขาย"),
+    "save": MessageLookupByLibrary.simpleMessage("บันทึก"),
+    "saveNPublish": MessageLookupByLibrary.simpleMessage("บันทึกและเผยแพร่"),
+    "savedSuccessFully": MessageLookupByLibrary.simpleMessage(
+      "บันทึกเรียบร้อยแล้ว!",
+    ),
+    "saving": MessageLookupByLibrary.simpleMessage("กำลังบันทึก"),
+    "search": MessageLookupByLibrary.simpleMessage("ค้นหา"),
+    "searchH": MessageLookupByLibrary.simpleMessage("ค้นหาที่นี่...."),
+    "searchProduct": MessageLookupByLibrary.simpleMessage("ค้นหาผลิตภัณฑ์"),
+    "second": MessageLookupByLibrary.simpleMessage("วินาที"),
+    "seeAllPromoCode": MessageLookupByLibrary.simpleMessage(
+      "ดูรหัสโปรโมชั่นทั้งหมด",
+    ),
+    "select": MessageLookupByLibrary.simpleMessage("เลือก"),
+    "selectABrand": MessageLookupByLibrary.simpleMessage("เลือกแบรนด์"),
+    "selectACategory": MessageLookupByLibrary.simpleMessage("เลือกหมวดหมู่"),
+    "selectAInvoice": MessageLookupByLibrary.simpleMessage("เลือกใบแจ้งหนี้"),
+    "selectBusinessCategory": MessageLookupByLibrary.simpleMessage(
+      "เลือกหมวดหมู่ธุรกิจ",
+    ),
+    "selectCategory": MessageLookupByLibrary.simpleMessage("เลือกหมวดหมู่"),
+    "selectContactType": MessageLookupByLibrary.simpleMessage(
+      "เลือกประเภทการติดต่อ",
+    ),
+    "selectCustomer": MessageLookupByLibrary.simpleMessage("เลือกลูกค้า"),
+    "selectFromDate": MessageLookupByLibrary.simpleMessage("เลือกจากวันที่"),
+    "selectInvoice": MessageLookupByLibrary.simpleMessage("เลือกใบแจ้งหนี้"),
+    "selectLang": MessageLookupByLibrary.simpleMessage("เลือกภาษาของคุณ"),
+    "selectOne": MessageLookupByLibrary.simpleMessage("เลือกหนึ่ง"),
+    "selectProduct": MessageLookupByLibrary.simpleMessage("เลือกผลิตภัณฑ์"),
+    "selectProductCategory": MessageLookupByLibrary.simpleMessage(
+      "เลือกหมวดหมู่สินค้า",
+    ),
+    "selectProductUnit": MessageLookupByLibrary.simpleMessage(
+      "เลือกหน่วยสินค้า",
+    ),
+    "selectToDate": MessageLookupByLibrary.simpleMessage("เลือกถึงวันที่"),
+    "selectType": MessageLookupByLibrary.simpleMessage("เลือกประเภท"),
+    "selectVariations": MessageLookupByLibrary.simpleMessage(
+      "เลือกความหลากหลาย: ",
+    ),
+    "selectYourSubscription": MessageLookupByLibrary.simpleMessage(
+      "เลือกการสมัครสมาชิกของคุณ",
+    ),
+    "sellAll": MessageLookupByLibrary.simpleMessage("ขายทั้งหมด >"),
+    "send": MessageLookupByLibrary.simpleMessage("ส่ง"),
+    "sendCode": MessageLookupByLibrary.simpleMessage("ส่งรหัส"),
+    "sendEmail": MessageLookupByLibrary.simpleMessage(
+      "เราได้ส่งอีเมลพร้อมคำแนะนำเกี่ยวกับวิธีรีเซ็ตรหัสผ่านไปที่:",
+    ),
+    "sendLink": MessageLookupByLibrary.simpleMessage("ส่งลิงค์รีเซ็ต"),
+    "sendMessage": MessageLookupByLibrary.simpleMessage("ส่งข้อความ"),
+    "sendSMS": MessageLookupByLibrary.simpleMessage("ส่ง SMS"),
+    "sendSms": MessageLookupByLibrary.simpleMessage("ส่ง SMS"),
+    "sendYourEmail": MessageLookupByLibrary.simpleMessage("ส่งอีเมลของคุณ"),
+    "setUpDesc": MessageLookupByLibrary.simpleMessage(
+      "อัปเดตโปรไฟล์ของคุณเพื่อเชื่อมต่อแพทย์ของคุณด้วยความประทับใจที่ดีขึ้น",
+    ),
+    "setUpNewPassword": MessageLookupByLibrary.simpleMessage(
+      "ตั้งค่ารหัสผ่านใหม่",
+    ),
+    "setUpProfile": MessageLookupByLibrary.simpleMessage(
+      "ตั้งค่าโปรไฟล์ของคุณ",
+    ),
+    "setting": MessageLookupByLibrary.simpleMessage("การตั้งค่า"),
+    "share": MessageLookupByLibrary.simpleMessage("แชร์"),
+    "shelf": MessageLookupByLibrary.simpleMessage("ชั้น"),
+    "shopOpeningBalance": MessageLookupByLibrary.simpleMessage("ยอดเปิดร้าน"),
+    "shopRemainingBalance": MessageLookupByLibrary.simpleMessage(
+      "ยอดคงเหลือของร้าน",
+    ),
+    "showCode": MessageLookupByLibrary.simpleMessage("แสดงรหัส"),
+    "showName": MessageLookupByLibrary.simpleMessage("แสดงชื่อ"),
+    "showPrice": MessageLookupByLibrary.simpleMessage("แสดงราคา"),
+    "signIn": MessageLookupByLibrary.simpleMessage("ลงชื่อเข้าใช้"),
+    "signUps": MessageLookupByLibrary.simpleMessage("ลงทะเบียน"),
+    "size": MessageLookupByLibrary.simpleMessage("ขนาด"),
+    "skip": MessageLookupByLibrary.simpleMessage("ข้าม"),
+    "skipTheUpdate": MessageLookupByLibrary.simpleMessage("ข้ามการอัปเดต"),
+    "smartWatch": MessageLookupByLibrary.simpleMessage("สมาร์ทวอทช์"),
+    "socialMarketing": MessageLookupByLibrary.simpleMessage("การตลาดทางสังคม"),
+    "someThingWentWrong": MessageLookupByLibrary.simpleMessage(
+      "เกิดข้อผิดพลาดบางอย่าง",
+    ),
+    "somethingIs": MessageLookupByLibrary.simpleMessage("มีบางอย่าง"),
+    "staffLogin": MessageLookupByLibrary.simpleMessage("เข้าสู่ระบบพนักงาน"),
+    "startDate": MessageLookupByLibrary.simpleMessage("วันที่เริ่มต้น"),
+    "startNewSale": MessageLookupByLibrary.simpleMessage("เริ่มการขายใหม่"),
+    "status": MessageLookupByLibrary.simpleMessage("สถานะ"),
+    "stillUnpaid": MessageLookupByLibrary.simpleMessage("ยังค้างชำระ"),
+    "stock": MessageLookupByLibrary.simpleMessage("คลังสินค้า"),
+    "stockIsEmpty": MessageLookupByLibrary.simpleMessage("สต็อกว่างเปล่า"),
+    "stockList": MessageLookupByLibrary.simpleMessage("รายการสต็อก"),
+    "stockManager": MessageLookupByLibrary.simpleMessage("ผู้จัดการสต็อก"),
+    "stockReport": MessageLookupByLibrary.simpleMessage("รายงานสต๊อก"),
+    "stockUpdateSuccessFully": MessageLookupByLibrary.simpleMessage(
+      "อัปเดตสต็อกเรียบร้อยแล้ว",
+    ),
+    "stockValue": MessageLookupByLibrary.simpleMessage("มูลค่าสินค้า"),
+    "stocks": MessageLookupByLibrary.simpleMessage("สต๊อก: "),
+    "strength": MessageLookupByLibrary.simpleMessage("ความเข้มข้น"),
+    "subDtotal": MessageLookupByLibrary.simpleMessage("ยอดรวมย่อย"),
+    "subTaxList": MessageLookupByLibrary.simpleMessage("รายการภาษีย่อย"),
+    "subTaxes": MessageLookupByLibrary.simpleMessage("ภาษีย่อย"),
+    "subTotal": MessageLookupByLibrary.simpleMessage("ยอดรวมย่อย"),
+    "submit": MessageLookupByLibrary.simpleMessage("ส่ง"),
+    "subscribedOn": MessageLookupByLibrary.simpleMessage("สมัครเมื่อ"),
+    "subscription": MessageLookupByLibrary.simpleMessage("การสมัครสมาชิก"),
+    "subtotal": MessageLookupByLibrary.simpleMessage("ยอดรวมย่อย"),
+    "successfullyPaid": MessageLookupByLibrary.simpleMessage("ชำระเงินสำเร็จ"),
+    "supplerPay": MessageLookupByLibrary.simpleMessage("ซัพพลายเออร์ชำระเงิน"),
+    "supplier": MessageLookupByLibrary.simpleMessage("ผู้จัดหา"),
+    "supplierDetails": MessageLookupByLibrary.simpleMessage(
+      "รายละเอียดผู้จัดหา",
+    ),
+    "supplierName": MessageLookupByLibrary.simpleMessage("ชื่อผู้ผลิต"),
+    "supplierPhone": MessageLookupByLibrary.simpleMessage("โทรศัพท์ผู้จัดหา"),
+    "tax": MessageLookupByLibrary.simpleMessage("ภาษี"),
+    "taxAndDiscount": MessageLookupByLibrary.simpleMessage("ภาษีและส่วนลด"),
+    "taxGroup": MessageLookupByLibrary.simpleMessage("กลุ่มภาษี"),
+    "taxNameIsRequired": MessageLookupByLibrary.simpleMessage(
+      "ต้องระบุชื่อภาษี",
+    ),
+    "taxPercent": MessageLookupByLibrary.simpleMessage("เปอร์เซ็นต์ภาษี"),
+    "taxRateIsRequired": MessageLookupByLibrary.simpleMessage(
+      "ต้องระบุอัตราภาษี",
+    ),
+    "taxRates": MessageLookupByLibrary.simpleMessage("อัตราภาษี"),
+    "taxRatesManageYourTaxRates": MessageLookupByLibrary.simpleMessage(
+      "อัตราภาษี - จัดการอัตราภาษีของคุณ",
+    ),
+    "taxType": MessageLookupByLibrary.simpleMessage("ประเภทภาษี"),
+    "thakYouForYourPurchase": MessageLookupByLibrary.simpleMessage(
+      "ขอบคุณสำหรับการซื้อของคุณ",
+    ),
+    "thankYouForChoosingUs": MessageLookupByLibrary.simpleMessage(
+      "ขอบคุณที่เลือกเรา!",
+    ),
+    "thankYouForYourDuePayment": MessageLookupByLibrary.simpleMessage(
+      "ขอบคุณสำหรับการชำระเงินค่าใช้จ่ายที่ครบกำหนด",
+    ),
+    "thisProductAlreadyAdded": MessageLookupByLibrary.simpleMessage(
+      "สินค้านี้ได้ถูกเพิ่มแล้ว!",
+    ),
+    "title": MessageLookupByLibrary.simpleMessage("ชื่อเรื่อง"),
+    "toDate": MessageLookupByLibrary.simpleMessage("ถึงวันที่"),
+    "todayProfit": MessageLookupByLibrary.simpleMessage("กำไรวันนี้"),
+    "todayPurchase": MessageLookupByLibrary.simpleMessage("การซื้อวันนี้"),
+    "todaySales": MessageLookupByLibrary.simpleMessage("ยอดขายวันนี้"),
+    "todaySummary": MessageLookupByLibrary.simpleMessage("สรุปวันนี้"),
+    "total": MessageLookupByLibrary.simpleMessage("ทั้งหมด"),
+    "totalAmount": MessageLookupByLibrary.simpleMessage("จำนวนเงินทั้งหมด"),
+    "totalCategories": MessageLookupByLibrary.simpleMessage("หมวดหมู่ทั้งหมด"),
+    "totalCustomer": MessageLookupByLibrary.simpleMessage("ลูกค้าทั้งหมด"),
+    "totalDue": MessageLookupByLibrary.simpleMessage("ยอดรวมที่ครบกำหนด"),
+    "totalDueAmount": MessageLookupByLibrary.simpleMessage("ยอดหนี้รวม"),
+    "totalExpense": MessageLookupByLibrary.simpleMessage("ค่าใช้จ่ายทั้งหมด"),
+    "totalIncome": MessageLookupByLibrary.simpleMessage("รายได้รวม"),
+    "totalItems": MessageLookupByLibrary.simpleMessage("รายการทั้งหมด"),
+    "totalLoss": MessageLookupByLibrary.simpleMessage("สูญเสียทั้งหมด"),
+    "totalPaid": MessageLookupByLibrary.simpleMessage("ยอดรวมที่ชำระ"),
+    "totalPayable": MessageLookupByLibrary.simpleMessage("ยอดรวมที่ต้องชำระ"),
+    "totalPrice": MessageLookupByLibrary.simpleMessage("ราคารวม"),
+    "totalProduct": MessageLookupByLibrary.simpleMessage("ผลิตภัณฑ์ทั้งหมด"),
+    "totalProfit": MessageLookupByLibrary.simpleMessage("กำไรรวม"),
+    "totalPurchase": MessageLookupByLibrary.simpleMessage("ยอดซื้อรวม"),
+    "totalQty": MessageLookupByLibrary.simpleMessage("จำนวนรวม"),
+    "totalReceiveAble": MessageLookupByLibrary.simpleMessage(
+      "ยอดรวมที่ต้องรับ",
+    ),
+    "totalReturn": MessageLookupByLibrary.simpleMessage("ยอดรวมการคืน"),
+    "totalSales": MessageLookupByLibrary.simpleMessage("ยอดขายรวม"),
+    "totalStock": MessageLookupByLibrary.simpleMessage("สต็อกทั้งหมด"),
+    "totalSupplier": MessageLookupByLibrary.simpleMessage("ผู้จัดหาทั้งหมด"),
+    "totalVat": MessageLookupByLibrary.simpleMessage("ภาษีมูลค่าเพิ่มทั้งหมด"),
+    "totall": MessageLookupByLibrary.simpleMessage("รวม:"),
+    "transactions": MessageLookupByLibrary.simpleMessage("ธุรกรรม"),
+    "tryAgain": MessageLookupByLibrary.simpleMessage("ลองอีกครั้ง"),
+    "twitter": MessageLookupByLibrary.simpleMessage("Twitter"),
+    "type": MessageLookupByLibrary.simpleMessage("ประเภท"),
+    "unPaid": MessageLookupByLibrary.simpleMessage("ค้างชำระ"),
+    "unit": MessageLookupByLibrary.simpleMessage("หน่วย"),
+    "unitName": MessageLookupByLibrary.simpleMessage("ชื่อหน่วย"),
+    "unitPirce": MessageLookupByLibrary.simpleMessage("ราคาต่อหน่วย"),
+    "units": MessageLookupByLibrary.simpleMessage("หน่วย"),
+    "unknownProduct": MessageLookupByLibrary.simpleMessage(
+      "ผลิตภัณฑ์ที่ไม่รู้จัก",
+    ),
+    "unlimited": MessageLookupByLibrary.simpleMessage("ไม่ จำกัด"),
+    "unlimitedUsage": MessageLookupByLibrary.simpleMessage("การใช้งานไม่จำกัด"),
+    "unlimitedUsagesOfOurPackage": MessageLookupByLibrary.simpleMessage(
+      "การใช้งานไม่จำกัดของแพ็คเกจของเรา👇",
+    ),
+    "update": MessageLookupByLibrary.simpleMessage("อัปเดต"),
+    "updateContact": MessageLookupByLibrary.simpleMessage("อัปเดตผู้ติดต่อ"),
+    "updateNow": MessageLookupByLibrary.simpleMessage("อัปเดตทันที"),
+    "updatePassword": MessageLookupByLibrary.simpleMessage("อัปเดตรหัสผ่าน"),
+    "updateProduct": MessageLookupByLibrary.simpleMessage("อัพเดทสินค้า"),
+    "updateProfile": MessageLookupByLibrary.simpleMessage(
+      "อัปเดตโปรไฟล์ของคุณ",
+    ),
+    "updateYourPassword": MessageLookupByLibrary.simpleMessage(
+      "อัปเดตรหัสผ่านของคุณ",
+    ),
+    "updateYourProfile": MessageLookupByLibrary.simpleMessage(
+      "อัปเดตโปรไฟล์ของคุณเพื่อเชื่อมต่อลูกค้าของคุณด้วยการแสดงผลที่ดีขึ้น",
+    ),
+    "updateYourSubscription": MessageLookupByLibrary.simpleMessage(
+      "อัปเดตการสมัครสมาชิกของคุณ",
+    ),
+    "updating": MessageLookupByLibrary.simpleMessage("กำลังอัปเดต..."),
+    "upgradeNow": MessageLookupByLibrary.simpleMessage("อัปเกรดตอนนี้"),
+    "upload": MessageLookupByLibrary.simpleMessage("อัปโหลด"),
+    "uploadDone": MessageLookupByLibrary.simpleMessage("อัปโหลดเสร็จสิ้น"),
+    "uploading": MessageLookupByLibrary.simpleMessage("กำลังอัปโหลด"),
+    "useFree": MessageLookupByLibrary.simpleMessage("ใช้ฟรี"),
+    "useTitleCanNotBeEmpty": MessageLookupByLibrary.simpleMessage(
+      "ชื่อผู้ใช้ไม่สามารถว่างเปล่า",
+    ),
+    "userRole": MessageLookupByLibrary.simpleMessage("บทบาทของผู้ใช้"),
+    "userRoleDetails": MessageLookupByLibrary.simpleMessage(
+      "รายละเอียดบทบาทผู้ใช้",
+    ),
+    "userTitle": MessageLookupByLibrary.simpleMessage("ชื่อผู้ใช้"),
+    "vat": MessageLookupByLibrary.simpleMessage("VAT"),
+    "vatAmount": MessageLookupByLibrary.simpleMessage("จำนวน VAT"),
+    "verification": MessageLookupByLibrary.simpleMessage("การตรวจสอบ"),
+    "verify": MessageLookupByLibrary.simpleMessage("ตรวจสอบ"),
+    "verifyYourEmail": MessageLookupByLibrary.simpleMessage(
+      "ยืนยันอีเมลของคุณ",
+    ),
+    "verityEmail": MessageLookupByLibrary.simpleMessage("ตรวจสอบอีเมล"),
+    "version": MessageLookupByLibrary.simpleMessage("เวอร์ชัน"),
+    "view": MessageLookupByLibrary.simpleMessage("ดู"),
+    "viewAll": MessageLookupByLibrary.simpleMessage("ดูทั้งหมด"),
+    "viewDetails": MessageLookupByLibrary.simpleMessage("ดูรายละเอียด"),
+    "viewInvoice": MessageLookupByLibrary.simpleMessage("ดูใบแจ้งหนี้"),
+    "viewLedger": MessageLookupByLibrary.simpleMessage("ดูบัญชีแยกประเภท"),
+    "viewLess": MessageLookupByLibrary.simpleMessage("ดูน้อยลง"),
+    "viewMore": MessageLookupByLibrary.simpleMessage("ดูเพิ่มเติม"),
+    "walkInCustomer": MessageLookupByLibrary.simpleMessage("ลูกค้าเดินเข้ามา"),
+    "weHaveSentAConfirmationEmailTo": MessageLookupByLibrary.simpleMessage(
+      "เราส่งอีเมลยืนยันไปที่",
+    ),
+    "weSentAnOTPInYourPhoneNumber": MessageLookupByLibrary.simpleMessage(
+      "เราได้ส่ง OTP ไปยังหมายเลขโทรศัพท์ของคุณ",
+    ),
+    "weekly": MessageLookupByLibrary.simpleMessage("รายสัปดาห์"),
+    "weight": MessageLookupByLibrary.simpleMessage("น้ำหนัก"),
+    "welcomeBack": MessageLookupByLibrary.simpleMessage("ยินดีต้อนรับกลับ!"),
+    "welcomeToOurPlatform": MessageLookupByLibrary.simpleMessage(
+      "ยินดีต้อนรับสู่แพลตฟอร์มของเรา! เพื่อเริ่มต้น เราขอเชิญคุณสร้างบัญชีฟรี ด้วยบัญชี",
+    ),
+    "whatNew": MessageLookupByLibrary.simpleMessage("มีอะไรใหม่"),
+    "wholeSalePrice": MessageLookupByLibrary.simpleMessage("ราคาขายส่ง"),
+    "wholesaler": MessageLookupByLibrary.simpleMessage("ผู้ค้าส่ง"),
+    "willBeAddedSoon": MessageLookupByLibrary.simpleMessage(
+      "จะถูกเพิ่มเร็วๆ นี้",
+    ),
+    "wit": MessageLookupByLibrary.simpleMessage("ด้วย"),
+    "writeYourMessageHere": MessageLookupByLibrary.simpleMessage(
+      "เขียนข้อความของคุณที่นี่",
+    ),
+    "yearly": MessageLookupByLibrary.simpleMessage("รายปี"),
+    "yes": MessageLookupByLibrary.simpleMessage("ใช่"),
+    "youCanNotPayMoreThenDue": MessageLookupByLibrary.simpleMessage(
+      "คุณไม่สามารถชำระมากกว่าที่ค้างชำระได้",
+    ),
+    "youCanNowResend": MessageLookupByLibrary.simpleMessage(
+      "คุณสามารถส่งใหม่ได้แล้ว",
+    ),
+    "youHaveToGivePermission": MessageLookupByLibrary.simpleMessage(
+      "คุณต้องให้สิทธิ์",
+    ),
+    "youRUsing": MessageLookupByLibrary.simpleMessage("คุณกำลังใช้ "),
+    "youWantTodeletetheProduct": MessageLookupByLibrary.simpleMessage(
+      "คุณต้องการลบสินค้านี้หรือไม่?",
+    ),
+    "yourFree": MessageLookupByLibrary.simpleMessage(
+      "แพ็คเกจฟรีของคุณเกือบจะหมดแล้ว ซื้อแผนถัดไปของคุณ ขอบคุณ",
+    ),
+    "yourPack": MessageLookupByLibrary.simpleMessage("แพ็คเกจของคุณ"),
+    "yourPackageExpiredInDays": MessageLookupByLibrary.simpleMessage(
+      "แพ็กเกจของคุณจะหมดอายุใน 5 วัน",
+    ),
+    "yourPackageExpiredToday": MessageLookupByLibrary.simpleMessage(
+      "แพ็กเกจของคุณจะหมดอายุวันนี้\n\nโปรดซื้อใหม่อีกครั้ง",
+    ),
+  };
+}

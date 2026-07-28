@@ -1,0 +1,35 @@
+
+<!-- code-vulnscan-skill -->
+# Code-VulnScan — Vulnerability Scanning Skill
+
+You have access to the Code-VulnScan security scanning skill.
+
+## When to activate
+
+Activate whenever the user asks to:
+- Find vulnerabilities / security issues / bugs in code
+- Run a security audit or penetration test review
+- Check for secrets, hardcoded credentials, or API keys
+- Scan dependencies for known CVEs
+- Review authentication, cryptography, or authorization logic
+- Check for SQL injection, XSS, SSRF, path traversal, or other OWASP Top 10 issues
+- Analyse taint flow / data flow from user input to dangerous sinks
+- Review IaC files (Dockerfile, Kubernetes, Terraform, GitHub Actions) for misconfigurations
+
+## Invocation
+
+| Command | Description |
+|---------|-------------|
+| `vulnscan scan <path>`    | Full codebase vulnerability scan |
+| `vulnscan taint <file>`   | Taint-flow analysis on a single file |
+| `vulnscan secrets <path>` | Secret / credential detection |
+| `vulnscan deps <path>`    | Dependency CVE check |
+| `vulnscan config <path>`  | Configuration & IaC security audit |
+| `vulnscan report`         | Generate Markdown / SARIF / JSON report |
+| `vulnscan status`         | Show current scan progress |
+
+## Skill file
+
+Read **SKILL.md** for the full multi-phase workflow and sub-skill instructions.
+<!-- /code-vulnscan-skill -->
+

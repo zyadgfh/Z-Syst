@@ -5,20 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Manufacturer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Validation\Rule;
 
 class AcnooManufacturerController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $companyId = $request->user()->company_id ?? app('tenant.company_id');
-
-        $data = Manufacturer::query()
-            ->where('company_id', $companyId)
-            ->latest()
-            ->get();
+        $data = Manufacturer::where('business_id', auth()->user()->business_id)->latest()->get();
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -28,70 +20,49 @@ class AcnooManufacturerController extends Controller
 
     public function store(Request $request)
     {
-        $companyId = $request->user()->company_id ?? app('tenant.company_id');
-
-        $data = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('manufacturers')->where(fn ($query) => $query->where('company_id', $companyId)),
-            ],
-            'description' => 'nullable|string',
-            'status' => 'nullable|in:active,inactive',
+        $business_id = auth()->user()->business_id;
+        $request->validate([
+            'name' => 'required|unique:manufacturers,name,NULL,id,business_id,' . $business_id,
+            'description' => 'nullable|string'
         ]);
 
-        $manufacturerPayload = array_merge($data, ['company_id' => $companyId]);
-        if (Schema::hasColumn('manufacturers', 'business_id') && Schema::hasTable('businesses')) {
-            $hasBusiness = DB::table('businesses')->where('id', $companyId)->exists();
-            if ($hasBusiness) {
-                $manufacturerPayload['business_id'] = $companyId;
-            }
-        }
-
-        $manufacturer = Manufacturer::create($manufacturerPayload);
+        $data = Manufacturer::create([
+                    'name' => $request->name,
+                    'description' => $request->description,
+                    'business_id' => $business_id
+                ]);
 
         return response()->json([
             'message' => __('Data saved successfully.'),
-            'data' => $manufacturer,
-        ], 201);
+            'data' => $data,
+        ]);
     }
 
     public function update(Request $request, Manufacturer $manufacturer)
     {
-        $companyId = $request->user()->company_id ?? app('tenant.company_id');
-
-        $data = $request->validate([
+        $request->validate([
             'name' => [
                 'required',
-                'string',
-                'max:255',
-                Rule::unique('manufacturers')->ignore($manufacturer->id)->where(fn ($query) => $query->where('company_id', $companyId)),
+                'unique:manufacturers,name,' . $manufacturer->id . ',id,business_id,' . auth()->user()->business_id,
             ],
-            'description' => 'nullable|string',
-            'status' => 'nullable|in:active,inactive',
+            'description' => 'nullable|string'
         ]);
 
-        $manufacturerPayload = array_merge($data, ['company_id' => $companyId]);
-        if (Schema::hasColumn('manufacturers', 'business_id') && Schema::hasTable('businesses')) {
-            $hasBusiness = DB::table('businesses')->where('id', $companyId)->exists();
-            if ($hasBusiness) {
-                $manufacturerPayload['business_id'] = $companyId;
-            }
-        }
-
-        $manufacturer->update($manufacturerPayload);
+        $manufacturer = $manufacturer->update([
+                    'name' => $request->name,
+                    'description' => $request->description,
+                    'business_id' => auth()->user()->business_id
+                    ]);
 
         return response()->json([
             'message' => __('Data updated successfully.'),
-            'data' => $manufacturer->fresh(),
+            'data' => $manufacturer,
         ]);
     }
 
     public function destroy(Manufacturer $manufacturer)
     {
         $manufacturer->delete();
-
         return response()->json([
             'message' => __('Data deleted successfully.'),
         ]);

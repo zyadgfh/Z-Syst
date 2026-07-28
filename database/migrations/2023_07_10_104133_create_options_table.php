@@ -11,15 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (! Schema::hasTable('options')) {
-            Schema::create('options', function (Blueprint $table) {
+        Schema::create('options', function (Blueprint $table) {
             $table->id();
             $table->string('key');
             $table->longText('value');
             $table->boolean('status')->default(1);
             $table->timestamps();
-            });
-        }
+        });
     }
 
     /**

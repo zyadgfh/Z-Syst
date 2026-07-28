@@ -11,15 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (! Schema::hasTable('medicine_types')) {
-            Schema::create('medicine_types', function (Blueprint $table) {
+        Schema::create('medicine_types', function (Blueprint $table) {
             $table->id();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->boolean('status')->default(1);
             $table->timestamps();
-            });
-        }
+        });
     }
 
     /**

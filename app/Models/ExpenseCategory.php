@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use App\Traits\HasCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ExpenseCategory extends Model
 {
-    use HasFactory, HasCompany;
+    use HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -17,7 +16,7 @@ class ExpenseCategory extends Model
      */
     protected $fillable = [
         'categoryName',
-        'company_id',
+        'business_id',
         'categoryDescription',
         'status',
     ];

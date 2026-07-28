@@ -100,6 +100,13 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('currencies-csv', [ADMIN\AcnooCurrencyController::class, 'exportCsv'])->name('currencies.csv');
 
 
+    // Prescriptions
+    Route::resource('prescriptions', ADMIN\AcnooPrescriptionController::class)->except('show', 'edit', 'create');
+    Route::post('prescriptions/filter', [ADMIN\AcnooPrescriptionController::class, 'acnooFilter'])->name('prescriptions.filter');
+    Route::post('prescriptions/status/{id}', [ADMIN\AcnooPrescriptionController::class,'status'])->name('prescriptions.status');
+    Route::post('prescriptions/delete-all', [ADMIN\AcnooPrescriptionController::class,'deleteAll'])->name('prescriptions.delete-all');
+    Route::post('prescriptions/link-to-sale/{id}', [ADMIN\AcnooPrescriptionController::class,'linkToSale'])->name('prescriptions.link-to-sale');
+
     // Notifications manager
     Route::prefix('notifications')->controller(ADMIN\NotificationController::class)->name('notifications.')->group(function () {
         Route::get('/', 'mtIndex')->name('index');

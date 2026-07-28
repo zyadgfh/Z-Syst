@@ -1,0 +1,48 @@
+@extends('layouts.master')
+
+@section('title')
+    {{ __('Term & Condition Settings') }}
+@endsection
+
+@push('css')
+<link rel="stylesheet" href="{{ asset('assets/css/summernote-lite.css') }}">
+@endpush
+
+@section('main_content')
+    <div class="erp-table-section">
+        <div class="container-fluid">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="table-header">
+                        <h4>{{ __('Term & Condition Settings') }}</h4>
+                    </div>
+                    <div class="order-form-section">
+                        <form action="{{ route('admin.term-conditions.store') }}" method="post" enctype="multipart/form-data"
+                            class="ajaxform">
+                            @csrf
+                            <div class="add-suplier-modal-wrapper d-block">
+                                <div class="row">
+
+                                    <div class="col-lg-12 mt-2">
+                                        <textarea name="description" class="form-control summernote-condition">{{ $term_condition->value['description'] ?? '' }}</textarea>
+                                    </div>
+
+                                    <div class="col-lg-12">
+                                        <div class="text-center mt-5">
+                                            <button type="submit"
+                                                class="theme-btn m-2 submit-btn">{{ __('Update') }}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@push('js')
+<script src="{{ asset('assets/js/summernote-lite.js') }}"></script>
+@endpush

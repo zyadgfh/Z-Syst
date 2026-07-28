@@ -1,109 +1,111 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
-use App\Traits\HasCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * Drug Interaction Model
- * 
- * Tracks dangerous interactions between medications
- * Critical for pharmacy compliance and patient safety
- */
 class DrugInteraction extends Model
 {
-    use HasCompany, HasFactory;
-
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'drug_interactions';
+    use HasFactory;
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var array
      */
     protected $fillable = [
-        'company_id',
-        'product_a_id',
-        'product_b_id',
-        'interaction_level', // mild, moderate, severe, contraindicated
+        'business_id',
+        'drug_a_name',
+        'drug_b_name',
+        'severity',
         'description',
-        'clinical_effects',
-        'management',
-        'is_active',
+        'mechanism',
+        'recommendation',
+        'source',
+        'category',
+        'meta',
     ];
 
     /**
-     * The attributes that should be cast.
+     * The attributes that should be cast to native types.
      *
-     * @var array<string, string>
+     * @var array
      */
     protected $casts = [
-        'is_active' => 'boolean',
+        'meta' => 'json',
     ];
 
     /**
-     * Get the first product in the interaction.
+     * The severity labels for display.
      */
-    public function productA(): BelongsTo
+    const SEVERITY_LABELS = [
+        'contraindicated' => 'Contraindicated',
+        'severe' => 'Severe',
+        'moderate' => 'Moderate',
+        'minor' => 'Minor',
+    ];
+
+    /**
+     * The severity colors for UI.
+     */
+    const SEVERITY_COLORS = [
+        'contraindicated' => '#DC2626', // Red
+        'severe' => '#EA580C', // Orange
+        'moderate' => '#EAB308', // Yellow
+        'minor' => '#22C55E', // Green
+    ];
+
+    /**
+     * Get the business that owns the drug interaction.
+     */
+    public function business(): BelongsTo
     {
-        return $this->belongsTo(Product::class, 'product_a_id');
+        return $this->belongsTo(Business::class);
     }
 
     /**
-     * Get the second product in the interaction.
+     * Scope a query to only include interactions for a specific business.
      */
-    public function productB(): BelongsTo
+    public function scopeForBusiness($query, $businessId)
     {
-        return $this->belongsTo(Product::class, 'product_b_id');
+        return $query->where('business_id', $businessId)
+                    ->orWhereNull('business_id'); // Include global interactions
     }
 
     /**
-     * Get the company that owns this record.
+     * Scope a query to search by drug name.
      */
-    public function company(): BelongsTo
+    public function scopeSearch($query, $search)
     {
-        return $this->belongsTo(Company::class);
+        return $query->where(function ($q) use ($search) {
+            $q->where('drug_a_name', 'like', '%' . $search . '%')
+              ->orWhere('drug_b_name', 'like', '%' . $search . '%')
+              ->orWhere('description', 'like', '%' . $search . '%');
+        });
     }
 
     /**
-     * Check if this is a dangerous interaction.
+     * Scope a query to filter by severity.
      */
-    public function isDangerous(): bool
+    public function scopeSeverity($query, $severity)
     {
-        return in_array($this->interaction_level, ['severe', 'contraindicated']);
+        return $query->where('severity', $severity);
     }
 
     /**
-     * Get all dangerous interactions for a given product.
+     * Get the reverse interaction (swap drug_a and drug_b).
      */
-    public static function dangerousForProduct(int $productId): array
+    public function getReverseAttribute(): array
     {
-        return static::where('is_active', true)
-            ->where(function ($query) use ($productId) {
-                $query->where('product_a_id', $productId)
-                    ->orWhere('product_b_id', $productId);
-            })
-            ->whereIn('interaction_level', ['severe', 'contraindicated'])
-            ->get()
-            ->map(function ($interaction) {
-                return [
-                    'product_id' => $interaction->product_a_id === $productId 
-                        ? $interaction->product_b_id 
-                        : $interaction->product_a_id,
-                    'interaction_level' => $interaction->interaction_level,
-                    'description' => $interaction->description,
-                ];
-            })
-            ->toArray();
+        return [
+            'drug_a_name' => $this->drug_b_name,
+            'drug_b_name' => $this->drug_a_name,
+            'severity' => $this->severity,
+            'description' => $this->description,
+            'recommendation' => $this->recommendation,
+        ];
     }
 }
+

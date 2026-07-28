@@ -11,8 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (! Schema::hasTable('taxes')) {
-            Schema::create('taxes', function (Blueprint $table) {
+        Schema::create('taxes', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
@@ -20,8 +19,7 @@ return new class extends Migration
             $table->longText('sub_tax')->nullable();
             $table->boolean('status')->default(1);
             $table->timestamps();
-            });
-        }
+        });
     }
 
     /**

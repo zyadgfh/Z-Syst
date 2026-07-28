@@ -3,14 +3,24 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Product;
+use App\Models\FefoSetting;
+use App\Services\FefoService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 
 class StockController extends Controller
 {
+    protected FefoService $fefoService;
+
+    public function __construct(FefoService $fefoService)
+    {
+        $this->fefoService = $fefoService;
+    }
+
     public function index()
     {
         $business_id = auth()->user()->business_id;
+        $fefoEnabled = FefoSetting::getForBusiness($business_id)->fefo_enabled;
 
         $products_count = Product::where('business_id', $business_id)->count();
         $low_stock_count = DB::table('products')
@@ -39,7 +49,15 @@ class StockController extends Controller
                     })
                     ->withSum('stocks', 'productStock')
                     ->where('business_id', $business_id)
-                    ->with('stocks:id,batch_no,expire_date,product_id,productStock')
+                    ->with(['stocks' => function ($query) use ($fefoEnabled) {
+                        $query->select('id', 'batch_no', 'expire_date', 'product_id', 'productStock', 'created_at');
+                        if ($fefoEnabled) {
+                            // FEFO: Order batches by nearest expiry first
+                            $query->orderByRaw('CASE WHEN expire_date IS NULL THEN 1 ELSE 0 END')
+                                  ->orderBy('expire_date', 'asc')
+                                  ->orderBy('id', 'asc');
+                        }
+                    }])
                     ->latest()
                     ->paginate(10);
 
