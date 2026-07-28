@@ -10,6 +10,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('inventory')) {
+            return;
+        }
         Schema::create('inventory', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('company_id')->comment('معرف الشركة');
@@ -61,10 +64,7 @@ return new class extends Migration
             $table->index('status', 'idx_inventory_status');
             $table->index('quantity', 'idx_inventory_quantity');
 
-            // Check Constraints
-            $table->check('quantity >= 0');
-            $table->check('reserved_quantity >= 0');
-            $table->check('reserved_quantity <= quantity');
+            // Note: Check constraints skipped for SQLite compatibility
         });
     }
 

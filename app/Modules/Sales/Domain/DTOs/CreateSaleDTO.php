@@ -14,6 +14,7 @@ class CreateSaleDTO
 {
     /**
      * @param array<array{product_id: string, quantity: float, unit_price: float, discount?: float, tax?: float}> $items
+     * @param array<array{payment_method: string, amount: float, reference_number?: string, transaction_id?: string}>|null $payments
      */
     public function __construct(
         public readonly array $items,
@@ -30,6 +31,10 @@ class CreateSaleDTO
         public readonly ?string $notes = null,
         public readonly ?string $created_by = null,
         public readonly ?string $prescription_id = null,
+        public readonly ?array $payments = null,
+        public readonly ?string $cash_register_id = null,
+        public readonly ?string $insurance_claim_id = null,
+        public readonly ?array $wallet_data = null,
     ) {}
 
     /**
@@ -52,6 +57,10 @@ class CreateSaleDTO
             notes: $data['notes'] ?? null,
             created_by: $data['created_by'] ?? null,
             prescription_id: $data['prescription_id'] ?? null,
+            payments: $data['payments'] ?? null,
+            cash_register_id: $data['cash_register_id'] ?? null,
+            insurance_claim_id: $data['insurance_claim_id'] ?? null,
+            wallet_data: $data['wallet_data'] ?? null,
         );
     }
 

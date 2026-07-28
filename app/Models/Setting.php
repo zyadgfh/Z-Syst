@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Setting extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'company_id',
@@ -21,6 +22,9 @@ class Setting extends Model
         'type',
         'is_public',
     ];
+
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $casts = [
         'is_public' => 'boolean',

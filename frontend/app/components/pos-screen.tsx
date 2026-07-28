@@ -75,7 +75,18 @@ const PAYMENT_METHODS = [
   { id: "cash", label: "💰 Cash", icon: "💵" },
   { id: "card", label: "💳 Card", icon: "💳" },
   { id: "wallet", label: "📱 Wallet", icon: "📱" },
+  { id: "vodafone_cash", label: "📱 Vodafone Cash", icon: "📱" },
+  { id: "instapay", label: "💳 InstaPay", icon: "💳" },
   { id: "insurance", label: "🏥 Insurance", icon: "🏥" },
+  { id: "credit", label: "💳 Credit", icon: "📝" },
+];
+
+const WALLET_PROVIDERS = [
+  { id: "vodafone_cash", label: "فودافون كاش" },
+  { id: "orange_cash", label: "أورانج كاش" },
+  { id: "etisalat_cash", label: "اتصالات كاش" },
+  { id: "instapay", label: "إنستاباي" },
+  { id: "we_pay", label: "WE Pay" },
 ];
 
 const CURRENCY = new Intl.NumberFormat("en-US", {
@@ -291,8 +302,30 @@ export default function PosScreen() {
   };
 
   // ══════════════════════════════════════════════════════════════════════════
-  //  Receipt preview
+  //  Receipt preview - opens browser print dialog or sends to thermal printer
   // ══════════════════════════════════════════════════════════════════════════
+
+  const printThermalReceipt = async () => {
+    if (!lastSale?.id) return;
+    
+    try {
+      const response = await fetch(`${API_BASE}/pos-printer/receipt/${lastSale.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      if (!response.ok) throw new Error("Failed to get thermal receipt");
+      
+      const { data } = await response.json();
+      
+      // Try to print via WebUSB or send to server for network printer
+      // For now, log the commands that would be sent to thermal printer
+      console.log('ESC/POS Commands:', data.base64_commands);
+      setStatusMessage("🖨️ Thermal receipt ready - check console for ESC/POS commands");
+      
+    } catch (error) {
+      setStatusMessage(`❌ Thermal print failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
 
   const openReceipt = () => {
     if (!lastSale) return;
@@ -669,12 +702,18 @@ export default function PosScreen() {
                   <p className="mt-1 text-2xl font-bold text-white">
                     {CURRENCY.format(lastSale.total_amount)}
                   </p>
-                  <div className="mt-3 flex justify-center gap-3">
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-center sm:gap-3">
                     <button
                       onClick={openReceipt}
                       className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-400"
                     >
-                      🧾 Print Receipt
+                      🖨️ Print Receipt
+                    </button>
+                    <button
+                      onClick={printThermalReceipt}
+                      className="rounded-xl bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-500"
+                    >
+                      🧾 Thermal Print
                     </button>
                     <button
                       onClick={() => {

@@ -10,12 +10,15 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('ticket_messages')) {
+            return;
+        }
         Schema::create('ticket_messages', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('ticket_id')->comment('معرف التذكرة');
             $table->uuid('user_id')->nullable()->comment('معرف المستخدم');
             $table->text('message')->comment('الرسالة');
-            $table->jsonb('attachments')->nullable()->comment('المرفقات');
+            $table->json('attachments')->nullable()->comment('المرفقات');
             $table->boolean('is_internal')->default(false)->comment('داخلي');
             $table->timestamps();
 

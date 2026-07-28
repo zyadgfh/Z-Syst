@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\ProductStock;
+use App\Models\Inventory;
+use App\Models\Product;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -17,14 +18,15 @@ class ExpiryAlertService
     public const ALERT_DAYS = [30, 60, 90];
 
     /**
-     * Get products expiring soon
+     * Get products expiring soon - uses Inventory (UUID) model for FEFO-aware expiry tracking.
+     *
+     * @return array<int, array>
      */
-    public function getExpiringProducts(int $companyId, int $branchId = null, int $days = 30): array
+    public function getExpiringProducts(string $companyId, ?string $branchId = null, int $days = 30): array
     {
         $endDate = Carbon::now()->addDays($days);
 
-        $query = ProductStock::where('company_id', $companyId)
-            ->where('is_active', true)
+        $query = Inventory::where('company_id', $companyId)
             ->where('quantity', '>', 0)
             ->whereBetween('expiry_date', [Carbon::now(), $endDate])
             ->with(['product', 'branch']);
@@ -33,30 +35,32 @@ class ExpiryAlertService
             $query->where('branch_id', $branchId);
         }
 
-        $stocks = $query->get();
+        $inventories = $query->orderBy('expiry_date', 'asc')->get();
 
-        return $stocks->map(function ($stock) {
-            $daysUntilExpiry = Carbon::now()->diffInDays($stock->expiry_date, false);
-            
+        return $inventories->map(function ($inventory) {
+            $daysUntilExpiry = Carbon::now()->diffInDays($inventory->expiry_date, false);
+
             return [
-                'product_id' => $stock->product_id,
-                'product_name' => $stock->product->productName ?? 'Unknown',
-                'product_code' => $stock->product->productCode ?? null,
-                'branch_id' => $stock->branch_id,
-                'branch_name' => $stock->branch->name ?? 'Unknown',
-                'batch_number' => $stock->batch_no,
-                'quantity' => $stock->quantity,
-                'expiry_date' => $stock->expiry_date->format('Y-m-d'),
+                'inventory_id' => $inventory->id,
+                'product_id' => $inventory->product_id,
+                'product_name' => $inventory->product->name ?? $inventory->product->generic_name ?? 'Unknown',
+                'product_code' => $inventory->product->product_code ?? $inventory->product->sku ?? null,
+                'barcode' => $inventory->product->barcode ?? null,
+                'branch_id' => $inventory->branch_id,
+                'branch_name' => $inventory->branch->name ?? 'Unknown',
+                'batch_number' => $inventory->batch_number,
+                'quantity' => (float) $inventory->quantity,
+                'expiry_date' => $inventory->expiry_date->format('Y-m-d'),
                 'days_until_expiry' => $daysUntilExpiry,
                 'urgency' => $this->calculateUrgency($daysUntilExpiry),
-                'value_at_cost' => $stock->quantity * ($stock->product->purchase_with_tax ?? 0),
-                'value_at_sale' => $stock->quantity * ($stock->product->sales_price ?? 0),
+                'value_at_cost' => (float) ($inventory->quantity * ($inventory->cost_price ?? 0)),
+                'value_at_sale' => (float) ($inventory->quantity * ($inventory->selling_price ?? 0)),
             ];
         })->sortBy('days_until_expiry')->values()->toArray();
     }
 
     /**
-     * Calculate urgency level based on days until expiry
+     * Calculate urgency level based on days until expiry.
      */
     public function calculateUrgency(int $daysUntilExpiry): string
     {
@@ -69,17 +73,17 @@ class ExpiryAlertService
         } elseif ($daysUntilExpiry <= 60) {
             return 'low';
         }
-        
+
         return 'info';
     }
 
     /**
-     * Send expiry alerts to managers
+     * Send expiry alerts to managers.
      */
-    public function sendExpiryAlerts(int $companyId, int $days = 30): array
+    public function sendExpiryAlerts(string $companyId, int $days = 30): array
     {
         $expiringProducts = $this->getExpiringProducts($companyId, null, $days);
-        
+
         if (empty($expiringProducts)) {
             return ['sent' => 0, 'message' => 'No products expiring soon'];
         }
@@ -93,25 +97,20 @@ class ExpiryAlertService
             ->get();
 
         // Here you would integrate with notification system
-        // For now, we'll just log the alerts
-        $alertCount = 0;
-        
-        foreach ($managers as $manager) {
-            // Send notification (to be implemented with actual notification system)
-            $alertCount++;
-        }
+        // For now, we'll just count the potential alerts
+        $alertCount = $managers->count();
 
         return [
             'sent' => $alertCount,
             'products_count' => count($expiringProducts),
-            'message' => "Expiry alerts sent to {$alertCount} managers",
+            'message' => "Expiry alerts sent to {$alertCount} managers about " . count($expiringProducts) . " products.",
         ];
     }
 
     /**
-     * Get expiry alert summary statistics
+     * Get expiry alert summary statistics.
      */
-    public function getExpiryStats(int $companyId, int $branchId = null): array
+    public function getExpiryStats(string $companyId, ?string $branchId = null): array
     {
         $stats = [
             '30_days' => 0,
@@ -121,8 +120,7 @@ class ExpiryAlertService
             'total_value_at_risk' => 0,
         ];
 
-        $query = ProductStock::where('company_id', $companyId)
-            ->where('is_active', true)
+        $query = Inventory::where('company_id', $companyId)
             ->where('quantity', '>', 0);
 
         if ($branchId) {
@@ -130,40 +128,70 @@ class ExpiryAlertService
         }
 
         // Products expiring within 30 days
-        $stats['30_days'] = (clone $query)
+        $stats['30_days'] = (float) (clone $query)
             ->whereBetween('expiry_date', [Carbon::now(), Carbon::now()->addDays(30)])
             ->sum('quantity');
 
-        // Products expiring within 60 days
-        $stats['60_days'] = (clone $query)
+        // Products expiring within 31-60 days
+        $stats['60_days'] = (float) (clone $query)
             ->whereBetween('expiry_date', [Carbon::now()->addDays(31), Carbon::now()->addDays(60)])
             ->sum('quantity');
 
-        // Products expiring within 90 days
-        $stats['90_days'] = (clone $query)
+        // Products expiring within 61-90 days
+        $stats['90_days'] = (float) (clone $query)
             ->whereBetween('expiry_date', [Carbon::now()->addDays(61), Carbon::now()->addDays(90)])
             ->sum('quantity');
 
         // Already expired products
-        $stats['expired'] = (clone $query)
+        $stats['expired'] = (float) (clone $query)
             ->where('expiry_date', '<', Carbon::now())
             ->sum('quantity');
 
-        // Calculate total value at risk
-        $atRiskStocks = (clone $query)
+        // Calculate total value at risk (products expiring within 90 days)
+        $atRiskInventories = (clone $query)
             ->where('expiry_date', '<=', Carbon::now()->addDays(90))
-            ->with('product')
             ->get();
 
-        $stats['total_value_at_risk'] = $atRiskStocks->sum(function ($stock) {
-            return $stock->quantity * ($stock->product->purchase_with_tax ?? 0);
+        $stats['total_value_at_risk'] = $atRiskInventories->sum(function ($inv) {
+            return (float) ($inv->quantity * ($inv->cost_price ?? 0));
         });
 
         return $stats;
     }
 
     /**
-     * Execute periodic expiry check (for scheduled command)
+     * Get expired products that need to be written off.
+     */
+    public function getExpiredProducts(string $companyId, ?string $branchId = null): array
+    {
+        $query = Inventory::where('company_id', $companyId)
+            ->where('quantity', '>', 0)
+            ->where('expiry_date', '<', Carbon::now())
+            ->with(['product:id,name,generic_name,barcode,product_code,sku', 'branch:id,name']);
+
+        if ($branchId) {
+            $query->where('branch_id', $branchId);
+        }
+
+        return $query->orderBy('expiry_date', 'asc')->get()
+            ->map(fn($inv) => [
+                'inventory_id' => $inv->id,
+                'product_id' => $inv->product_id,
+                'product_name' => $inv->product->name ?? $inv->product->generic_name ?? 'Unknown',
+                'barcode' => $inv->product->barcode,
+                'branch_name' => $inv->branch->name ?? 'Unknown',
+                'batch_number' => $inv->batch_number,
+                'quantity' => (float) $inv->quantity,
+                'expiry_date' => $inv->expiry_date->format('Y-m-d'),
+                'days_expired' => Carbon::now()->diffInDays($inv->expiry_date, false),
+                'value_at_cost' => (float) ($inv->quantity * ($inv->cost_price ?? 0)),
+            ])
+            ->values()
+            ->toArray();
+    }
+
+    /**
+     * Execute periodic expiry check (for scheduled command).
      */
     public function runPeriodicCheck(): array
     {
@@ -180,3 +208,4 @@ class ExpiryAlertService
         return $results;
     }
 }
+

@@ -10,6 +10,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('journal_entry_lines')) {
+            return;
+        }
         Schema::create('journal_entry_lines', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('journal_entry_id')->comment('معرف القيد');

@@ -10,12 +10,15 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('notifications')) {
+            return;
+        }
         Schema::create('notifications', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('type', 255)->comment('نوع الإشعار');
             $table->string('notifiable_type', 255)->comment('نوع المُرسل له');
             $table->uuid('notifiable_id')->comment('معرف المُرسل له');
-            $table->jsonb('data')->comment('البيانات');
+            $table->json('data')->comment('البيانات');
             $table->timestamp('read_at')->nullable()->comment('تاريخ القراءة');
             $table->timestamps();
 

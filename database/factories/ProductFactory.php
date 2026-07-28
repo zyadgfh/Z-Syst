@@ -27,7 +27,7 @@ class ProductFactory extends Factory
             'cost_price' => $this->faker->randomFloat(2, 5, 100),
             'selling_price' => $this->faker->randomFloat(2, 10, 200),
             'wholesale_price' => $this->faker->randomFloat(2, 8, 150),
-            'requires_prescription' => false,
+            'prescription_required' => false,
             'is_controlled' => false,
             'is_active' => true,
             'created_by' => 1,

@@ -10,6 +10,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('activity_logs')) {
+            return;
+        }
         Schema::create('activity_logs', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('company_id')->nullable()->comment('معرف الشركة');
@@ -19,7 +22,7 @@ return new class extends Migration
             $table->uuid('subject_id')->nullable()->comment('معرف الموضوع');
             $table->string('causer_type', 255)->nullable()->comment('نوع المُسبب');
             $table->uuid('causer_id')->nullable()->comment('معرف المُسبب');
-            $table->jsonb('properties')->nullable()->comment('الخصائص');
+            $table->json('properties')->nullable()->comment('الخصائص');
             $table->string('event', 100)->nullable()->comment('الحدث');
             $table->timestamps();
 

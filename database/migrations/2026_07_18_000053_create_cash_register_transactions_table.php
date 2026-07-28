@@ -10,6 +10,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('cash_register_transactions')) {
+            return;
+        }
         Schema::create('cash_register_transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('cash_register_id')->comment('معرف الصندوق');

@@ -9,9 +9,11 @@ use App\Events\StockTransferRejected;
 use App\Events\StockTransferShipped;
 use App\Models\Product;
 use App\Models\ProductStock;
+use App\Models\Inventory;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
 use App\Services\Stock\StockAllocationService;
+use App\Services\StockBatchService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
@@ -37,11 +39,26 @@ class StockTransferService extends BaseService
     protected StockMovementService $stockMovementService;
 
     /**
+     * The FefoStockService instance.
+     */
+    protected FefoStockService $fefoStockService;
+
+    /**
+     * The StockBatchService instance.
+     */
+    protected StockBatchService $stockBatchService;
+
+    /**
      * StockTransferService constructor.
      */
-    public function __construct(StockMovementService $stockMovementService)
-    {
+    public function __construct(
+        StockMovementService $stockMovementService,
+        FefoStockService $fefoStockService,
+        StockBatchService $stockBatchService
+    ) {
         $this->stockMovementService = $stockMovementService;
+        $this->fefoStockService = $fefoStockService;
+        $this->stockBatchService = $stockBatchService;
     }
 
     /**
@@ -220,6 +237,7 @@ class StockTransferService extends BaseService
 
     /**
      * Ship a stock transfer (deduct stock from source branch).
+     * Uses FEFO to allocate from nearest-expiry batches first.
      *
      * @throws \Exception
      */
@@ -240,12 +258,26 @@ class StockTransferService extends BaseService
                     'expiry_date' => $itemData['expiry_date'] ?? $transferItem->expiry_date,
                 ]);
 
-                // Deduct stock from source branch using StockAllocationService with pessimistic locking
-                StockAllocationService::allocateToProductStock(
+                // Allocate via FEFO from source branch
+                $allocations = $this->fefoStockService->allocate(
                     $transferItem->product_id,
-                    (int) $itemData['quantity_sent'],
-                    $transfer->from_branch_id
+                    $transfer->from_branch_id,
+                    (float) $itemData['quantity_sent']
                 );
+
+                // Deduct stock via FefoStockService (deducts Inventory + StockBatch + logs movement)
+                $this->fefoStockService->deduct(
+                    $allocations,
+                    'stock_transfer_ship',
+                    $transfer->id
+                );
+
+                // Update batch info on transfer item from actual allocation
+                if (!empty($allocations[0]['batch_number'])) {
+                    $transferItem->update([
+                        'batch_number' => $allocations[0]['batch_number'],
+                    ]);
+                }
             }
 
             // Update transfer status
@@ -267,6 +299,7 @@ class StockTransferService extends BaseService
 
     /**
      * Receive a stock transfer (add stock to destination branch).
+     * Uses FefoStockService to restore stock with full batch tracking.
      *
      * @throws \Exception
      */
@@ -285,15 +318,23 @@ class StockTransferService extends BaseService
                     'quantity_received' => $itemData['quantity_received'],
                 ]);
 
-                // Add stock to destination branch using StockAllocationService with pessimistic locking
-                StockAllocationService::addToProductStock([
-                    'company_id' => $transfer->company_id,
-                    'product_id' => $transferItem->product_id,
-                    'branch_id' => $transfer->to_branch_id,
-                    'quantity' => $itemData['quantity_received'],
-                    'batch_number' => $transferItem->batch_number,
-                    'expiry_date' => $transferItem->expiry_date?->toDateString(),
-                ]);
+                // Restore stock to destination branch via FefoStockService
+                $this->fefoStockService->restore(
+                    [
+                        [
+                            'product_id' => $transferItem->product_id,
+                            'branch_id' => $transfer->to_branch_id,
+                            'batch_number' => $transferItem->batch_number,
+                            'expiry_date' => $transferItem->expiry_date?->toDateString(),
+                            'quantity' => $itemData['quantity_received'],
+                            'unit_price' => $transferItem->unit_cost,
+                            'cost_price' => $transferItem->unit_cost,
+                            'company_id' => $transfer->company_id,
+                        ]
+                    ],
+                    'stock_transfer_receive',
+                    $transfer->id
+                );
             }
 
             // Update transfer status

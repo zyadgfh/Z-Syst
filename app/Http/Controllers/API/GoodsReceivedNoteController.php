@@ -9,6 +9,7 @@ use App\Models\GoodsReceivedNote;
 use App\Models\GrnItem;
 use App\Models\ProductStock;
 use App\Models\PurchaseOrder;
+use App\Services\Stock\StockAllocationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -74,25 +75,18 @@ class GoodsReceivedNoteController extends Controller
                     'rack_location' => $item['rack_location'] ?? null,
                 ]);
 
-                // Update product stock
-                $stock = ProductStock::firstOrNew([
+                // Update product stock using StockAllocationService
+                StockAllocationService::addToProductStock([
+                    'company_id' => $request->user()->company_id,
                     'product_id' => $item['product_id'],
                     'branch_id' => $request->branch_id,
+                    'quantity' => $item['quantity_received'],
                     'batch_number' => $item['batch_number'] ?? null,
+                    'expiry_date' => $item['expiry_date'] ?? null,
+                    'reorder_level' => 10,
+                    'reorder_quantity' => 50,
+                    'is_active' => true,
                 ]);
-
-                if ($stock->exists) {
-                    $stock->increment('quantity', $item['quantity_received']);
-                } else {
-                    $stock->fill([
-                        'company_id' => $request->user()->company_id,
-                        'quantity' => $item['quantity_received'],
-                        'reorder_level' => 10,
-                        'reorder_quantity' => 50,
-                        'expiry_date' => $item['expiry_date'] ?? null,
-                        'is_active' => true,
-                    ])->save();
-                }
             }
 
             // Update purchase order quantities

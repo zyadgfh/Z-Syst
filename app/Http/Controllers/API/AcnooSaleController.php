@@ -11,6 +11,7 @@ use App\Models\SaleDetails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Services\Stock\StockAllocationService;
 use App\Services\StockMovementService;
 use Illuminate\Support\Facades\Validator;
 
@@ -203,8 +204,12 @@ class AcnooSaleController extends Controller
                     ], 422);
                 }
 
-                // Deduct stock
-                $stock->update(['productStock' => max(0, (int) $stock->productStock - $quantity)]);
+                // Deduct stock using StockAllocationService
+                StockAllocationService::allocateToProductStock(
+                    $product->id,
+                    $quantity,
+                    $request->input('branch_id', 1)
+                );
 
                 // Log stock movement
                 $this->stockMovementService->logMovement(
@@ -392,7 +397,11 @@ class AcnooSaleController extends Controller
                     'purchase_price' => $productData['purchase_price'] ?? 0,
                 ];
 
-                Stock::where('batch_no', $productData['batch_no'])->decrement('productStock', $productData['quantities']);
+                StockAllocationService::allocateToProductStock(
+                    $productData['product_id'],
+                    $productData['quantities'],
+                    $request->user()->branch_id ?? $request->input('branch_id', 1)
+                );
             }
 
             SaleDetails::insert($saleDetails);
@@ -509,7 +518,11 @@ class AcnooSaleController extends Controller
                             ->first();
 
                 if ($stock) {
-                    $stock->increment('productStock', $prevItem->quantities);
+                    StockAllocationService::releaseFromProductStock(
+                        $prevItem->product_id,
+                        $prevItem->quantities,
+                        $request->user()->branch_id ?? $request->input('branch_id', 1)
+                    );
                 }
             }
 
@@ -538,7 +551,11 @@ class AcnooSaleController extends Controller
                 }
 
                 if ($stock) {
-                    $stock->decrement('productStock', $productData['quantities']);
+                    StockAllocationService::allocateToProductStock(
+                        $productData['product_id'],
+                        $productData['quantities'],
+                        $request->user()->branch_id ?? $request->input('branch_id', 1)
+                    );
                 }
             }
 
@@ -590,7 +607,7 @@ class AcnooSaleController extends Controller
         }
     }
 
-    public function destroy(Sale $sale)
+    public function destroy(Request $request, Sale $sale)
     {
         foreach ($sale->details as $detail) {
             $stock = Stock::where('product_id', $detail->product_id)
@@ -602,7 +619,11 @@ class AcnooSaleController extends Controller
             }
 
             if ($stock) {
-                $stock->increment('productStock', $detail->quantities);
+                StockAllocationService::releaseFromProductStock(
+                    $detail->product_id,
+                    $detail->quantities,
+                    $request->user()->branch_id ?? $request->input('branch_id', 1)
+                );
             }
         }
 

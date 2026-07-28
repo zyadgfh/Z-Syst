@@ -13,6 +13,7 @@ use App\Models\Product;
 use App\Models\Stock;
 use App\Services\ForecastingService;
 use App\Services\PrescriptionService;
+use App\Services\Stock\StockAllocationService;
 use App\Services\StockMovementService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -267,7 +268,11 @@ class PrescriptionController extends Controller
             ->first();
 
         if ($stock) {
-            $stock->update(['productStock' => max(0, (int) $stock->productStock - $newDispensed)]);
+            StockAllocationService::allocateToProductStock(
+                $product->id,
+                $newDispensed,
+                $prescription->branch_id
+            );
         }
 
         $this->stockMovementService->logMovement(
@@ -336,7 +341,11 @@ class PrescriptionController extends Controller
                 return response()->json(['message' => 'Insufficient stock for this item'], 422);
             }
 
-            $stock->update(['productStock' => max(0, (int) $stock->productStock - $quantity)]);
+            StockAllocationService::allocateToProductStock(
+                $product->id,
+                $quantity,
+                $request->input('branch_id', 1)
+            );
 
             $this->stockMovementService->logMovement(
                 (int) $product->id,

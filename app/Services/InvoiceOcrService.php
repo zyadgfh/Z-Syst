@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\Product;
 use App\Models\Supplier;
+use App\Services\Stock\StockAllocationService;
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
@@ -211,17 +212,13 @@ class InvoiceOcrService
                     ->where('batch_no', $item['batch_number'])
                     ->first();
 
-                if ($stock) {
-                    $stock->increment('productStock', $item['quantity']);
-                } else {
-                    \App\Models\Stock::create([
-                        'company_id' => $companyId,
-                        'product_id' => $product->id,
-                        'productStock' => $item['quantity'],
-                        'batch_no' => $item['batch_number'],
-                        'expire_date' => $item['expiry_date'],
-                    ]);
-                }
+                StockAllocationService::addToLegacyStock(
+                    $product->id,
+                    $item['quantity'],
+                    $item['batch_number'] ?? null,
+                    $item['expiry_date'] ?? null,
+                    $companyId
+                );
 
                 $updated[] = $product->productName;
             } catch (\Exception $e) {

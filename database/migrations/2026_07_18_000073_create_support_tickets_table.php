@@ -10,6 +10,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('support_tickets')) {
+            return;
+        }
         Schema::create('support_tickets', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('company_id')->nullable()->comment('معرف الشركة');

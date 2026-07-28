@@ -10,6 +10,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('grn_items')) {
+            return;
+        }
         Schema::create('grn_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('grn_id')->comment('معرف إذن الاستلام');

@@ -26,10 +26,10 @@ return new class extends Migration
                 $table->text('address')->nullable()->comment('العنوان');
                 $table->string('city', 100)->nullable()->comment('المدينة');
                 $table->string('blood_group', 10)->nullable()->comment('فصيلة الدم');
-                $table->jsonb('allergies')->default('[]')->comment('الحساسية');
-                $table->jsonb('chronic_conditions')->default('[]')->comment('الأمراض المزمنة');
-                $table->jsonb('current_medications')->default('[]')->comment('الأدوية الحالية');
-                $table->jsonb('medical_history')->default('{}')->comment('السجل الطبي');
+                $table->json('allergies')->default('[]')->comment('الحساسية');
+                $table->json('chronic_conditions')->default('[]')->comment('الأمراض المزمنة');
+                $table->json('current_medications')->default('[]')->comment('الأدوية الحالية');
+                $table->json('medical_history')->default('{}')->comment('السجل الطبي');
                 $table->uuid('insurance_id')->nullable()->comment('معرف التأمين');
                 $table->string('insurance_number', 100)->nullable()->comment('رقم التأمين');
                 $table->string('insurance_policy', 100)->nullable()->comment('سياسة التأمين');

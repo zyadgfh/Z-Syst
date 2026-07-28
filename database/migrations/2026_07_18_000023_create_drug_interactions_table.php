@@ -10,6 +10,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('drug_interactions')) {
+            return;
+        }
         Schema::create('drug_interactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('drug_a_id')->comment('الدواء أ');
@@ -32,10 +35,7 @@ return new class extends Migration
             // Unique Constraints
             $table->unique(['drug_a_id', 'drug_b_id'], 'uniq_drug_interactions_pair');
 
-            // Check Constraint
-            $table->check('drug_a_id < drug_b_id');
-
-            // Indexes
+// Indexes
             $table->index('severity', 'idx_drug_interactions_severity');
             $table->index('is_active', 'idx_drug_interactions_is_active');
         });

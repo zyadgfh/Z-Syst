@@ -10,6 +10,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('insurance_claim_items')) {
+            return;
+        }
         Schema::create('insurance_claim_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('insurance_claim_id')->comment('معرف المطالبة');

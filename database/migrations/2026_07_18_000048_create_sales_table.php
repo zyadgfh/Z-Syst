@@ -10,6 +10,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('sales')) {
+            return;
+        }
         Schema::create('sales', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('company_id')->comment('معرف الشركة');
@@ -34,7 +37,7 @@ return new class extends Migration
             $table->string('payment_status', 50)->default('paid')->comment('حالة الدفع');
             $table->integer('items_count')->default(0)->comment('عدد البنود');
             $table->text('notes')->nullable()->comment('ملاحظات');
-            $table->jsonb('metadata')->default('{}')->comment('بيانات إضافية');
+            $table->json('metadata')->default('{}')->comment('بيانات إضافية');
             $table->string('status', 50)->default('completed')->comment('الحالة');
             $table->uuid('voided_by')->nullable()->comment('ألغي بواسطة');
             $table->timestamp('voided_at')->nullable()->comment('تاريخ الإلغاء');

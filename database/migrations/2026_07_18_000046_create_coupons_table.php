@@ -10,6 +10,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('coupons')) {
+            return;
+        }
         Schema::create('coupons', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('company_id')->comment('معرف الشركة');
@@ -25,7 +28,7 @@ return new class extends Migration
             $table->timestamp('valid_from')->nullable()->comment('صالح من');
             $table->timestamp('valid_until')->nullable()->comment('صالح حتى');
             $table->boolean('is_active')->default(true)->comment('نشط');
-            $table->jsonb('applicable_products')->nullable()->comment('المنتجات المطبقة');
+            $table->json('applicable_products')->nullable()->comment('المنتجات المطبقة');
             $table->text('notes')->nullable()->comment('ملاحظات');
             $table->timestamps();
             $table->softDeletes();

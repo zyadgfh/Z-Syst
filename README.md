@@ -1,101 +1,71 @@
-**مشروع مدمج — مستودع العمل الموحد**
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-هذا المستودع يجمع عدة مشاريع وموديولات (واجهة خلفية Laravel، إضافات Modules، تطبيقات POS موبايل، أدوات مساعدة أخرى) في مكان واحد لغرض توحيد الميزات والصيانة.
+<p align="center">
+<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
-**نظرة عامة على الميزات المضمنة**
-- نظام خلفي مبني على Laravel 10 مع دعم حزم وموديولات عبر `nwidart/laravel-modules`.
-- نظام تعدد مستأجرين (tenant) عبر `HasCompany` trait و`TenantMiddleware` (انظر `README_PHASE1.md`).
-- تكامل بوابات دفع متعددة: PayPal, Stripe, Razorpay, Mollie, Paytm، إلخ (مذكور في `composer.json`).
-- نظام صلاحيات مستند إلى `spatie/laravel-permission`.
-- دعم تصدير/استيراد Excel عبر `maatwebsite/excel`.
-- موديولات جاهزة داخل مجلد `Modules/` (مثل `Super-Admin`, `HrmAddon`, Landing...).
-- واجهات موبايل/نقاط بيع (POS) على شكل مشاريع Flutter موجودة في مجلدات فرعية (`pharmacy-store-app`, `pospro-app...`).
-- أدوات مساعدة وأدوات خارجية موجودة في المجلد `free-claude-code` و`Cody` (أدوات منفصلة — غير مطلوبة لتشغيل الـ backend).
+## About Laravel
 
-**مبادئ الدمج التي تم اعتمادها**
-- الاحتفاظ بالميزات الوظيفية: أبقينا كل الموديولات والواجهات التي تقدم قدرات عملية (موديولات Laravel، بوابات دفع، دعم تعدد الشركات، تطبيقات POS).
-- إزالة التكرار: توحيد التوثيق وتعليمات التشغيل في هذا الملف وعدم ترك نسخ متضاربة متناثرة.
-- فصل الأدوات الخارجية: حفظ أدوات مستقلة (مثل `free-claude-code`) كمشاريع مساعدة وليس جزءاً من تشغيل الـ backend الافتراضي.
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
----
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-**البدء السريع (Laravel backend)**
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-المتطلبات الأساسية:
-- PHP >= 8.1
-- Composer
-- Node.js و npm (لتجميع الأصول عبر Vite)
-- قاعدة بيانات (MySQL/MariaDB)
+## Learning Laravel
 
-خطوات الإعداد:
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-```bash
-# تثبيت الاعتمادات PHP
-composer install
+You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
 
-# انسخ ملف البيئة وعدل القيم (DB, CACHE, MAIL, ...)
-cp .env.example .env
-php artisan key:generate
+If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-# إعداد قاعدة البيانات وتشغيل المهاجرات
-php artisan migrate --seed
+## Laravel Sponsors
 
-# تثبيت حزم الجافاسكربت وبناء الأصول
-npm install
-npm run dev # أو npm run build للإنتاج
+We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
 
-# تشغيل الخادم محلياً
-php artisan serve
-```
+### Premium Partners
 
-ملاحظات مهمة:
-- لا تترك بيانات اعتماد افتراضية في ملفات الوثائق. إن كنت بحاجة لحساب إداري محلي، استعمل ملفات seed أو أوامر artisan المخصصة لإنشاء مستخدم اختباري.
-- ملفات `composer.json` و`package.json` متعددة في الموديولات الفرعية — الاعتماد الرئيسي للتشغيل الخلفي محفوظ في جذر المشروع. الموديولات قد تحتفظ بملفاتها المحلية لأغراض تطوير أو بناء فرعي.
+- **[Vehikl](https://vehikl.com/)**
+- **[Tighten Co.](https://tighten.co)**
+- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+- **[64 Robots](https://64robots.com)**
+- **[Cubet Techno Labs](https://cubettech.com)**
+- **[Cyber-Duck](https://cyber-duck.co.uk)**
+- **[Many](https://www.many.co.uk)**
+- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
+- **[DevSquad](https://devsquad.com)**
+- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
+- **[OP.GG](https://op.gg)**
+- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
+- **[Lendio](https://lendio.com)**
 
----
+## Contributing
 
-**كيف تم التعامل مع التوثيق والملفات المتضاربة**
-- `README.md` الرئيسي: موحّد هنا ويشرح المشروع المدمج وطريقة التشغيل الأساسية.
-- `README_PHASE1.md`: احتفظنا به كمستند تنفيذي يشرح آليات الـ tenant والطريقة الموصى بها؛ النقاط الأساسية دمجت في هذا الـ README.
-- ملفات README فرعية (مشاريع Flutter، أدوات مستقلة): لم تُحذف لكنها صنفت كمشاريع مستقلة؛ إن رغبت بمسحها سأقترح حذفها أو نقلها إلى مجلد `third_party/` لتقليل الفوضى.
-- ملفات الإعدادات المتضاربة: اقتراحات
-	- اعتمد ملف `.env` واحد في جذر المشروع كمرجع. إذا كانت موديولات تحتاج متغيرات إضافية، أدرجها في `.env.example` مع توضيح الفئة.
-	- حافظ على `composer.json` الجذر لإدارة اعتمادات الـ backend. اترك `composer.json` داخل موديولات فقط إذا كانت الموديولات مصممة كي تُنشر كحزم مستقلة.
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
----
+## Code of Conduct
 
-**أوامر مفيدة**
-- تشغيل اختبارات PHPUnit:
-```bash
-vendor/bin/phpunit
-```
-- تشغيل فحص ثابت (PHPStan) كما كان مستخدماً:
-```bash
-vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=1G
-```
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
----
+## Security Vulnerabilities
 
-**ملاحظة حول الأدوات الكبيرة المكتشفة**
-- `free-claude-code` و`Cody` وملفات `frontend` داخل `Cody` هي مشاريع وأدوات مستقلة (خاصة بتشغيل وكلاء أو واجهات منفصلة). نوصي إبقاؤها كمجلدات مستقلة وعدم مزج إعداداتها مع إعدادات الـ backend الافتراضي.
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
----
+## License
 
-**ملخص سريع للتغييرات المقترحة / المنفذة الآن**
-- ما قمتُ به الآن:
-	- دمج وتوحيد التوثيق في `README.md` الرئيسي (الملف الحالي).
-	- احتفظت بـ `README_PHASE1.md` كمستند تفصيلي لآلية التعدد (tenant).
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Authenticate
 
-- ملفات أو محتويات لم تُحذف حالياً (اقتراح):
-	- لم أحذف ملفات المشروع أو الموديولات الفعلية (حتى لا أفقد ميزات وظيفية). بدلاً من ذلك، وحدت التوثيق ووضعت توصيات للحذف أو النقل.
-
----
-
-إذا رغبت، أستطيع الآن:
-- تنفيذ تنظيف إضافي (حذف README الفرعية غير الضرورية أو نقلها إلى `third_party/`).
-- توحيد متغيرات البيئة في `.env.example` وفتح موجز بتعارضات الـ `composer.json` و`package.json` ودمج ما يلزم.
-
-يرجى إخباري ما إذا أبدأ بتنظيف الملفات الغير ضرورية فعلياً أو أكتفي بهذه التوحيد للتوثيق في المرحلة الأولى.
-
----
-© وحدة توثيق — مولَّف تلقائياً لتوحيد المشروع المدمج
+email : admin@gmail.com <br>
+pass : password
+"# Z-Syst" 

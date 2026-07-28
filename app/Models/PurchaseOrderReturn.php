@@ -15,6 +15,20 @@ class PurchaseOrderReturn extends Model
 {
     use HasCompany, HasFactory, SoftDeletes;
 
+    // ────────────────── Status Constants ──────────────────
+    public const STATUS_DRAFT = 'draft';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_CANCELLED = 'cancelled';
+
+    /**
+     * All valid status values.
+     */
+    public const STATUSES = [
+        self::STATUS_DRAFT,
+        self::STATUS_APPROVED,
+        self::STATUS_CANCELLED,
+    ];
+
     protected $fillable = [
         'company_id',
         'purchase_order_id',
@@ -48,5 +62,29 @@ class PurchaseOrderReturn extends Model
     public function items(): HasMany
     {
         return $this->hasMany(PurchaseOrderReturnItem::class);
+    }
+
+    /**
+     * Get the total amount of all return items.
+     */
+    public function totalAmount(): float
+    {
+        return (float) $this->items->sum('total');
+    }
+
+    /**
+     * Get the total quantity returned across all items.
+     */
+    public function totalQuantityReturned(): float
+    {
+        return (float) $this->items->sum('quantity_returned');
+    }
+
+    /**
+     * Check if the return can be edited (only in draft status).
+     */
+    public function canEdit(): bool
+    {
+        return $this->status === self::STATUS_DRAFT;
     }
 }

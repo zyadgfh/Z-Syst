@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if tables already exist (conflicts with other migration files)
+        if (Schema::hasTable('companies')) {
+            return;
+        }
+
         Schema::create('companies', function (Blueprint $table) {
             $table->id();
             $table->string('name');

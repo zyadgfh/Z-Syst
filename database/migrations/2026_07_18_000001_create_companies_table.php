@@ -29,7 +29,7 @@ return new class extends Migration
                 $table->string('subscription_plan', 50)->default('starter')->comment('خطة الاشتراك');
                 $table->string('subscription_status', 50)->default('active')->comment('حالة الاشتراك');
                 $table->timestamp('subscription_ends')->nullable()->comment('انتهاء الاشتراك');
-                $table->jsonb('settings')->default('{}')->comment('الإعدادات');
+                $table->json('settings')->default('{}')->comment('الإعدادات');
                 $table->boolean('is_active')->default(true)->comment('نشط');
                 $table->timestamps();
                 $table->softDeletes();

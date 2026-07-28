@@ -79,6 +79,14 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::group(['middleware' => ['auth:sanctum', 'tenant']], function () {
+        // Wallet Settings (Admin only - manage_wallet_settings permission)
+        Route::prefix('admin')->group(function () {
+            Route::get('wallet-settings', [\App\Http\Controllers\Admin\WalletSettingController::class, 'index']);
+            Route::put('wallet-settings', [\App\Http\Controllers\Admin\WalletSettingController::class, 'update']);
+        });
+        // Public wallet phone endpoint (any authenticated user)
+        Route::get('wallet-phone', [\App\Http\Controllers\Admin\WalletSettingController::class, 'getWalletPhone']);
+
         Route::get('drugs/barcode/{barcode}', [\App\Http\Controllers\API\V1\DrugController::class, 'byBarcode']);
 
         Route::get('summary', [Api\StatisticsController::class, 'summary']);
@@ -182,6 +190,11 @@ Route::prefix('v1')->group(function () {
         Route::post('purchase-orders/{purchaseOrder}/cancel', [API\V1\PurchaseOrderController::class, 'cancel']);
 
         // ============================================================
+        // V1 - Purchase Order Returns (full workflow)
+        // ============================================================
+        Route::apiResource('purchase-order-returns', API\V1\PurchaseOrderReturnController::class);
+
+        // ============================================================
         // V1 - Stock Transfers (full workflow)
         // ============================================================
         Route::get('stock-transfers/statistics', [API\V1\StockTransferController::class, 'statistics']);
@@ -215,6 +228,11 @@ Route::prefix('v1')->group(function () {
             Route::post('goods-received-notes', [\App\Http\Controllers\Admin\GoodsReceivedNoteController::class, 'store']);
             Route::get('goods-received-notes/{goodsReceivedNote}', [\App\Http\Controllers\Admin\GoodsReceivedNoteController::class, 'show']);
             Route::delete('goods-received-notes/{goodsReceivedNote}', [\App\Http\Controllers\Admin\GoodsReceivedNoteController::class, 'destroy']);
+
+            // ============================================================
+            // V1 - Purchase Order Returns (Admin full workflow)
+            // ============================================================
+            Route::apiResource('purchase-order-returns', \App\Http\Controllers\Admin\PurchaseOrderReturnController::class);
         });
 
         Route::get('goods-received', [Api\GoodsReceivedNoteController::class, 'index']);
@@ -236,10 +254,26 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('cash-register', API\V1\CashRegisterController::class)->only(['index']);
 
         // ============================================================
+        // V1 - POS Printer (ESC/POS Thermal Printing)
+        // ============================================================
+        Route::get('pos-printer/settings', [API\V1\PosPrinterController::class, 'settings']);
+        Route::get('pos-printer/receipt/{sale}', [API\V1\PosPrinterController::class, 'receipt']);
+        Route::post('pos-printer/print', [API\V1\PosPrinterController::class, 'print']);
+
+        // ============================================================
         // V1 - Stock Movements
         // ============================================================
         Route::get('stock-movements/history', [API\V1\StockMovementController::class, 'history']);
         Route::get('stock-movements/summary', [API\V1\StockMovementController::class, 'summary']);
+
+        // ============================================================
+        // V1 - FEFO Stock (First Expiry, First Out)
+        // ============================================================
+        Route::get('fefo/priority/{product}', [API\V1\FefoStockController::class, 'priority']);
+        Route::get('fefo/overview/{product}', [API\V1\FefoStockController::class, 'overview']);
+        Route::get('fefo/check-availability', [API\V1\FefoStockController::class, 'checkAvailability']);
+        Route::get('fefo/expiring', [API\V1\FefoStockController::class, 'expiring']);
+        Route::get('fefo/low-stock', [API\V1\FefoStockController::class, 'lowStock']);
 
         // ============================================================
         // V1 - Notifications

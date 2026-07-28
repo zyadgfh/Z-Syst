@@ -10,6 +10,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('insurance_plans')) {
+            return;
+        }
         Schema::create('insurance_plans', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('insurance_company_id')->comment('معرف شركة التأمين');
@@ -19,8 +22,8 @@ return new class extends Migration
             $table->decimal('max_coverage', 15, 3)->default(0)->comment('أقصى تغطية');
             $table->decimal('deductible', 15, 3)->default(0)->comment('الاشتراكية');
             $table->decimal('copay_percentage', 5, 2)->default(0)->comment('نسبة التحمل');
-            $table->jsonb('covered_categories')->nullable()->comment('الفئات المغطاة');
-            $table->jsonb('excluded_categories')->nullable()->comment('الفئات المستبعدة');
+            $table->json('covered_categories')->nullable()->comment('الفئات المغطاة');
+            $table->json('excluded_categories')->nullable()->comment('الفئات المستبعدة');
             $table->boolean('is_active')->default(true)->comment('نشط');
             $table->timestamps();
             $table->softDeletes();

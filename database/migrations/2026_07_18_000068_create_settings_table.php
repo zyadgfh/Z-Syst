@@ -10,6 +10,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('settings')) {
+            return;
+        }
         Schema::create('settings', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('company_id')->nullable()->comment('معرف الشركة');

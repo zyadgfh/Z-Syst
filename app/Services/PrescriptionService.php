@@ -10,6 +10,7 @@ use App\Models\Prescription;
 use App\Models\PrescriptionItem;
 use App\Models\Product;
 use App\Models\Stock;
+use App\Services\Stock\StockAllocationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -136,8 +137,12 @@ class PrescriptionService
             ->first();
 
         if ($stock) {
-            $newStock = max(0, (int) $stock->productStock - $quantity);
-            $stock->update(['productStock' => $newStock]);
+            StockAllocationService::allocateToProductStock(
+                $stock->product_id,
+                $quantity,
+                $prescription->branch_id,
+                $stock->id
+            );
 
             // Log stock movement
             $this->stockMovementService->logMovement(
@@ -192,7 +197,12 @@ class PrescriptionService
                 ->first();
 
             if ($stock) {
-                $stock->update(['productStock' => max(0, (int) $stock->productStock - $newDispensed)]);
+                StockAllocationService::allocateToProductStock(
+                    $product->id,
+                    $newDispensed,
+                    $prescription->branch_id,
+                    $stock->id
+                );
             }
 
             $this->stockMovementService->logMovement(

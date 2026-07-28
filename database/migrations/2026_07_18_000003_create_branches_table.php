@@ -21,11 +21,11 @@ return new class extends Migration
                 $table->string('city', 100)->nullable()->comment('المدينة');
                 $table->string('phone', 50)->nullable()->comment('الهاتف');
                 $table->string('email', 255)->nullable()->comment('البريد الإلكتروني');
-                $table->jsonb('working_hours')->nullable()->comment('ساعات العمل');
+                $table->json('working_hours')->nullable()->comment('ساعات العمل');
                 $table->string('timezone', 50)->default('Africa/Cairo')->comment('المنطقة الزمنية');
                 $table->string('currency', 3)->default('EGP')->comment('العملة');
                 $table->decimal('tax_rate', 5, 2)->default(0)->comment('معدل الضريبة');
-                $table->jsonb('receipt_template')->default('{}')->comment('قالب الإيصال');
+                $table->json('receipt_template')->default('{}')->comment('قالب الإيصال');
                 $table->boolean('is_active')->default(true)->comment('نشط');
                 $table->uuid('created_by')->nullable()->comment('منشئ');
                 $table->uuid('updated_by')->nullable()->comment('محدث');

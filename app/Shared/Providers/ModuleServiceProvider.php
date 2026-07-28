@@ -28,10 +28,16 @@ class ModuleServiceProvider extends ServiceProvider
 
         foreach ($modules as $module) {
             $moduleName = basename($module);
-            $providerClass = "App\\Modules\\{$moduleName}\\ModuleServiceProvider";
+            $providerCandidates = [
+                "App\\Modules\\{$moduleName}\\ModuleServiceProvider",
+                "App\\Modules\\{$moduleName}\\{$moduleName}Module",
+            ];
 
-            if (class_exists($providerClass)) {
-                $this->app->register($providerClass);
+            foreach ($providerCandidates as $providerClass) {
+                if (class_exists($providerClass)) {
+                    $this->app->register($providerClass);
+                    break;
+                }
             }
         }
     }

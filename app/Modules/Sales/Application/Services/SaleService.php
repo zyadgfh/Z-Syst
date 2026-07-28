@@ -7,9 +7,13 @@ namespace App\Modules\Sales\Application\Services;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleItem;
+use App\Models\SalePayment;
+use App\Models\CashRegister;
 use App\Models\StockMovement;
 use App\Modules\Sales\Domain\DTOs\CreateSaleDTO;
 use App\Modules\Sales\Domain\Events\SaleCreated;
+use App\Modules\Sales\Domain\Events\SaleVoided;
+use App\Services\FefoStockService;
 use App\Services\StockBatchService;
 use App\Services\StockMovementService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -32,6 +36,7 @@ class SaleService
     public function __construct(
         protected StockBatchService $stockBatchService,
         protected StockMovementService $stockMovementService,
+        protected FefoStockService $fefoStockService,
     ) {}
 
     /**
@@ -216,13 +221,23 @@ class SaleService
 
             // ── Step 5: Create SaleItems & Deduct Stock ──
             foreach ($items as $index => $item) {
+                $productName = $item['product']->name
+                    ?? $item['product']->product_name
+                    ?? $item['product']->generic_name
+                    ?? 'Product';
+
                 $saleItem = SaleItem::create([
+                    'id' => \Illuminate\Support\Str::uuid()->toString(),
                     'sale_id' => $sale->id,
                     'product_id' => $item['product']->id,
+                    'name_snapshot' => $productName,
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
+                    'cost_price' => (float) ($item['product']->cost_price ?? 0),
                     'discount' => $item['discount'],
-                    'tax' => $item['tax'],
+                    'tax_rate' => $dto->tax_rate ?? 0,
+                    'tax_amount' => $item['tax'],
+                    'total' => $item['unit_price'] * $item['quantity'],
                     'line_total' => $item['line_total'],
                 ]);
 
@@ -237,10 +252,41 @@ class SaleService
                 }
             }
 
-            // ── Step 7: Dispatch event ──
+            // ── Step 7: Record SalePayments (supports split payments) ──
+            $payments = $dto->payments ?? [];
+            if (empty($payments) && $amountPaid > 0) {
+                // Default single payment
+                $payments[] = [
+                    'payment_method' => $dto->payment_method ?? 'cash',
+                    'amount' => $amountPaid,
+                ];
+            }
+
+            foreach ($payments as $paymentData) {
+                SalePayment::create([
+                    'sale_id' => $sale->id,
+                    'payment_method' => $paymentData['payment_method'] ?? 'cash',
+                    'amount' => $paymentData['amount'],
+                    'reference_number' => $paymentData['reference_number'] ?? null,
+                    'transaction_id' => $paymentData['transaction_id'] ?? null,
+                ]);
+            }
+
+            // ── Step 8: Update Cash Register if open ──
+            if (!empty($dto->cash_register_id)) {
+                $cashRegister = CashRegister::find($dto->cash_register_id);
+                if ($cashRegister && $cashRegister->status === 'open') {
+                    $cashRegister->increment('total_sales', $totalAmount);
+                }
+            }
+
+            // ── Step 9: Dispatch event ──
             event(new SaleCreated($sale));
 
-            return $sale->load(['items.product:id,name,product_name,barcode,sales_price']);
+            return $sale->load([
+                'items.product:id,name,product_name,barcode,sales_price',
+                'payments',
+            ]);
         });
     }
 
@@ -348,6 +394,80 @@ class SaleService
             ]);
 
             return $sale->fresh();
+        });
+    }
+
+    /**
+     * Void/Cancel a sale and restore stock via FEFO.
+     *
+     * Steps:
+     * 1. Validate sale is not already voided
+     * 2. Restore stock to original batches via FefoStockService::restore()
+     * 3. Log stock movements for each item (restoration)
+     * 4. Update sale status to 'voided'
+     * 5. Update Cash Register if applicable
+     * 6. Dispatch SaleVoided event
+     *
+     * @throws \RuntimeException if sale is already voided
+     */
+    public function voidSale(string $saleId, ?string $reason = null): Sale
+    {
+        return DB::transaction(function () use ($saleId, $reason) {
+            $sale = Sale::with(['items', 'items.product'])->findOrFail($saleId);
+
+            if ($sale->status === 'voided') {
+                throw new \RuntimeException("Sale {$sale->invoice_number} is already voided.");
+            }
+
+            // Restore stock for each item
+            foreach ($sale->items as $item) {
+                // Check if item has FEFO allocation (inventory_id)
+                if ($item->inventory_id) {
+                    // Restore to the specific inventory batch
+                    $this->fefoStockService->restore(
+                        allocations: [[
+                            'inventory_id' => $item->inventory_id,
+                            'product_id' => $item->product_id,
+                            'branch_id' => $sale->branch_id,
+                            'batch_number' => $item->batch_number,
+                            'quantity' => (float) $item->quantity,
+                            'unit_price' => (float) $item->unit_price,
+                            'cost_price' => (float) ($item->cost_price ?? 0),
+                        ]],
+                        referenceType: 'sale_void',
+                        referenceId: $sale->id,
+                    );
+                } else {
+                    // Legacy mode: log restore movement
+                    $this->stockMovementService->logMovement(
+                        productId: $item->product_id,
+                        branchId: $sale->branch_id,
+                        movementType: 'in',
+                        quantity: (float) $item->quantity,
+                        referenceType: 'sale_void',
+                        referenceId: $sale->id,
+                        batchNumber: $item->batch_number,
+                        extra: ['restored_from_sale' => $sale->id, 'reason' => $reason]
+                    );
+                }
+            }
+
+            // Update sale status
+            $sale->update([
+                'status' => 'voided',
+                'void_reason' => $reason,
+                'voided_at' => now(),
+            ]);
+
+            // Update Cash Register if applicable
+            if ($sale->cashRegister) {
+                $sale->cashRegister->decrement('total_sales', $sale->total_amount);
+            }
+
+            // Dispatch event
+            event(new SaleVoided($sale, $reason));
+
+            return $sale->fresh(['items.product', 'payments']);
         });
     }
 

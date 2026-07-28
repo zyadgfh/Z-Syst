@@ -13,6 +13,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('loyalty_transactions')) {
+            return;
+        }
         Schema::create('loyalty_transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained()->cascadeOnDelete();

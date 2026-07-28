@@ -11,6 +11,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('products')) {
+            return;
+        }
         Schema::create('products', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('company_id')->comment('معرف الشركة');
@@ -42,7 +45,7 @@ return new class extends Migration
             $table->decimal('discount_percentage', 5, 2)->default(0)->comment('نسبة الخصم');
             $table->boolean('is_active')->default(true)->comment('نشط');
             $table->string('image_path', 500)->nullable()->comment('مسار الصورة');
-            $table->jsonb('metadata')->default('{}')->comment('بيانات إضافية');
+            $table->json('metadata')->default('{}')->comment('بيانات إضافية');
             $table->uuid('created_by')->nullable()->comment('منشئ');
             $table->uuid('updated_by')->nullable()->comment('محدث');
             $table->timestamps();
@@ -81,21 +84,15 @@ return new class extends Migration
             $table->index('requires_prescription', 'idx_products_requires_prescription');
             $table->index('is_controlled', 'idx_products_is_controlled');
             $table->index('is_active', 'idx_products_is_active');
-
-            // Check Constraints
-            $table->check('cost_price >= 0');
-            $table->check('selling_price >= 0');
-            $table->check('wholesale_price >= 0');
-            $table->check('min_stock_level >= 0');
-            $table->check('reorder_point >= 0');
-            $table->check('max_stock_level >= 0');
         });
 
-        // Full-text Search Index (PostgreSQL-specific)
-        DB::statement("
-            CREATE INDEX idx_products_search ON products 
-            USING GIN (to_tsvector('arabic', COALESCE(name, '') || ' ' || COALESCE(generic_name, '') || ' ' || COALESCE(brand_name, '')))
-        ");
+        // Full-text Search Index (PostgreSQL-specific; skipped on SQLite)
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("
+                CREATE INDEX IF NOT EXISTS idx_products_search ON products
+                USING GIN (to_tsvector('arabic', COALESCE(name, '') || ' ' || COALESCE(generic_name, '') || ' ' || COALESCE(brand_name, '')))
+            ");
+        }
     }
 
     public function down(): void

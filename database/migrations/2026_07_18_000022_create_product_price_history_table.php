@@ -10,6 +10,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('product_price_history')) {
+            return;
+        }
         Schema::create('product_price_history', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('product_id')->comment('معرف المنتج');

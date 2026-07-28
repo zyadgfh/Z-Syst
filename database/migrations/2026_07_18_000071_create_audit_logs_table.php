@@ -10,6 +10,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('audit_logs')) {
+            return;
+        }
         Schema::create('audit_logs', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('company_id')->nullable()->comment('معرف الشركة');
@@ -17,8 +20,8 @@ return new class extends Migration
             $table->string('table_name', 100)->comment('اسم الجدول');
             $table->uuid('record_id')->comment('معرف السجل');
             $table->string('action', 50)->comment('الإجراء');
-            $table->jsonb('old_values')->nullable()->comment('القيم القديمة');
-            $table->jsonb('new_values')->nullable()->comment('القيم الجديدة');
+            $table->json('old_values')->nullable()->comment('القيم القديمة');
+            $table->json('new_values')->nullable()->comment('القيم الجديدة');
             $table->text('url')->nullable()->comment('الرابط');
             $table->string('ip_address', 45)->nullable()->comment('IP العناوين');
             $table->text('user_agent')->nullable()->comment('Agent المستخدم');

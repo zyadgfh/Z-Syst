@@ -58,13 +58,45 @@ final class PurchaseOrderReturnController extends BaseController
         return $this->success($purchaseOrderReturn->load(['purchaseOrder', 'supplier', 'branch', 'items.product', 'createdBy']));
     }
 
+    public function update(Request $request, PurchaseOrderReturn $purchaseOrderReturn): JsonResponse
+    {
+        if ($purchaseOrderReturn->company_id !== $request->user()->company_id) {
+            return $this->error('Forbidden', 403);
+        }
+
+        if (! $purchaseOrderReturn->canEdit()) {
+            return $this->error('Cannot modify a non-draft purchase order return', 422);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'notes' => 'nullable|string',
+            'items' => 'sometimes|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity_returned' => 'required|numeric|min:0.01',
+            'items.*.unit_cost' => 'required|numeric|min:0',
+            'items.*.batch_number' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationError($validator->errors()->toArray());
+        }
+
+        $data = $validator->validated();
+        $items = $data['items'] ?? [];
+        unset($data['items']);
+
+        $return = $this->purchaseOrderReturnService->update($purchaseOrderReturn, $data, $items);
+
+        return $this->success($return, 'Purchase order return updated successfully');
+    }
+
     public function destroy(Request $request, PurchaseOrderReturn $purchaseOrderReturn): JsonResponse
     {
         if ($purchaseOrderReturn->company_id !== $request->user()->company_id) {
             return $this->error('Forbidden', 403);
         }
 
-        $purchaseOrderReturn->delete();
+        $this->purchaseOrderReturnService->destroy($purchaseOrderReturn);
 
         return $this->success(null, 'Purchase order return deleted successfully');
     }

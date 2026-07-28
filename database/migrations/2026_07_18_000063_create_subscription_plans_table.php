@@ -10,6 +10,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('subscription_plans')) {
+            return;
+        }
         Schema::create('subscription_plans', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name', 255)->comment('اسم الخطة');
@@ -23,7 +26,7 @@ return new class extends Migration
             $table->integer('max_users')->nullable()->comment('أقصى عدد المستخدمين');
             $table->integer('max_products')->nullable()->comment('أقصى عدد المنتجات');
             $table->integer('max_invoices_monthly')->nullable()->comment('أقصى عدد الفواتير');
-            $table->jsonb('features')->nullable()->comment('الميزات');
+            $table->json('features')->nullable()->comment('الميزات');
             $table->boolean('is_active')->default(true)->comment('نشط');
             $table->integer('sort_order')->default(0)->comment('الترتيب');
             $table->timestamps();

@@ -10,13 +10,16 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('announcements')) {
+            return;
+        }
         Schema::create('announcements', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('title', 255)->comment('العنوان');
             $table->text('message')->comment('الرسالة');
             $table->string('type', 50)->default('info')->comment('النوع');
             $table->string('audience', 50)->default('all')->comment('الجمهور');
-            $table->jsonb('companies_ids')->nullable()->comment('معرفات الشركات');
+            $table->json('companies_ids')->nullable()->comment('معرفات الشركات');
             $table->timestamp('starts_at')->nullable()->comment('تاريخ البدء');
             $table->timestamp('ends_at')->nullable()->comment('تاريخ الانتهاء');
             $table->boolean('is_active')->default(true)->comment('نشط');
