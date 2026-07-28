@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_pos/Screens/Income/Repo/income_category_repo.dart';
 import 'package:mobile_pos/Screens/widget/acnoo_scafold.dart';
 import 'package:mobile_pos/constant.dart';
-import 'package:mobile_pos/generated/l10n.dart' as lang;
 import 'package:nb_utils/nb_utils.dart';
 import 'Model/income_category.dart';
 import 'Providers/income_category_provider.dart';

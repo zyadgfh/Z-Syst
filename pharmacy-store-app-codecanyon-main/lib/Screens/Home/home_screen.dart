@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:mobile_pos/Screens/ExpiryAlerts/expiry_alert_screen.dart';
+import 'package:mobile_pos/Screens/ExpiryAlerts/repo/expiry_alert_repo.dart';
 import 'package:mobile_pos/app_config/api_config.dart';
 import 'package:mobile_pos/Screens/Home/components/grid_items.dart';
 import 'package:mobile_pos/Screens/Profile%20Screen/profile_details.dart';
@@ -39,9 +40,13 @@ class _HomeScreenState extends State<HomeScreen> {
             data: (summary) {
               return RefreshIndicator.adaptive(
                 onRefresh: () async {
+                  // ignore: unused_result
                   ref.refresh(summaryInfoProvider);
+                  // ignore: unused_result
                   ref.refresh(businessInfoProvider);
+                  // ignore: unused_result
                   ref.refresh(bannerProvider);
+                  return Future.value();
                 },
                 child: CustomScrollView(
                   slivers: [
@@ -223,8 +228,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
                                   ),
-                                  title: '$currency ${summary.data?.income?.abs() ?? 0}',
-                                  subtitle: summary.data!.income! < 0 ? lan.loss : lan.todayProfit,
+                                  title: '$currency ${summary.data?.profit?.abs() ?? 0}',
+                                  subtitle: (summary.data?.profit ?? 0) < 0 ? lan.loss : lan.todayProfit,
                                   subTitleStyle: Theme.of(context).textTheme.titleSmall?.copyWith(
                                         color: kNutral700,
                                       ),

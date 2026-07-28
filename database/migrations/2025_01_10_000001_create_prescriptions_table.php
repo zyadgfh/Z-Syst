@@ -19,6 +19,17 @@ return new class extends Migration
             $table->string('image');
             $table->text('notes')->nullable();
             $table->enum('status', ['pending', 'used'])->default('pending');
+            $table->string('prescription_number')->nullable()->unique();
+            $table->string('review_status')->default('pending');
+            $table->text('review_notes')->nullable();
+            $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('reviewed_at')->nullable();
+            $table->date('expires_at')->nullable();
+            $table->string('patient_name')->nullable();
+            $table->string('patient_phone')->nullable();
+            $table->string('doctor_name')->nullable();
+            $table->string('doctor_license')->nullable();
+            $table->timestamp('used_at')->nullable();
             $table->json('meta')->nullable();
             $table->timestamps();
         });

@@ -18,6 +18,8 @@ Route::prefix('v1')->group(function () {
 
         Route::get('summary', [Api\StatisticsController::class, 'summary']);
         Route::get('dashboard', [Api\StatisticsController::class, 'dashboard']);
+        Route::get('features', [Api\FeatureStatusController::class, 'index']);
+        Route::post('backup', [Api\BackupController::class, 'store']);
 
         Route::post('stock-update/{id}',[Api\AcnooProductController::class, 'updateStock']);
         Route::get('stocks-with-product', [Api\AcnooProductController::class, 'stocksWithProduct']);
@@ -47,6 +49,7 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('medicine-types', Api\AcnooMedicineTypeController::class)->except('show');
 
         Route::apiResource('prescriptions', Api\AcnooPrescriptionController::class);
+        Route::get('prescriptions/review', [Api\AcnooPrescriptionController::class, 'review']);
         Route::post('prescriptions/link-to-sale', [Api\AcnooPrescriptionController::class, 'linkToSale']);
 
         // Drug Interactions
@@ -126,6 +129,43 @@ Route::prefix('v1')->group(function () {
         Route::get('taxes-report', [Api\ReportsController::class, 'taxesReport']);
         Route::get('sales-return-report', [Api\ReportsController::class, 'saleReturnReport']);
         Route::get('purchase-return-report', [Api\ReportsController::class, 'purchaseReturnReport']);
+        Route::get('stock-audit-report', [Api\ReportsController::class, 'stockAuditReport']);
+        Route::get('financial-audit-report', [Api\ReportsController::class, 'financialAuditReport']);
+
+        // Stock Audit System
+        Route::prefix('stock-audits')->group(function () {
+            Route::get('/', [Api\StockAuditController::class, 'index']);
+            Route::post('/', [Api\StockAuditController::class, 'store']);
+            Route::get('{audit}', [Api\StockAuditController::class, 'show']);
+            Route::post('{audit}/start', [Api\StockAuditController::class, 'start']);
+            Route::post('{audit}/complete', [Api\StockAuditController::class, 'complete']);
+            Route::post('{audit}/cancel', [Api\StockAuditController::class, 'cancel']);
+            Route::post('{audit}/auto-populate', [Api\StockAuditController::class, 'autoPopulate']);
+            Route::post('{audit}/details', [Api\StockAuditController::class, 'addDetail']);
+            Route::post('{audit}/bulk-details', [Api\StockAuditController::class, 'addBulkDetails']);
+            Route::get('{audit}/variance-report', [Api\StockAuditController::class, 'varianceReport']);
+            Route::post('{audit}/post-all-reconciliations', [Api\StockAuditController::class, 'postAllReconciliations']);
+            Route::post('details/{detail}/reconcile', [Api\StockAuditController::class, 'createReconciliation']);
+            Route::post('reconciliations/{reconciliation}/post', [Api\StockAuditController::class, 'postReconciliation']);
+            Route::put('reconciliations/{reconciliation}', [Api\StockAuditController::class, 'updateReconciliation']);
+            Route::delete('reconciliations/{reconciliation}', [Api\StockAuditController::class, 'deleteReconciliation']);
+            Route::delete('details/{detail}', [Api\StockAuditController::class, 'deleteDetail']);
+        });
+
+        // Financial Audit System
+        Route::prefix('financial-audits')->group(function () {
+            Route::get('/', [Api\FinancialAuditController::class, 'index']);
+            Route::post('/', [Api\FinancialAuditController::class, 'store']);
+            Route::get('{audit}', [Api\FinancialAuditController::class, 'show']);
+            Route::post('{audit}/start', [Api\FinancialAuditController::class, 'start']);
+            Route::post('{audit}/execute', [Api\FinancialAuditController::class, 'execute']);
+            Route::post('{audit}/complete', [Api\FinancialAuditController::class, 'complete']);
+            Route::post('{audit}/cancel', [Api\FinancialAuditController::class, 'cancel']);
+            Route::get('{audit}/report', [Api\FinancialAuditController::class, 'report']);
+            Route::get('{audit}/transactions', [Api\FinancialAuditController::class, 'transactionDetails']);
+            Route::get('comparative-report', [Api\FinancialAuditController::class, 'comparativeReport']);
+            Route::get('statistics', [Api\FinancialAuditController::class, 'statistics']);
+        });
 
         Route::post('change-password', [Api\AcnooProfileController::class, 'changePassword']);
 

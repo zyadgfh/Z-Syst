@@ -9,6 +9,7 @@ use App\Models\Purchase;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\Income;
+use App\Models\Expense;
 use App\Models\Stock;
 
 class StatisticsController extends Controller
@@ -16,11 +17,21 @@ class StatisticsController extends Controller
     public function summary()
     {
         $business_id = auth()->user()->business_id;
-        $total_income = Income::where('business_id', $business_id)->whereDate('incomeDate', request('date') ?? today())->sum('amount');
+        $date = request('date') ?? today();
+
+        $total_income = Income::where('business_id', $business_id)->whereDate('incomeDate', $date)->sum('amount');
+        $total_expense = Expense::where('business_id', $business_id)->whereDate('expenseDate', $date)->sum('amount');
+
+        $sales = Sale::where('business_id', $business_id)->whereDate('created_at', $date)->sum('totalAmount');
+        $purchase = Purchase::where('business_id', $business_id)->whereDate('created_at', $date)->sum('totalAmount');
+        $profit = Sale::where('business_id', $business_id)->whereDate('created_at', $date)->sum('lossProfit') + $total_income - $total_expense;
+
         $data = [
-            'sales' => Sale::where('business_id', $business_id)->whereDate('created_at', request('date') ?? today())->sum('totalAmount'),
-            'purchase' => Purchase::where('business_id', $business_id)->whereDate('created_at', request('date') ?? today())->sum('totalAmount'),
-            'profit' => Sale::where('business_id', $business_id)->whereDate('created_at', request('date') ?? today())->sum('lossProfit') + $total_income,
+            'sales' => $sales,
+            'purchase' => $purchase,
+            'income' => (float) $total_income,
+            'expense' => (float) $total_expense,
+            'profit' => (float) $profit,
         ];
 
         return response()->json([

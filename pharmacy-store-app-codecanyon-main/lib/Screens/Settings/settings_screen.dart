@@ -7,7 +7,6 @@ import 'package:mobile_pos/app_config/api_config.dart';
 import 'package:mobile_pos/Screens/DashBoard/dashboard.dart';
 import 'package:mobile_pos/Screens/Profile%20Screen/profile_details.dart';
 import 'package:mobile_pos/Screens/User%20Roles/user_role_screen.dart';
-import 'package:mobile_pos/Screens/widget/acnoo_scafold.dart';
 import 'package:mobile_pos/generated/l10n.dart' as l;
 import 'package:nb_utils/nb_utils.dart';
 import '../../Provider/profile_provider.dart';
@@ -20,12 +19,15 @@ import '../Shimmers/home_screen_appbar_shimmer.dart';
 import '../barcode/gererate_barcode.dart';
 import '../language/language.dart';
 import '../subscription/package_screen.dart';
+import '../widget/acnoo_scafold.dart';
+import 'Repo/feature_status_repo.dart';
+import 'feature_status_screen.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
 
   @override
-  _SettingScreenState createState() => _SettingScreenState();
+  State<SettingScreen> createState() => _SettingScreenState();
 }
 
 class _SettingScreenState extends State<SettingScreen> {
@@ -177,6 +179,29 @@ class _SettingScreenState extends State<SettingScreen> {
                       const Icon(Icons.arrow_forward_ios, color: Color(0xff22215B), size: 16),
                     ],
                   ),
+                ),
+                _buildListTile(
+                  title: l.S.of(context).features,
+                  svgAsset: 'assets/reports.svg',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const FeatureStatusScreen()),
+                  ),
+                  trailing: const Icon(Icons.arrow_forward_ios, color: Color(0xff22215B), size: 16),
+                ),
+                _buildListTile(
+                  title: l.S.of(context).freeDataBackup,
+                  svgAsset: 'assets/dashboard.svg',
+                  onTap: () async {
+                    EasyLoading.show(status: l.S.of(context).freeDataBackup);
+                    try {
+                      final message = await FeatureStatusRepo().triggerBackup();
+                      EasyLoading.showSuccess(message);
+                    } catch (error) {
+                      EasyLoading.showError(error.toString());
+                    }
+                  },
+                  trailing: const Icon(Icons.arrow_forward_ios, color: Color(0xff22215B), size: 16),
                 ),
                 _buildListTile(
                   title: l.S.of(context).barcodeGenerator,

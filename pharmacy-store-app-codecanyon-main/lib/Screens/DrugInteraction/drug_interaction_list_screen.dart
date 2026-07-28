@@ -156,7 +156,7 @@ class _DrugInteractionListScreenState extends State<DrugInteractionListScreen> {
                 SizedBox(
                   height: 48,
                   child: DropdownButtonFormField<String>(
-                    value: _selectedSeverity,
+                    initialValue: _selectedSeverity,
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
@@ -370,7 +370,7 @@ class _DrugInteractionListScreenState extends State<DrugInteractionListScreen> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: severity,
+                initialValue: severity,
                 decoration: const InputDecoration(labelText: 'Severity *', border: OutlineInputBorder()),
                 items: const [
                   DropdownMenuItem(value: 'contraindicated', child: Text('Contraindicated - Do Not Use Together')),
@@ -420,7 +420,7 @@ class _DrugInteractionListScreenState extends State<DrugInteractionListScreen> {
               try {
                 if (isEdit) {
                   await _repo.updateDrugInteraction(
-                    id: existing!.id!,
+                    id: existing.id!,
                     drugAName: nameAController.text,
                     drugBName: nameBController.text,
                     severity: severity,

@@ -14,6 +14,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('demo:restore-public-images')->everyThirtyMinutes();
         $schedule->command('expiry-alert:send')->dailyAt('08:00');
+        $schedule->command('backup:database')->dailyAt('02:00');
     }
 
     /**

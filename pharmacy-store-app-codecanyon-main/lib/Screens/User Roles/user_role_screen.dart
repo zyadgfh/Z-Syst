@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_pos/Screens/User%20Roles/user_role_details.dart';
 import 'package:mobile_pos/Screens/widget/acnoo_scafold.dart';
 import 'package:mobile_pos/Screens/widget/primary_button.dart';

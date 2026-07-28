@@ -16,6 +16,7 @@
         "vite": "^3.0.0"
     },
     "dependencies": {
+        "@dataconnect/generated": "file:src/dataconnect-generated",
         "@vercel/analytics": "^2.0.1"
     }
 }

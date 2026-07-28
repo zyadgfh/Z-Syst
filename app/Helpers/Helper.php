@@ -17,9 +17,27 @@ function cache_remember(string $key, callable $callback, int $ttl = 1800): mixed
     return cache()->remember($key, env('CACHE_LIFETIME', $ttl), $callback);
 }
 
+function normalize_manage_pages_option($value)
+{
+    $value = is_string($value) ? json_decode($value, true) : $value;
+    $value = is_array($value) ? $value : [];
+
+    $value['headings'] = is_array($value['headings'] ?? null) ? $value['headings'] : [];
+    $value['footer_socials_icons'] = is_array($value['footer_socials_icons'] ?? null) ? $value['footer_socials_icons'] : [];
+
+    return $value;
+}
+
 function get_option($key) {
     return cache_remember($key, function () use ($key) {
-        return Option::where('key', $key)->first()->value ?? [];
+        $option = Option::where('key', $key)->first();
+        $value = $option?->value ?? [];
+
+        if ($key === 'manage-pages') {
+            return normalize_manage_pages_option($value);
+        }
+
+        return $value;
     });
 }
 

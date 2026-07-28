@@ -262,7 +262,7 @@ class _AutoOrderSuggestionsScreenState
       child: Container(
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -286,7 +286,7 @@ class _AutoOrderSuggestionsScreenState
         children: [
           Expanded(
             child: DropdownButtonFormField<String?>(
-              value: _statusFilter,
+              initialValue: _statusFilter,
               decoration: const InputDecoration(
                 labelText: 'الحالة',
                 isDense: true,
@@ -309,7 +309,7 @@ class _AutoOrderSuggestionsScreenState
           const SizedBox(width: 8),
           Expanded(
             child: DropdownButtonFormField<String?>(
-              value: _priorityFilter,
+              initialValue: _priorityFilter,
               decoration: const InputDecoration(
                 labelText: 'الأولوية',
                 isDense: true,
@@ -411,9 +411,9 @@ class _AutoOrderSuggestionsScreenState
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: priorityColor.withOpacity(0.1),
+                    color: priorityColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: priorityColor.withOpacity(0.3)),
+                    border: Border.all(color: priorityColor.withValues(alpha: 0.3)),
                   ),
                   child: Text(
                     item.priorityLabel,
@@ -442,11 +442,11 @@ class _AutoOrderSuggestionsScreenState
             const SizedBox(height: 12),
             Row(
               children: [
-                _buildMiniInfo('المخزون', '${item.currentStock?.toStringAsFixed(0) ?? '0'}'),
+                _buildMiniInfo('المخزون', item.currentStock?.toStringAsFixed(0) ?? '0'),
                 const SizedBox(width: 8),
-                _buildMiniInfo('الطلب المتوقع', '${item.predictedDemand?.toStringAsFixed(0) ?? '0'}'),
+                _buildMiniInfo('الطلب المتوقع', item.predictedDemand?.toStringAsFixed(0) ?? '0'),
                 const SizedBox(width: 8),
-                _buildMiniInfo('الكمية المقترحة', '${item.suggestedOrderQty?.toStringAsFixed(0) ?? '0'}',
+                _buildMiniInfo('الكمية المقترحة', item.suggestedOrderQty?.toStringAsFixed(0) ?? '0',
                     isHighlight: true),
                 if (item.confidenceScore != null) ...[
                   const SizedBox(width: 8),
@@ -473,11 +473,11 @@ class _AutoOrderSuggestionsScreenState
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           color: isHighlight
-              ? Colors.green.withOpacity(0.1)
+              ? Colors.green.withValues(alpha: 0.1)
               : Colors.grey[50],
           borderRadius: BorderRadius.circular(6),
           border: isHighlight
-              ? Border.all(color: Colors.green.withOpacity(0.3))
+              ? Border.all(color: Colors.green.withValues(alpha: 0.3))
               : null,
         ),
         child: Column(

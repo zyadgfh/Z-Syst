@@ -4,22 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Product;
 use App\Models\FefoSetting;
-use App\Services\FefoService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 
 class StockController extends Controller
 {
-    protected FefoService $fefoService;
-
-    public function __construct(FefoService $fefoService)
-    {
-        $this->fefoService = $fefoService;
-    }
-
     public function index()
     {
-        $business_id = auth()->user()->business_id;
+        $business_id = Auth::user()->business_id;
         $fefoEnabled = FefoSetting::getForBusiness($business_id)->fefo_enabled;
 
         $products_count = Product::where('business_id', $business_id)->count();

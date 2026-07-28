@@ -8,7 +8,6 @@ import 'package:mobile_pos/Screens/Products/box/provider/box_provider.dart';
 import 'package:mobile_pos/Screens/Products/box/repo/box_repo.dart';
 import 'package:mobile_pos/Screens/widget/acnoo_scafold.dart';
 import 'package:mobile_pos/constant.dart';
-import 'package:mobile_pos/generated/l10n.dart' as lang;
 import 'package:nb_utils/nb_utils.dart';
 import '../Widgets/widgets.dart';
 import 'model/box_model.dart';

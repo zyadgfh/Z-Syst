@@ -8,8 +8,6 @@ import 'package:mobile_pos/model/business_info_model.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mobile_pos/generated/l10n.dart' as lang;
 import '../../Repository/API/business_info_repo.dart';
 import '../../app_config/app_config.dart';
 import '../../currency.dart';

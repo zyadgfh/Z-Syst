@@ -2,8 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:mobile_pos/GlobalComponents/button_global.dart';
 import 'package:mobile_pos/Screens/Products/category/model/category_model.dart';
 import 'package:mobile_pos/Screens/widget/acnoo_scafold.dart';
 import 'package:mobile_pos/Screens/widget/primary_button.dart';

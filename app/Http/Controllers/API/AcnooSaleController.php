@@ -17,7 +17,6 @@ use App\Exceptions\NotFoundException;
 use App\Exceptions\TransactionException;
 use App\Helpers\TransactionHelper;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 
 class AcnooSaleController extends Controller
@@ -28,6 +27,34 @@ class AcnooSaleController extends Controller
     {
         $this->fefoService = $fefoService;
     }
+
+    private function loadBusinessStocks(int $businessId, array $productIds): \Illuminate\Support\Collection
+    {
+        if (empty($productIds)) {
+            return collect();
+        }
+
+        return Stock::where('business_id', $businessId)
+            ->whereIn('product_id', $productIds)
+            ->select('id', 'business_id', 'product_id', 'batch_no', 'expire_date', 'productStock')
+            ->get()
+            ->groupBy('product_id');
+    }
+
+    private function resolveStockForProduct(\Illuminate\Support\Collection $stocksByProduct, int $productId, ?string $batchNo = null): ?Stock
+    {
+        $productStocks = $stocksByProduct->get($productId, collect());
+
+        if ($batchNo) {
+            $stock = $productStocks->first(fn ($item) => $item->batch_no === $batchNo);
+            if ($stock) {
+                return $stock;
+            }
+        }
+
+        return $productStocks->first();
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -86,55 +113,68 @@ class AcnooSaleController extends Controller
             $fefoService = $this->fefoService;
             $fefoSettings = FefoSetting::getForBusiness($business_id);
 
-            // Validate stock availability for all products
-            $batch_numbers = collect($request->products)->pluck('batch_no')->filter()->toArray();
+            $productIds = collect($request->products)->pluck('product_id')->filter()->unique()->values()->all();
+            $businessStocks = $this->loadBusinessStocks($business_id, $productIds);
 
-            // Only validate batch-specific stock if batch_no provided OR FEFO is disabled
-            if (!empty($batch_numbers)) {
-                $stocks = Stock::whereIn('batch_no', $batch_numbers)->where('business_id', $business_id)->get();
+            foreach ($request->products as $productData) {
+                $productId = $productData['product_id'];
+                $productStocks = $businessStocks->get($productId, collect());
+                $batchNo = $productData['batch_no'] ?? null;
 
-                foreach ($stocks as $key => $stock) {
-                    if ($stock->productStock < $request->products[$key]['quantities']) {
+                if (!empty($batchNo)) {
+                    $stock = $productStocks->first(fn ($item) => $item->batch_no === $batchNo);
+
+                    if (!$stock) {
                         throw new BusinessRuleException(
                             ErrorCode::BUSINESS_INSUFFICIENT_STOCK,
                             __('errors.insufficient_stock', [
-                                'product' => $request->products[$key]['product_id'],
-                                'batch' => $stock->batch_no,
-                                'available' => $stock->productStock,
-                                'requested' => $request->products[$key]['quantities'],
+                                'product' => $productId,
+                                'batch' => $batchNo,
+                                'available' => 0,
+                                'requested' => $productData['quantities'],
                             ]),
                             [
-                                'product_id' => $request->products[$key]['product_id'],
-                                'batch_no' => $stock->batch_no,
-                                'available_qty' => $stock->productStock,
-                                'requested_qty' => $request->products[$key]['quantities'],
+                                'product_id' => $productId,
+                                'batch_no' => $batchNo,
+                                'available_qty' => 0,
+                                'requested_qty' => $productData['quantities'],
                             ]
                         );
                     }
-                }
-            } elseif ($fefoSettings->fefo_enabled) {
-                // FEFO auto-selection: validate total stock across all batches
-                foreach ($request->products as $productData) {
-                    $totalStock = Stock::where('product_id', $productData['product_id'])
-                        ->where('business_id', $business_id)
-                        ->where('productStock', '>', 0)
-                        ->where(function ($q) {
-                            $q->whereNull('expire_date')
-                              ->orWhere('expire_date', '>=', now()->startOfDay());
-                        })
-                        ->sum('productStock');
+
+                    if ($stock->productStock < $productData['quantities']) {
+                        throw new BusinessRuleException(
+                            ErrorCode::BUSINESS_INSUFFICIENT_STOCK,
+                            __('errors.insufficient_stock', [
+                                'product' => $productId,
+                                'batch' => $stock->batch_no,
+                                'available' => $stock->productStock,
+                                'requested' => $productData['quantities'],
+                            ]),
+                            [
+                                'product_id' => $productId,
+                                'batch_no' => $stock->batch_no,
+                                'available_qty' => $stock->productStock,
+                                'requested_qty' => $productData['quantities'],
+                            ]
+                        );
+                    }
+                } elseif ($fefoSettings->fefo_enabled) {
+                    $totalStock = $productStocks->filter(function ($stock) {
+                        return $stock->productStock > 0 && (is_null($stock->expire_date) || $stock->expire_date >= now()->startOfDay());
+                    })->sum('productStock');
 
                     if ($totalStock < $productData['quantities']) {
                         throw new BusinessRuleException(
                             ErrorCode::BUSINESS_INSUFFICIENT_STOCK,
                             __('errors.insufficient_stock', [
-                                'product' => $productData['product_id'],
+                                'product' => $productId,
                                 'batch' => 'FEFO auto',
                                 'available' => $totalStock,
                                 'requested' => $productData['quantities'],
                             ]),
                             [
-                                'product_id' => $productData['product_id'],
+                                'product_id' => $productId,
                                 'batch_no' => null,
                                 'available_qty' => $totalStock,
                                 'requested_qty' => $productData['quantities'],
@@ -242,13 +282,10 @@ class AcnooSaleController extends Controller
                         'purchase_price' => $productData['purchase_price'] ?? 0,
                     ];
 
-                    $stock = Stock::where('batch_no', $productData['batch_no'])
-                        ->where('product_id', $productId)
-                        ->first();
+                    $stock = $this->resolveStockForProduct($businessStocks, $productId, $productData['batch_no'] ?? null);
 
                     if ($stock) {
                         $stock->decrement('productStock', $quantity);
-                        $stock->refresh();
 
                         // Log FEFO deduction for manual selection
                         $fefoService->logFefoDeduction(
@@ -293,7 +330,8 @@ class AcnooSaleController extends Controller
 
     public function show($id)
     {
-        $data = Sale::with([
+        $data = Sale::where('business_id', auth()->user()->business_id)
+                ->with([
                     'tax',
                     'party',
                     'user:id,name',
@@ -314,6 +352,10 @@ class AcnooSaleController extends Controller
 
     public function update(Request $request, Sale $sale)
     {
+        if ($sale->business_id !== auth()->user()->business_id) {
+            abort(403);
+        }
+
         $request->validate([
             'products' => 'required|array',
             'saleDate' => 'required|string',
@@ -337,21 +379,17 @@ class AcnooSaleController extends Controller
             $business_id = auth()->user()->business_id;
 
             $prevDetails = SaleDetails::where('sale_id', $sale->id)->get();
-            $productIds = collect($request->products)->pluck('product_id')->toArray();
-            $products = Product::whereIn('id', $productIds)->get();
+            $productIds = collect($request->products)->pluck('product_id')->filter()->unique()->values()->all();
+            $allProductIds = collect([...$productIds, $prevDetails->pluck('product_id')->all()])->filter()->unique()->values()->all();
+            $businessStocks = $this->loadBusinessStocks($business_id, $allProductIds);
+            $products = Product::select('id', 'productName')->whereIn('id', $productIds)->get();
 
             foreach ($products as $key => $product) {
                 $prevProduct = $prevDetails->first(function ($item) use ($product) {
                     return $item->product_id == $product->id;
                 });
 
-                $stock = Stock::where('product_id', $product->id)
-                            ->where('batch_no', $request->products[$key]['batch_no'] ?? null)
-                            ->first();
-
-                if (!$stock) {
-                    $stock = Stock::where('product_id', $product->id)->orderBy('id', 'asc')->first();
-                }
+                $stock = $this->resolveStockForProduct($businessStocks, $product->id, $request->products[$key]['batch_no'] ?? null);
 
                 $productStock = 0;
                 if ($prevProduct) {
@@ -381,9 +419,7 @@ class AcnooSaleController extends Controller
 
             // Restore stock for previously saved sale details
             foreach ($prevDetails as $prevItem) {
-                $stock = Stock::where('product_id', $prevItem->product_id)
-                            ->where('batch_no', $prevItem->batch_no)
-                            ->first();
+                $stock = $this->resolveStockForProduct($businessStocks, $prevItem->product_id, $prevItem->batch_no);
 
                 if ($stock) {
                     $stock->increment('productStock', $prevItem->quantities);
@@ -406,13 +442,7 @@ class AcnooSaleController extends Controller
                     'purchase_price' => $productData['purchase_price'] ?? 0,
                 ];
 
-                $stock = Stock::where('product_id', $productData['product_id'])
-                            ->where('batch_no', $productData['batch_no'])
-                            ->first();
-
-                if (!$stock) {
-                    $stock = Stock::where('product_id', $productData['product_id'])->orderBy('id', 'asc')->first();
-                }
+                $stock = $this->resolveStockForProduct($businessStocks, $productData['product_id'], $productData['batch_no'] ?? null);
 
                 if ($stock) {
                     $stock->decrement('productStock', $productData['quantities']);
@@ -461,24 +491,23 @@ class AcnooSaleController extends Controller
 
     public function destroy(Sale $sale)
     {
+        if ($sale->business_id !== auth()->user()->business_id) {
+            abort(403);
+        }
+
         TransactionHelper::run(function () use ($sale) {
             $business_id = auth()->user()->business_id;
             $fefoService = $this->fefoService;
+            $productIds = $sale->details->pluck('product_id')->filter()->unique()->values()->all();
+            $businessStocks = $this->loadBusinessStocks($business_id, $productIds);
 
             foreach ($sale->details as $detail) {
-                $stock = Stock::where('product_id', $detail->product_id)
-                              ->where('batch_no', $detail->batch_no)
-                              ->first();
-
-                if (!$stock) {
-                    $stock = Stock::where('product_id', $detail->product_id)->orderBy('id', 'asc')->first();
-                }
+                $stock = $this->resolveStockForProduct($businessStocks, $detail->product_id, $detail->batch_no);
 
                 if ($stock) {
                     $stock->increment('productStock', $detail->quantities);
 
                     // Log FEFO return (stock restoration)
-                    $stock->refresh();
                     $fefoService->logFefoDeduction(
                         businessId: $business_id,
                         productId: $detail->product_id,

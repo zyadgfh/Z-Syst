@@ -5,7 +5,7 @@
 ### ✅ المرحلة 1: قاعدة البيانات (Database Layer)
 - [x] 1. إنشاء جدول `inventory_turnover_reports` - تقارير دوران المخزون
 - [x] 2. إنشاء جدول `product_inventory_analysis` - تحليل كل منتج
-- [ ] 3. تشغيل الترحيلات (Run migrations)
+- [x] 3. تشغيل الترحيلات (Run migrations)
 
 ### ✅ المرحلة 2: الموديلات (Models)
 - [x] 4. إنشاء `InventoryTurnoverReport` Model
@@ -25,6 +25,6 @@
 - [x] 8. إضافة المسارات في `routes/api.php`
 
 ### المرحلة 5: تطبيق Flutter (Mobile)
-- [ ] 9. إنشاء موديل `inventory_turnover_model.dart`
-- [ ] 10. إضافة دوال API في `prediction_repo.dart`
-- [ ] 11. إنشاء شاشة `inventory_turnover_screen.dart`
+- [x] 9. إنشاء موديل `inventory_turnover_model.dart`
+- [x] 10. إضافة دوال API في `prediction_repo.dart`
+- [x] 11. إنشاء شاشة `inventory_turnover_screen.dart`

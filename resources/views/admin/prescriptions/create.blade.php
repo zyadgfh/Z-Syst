@@ -21,6 +21,35 @@
                     </div>
 
                     <div class="mt-3">
+                        <label>{{ __('Prescription Number') }}</label>
+                        <input type="text" name="prescription_number" class="form-control" placeholder="{{ __('RX-123456') }}">
+                    </div>
+
+                    <div class="mt-3">
+                        <label>{{ __('Patient Name') }}</label>
+                        <input type="text" name="patient_name" class="form-control" placeholder="{{ __('Patient full name') }}">
+                    </div>
+
+                    <div class="mt-3">
+                        <label>{{ __('Doctor Name') }}</label>
+                        <input type="text" name="doctor_name" class="form-control" placeholder="{{ __('Doctor name') }}">
+                    </div>
+
+                    <div class="mt-3">
+                        <label>{{ __('Expiry Date') }}</label>
+                        <input type="date" name="expires_at" class="form-control">
+                    </div>
+
+                    <div class="mt-3">
+                        <label>{{ __('Review Status') }}</label>
+                        <select name="review_status" class="form-control">
+                            <option value="pending">{{ __('Pending') }}</option>
+                            <option value="approved">{{ __('Approved') }}</option>
+                            <option value="rejected">{{ __('Rejected') }}</option>
+                        </select>
+                    </div>
+
+                    <div class="mt-3">
                         <label>{{ __('Notes') }}</label>
                         <textarea name="notes" class="form-control" rows="3" placeholder="{{ __('Enter notes about the prescription') }}"></textarea>
                     </div>

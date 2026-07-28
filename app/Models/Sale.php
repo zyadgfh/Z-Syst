@@ -64,8 +64,10 @@ class Sale extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            $id = Sale::where('business_id', auth()->user()->business_id)->count() + 1;
-            $model->invoiceNumber = "S-" . str_pad($id, 5, '0', STR_PAD_LEFT);
+            if (!$model->invoiceNumber && auth()->check()) {
+                $id = Sale::where('business_id', auth()->user()->business_id)->count() + 1;
+                $model->invoiceNumber = "S-" . str_pad($id, 5, '0', STR_PAD_LEFT);
+            }
         });
     }
 

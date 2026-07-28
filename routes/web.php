@@ -16,23 +16,23 @@ Route::get('/order-status', [Web\PaymentController::class, 'orderStatus'])->name
 Route::group([
     'namespace' => 'App\Library',
 ], function () {
-    Route::get('/payment/paypal', 'Paypal@status');
-    Route::get('/payment/mollie', 'Mollie@status');
-    Route::post('/payment/paystack', 'Paystack@status')->name('paystack.status');
-    Route::get('/paystack', 'Paystack@view')->name('paystack.view');
-    Route::get('/razorpay/payment', 'Razorpay@view')->name('razorpay.view');
-    Route::post('/razorpay/status', 'Razorpay@status');
-    Route::get('/mercadopago/pay', 'Mercado@status')->name('mercadopago.status');
-    Route::get('/payment/flutterwave', 'Flutterwave@status');
-    Route::get('/payment/thawani', 'Thawani@status');
-    Route::get('/payment/instamojo', 'Instamojo@status');
-    Route::get('/payment/toyyibpay', 'Toyyibpay@status');
-    Route::get('/manual/payment', 'CustomGateway@status')->name('manual.payment');
-    Route::get('payu/payment', 'Payu@view')->name('payu.view');
-    Route::post('/payu/status', 'Payu@status')->name('payu.status');
-    Route::post('/phonepe/status', 'PhonePe@status')->name('phonepe.status');
-    Route::post('/paytm/status', 'Paytm@status')->name('paytm.status');
-    Route::get('/tap-payment/status', 'TapPayment@status')->name('tap-payment.status');
+    Route::get('/payment/paypal', [Web\PaymentController::class, 'failed']);
+    Route::get('/payment/mollie', [Web\PaymentController::class, 'failed']);
+    Route::post('/payment/paystack', [Web\PaymentController::class, 'failed'])->name('paystack.status');
+    Route::get('/paystack', [Web\PaymentController::class, 'failed'])->name('paystack.view');
+    Route::get('/razorpay/payment', [Web\PaymentController::class, 'failed'])->name('razorpay.view');
+    Route::post('/razorpay/status', [Web\PaymentController::class, 'failed']);
+    Route::get('/mercadopago/pay', [Web\PaymentController::class, 'failed'])->name('mercadopago.status');
+    Route::get('/payment/flutterwave', [Web\PaymentController::class, 'failed']);
+    Route::get('/payment/thawani', [Web\PaymentController::class, 'failed']);
+    Route::get('/payment/instamojo', [Web\PaymentController::class, 'failed']);
+    Route::get('/payment/toyyibpay', [Web\PaymentController::class, 'failed']);
+    Route::get('/manual/payment', [Web\PaymentController::class, 'failed'])->name('manual.payment');
+    Route::get('payu/payment', [Web\PaymentController::class, 'failed'])->name('payu.view');
+    Route::post('/payu/status', [Web\PaymentController::class, 'failed'])->name('payu.status');
+    Route::post('/phonepe/status', [Web\PaymentController::class, 'failed'])->name('phonepe.status');
+    Route::post('/paytm/status', [Web\PaymentController::class, 'failed'])->name('paytm.status');
+    Route::get('/tap-payment/status', [Web\PaymentController::class, 'failed'])->name('tap-payment.status');
 });
 // Payment Routes End
 

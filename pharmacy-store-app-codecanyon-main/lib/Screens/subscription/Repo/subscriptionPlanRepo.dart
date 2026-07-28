@@ -4,11 +4,9 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_pos/Provider/profile_provider.dart';
-import 'package:mobile_pos/model/business_info_model.dart';
 
 
 import '../../../app_config/api_config.dart';

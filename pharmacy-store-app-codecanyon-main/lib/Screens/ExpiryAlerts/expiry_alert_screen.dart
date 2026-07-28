@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_pos/constant.dart';
-import 'package:mobile_pos/currency.dart';
 import 'package:mobile_pos/Screens/ExpiryAlerts/model/expiry_alert_model.dart';
 import 'package:mobile_pos/Screens/ExpiryAlerts/repo/expiry_alert_repo.dart';
 import 'package:mobile_pos/Screens/Products/product_details.dart';

@@ -251,7 +251,7 @@ class _PredictionSettingsScreenState extends State<PredictionSettingsScreen> {
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
       subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
       value: value,
-      activeColor: const Color(0xFF1A237E),
+      activeThumbColor: const Color(0xFF1A237E),
       onChanged: onChanged,
     );
   }

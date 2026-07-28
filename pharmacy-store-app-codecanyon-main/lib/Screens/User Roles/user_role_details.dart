@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_pos/GlobalComponents/button_global.dart';
 import 'package:mobile_pos/Screens/User%20Roles/Model/user_role_model.dart' as user;
 import 'package:mobile_pos/Screens/User%20Roles/Repo/user_role_repo.dart';

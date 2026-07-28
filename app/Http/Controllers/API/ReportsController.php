@@ -10,6 +10,8 @@ use App\Models\DueCollect;
 use App\Models\SaleReturn;
 use App\Models\PurchaseReturn;
 use App\Models\SaleReturnDetails;
+use App\Models\StockAudit;
+use App\Models\FinancialAuditLog;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\PurchaseReturnDetail;
@@ -373,6 +375,105 @@ class ReportsController extends Controller
             'message' => __('Data fetched successfully.'),
             'total_return' => (float) $total_return,
             'total_qty' => (float) $total_qty,
+            'data' => $data,
+        ]);
+    }
+
+    /**
+     * Stock Audit Report
+     */
+    public function stockAuditReport()
+    {
+        $query = StockAudit::select('id', 'audit_number', 'audit_type', 'status', 'audit_date', 'completed_at', 'business_id', 'user_id')
+                    ->with('user:id,name')
+                    ->withCount('details')
+                    ->when(request('search'), function ($query) {
+                        $query->where(function ($subQuery) {
+                            $subQuery->where('audit_number', 'like', '%' . request('search') . '%')
+                                ->orWhere('audit_type', 'like', '%' . request('search') . '%')
+                                ->orWhere('status', 'like', '%' . request('search') . '%');
+                        });
+                    })
+                    ->when(request('from_date') || request('to_date'), function ($query) {
+                        $query->whereBetween('audit_date', [request('from_date'), request('to_date')]);
+                    })
+                    ->when(request('status'), function ($query) {
+                        $query->where('status', request('status'));
+                    })
+                    ->when(request('audit_type'), function ($query) {
+                        $query->where('audit_type', request('audit_type'));
+                    })
+                    ->where('business_id', auth()->user()->business_id);
+
+        $data = (clone $query)->latest()->paginate(10);
+        
+        // Calculate summary statistics
+        $total_audits = StockAudit::where('business_id', auth()->user()->business_id)
+            ->when(request('from_date') || request('to_date'), function ($query) {
+                $query->whereBetween('audit_date', [request('from_date'), request('to_date')]);
+            })
+            ->count();
+        
+        $completed_audits = StockAudit::where('business_id', auth()->user()->business_id)
+            ->where('status', 'completed')
+            ->when(request('from_date') || request('to_date'), function ($query) {
+                $query->whereBetween('audit_date', [request('from_date'), request('to_date')]);
+            })
+            ->count();
+
+        return response()->json([
+            'message' => __('Stock audit report fetched successfully.'),
+            'total_audits' => $total_audits,
+            'completed_audits' => $completed_audits,
+            'data' => $data,
+        ]);
+    }
+
+    /**
+     * Financial Audit Report
+     */
+    public function financialAuditReport()
+    {
+        $query = FinancialAuditLog::select('id', 'audit_number', 'audit_type', 'start_date', 'end_date', 'status', 'opening_balance', 'closing_balance', 'variance', 'business_id', 'user_id')
+                    ->with('user:id,name')
+                    ->when(request('search'), function ($query) {
+                        $query->where(function ($subQuery) {
+                            $subQuery->where('audit_number', 'like', '%' . request('search') . '%')
+                                ->orWhere('audit_type', 'like', '%' . request('search') . '%')
+                                ->orWhere('status', 'like', '%' . request('search') . '%');
+                        });
+                    })
+                    ->when(request('from_date') || request('to_date'), function ($query) {
+                        $query->whereBetween('start_date', [request('from_date'), request('to_date')]);
+                    })
+                    ->when(request('status'), function ($query) {
+                        $query->where('status', request('status'));
+                    })
+                    ->when(request('audit_type'), function ($query) {
+                        $query->where('audit_type', request('audit_type'));
+                    })
+                    ->where('business_id', auth()->user()->business_id);
+
+        $data = (clone $query)->latest()->paginate(10);
+        
+        // Calculate summary statistics
+        $total_audits = FinancialAuditLog::where('business_id', auth()->user()->business_id)
+            ->when(request('from_date') || request('to_date'), function ($query) {
+                $query->whereBetween('start_date', [request('from_date'), request('to_date')]);
+            })
+            ->count();
+        
+        $total_variance = FinancialAuditLog::where('business_id', auth()->user()->business_id)
+            ->where('status', 'completed')
+            ->when(request('from_date') || request('to_date'), function ($query) {
+                $query->whereBetween('start_date', [request('from_date'), request('to_date')]);
+            })
+            ->sum('variance');
+
+        return response()->json([
+            'message' => __('Financial audit report fetched successfully.'),
+            'total_audits' => $total_audits,
+            'total_variance' => $total_variance,
             'data' => $data,
         ]);
     }

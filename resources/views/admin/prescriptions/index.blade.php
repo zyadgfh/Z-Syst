@@ -22,6 +22,28 @@
                         <h4 class="mt-2">{{ __('Prescriptions List') }}</h4>
                     </div>
 
+                    @if (!empty($expiryAlertSummary) && ($expiryAlertSummary['expired'] + $expiryAlertSummary['critical'] + $expiryAlertSummary['warning']) > 0)
+                        <div class="alert alert-warning border-0 rounded-3 mb-3" role="alert">
+                            <div class="d-flex justify-content-between align-items-start gap-3">
+                                <div>
+                                    <strong>{{ __('Prescription expiry alerts') }}</strong>
+                                    <div class="mt-1">
+                                        @if ($expiryAlertSummary['expired'] > 0)
+                                            <span class="badge bg-danger me-2">{{ __('Expired') }}: {{ $expiryAlertSummary['expired'] }}</span>
+                                        @endif
+                                        @if ($expiryAlertSummary['critical'] > 0)
+                                            <span class="badge bg-warning text-dark me-2">{{ __('Next 7 days') }}: {{ $expiryAlertSummary['critical'] }}</span>
+                                        @endif
+                                        @if ($expiryAlertSummary['warning'] > 0)
+                                            <span class="badge bg-info text-dark">{{ __('Next 30 days') }}: {{ $expiryAlertSummary['warning'] }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <a href="{{ route('admin.prescriptions.index') }}" class="btn btn-sm btn-outline-dark">{{ __('Review now') }}</a>
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="table-top-form sec-header d-print-none">
                         <form action="{{ route('admin.prescriptions.filter') }}" method="post" class="filter-form mb-0"
                             table="#prescription-data">

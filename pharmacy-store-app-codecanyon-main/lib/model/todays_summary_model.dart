@@ -33,28 +33,33 @@ class Data {
     num? income,
     num? expense,
     num? purchase,
+    num? profit,
   }) {
     _sales = sales;
     _income = income;
     _expense = expense;
     _purchase = purchase;
+    _profit = profit;
   }
 
   Data.fromJson(dynamic json) {
     _sales = json['sales'];
-    _income = json['profit'];
+    _income = json['income'];
     _expense = json['expense'];
     _purchase = json['purchase'];
+    _profit = json['profit'];
   }
   num? _sales;
   num? _income;
   num? _expense;
   num? _purchase;
+  num? _profit;
 
   num? get sales => _sales;
   num? get income => _income;
   num? get expense => _expense;
   num? get purchase => _purchase;
+  num? get profit => _profit;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -62,6 +67,7 @@ class Data {
     map['income'] = _income;
     map['expense'] = _expense;
     map['purchase'] = _purchase;
+    map['profit'] = _profit;
     return map;
   }
 }

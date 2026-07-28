@@ -215,7 +215,7 @@ class _InventoryTurnoverScreenState extends State<InventoryTurnoverScreen>
               Expanded(
                 child: _buildMetricCard(
                   'كمية المخزون',
-                  '${_summary!.totalStockQty?.toStringAsFixed(0) ?? '0'}',
+                  _summary!.totalStockQty?.toStringAsFixed(0) ?? '0',
                   Icons.numbers,
                   Colors.orange,
                 ),
@@ -326,7 +326,7 @@ class _InventoryTurnoverScreenState extends State<InventoryTurnoverScreen>
             Row(
               children: [
                 _buildReportMetric('نسبة الدوران',
-                    '${report.inventoryTurnoverRatio?.toStringAsFixed(2) ?? '0'}',
+                    report.inventoryTurnoverRatio?.toStringAsFixed(2) ?? '0',
                     Colors.teal),
                 const SizedBox(width: 8),
                 _buildReportMetric(
@@ -365,9 +365,9 @@ class _InventoryTurnoverScreenState extends State<InventoryTurnoverScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
         text,
@@ -452,7 +452,7 @@ class _InventoryTurnoverScreenState extends State<InventoryTurnoverScreen>
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: total > 0 ? count / total : 0,
-              backgroundColor: color.withOpacity(0.1),
+              backgroundColor: color.withValues(alpha: 0.1),
               valueColor: AlwaysStoppedAnimation<Color>(color),
               minHeight: 12,
             ),
@@ -609,7 +609,7 @@ class _InventoryTurnoverScreenState extends State<InventoryTurnoverScreen>
         decoration: BoxDecoration(
           color: selected ? color : Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.5)),
+          border: Border.all(color: color.withValues(alpha: 0.5)),
         ),
         child: Text(
           label,
@@ -662,7 +662,7 @@ class _InventoryTurnoverScreenState extends State<InventoryTurnoverScreen>
                   padding: const EdgeInsets.symmetric(
                       horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: movementColor.withOpacity(0.1),
+                    color: movementColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -679,6 +679,6 @@ class _InventoryTurnoverScreenState extends State<InventoryTurnoverScreen>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Colors.indigo.withOpacity(0.1),
+                      color: Colors.indigo.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),

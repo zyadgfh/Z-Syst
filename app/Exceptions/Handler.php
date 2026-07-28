@@ -108,6 +108,12 @@ class Handler extends ExceptionHandler
                 return $e->render($request);
             }
 
+            // Let parent handle renderable callbacks (AuthenticationException, ValidationException, etc.)
+            $parentResponse = parent::render($request, $e);
+            if ($parentResponse instanceof \Illuminate\Http\JsonResponse) {
+                return $parentResponse;
+            }
+
             // Fallback for any unhandled exception
             $status = method_exists($e, 'getStatusCode')
                 ? $e->getStatusCode()
