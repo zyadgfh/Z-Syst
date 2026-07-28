@@ -10,8 +10,12 @@ class TermServiceController extends Controller
     public function index()
     {
         $page_data = get_option('manage-pages');
-        $general = Option::where('key','general')->first();
+        $generalOption = Option::where('key', 'general')->first();
+        $general = $generalOption ? (object) array_merge([
+            'value' => [],
+        ], (array) $generalOption->toArray()) : (object) ['value' => []];
+        $general->value = is_array($general->value) ? $general->value : [];
         $term_condition = Option::where('key', 'term-condition')->first();
-        return view('landing::web.term.index',compact('page_data','general','term_condition'));
+        return view('landing::web.term.index', compact('page_data','general','term_condition'));
     }
 }

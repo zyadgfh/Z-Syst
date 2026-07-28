@@ -26,14 +26,21 @@
                 {{ Str::words($page_data['headings']['contact_us_description'] ?? '', 20, '...') }}
             </p>
         </div>
-        <div class="row">
-            <div class="col-lg-6 mb-3 align-self-center">
-                <div class="contact-image">
-                    <img src="{{ asset($page_data['contact_us_icon'] ?? 'assets/images/icons/img-upload.png') }}" alt="image" class="w-100 object-fit-cover rounded-2" />
+        <div class="section-card contact-card p-4 p-lg-5 mt-4">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-6 mb-3 align-self-center">
+                    <div class="contact-image">
+                        <img src="{{ asset($page_data['contact_us_icon'] ?? 'assets/images/icons/img-upload.png') }}" alt="image" class="w-100 object-fit-cover rounded-2" />
+                    </div>
                 </div>
-            </div>
-            <div class="col-lg-6 mb-3 align-self-center">
-                <form action="{{ route('contact.store') }}" method="post" class="ajaxform_instant_reload">
+                <div class="col-lg-6 mb-3 align-self-center">
+                    <div class="section-pill mb-3">
+                        <i class="fa-solid fa-comments"></i>
+                        {{ __('We reply fast') }}
+                    </div>
+                    <h3 class="mb-2">{{ __('Tell us what you need') }}</h3>
+                    <p class="section-description pt-0 mb-4">{{ __('Share your details and our team will reach out with the right support.') }}</p>
+                    <form action="{{ route('contact.store') }}" method="post" class="ajaxform_instant_reload">
                     @csrf
                     <div class="row contact">
                         <div class="col-md-12 mb-2">
@@ -75,7 +82,8 @@
                             </button>
                         </div>
                     </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

@@ -11,6 +11,7 @@ use Modules\Landing\App\Models\Blog;
 use Modules\Landing\App\Models\Feature;
 use Modules\Landing\App\Models\Testimonial;
 use Modules\Landing\App\Models\PosAppInterface;
+use Illuminate\Support\Arr;
 
 class WebController extends Controller
 {
@@ -22,7 +23,11 @@ class WebController extends Controller
         $testimonials = Testimonial::latest()->get();
         $recent_blogs = Blog::with('user:id,name')->whereStatus(1)->latest()->take(3)->get();
         $blogs = Blog::with('user:id,name')->whereStatus(1)->take(2)->latest()->get();
-        $general = Option::where('key','general')->first();
+        $generalOption = Option::where('key', 'general')->first();
+        $general = $generalOption ? (object) array_merge([
+            'value' => [],
+        ], (array) $generalOption->toArray()) : (object) ['value' => []];
+        $general->value = is_array($general->value) ? $general->value : [];
         $plans = Plan::whereStatus(1)->latest()->get();
         $gateways = Gateway::latest()->get();
         $business_categories = BusinessCategory::latest()->get();

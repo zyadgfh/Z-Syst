@@ -5,7 +5,7 @@
                 <div class="row" id="blogs-container">
                     @foreach ($blogs as $index => $blog)
                         <div data-aos="zoom-in-up" data-aos-delay="{{ $index * 300 }}" class="col-lg-6 pb-4">
-                            <div class="blog-shadow rounded-16">
+                            <div class="blog-shadow section-card blog-card rounded-16">
                                 <div class="text-center blog-image pb-3">
                                     <img src="{{ asset($blog->image) }}" alt="product-image"
                                         class="w-100 h-100 object-fit-cover  blog-img-1" />
@@ -43,7 +43,7 @@
             </div>
             <div class="col-xl-4">
                 @foreach ($recent_blogs as $index => $blog)
-                    <div data-aos="zoom-in-up" data-aos-delay="{{ $index * 300 }}" class="blog-shadow rounded-16 mb-4">
+                    <div data-aos="zoom-in-up" data-aos-delay="{{ $index * 300 }}" class="blog-shadow section-card blog-card rounded-16 mb-4">
                         <div class="d-flex align-items-center ">
                             <img src="{{ asset($blog->image) }}"
                                 class="object-fit-cover rounded home-blog-small-image blog-img-1" alt="..." />

@@ -9,6 +9,12 @@
         <div class="custom-container mt-2">
             <div class=" hero-bg position-relative p-3">
                 <div class="banner-content">
+                    <div class="d-flex justify-content-center mb-4" data-aos="fade-down">
+                        <div class="section-pill">
+                            <i class="fa-solid fa-sparkles"></i>
+                            {{ __('Modern pharmacy experience') }}
+                        </div>
+                    </div>
                     <h1 data-aos="fade-right">
                         {{ str_word_count($page_data['headings']['slider_title'] ?? '') > 6
                             ? implode(' ', array_slice(explode(' ', $page_data['headings']['slider_title'] ?? ''), 0, 6)) . '...'
@@ -41,6 +47,20 @@
                                 class="watch-text">{{ Str::words($page_data['headings']['slider_btn2'] ?? '', 3, '...') }}
                             </span>
                         </a>
+                    </div>
+                    <div class="hero-highlights" data-aos="fade-up" data-aos-delay="700">
+                        <div class="hero-highlight-item">
+                            <i class="fa-solid fa-bolt"></i>
+                            <span>{{ __('Fast setup') }}</span>
+                        </div>
+                        <div class="hero-highlight-item">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span>{{ __('Secure billing') }}</span>
+                        </div>
+                        <div class="hero-highlight-item">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                            <span>{{ __('Mobile ready') }}</span>
+                        </div>
                     </div>
                     <div data-aos="fade-up"  class="hero-img-container">
                         <img class="position-absolute bottom-0 start-50 translate-middle-x"

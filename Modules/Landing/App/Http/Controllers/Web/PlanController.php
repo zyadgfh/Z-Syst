@@ -12,7 +12,11 @@ class PlanController extends Controller
     public function index()
     {
         $page_data = get_option('manage-pages');
-        $general = Option::where('key','general')->first();
+        $generalOption = Option::where('key', 'general')->first();
+        $general = $generalOption ? (object) array_merge([
+            'value' => [],
+        ], (array) $generalOption->toArray()) : (object) ['value' => []];
+        $general->value = is_array($general->value) ? $general->value : [];
         $plans = Plan::where('status',1)->latest()->get();
         $business_categories = BusinessCategory::latest()->get();
 

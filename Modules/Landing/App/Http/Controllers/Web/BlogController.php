@@ -15,7 +15,11 @@ class BlogController extends Controller
         $page_data = get_option('manage-pages');
         $recent_blogs = Blog::with('user:id,name')->whereStatus(1)->latest()->take(3)->get();
         $blogs = Blog::with('user:id,name')->whereStatus(1)->take(10)->latest()->get();
-        $general = Option::where('key','general')->first();
+        $generalOption = Option::where('key', 'general')->first();
+        $general = $generalOption ? (object) array_merge([
+            'value' => [],
+        ], (array) $generalOption->toArray()) : (object) ['value' => []];
+        $general->value = is_array($general->value) ? $general->value : [];
 
         return view('landing::web.blog.index', compact('recent_blogs', 'blogs', 'page_data','general'));
     }
@@ -26,7 +30,11 @@ class BlogController extends Controller
         $blog = Blog::where('slug', $slug)->firstOrFail();
         $recent_blogs = Blog::with('user:id,name')->select('id', 'title', 'slug', 'image', 'user_id', 'created_at', 'updated_at')->whereStatus(1)->latest()->limit(3)->get();
         $comments = Comment::with('blog:id')->whereStatus(1)->where('blog_id', $blog->id)->latest()->limit(3)->get();
-        $general = Option::where('key','general')->first();
+        $generalOption = Option::where('key', 'general')->first();
+        $general = $generalOption ? (object) array_merge([
+            'value' => [],
+        ], (array) $generalOption->toArray()) : (object) ['value' => []];
+        $general->value = is_array($general->value) ? $general->value : [];
 
         return view('landing::web.blog.show', compact('page_data','blog', 'recent_blogs','comments','general'));
     }

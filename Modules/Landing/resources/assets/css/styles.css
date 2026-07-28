@@ -243,6 +243,133 @@ body .modal-custom-design .save-btn {
     padding-top: 80px;
 }
 
+.section-shell {
+    background: linear-gradient(135deg, rgba(0, 152, 127, 0.05) 0%, rgba(255, 255, 255, 1) 100%);
+    border: 1px solid rgba(0, 152, 127, 0.1);
+    box-shadow: 0 20px 45px rgba(16, 24, 40, 0.06);
+    border-radius: 24px;
+}
+
+.section-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(0, 152, 127, 0.12);
+    color: var(--clr-primary);
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.section-card {
+    border-radius: 20px;
+    background: #fff;
+    border: 1px solid #e9eef4;
+    box-shadow: 0 16px 40px rgba(16, 24, 40, 0.06);
+    padding: 24px;
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+.section-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 24px 50px rgba(16, 24, 40, 0.1);
+}
+
+.hero-highlights {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.hero-highlight-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 152, 127, 0.16);
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #344054;
+}
+
+.hero-highlight-item i {
+    color: var(--clr-primary);
+}
+
+.about-section .about-card,
+.contact-section .contact-card,
+.blogs-section .blog-intro-card {
+    padding: 32px;
+}
+
+.contact-section .contact-form-card {
+    padding: 30px;
+}
+
+.blogs-section .blog-card {
+    border: 1px solid #edf2f7;
+    box-shadow: 0 20px 38px rgba(15, 23, 42, 0.06);
+    transition: all 0.3s ease;
+}
+
+.blogs-section .blog-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 24px 44px rgba(15, 23, 42, 0.12);
+}
+
+.blogs-section .blog-card .blog-image {
+    overflow: hidden;
+}
+
+.blogs-section .blog-card .blog-image img {
+    transition: transform 0.3s ease;
+}
+
+.blogs-section .blog-card:hover .blog-image img {
+    transform: scale(1.04);
+}
+
+.plans-list .card.featured-plan {
+    border: 1px solid var(--clr-primary) !important;
+    box-shadow: 0 18px 40px rgba(0, 152, 127, 0.16);
+}
+
+.plans-list .card .plan-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(0, 152, 127, 0.12);
+    color: var(--clr-primary);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 576px) {
+    .hero-highlights {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .about-section .about-card,
+    .contact-section .contact-card,
+    .blogs-section .blog-intro-card {
+        padding: 24px;
+    }
+}
+
 .bg-FFFFFF {
     background-color: #ffffff;
     /* background-color: red; */

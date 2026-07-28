@@ -1,13 +1,19 @@
 <section class="pricing-plan-section plans-list" id="plans">
     <div class="container">
         <div class="section-title text-center">
+            @php($headings = is_array($page_data['headings'] ?? null) ? $page_data['headings'] : [])
+
+            <div class="section-pill mb-3" data-aos="fade-up">
+                <i class="fa-solid fa-circle-check"></i>
+                {{ __('Flexible plans') }}
+            </div>
 
             <h2 data-aos="fade-up" class="langing-section-title">
-                {{ Str::words($page_data['headings']['pricing_short_title_start'] ?? '', 2, '...') }} <span class="title-span-color"> {{ Str::words($page_data['headings']['pricing_short_title_middle'] ?? '', 2, '...') }}</span>   {{ Str::words($page_data['headings']['pricing_short_title_end'] ?? '', 2, '...') }}
+                {{ Str::words($headings['pricing_short_title_start'] ?? '', 2, '...') }} <span class="title-span-color"> {{ Str::words($headings['pricing_short_title_middle'] ?? '', 2, '...') }}</span>   {{ Str::words($headings['pricing_short_title_end'] ?? '', 2, '...') }}
             </h2>
 
             <p data-aos="fade-up" class="max-w-600 mx-auto section-description ">
-                {{ Str::words($page_data['headings']['pricing_title'] ?? '', 20, '...') }}
+                {{ Str::words($headings['pricing_title'] ?? '', 20, '...') }}
             </p>
 
              <div class="d-flex align-items-center justify-content-center gap-4">
@@ -19,8 +25,11 @@
                             <div class="row">
                                 @foreach ($plans as $plan)
                                     <div class="col-sm-12 col-md-6 col-lg-4 mt-3">
-                                        <div class="card">
+                                        <div class="card {{ $loop->first ? 'featured-plan' : '' }}">
                                             <div  class="card-header py-3 border-0 ">
+                                                @if ($loop->first)
+                                                    <span class="plan-badge">{{ __('Popular') }}</span>
+                                                @endif
                                                 <p class="m-0">{{ $plan->subscriptionName }}</p>
                                                 <h4 class="m-0">{{ currency_format($plan->subscriptionPrice ?? 0) }}<span
                                                         class="price-span">/

@@ -1,3 +1,10 @@
+@php
+    $pageData = is_array($page_data ?? null) ? $page_data : [];
+    $generalData = is_object($general ?? null) ? $general : (object) ['value' => []];
+    $headerButtonRoute = data_get($pageData, 'headings.header_btn_link') ?: 'login';
+    $headerButtonText = data_get($pageData, 'headings.header_btn_text') ?: __('Login');
+@endphp
+
 <header class="header-section home-header">
     <nav class="navbar navbar-expand-lg p-0">
         <div class="custom-container">
@@ -25,12 +32,12 @@
                  </ul>
                  <a href="{{ route('home') }}" class="header-logo logo-lg-device ">
                     <img class="img-fluid nav-logo"
-                    src="{{ asset($general->value['frontend_logo'] ?? 'assets/images/icons/upload-icon.svg') }}"
+                    src="{{ asset(data_get($generalData, 'value.frontend_logo') ?: 'assets/images/icons/upload-icon.svg') }}"
                     alt="header-logo" />
                 </a>
 
                     <div class="get-btn-container">
-                    <a href="{{ Route::has($page_data['headings']['header_btn_link']) ? route($page_data['headings']['header_btn_link']) : route('login') }}"
+                    <a href="{{ Route::has($headerButtonRoute) ? route($headerButtonRoute) : route('login') }}"
                         class="get-app-btn ps-custom-btn">
                         <svg  width="20" height="20" viewBox="0 0 20 20" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
@@ -41,7 +48,7 @@
                                 d="M13.75 5.4165C13.75 7.48757 12.0711 9.1665 10 9.1665C7.92893 9.1665 6.25 7.48757 6.25 5.4165C6.25 3.34544 7.92893 1.6665 10 1.6665C12.0711 1.6665 13.75 3.34544 13.75 5.4165Z"
                                 fill="white"></path>
                         </svg>
-                        {{ Str::words($page_data['headings']['header_btn_text'] ?? '', 1, '...') }}
+                        {{ Str::words($headerButtonText, 1, '...') }}
 
                     </a>
                 </div>
@@ -66,12 +73,12 @@
                 </button>
                 <a href="{{ route('home') }}" class="header-logo  ">
                     <img class="img-fluid nav-logo"
-                    src="{{ asset($general->value['frontend_logo'] ?? 'assets/images/icons/upload-icon.svg') }}"
+                    src="{{ asset(data_get($generalData, 'value.frontend_logo') ?: 'assets/images/icons/upload-icon.svg') }}"
                     alt="header-logo" />
                 </a>
 
                 <div class="get-btn-container login-sm-device">
-                    <a href="{{ Route::has($page_data['headings']['header_btn_link']) ? route($page_data['headings']['header_btn_link']) : route('login') }}"
+                    <a href="{{ Route::has($headerButtonRoute) ? route($headerButtonRoute) : route('login') }}"
                         class="get-app-btn ps-custom-btn">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
@@ -82,7 +89,7 @@
                                 d="M13.75 5.4165C13.75 7.48757 12.0711 9.1665 10 9.1665C7.92893 9.1665 6.25 7.48757 6.25 5.4165C6.25 3.34544 7.92893 1.6665 10 1.6665C12.0711 1.6665 13.75 3.34544 13.75 5.4165Z"
                                 fill="white"></path>
                         </svg>
-                        {{ Str::words($page_data['headings']['header_btn_text'] ?? '', 4, '...') }}
+                        {{ Str::words($headerButtonText, 4, '...') }}
 
                     </a>
                 </div>
@@ -93,7 +100,7 @@
                 id="staticBackdrop" aria-labelledby="staticBackdropLabel">
                 <div class="offcanvas-header">
                     <a href="{{ route('home') }}" class="header-logo"><img
-                            src="{{ asset($general->value['frontend_logo'] ?? 'assets/images/icons/upload-icon.svg') }}"
+                            src="{{ asset(data_get($generalData, 'value.frontend_logo') ?: 'assets/images/icons/upload-icon.svg') }}"
                             alt="header-logo" class="w-75" /></a>
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
