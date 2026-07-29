@@ -138,6 +138,34 @@
         display: none !important;
     }
 }
+
+/* Header responsive fix */
+@media only screen and (max-width: 991px) {
+    .navbar-lg-device {
+        display: none !important;
+    }
+    .header-sm-container {
+        display: flex !important;
+    }
+}
+
+@media only screen and (min-width: 992px) {
+    .header-sm-container {
+        display: none !important;
+    }
+}
+
+.collapse:not(.show) {
+    display: none !important;
+}
+
+.offcanvas {
+    display: none !important;
+}
+
+.offcanvas.show {
+    display: block !important;
+}
 @media only screen and (min-width: 0px) and (max-width: 768px) {
     /* faq */
     .faqs-section .accordion-button {
@@ -414,5 +442,107 @@
 @media (max-width: 400px) {
     .hero-img-container img {
         width: 280px !important;
+    }
+}
+
+/* Global responsive defaults for all pages */
+html {
+    box-sizing: border-box;
+}
+*, *::before, *::after {
+    box-sizing: inherit;
+}
+body {
+    min-width: 320px;
+    overflow-x: hidden;
+}
+img, svg, video, iframe, embed, object, .banner-img, .hero-img-container img, .contact-image img {
+    max-width: 100%;
+    height: auto !important;
+}
+section {
+    padding: clamp(30px, 4vw, 80px) 0;
+}
+.container,
+.container-fluid,
+.custom-container {
+    width: 100%;
+    max-width: 1260px;
+    padding-left: 16px;
+    padding-right: 16px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.row,
+.d-flex,
+.d-grid,
+.flex-row,
+.navbar-nav {
+    flex-wrap: wrap !important;
+}
+.card,
+.pricing-plan-section .card,
+.footer-section .footer-widget,
+.about-section .icon {
+    width: 100%;
+}
+.header-section .nav-link,
+.header-section .header-logo,
+.header-section .menu-dropdown .mega-menu,
+.footer-section .footer-widget {
+    min-width: 0;
+}
+@media (max-width: 992px) {
+    .header-section .nav-link {
+        padding: .5rem .75rem !important;
+    }
+    .header-section .menu-dropdown .mega-menu {
+        width: 100% !important;
+        padding: 1rem !important;
+    }
+    .section-title {
+        margin-bottom: 1.25rem !important;
+    }
+}
+@media (max-width: 768px) {
+    section {
+        padding: 40px 0;
+    }
+    .custom-container {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+    .card,
+    .pricing-plan-section .card {
+        margin-bottom: 1.25rem;
+    }
+}
+@media (max-width: 576px) {
+    body h2 {
+        font-size: 28px !important;
+        line-height: 36px !important;
+    }
+    body h4 {
+        font-size: 22px !important;
+        line-height: 30px !important;
+    }
+    .home-banner-section .banner-content h1,
+    .langing-section-title {
+        font-size: 2rem !important;
+        line-height: 2.4rem !important;
+    }
+    .section-description {
+        font-size: 14px !important;
+        line-height: 22px !important;
+    }
+    .custom-btn {
+        width: 100%;
+        padding: .85rem 1rem !important;
+    }
+    .header-section .header-logo,
+    .header-section .nav-link,
+    .header-section .menu-dropdown .mega-menu {
+        width: 100% !important;
+        text-align: center;
     }
 }

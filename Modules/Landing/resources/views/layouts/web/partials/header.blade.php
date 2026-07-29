@@ -8,7 +8,7 @@
 <header class="header-section home-header">
     <nav class="navbar navbar-expand-lg p-0">
         <div class="custom-container">
-             <div class="collapse navbar-collapse navbar-lg-device d-flex align-items-center justify-content-between">
+             <div class="collapse navbar-collapse navbar-lg-device align-items-center justify-content-between">
                  <ul class="navbar-nav  mb-2 mb-lg-0">
                      <li class="nav-item">
                          <a href="{{ route('home') }}" class="nav-link active" aria-current="page">{{ __('Home') }}</a>

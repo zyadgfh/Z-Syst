@@ -17,14 +17,9 @@
         </div>
         <div class="container">
             @php($headings = is_array($page_data['headings'] ?? null) ? $page_data['headings'] : [])
-            <div class="about-card section-shell p-4 p-lg-5 mt-4">
-                <div class="row mb-3">
+            <div class="row mb-3 mt-5">
                 <div class="col-lg-7 align-self-center">
                     <div>
-                        <div class="section-pill mb-3">
-                            <i class="fa-solid fa-circle-check"></i>
-                            {{ __('Built for modern pharmacies') }}
-                        </div>
                         <h6>
                             <span
                                 class="langing-section-subtitle ">{{ Str::words($headings['about_short_title'] ?? '', 3, '...') }}
@@ -47,11 +42,10 @@
                     </div>
                 </div>
                 <div class="col-lg-5 align-self-center">
-                    <div class="section-card p-3 p-lg-4 w-100 position-relative ms-auto about-img">
+                    <div class="w-90 position-relative ms-auto about-img">
                         <img src="{{ asset($page_data['about_image'] ?? 'assets/images/icons/img-upload.png') }}"
                             alt="image" class="w-100" />
                     </div>
-                </div>
                 </div>
             </div>
 

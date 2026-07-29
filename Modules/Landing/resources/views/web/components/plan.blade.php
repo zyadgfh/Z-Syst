@@ -3,11 +3,6 @@
         <div class="section-title text-center">
             @php($headings = is_array($page_data['headings'] ?? null) ? $page_data['headings'] : [])
 
-            <div class="section-pill mb-3" data-aos="fade-up">
-                <i class="fa-solid fa-circle-check"></i>
-                {{ __('Flexible plans') }}
-            </div>
-
             <h2 data-aos="fade-up" class="langing-section-title">
                 {{ Str::words($headings['pricing_short_title_start'] ?? '', 2, '...') }} <span class="title-span-color"> {{ Str::words($headings['pricing_short_title_middle'] ?? '', 2, '...') }}</span>   {{ Str::words($headings['pricing_short_title_end'] ?? '', 2, '...') }}
             </h2>
@@ -25,12 +20,9 @@
                             <div class="row">
                                 @foreach ($plans as $plan)
                                     <div class="col-sm-12 col-md-6 col-lg-4 mt-3">
-                                        <div class="card {{ $loop->first ? 'featured-plan' : '' }}">
+                                        <div class="card plan-card">
                                             <div  class="card-header py-3 border-0 ">
-                                                @if ($loop->first)
-                                                    <span class="plan-badge">{{ __('Popular') }}</span>
-                                                @endif
-                                                <p class="m-0">{{ $plan->subscriptionName }}</p>
+                                                <p class="m-0 fw-semibold text-uppercase small">{{ $plan->subscriptionName }}</p>
                                                 <h4 class="m-0">{{ currency_format($plan->subscriptionPrice ?? 0) }}<span
                                                         class="price-span">/
                                                         {{ $plan->duration . ' ' . __('Days') }}</span></h4>
@@ -41,10 +33,10 @@
                                                     @foreach ($plan['features'] ?? [] as $key => $item)
                                                         <li class="feature-item">
                                                             @if (isset($item[1]))
-                                                                <img src="{{ asset('modules/landing/web/images/banner/plan-check.svg') }}"
+                                                                <img src="{{ asset('assets/web/images/banner/plan-check.svg') }}"
                                                                     alt="Check" class="me-1 plan-icon">
                                                             @else
-                                                                <img src="{{ asset('modules/landing/web/images/banner/plan-cross.svg') }}"
+                                                                <img src="{{ asset('assets/web/images/banner/plan-cross.svg') }}"
                                                                     alt="Times" class="me-1 plan-icon">
                                                             @endif
                                                             <span class="single-features">{{ $item[0] ?? '' }}</span>
