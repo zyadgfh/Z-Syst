@@ -61,5 +61,6 @@
                 </div>
             </div>
         </div>
+    </div>
 </section>
 @include('landing::web.components.signup')

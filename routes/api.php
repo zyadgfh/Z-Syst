@@ -10,9 +10,9 @@ Route::prefix('v1')->group(function () {
     Route::post('/sign-up', [Api\Auth\AuthController::class, 'signUp']);
     Route::post('/resend-otp', [Api\Auth\AuthController::class, 'resendOtp']);
 
-    Route::post('/send-reset-code',[Api\Auth\AcnooForgotPasswordController::class, 'sendResetCode']);
-    Route::post('/verify-reset-code',[Api\Auth\AcnooForgotPasswordController::class, 'verifyResetCode']);
-    Route::post('/password-reset',[Api\Auth\AcnooForgotPasswordController::class, 'resetPassword']);
+    Route::post('/send-reset-code',[Api\Auth\ZSystForgotPasswordController::class, 'sendResetCode']);
+    Route::post('/verify-reset-code',[Api\Auth\ZSystForgotPasswordController::class, 'verifyResetCode']);
+    Route::post('/password-reset',[Api\Auth\ZSystForgotPasswordController::class, 'resetPassword']);
 
     Route::group(['middleware' => ['auth:sanctum']], function () {
 
@@ -21,41 +21,41 @@ Route::prefix('v1')->group(function () {
         Route::get('features', [Api\FeatureStatusController::class, 'index']);
         Route::post('backup', [Api\BackupController::class, 'store']);
 
-        Route::post('stock-update/{id}',[Api\AcnooProductController::class, 'updateStock']);
-        Route::get('stocks-with-product', [Api\AcnooProductController::class, 'stocksWithProduct']);
-        Route::get('dues-list', [Api\AcnooDueController::class, 'duesList']);
+        Route::post('stock-update/{id}',[Api\ZSystProductController::class, 'updateStock']);
+        Route::get('stocks-with-product', [Api\ZSystProductController::class, 'stocksWithProduct']);
+        Route::get('dues-list', [Api\ZSystDueController::class, 'duesList']);
 
         Route::apiResource('parties', Api\PartyController::class);
-        Route::apiResource('users', Api\AcnooUserController::class)->except('show');
+        Route::apiResource('users', Api\ZSystUserController::class)->except('show');
         Route::apiResource('units', Api\UnitController::class)->except('show');
-        Route::apiResource('categories', Api\AcnooCategoryController::class)->except('show');
-        Route::apiResource('manufacturer', Api\AcnooManufacturerController::class)->except('show');
+        Route::apiResource('categories', Api\ZSystCategoryController::class)->except('show');
+        Route::apiResource('manufacturer', Api\ZSystManufacturerController::class)->except('show');
         Route::apiResource('parties', Api\PartyController::class);
-        Route::apiResource('products', Api\AcnooProductController::class);
+        Route::apiResource('products', Api\ZSystProductController::class);
         Route::apiResource('stocks', Api\StockController::class)->only('index');
         Route::apiResource('business-categories', Api\BusinessCategoryController::class)->only('index');
         Route::apiResource('business', Api\BusinessController::class)->only('index', 'store', 'update');
         Route::apiResource('purchase', Api\PurchaseController::class);
-        Route::apiResource('sales', Api\AcnooSaleController::class);
+        Route::apiResource('sales', Api\ZSystSaleController::class);
         Route::apiResource('sales-return', Api\SaleReturnController::class)->only('index', 'store', 'show');
         Route::apiResource('purchases-return', Api\PurchaseReturnController::class)->only('index', 'store', 'show');
-        Route::apiResource('invoices', Api\AcnooInvoiceController::class)->only('index');
-        Route::apiResource('dues', Api\AcnooDueController::class)->only('index', 'store');
+        Route::apiResource('invoices', Api\ZSystInvoiceController::class)->only('index');
+        Route::apiResource('dues', Api\ZSystDueController::class)->only('index', 'store');
         Route::apiResource('expense-categories', Api\ExpenseCategoryController::class)->except('show');
-        Route::apiResource('expenses', Api\AcnooExpenseController::class)->except('show');
-        Route::apiResource('income-categories', Api\AcnooIncomeCategoryController::class)->except('show');
-        Route::apiResource('incomes', Api\AcnooIncomeController::class)->except('show');
-        Route::apiResource('box-sizes', Api\AcnooBoxSizeController::class)->except('show');
-        Route::apiResource('medicine-types', Api\AcnooMedicineTypeController::class)->except('show');
+        Route::apiResource('expenses', Api\ZSystExpenseController::class)->except('show');
+        Route::apiResource('income-categories', Api\ZSystIncomeCategoryController::class)->except('show');
+        Route::apiResource('incomes', Api\ZSystIncomeController::class)->except('show');
+        Route::apiResource('box-sizes', Api\ZSystBoxSizeController::class)->except('show');
+        Route::apiResource('medicine-types', Api\ZSystMedicineTypeController::class)->except('show');
 
-        Route::apiResource('prescriptions', Api\AcnooPrescriptionController::class);
-        Route::get('prescriptions/review', [Api\AcnooPrescriptionController::class, 'review']);
-        Route::post('prescriptions/link-to-sale', [Api\AcnooPrescriptionController::class, 'linkToSale']);
+        Route::apiResource('prescriptions', Api\ZSystPrescriptionController::class);
+        Route::get('prescriptions/review', [Api\ZSystPrescriptionController::class, 'review']);
+        Route::post('prescriptions/link-to-sale', [Api\ZSystPrescriptionController::class, 'linkToSale']);
 
         // Drug Interactions
-        Route::apiResource('drug-interactions', Api\AcnooDrugInteractionController::class);
-        Route::post('drug-interactions/check', [Api\AcnooDrugInteractionController::class, 'check']);
-        Route::post('drug-interactions/bulk-import', [Api\AcnooDrugInteractionController::class, 'bulkImport']);
+        Route::apiResource('drug-interactions', Api\ZSystDrugInteractionController::class);
+        Route::post('drug-interactions/check', [Api\ZSystDrugInteractionController::class, 'check']);
+        Route::post('drug-interactions/bulk-import', [Api\ZSystDrugInteractionController::class, 'bulkImport']);
 
         // Expiry Alerts
         Route::get('expiry-alerts/stats', [Api\ExpiryAlertController::class, 'stats']);
@@ -99,13 +99,13 @@ Route::prefix('v1')->group(function () {
             Route::get('report', [Api\AutoOrderController::class, 'report']);
         });
 
-        Route::apiResource('banners', Api\AcnooBannerController::class)->only('index');
-        Route::apiResource('lang', Api\AcnooLanguageController::class)->only('index', 'store');
-        Route::apiResource('profile', Api\AcnooProfileController::class)->only('index', 'store');
-        Route::apiResource('plans', Api\AcnooSubscriptionsController::class)->only('index');
-        Route::apiResource('subscribes', Api\AcnooSubscribesController::class)->only('index');
-        Route::apiResource('currencies', Api\AcnooCurrencyController::class)->only('index');
-        Route::apiResource('taxes', Api\AcnooTaxController::class)->except('show');
+        Route::apiResource('banners', Api\ZSystBannerController::class)->only('index');
+        Route::apiResource('lang', Api\ZSystLanguageController::class)->only('index', 'store');
+        Route::apiResource('profile', Api\ZSystProfileController::class)->only('index', 'store');
+        Route::apiResource('plans', Api\ZSystSubscriptionsController::class)->only('index');
+        Route::apiResource('subscribes', Api\ZSystSubscribesController::class)->only('index');
+        Route::apiResource('currencies', Api\ZSystCurrencyController::class)->only('index');
+        Route::apiResource('taxes', Api\ZSystTaxController::class)->except('show');
 
         // Inventory Turnover Analysis
         Route::prefix('inventory-turnover')->group(function () {
@@ -167,9 +167,43 @@ Route::prefix('v1')->group(function () {
             Route::get('statistics', [Api\FinancialAuditController::class, 'statistics']);
         });
 
-        Route::post('change-password', [Api\AcnooProfileController::class, 'changePassword']);
+        // Insurance System
+        Route::prefix('insurance')->group(function () {
+            Route::get('summary', [Api\InsuranceController::class, 'summary']);
 
-        Route::get('new-invoice', [Api\AcnooInvoiceController::class, 'newInvoice']);
+            // Companies
+            Route::get('companies', [Api\InsuranceController::class, 'companiesIndex']);
+            Route::post('companies', [Api\InsuranceController::class, 'companiesStore']);
+            Route::get('companies/{company}', [Api\InsuranceController::class, 'companiesShow']);
+            Route::put('companies/{company}', [Api\InsuranceController::class, 'companiesUpdate']);
+            Route::delete('companies/{company}', [Api\InsuranceController::class, 'companiesDestroy']);
+
+            // Policies
+            Route::get('policies', [Api\InsuranceController::class, 'policiesIndex']);
+            Route::post('policies', [Api\InsuranceController::class, 'policiesStore']);
+            Route::get('policies/{policy}', [Api\InsuranceController::class, 'policiesShow']);
+            Route::put('policies/{policy}', [Api\InsuranceController::class, 'policiesUpdate']);
+            Route::delete('policies/{policy}', [Api\InsuranceController::class, 'policiesDestroy']);
+
+            // Claims
+            Route::get('claims', [Api\InsuranceController::class, 'claimsIndex']);
+            Route::post('claims', [Api\InsuranceController::class, 'claimsStore']);
+            Route::get('claims/{claim}', [Api\InsuranceController::class, 'claimsShow']);
+            Route::post('claims/{claim}/submit', [Api\InsuranceController::class, 'claimsSubmit']);
+            Route::post('claims/{claim}/approve', [Api\InsuranceController::class, 'claimsApprove']);
+            Route::post('claims/{claim}/reject', [Api\InsuranceController::class, 'claimsReject']);
+            Route::post('claims/{claim}/pay', [Api\InsuranceController::class, 'claimsPay']);
+
+            // Coverage rules
+            Route::get('coverages', [Api\InsuranceController::class, 'coveragesIndex']);
+            Route::post('coverages', [Api\InsuranceController::class, 'coveragesStore']);
+            Route::put('coverages/{coverage}', [Api\InsuranceController::class, 'coveragesUpdate']);
+            Route::delete('coverages/{coverage}', [Api\InsuranceController::class, 'coveragesDestroy']);
+        });
+
+        Route::post('change-password', [Api\ZSystProfileController::class, 'changePassword']);
+
+        Route::get('new-invoice', [Api\ZSystInvoiceController::class, 'newInvoice']);
         Route::get('/sign-out', [Api\Auth\AuthController::class, 'signOut']);
         Route::get('/refresh-token', [Api\Auth\AuthController::class, 'refreshToken']);
     });

@@ -14,7 +14,7 @@
                 <div class="mybazar-login-wrapper ">
                     <div class="login-wrapper">
                         <div class="login-body w-100">
-                            <h2 class="text-center login-title">{{ __('Welcome to') }}<span>{{ __(env('APP_NAME')) }}</span></h2>
+                            <h2 class="text-center login-title">{{ __('Welcome to') }} <span>{{ __(config('app.name', 'Z-Syst')) }}</span></h2>
                             <h6 class="text-center login-para">{{ __('Welcome back, Please login in to your account') }}</h6>
                             <form method="POST" action="{{ route('login') }}" class="ajaxform_instant_reload">
                                 @csrf

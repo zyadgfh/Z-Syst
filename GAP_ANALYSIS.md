@@ -1,472 +1,263 @@
-# تحليل الفجوات والمميزات الناقصة - Z-Syst Pharmacy Management System
+# Gap Analysis — Z-Syst Pharmacy Management System
 
-التاريخ: 2026-07-28
-النظام: نظام إدارة الصيدليات (Z-Syst)
-
----
-
-## 📊 نظرة عامة على النظام الحالي
-
-### المميزات المتوفرة حالياً:
-- ✅ نظام إدارة المنتجات (الأدوية)
-- ✅ نظام إدارة المخزون الأساسي
-- ✅ نظام المشتريات والمبيعات
-- ✅ نظام الفواتير والإرجاع
-- ✅ نظام الوصفات الطبية (Prescriptions)
-- ✅ نظام تفاعلات الأدوية (Drug Interactions)
-- ✅ نظام FEFO (First Expiry, First Out)
-- ✅ نظام التنبؤ بالمبيعات (AI Sales Prediction)
-- ✅ نظام الطلب الآلي (Auto-Order)
-- ✅ نظام تحليل دوران المخزون (Inventory Turnover)
-- ✅ نظام إدارة الموظفين والصلاحيات
-- ✅ نظام التقارير المالية الأساسية
-- ✅ نظام الاشتراكات (SaaS)
-- ✅ تطبيق موبايل Flutter
+> **Generated:** 2026-07-29  
+> **Scope:** Laravel Backend (`app/`, `Modules/`) ↔ Flutter Mobile App (`pharmacy-store-app-codecanyon-main/lib/`)
 
 ---
 
-## 🚨 الفجوات الحرجة (Critical Gaps)
+## 1. Overview
 
-### 1. نظام الجرد والتدقيق الشامل (Audit & Stock Taking)
-**الحالة:** ❌ غير موجود
-**الأهمية:** حرجة - ضروري لأي صيدلية
+This document maps every feature available in the **Laravel backend** (API + Admin) against the **Flutter mobile app** to identify what is implemented, partially implemented, or missing on each side.
 
-**المميزات الناقصة:**
-- نظام الجرد الدوري للمخزون
-- نظام التسوية اليدوية للمخزون
-- نظام التدقيق المالي الشامل
-- سجل كامل لعمليات التسوية
-- تقرير الاختلافات بين المخزون الفعلي والنظامي
-
-**التطوير المطلوب:**
-```php
-// جداول مطلوبة:
-- stock_taking_sessions (جلسات الجرد)
-- stock_taking_items (عناصر الجرد)
-- stock_adjustments (تسويات المخزون)
-- audit_logs (سجلات التدقيق الشامل)
-```
-
-### 2. نظام التأمين الصحي والتأمين على الأدوية
-**الحالة:** ❌ غير موجود
-**الأهمية:** حرجة - ضروري في الأسواق الحديثة
-
-**المميزات الناقصة:**
-- إدارة شركات التأمين
-- ارتباط السياسات التأمينية بالعملاء
-- التحقق من التغطية التأمينية
-- مطالبات التأمين الإلكترونية
-- تقارير المطالبات والمدفوعات
-- تكامل مع أنظمة التأمين الحكومية/الخاصة
-
-**التطوير المطلوب:**
-```php
-// جداول مطلوبة:
-- insurance_companies (شركات التأمين)
-- insurance_policies (السياسات التأمينية)
-- insurance_claims (المطالبات)
-- insurance_coverage (تغطية الأدوية)
-```
-
-### 3. نظام الباركود وQR Code المتقدم
-**الحالة:** ⚠️ جزئي فقط
-**الأهمية:** حرجة لعمليات الصيدلية السريعة
-
-**المميزات الناقصة:**
-- توليد باركود متعدد الأشكال
-- نظام QR Code للمنتجات
-- الماسح الضوئي المتقدم (Scanner Integration)
-- نظام الملصقات (Labels Printing)
-- دعم باركود GS1
-- تطابق الباركود مع قواعد السلامة
-
-### 4. نظام التتبع الكامل (End-to-End Traceability)
-**الحالة:** ⚠️ جزئي فقط
-**الأهمية:** حرجة للسلامة الدوائية
-
-**المميزات الناقصة:**
-- تتبع المنتج من المورد إلى العميل النهائي
-- نظام الاسترجاع (Recall Management)
-- تتبع الأرقام التسلسلية (Serial Number Tracking)
-- نظام التنبيهات للمنتجات المسترجعة
-- تقارير التتبع الكامل
+| Side | Status |
+|------|--------|
+| **Laravel API (Backend)** | ✅ Most features fully implemented |
+| **Laravel Admin (Blade)** | ✅ Admin panel complete for core CRUD |
+| **Flutter Mobile App** | ⚠️ Core pharmacy features present; newer features (Audit, Insurance) missing |
 
 ---
 
-## ⚠️ الفجوات المتوسطة الأهمية (Medium Priority Gaps)
+## 2. Feature Comparison Matrix
 
-### 5. نظام التخزين المتعدد (Multi-Warehouse)
-**الحالة:** ❌ غير موجود
-**الأهمية:** متوسطة - عالية للصيدليات الكبيرة
+### 2.1 Core Pharmacy Operations
 
-**المميزات الناقصة:**
-- إدارة مستودعات متعددة
-- النقل بين المستودعات
-- تخصيص المنتجات للمستودعات
-- جرد كل مستودع على حدة
-- تقارير المخزون لكل مستودع
+| Module | Backend API | Flutter App | Notes |
+|--------|:-----------:|:-----------:|-------|
+| **Authentication** (login, OTP, register, forgot password) | ✅ | ✅ | Complete on both sides |
+| **Profile Management** | ✅ | ✅ | |
+| **Products** (CRUD, barcode, stock update) | ✅ | ✅ | Full CRUD + barcode generation |
+| **Categories** | ✅ | ✅ | |
+| **Units** | ✅ | ❌ | No UI in Flutter (managed via web) |
+| **Manufacturers** | ✅ | ❌ | No UI in Flutter |
+| **Medicine Types** | ✅ | ❌ | No UI in Flutter |
+| **Box Sizes** | ✅ | ❌ | No UI in Flutter |
+| **Taxes** (single + group) | ✅ | ✅ | |
+| **Parties** (Customers/Suppliers) | ✅ | ✅ | CRUD + details |
+| **Purchases** (add, list, details) | ✅ | ✅ | |
+| **Purchase Returns** | ✅ | ✅ | |
+| **Sales** (add, list, details) | ✅ | ✅ | |
+| **Sale Returns** | ✅ | ✅ | |
+| **Stocks** (list, by product) | ✅ | ✅ | Stock list screen exists |
+| **Stock Movements** | ✅ | ❌ | **Missing** — No Flutter screen for movement log |
 
-**التطوير المطلوب:**
-```php
-// جداول مطلوبة:
-- warehouses (المستودعات)
-- warehouse_stocks (مخزون المستودعات)
-- stock_transfers (نقل المخزون)
-```
+### 2.2 Financial Features
 
-### 6. نظام تسعير متقدم
-**الحالة:** ⚠️ أساسي فقط
-**الأهمية:** متوسطة
+| Module | Backend API | Flutter App | Notes |
+|--------|:-----------:|:-----------:|-------|
+| **Expense Categories** | ✅ | ✅ | |
+| **Expenses** (add, list) | ✅ | ✅ | |
+| **Income Categories** | ✅ | ✅ | |
+| **Incomes** (add, list) | ✅ | ✅ | |
+| **Due Collections** | ✅ | ✅ | Due list + collection screen |
 
-**المميزات الناقصة:**
-- تسعير متعدد المستويات (Retail, Wholesale, Insurance)
-- نظام الخصومات التلقائية
-- التسعير الديناميكي حسب العميل
-- التسعير الموسمي
-- إدارة الحملات الترويجية
-- نظام القسائم (Coupons)
+### 2.3 Advanced Pharmacy Features
 
-### 7. نظام الموردين وتقييمهم
-**الحالة:** ⚠️ أساسي فقط
-**الأهمية:** متوسطة
+| Module | Backend API | Flutter App | Notes |
+|--------|:-----------:|:-----------:|-------|
+| **Prescriptions** (upload, link to sale) | ✅ | ✅ | List screen exists; no upload screen |
+| **Drug Interactions** (check, bulk import) | ✅ | ✅ | Check + list screens |
+| **FEFO System** (settings, suggestions, logs, report) | ✅ | ✅ | Settings, report, logs screens |
+| **Expiry Alerts** (stats, list) | ✅ | ✅ | Alert screen + notification bell |
+| **AI Sales Predictions** (settings, forecast, demand report, reorder point) | ✅ | ✅ | Settings + forecast screens |
+| **Auto-Order System** (rules, suggestions, approve/reject) | ✅ | ✅ | Suggestions screen exists |
+| **Inventory Turnover Analysis** | ✅ | ✅ | Full screen with tabs (summary, products, slow-moving, ABC) |
 
-**المميزات الناقصة:**
-- تقييم الموردين
-- مؤشرات أداء الموردين (KPIs)
-- مقارنة الأسعار بين الموردين
-- نظام عقود الموردين
-- تاريخ التعامل مع المورد
-- نظام الترتيب التلقائي للموردين
+### 2.4 Audit & Compliance (NEW — Added July 2026)
 
-### 8. نظام العملاء وإدارة العلاقات (CRM)
-**الحالة:** ⚠️ أساسي فقط
-**الأهمية:** متوسطة
+| Module | Backend API | Flutter App | Notes |
+|--------|:-----------:|:-----------:|-------|
+| **Stock Audit** (create, start, complete, auto-populate, variance, reconciliation) | ✅ | ❌ | **CRITICAL GAP** — Completely missing from Flutter |
+| **Stock Reconciliation** (create, post, update, delete) | ✅ | ❌ | **CRITICAL GAP** — No Flutter screens |
+| **Financial Audit** (create, execute, complete, variance report, comparative) | ✅ | ❌ | **CRITICAL GAP** — Completely missing from Flutter |
 
-**المميزات الناقصة:**
-- ملفات العميل الشاملة
-- نظام نقاط الولاء (Loyalty Points)
-- تاريخ الشراء للعملاء
-- التنبيهات للعملاء
-- حملات التسويق المستهدفة
-- نظام الإحالات (Referrals)
+### 2.5 Insurance System (NEW — Added July 2026)
 
----
+| Module | Backend API | Flutter App | Notes |
+|--------|:-----------:|:-----------:|-------|
+| **Insurance Companies** (CRUD) | ✅ | ❌ | **CRITICAL GAP** — No Flutter UI |
+| **Insurance Policies** (CRUD, validation, expiry tracking) | ✅ | ❌ | **CRITICAL GAP** — No Flutter UI |
+| **Insurance Claims** (create, submit, approve, reject, pay) | ✅ | ❌ | **CRITICAL GAP** — No Flutter UI |
+| **Insurance Coverage Rules** (product/category, pre-auth) | ✅ | ❌ | **CRITICAL GAP** — No Flutter UI |
+| **Insurance Summary/Dashboard** | ✅ | ❌ | **CRITICAL GAP** — No Flutter UI |
 
-## 📈 الفجوات في الذكاء التجاري (Business Intelligence Gaps)
+### 2.6 Reports
 
-### 9. نظام التحليلات المتقدم
-**الحالة:** ⚠️ أساسي فقط
-**الأهمية:** عالية لاتخاذ القرارات
+| Report Type | Backend API | Flutter App | Notes |
+|-------------|:-----------:|:-----------:|-------|
+| Sales Report | ✅ | ✅ | |
+| Purchase Report | ✅ | ✅ | |
+| Due Collect Report | ✅ | ✅ | |
+| Loss/Profit Report | ✅ | ✅ | |
+| Income Report | ✅ | ✅ | |
+| Expense Report | ✅ | ✅ | |
+| Stock Report | ✅ | ✅ | |
+| Tax Report | ✅ | ✅ | |
+| Sale Return Report | ✅ | ✅ | |
+| Purchase Return Report | ✅ | ✅ | |
+| **Stock Audit Report** | ✅ | ❌ | Backend API exists; no Flutter report screen |
+| **Financial Audit Report** | ✅ | ❌ | Backend API exists; no Flutter report screen |
 
-**المميزات الناقصة:**
-- لوحة تحكم تفاعلية (Interactive Dashboard)
-- تقارير الوقت الحقيقي (Real-time Reports)
-- مقارنة الفترات الزمنية
-- مؤشرات الأداء الرئيسية (KPIs)
-- التنبؤ بالطلب الموسمي
-- تحليل سلوك العملاء
+### 2.7 Admin / Business Management
 
-### 10. نظام الذكاء الاصطناعي المتقدم
-**الحالة:** ⚠️ تنبؤ أساسي فقط
-**الأهمية:** عالية
+| Module | Backend API | Flutter App | Notes |
+|--------|:-----------:|:-----------:|-------|
+| Business Info (read/update) | ✅ | ✅ | |
+| Business Categories | ✅ | ✅ | |
+| Subscriptions & Plans | ✅ | ✅ | Plan list + subscribe |
+| Banners | ✅ | ✅ | |
+| Languages | ✅ | ✅ | Multi-language support |
+| Currencies | ✅ | ✅ | |
+| Roles & Permissions | ✅ | ❌ | No Flutter screens (admin web only) |
+| Users (staff management) | ✅ | ❌ | No staff CRUD in Flutter |
+| Settings (system) | ✅ | ✅ | Feature status screen exists |
 
-**المميزات الناقصة:**
-- تحليل الصور للوصفات الطبية
-- التعرف على الأدوية من الصور
-- تحديد الأخطاء الطبية المحتملة
-- التوصيات التلقائية للمنتجات البديلة
-- كشف الأنماط غير الطبيعية
-- نظام Chatbot للخدمة الذاتية
+### 2.8 Missing Backend Features (Not Yet Implemented Anywhere)
 
-### 11. نظام التقارير المتقدم
-**الحالة:** ⚠️ تقارير أساسية
-**الأهمية:** عالية
-
-**المميزات الناقصة:**
-- تقارير مخصصة (Custom Reports)
-- نظام تصدير متقدم (PDF, Excel, CSV)
-- جدولة التقارير التلقائية
-- نظام الرسوم البيانية التفاعلية
-- تقارير مقارنة متعددة الأبعاد
-- نظام التنبيهات الذكية
-
----
-
-## 🔧 الفجوات التقنية والبنية التحتية (Technical Gaps)
-
-### 12. نظام النسخ الاحتياطي والتعافي من الكوارث
-**الحالة:** ❌ غير موجود
-**الأهمية:** حرجة
-
-**المميزات الناقصة:**
-- نسخ احتياطي تلقائي مجدول
-- نسخ احتياطي سحابي (Cloud Backup)
-- نظام التعافي من الكوارث
-- اختبار التعافي الدوري
-- تشفير النسخ الاحتياطية
-- تقرير حالة النسخ الاحتياطية
-
-### 13. نظام المراقبة والتسجيل (Monitoring & Logging)
-**الحالة:** ⚠️ أساسي فقط
-**الأهمية:** عالية
-
-**المميزات الناقصة:**
-- مراقبة الأداء في الوقت الحقيقي
-- نظام التنبيهات الآلي
-- تسجيل الأخطاء المتقدم
-- تتبع الأداء (Performance Monitoring)
-- مراقبة سلامة النظام
-- إحصائيات الاستخدام
-
-### 14. نظام الأمان المتقدم
-**الحالة:** ⚠️ أساسي فقط
-**الأهمية:** حرجة
-
-**المميزات الناقصة:**
-- المصادقة الثنائية (2FA)
-- نظام الصلاحيات المتقدم (Advanced RBAC)
-- تسجيل جميع العمليات الحساسة
-- تشفير البيانات المتقدم
-- نظام الكشف عن الاختراق
-- فحص الثغرات الأمنية الدوري
-
-### 15. نظام تكامل APIs متقدم
-**الحالة:** ⚠️ أساسي فقط
-**الأهمية:** عالية
-
-**المميزات الناقصة:**
-- تكامل مع أنظمة الحكومة الإلكترونية
-- تكامل مع أنظمة المستشفيات
-- تكامل مع أنظمة الدفع المحلية
-- تكامل مع أنظمة التأمين
-- تكامل مع أنظمة المخزون الخارجية
-- تطبيق API Gateway موحد
+| Feature | Status | Priority |
+|---------|--------|----------|
+| **Multi-Warehouse** (warehouses, warehouse_stocks, stock_transfers) | ❌ Not started | Medium |
+| **Drug Recall / Traceability** (batch_serial_numbers, recall_events, lot tracking) | ❌ Not started | Medium |
+| **Loyalty / CRM** (points, rewards, customer tiers) | ❌ Not started | Low |
+| **Insurance Claims Integration with Sales** (auto-claim from sale) | ❌ Not started | Medium |
+| **Receipt Printing Templates** (customizable) | ⚠️ Basic thermal only | Low |
 
 ---
 
-## 🌐 الفجوات في التجربة المستخدم (UX/UI Gaps)
+## 3. Flutter Mobile App — Detailed Gap Analysis
 
-### 16. تطبيق ويب متكامل
-**الحالة:** ❌ تطبيق موبايل فقط
-**الأهمية:** عالية
+### 3.1 Critical Missing Screens
 
-**المميزات الناقصة:**
-- لوحة تحكم ويب للإدارة
-- واجهة لسطح المكتب
-- نظام تبديل بين موبايل ويب
-- متجاوب مع جميع الأجهزة
-- دعم اللغات المتعددة
-- ثيم متعدد الألوان
+These modules have **complete backend APIs** but **zero Flutter implementation**:
 
-### 17. نظام الإشعارات المتقدم
-**الحالة:** ⚠️ أساسي فقط
-**الأهمية:** متوسطة
+| Missing Screen | Backend Routes | Estimated Effort |
+|----------------|----------------|:----------------:|
+| **Stock Audit — List Screen** | `GET /api/v1/stock-audits` | Medium |
+| **Stock Audit — Create Screen** | `POST /api/v1/stock-audits` | Medium |
+| **Stock Audit — Detail/Execute Screen** | `GET /api/v1/stock-audits/{id}`, `POST .../start`, `POST .../complete` | Large |
+| **Stock Audit — Add Items Screen** | `POST .../details`, `POST .../bulk-details`, `POST .../auto-populate` | Medium |
+| **Stock Audit — Variance Report** | `GET .../variance-report` | Small |
+| **Stock Reconciliation — Create/Post** | `POST .../details/{detail}/reconcile`, `POST .../reconciliations/{id}/post` | Medium |
+| **Financial Audit — List/Create** | `GET /api/v1/financial-audits`, `POST /api/v1/financial-audits` | Medium |
+| **Financial Audit — Execute/Report** | `POST .../{audit}/execute`, `GET .../{audit}/report` | Large |
+| **Insurance — Company CRUD** | `GET/POST /api/v1/insurance/companies`, `PUT/DELETE .../{company}` | Medium |
+| **Insurance — Policy CRUD** | `GET/POST /api/v1/insurance/policies`, `PUT/DELETE .../{policy}` | Medium |
+| **Insurance — Claims Lifecycle** | All `POST .../claims/{claim}/{submit,approve,reject,pay}` | Large |
+| **Insurance — Coverage Rules** | `GET/POST /api/v1/insurance/coverages` | Medium |
+| **Insurance — Summary Dashboard** | `GET /api/v1/insurance/summary` | Small |
 
-**المميزات الناقصة:**
-- إشعارات دفع متعددة القنوات
-- إشعارات داخل التطبيق
-- إشعارات البريد الإلكتروني
-- إشعارات SMS
-- إشعارات مخصصة لكل مستخدم
-- جدولة الإشعارات
+### 3.2 Partially Implemented / Needs Enhancement
 
-### 18. نظام إعدادات متقدم
-**الحالة:** ⚠️ أساسي فقط
-**الأهمية:** متوسطة
+| Feature | Current State | What's Missing |
+|---------|---------------|----------------|
+| **Home Screen Grid Items** | 16 items (Parties, Sales, Purchase, Products, Due List, Sales List, Purchase List, Stock, Ledger, Loss/Profit, Expiring, Reports, Income, Expense, Tax) | Prescriptions, Drug Interactions, FEFO, Predictions, Inventory Turnover, Stock Audit, Insurance links not in grid |
+| **Prescriptions** | List screen only | No add/upload screen; no link-to-sale flow |
+| **Navigation** | 5 bottom tabs (Home, Dashboard, Add Product, Reports, Profile) | No deep navigation to newer features |
+| **Reports Screen** | 9 report types listed | Stock Audit Report, Financial Audit Report missing |
 
-**المميزات الناقصة:**
-- إعدادات مخصصة لكل مستخدم
-- قوالب الفواتير المخصصة
-- إعدادات التقارير المخصصة
-- إعدادات التنبيهات المخصصة
-- نظام السمات المخصص
-- إعدادات التكامل
+### 3.3 Code Quality Issues (from Flutter analysis)
 
----
-
-## 🏥 الفجوات المتخصصة للصيدليات (Pharmacy-Specific Gaps)
-
-### 19. نظام المرفقات والأدوات الطبية
-**الحالة:** ❌ غير موجود
-**الأهمية:** متوسطة
-
-**المميزات الناقصة:**
-- إدارة المرفقات الطبية
-- تتبع صلاحية المرفقات
-- نظام التطعيمات
-- إدارة العينات الطبية
-- نظام الفحوصات
-
-### 20. نظام الصيدليات المرتبطة
-**الحالة:** ❌ غير موجود
-**الأهمية:** منخفضة - متوسطة
-
-**المميزات الناقصة:**
-- إدارة فروع متعددة
-- نظام التحويل بين الفروع
-- التقارير المجمعة
-- المخزون المشترك
-- إدارة الموظفين المشتركة
-
-### 21. نظام الامتثال التنظيمي
-**الحالة:** ❌ غير موجود
-**الأهمية:** عالية للأسواق المنظمة
-
-**المميزات الناقصة:**
-- تتبع المتطلبات التنظيمية
-- نظام التراخيص
-- تقارير الامتثال
-- تتبع الأدوية الخاضعة للرقابة
-- نظام السجلات المطلوبة قانوناً
-- تنبيهات انتهاء التراخيص
+| Issue Type | Count | Severity |
+|------------|:-----:|:--------:|
+| `avoid_print` (use `debugPrint` instead) | ~200 | 💡 Info |
+| `use_build_context_synchronously` | ~130 | ⚠️ Medium |
+| `deprecated_member_use` (withOpacity, WillPopScope) | ~35 | ⚠️ High (will break in future Flutter) |
+| `unused_import` | ~50 | 💡 Low |
+| `unused_result` | ~50 | 💡 Low |
 
 ---
 
-## 🚀 الفجوات في قابلية التوسع (Scalability Gaps)
+## 4. Action Plan — Priority Order
 
-### 22. نظام Multi-Tenant كامل
-**الحالة:** ⚠️ أساسي فقط
-**الأهمية:** عالية للتوسع
+### Phase 1: Critical (Week 1-2)
+| # | Task | Area |
+|---|------|------|
+| 1 | Create Stock Audit Flutter screens (list, detail, items, reconciliation) | Mobile |
+| 2 | Create Financial Audit Flutter screens (list, execute, report) | Mobile |
+| 3 | Add Stock Audit & Financial Audit report entries to Reports screen | Mobile |
+| 4 | Add navigation links in Home grid for Stock Audit, Financial Audit | Mobile |
 
-**المميزات الناقصة:**
-- عزل كامل للبيانات
-- تخصيص لكل tenant
-- إدارة الموارد لكل tenant
-- نظام الفوترة لكل tenant
-- قيود الاستخدام لكل tenant
-- إعدادات منفصلة لكل tenant
+### Phase 2: Insurance System (Week 3-4)
+| # | Task | Area |
+|---|------|------|
+| 5 | Create Insurance Company Flutter screens (list, add, edit) | Mobile |
+| 6 | Create Insurance Policy Flutter screens (list, add, edit, detail) | Mobile |
+| 7 | Create Insurance Claim Flutter screens (list, create, submit, approve, reject, pay) | Mobile |
+| 8 | Create Insurance Coverage rules screen | Mobile |
+| 9 | Add Insurance summary card to Dashboard | Mobile |
 
-### 23. نظام ذاكرة التخزين المؤقت المتقدم
-**الحالة:** ❌ غير موجود
-**الأهمية:** عالية للأداء
+### Phase 3: Enhancements (Week 5-6)
+| # | Task | Area |
+|---|------|------|
+| 10 | Add missing grid items to Home screen (Prescriptions, Drug Interactions, FEFO, Predictions, Inventory Turnover, Stock Audit, Insurance) | Mobile |
+| 11 | Add Prescription upload screen in Flutter | Mobile |
+| 12 | Create Stock Movement log viewer | Mobile |
+| 13 | Add Stock Audit and Financial Audit reports to Reports screen | Mobile |
 
-**المميزات الناقصة:**
-- Redis Cache
-- نظام Cache Strategy
-- إدارة ذاكرة التخزين المؤقت
-- Cache Warmer
-- نظام Cache Invalidation
-- مراقبة Cache Performance
-
-### 24. نظام المعالجة غير المتزامنة
-**الحالة:** ⚠️ أساسي فقط
-**الأهمية:** عالية للأداء
-
-**المميزات الناقصة:**
-- Queue System متقدم
-- معالجة الخلفية الثقيلة
-- إدارة مهام مجدولة
-- نظام retry mechanism
-- مراقبة الـ Queues
-- معالجة الأخطاء في الخلفية
+### Phase 4: Future Features (Long-term)
+| # | Task | Area |
+|---|------|------|
+| 14 | Multi-Warehouse system (DB + API + Flutter) | Backend + Mobile |
+| 15 | Drug Recall / Traceability system | Backend + Mobile |
+| 16 | Loyalty / CRM module | Backend + Mobile |
+| 17 | Fix deprecated Flutter API usage (withOpacity → withValues, WillPopScope → PopScope) | Mobile |
 
 ---
 
-## 📝 اقتراحات إضافية متقدمة
+## 5. API Route Coverage Summary
 
-### 1. نظام Blockchain للتتبع
-- استخدام blockchain لتتبع الأدوية من المصنع إلى الصيدلية
-- التحقق من أصالة الأدوية
-- منع التزوير
-
-### 2. نظام IoT Integration
-- أجهزة استشعار درجة الحرارة للثلاجات
-- تنبيهات تلقائية لانتهاك درجات الحرارة
-- ربط بنظام الصيدلية
-
-### 3. نظام Voice Commands
-- أوامر صوتية للإدخال السريع
-- بحث صوتي عن المنتجات
-- إدخال صوتي للوصفات
-
-### 4. نظام Augmented Reality
-- AR لمسح الأدوية وعرض المعلومات
-- AR لتدريب الموظفين
-- AR لإرشاد العملاء
-
-### 5. نظام Telepharmacy
-- استشارات صيدلانية عن بعد
-- وصفات إلكترونية عن بعد
-- خدمة العملاء عن بعد
-
-### 6. نظام المشاركة البيانات
-- مشاركة البيانات مع الأطباء
-- تكامل مع أنظمة السجلات الصحية الإلكترونية
-- واجهة لتبادل البيانات
+| Prefix | Routes Exist | Flutter Integration | Coverage |
+|--------|:-----------:|:-------------------:|:--------:|
+| `/api/v1/auth` | ✅ 7 routes | ✅ | 100% |
+| `/api/v1/parties` | ✅ Full CRUD | ✅ | 100% |
+| `/api/v1/products` | ✅ Full CRUD + stock | ✅ | 100% |
+| `/api/v1/purchase` | ✅ Full CRUD | ✅ | 100% |
+| `/api/v1/sales` | ✅ Full CRUD | ✅ | 100% |
+| `/api/v1/sales-return` | ✅ Index, store, show | ✅ | 100% |
+| `/api/v1/purchases-return` | ✅ Index, store, show | ✅ | 100% |
+| `/api/v1/stocks` | ✅ Index | ✅ | 100% |
+| `/api/v1/prescriptions` | ✅ Full CRUD + review + link | ⚠️ Partial (list only) | 50% |
+| `/api/v1/drug-interactions` | ✅ Full CRUD + check + bulk | ✅ | 100% |
+| `/api/v1/expiry-alerts` | ✅ Stats + index | ✅ | 100% |
+| `/api/v1/fefo` | ✅ 8 routes | ✅ | 100% |
+| `/api/v1/predictions` | ✅ 8 routes | ✅ | 100% |
+| `/api/v1/auto-order` | ✅ 9 routes | ✅ | 100% |
+| `/api/v1/inventory-turnover` | ✅ 7 routes | ✅ | 100% |
+| `/api/v1/stock-audits` | ✅ **20 routes** | ❌ **0%** | **0%** |
+| `/api/v1/financial-audits` | ✅ **11 routes** | ❌ **0%** | **0%** |
+| `/api/v1/insurance` | ✅ **19 routes** | ❌ **0%** | **0%** |
+| `/api/v1/reports` | ✅ 12 report types | ⚠️ 10/12 implemented | 83% |
 
 ---
 
-## 🎯 خارطة الطريق المقترحة (Roadmap)
+## 6. Technical Debt & Observations
 
-### المرحلة 1: الحرجة (1-3 أشهر)
-1. نظام الجرد والتدقيق الشامل
-2. نظام التأمين الصحي
-3. نظام الأمان المتقدم
-4. نظام النسخ الاحتياطي
+### Backend
+- ✅ Error handling system well-implemented (`ErrorCode` enum, exception classes, `TransactionHelper`)
+- ✅ Service layer pattern consistently used
+- ✅ Form request validation classes exist
+- ✅ Proper multi-tenant isolation via `business_id`
+- ⚠️ Some controllers still use inline JSON responses instead of exceptions (needs refactoring per `ERROR_HANDLING_STRATEGY.md`)
 
-### المرحلة 2: العالية (3-6 أشهر)
-5. نظام التخزين المتعدد
-6. نظام التسعير المتقدم
-7. نظام التحليلات المتقدم
-8. تطبيق ويب متكامل
-
-### المرحلة 3: المتوسطة (6-12 شهر)
-9. نظام CRM متقدم
-10. نظام الموردين المتقدم
-11. نظام الإشعارات المتقدم
-12. نظام Multi-Tenant كامل
-
-### المرحلة 4: المتقدمة (12+ شهر)
-13. نظام AI متقدم
-14. نظام IoT Integration
-15. نظام Blockchain
-16. نظام Telepharmacy
+### Flutter
+- ⚠️ No repository pattern for Audit or Insurance APIs (need `stock_audit_repo.dart`, `financial_audit_repo.dart`, `insurance_repo.dart`)
+- ⚠️ No models for Audit or Insurance data
+- ⚠️ `withOpacity()` deprecated in Flutter 3.27+ — should use `withValues(alpha:)`
+- ⚠️ `WillPopScope` deprecated — should use `PopScope`
+- ⚠️ ~130 `use_build_context_synchronously` warnings — potential crashes after async operations
+- ⚠️ No centralized API error handling matching `ERROR_HANDLING_STRATEGY.md` patterns
 
 ---
 
-## 📊 ملخص الفجوات
+## 7. Recommendations
 
-| الفئة | الحرجة | العالية | المتوسطة | المجموع |
-|-------|--------|---------|----------|---------|
-| المميزات الأساسية | 4 | 6 | 8 | 18 |
-| التقنية | 3 | 5 | 4 | 12 |
-| التحليلات | 1 | 4 | 3 | 8 |
-| التجربة المستخدم | 0 | 2 | 3 | 5 |
-| التوسع | 0 | 3 | 3 | 6 |
-| **المجموع** | **8** | **20** | **21** | **49** |
+1. **Immediate**: Build Stock Audit and Financial Audit Flutter screens — these are compliance-critical features already fully functional on the backend.
+2. **Immediate**: Add Insurance Flutter screens — the backend has a complete insurance system with 19 API routes that are completely inaccessible from mobile.
+3. **Short-term**: Add navigation entries for all advanced features in the Home screen grid.
+4. **Short-term**: Create Flutter models and repositories for Audit and Insurance following the existing `prediction_repo.dart` pattern.
+5. **Medium-term**: Implement remaining backend features (Multi-Warehouse, Drug Recall).
+6. **Ongoing**: Address Flutter technical debt (deprecated APIs, context usage warnings, print statements).
 
 ---
 
-## 💡 التوصيات الأولوية
+*This analysis reflects the state of the repository as of 2026-07-29. The backend has outpaced the mobile app in feature development, particularly for modules added in late July 2026 (Audit, Insurance).*
 
-### الفورية (ابدأ الآن):
-1. **نظام الجرد والتدقيق** - ضروري لسلامة المخزون
-2. **نظام الأمان المتقدم** - حماية البيانات الحساسة
-3. **نظام النسخ الاحتياطي** - حماية من فقدان البيانات
-4. **نظام التأمين الصحي** - ضروري للأسواق الحديثة
-
-### القريبة (في 3-6 أشهر):
-1. **نظام التخزين المتعدد** - للصيدليات الكبيرة
-2. **نظام التحليلات المتقدم** - لاتخاذ القرارات
-3. **تطبيق ويب متكامل** - تحسين التجربة
-4. **نظام التسعير المتقدم** - زيادة الربحية
-
-### المتوسطة (في 6-12 شهر):
-1. **نظام CRM** - تحسين خدمة العملاء
-2. **نظام AI متقدم** - تميز تنافسي
-3. **نظام Multi-Tenant كامل** - للتوسع كـ SaaS
-4. **نظام المراقبة المتقدم** - استقرار النظام
-
----
-
-## 🎯 الخلاصة
-
-النظام الحالي **جيد وقوي** ويحتوي على مميزات متقدمة مثل:
-- نظام FEFO ممتاز
-- نظام التنبؤ بالمبيعات
-- نظام تحليل دوران المخزون
-- نظام الوصفات الطبية
-
-لكن هناك **49 فجوة** متنوعة بين الحرجة والمتوسطة تحتاج للتطوير لجعل النظام **نظام صيدليات احترافي متكامل** يتنافس عالمياً.
-
-التركيز الأول يجب أن يكون على **المميزات الحرجة** ثم **التقنية الأساسية** ثم **التحليلات والتجربة المستخدم** وأخيراً **المميزات المتقدمة والتوسع**.

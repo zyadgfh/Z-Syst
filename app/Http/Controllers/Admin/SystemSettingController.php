@@ -34,7 +34,7 @@ class SystemSettingController extends Controller
             $file->move($path, $name);
         }
 
-        $APP_NAME = Str::slug($request->APP_NAME);
+        $APP_NAME = trim((string) $request->APP_NAME);
         $txt = "APP_NAME=" . $APP_NAME . "
 APP_ENV=local
 APP_KEY=" . env('APP_KEY') . "

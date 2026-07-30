@@ -22,7 +22,7 @@ class NotificationController extends Controller
         return view('admin.notifications.index', compact('notifications'));
     }
 
-    public function acnooFilter(Request $request)
+    public function zsystFilter(Request $request)
     {
         $notifications = Notification::whereDate('created_at', today())->latest()->paginate($request->per_page ?? 10);
 

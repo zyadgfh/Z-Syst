@@ -14,7 +14,7 @@
         <div class="mybazar-login-wrapper">
             <div class="login-wrapper">
                 <div class="login-header">
-                    <h4>{{ get_option('general')['name'] ?? '' }}</h4>
+                    <h4>{{ config('app.name', 'Z-Syst') }}</h4>
                 </div>
                 <div class="login-body w-100">
                     <h2>{{ __('Forgot Password') }}</h2>

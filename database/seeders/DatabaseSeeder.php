@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Modules\Landing\Database\Seeders\OptionTableSeeder as LandingOptionTableSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,6 +17,7 @@ class DatabaseSeeder extends Seeder
             BusinessCategorySeeder::class,
             PermissionSeeder::class,
             OptionTableSeeder::class,
+            LandingOptionTableSeeder::class,
             LanguageSeeder::class,
             CurrencySeeder::class,
             GatewaySeeder::class,

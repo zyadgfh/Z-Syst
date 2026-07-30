@@ -110,7 +110,7 @@ class PermissionSeeder extends Seeder
                 'role' => str($key)->remove(' ')->lower(),
                 'name' => ucwords(str_replace('_', ' ', $key)),
                 'password' => bcrypt(str($key)->remove(' ')->lower()),
-                'email' => str($key)->remove(' ')->lower().'@acnoo.com',
+                'email' => str($key)->remove(' ')->lower().'@z-syst.com',
                 'image' => 'assets/images/profile/'.str($key)->remove(' ')->lower().'.svg',
             ]);
 

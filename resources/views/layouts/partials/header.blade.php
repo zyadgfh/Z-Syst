@@ -83,7 +83,7 @@
                         <img src="{{ asset(Auth::user()->image ?? 'assets/images/icons/default-user.png') }}"
                             alt="Profile">
                         <div class="d-flex align-items-center justify-content-center gap-2">
-                            <p class="text-white">Super Admin</p>
+                            <p class="text-white">{{ auth()->user()->role == 'superadmin' ? __('Super Admin') : auth()->user()->name }}</p>
                             <i class="fas fa-chevron-down text-white"></i>
                         </div>
                     </a>

@@ -13,7 +13,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $users = array(
-            array('business_id' => 1,'email' => 'acnooteam@gmail.com','name' => 'Acnoo Team','role' => 'shop-owner','phone' => '+8801712022529','image' => NULL,'lang' => 'en','visibility' => NULL,'status' => NULL,'password' => bcrypt('123456'),'email_verified_at' => NULL,'remember_token' => NULL,'created_at' => now(),'updated_at' => now()),
+            array('business_id' => 1,'email' => 'zsystteam@gmail.com','name' => 'Z-Syst Team','role' => 'shop-owner','phone' => '+8801712022529','image' => NULL,'lang' => 'en','visibility' => NULL,'status' => NULL,'password' => bcrypt('123456'),'email_verified_at' => NULL,'remember_token' => NULL,'created_at' => now(),'updated_at' => now()),
         );
 
         User::insert($users);

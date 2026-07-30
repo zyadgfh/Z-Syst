@@ -17,7 +17,7 @@ class SubscriptionReport extends Controller
         return view('admin.subscribers.index', compact('subscribers'));
     }
 
-    public function acnooFilter(Request $request)
+    public function zsystFilter(Request $request)
     {
         $search = $request->input('search');
 

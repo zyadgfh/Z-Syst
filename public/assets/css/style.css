@@ -415,7 +415,7 @@ svg {
 }
 .multiple-button-group .multi-delete-btn,
 .multiple-button-group .multi-delete-btn {
-    background: #c52127 !important;
+    background: #00987f !important;
     color: #fff !important;
     min-width: 110px !important;
     font-size: 14px !important;
@@ -575,7 +575,7 @@ svg {
 
 .side-bar-manu li .dropdown-menu li li:hover > a,
 .side-bar-manu li .dropdown-menu li li.active > a {
-    background-color: #c52127;
+    background-color: #00987f;
     color: #fff !important;
 }
 
@@ -1053,7 +1053,7 @@ svg {
 }
 
 .search-btn {
-    background: #c52127 !important;
+    background: #00987f !important;
     color: #fff !important;
 }
 
@@ -1405,7 +1405,7 @@ svg {
 }
 
 .table-header .button-group {
-    border-bottom: 1px solid #c52127;
+    border-bottom: 1px solid #00987f;
 }
 
 .table-header .button-group a {
@@ -1415,7 +1415,7 @@ svg {
 }
 
 .table-header .button-group a.active {
-    background: #c52127 !important;
+    background: #00987f !important;
     color: #fff !important;
 }
 .erp-table-section .searchResults .w-60 {
@@ -2245,11 +2245,11 @@ svg {
 }
 
 .add-color-btn {
-    border: 1px solid #c52127;
+    border: 1px solid #00987f;
     border-radius: 3px;
     padding: 2px 8px;
     font-size: 10px;
-    color: #c52127;
+    color: #00987f;
     cursor: pointer;
     display: inline-block;
     line-height: 1.6;
@@ -2279,10 +2279,10 @@ input[type="date"] {
 }
 
 .border-btn {
-    border: 1px solid #c52127;
+    border: 1px solid #00987f;
     border-radius: 8px;
     background: none !important;
-    color: #c52127;
+    color: #00987f;
 }
 
 .table-title {
@@ -2395,8 +2395,8 @@ strong {
 }
 
 .theme-border {
-    border-color: #c52127;
-    color: #c52127;
+    border-color: #00987f;
+    color: #00987f;
 }
 
 .title-four {
@@ -2579,13 +2579,13 @@ label.upload-img-label {
 /* role-reset-btn */
 .role-reset-btn {
     font-weight: bold;
-    color: #c52127;
-    border: 1px solid #c52127;
+    color: #00987f;
+    border: 1px solid #00987f;
     padding: 0.2rem 0.5rem !important;
 }
 .role-reset-btn:hover {
     color: #fff !important;
-    background-color: #c52127;
+    background-color: #00987f;
     border: 1px solid transparent;
 }
 .costing-price-wrapper {
@@ -3160,7 +3160,7 @@ input:checked + .slider:before {
 }
 
 .mybazar-login-wrapper .input-group input:focus-visible {
-    border: 1px solid #c52127 !important;
+    border: 1px solid #00987f !important;
 }
 
 .mybazar-login-section .button-group {
@@ -3286,7 +3286,7 @@ input:checked + .slider:before {
     overflow: hidden;
     margin: 0 auto;
     margin-top: -40px;
-    border: 2px solid #c52127;
+    border: 2px solid #00987f;
 }
 
 .erp-dashboard-profile-section {
@@ -3376,7 +3376,7 @@ input:checked + .slider:before {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
     color: #fff !important;
-    background: #c52127;
+    background: #00987f;
 }
 
 .input-group .form-control {
@@ -3515,7 +3515,7 @@ input:checked + .slider:before {
 }
 
 .service-btn-possition {
-    background: #c52127 !important;
+    background: #00987f !important;
     color: #fff !important;
     font-size: 20px;
     height: 40px;
@@ -3628,7 +3628,7 @@ select {
 }
 
 .form-switch .form-check-input:checked {
-    background-color: #c52127;
+    background-color: #00987f;
 }
 
 .commercial-invoice tr,
@@ -4852,7 +4852,7 @@ tr.position-relative td {
 .table-search button {
     width: 29px;
     border-radius: 6px;
-    background: #c52127;
+    background: #00987f;
     color: #fff;
     position: absolute;
     top: 3px;
@@ -5423,7 +5423,7 @@ tr.position-relative td {
     padding: 0px;
 }
 .in-table-row-bottom .total-amound {
-    background-color: #c52127;
+    background-color: #00987f;
     color: white;
     padding: 3px;
 }
@@ -5465,7 +5465,7 @@ tr.position-relative td {
 .in-footer {
     bottom: 0px;
     left: 0;
-    background-color: #c52127;
+    background-color: #00987f;
     width: 100%;
     display: flex;
     align-items: center;

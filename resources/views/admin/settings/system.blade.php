@@ -144,7 +144,7 @@
 
                                                         <span>{{ __('Note :') }} <span class="text-danger">{{ __('If you are using MAIL QUEUE after Changing The Mail Settings You Need To Restart Your Supervisor From Your Server') }}</span></span><br>
 
-                                                        <span>{{ __('QUEUE COMMAND Path :') }} <span class="text-danger">{{ __('/home/u186958312/domains/maanai.acnoo.com/public_html/maanai') }}</span></span><br>
+                                                        <span>{{ __('QUEUE COMMAND Path :') }} <span class="text-danger">{{ __('Configured for Z-Syst environment') }}</span></span><br>
                                                         <span>{{ __('QUEUE COMMAND :') }} <span class="text-danger">{{ __('php artisan queue:work') }}</span></span>
                                                         <div class="row">
                                                             <div class="col-lg-12">

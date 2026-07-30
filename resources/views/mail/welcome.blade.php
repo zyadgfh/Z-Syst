@@ -45,12 +45,12 @@
 </head>
 <body>
   <div class="container">
-    <h1>{{ __('Hi,') }} {{ $mesasge['name'] ?? '' }}. {{ __('Welcome to') }} {{ env('APP_NAME') }}!</h1>
+    <h1>{{ __('Hi,') }} {{ $mesasge['name'] ?? '' }}. {{ __('Welcome to') }} {{ config('app.name', 'Z-Syst') }}!</h1>
     <p>{{ __('Your account has been created successfully.') }}</p>
 
     <p><strong>{{ __('OTP:') }}</strong> {{ __('Dear') }} {{ $data['name'] ?? '' }}, {{ __('your OTP code is') }} <b class="text-dark">{{ $data['code'] ?? '' }}</b>. {{ __('Please do not share this PIN with anyone') }}.</p>
 
-    <p>{{ __('Best Regards,') }}<br>{{ env('APP_NAME') }}</p>
+    <p>{{ __('Best Regards,') }}<br>{{ config('app.name', 'Z-Syst') }}</p>
   </div>
 </body>
 </html>
