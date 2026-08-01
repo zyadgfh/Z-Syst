@@ -1003,9 +1003,20 @@ html {
 
 .home-header .header-logo img,
 .header-logo img {
-    height: 44px;
+    max-height: 56px;
+    height: auto;
+    width: auto;
+    max-width: 240px;
+}
+
+.header-sm-container .header-logo img {
+    max-height: 48px;
+    max-width: 220px;
+    height: auto;
+    width: auto;
     width: auto;
 }
+
 .header-section a {
     color: #101828 !important;
     font-size: 15px;
@@ -1283,8 +1294,16 @@ html {
     background-position: center;
 }
 .footer-section .footer-logo {
-    height: 44px;
+    max-width: 220px;
     width: auto;
+    height: auto;
+    object-fit: contain;
+}
+.footer-section .footer-logo img {
+    max-height: 56px;
+    height: auto;
+    width: auto;
+    display: block;
 }
 .footer-play-store {
     display: flex;

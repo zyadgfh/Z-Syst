@@ -256,8 +256,10 @@
 }
 
 @media only screen and (min-width: 0px) and (max-width: 992px) {
-    .home-header .header-logo img, .header-logo img, .footer-section .footer-logo{
-        height: 35px;
+    .home-header .header-logo img,
+    .header-logo img,
+    .footer-section .footer-logo img {
+        max-height: 40px;
         width: auto;
     }
 

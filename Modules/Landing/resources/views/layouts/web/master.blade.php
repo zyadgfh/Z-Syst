@@ -8,7 +8,7 @@
     <title>
         @hasSection('title')
             @yield('title') |
-        @endif {{ get_option('general')['title'] ?? config('app.name') }}
+        @endif {{ get_option('general')['title'] ?? 'Z-Syst' }}
     </title>
     @include('landing::layouts.web.partials.css')
 </head>
@@ -16,7 +16,7 @@
 <body>
 
     @include('landing::layouts.web.partials.header')
-    
+
     @yield('main_content')
 
     @include('landing::layouts.web.partials.footer')

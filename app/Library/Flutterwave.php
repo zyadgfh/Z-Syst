@@ -78,7 +78,7 @@ class Flutterwave
         Session::put('flutterwave_credentials', $data);
 
         $url = 'https://api.flutterwave.com/v3/payments';
-        $logo = get_option('logo_setting')->logo ?? asset('uploads/logo.png');
+        $logo = get_option('logo_setting')->logo ?? asset('assets/images/logo/logo.png');
 
         try {
             $params = [

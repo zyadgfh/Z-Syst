@@ -57,7 +57,7 @@
                                         <div class="upload-img-v2">
                                             <label class="upload-v4 settings-upload-v4">
                                                 <div class="img-wrp">
-                                                    <img src="{{ asset($general->value['admin_logo'] ?? 'assets/images/icons/upload-icon.svg') }}"
+                                                    <img src="{{ asset($general->value['admin_logo'] ?? 'assets/images/logo/logo.png') }}"
                                                         alt="user" id="admin_logo">
                                                 </div>
                                                 <input type="file" name="admin_logo" class="d-none"
@@ -73,7 +73,7 @@
                                         <div class="upload-img-v2">
                                             <label class="upload-v4 settings-upload-v4">
                                                 <div class="img-wrp">
-                                                    <img src="{{ asset($general->value['favicon'] ?? 'assets/images/icons/upload-icon.svg') }}"
+                                                    <img src="{{ asset($general->value['favicon'] ?? 'assets/images/logo/logo.png') }}"
                                                         alt="user" id="favicon">
                                                 </div>
                                                 <input type="file" name="favicon" class="d-none" accept="image/*"
@@ -88,7 +88,7 @@
                                         <div class="upload-img-v2">
                                             <label class="upload-v4 settings-upload-v4">
                                                 <div class="img-wrp">
-                                                    <img src="{{ asset($general->value['frontend_logo'] ?? 'assets/images/icons/upload-icon.svg') }}"
+                                                    <img src="{{ asset($general->value['frontend_logo'] ?? 'assets/images/logo/logo.png') }}"
                                                         alt="user" id="frontend_logo">
                                                 </div>
                                                 <input type="file" name="frontend_logo" class="d-none"

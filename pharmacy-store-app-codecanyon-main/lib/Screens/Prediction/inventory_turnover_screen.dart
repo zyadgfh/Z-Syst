@@ -682,3 +682,286 @@ class _InventoryTurnoverScreenState extends State<InventoryTurnoverScreen>
                       color: Colors.indigo.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
+                    child: Text(
+                      product.abcStatusLabel,
+                      style: TextStyle(
+                          color: Colors.indigo,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                _buildProductMetric('الدوران',
+                    product.turnoverRatio?.toStringAsFixed(2) ?? '0',
+                    Colors.teal),
+                const SizedBox(width: 4),
+                _buildProductMetric(
+                    'أيام المخزون',
+                    product.daysInventoryOutstanding?.toStringAsFixed(0) ??
+                        '0',
+                    Colors.indigo),
+                const SizedBox(width: 4),
+                _buildProductMetric('سرعة البيع',
+                    product.stockVelocity?.toStringAsFixed(1) ?? '0',
+                    Colors.green),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                _buildProductMetric('المخزون الحالي',
+                    '${product.currentStockQty?.toStringAsFixed(0) ?? '0'}',
+                    Colors.blue),
+                const SizedBox(width: 4),
+                _buildProductMetric(
+                    'قيمة المخزون',
+                    '${product.currentStockValue?.toStringAsFixed(0) ?? '0'}',
+                    Colors.orange),
+                const SizedBox(width: 4),
+                _buildProductMetric('الكمية المباعة',
+                    '${product.totalQuantitySold?.toStringAsFixed(0) ?? '0'}',
+                    Colors.purple),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProductMetric(String label, String value, Color color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          children: [
+            Text(
+              value,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(color: color, fontSize: 10),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ========== Slow Moving Tab ==========
+
+  Widget _buildSlowMovingTab() {
+    if (_loadingSlowMoving) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_slowMoving == null || (_slowMoving!.products?.isEmpty ?? true)) {
+      return _buildErrorWidget(
+          'لا يوجد مخزون بطيء أو راكد', () => _loadSlowMoving());
+    }
+
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          color: Colors.red[50],
+          child: Row(
+            children: [
+              Icon(Icons.warning_amber, color: Colors.red[700]),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '${_slowMoving!.totalProducts ?? 0} منتج بقيمة ${_slowMoving!.totalInventoryValue?.toStringAsFixed(0) ?? '0'} ج.م',
+                  style: TextStyle(
+                      color: Colors.red[700], fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(8),
+            itemCount: _slowMoving!.products!.length,
+            itemBuilder: (context, index) {
+              final product = _slowMoving!.products![index];
+              return _buildProductCard(product);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ========== ABC Tab ==========
+
+  Widget _buildAbcTab() {
+    if (_loadingAbc) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_abcAnalysis == null) {
+      return _buildErrorWidget(
+          'لا توجد بيانات تحليل ABC', () => _loadAbcAnalysis());
+    }
+
+    final abc = _abcAnalysis!;
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // Category summary cards
+        Row(
+          children: [
+            Expanded(
+              child: _buildCategoryCard('A', abc.categories?['A']),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildCategoryCard('B', abc.categories?['B']),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildCategoryCard('C', abc.categories?['C']),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        const Text(
+          'المنتجات حسب التصنيف',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        if (abc.products == null || abc.products!.isEmpty)
+          const Card(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('لا توجد بيانات منتجات متاحة'),
+            ),
+          )
+        else
+          ...abc.products!.map((item) => _buildAbcProductCard(item)).toList(),
+      ],
+    );
+  }
+
+  Widget _buildCategoryCard(String category, AbcCategoryInfo? info) {
+    Color color;
+    switch (category) {
+      case 'A':
+        color = Colors.red;
+        break;
+      case 'B':
+        color = Colors.amber;
+        break;
+      default:
+        color = Colors.green;
+    }
+    final value = info?.totalValue ?? 0;
+    final count = info?.count ?? 0;
+    final percent = info?.percentage ?? 0;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            CircleAvatar(
+              backgroundColor: color.withValues(alpha: 0.1),
+              child: Text(
+                category,
+                style: TextStyle(color: color, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              value.toStringAsFixed(0),
+              style: TextStyle(
+                  color: color, fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            Text('$count منتج', style: const TextStyle(fontSize: 12)),
+            Text('$percent%', style: const TextStyle(fontSize: 12)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAbcProductCard(AbcProductItem item) {
+    Color color;
+    switch (item.abcCategory) {
+      case 'A':
+        color = Colors.red;
+        break;
+      case 'B':
+        color = Colors.amber;
+        break;
+      default:
+        color = Colors.green;
+    }
+
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: ListTile(
+        leading: CircleAvatar(
+          radius: 16,
+          backgroundColor: color.withValues(alpha: 0.1),
+          child: Text(
+            item.abcCategory ?? '-',
+            style: TextStyle(color: color, fontWeight: FontWeight.bold),
+          ),
+        ),
+        title: Text(item.productName ?? 'منتج',
+            style: const TextStyle(fontSize: 13)),
+        subtitle: Text(
+          'قيمة: ${item.totalSalesValue?.toStringAsFixed(0) ?? '0'} ج.م | نسبة: ${item.percentageOfTotal?.toStringAsFixed(1) ?? '0'}%',
+          style: const TextStyle(fontSize: 11),
+        ),
+        trailing: Text(
+          'تراكمي ${item.cumulativePercentage?.toStringAsFixed(0) ?? '0'}%',
+          style: TextStyle(fontSize: 11, color: color),
+        ),
+      ),
+    );
+  }
+
+  // ========== Helpers ==========
+
+  Widget _buildErrorWidget(String message, VoidCallback onRetry) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.error_outline, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: const TextStyle(color: Colors.grey, fontSize: 16),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh),
+            label: const Text('إعادة المحاولة'),
+          ),
+        ],
+      ),
+    );
+  }
+}

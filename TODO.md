@@ -1,30 +1,12 @@
-# تحليل دوران المخزون - Inventory Turnover Analysis
+# Fix Corrupted Vendor Directory - Task Tracker
 
-## قائمة المهام
+## Goal
+Restore the corrupted `vendor/` directory so Laravel and Laravel Extra Intellisense work again.
 
-### ✅ المرحلة 1: قاعدة البيانات (Database Layer)
-- [x] 1. إنشاء جدول `inventory_turnover_reports` - تقارير دوران المخزون
-- [x] 2. إنشاء جدول `product_inventory_analysis` - تحليل كل منتج
-- [x] 3. تشغيل الترحيلات (Run migrations)
+## Steps
+- [x] Step 1: Delete corrupted `vendor/` directory
+- [x] Step 2: Run `composer install` to restore all packages from `composer.lock`
+- [x] Step 3: Verify Laravel app boots (`php artisan --version`)
+- [x] Step 4: Verify autoload works (`php -r "require 'vendor/autoload.php'; echo 'OK';"`)
+- [x] Step 5: Reload VS Code window / restart Laravel Extra Intellisense
 
-### ✅ المرحلة 2: الموديلات (Models)
-- [x] 4. إنشاء `InventoryTurnoverReport` Model
-- [x] 5. إنشاء `ProductInventoryAnalysis` Model
-
-### ✅ المرحلة 3: Service
-- [x] 6. إنشاء `InventoryTurnoverService`
-  - [x] حساب نسبة دوران المخزون (Inventory Turnover Ratio)
-  - [x] حساب أيام المخزون المعلقة (DIO)
-  - [x] تحليل المخزون البطيء/الراكد
-  - [x] تحليل ABC حسب سرعة الدوران
-  - [x] تحليل مقارن حسب الفترات
-  - [x] إحصائيات إجمالية للمخزون
-
-### ✅ المرحلة 4: Controller & Routes
-- [x] 7. إنشاء `InventoryTurnoverController`
-- [x] 8. إضافة المسارات في `routes/api.php`
-
-### المرحلة 5: تطبيق Flutter (Mobile)
-- [x] 9. إنشاء موديل `inventory_turnover_model.dart`
-- [x] 10. إضافة دوال API في `prediction_repo.dart`
-- [x] 11. إنشاء شاشة `inventory_turnover_screen.dart`

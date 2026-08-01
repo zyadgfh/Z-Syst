@@ -248,8 +248,9 @@ body .modal-custom-design .save-btn {
     /* background-color: red; */
 }
 .nav-logo {
-    height: 60px;
-    width: 215px;
+    max-height: 56px;
+    width: auto;
+    max-width: 220px;
     object-fit: contain;
 }
 .max-w-600 {
@@ -572,16 +573,37 @@ html {
 .header-section .navbar-toggler {
     border: none !important;
     background-color: var(--clr-white);
+    border-radius: 999px;
+    padding: 10px;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.header-section .header-logo img {
+    max-height: 56px;
+    width: auto;
+    max-width: 240px;
+}
+.header-sm-container .header-logo img {
+    max-height: 48px;
+    max-width: 220px;
+    width: auto;
 }
 .header-section .navbar-toggler-icon {
     background-image: url("../images/icons/bar.svg") !important;
     /* filter: invert(0%) grayscale(100%); */
+}
+.header-section .mobile-menu {
+    width: min(320px, 85vw);
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.16);
 }
 .header-section .mobile-menu .btn-close {
     color: var(--clr-dark) !important;
     background-image: none !important;
     font-size: 30px;
     opacity: 1;
+    padding: 8px;
 }
 .header-section .navbar-toggler:focus,
 .header-section .mobile-menu .btn-close:focus {
@@ -596,6 +618,22 @@ html {
 .header-section .accordion-button:focus {
     background-color: transparent !important;
     box-shadow: none !important;
+}
+.header-section .mobile-menu-login {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    margin: 0 0 16px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--clr-primary) 0%, #00a98a 100%);
+    color: #fff !important;
+    font-weight: 600;
+    box-shadow: 0 10px 20px rgba(0, 152, 127, 0.18);
+}
+.header-section .mobile-menu-login:hover {
+    color: #fff !important;
+    transform: translateY(-1px);
 }
 .header-section .accordion-button {
     padding: 7px 0px !important;
@@ -634,9 +672,14 @@ html {
     font-size: 15px;
     line-height: 24px;
     font-weight: 500;
-    border-radius: 8px;
-    padding: 14px 18px !important;
+    border-radius: 999px;
+    padding: 12px 16px !important;
     text-align: center;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 .ps-custom-btn {
     box-shadow: 0px 3px 5px 0px rgba(255,255,255,0.2) inset !important;
@@ -780,9 +823,15 @@ html {
     padding: 5px !important;
 }
 .footer-section .footer-logo {
-    width: 220px;
-    height: 50px;
+    max-width: 220px;
+    width: auto;
+    height: auto;
     object-fit: contain;
+}
+.footer-section .footer-logo img {
+    max-height: 56px;
+    width: auto;
+    display: block;
 }
 .footer-shape1 {
     position: absolute;

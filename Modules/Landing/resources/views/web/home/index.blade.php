@@ -1,7 +1,7 @@
 @extends('landing::layouts.web.master')
 
 @section('title')
-    {{ __(env('APP_NAME')) }}
+    {{ __('Z-Syst') }}
 @endsection
 
 @section('main_content')

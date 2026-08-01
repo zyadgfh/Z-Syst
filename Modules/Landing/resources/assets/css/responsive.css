@@ -431,8 +431,10 @@
         padding-top: 25px;
     }
     .nav-logo {
-        height: 45px !important;
-        width: 155px !important;
+        max-height: 45px !important;
+        width: auto !important;
+        max-width: 155px !important;
+        height: auto !important;
     }
     .header-section .get-app-btn {
         padding: 10px 14px !important;

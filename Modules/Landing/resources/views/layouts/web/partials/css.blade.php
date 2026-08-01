@@ -1,4 +1,4 @@
-<link rel="shortcut icon" type="image/x-icon" href="{{ asset(get_option('general')['favicon'] ?? 'assets/images/logo/favicon.png')}}">
+<link rel="shortcut icon" type="image/x-icon" href="{{ asset(get_option('general')['favicon'] ?? 'assets/images/logo/logo.png')}}">
 <link rel="stylesheet" href="{{ asset('assets/web/css/bootstrap.min.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/web/css/swiper-bundle.min.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/web/fonts/fontawesome/css/all.min.css') }}" />

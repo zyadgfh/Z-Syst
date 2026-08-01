@@ -362,9 +362,27 @@ svg {
 }
 
 .side-bar-logo img {
-    height: 40px;
+    max-width: 240px;
     width: auto;
+    max-height: 56px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
 }
+
+.logo img,
+.footer-logo img,
+.header-logo img,
+.side-bar-logo img,
+.nav-logo {
+    max-width: 240px;
+    width: auto;
+    max-height: 56px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
 
 .close-btn {
     background: none;
@@ -2933,8 +2951,9 @@ input:checked + .slider:before {
 
 .footer .footer-logo img {
     margin-top: 20px;
-    height: 48px;
+    max-height: 56px;
     width: auto;
+    height: auto;
 }
 .mybazar-login-section {
     height: calc(100vh - 120px);

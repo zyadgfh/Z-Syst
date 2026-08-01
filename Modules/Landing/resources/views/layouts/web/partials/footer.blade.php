@@ -18,7 +18,7 @@
                 <a href="{{ route('home') }}">
                     <img class="footer-logo"
                         src="{{ asset(data_get($pageData, 'footer_image') ?: 'assets/images/icons/img-upload.png') }}"
-                        alt="footer-logo" class="w-50" />
+                        alt="footer-logo" />
                 </a>
                 <p class="mt-4">
                     {{ Str::words(data_get($headings, 'footer_short_title') ?: '', 15, '...') }}

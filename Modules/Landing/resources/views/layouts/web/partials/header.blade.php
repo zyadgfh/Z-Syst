@@ -32,7 +32,7 @@
                  </ul>
                  <a href="{{ route('home') }}" class="header-logo logo-lg-device ">
                     <img class="img-fluid nav-logo"
-                    src="{{ asset(data_get($generalData, 'value.frontend_logo') ?: 'assets/images/icons/upload-icon.svg') }}"
+                    src="{{ asset(data_get($generalData, 'value.frontend_logo') ?: 'assets/images/logo/logo.png') }}"
                     alt="header-logo" />
                 </a>
 
@@ -55,7 +55,7 @@
             </div>
             <div class="header-sm-container">
                 <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#staticBackdrop"
-                    aria-controls="staticBackdrop">
+                    aria-controls="staticBackdrop" aria-label="Toggle navigation">
 
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
@@ -73,7 +73,7 @@
                 </button>
                 <a href="{{ route('home') }}" class="header-logo  ">
                     <img class="img-fluid nav-logo"
-                    src="{{ asset(data_get($generalData, 'value.frontend_logo') ?: 'assets/images/icons/upload-icon.svg') }}"
+                    src="{{ asset(data_get($generalData, 'value.frontend_logo') ?: 'assets/images/logo/logo.png') }}"
                     alt="header-logo" />
                 </a>
 
@@ -89,7 +89,7 @@
                                 d="M13.75 5.4165C13.75 7.48757 12.0711 9.1665 10 9.1665C7.92893 9.1665 6.25 7.48757 6.25 5.4165C6.25 3.34544 7.92893 1.6665 10 1.6665C12.0711 1.6665 13.75 3.34544 13.75 5.4165Z"
                                 fill="white"></path>
                         </svg>
-                        {{ Str::words($headerButtonText, 4, '...') }}
+                        {{ Str::words($headerButtonText, 2, '') }}
 
                     </a>
                 </div>
@@ -100,7 +100,7 @@
                 id="staticBackdrop" aria-labelledby="staticBackdropLabel">
                 <div class="offcanvas-header">
                     <a href="{{ route('home') }}" class="header-logo"><img
-                            src="{{ asset(data_get($generalData, 'value.frontend_logo') ?: 'assets/images/icons/upload-icon.svg') }}"
+                            src="{{ asset(data_get($generalData, 'value.frontend_logo') ?: 'assets/images/logo/logo.png') }}"
                             alt="header-logo" class="w-75" /></a>
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
@@ -113,6 +113,17 @@
                     </button>
                 </div>
                 <div class="offcanvas-body">
+                    <a href="{{ Route::has($headerButtonRoute) ? route($headerButtonRoute) : route('login') }}"
+                        class="mobile-menu-login">
+                        <svg width="18" height="18" viewBox="0 0 20 20" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5.48131 12.9012C4.30234 13.6032 1.21114 15.0366 3.09389 16.8304C4.01359 17.7065 5.03791 18.3332 6.32573 18.3332H13.6743C14.9621 18.3332 15.9864 17.7065 16.9061 16.8304C18.7888 15.0366 15.6977 13.6032 14.5187 12.9012C11.754 11.2549 8.24599 11.2549 5.48131 12.9012Z"
+                                fill="currentColor"></path>
+                            <path d="M13.75 5.4165C13.75 7.48757 12.0711 9.1665 10 9.1665C7.92893 9.1665 6.25 7.48757 6.25 5.4165C6.25 3.34544 7.92893 1.6665 10 1.6665C12.0711 1.6665 13.75 3.34544 13.75 5.4165Z"
+                                fill="currentColor"></path>
+                        </svg>
+                        <span>{{ __('Login') }}</span>
+                    </a>
                     <div class="accordion accordion-flush" id="sidebarMenuAccordion">
                         <div class="accordion-item">
                             <a href="{{ route('home') }}" class="accordion-button without-sub-menu"

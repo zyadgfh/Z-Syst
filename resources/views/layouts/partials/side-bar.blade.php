@@ -2,7 +2,7 @@
     <nav class="side-bar">
         <div class="side-bar-logo">
             <a href="{{ route('admin.dashboard.index') }}"><img
-                    src="{{ asset(get_option('general')['admin_logo'] ?? 'assets/images/logo/backend_logo.png') }}"
+                    src="{{ asset(get_option('general')['admin_logo'] ?? 'assets/images/logo/logo.png') }}"
                     alt="Logo"></a>
 
             <button class="close-btn"><i class="fal fa-times"></i></button>

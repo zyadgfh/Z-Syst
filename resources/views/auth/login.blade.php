@@ -7,14 +7,14 @@
 @section('main_content')
     <div class="footer position-relative">
         <div class="footer-logo w-100  d-flex align-items-center justify-content-center">
-            <img src="{{ asset('assets/images/login/login-logo.svg') }}" alt="">
+            <img src="{{ asset('assets/images/logo/logo.png') }}" alt="Z-Syst Logo">
         </div>
         <div class="mybazar-login-section ">
             <div class="d-flex align-items-center justify-content-center ">
                 <div class="mybazar-login-wrapper ">
                     <div class="login-wrapper">
                         <div class="login-body w-100">
-                            <h2 class="text-center login-title">{{ __('Welcome to') }} <span>{{ __(config('app.name', 'Z-Syst')) }}</span></h2>
+                            <h2 class="text-center login-title">{{ __('Welcome to') }} <span>Z-Syst</span></h2>
                             <h6 class="text-center login-para">{{ __('Welcome back, Please login in to your account') }}</h6>
                             <form method="POST" action="{{ route('login') }}" class="ajaxform_instant_reload">
                                 @csrf

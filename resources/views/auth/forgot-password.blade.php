@@ -5,7 +5,7 @@
 @section('main_content')
 <div class="footer">
     <div class="footer-logo w-100 mx-4">
-        <img src="{{ asset('assets/images/login/footer-logo.svg') }}" alt="">
+        <img src="{{ asset('assets/images/logo/logo.png') }}" alt="Z-Syst Logo">
     </div>
     <div class="mybazar-login-section">
         <div class="mybazar-login-avatar">
