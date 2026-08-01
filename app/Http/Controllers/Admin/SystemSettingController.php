@@ -6,6 +6,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class SystemSettingController extends Controller
 {
@@ -22,19 +23,34 @@ class SystemSettingController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'SESSION_LIFETIME' => 'required|integer',
-            'service_account_credentials' => 'mimes:json,txt|max:100',
+        $validated = $request->validate([
+            'APP_NAME' => ['nullable', 'string', 'max:255'],
+            'APP_DEBUG' => ['nullable', 'in:true,false'],
+            'SESSION_LIFETIME' => ['required', 'integer', 'min:1', 'max:525600'],
+            'service_account_credentials' => ['nullable', 'file', 'mimes:json', 'max:2048'],
         ]);
 
         if ($request->hasFile('service_account_credentials')) {
             $file = $request->file('service_account_credentials');
-            $name = 'service-account-credentials.json';
-            $path = 'uploads/';
-            $file->move($path, $name);
+            $content = file_get_contents($file->getRealPath());
+            $json = json_decode($content, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE || !is_array($json)) {
+                return response()->json(['success' => false, 'message' => 'Invalid JSON service account file'], 422);
+            }
+
+            $destination = storage_path('app/private/firebase');
+            if (!is_dir($destination)) {
+                mkdir($destination, 0755, true);
+            }
+
+            $name = 'service-account-' . now()->timestamp . '-' . Str::random(8) . '.json';
+            $path = $destination . DIRECTORY_SEPARATOR . $name;
+            file_put_contents($path, $content);
+            chmod($path, 0600);
         }
 
-        $APP_NAME = trim((string) $request->APP_NAME);
+        $APP_NAME = trim((string) ($validated['APP_NAME'] ?? env('APP_NAME', 'Z-Syst')));
         $txt = "APP_NAME=" . $APP_NAME . "
 APP_ENV=local
 APP_KEY=" . env('APP_KEY') . "

@@ -146,8 +146,8 @@ return [
     'demoPurchaseCodeAllow' => true,
     'demoPurchaseCode' => '',
     'updaterEnabled' => 'true',
-    'headerkeys' => 'Bearer sLAEuLH83WuGmg8iJGDSxQiavZ2TF1ba',
+    'headerkeys' => env('INSTALLER_HEADER_KEYS', ''),
 
-    'api_url' => 'https://api.envato.com',
-    'download_path' => '/../../../../..'
+    'api_url' => env('INSTALLER_API_URL', 'https://api.envato.com'),
+    'download_path' => env('INSTALLER_DOWNLOAD_PATH', '/../../../../..')
 ];

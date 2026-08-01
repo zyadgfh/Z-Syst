@@ -5,14 +5,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
-    Route::post('/sign-in', [Api\Auth\AuthController::class, 'login']);
-    Route::post('/submit-otp', [Api\Auth\AuthController::class, 'submitOtp']);
-    Route::post('/sign-up', [Api\Auth\AuthController::class, 'signUp']);
-    Route::post('/resend-otp', [Api\Auth\AuthController::class, 'resendOtp']);
-
-    Route::post('/send-reset-code',[Api\Auth\ZSystForgotPasswordController::class, 'sendResetCode']);
-    Route::post('/verify-reset-code',[Api\Auth\ZSystForgotPasswordController::class, 'verifyResetCode']);
-    Route::post('/password-reset',[Api\Auth\ZSystForgotPasswordController::class, 'resetPassword']);
+    Route::middleware('throttle:10,1')->group(function () {
+        Route::post('/sign-in', [Api\Auth\AuthController::class, 'login']);
+        Route::post('/submit-otp', [Api\Auth\AuthController::class, 'submitOtp']);
+        Route::post('/sign-up', [Api\Auth\AuthController::class, 'signUp']);
+        Route::post('/resend-otp', [Api\Auth\AuthController::class, 'resendOtp']);
+        Route::post('/send-reset-code',[Api\Auth\ZSystForgotPasswordController::class, 'sendResetCode']);
+        Route::post('/verify-reset-code',[Api\Auth\ZSystForgotPasswordController::class, 'verifyResetCode']);
+        Route::post('/password-reset',[Api\Auth\ZSystForgotPasswordController::class, 'resetPassword']);
+    });
 
     Route::group(['middleware' => ['auth:sanctum']], function () {
 
