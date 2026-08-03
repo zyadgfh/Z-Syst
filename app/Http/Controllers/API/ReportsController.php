@@ -15,36 +15,40 @@ use App\Models\FinancialAuditLog;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\PurchaseReturnDetail;
+use App\Http\Requests\ReportRequest;
 
 class ReportsController extends Controller
 {
     public function purchaseReport()
     {
+        $request = ReportRequest::capture();
+
         $query = Purchase::select('id', 'party_id', 'invoiceNumber', 'purchaseDate', 'totalAmount', 'dueAmount', 'paidAmount', 'paymentType', 'note')
                     ->with('party:id,name,phone')
                     ->withCount('purchaseReturns')
-                    ->when(request('search'), function ($query) {
-                        $query->where(function ($subQuery) {
-                            $subQuery->where('paymentType', 'like', '%' . request('search') . '%')
-                                ->orWhere('invoiceNumber', 'like', '%' . request('search') . '%')
-                                ->orWhere('note', 'like', '%' . request('search') . '%')
-                                ->orWhereHas('party', function ($query) {
-                                    $query->where('name', 'like', '%' . request('search') . '%')
-                                        ->orWhere('phone', 'like', '%' . request('search') . '%');
+                    ->when($request->filled('search'), function ($query) use ($request) {
+                        $query->where(function ($subQuery) use ($request) {
+                            $term = '%' . $request->input('search') . '%';
+                            $subQuery->where('paymentType', 'like', $term)
+                                ->orWhere('invoiceNumber', 'like', $term)
+                                ->orWhere('note', 'like', $term)
+                                ->orWhereHas('party', function ($query) use ($term) {
+                                    $query->where('name', 'like', $term)
+                                        ->orWhere('phone', 'like', $term);
                                 });
                         });
                     })
-                    ->when(request('from_date') || request('to_date'), function ($query) {
-                        $query->whereBetween('purchaseDate', [request('from_date'), request('to_date')]);
+                    ->when($request->filled('from_date') || $request->filled('to_date'), function ($query) use ($request) {
+                        $query->whereBetween('purchaseDate', [$request->input('from_date'), $request->input('to_date')]);
                     })
-                    ->when(request('payment_status') == 'paid', function ($query) {
+                    ->when($request->input('payment_status') == 'paid', function ($query) {
                         $query->where('dueAmount', '<=', 0);
                     })
-                    ->when(request('payment_status') == 'unpaid', function ($query) {
+                    ->when($request->input('payment_status') == 'unpaid', function ($query) {
                         $query->where('dueAmount', '>', 0);
                     })
-                    ->when(request('party_id'), function ($query) {
-                        $query->where('party_id', request('party_id'));
+                    ->when($request->filled('party_id'), function ($query) use ($request) {
+                        $query->where('party_id', $request->input('party_id'));
                     })
                     ->where('business_id', auth()->user()->business_id);
 
@@ -406,14 +410,14 @@ class ReportsController extends Controller
                     ->where('business_id', auth()->user()->business_id);
 
         $data = (clone $query)->latest()->paginate(10);
-        
+
         // Calculate summary statistics
         $total_audits = StockAudit::where('business_id', auth()->user()->business_id)
             ->when(request('from_date') || request('to_date'), function ($query) {
                 $query->whereBetween('audit_date', [request('from_date'), request('to_date')]);
             })
             ->count();
-        
+
         $completed_audits = StockAudit::where('business_id', auth()->user()->business_id)
             ->where('status', 'completed')
             ->when(request('from_date') || request('to_date'), function ($query) {
@@ -455,14 +459,14 @@ class ReportsController extends Controller
                     ->where('business_id', auth()->user()->business_id);
 
         $data = (clone $query)->latest()->paginate(10);
-        
+
         // Calculate summary statistics
         $total_audits = FinancialAuditLog::where('business_id', auth()->user()->business_id)
             ->when(request('from_date') || request('to_date'), function ($query) {
                 $query->whereBetween('start_date', [request('from_date'), request('to_date')]);
             })
             ->count();
-        
+
         $total_variance = FinancialAuditLog::where('business_id', auth()->user()->business_id)
             ->where('status', 'completed')
             ->when(request('from_date') || request('to_date'), function ($query) {

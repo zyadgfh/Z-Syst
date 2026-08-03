@@ -1,39 +1,39 @@
 rules_version = '2';
 
 service cloud.firestore {
-  function isAuthenticated() {
-    return request.auth != null;
-  }
-
-  function isAdmin() {
-    return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-  }
-
-  function isOwner(userId) {
-    return isAuthenticated() && request.auth.uid == userId;
-  }
-
   match /databases/{database}/documents {
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserProfile() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data
+        : {};
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && getUserProfile().role == 'admin';
+    }
+
+    function isBusinessMember(businessId) {
+      return isAuthenticated() && getUserProfile().businessId == businessId;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update, delete: if isOwner(userId) || isAdmin();
+    }
+
+    match /businesses/{businessId} {
+      allow read: if isBusinessMember(businessId) || isAdmin();
       allow create: if isAuthenticated();
-    }
-
-    match /business/{businessId} {
-      allow read, write: if isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.businessId == businessId;
-      allow create: if isAuthenticated();
-    }
-
-    match /sales/{saleId} {
-      allow read, write: if isAuthenticated() && get(/databases/$(database)/documents/sales/$(saleId)).data.businessId == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.businessId;
-    }
-
-    match /products/{productId} {
-      allow read, write: if isAuthenticated() && get(/databases/$(database)/documents/products/$(productId)).data.businessId == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.businessId;
-    }
-
-    match /settings/{settingId} {
-      allow read, write: if isAdmin();
+      allow update, delete: if isAdmin();
     }
 
     match /public/{document=**} {
@@ -42,7 +42,8 @@ service cloud.firestore {
     }
 
     match /{document=**} {
-      allow read, write: if false;
+      allow read: if false;
+      allow write: if false;
     }
   }
 }

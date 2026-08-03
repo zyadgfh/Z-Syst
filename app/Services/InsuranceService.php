@@ -246,15 +246,18 @@ class InsuranceService
             ->expiringSoon(30)->count();
 
         $claimStats = InsuranceClaim::where('business_id', $businessId)
-            ->selectRaw('status, COUNT(*) as count, COALESCE(SUM(total_amount),0) as total')
+            ->selectRaw('status, COUNT(*) as count, COALESCE(SUM(total_amount),0) as total, COALESCE(SUM(paid_amount),0) as paid_total')
             ->groupBy('status')
             ->get()
             ->keyBy('status')
-            ->map(fn ($row) => ['count' => (int) $row->count, 'total' => (float) $row->total])
+            ->map(fn ($row) => [
+                'count' => (int) $row->count,
+                'total' => (float) ($row->status === 'paid' ? ($row->paid_total ?? 0) : $row->total),
+            ])
             ->all();
 
         $pending = ($claimStats['submitted']['total'] ?? 0) + ($claimStats['under_review']['total'] ?? 0);
-        $paid = $claimStats['paid']['total'] ?? 0;
+        $paid = (float) ($claimStats['paid']['total'] ?? 0);
 
         return [
             'companies' => [

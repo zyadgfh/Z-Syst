@@ -10,6 +10,9 @@ Route::prefix('v1')->group(function () {
         Route::post('/submit-otp', [Api\Auth\AuthController::class, 'submitOtp']);
         Route::post('/sign-up', [Api\Auth\AuthController::class, 'signUp']);
         Route::post('/resend-otp', [Api\Auth\AuthController::class, 'resendOtp']);
+    });
+
+    Route::middleware('throttle:5,5')->group(function () {
         Route::post('/send-reset-code',[Api\Auth\ZSystForgotPasswordController::class, 'sendResetCode']);
         Route::post('/verify-reset-code',[Api\Auth\ZSystForgotPasswordController::class, 'verifyResetCode']);
         Route::post('/password-reset',[Api\Auth\ZSystForgotPasswordController::class, 'resetPassword']);
@@ -20,7 +23,25 @@ Route::prefix('v1')->group(function () {
         Route::get('summary', [Api\StatisticsController::class, 'summary']);
         Route::get('dashboard', [Api\StatisticsController::class, 'dashboard']);
         Route::get('features', [Api\FeatureStatusController::class, 'index']);
-        Route::post('backup', [Api\BackupController::class, 'store']);
+
+        Route::middleware(['business.context', 'throttle:20,1'])->group(function () {
+            Route::post('backup', [Api\BackupController::class, 'store']);
+            Route::apiResource('profile', Api\ZSystProfileController::class)->only('index', 'store');
+            Route::post('change-password', [Api\ZSystProfileController::class, 'changePassword']);
+
+            Route::get('purchase-report', [Api\ReportsController::class, 'purchaseReport']);
+            Route::get('sales-report', [Api\ReportsController::class, 'salesReport']);
+            Route::get('due-collects-report', [Api\ReportsController::class, 'dueCollectsReport']);
+            Route::get('loss-profit-report', [Api\ReportsController::class, 'lossProfitReport']);
+            Route::get('income-report', [Api\ReportsController::class, 'incomeReport']);
+            Route::get('expense-report', [Api\ReportsController::class, 'expenseReport']);
+            Route::get('low-stock-report', [Api\ReportsController::class, 'lowStockReport']);
+            Route::get('taxes-report', [Api\ReportsController::class, 'taxesReport']);
+            Route::get('sales-return-report', [Api\ReportsController::class, 'saleReturnReport']);
+            Route::get('purchase-return-report', [Api\ReportsController::class, 'purchaseReturnReport']);
+            Route::get('stock-audit-report', [Api\ReportsController::class, 'stockAuditReport']);
+            Route::get('financial-audit-report', [Api\ReportsController::class, 'financialAuditReport']);
+        });
 
         Route::post('stock-update/{id}',[Api\ZSystProductController::class, 'updateStock']);
         Route::get('stocks-with-product', [Api\ZSystProductController::class, 'stocksWithProduct']);
@@ -31,7 +52,6 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('units', Api\UnitController::class)->except('show');
         Route::apiResource('categories', Api\ZSystCategoryController::class)->except('show');
         Route::apiResource('manufacturer', Api\ZSystManufacturerController::class)->except('show');
-        Route::apiResource('parties', Api\PartyController::class);
         Route::apiResource('products', Api\ZSystProductController::class);
         Route::apiResource('stocks', Api\StockController::class)->only('index');
         Route::apiResource('business-categories', Api\BusinessCategoryController::class)->only('index');
@@ -102,7 +122,6 @@ Route::prefix('v1')->group(function () {
 
         Route::apiResource('banners', Api\ZSystBannerController::class)->only('index');
         Route::apiResource('lang', Api\ZSystLanguageController::class)->only('index', 'store');
-        Route::apiResource('profile', Api\ZSystProfileController::class)->only('index', 'store');
         Route::apiResource('plans', Api\ZSystSubscriptionsController::class)->only('index');
         Route::apiResource('subscribes', Api\ZSystSubscribesController::class)->only('index');
         Route::apiResource('currencies', Api\ZSystCurrencyController::class)->only('index');
@@ -118,20 +137,6 @@ Route::prefix('v1')->group(function () {
             Route::get('abc-analysis', [Api\InventoryTurnoverController::class, 'abcAnalysis']);
             Route::get('trends', [Api\InventoryTurnoverController::class, 'trends']);
         });
-
-        // Reports
-        Route::get('purchase-report', [Api\ReportsController::class, 'purchaseReport']);
-        Route::get('sales-report', [Api\ReportsController::class, 'salesReport']);
-        Route::get('due-collects-report', [Api\ReportsController::class, 'dueCollectsReport']);
-        Route::get('loss-profit-report', [Api\ReportsController::class, 'lossProfitReport']);
-        Route::get('income-report', [Api\ReportsController::class, 'incomeReport']);
-        Route::get('expense-report', [Api\ReportsController::class, 'expenseReport']);
-        Route::get('low-stock-report', [Api\ReportsController::class, 'lowStockReport']);
-        Route::get('taxes-report', [Api\ReportsController::class, 'taxesReport']);
-        Route::get('sales-return-report', [Api\ReportsController::class, 'saleReturnReport']);
-        Route::get('purchase-return-report', [Api\ReportsController::class, 'purchaseReturnReport']);
-        Route::get('stock-audit-report', [Api\ReportsController::class, 'stockAuditReport']);
-        Route::get('financial-audit-report', [Api\ReportsController::class, 'financialAuditReport']);
 
         // Stock Audit System
         Route::prefix('stock-audits')->group(function () {
@@ -201,8 +206,6 @@ Route::prefix('v1')->group(function () {
             Route::put('coverages/{coverage}', [Api\InsuranceController::class, 'coveragesUpdate']);
             Route::delete('coverages/{coverage}', [Api\InsuranceController::class, 'coveragesDestroy']);
         });
-
-        Route::post('change-password', [Api\ZSystProfileController::class, 'changePassword']);
 
         Route::get('new-invoice', [Api\ZSystInvoiceController::class, 'newInvoice']);
         Route::get('/sign-out', [Api\Auth\AuthController::class, 'signOut']);

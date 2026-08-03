@@ -49,7 +49,7 @@
                                 <div class="col-12 col-sm-12 col-md-8">
                                     <div class="cards-header shadow">
                                         <div class="card-body">
-                                            <form action="{{ route('admin.system-settings.store') }}" method="post" class="ajaxform">
+                                            <form action="{{ route('admin.system-settings.store') }}" method="post" enctype="multipart/form-data" class="ajaxform">
                                                 @csrf
 
                                                 <div class="tab-content no-padding">
@@ -72,6 +72,11 @@
                                                         <div class="form-group">
                                                             <label>{{ __('APP_URL') }}</label>
                                                             <input type="text" name="APP_URL" value="{{ env('APP_URL') ?? '' }}" required class="form-control">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>{{ __('Firebase Service Account JSON') }}</label>
+                                                            <input type="file" name="service_account_credentials" accept="application/json" class="form-control">
+                                                            <small class="text-muted">{{ __('Upload a valid Firebase service account JSON file.') }}</small>
                                                         </div>
                                                         <div class="row">
                                                             <div class="col-lg-12">

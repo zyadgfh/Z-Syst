@@ -73,6 +73,7 @@ class Kernel extends HttpKernel
         'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
         'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
+        'business.context' => \App\Http\Middleware\EnsureBusinessContext::class,
         // 'token_expired' => \App\Http\Middleware\TokenExpired::class,
     ];
 }

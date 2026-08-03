@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Landing\App\Http\Controllers\Api\LandingController;
 
 /*
     |--------------------------------------------------------------------------
@@ -14,6 +14,6 @@ use Illuminate\Support\Facades\Route;
     |
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->name('api.')->group(function () {
-    Route::get('landing', fn (Request $request) => $request->user())->name('landing');
+Route::prefix('v1')->name('api.')->group(function () {
+    Route::get('landing', [LandingController::class, 'index'])->name('landing');
 });

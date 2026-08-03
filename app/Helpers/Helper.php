@@ -30,8 +30,12 @@ function normalize_manage_pages_option($value)
 
 function get_option($key) {
     return cache_remember($key, function () use ($key) {
-        $option = Option::where('key', $key)->first();
-        $value = $option?->value ?? [];
+        try {
+            $option = Option::where('key', $key)->first();
+            $value = $option?->value ?? [];
+        } catch (Throwable $e) {
+            $value = [];
+        }
 
         if ($key === 'manage-pages') {
             return normalize_manage_pages_option($value);

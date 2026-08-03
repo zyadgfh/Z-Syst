@@ -715,16 +715,16 @@ class _InventoryTurnoverScreenState extends State<InventoryTurnoverScreen>
             Row(
               children: [
                 _buildProductMetric('المخزون الحالي',
-                    '${product.currentStockQty?.toStringAsFixed(0) ?? '0'}',
+                    product.currentStockQty?.toStringAsFixed(0) ?? '0',
                     Colors.blue),
                 const SizedBox(width: 4),
                 _buildProductMetric(
                     'قيمة المخزون',
-                    '${product.currentStockValue?.toStringAsFixed(0) ?? '0'}',
+                    product.currentStockValue?.toStringAsFixed(0) ?? '0',
                     Colors.orange),
                 const SizedBox(width: 4),
                 _buildProductMetric('الكمية المباعة',
-                    '${product.totalQuantitySold?.toStringAsFixed(0) ?? '0'}',
+                    product.totalQuantitySold?.toStringAsFixed(0) ?? '0',
                     Colors.purple),
               ],
             ),
@@ -856,7 +856,7 @@ class _InventoryTurnoverScreenState extends State<InventoryTurnoverScreen>
             ),
           )
         else
-          ...abc.products!.map((item) => _buildAbcProductCard(item)).toList(),
+          ...abc.products!.map((item) => _buildAbcProductCard(item)),
       ],
     );
   }

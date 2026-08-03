@@ -40,7 +40,7 @@ class InsuranceController extends Controller
         return response()->json([
             'message' => __('Insurance summary fetched successfully.'),
             'data' => $this->insurance->getSummary($businessId),
-        ]);
+        ], 200, [], JSON_PRESERVE_ZERO_FRACTION);
     }
 
     // ─── Companies ────────────────────────────────────────────────────────────
@@ -58,9 +58,16 @@ class InsuranceController extends Controller
             ->latest()
             ->paginate(15);
 
+        $companyData = $companies->getCollection()
+            ->map(fn ($company) => (new InsuranceCompanyResource($company))->resolve())
+            ->values()
+            ->all();
+
         return response()->json([
             'message' => __('Insurance companies fetched successfully.'),
-            'companies' => InsuranceCompanyResource::collection($companies),
+            'companies' => [
+                'data' => $companyData,
+            ],
             'meta' => [
                 'current_page' => $companies->currentPage(),
                 'last_page' => $companies->lastPage(),

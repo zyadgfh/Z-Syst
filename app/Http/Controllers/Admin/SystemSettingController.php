@@ -2,159 +2,152 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SystemSettingRequest;
+use App\Models\Setting;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Crypt;
 
 class SystemSettingController extends Controller
 {
     public function __construct()
     {
         $this->middleware('permission:settings-read')->only('index');
-        $this->middleware('permission:settings-update')->only('update');
+        $this->middleware('permission:settings-update')->only('store');
     }
 
     public function index()
     {
-        return view ('admin.settings.system');
+        return view('admin.settings.system');
     }
 
-    public function store(Request $request)
+    public function store(SystemSettingRequest $request)
     {
-        $validated = $request->validate([
-            'APP_NAME' => ['nullable', 'string', 'max:255'],
-            'APP_DEBUG' => ['nullable', 'in:true,false'],
-            'SESSION_LIFETIME' => ['required', 'integer', 'min:1', 'max:525600'],
-            'service_account_credentials' => ['nullable', 'file', 'mimes:json', 'max:2048'],
-        ]);
+        $validated = $request->validated();
 
         if ($request->hasFile('service_account_credentials')) {
             $file = $request->file('service_account_credentials');
-            $content = file_get_contents($file->getRealPath());
+            $content = File::get($file->getRealPath());
             $json = json_decode($content, true);
 
-            if (json_last_error() !== JSON_ERROR_NONE || !is_array($json)) {
-                return response()->json(['success' => false, 'message' => 'Invalid JSON service account file'], 422);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json(['message' => 'Invalid JSON file content.'], 422);
             }
 
-            $destination = storage_path('app/private/firebase');
-            if (!is_dir($destination)) {
-                mkdir($destination, 0755, true);
+            $requiredFields = [
+                'type',
+                'project_id',
+                'private_key_id',
+                'private_key',
+                'client_email',
+                'client_id',
+                'auth_uri',
+                'token_uri',
+                'auth_provider_x509_cert_url',
+                'client_x509_cert_url',
+            ];
+
+            foreach ($requiredFields as $field) {
+                if (!isset($json[$field])) {
+                    return response()->json(['message' => "Missing required JSON field: $field"], 422);
+                }
             }
 
-            $name = 'service-account-' . now()->timestamp . '-' . Str::random(8) . '.json';
-            $path = $destination . DIRECTORY_SEPARATOR . $name;
-            file_put_contents($path, $content);
-            chmod($path, 0600);
+            if ($json['type'] !== 'service_account') {
+                return response()->json(['message' => 'Invalid service account type.'], 422);
+            }
+
+            if (!filter_var($json['client_email'], FILTER_VALIDATE_EMAIL)) {
+                return response()->json(['message' => 'Invalid client email address.'], 422);
+            }
+
+            $name = 'service-account-' . time() . '-' . bin2hex(random_bytes(8)) . '.json';
+            $path = storage_path('app/private/firebase/');
+
+            if (!File::exists($path)) {
+                File::makeDirectory($path, 0600, true);
+            }
+
+            $file->move($path, $name);
+            File::chmod($path . $name, 0600);
         }
 
-        $APP_NAME = trim((string) ($validated['APP_NAME'] ?? env('APP_NAME', 'Z-Syst')));
-        $txt = "APP_NAME=" . $APP_NAME . "
-APP_ENV=local
-APP_KEY=" . env('APP_KEY') . "
-APP_DEBUG=" . $request->APP_DEBUG . "
-APP_URL=" . url('/') . "
-SITE_KEY=" . env('SITE_KEY') . "
-AUTHORIZED_KEY=" . env('AUTHORIZED_KEY') . "
+        $storeKeys = [
+            'APP_NAME', 'APP_ENV', 'APP_DEBUG', 'APP_URL', 'QUEUE_MAIL',
+            'MAIL_DRIVER_TYPE','MAIL_DRIVER','MAIL_HOST','MAIL_PORT','MAIL_USERNAME',
+            'MAIL_ENCRYPTION','MAIL_FROM_ADDRESS','MAIL_FROM_NAME','CACHE_DRIVER',
+            'QUEUE_CONNECTION','SESSION_DRIVER','SESSION_LIFETIME','FILESYSTEM_DISK',
+            'AWS_ACCESS_KEY_ID','AWS_DEFAULT_REGION','AWS_BUCKET',
+            'WAS_ACCESS_KEY_ID','WAS_DEFAULT_REGION','WAS_BUCKET','WAS_ENDPOINT',
+            'CACHE_LIFETIME','TIMEZONE'
+        ];
 
-CONTENT_EDITOR=" . $request->CONTENT_EDITOR . "
-ANALYTICS_VIEW_ID=" . $request->ANALYTICS_VIEW_ID . "
-GA_MEASUREMENT_ID=" . $request->GA_MEASUREMENT_ID . "
-FORCE_USER_TO_PURCHASE_PLAN=" . $request->FORCE_USER_TO_PURCHASE_PLAN . "
-UNSUBSCRIBE_AFTER_DAYS=" . $request->UNSUBSCRIBE_AFTER_DAYS . "
+        foreach ($storeKeys as $k) {
+            $val = $validated[$k] ?? env($k);
+            if (is_null($val)) {
+                continue;
+            }
+            Setting::updateOrCreate(
+                ['key' => $k],
+                ['value' => (string) $val, 'type' => 'string']
+            );
+        }
 
+        // Sensitive keys: encrypt before storing
+        $sensitive = [
+            'MAIL_PASSWORD', 'AWS_SECRET_ACCESS_KEY', 'WAS_SECRET_ACCESS_KEY', 'APILAYER_API_KEY'
+        ];
 
-DB_CONNECTION=" . env("DB_CONNECTION") . "
-DB_HOST=" . env("DB_HOST") . "
-DB_PORT=" . env("DB_PORT") . "
-DB_DATABASE=" . env("DB_DATABASE") . "
-DB_USERNAME=" . env("DB_USERNAME") . "
-DB_PASSWORD=" . env("DB_PASSWORD") . "
+        foreach ($sensitive as $k) {
+            if (isset($validated[$k]) && $validated[$k] !== null) {
+                Setting::updateOrCreate(
+                    ['key' => $k],
+                    ['value' => Crypt::encryptString($validated[$k]), 'type' => 'encrypted']
+                );
+            }
+        }
 
+        // If service account file saved above, persist filename
+        if (isset($name)) {
+            Setting::updateOrCreate(
+                ['key' => 'FIREBASE_SERVICE_ACCOUNT'],
+                ['value' => $name, 'type' => 'string']
+            );
+        }
 
-QUEUE_MAIL=" . $request->QUEUE_MAIL . "
-" . $request->MAIL_DRIVER_TYPE . "=" . $request->MAIL_DRIVER . "
-MAIL_DRIVER_TYPE=" . $request->MAIL_DRIVER_TYPE . "
-MAIL_HOST=" . $request->MAIL_HOST . "
-MAIL_PORT=" . $request->MAIL_PORT . "
-MAIL_USERNAME=" . $request->MAIL_USERNAME . "
-MAIL_PASSWORD=" . $request->MAIL_PASSWORD . "
-MAIL_ENCRYPTION=" . $request->MAIL_ENCRYPTION . "
-MAIL_FROM_ADDRESS=" . $request->MAIL_FROM_ADDRESS . "
-MAIL_TO=" . $request->MAIL_TO . "
-MAIL_FROM_NAME='" . $request->MAIL_FROM_NAME . "'
+        // Ensure APP_ENV is set to production in .env if different (minimal write)
+        if (env('APP_ENV') !== 'production') {
+            try {
+                $this->writeEnv(['APP_ENV' => 'production']);
+            } catch (\Throwable $e) {
+                // Log but don't fail the request
+                logger()->warning('Failed to update .env APP_ENV: ' . $e->getMessage());
+            }
+        }
 
+        return response()->json(['message' => 'System Updated']);
+    }
 
-MAILCHIMP_DRIVER=" . $request->MAILCHIMP_DRIVER . "
-MAILCHIMP_APIKEY=" . $request->MAILCHIMP_APIKEY . "
-MAILCHIMP_LIST_ID=" . $request->MAILCHIMP_LIST_ID . "
+    protected function writeEnv(array $values)
+    {
+        $path = base_path('.env');
 
-NOCAPTCHA_SECRET=" . $request->NOCAPTCHA_SECRET . "
-NOCAPTCHA_SITEKEY=" . $request->NOCAPTCHA_SITEKEY . "
+        if (!File::exists($path)) {
+            return false;
+        }
 
-BROADCAST_DRIVER=pusher
-CACHE_DRIVER=" . $request->CACHE_DRIVER . "
-QUEUE_CONNECTION=database
-SESSION_DRIVER=" . $request->SESSION_DRIVER . "
-SESSION_LIFETIME=" . $request->SESSION_LIFETIME . "
+        $content = File::get($path);
 
-PUSHER_APP_ID=" . $request->PUSHER_APP_ID . "
-PUSHER_APP_KEY=" . $request->PUSHER_APP_KEY . "
-PUSHER_APP_SECRET=" . $request->PUSHER_APP_SECRET . "
-PUSHER_APP_CLUSTER=" . $request->PUSHER_APP_CLUSTER . "
-PUSHER_SCHEME=https
-MIX_PUSHER_APP_KEY=" . '${PUSHER_APP_KEY}' . "
-MIX_PUSHER_APP_CLUSTER=" . '${PUSHER_APP_CLUSTER}' . "
+        foreach ($values as $key => $value) {
+            $escapedValue = str_replace("\n", '\\n', (string) $value);
+            if (preg_match("/^{$key}=.*$/m", $content)) {
+                $content = preg_replace("/^{$key}=.*$/m", "$key={$escapedValue}", $content);
+            } else {
+                $content .= PHP_EOL . "$key={$escapedValue}";
+            }
+        }
 
-REDIS_HOST=" . $request->REDIS_HOST . "
-REDIS_PORT=" . $request->REDIS_PORT . "
-REDIS_URL=" . $request->REDIS_URL . "
-REDIS_PASSWORD=" . $request->REDIS_PASSWORD . "
-
-MEMCACHED_HOST=" . $request->MEMCACHED_HOST . "
-MEMCACHED_PORT=" . $request->MEMCACHED_PORT . "
-MEMCACHED_PERSISTENT_ID=" . $request->MEMCACHED_PERSISTENT_ID . "
-MEMCACHED_USERNAME=" . $request->MEMCACHED_USERNAME . "
-MEMCACHED_PASSWORD=" . $request->MEMCACHED_PASSWORD . "
-
-
-AWS_ACCESS_KEY_ID=" . $request->AWS_ACCESS_KEY_ID . "
-AWS_SECRET_ACCESS_KEY=" . $request->AWS_SECRET_ACCESS_KEY . "
-AWS_DEFAULT_REGION=" . $request->AWS_DEFAULT_REGION . "
-AWS_BUCKET=" . $request->AWS_BUCKET . "
-
-WAS_ACCESS_KEY_ID=" . $request->WAS_ACCESS_KEY_ID . "
-WAS_SECRET_ACCESS_KEY=" . $request->WAS_SECRET_ACCESS_KEY . "
-WAS_DEFAULT_REGION=" . $request->WAS_DEFAULT_REGION . "
-WAS_BUCKET=" . $request->WAS_BUCKET . "
-WAS_ENDPOINT=" . $request->WAS_ENDPOINT . "
-
-
-DISCUSS_COMMENT_KEY=" . $request->DISCUSS_COMMENT_KEY . "
-
-LOG_CHANNEL=stack
-LOG_LEVEL=debug
-CACHE_LIFETIME=" . $request->CACHE_LIFETIME . "
-TIMEZONE=" . $request->TIMEZONE . "
-
-DEFAULT_LANG=" . $request->DEFAULT_LANG . "
-DISCUSS_COMMENT_KEY=" . $request->DISCUSS_COMMENT_KEY . "
-
-FILESYSTEM_DISK=" . $request->FILESYSTEM_DISK . "
-
-VITE_PUSHER_APP_KEY=" . '${PUSHER_APP_KEY}' . "
-VITE_PUSHER_HOST=" . '${PUSHER_HOST}' . "
-VITE_PUSHER_PORT=" . '${PUSHER_PORT}' . "
-VITE_PUSHER_SCHEME=" . '${PUSHER_SCHEME}' . "
-VITE_PUSHER_APP_CLUSTER=" . '${PUSHER_APP_CLUSTER}' . "
-
-APILAYER_API_KEY=" . $request->APILAYER_API_KEY . "
-
-";
-
-        File::put(base_path('.env'), $txt);
-        return response()->json("System Updated");
+        File::put($path, $content);
+        return true;
     }
 }

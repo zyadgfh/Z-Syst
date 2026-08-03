@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\User;
 use App\Helpers\HasUploader;
+use App\Services\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
@@ -16,6 +17,11 @@ class ZSystProfileController extends Controller
     public function index()
     {
         $user = User::with('business')->findOrFail(auth()->id());
+
+        if ($user->id !== auth()->id()) {
+            return response()->json(['message' => __('Forbidden.')], 403);
+        }
+
         return response()->json([
             'message' => __('Data fetched successfully.'),
             'data' => $user
@@ -32,11 +38,19 @@ class ZSystProfileController extends Controller
 
         $user = User::findOrFail(auth()->id());
 
+        if ($user->id !== auth()->id()) {
+            return response()->json(['message' => __('Forbidden.')], 403);
+        }
+
         $user->update($request->except('image') + [
             'image' => $request->image ? $this->upload($request, 'image', $user->image) : $user->image,
         ]);
 
         $user = User::findOrFail(auth()->id());
+
+        AuditLogger::log('profile.updated', 'User profile updated.', [
+            'user_id' => $user->id,
+        ]);
 
         $data = [
             'name' => $user->name,
@@ -69,6 +83,10 @@ class ZSystProfileController extends Controller
 
         $user->update([
             'password' => Hash::make($request->password),
+        ]);
+
+        AuditLogger::log('password.changed', 'User password changed.', [
+            'user_id' => $user->id,
         ]);
 
         return response()->json([
