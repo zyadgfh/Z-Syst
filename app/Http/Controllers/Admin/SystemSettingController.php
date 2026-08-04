@@ -115,39 +115,11 @@ class SystemSettingController extends Controller
             );
         }
 
-        // Ensure APP_ENV is set to production in .env if different (minimal write)
-        if (env('APP_ENV') !== 'production') {
-            try {
-                $this->writeEnv(['APP_ENV' => 'production']);
-            } catch (\Throwable $e) {
-                // Log but don't fail the request
-                logger()->warning('Failed to update .env APP_ENV: ' . $e->getMessage());
-            }
-        }
+        Setting::updateOrCreate(
+            ['key' => 'APP_ENV'],
+            ['value' => 'production', 'type' => 'string']
+        );
 
         return response()->json(['message' => 'System Updated']);
-    }
-
-    protected function writeEnv(array $values)
-    {
-        $path = base_path('.env');
-
-        if (!File::exists($path)) {
-            return false;
-        }
-
-        $content = File::get($path);
-
-        foreach ($values as $key => $value) {
-            $escapedValue = str_replace("\n", '\\n', (string) $value);
-            if (preg_match("/^{$key}=.*$/m", $content)) {
-                $content = preg_replace("/^{$key}=.*$/m", "$key={$escapedValue}", $content);
-            } else {
-                $content .= PHP_EOL . "$key={$escapedValue}";
-            }
-        }
-
-        File::put($path, $content);
-        return true;
     }
 }

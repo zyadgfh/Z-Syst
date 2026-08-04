@@ -15,7 +15,7 @@ class RotateSettingsKey extends Command
      *
      * @var string
      */
-    protected $signature = 'settings:rotate-key {oldKey : The old APP_KEY (can be base64:...)}';
+    protected $signature = 'settings:rotate-key {oldKey : The old APP_KEY (can be base64:...)} {--dry-run : Preview changes without persisting updates}';
 
     /**
      * The console command description.
@@ -56,6 +56,12 @@ class RotateSettingsKey extends Command
         foreach ($settings as $s) {
             try {
                 $plain = $oldEncrypter->decryptString($s->value);
+                if ($this->option('dry-run')) {
+                    $this->line("[dry-run] {$s->key}");
+                    $count++;
+                    continue;
+                }
+
                 $s->value = Crypt::encryptString($plain);
                 $s->save();
                 $count++;
@@ -65,7 +71,8 @@ class RotateSettingsKey extends Command
             }
         }
 
-        $this->info("Completed. Rotated: {$count}, Failed: {$failed}");
+        $this->info($this->option('dry-run') ? 'Dry run completed.' : 'Completed.');
+        $this->info("Rotated: {$count}, Failed: {$failed}");
         return 0;
     }
 }
