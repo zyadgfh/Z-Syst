@@ -31,12 +31,15 @@ class LandingController extends Controller
 
         return response()->json([
             'page_data' => $page_data,
+            'sections' => $page_data['sections'] ?? [],
             'features' => $features,
             'interfaces' => $interfaces,
+            'pricing' => $page_data['pricing'] ?? [],
             'testimonials' => $testimonials,
             'recent_blogs' => $recent_blogs,
             'blogs' => $blogs,
             'plans' => $plans,
+            'contact' => $page_data['contact'] ?? [],
             'gateways' => $gateways,
             'general' => $general,
             'business_categories' => $business_categories,

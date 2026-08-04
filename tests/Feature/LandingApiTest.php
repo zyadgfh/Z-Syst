@@ -16,12 +16,15 @@ class LandingApiTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'page_data',
+                'sections',
                 'features',
                 'interfaces',
+                'pricing',
                 'testimonials',
                 'recent_blogs',
                 'blogs',
                 'plans',
+                'contact',
                 'gateways',
                 'general',
                 'business_categories',
@@ -33,12 +36,15 @@ class LandingApiTest extends TestCase
         $response = $this->getJson('/api/v1/landing');
 
         $response->assertStatus(200)
+            ->assertJsonPath('sections', [])
             ->assertJsonPath('features', [])
             ->assertJsonPath('interfaces', [])
+            ->assertJsonPath('pricing', [])
             ->assertJsonPath('testimonials', [])
             ->assertJsonPath('recent_blogs', [])
             ->assertJsonPath('blogs', [])
             ->assertJsonPath('plans', [])
+            ->assertJsonPath('contact', [])
             ->assertJsonPath('gateways', [])
             ->assertJsonPath('business_categories', []);
     }

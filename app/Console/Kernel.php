@@ -9,11 +9,19 @@ use App\Console\Commands\RotateSettingsKey;
 class Kernel extends ConsoleKernel
 {
     /**
+     * The Artisan commands provided by your application.
+     *
+     * @var array<int, class-string>
+     */
+    protected $commands = [
+        RotateSettingsKey::class,
+    ];
+
+    /**
      * Define the application's command schedule.
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('demo:restore-public-images')->everyThirtyMinutes();
         $schedule->command('expiry-alert:send')->dailyAt('08:00');
         $schedule->command('backup:database')->dailyAt('02:00');
     }
@@ -23,10 +31,6 @@ class Kernel extends ConsoleKernel
      */
     protected function commands(): void
     {
-        $this->commands([
-            RotateSettingsKey::class,
-        ]);
-
         $this->load(__DIR__.'/Commands');
 
         require base_path('routes/console.php');

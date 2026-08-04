@@ -83,9 +83,7 @@ abstract class RenderableException extends \Exception
 
     protected function sendAlert(array $logData): void
     {
-        // TODO: Integrate with Slack/Discord/Telegram for alerts
-        // Notification::route('slack', config('logging.slack_webhook'))
-        //     ->notify(new CriticalErrorNotification($logData));
+        // No external alert integration configured yet.
     }
 }
 

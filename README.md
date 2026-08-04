@@ -61,6 +61,28 @@ In order to ensure that the Laravel community is welcoming to all, please review
 
 If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
+## Z-Syst Pharmacy Project
+
+This repository contains the Z-Syst Pharmacy management application built on Laravel 10.
+
+### Local setup
+
+1. Copy `.env.example` to `.env` and configure database credentials.
+2. Run `composer install`.
+3. Run `php artisan key:generate`.
+4. Run `php artisan migrate --seed`.
+5. Optionally, run `php artisan storage:link`.
+
+### Test commands
+
+- `php -d memory_limit=1G artisan test`
+- `php -d memory_limit=1G vendor\bin\phpunit --configuration phpunit.xml`
+
+### Notes
+
+- `app/Console/Kernel.php` was fixed to register commands via `protected $commands` rather than recursively calling `commands()`.
+- `Modules/Landing/App/Http/Controllers/Api/LandingController.php` now returns the expected landing API response keys required by the tests.
+
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
