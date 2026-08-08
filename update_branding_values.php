@@ -1,4 +1,5 @@
 <?php
+
 $path = 'Modules/Landing/Database/Seeders/OptionTableSeeder.php';
 $content = file_get_contents($path);
 $replacements = [

@@ -27,7 +27,8 @@ class SaleReturnDetails extends Model
         return $this->belongsTo(SaleReturn::class, 'sale_return_id');
     }
 
-    public function saleDetail(){
-        return $this->belongsTo(SaleDetails::class , 'sale_detail_id');
+    public function saleDetail()
+    {
+        return $this->belongsTo(SaleDetails::class, 'sale_detail_id');
     }
 }

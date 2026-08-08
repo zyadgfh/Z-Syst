@@ -21,4 +21,3 @@ class ExternalServiceException extends RenderableException
         );
     }
 }
-

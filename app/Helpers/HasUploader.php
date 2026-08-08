@@ -16,14 +16,14 @@ trait HasUploader
     private function upload(Request $request, $input, $oldFile = null, $disk = null)
     {
         // Check if file exists in request
-        if (!$request->hasFile($input)) {
+        if (! $request->hasFile($input)) {
             throw new UploadException('No file uploaded', ['input' => $input]);
         }
 
         $file = $request->file($input);
 
         // Validate the file
-        if (!$file->isValid()) {
+        if (! $file->isValid()) {
             throw new UploadException(
                 $file->getErrorMessage(),
                 ['input' => $input, 'original_name' => $file->getClientOriginalName()]
@@ -32,10 +32,10 @@ trait HasUploader
 
         try {
             $ext = $file->getClientOriginalExtension();
-            $filename = now()->timestamp . '-' . rand(1, 1000) . '.' . $ext;
+            $filename = now()->timestamp.'-'.rand(1, 1000).'.'.$ext;
 
-            $path = 'uploads/' . date('y') . '/' . date('m') . '/';
-            $filePath = $path . $filename;
+            $path = 'uploads/'.date('y').'/'.date('m').'/';
+            $filePath = $path.$filename;
 
             // Delete old file if exists
             if ($oldFile) {
@@ -70,13 +70,13 @@ trait HasUploader
      */
     private function uploadWithFileName(Request $request, $input, $oldFile = null, $disk = null)
     {
-        if (!$request->hasFile($input)) {
+        if (! $request->hasFile($input)) {
             throw new UploadException('No file uploaded', ['input' => $input]);
         }
 
         $file = $request->file($input);
 
-        if (!$file->isValid()) {
+        if (! $file->isValid()) {
             throw new UploadException(
                 $file->getErrorMessage(),
                 ['input' => $input, 'original_name' => $file->getClientOriginalName()]
@@ -86,7 +86,7 @@ trait HasUploader
         try {
             $filename = $file->getClientOriginalName();
             $path = 'files/';
-            $filePath = $path . $filename;
+            $filePath = $path.$filename;
 
             if ($oldFile) {
                 if (Storage::exists($oldFile)) {
@@ -119,7 +119,7 @@ trait HasUploader
      */
     private function multipleUpload(Request $request, $input, $oldFiles = [], $disk = null)
     {
-        if (!$request->hasFile($input)) {
+        if (! $request->hasFile($input)) {
             throw new UploadException('No files uploaded', ['input' => $input]);
         }
 
@@ -127,7 +127,7 @@ trait HasUploader
 
         try {
             foreach ($request->file($input) as $file) {
-                if (!$file->isValid()) {
+                if (! $file->isValid()) {
                     throw new UploadException(
                         $file->getErrorMessage(),
                         ['input' => $input, 'original_name' => $file->getClientOriginalName()]
@@ -135,10 +135,10 @@ trait HasUploader
                 }
 
                 $ext = $file->getClientOriginalExtension();
-                $filename = now()->timestamp . '_' . uniqid() . '.' . $ext;
+                $filename = now()->timestamp.'_'.uniqid().'.'.$ext;
 
-                $path = 'uploads/' . date('y') . '/' . date('m') . '/';
-                $filePath = $path . $filename;
+                $path = 'uploads/'.date('y').'/'.date('m').'/';
+                $filePath = $path.$filename;
 
                 // Delete old files
                 foreach ($oldFiles as $oldFile) {
@@ -175,4 +175,3 @@ trait HasUploader
         }
     }
 }
-

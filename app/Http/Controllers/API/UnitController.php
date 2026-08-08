@@ -27,12 +27,12 @@ class UnitController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'unitName' => 'required|unique:units,unitName,NULL,id,business_id,' . auth()->user()->business_id,
+            'unitName' => 'required|unique:units,unitName,NULL,id,business_id,'.auth()->user()->business_id,
         ]);
 
         $data = Unit::create($request->all() + [
-                    'business_id' => auth()->user()->business_id
-                ]);
+            'business_id' => auth()->user()->business_id,
+        ]);
 
         return response()->json([
             'message' => __('Data saved successfully.'),
@@ -48,7 +48,7 @@ class UnitController extends Controller
         $request->validate([
             'unitName' => [
                 'required',
-                'unique:units,unitName,' . $unit->id . ',id,business_id,' . auth()->user()->business_id,
+                'unique:units,unitName,'.$unit->id.',id,business_id,'.auth()->user()->business_id,
             ],
         ]);
 
@@ -66,6 +66,7 @@ class UnitController extends Controller
     public function destroy(Unit $unit)
     {
         $unit->delete();
+
         return response()->json([
             'message' => __('Data deleted successfully.'),
         ]);

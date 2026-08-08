@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Models\Plan;
-use App\Models\User;
-use App\Models\Business;
-use App\Mail\WelcomeMail;
-use Illuminate\Http\Request;
-use App\Models\PlanSubscribe;
-use App\Mail\RegistrationMail;
-use Illuminate\Support\Facades\DB;
-use Laravel\Sanctum\NewAccessToken;
 use App\Http\Controllers\Controller;
+use App\Mail\RegistrationMail;
+use App\Mail\WelcomeMail;
+use App\Models\Business;
+use App\Models\Plan;
+use App\Models\PlanSubscribe;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Config;
+use Laravel\Sanctum\NewAccessToken;
 
 class RegisteredUserController extends Controller
 {
@@ -93,17 +93,17 @@ class RegisteredUserController extends Controller
                 'email_verified_at' => $expire,
             ]);
 
-             if (env('MAIL_USERNAME')) {
-                 if (env('QUEUE_MAIL')) {
-                     Mail::to($request->email)->queue(new RegistrationMail($data));
-                 } else {
-                     Mail::to($request->email)->send(new RegistrationMail($data));
-                 }
-             } else {
-                 return response()->json([
-                     'message' => 'Mail service is not configured. Please contact your administrator.',
-                 ], 406);
-             }
+            if (env('MAIL_USERNAME')) {
+                if (env('QUEUE_MAIL')) {
+                    Mail::to($request->email)->queue(new RegistrationMail($data));
+                } else {
+                    Mail::to($request->email)->send(new RegistrationMail($data));
+                }
+            } else {
+                return response()->json([
+                    'message' => 'Mail service is not configured. Please contact your administrator.',
+                ], 406);
+            }
 
             DB::commit();
 
@@ -116,6 +116,7 @@ class RegisteredUserController extends Controller
 
         } catch (\Throwable $th) {
             DB::rollBack();
+
             return response()->json([
                 'message' => 'Something went wrong. Please contact the admin.',
             ], 403);
@@ -166,21 +167,22 @@ class RegisteredUserController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => __('User not found.')], 400);
         }
 
         if ($user->remember_token == $request->otp) {
             if ($user->email_verified_at > now()) {
-                    $user->update([
-                        'remember_token' => NULL,
-                        'email_verified_at' => now(),
-                    ]);
-                    return response()->json([
-                        'message' => 'OTP verified successfully. Please confirm your action in the modal.',
-                        'openModal' => true,
-                        'email' => $request->email,
-                    ]);
+                $user->update([
+                    'remember_token' => null,
+                    'email_verified_at' => now(),
+                ]);
+
+                return response()->json([
+                    'message' => 'OTP verified successfully. Please confirm your action in the modal.',
+                    'openModal' => true,
+                    'email' => $request->email,
+                ]);
             } else {
                 return response()->json(['message' => __('The verification otp has been expired.')], 400);
             }
@@ -197,5 +199,4 @@ class RegisteredUserController extends Controller
             ->where('id', $accessToken->accessToken->id)
             ->update(['expires_at' => $expiration]);
     }
-
 }

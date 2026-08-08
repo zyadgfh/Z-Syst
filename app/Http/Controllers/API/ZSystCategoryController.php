@@ -28,15 +28,15 @@ class ZSystCategoryController extends Controller
     {
         $business_id = auth()->user()->business_id;
         $request->validate([
-            'categoryName' => 'required|unique:categories,categoryName,NULL,id,business_id,' . $business_id,
-            'description' => 'nullable|string'
+            'categoryName' => 'required|unique:categories,categoryName,NULL,id,business_id,'.$business_id,
+            'description' => 'nullable|string',
         ]);
 
         $data = Category::create([
-                    'categoryName' => $request->categoryName,
-                    'description' => $request->description,
-                    'business_id' => $business_id
-                ]);
+            'categoryName' => $request->categoryName,
+            'description' => $request->description,
+            'business_id' => $business_id,
+        ]);
 
         return response()->json([
             'message' => __('Data saved successfully.'),
@@ -52,16 +52,16 @@ class ZSystCategoryController extends Controller
         $request->validate([
             'categoryName' => [
                 'required',
-                'unique:categories,categoryName,' . $category->id . ',id,business_id,' . auth()->user()->business_id,
+                'unique:categories,categoryName,'.$category->id.',id,business_id,'.auth()->user()->business_id,
             ],
-            'description' => 'nullable|string'
+            'description' => 'nullable|string',
         ]);
 
         $category = $category->update([
-                    'categoryName' => $request->categoryName,
-                    'description' => $request->description,
-                    'business_id' => auth()->user()->business_id
-                    ]);
+            'categoryName' => $request->categoryName,
+            'description' => $request->description,
+            'business_id' => auth()->user()->business_id,
+        ]);
 
         return response()->json([
             'message' => __('Data saved successfully.'),
@@ -75,6 +75,7 @@ class ZSystCategoryController extends Controller
     public function destroy(Category $category)
     {
         $category->delete();
+
         return response()->json([
             'message' => __('Data deleted successfully.'),
         ]);

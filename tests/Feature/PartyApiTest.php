@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Business;
-use App\Models\User;
 use App\Models\Party;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,6 +13,7 @@ class PartyApiTest extends TestCase
     use RefreshDatabase;
 
     private $user;
+
     private $business;
 
     protected function setUp(): void

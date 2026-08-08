@@ -32,7 +32,7 @@ return new class extends Migration
             $table->boolean('is_posted')->default(false);
             $table->timestamp('posted_at')->nullable();
             $table->timestamps();
-            
+
             $table->index(['business_id', 'product_id']);
             $table->index(['business_id', 'is_posted']);
             $table->index(['reference_type', 'reference_id']);

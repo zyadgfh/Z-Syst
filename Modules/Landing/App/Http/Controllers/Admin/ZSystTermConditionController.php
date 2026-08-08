@@ -2,9 +2,9 @@
 
 namespace Modules\Landing\App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Option;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Cache;
 
 class ZSystTermConditionController extends Controller
@@ -18,6 +18,7 @@ class ZSystTermConditionController extends Controller
     public function index()
     {
         $term_condition = Option::where('key', 'term-condition')->first();
+
         return view('landing::admin.settings.term-condition.index', compact('term_condition'));
     }
 
@@ -33,6 +34,7 @@ class ZSystTermConditionController extends Controller
         );
 
         Cache::forget('term-condition');
+
         return response()->json(__('Term And Condition updated successfully.'));
     }
 }

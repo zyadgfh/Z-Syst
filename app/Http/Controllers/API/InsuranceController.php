@@ -16,11 +16,11 @@ use App\Models\InsuranceCompany;
 use App\Models\InsuranceCoverage;
 use App\Models\InsurancePolicy;
 use App\Services\InsuranceService;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class InsuranceController extends Controller
 {
@@ -56,7 +56,7 @@ class InsuranceController extends Controller
             }))
             ->withCount(['policies', 'claims'])
             ->latest()
-            ->paginate(15);
+            ->paginate($request->input('per_page', 15));
 
         $companyData = $companies->getCollection()
             ->map(fn ($company) => (new InsuranceCompanyResource($company))->resolve())
@@ -143,7 +143,7 @@ class InsuranceController extends Controller
                 $q->expiringSoon($days);
             })
             ->latest()
-            ->paginate(15);
+            ->paginate($request->input('per_page', 15));
 
         return response()->json([
             'message' => __('Insurance policies fetched successfully.'),
@@ -223,7 +223,7 @@ class InsuranceController extends Controller
                     ->orWhere('external_reference', 'like', "%{$s}%");
             }))
             ->latest('service_date')
-            ->paginate(15);
+            ->paginate($request->input('per_page', 15));
 
         return response()->json([
             'message' => __('Insurance claims fetched successfully.'),
@@ -335,7 +335,7 @@ class InsuranceController extends Controller
         $claim = $this->insurance->recordPayment(
             $claim,
             (float) $data['paid_amount'],
-            isset($data['settlement_date']) ? \Carbon\Carbon::parse($data['settlement_date']) : null
+            isset($data['settlement_date']) ? Carbon::parse($data['settlement_date']) : null
         );
 
         return response()->json([
@@ -356,7 +356,7 @@ class InsuranceController extends Controller
             ->when($request->is_active !== null, fn ($q) => $q->where('is_active', $request->boolean('is_active')))
             ->when($request->scope, fn ($q, $s) => $q->where('scope', $s))
             ->latest()
-            ->paginate(15);
+            ->paginate($request->input('per_page', 15));
 
         return response()->json([
             'message' => __('Coverage rules fetched successfully.'),

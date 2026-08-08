@@ -9,7 +9,7 @@ class FeatureStatusTest extends TestCase
 {
     public function test_feature_status_service_reports_completed_modules(): void
     {
-        $service = new FeatureStatusService();
+        $service = new FeatureStatusService;
         $features = $service->getFeatures();
 
         $this->assertIsArray($features);

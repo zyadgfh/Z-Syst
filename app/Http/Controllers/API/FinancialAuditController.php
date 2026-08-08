@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreFinancialAuditRequest;
-use App\Services\FinancialAuditService;
-use App\Models\FinancialAuditLog;
 use App\Http\Resources\FinancialAuditResource;
-use Illuminate\Support\Facades\Auth;
+use App\Models\FinancialAuditLog;
+use App\Services\FinancialAuditService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class FinancialAuditController extends Controller
 {
@@ -25,7 +25,7 @@ class FinancialAuditController extends Controller
     public function index(Request $request)
     {
         $businessId = Auth::user()->business_id;
-        
+
         $audits = FinancialAuditLog::byBusiness($businessId)
             ->with(['user:id,name'])
             ->when($request->status, function ($query) use ($request) {
@@ -35,7 +35,7 @@ class FinancialAuditController extends Controller
                 return $query->byType($request->audit_type);
             })
             ->latest()
-            ->paginate(10);
+            ->paginate($request->input('per_page', 10));
 
         return response()->json([
             'message' => __('Financial audits fetched successfully.'),
@@ -50,7 +50,7 @@ class FinancialAuditController extends Controller
     {
         $data = $request->validated();
         $data['business_id'] = Auth::user()->business_id;
-        
+
         $audit = $this->auditService->createAudit($data);
 
         return response()->json([
@@ -65,7 +65,7 @@ class FinancialAuditController extends Controller
     public function show(FinancialAuditLog $audit)
     {
         $this->authorizeAuditAccess($audit);
-        
+
         $audit->load(['user:id,name']);
 
         return response()->json([
@@ -80,7 +80,7 @@ class FinancialAuditController extends Controller
     public function start(FinancialAuditLog $audit)
     {
         $this->authorizeAuditAccess($audit);
-        
+
         $audit = $this->auditService->startAudit($audit, Auth::id());
 
         return response()->json([
@@ -95,7 +95,7 @@ class FinancialAuditController extends Controller
     public function execute(Request $request, FinancialAuditLog $audit)
     {
         $this->authorizeAuditAccess($audit);
-        
+
         $request->validate([
             'opening_balance' => 'required|numeric|min:0',
             'closing_balance' => 'required|numeric|min:0',
@@ -119,7 +119,7 @@ class FinancialAuditController extends Controller
     public function complete(FinancialAuditLog $audit)
     {
         $this->authorizeAuditAccess($audit);
-        
+
         $audit = $this->auditService->completeAudit($audit);
 
         return response()->json([
@@ -134,7 +134,7 @@ class FinancialAuditController extends Controller
     public function cancel(Request $request, FinancialAuditLog $audit)
     {
         $this->authorizeAuditAccess($audit);
-        
+
         $reason = $request->input('reason');
         $audit = $this->auditService->cancelAudit($audit, $reason);
 
@@ -150,7 +150,7 @@ class FinancialAuditController extends Controller
     public function report(FinancialAuditLog $audit)
     {
         $this->authorizeAuditAccess($audit);
-        
+
         $report = $this->auditService->getAuditReport($audit);
 
         return response()->json([
@@ -165,7 +165,7 @@ class FinancialAuditController extends Controller
     public function transactionDetails(Request $request, FinancialAuditLog $audit)
     {
         $this->authorizeAuditAccess($audit);
-        
+
         $request->validate([
             'type' => 'required|in:sales,purchases,income,expenses',
         ]);
@@ -185,7 +185,7 @@ class FinancialAuditController extends Controller
     public function comparativeReport(Request $request)
     {
         $businessId = Auth::user()->business_id;
-        
+
         $request->validate([
             'periods' => 'required|array|min:1',
             'periods.*.start_date' => 'required|date',
@@ -206,7 +206,7 @@ class FinancialAuditController extends Controller
     public function statistics(Request $request)
     {
         $businessId = Auth::user()->business_id;
-        
+
         $startDate = $request->input('start_date', now()->startOfMonth()->toDateString());
         $endDate = $request->input('end_date', now()->endOfMonth()->toDateString());
 

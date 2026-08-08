@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use App\Models\StockAudit;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class StockAuditPolicy
@@ -39,7 +39,7 @@ class StockAuditPolicy
      */
     public function update(User $user, StockAudit $audit): bool
     {
-        return $user->business_id === $audit->business_id && 
+        return $user->business_id === $audit->business_id &&
                $audit->status !== 'completed';
     }
 
@@ -48,7 +48,7 @@ class StockAuditPolicy
      */
     public function delete(User $user, StockAudit $audit): bool
     {
-        return $user->business_id === $audit->business_id && 
+        return $user->business_id === $audit->business_id &&
                $audit->status === 'pending';
     }
 
@@ -57,7 +57,7 @@ class StockAuditPolicy
      */
     public function start(User $user, StockAudit $audit): bool
     {
-        return $user->business_id === $audit->business_id && 
+        return $user->business_id === $audit->business_id &&
                $audit->status === 'pending';
     }
 
@@ -66,7 +66,7 @@ class StockAuditPolicy
      */
     public function complete(User $user, StockAudit $audit): bool
     {
-        return $user->business_id === $audit->business_id && 
+        return $user->business_id === $audit->business_id &&
                $audit->status === 'in_progress';
     }
 
@@ -75,7 +75,7 @@ class StockAuditPolicy
      */
     public function cancel(User $user, StockAudit $audit): bool
     {
-        return $user->business_id === $audit->business_id && 
+        return $user->business_id === $audit->business_id &&
                in_array($audit->status, ['pending', 'in_progress']);
     }
 
@@ -84,7 +84,7 @@ class StockAuditPolicy
      */
     public function addDetails(User $user, StockAudit $audit): bool
     {
-        return $user->business_id === $audit->business_id && 
+        return $user->business_id === $audit->business_id &&
                in_array($audit->status, ['pending', 'in_progress']);
     }
 
@@ -93,7 +93,7 @@ class StockAuditPolicy
      */
     public function postReconciliations(User $user, StockAudit $audit): bool
     {
-        return $user->business_id === $audit->business_id && 
+        return $user->business_id === $audit->business_id &&
                $audit->status === 'completed';
     }
 }

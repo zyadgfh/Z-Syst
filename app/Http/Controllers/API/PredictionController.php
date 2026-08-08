@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Product;
+use App\Http\Controllers\Controller;
 use App\Models\PredictionSetting;
+use App\Models\Product;
 use App\Models\SalesForecast;
 use App\Services\PredictionService;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 
 class PredictionController extends Controller
 {
@@ -205,4 +205,3 @@ class PredictionController extends Controller
         ]);
     }
 }
-

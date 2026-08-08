@@ -2,23 +2,63 @@
 
 namespace Database\Seeders;
 
-use App\Models\Plan;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class PlanSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $plans = array(
-            array('subscriptionName' => 'Free','duration' => '7','offerPrice' => NULL,'subscriptionPrice' => '0','status' => '1','features' => '{"features_features_features_features_0":["Lifetime Free  Update","1"],"features_features_features_features_1":["Permitted for 1 domain","1"],"features_features_features_features_2":["6 months technical support","1"],"features_features_features_features_3":["WhatsApp & Skype support","1"],"features_features_features_features_4":["Live support","1"],"features_features_features_features_5":["Free installation"],"features_features_features_features_6":["Free installation Cpanel"],"features_features_features_features_7":["Advance Remote Support"]}','created_at' => '2024-06-04 18:08:12','updated_at' => '2024-06-05 09:58:15'),
-            array('subscriptionName' => 'Standard','duration' => '30','offerPrice' => NULL,'subscriptionPrice' => '10','status' => '1','features' => '{"features_features_features_0":["Lifetime Free  Update","1"],"features_features_features_1":["Permitted for 1 domain","1"],"features_features_features_2":["6 months technical support","1"],"features_features_features_3":["WhatsApp & Skype support","1"],"features_features_features_4":["Live support","1"],"features_features_features_5":["Free installation","1"],"features_features_features_6":["Free installation Cpanel"],"features_features_features_7":["Advance Remote Support"]}','created_at' => '2024-06-04 18:08:12','updated_at' => '2024-06-05 09:58:24'),
-            array('subscriptionName' => 'Premium','duration' => '180','offerPrice' => '50','subscriptionPrice' => '60','status' => '1','features' => '{"features_features_0":["Lifetime Free  Update","1"],"features_features_1":["Permitted for 1 domain","1"],"features_features_2":["6 months technical support","1"],"features_features_3":["WhatsApp & Skype support","1"],"features_features_4":["Live support","1"],"features_features_5":["Free installation","1"],"features_features_6":["Free installation Cpanel","1"],"features_features_7":["Advance Remote Support","1"]}','created_at' => '2024-06-04 18:08:12','updated_at' => '2024-06-05 09:58:32')
-          );
+        $plans = [
+            [
+                'subscriptionName' => 'Starter',
+                'subscriptionPrice' => 29.99,
+                'duration' => 30,
+                'features' => json_encode([
+                    'up to 50 products',
+                    'up to 2 users',
+                    'basic reporting',
+                    'email support',
+                ]),
+                'isActive' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'subscriptionName' => 'Professional',
+                'subscriptionPrice' => 79.99,
+                'duration' => 30,
+                'features' => json_encode([
+                    'unlimited products',
+                    'up to 10 users',
+                    'advanced reporting',
+                    'priority support',
+                    'multi-warehouse',
+                ]),
+                'isActive' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'subscriptionName' => 'Enterprise',
+                'subscriptionPrice' => 199.99,
+                'duration' => 30,
+                'features' => json_encode([
+                    'unlimited products',
+                    'unlimited users',
+                    'custom reporting',
+                    '24/7 phone support',
+                    'multi-warehouse',
+                    'API access',
+                    'custom integrations',
+                ]),
+                'isActive' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ];
 
-        Plan::insert($plans);
+        DB::table('plans')->insert($plans);
     }
 }

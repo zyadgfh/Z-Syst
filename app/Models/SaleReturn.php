@@ -27,7 +27,7 @@ class SaleReturn extends Model
 
         static::creating(function ($model) {
             $id = SaleReturn::where('business_id', auth()->user()->business_id)->count() + 1;
-            $model->invoice_no = "SR-" . str_pad($id, 5, '0', STR_PAD_LEFT);
+            $model->invoice_no = 'SR-'.str_pad($id, 5, '0', STR_PAD_LEFT);
         });
     }
 

@@ -9,9 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class TenantContextMiddleware
 {
-    public function __construct(protected TenantResolver $resolver)
-    {
-    }
+    public function __construct(protected TenantResolver $resolver) {}
 
     public function handle(Request $request, Closure $next): Response
     {

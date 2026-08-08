@@ -1,6 +1,7 @@
 <?php
+
 $pdo = new PDO('sqlite:D:/Zyad/laragon/www/database/database.sqlite');
-$keys = ['general','manage-pages','term-condition','privacy-policy'];
+$keys = ['general', 'manage-pages', 'term-condition', 'privacy-policy'];
 $placeholders = implode(',', array_fill(0, count($keys), '?'));
 $stmt = $pdo->prepare("SELECT id, key, value FROM options WHERE key IN ($placeholders)");
 $stmt->execute($keys);

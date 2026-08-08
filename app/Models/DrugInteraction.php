@@ -71,7 +71,7 @@ class DrugInteraction extends Model
     public function scopeForBusiness($query, $businessId)
     {
         return $query->where('business_id', $businessId)
-                    ->orWhereNull('business_id'); // Include global interactions
+            ->orWhereNull('business_id'); // Include global interactions
     }
 
     /**
@@ -80,9 +80,9 @@ class DrugInteraction extends Model
     public function scopeSearch($query, $search)
     {
         return $query->where(function ($q) use ($search) {
-            $q->where('drug_a_name', 'like', '%' . $search . '%')
-              ->orWhere('drug_b_name', 'like', '%' . $search . '%')
-              ->orWhere('description', 'like', '%' . $search . '%');
+            $q->where('drug_a_name', 'like', '%'.$search.'%')
+                ->orWhere('drug_b_name', 'like', '%'.$search.'%')
+                ->orWhere('description', 'like', '%'.$search.'%');
         });
     }
 
@@ -108,4 +108,3 @@ class DrugInteraction extends Model
         ];
     }
 }
-

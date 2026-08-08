@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use App\Exceptions\RenderableException;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 
 class Logger
@@ -36,11 +38,11 @@ class Logger
 
         $level = 'error';
 
-        if ($e instanceof \App\Exceptions\RenderableException) {
+        if ($e instanceof RenderableException) {
             $level = $e->errorCode->logLevel();
         }
 
-        if ($e instanceof \Illuminate\Database\QueryException) {
+        if ($e instanceof QueryException) {
             $logData['sql'] = $e->getSql();
             $logData['bindings'] = $e->getBindings();
             $level = 'critical';
@@ -53,4 +55,3 @@ class Logger
         }
     }
 }
-

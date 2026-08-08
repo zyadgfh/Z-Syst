@@ -2,17 +2,14 @@
 
 namespace App\Services;
 
-use App\Models\Sale;
-use App\Models\Stock;
+use App\Models\AutoOrderRule;
+use App\Models\PredictionSetting;
 use App\Models\Product;
 use App\Models\SaleDetails;
 use App\Models\SalesForecast;
-use App\Models\PredictionSetting;
-use App\Models\AutoOrderRule;
-use App\Models\Party;
+use App\Models\Stock;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PredictionService
@@ -20,10 +17,7 @@ class PredictionService
     /**
      * Generate sales forecast for a specific product.
      *
-     * @param int $productId
-     * @param int $businessId
-     * @param int|null $forecastDays Override default forecast days
-     * @return array
+     * @param  int|null  $forecastDays  Override default forecast days
      */
     public function forecastProduct(int $productId, int $businessId, ?int $forecastDays = null): array
     {
@@ -144,10 +138,6 @@ class PredictionService
 
     /**
      * Generate forecasts for multiple products (batch).
-     *
-     * @param array $productIds
-     * @param int $businessId
-     * @return array
      */
     public function batchForecast(array $productIds, int $businessId): array
     {
@@ -171,9 +161,6 @@ class PredictionService
 
     /**
      * Forecast all active products for a business.
-     *
-     * @param int $businessId
-     * @return array
      */
     public function forecastAllProducts(int $businessId): array
     {
@@ -186,10 +173,6 @@ class PredictionService
 
     /**
      * Calculate reorder point for a product.
-     *
-     * @param int $productId
-     * @param int $businessId
-     * @return array
      */
     public function calculateReorderPoint(int $productId, int $businessId): array
     {
@@ -241,9 +224,7 @@ class PredictionService
     /**
      * Get demand forecast report for a business.
      *
-     * @param int $businessId
-     * @param string $period (daily, weekly, monthly)
-     * @return array
+     * @param  string  $period  (daily, weekly, monthly)
      */
     public function getDemandReport(int $businessId, string $period = 'daily'): array
     {
@@ -272,9 +253,9 @@ class PredictionService
 
             // Aggregate by period
             $periodData = match ($period) {
-                'weekly' => $productForecasts->groupBy(fn($f) => $f->forecast_date->weekOfYear),
-                'monthly' => $productForecasts->groupBy(fn($f) => $f->forecast_date->month),
-                default => $productForecasts->keyBy(fn($f) => $f->forecast_date->format('Y-m-d')),
+                'weekly' => $productForecasts->groupBy(fn ($f) => $f->forecast_date->weekOfYear),
+                'monthly' => $productForecasts->groupBy(fn ($f) => $f->forecast_date->month),
+                default => $productForecasts->keyBy(fn ($f) => $f->forecast_date->format('Y-m-d')),
             };
 
             // Calculate stock coverage
@@ -291,6 +272,7 @@ class PredictionService
                 'needs_reorder' => $currentStock <= ($totalPredicted * 0.3), // less than 30% of forecast
                 'period_data' => $periodData->map(function ($group, $key) {
                     $total = collect($group)->sum('predicted_quantity');
+
                     return [
                         'period' => $key,
                         'predicted_qty' => round($total, 2),
@@ -301,7 +283,7 @@ class PredictionService
         }
 
         // Sort by need (lowest stock coverage first)
-        usort($report, fn($a, $b) => $a['stock_coverage_days'] <=> $b['stock_coverage_days']);
+        usort($report, fn ($a, $b) => $a['stock_coverage_days'] <=> $b['stock_coverage_days']);
 
         return [
             'business_id' => $businessId,
@@ -321,12 +303,12 @@ class PredictionService
         $startDate = now()->subMonths($months)->startOfDay();
 
         return SaleDetails::select(
-                'sale_details.product_id',
-                'sale_details.price',
-                'sale_details.quantities',
-                'sale_details.purchase_price',
-                'sales.saleDate'
-            )
+            'sale_details.product_id',
+            'sale_details.price',
+            'sale_details.quantities',
+            'sale_details.purchase_price',
+            'sales.saleDate'
+        )
             ->join('sales', 'sales.id', '=', 'sale_details.sale_id')
             ->where('sale_details.product_id', $productId)
             ->where('sales.business_id', $businessId)
@@ -335,6 +317,7 @@ class PredictionService
             ->get()
             ->map(function ($item) {
                 $item->sale_date = Carbon::parse($item->saleDate);
+
                 return $item;
             });
     }
@@ -364,8 +347,8 @@ class PredictionService
         }
 
         // Group by month
-        $monthlySales = $sales->groupBy(fn($item) => $item->sale_date->format('Y-m'))
-            ->map(fn($group) => $group->sum('quantities'));
+        $monthlySales = $sales->groupBy(fn ($item) => $item->sale_date->format('Y-m'))
+            ->map(fn ($group) => $group->sum('quantities'));
 
         if ($monthlySales->count() < 2) {
             return 0;
@@ -416,7 +399,7 @@ class PredictionService
         }
 
         // Group by day of week
-        $daySales = $sales->groupBy(fn($item) => $item->sale_date->dayOfWeek);
+        $daySales = $sales->groupBy(fn ($item) => $item->sale_date->dayOfWeek);
 
         $overallAvg = $sales->sum('quantities') / max(1, $sales->count());
 
@@ -444,8 +427,7 @@ class PredictionService
         }
 
         // Get last N days
-        $recentSales = $sales->filter(fn($item) => 
-            $item->sale_date >= now()->subDays($windowDays)
+        $recentSales = $sales->filter(fn ($item) => $item->sale_date >= now()->subDays($windowDays)
         );
 
         if ($recentSales->isEmpty()) {
@@ -453,8 +435,8 @@ class PredictionService
         }
 
         // Group by date and sum quantities
-        $dailySales = $recentSales->groupBy(fn($item) => $item->sale_date->format('Y-m-d'))
-            ->map(fn($group) => $group->sum('quantities'));
+        $dailySales = $recentSales->groupBy(fn ($item) => $item->sale_date->format('Y-m-d'))
+            ->map(fn ($group) => $group->sum('quantities'));
 
         if ($dailySales->isEmpty()) {
             return 0;
@@ -484,7 +466,7 @@ class PredictionService
         }
 
         // Sort by date
-        $sorted = $sales->sortBy(fn($item) => $item->sale_date);
+        $sorted = $sales->sortBy(fn ($item) => $item->sale_date);
         $values = $sorted->pluck('quantities')->toArray();
 
         if (empty($values)) {
@@ -524,8 +506,8 @@ class PredictionService
         }
 
         // Group by date
-        $dailySales = $sales->groupBy(fn($item) => $item->sale_date->format('Y-m-d'))
-            ->map(fn($group) => $group->sum('quantities'));
+        $dailySales = $sales->groupBy(fn ($item) => $item->sale_date->format('Y-m-d'))
+            ->map(fn ($group) => $group->sum('quantities'));
 
         if ($dailySales->count() < 2) {
             return 0;
@@ -542,4 +524,3 @@ class PredictionService
         return sqrt($sumSquaredDiff / (count($values) - 1));
     }
 }
-

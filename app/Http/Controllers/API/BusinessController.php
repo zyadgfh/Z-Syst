@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Plan;
-use App\Models\User;
-use App\Models\Business;
 use App\Helpers\HasUploader;
-use Illuminate\Http\Request;
-use App\Models\PlanSubscribe;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\Business;
+use App\Models\Plan;
+use App\Models\PlanSubscribe;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BusinessController extends Controller
 {
@@ -24,7 +24,7 @@ class BusinessController extends Controller
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
-            'data' => $data
+            'data' => $data,
         ]);
     }
 
@@ -45,11 +45,11 @@ class BusinessController extends Controller
             $free_plan = Plan::where('subscriptionPrice', '<=', 0)->orWhere('offerPrice', '<=', 0)->first();
 
             $business = Business::create($request->except('pictureUrl') + [
-                            'phoneNumber' => $request->phoneNumber,
-                            'subscriptionDate' => $free_plan ? now() : NULL,
-                            'will_expire' => now()->addDays($free_plan->duration),
-                            'pictureUrl' => $request->pictureUrl ? $this->upload($request, 'pictureUrl') : NULL
-                        ]);
+                'phoneNumber' => $request->phoneNumber,
+                'subscriptionDate' => $free_plan ? now() : null,
+                'will_expire' => now()->addDays($free_plan->duration),
+                'pictureUrl' => $request->pictureUrl ? $this->upload($request, 'pictureUrl') : null,
+            ]);
 
             $user->update([
                 'business_id' => $business->id,
@@ -59,10 +59,10 @@ class BusinessController extends Controller
 
             if ($free_plan) {
                 $subscribe = PlanSubscribe::create([
-                                'plan_id' => $free_plan->id,
-                                'business_id' => $business->id,
-                                'duration' => $free_plan->duration,
-                            ]);
+                    'plan_id' => $free_plan->id,
+                    'business_id' => $business->id,
+                    'duration' => $free_plan->duration,
+                ]);
 
                 $business->update([
                     'plan_subscribe_id' => $subscribe->id,
@@ -70,12 +70,14 @@ class BusinessController extends Controller
             }
 
             DB::commit();
+
             return response()->json([
                 'message' => __('Business setup completed.'),
             ]);
 
         } catch (\Throwable $th) {
             DB::rollback();
+
             return response()->json(__('Something was wrong, Please contact with admin.'), 403);
         }
     }
@@ -87,7 +89,7 @@ class BusinessController extends Controller
             'companyName' => 'required|max:250',
             'pictureUrl' => 'nullable|image|max:5120',
             'business_category_id' => 'required|exists:business_categories,id',
-            'phoneNumber'  => ['nullable', 'min:5', 'max:15'],
+            'phoneNumber' => ['nullable', 'min:5', 'max:15'],
         ]);
 
         auth()->user()->update([

@@ -8,9 +8,7 @@ use Illuminate\Http\JsonResponse;
 
 class FeatureStatusController extends Controller
 {
-    public function __construct(protected FeatureStatusService $service)
-    {
-    }
+    public function __construct(protected FeatureStatusService $service) {}
 
     public function index(): JsonResponse
     {

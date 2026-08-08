@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\PredictionSetting;
 use App\Models\Business;
+use App\Models\PredictionSetting;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class PredictionSettingFactory extends Factory

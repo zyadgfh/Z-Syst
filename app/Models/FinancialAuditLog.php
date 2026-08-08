@@ -64,6 +64,7 @@ class FinancialAuditLog extends Model
     {
         $expectedClosingBalance = $this->opening_balance + $this->total_revenue - $this->total_expenses;
         $this->variance = $this->closing_balance - $expectedClosingBalance;
+
         return $this;
     }
 }

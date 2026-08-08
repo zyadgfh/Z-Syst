@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Setting;
+use Illuminate\Console\Command;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
@@ -30,6 +30,7 @@ class RotateSettingsKey extends Command
 
         if (empty($oldKey)) {
             $this->error('oldKey argument is required');
+
             return 1;
         }
 
@@ -44,7 +45,8 @@ class RotateSettingsKey extends Command
             $cipher = config('app.cipher', 'AES-256-CBC');
             $oldEncrypter = new Encrypter($decoded, $cipher);
         } catch (\Throwable $e) {
-            $this->error('Failed to create encrypter with provided old key: ' . $e->getMessage());
+            $this->error('Failed to create encrypter with provided old key: '.$e->getMessage());
+
             return 1;
         }
 
@@ -59,6 +61,7 @@ class RotateSettingsKey extends Command
                 if ($this->option('dry-run')) {
                     $this->line("[dry-run] {$s->key}");
                     $count++;
+
                     continue;
                 }
 
@@ -66,13 +69,14 @@ class RotateSettingsKey extends Command
                 $s->save();
                 $count++;
             } catch (\Throwable $e) {
-                $this->error("Failed to rotate setting {$s->key}: " . $e->getMessage());
+                $this->error("Failed to rotate setting {$s->key}: ".$e->getMessage());
                 $failed++;
             }
         }
 
         $this->info($this->option('dry-run') ? 'Dry run completed.' : 'Completed.');
         $this->info("Rotated: {$count}, Failed: {$failed}");
+
         return 0;
     }
 }

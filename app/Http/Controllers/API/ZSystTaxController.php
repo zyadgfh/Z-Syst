@@ -8,20 +8,20 @@ use Illuminate\Http\Request;
 
 class ZSystTaxController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $taxes = Tax::where('business_id', auth()->user()->business_id)
-                    ->when(request('type') == 'single', function ($query) {
-                        $query->whereNull('sub_tax');
-                    })
-                    ->when(request('type') == 'group', function ($query) {
-                        $query->whereNotNull('sub_tax');
-                    })
-                    ->when(request('status'), function ($query) {
-                        $query->where('status', request('status') == 'active' ? 1 : 0);
-                    })
-                    ->latest()
-                    ->get();
+            ->when($request->input('type') == 'single', function ($query) {
+                $query->whereNull('sub_tax');
+            })
+            ->when($request->input('type') == 'group', function ($query) {
+                $query->whereNotNull('sub_tax');
+            })
+            ->when($request->input('status'), function ($query) use ($request) {
+                $query->where('status', $request->input('status') == 'active' ? 1 : 0);
+            })
+            ->latest()
+            ->get();
 
         return response()->json([
             'message' => 'Data fetched successfully.',
@@ -37,13 +37,13 @@ class ZSystTaxController extends Controller
             'rate' => 'required_if:rate,null|numeric',
         ]);
 
-        if ($request->rate && !$request->tax_ids) {
+        if ($request->rate && ! $request->tax_ids) {
 
             $tax = Tax::create($request->all() + [
                 'business_id' => auth()->user()->business_id,
             ]);
 
-        } elseif (!$request->rate && $request->tax_ids) {
+        } elseif (! $request->rate && $request->tax_ids) {
 
             $taxs = Tax::whereIn('id', $request->tax_ids)->select('id', 'name', 'rate')->get();
 
@@ -86,11 +86,11 @@ class ZSystTaxController extends Controller
             'rate' => 'required_if:rate,null|numeric',
         ]);
 
-        if ($request->rate && !$request->tax_ids) {
+        if ($request->rate && ! $request->tax_ids) {
 
             $tax = $tax->update($request->all());
 
-        } elseif (!$request->rate && $request->tax_ids) {
+        } elseif (! $request->rate && $request->tax_ids) {
 
             $taxes = Tax::whereIn('id', $request->tax_ids)->select('id', 'name', 'rate')->get();
 
@@ -128,6 +128,7 @@ class ZSystTaxController extends Controller
     public function destroy(Tax $tax)
     {
         $tax->delete();
+
         return response()->json([
             'message' => 'Data deleted successfully',
         ]);

@@ -2,55 +2,43 @@
 
 namespace App\Services;
 
+use App\Models\Expense;
 use App\Models\FinancialAuditLog;
 use App\Models\Income;
-use App\Models\Expense;
-use App\Models\Sale;
 use App\Models\Purchase;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use App\Models\Sale;
 
 class FinancialAuditService
 {
     /**
      * Create a new financial audit.
-     *
-     * @param array $data
-     * @return FinancialAuditLog
      */
     public function createAudit(array $data): FinancialAuditLog
     {
         $data['audit_number'] = $this->generateAuditNumber($data['business_id']);
         $data['status'] = 'pending';
-        
+
         return FinancialAuditLog::create($data);
     }
 
     /**
      * Generate a unique financial audit number.
-     *
-     * @param int $businessId
-     * @return string
      */
     private function generateAuditNumber(int $businessId): string
     {
-        $prefix = 'FIN-AUD-' . date('Ymd') . '-';
+        $prefix = 'FIN-AUD-'.date('Ymd').'-';
         $lastAudit = FinancialAuditLog::where('business_id', $businessId)
-            ->where('audit_number', 'like', $prefix . '%')
+            ->where('audit_number', 'like', $prefix.'%')
             ->orderBy('id', 'desc')
             ->first();
-        
-        $sequence = $lastAudit ? (int)substr($lastAudit->audit_number, -4) + 1 : 1;
-        
-        return $prefix . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+
+        $sequence = $lastAudit ? (int) substr($lastAudit->audit_number, -4) + 1 : 1;
+
+        return $prefix.str_pad($sequence, 4, '0', STR_PAD_LEFT);
     }
 
     /**
      * Start a financial audit.
-     *
-     * @param FinancialAuditLog $audit
-     * @param int $userId
-     * @return FinancialAuditLog
      */
     public function startAudit(FinancialAuditLog $audit, int $userId): FinancialAuditLog
     {
@@ -64,9 +52,6 @@ class FinancialAuditService
 
     /**
      * Calculate financial data for the audit period.
-     *
-     * @param FinancialAuditLog $audit
-     * @return array
      */
     public function calculateFinancialData(FinancialAuditLog $audit): array
     {
@@ -107,11 +92,6 @@ class FinancialAuditService
 
     /**
      * Execute a financial audit with calculated data.
-     *
-     * @param FinancialAuditLog $audit
-     * @param float $openingBalance
-     * @param float $closingBalance
-     * @return FinancialAuditLog
      */
     public function executeAudit(FinancialAuditLog $audit, float $openingBalance, float $closingBalance): FinancialAuditLog
     {
@@ -133,9 +113,6 @@ class FinancialAuditService
 
     /**
      * Complete a financial audit.
-     *
-     * @param FinancialAuditLog $audit
-     * @return FinancialAuditLog
      */
     public function completeAudit(FinancialAuditLog $audit): FinancialAuditLog
     {
@@ -149,16 +126,12 @@ class FinancialAuditService
 
     /**
      * Cancel a financial audit.
-     *
-     * @param FinancialAuditLog $audit
-     * @param string|null $reason
-     * @return FinancialAuditLog
      */
     public function cancelAudit(FinancialAuditLog $audit, ?string $reason = null): FinancialAuditLog
     {
         $audit->update([
             'status' => 'cancelled',
-            'notes' => $reason ? $audit->notes . ' - Cancelled: ' . $reason : $audit->notes . ' - Cancelled',
+            'notes' => $reason ? $audit->notes.' - Cancelled: '.$reason : $audit->notes.' - Cancelled',
         ]);
 
         return $audit->fresh();
@@ -166,9 +139,6 @@ class FinancialAuditService
 
     /**
      * Get audit report with detailed breakdown.
-     *
-     * @param FinancialAuditLog $audit
-     * @return array
      */
     public function getAuditReport(FinancialAuditLog $audit): array
     {
@@ -207,10 +177,6 @@ class FinancialAuditService
 
     /**
      * Get audit details by transaction type.
-     *
-     * @param FinancialAuditLog $audit
-     * @param string $type
-     * @return array
      */
     public function getTransactionDetails(FinancialAuditLog $audit, string $type): array
     {
@@ -288,10 +254,6 @@ class FinancialAuditService
 
     /**
      * Get comparative audit report (compare multiple periods).
-     *
-     * @param int $businessId
-     * @param array $periods
-     * @return array
      */
     public function getComparativeReport(int $businessId, array $periods): array
     {

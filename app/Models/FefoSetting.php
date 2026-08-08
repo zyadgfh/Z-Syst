@@ -64,4 +64,3 @@ class FefoSetting extends Model
         );
     }
 }
-

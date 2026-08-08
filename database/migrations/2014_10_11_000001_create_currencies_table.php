@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('country_name')->nullable();
-            $table->string('code',10)->unique();
+            $table->string('code', 10)->unique();
             $table->double('rate', 10, 2)->nullable();
-            $table->string('symbol',10)->nullable();
-            $table->string('position',20)->nullable();
+            $table->string('symbol', 10)->nullable();
+            $table->string('position', 20)->nullable();
             $table->boolean('status')->default(1);
             $table->boolean('is_default')->default(0);
             $table->timestamps();

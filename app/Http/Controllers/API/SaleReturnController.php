@@ -2,33 +2,30 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Sale;
-use App\Models\Party;
-use App\Models\Stock;
-use App\Models\SaleReturn;
-use App\Models\SaleDetails;
-use App\Exceptions\NotFoundException;
 use App\Exceptions\BusinessRuleException;
 use App\Exceptions\Errors\ErrorCode;
-use App\Exceptions\TransactionException;
 use App\Helpers\TransactionHelper;
-use App\Models\SaleReturnDetails;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\Party;
+use App\Models\Sale;
+use App\Models\SaleDetails;
+use App\Models\SaleReturn;
+use App\Models\SaleReturnDetails;
+use App\Models\Stock;
+use Illuminate\Http\Request;
 
 class SaleReturnController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $data = SaleReturn::with('sale:id,party_id,isPaid,totalAmount,dueAmount,paidAmount,invoiceNumber', 'sale.party:id,name', 'details')
-                ->whereBetween('return_date', [request()->start_date, request()->end_date])
-                ->where('business_id', auth()->user()->business_id)
-                ->latest()
-                ->paginate(10);
+            ->whereBetween('return_date', [$request->input('start_date'), $request->input('end_date')])
+            ->where('business_id', auth()->user()->business_id)
+            ->latest()
+            ->paginate($request->input('per_page', 10));
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -84,12 +81,12 @@ class SaleReturnController extends Controller
 
                 // Update stock for the specific batch
                 $batch = Stock::where('product_id', $sale_detail->product_id)
-                            ->when($sale_detail->batch_no ?? false, function ($query) use ($sale_detail) {
-                                return $query->where('batch_no', $sale_detail->batch_no);
-                            })
-                            ->first();
+                    ->when($sale_detail->batch_no ?? false, function ($query) use ($sale_detail) {
+                        return $query->where('batch_no', $sale_detail->batch_no);
+                    })
+                    ->first();
 
-                if (!$batch) {
+                if (! $batch) {
                     throw new BusinessRuleException(
                         ErrorCode::NOT_FOUND_BATCH,
                         __('errors.batch_not_found'),
@@ -142,4 +139,3 @@ class SaleReturnController extends Controller
         ]);
     }
 }
-

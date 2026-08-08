@@ -27,7 +27,7 @@ return new class extends Migration
             $table->unsignedBigInteger('reference_id')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             $table->index(['business_id', 'product_id']);
             $table->index(['business_id', 'movement_type']);
             $table->index(['reference_type', 'reference_id']);

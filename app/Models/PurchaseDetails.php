@@ -35,7 +35,7 @@ class PurchaseDetails extends Model
      */
     public $timestamps = false;
 
-    public function product() : BelongsTo
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
     }

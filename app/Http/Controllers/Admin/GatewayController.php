@@ -29,7 +29,7 @@ class GatewayController extends Controller
     public function update(Request $request, $id)
     {
         Gateway::findOrFail($id)->update($request->except('image') + [
-            'image' => $request->hasFile('image') ? $this->upload($request, 'image') : NULL
+            'image' => $request->hasFile('image') ? $this->upload($request, 'image') : null,
         ]);
 
         return response()->json('Gateway updated successfully');

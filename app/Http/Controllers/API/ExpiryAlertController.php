@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Stock;
-use App\Models\Product;
-use App\Models\FefoSetting;
-use App\Services\FefoService;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
+use App\Models\Stock;
+use App\Services\FefoService;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class ExpiryAlertController extends Controller
 {
@@ -28,12 +26,12 @@ class ExpiryAlertController extends Controller
         $today = now()->startOfDay();
 
         $stocks = Stock::where('productStock', '>', 0)
-                    ->whereNotNull('expire_date')
-                    ->whereHas('product', function ($query) use ($businessId) {
-                        $query->where('business_id', $businessId);
-                    })
-                    ->with('product:id,productName,business_id')
-                    ->get();
+            ->whereNotNull('expire_date')
+            ->whereHas('product', function ($query) use ($businessId) {
+                $query->where('business_id', $businessId);
+            })
+            ->with('product:id,productName,business_id')
+            ->get();
 
         $stats = [
             'expired' => 0,
@@ -47,8 +45,10 @@ class ExpiryAlertController extends Controller
         ];
 
         foreach ($stocks as $stock) {
-            $expireDate = $stock->expire_date ? \Carbon\Carbon::parse($stock->expire_date)->startOfDay() : null;
-            if (!$expireDate) continue;
+            $expireDate = $stock->expire_date ? Carbon::parse($stock->expire_date)->startOfDay() : null;
+            if (! $expireDate) {
+                continue;
+            }
 
             $daysRemaining = $today->diffInDays($expireDate, false);
 
@@ -94,14 +94,14 @@ class ExpiryAlertController extends Controller
         $threshold = $request->threshold; // expired, today, 7, 30, 60, 90, 365, all
 
         $query = Stock::where('productStock', '>', 0)
-                    ->whereNotNull('expire_date')
-                    ->whereHas('product', function ($query) use ($businessId) {
-                        $query->where('business_id', $businessId);
-                    })
-                    ->with([
-                        'product:id,productName,productCode,sales_price,purchase_with_tax,business_id,category_id',
-                        'product.category:id,categoryName',
-                    ]);
+            ->whereNotNull('expire_date')
+            ->whereHas('product', function ($query) use ($businessId) {
+                $query->where('business_id', $businessId);
+            })
+            ->with([
+                'product:id,productName,productCode,sales_price,purchase_with_tax,business_id,category_id',
+                'product.category:id,categoryName',
+            ]);
 
         // Apply threshold filter
         switch ($threshold) {
@@ -130,7 +130,7 @@ class ExpiryAlertController extends Controller
                 // all - get expired + expiring within 365 days
                 $query->where(function ($q) use ($today) {
                     $q->where('expire_date', '<', $today)
-                      ->orWhereBetween('expire_date', [$today, $today->copy()->addDays(365)]);
+                        ->orWhereBetween('expire_date', [$today, $today->copy()->addDays(365)]);
                 });
                 break;
         }
@@ -139,22 +139,22 @@ class ExpiryAlertController extends Controller
         if ($search = $request->search) {
             $query->where(function ($q) use ($search) {
                 $q->where('batch_no', 'like', "%{$search}%")
-                  ->orWhereHas('product', function ($sub) use ($search) {
-                      $sub->where('productName', 'like', "%{$search}%")
-                          ->orWhere('productCode', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('product', function ($sub) use ($search) {
+                        $sub->where('productName', 'like', "%{$search}%")
+                            ->orWhere('productCode', 'like', "%{$search}%");
+                    });
             });
         }
 
         // FEFO sorting: nearest expiry first
         $query->orderBy('expire_date', 'asc')
-              ->orderBy('id', 'asc');
+            ->orderBy('id', 'asc');
 
         $stocks = $query->paginate($request->per_page ?? 20);
 
         // Add computed days_remaining and severity to each item
         $stocks->getCollection()->transform(function ($stock) use ($today) {
-            $expireDate = $stock->expire_date ? \Carbon\Carbon::parse($stock->expire_date)->startOfDay() : null;
+            $expireDate = $stock->expire_date ? Carbon::parse($stock->expire_date)->startOfDay() : null;
             $stock->days_remaining = $expireDate ? $today->diffInDays($expireDate, false) : null;
 
             // Severity: critical=expired, high=<=7days, medium=<=30days, low=<=90days, info=<=365days
@@ -185,12 +185,13 @@ class ExpiryAlertController extends Controller
         });
 
         // Add FEFO recommendation for each expiring batch
-        $stocks->getCollection()->transform(function ($stock) use ($businessId) {
+        $stocks->getCollection()->transform(function ($stock) {
             $stock->fefo_recommendation = [
                 'should_sell_first' => $stock->days_remaining !== null && $stock->days_remaining >= 0 && $stock->days_remaining <= 30,
                 'priority' => $stock->days_remaining !== null && $stock->days_remaining < 0 ? 'do_not_sell' : ($stock->days_remaining <= 7 ? 'urgent' : ($stock->days_remaining <= 30 ? 'high' : 'normal')),
                 'days_until_expiry' => $stock->days_remaining,
             ];
+
             return $stock;
         });
 
@@ -200,4 +201,3 @@ class ExpiryAlertController extends Controller
         ]);
     }
 }
-

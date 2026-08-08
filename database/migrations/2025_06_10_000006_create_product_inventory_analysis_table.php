@@ -44,4 +44,3 @@ return new class extends Migration
         Schema::dropIfExists('product_inventory_analysis');
     }
 };
-

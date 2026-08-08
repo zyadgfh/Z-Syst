@@ -2,22 +2,20 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Sale;
-use App\Models\Party;
-use App\Models\Stock;
-use App\Models\Product;
-use App\Models\Business;
-use App\Models\FefoLog;
-use App\Models\FefoSetting;
-use App\Models\SaleDetails;
-use App\Services\FefoService;
 use App\Exceptions\BusinessRuleException;
 use App\Exceptions\Errors\ErrorCode;
-use App\Exceptions\NotFoundException;
-use App\Exceptions\TransactionException;
 use App\Helpers\TransactionHelper;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Business;
+use App\Models\FefoSetting;
+use App\Models\Party;
+use App\Models\Product;
+use App\Models\Sale;
+use App\Models\SaleDetails;
+use App\Models\Stock;
+use App\Services\FefoService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class ZSystSaleController extends Controller
 {
@@ -28,7 +26,7 @@ class ZSystSaleController extends Controller
         $this->fefoService = $fefoService;
     }
 
-    private function loadBusinessStocks(int $businessId, array $productIds): \Illuminate\Support\Collection
+    private function loadBusinessStocks(int $businessId, array $productIds): Collection
     {
         if (empty($productIds)) {
             return collect();
@@ -41,7 +39,7 @@ class ZSystSaleController extends Controller
             ->groupBy('product_id');
     }
 
-    private function resolveStockForProduct(\Illuminate\Support\Collection $stocksByProduct, int $productId, ?string $batchNo = null): ?Stock
+    private function resolveStockForProduct(Collection $stocksByProduct, int $productId, ?string $batchNo = null): ?Stock
     {
         $productStocks = $stocksByProduct->get($productId, collect());
 
@@ -58,25 +56,26 @@ class ZSystSaleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $data = Sale::select('id', 'party_id', 'invoiceNumber', 'saleDate', 'totalAmount', 'dueAmount', 'paidAmount', 'paymentType')
-                ->with('party:id,name,phone')
-                ->when(request('search'), function ($query) {
-                    $query->where(function ($subQuery) {
-                        $subQuery->where('paymentType', 'like', '%' . request('search') . '%')
-                            ->orWhere('invoiceNumber', 'like', '%' . request('search') . '%')
-                            ->orWhere('meta', 'like', '%' . request('search') . '%')
-                            ->orWhereHas('party', function ($query) {
-                                $query->where('name', 'like', '%' . request('search') . '%')
-                                    ->orWhere('phone', 'like', '%' . request('search') . '%');
-                            });
-                    });
-                })
-                ->withCount('saleReturns')
-                ->where('business_id', auth()->user()->business_id)
-                ->latest()
-                ->paginate(10);
+            ->with('party:id,name,phone')
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $term = '%'.$request->input('search').'%';
+                $query->where(function ($subQuery) use ($term) {
+                    $subQuery->where('paymentType', 'like', $term)
+                        ->orWhere('invoiceNumber', 'like', $term)
+                        ->orWhere('meta', 'like', $term)
+                        ->orWhereHas('party', function ($query) use ($term) {
+                            $query->where('name', 'like', $term)
+                                ->orWhere('phone', 'like', $term);
+                        });
+                });
+            })
+            ->withCount('saleReturns')
+            ->where('business_id', auth()->user()->business_id)
+            ->latest()
+            ->paginate($request->input('per_page', 10));
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -121,10 +120,10 @@ class ZSystSaleController extends Controller
                 $productStocks = $businessStocks->get($productId, collect());
                 $batchNo = $productData['batch_no'] ?? null;
 
-                if (!empty($batchNo)) {
+                if (! empty($batchNo)) {
                     $stock = $productStocks->first(fn ($item) => $item->batch_no === $batchNo);
 
-                    if (!$stock) {
+                    if (! $stock) {
                         throw new BusinessRuleException(
                             ErrorCode::BUSINESS_INSUFFICIENT_STOCK,
                             __('errors.insufficient_stock', [
@@ -185,7 +184,7 @@ class ZSystSaleController extends Controller
             }
 
             // Validate due sale for walking customers
-            if ($request->dueAmount && !$request->party_id) {
+            if ($request->dueAmount && ! $request->party_id) {
                 throw new BusinessRuleException(
                     ErrorCode::BUSINESS_DUE_SALE_WALKING_CUSTOMER,
                     __('errors.due_sale_walking_customer'),
@@ -199,27 +198,27 @@ class ZSystSaleController extends Controller
 
             if ($request->dueAmount && isset($party)) {
                 $party->update([
-                    'due' => $party->due + $request->dueAmount
+                    'due' => $party->due + $request->dueAmount,
                 ]);
             }
 
             $business = Business::findOrFail($business_id);
             $business_name = $business->companyName;
             $business->update([
-                'remainingShopBalance' => $business->remainingShopBalance + $request->paidAmount
+                'remainingShopBalance' => $business->remainingShopBalance + $request->paidAmount,
             ]);
 
             $lossProfit = collect($request->products)->pluck('lossProfit')->toArray();
 
             $sale = Sale::create($request->all() + [
-                        'user_id' => auth()->id(),
-                        'business_id' => $business_id,
-                        'lossProfit' => array_sum($lossProfit) - ($request->discountAmount ?? 0),
-                        'meta' => [
-                            'notes' => $request->notes,
-                            'customer_phone' => $request->customer_phone,
-                        ],
-                    ]);
+                'user_id' => auth()->id(),
+                'business_id' => $business_id,
+                'lossProfit' => array_sum($lossProfit) - ($request->discountAmount ?? 0),
+                'meta' => [
+                    'notes' => $request->notes,
+                    'customer_phone' => $request->customer_phone,
+                ],
+            ]);
 
             $saleDetails = [];
             $fefoService = $this->fefoService;
@@ -331,18 +330,18 @@ class ZSystSaleController extends Controller
     public function show($id)
     {
         $data = Sale::where('business_id', auth()->user()->business_id)
-                ->with([
-                    'tax',
-                    'party',
-                    'user:id,name',
-                    'saleReturns.details',
-                    'details:id,sale_id,product_id,price,quantities,purchase_price,batch_no,expire_date',
-                    'details.product' => function ($query) {
-                        $query->select('id', 'productName')
-                            ->withSum('stocks', 'productStock');
-                    },
-                ])
-                ->findOrFail($id);
+            ->with([
+                'tax',
+                'party',
+                'user:id,name',
+                'saleReturns.details',
+                'details:id,sale_id,product_id,price,quantities,purchase_price,batch_no,expire_date',
+                'details.product' => function ($query) {
+                    $query->select('id', 'productName')
+                        ->withSum('stocks', 'productStock');
+                },
+            ])
+            ->findOrFail($id);
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -455,20 +454,20 @@ class ZSystSaleController extends Controller
             if ($sale->dueAmount || $request->dueAmount) {
                 $party = Party::findOrFail($request->party_id);
                 $party->update([
-                    'due' => $request->party_id == $sale->party_id ? (($party->due - $sale->dueAmount) + $request->dueAmount) : ($party->due + $request->dueAmount)
+                    'due' => $request->party_id == $sale->party_id ? (($party->due - $sale->dueAmount) + $request->dueAmount) : ($party->due + $request->dueAmount),
                 ]);
 
                 if ($request->party_id != $sale->party_id) {
                     $prevParty = Party::findOrFail($sale->party_id);
                     $prevParty->update([
-                        'due' => $prevParty->due - $sale->dueAmount
+                        'due' => $prevParty->due - $sale->dueAmount,
                     ]);
                 }
             }
 
             $business = Business::findOrFail($business_id);
             $business->update([
-                'shopOpeningBalance' => ($business->shopOpeningBalance - $sale->paidAmount) + $request->paidAmount
+                'shopOpeningBalance' => ($business->shopOpeningBalance - $sale->paidAmount) + $request->paidAmount,
             ]);
 
             $lossProfit = collect($request->products)->pluck('lossProfit')->toArray();
@@ -526,13 +525,13 @@ class ZSystSaleController extends Controller
             if ($sale->dueAmount) {
                 $party = Party::findOrFail($sale->party_id);
                 $party->update([
-                    'due' => $party->due - $sale->dueAmount
+                    'due' => $party->due - $sale->dueAmount,
                 ]);
             }
 
             $business = Business::findOrFail(auth()->user()->business_id);
             $business->update([
-                'shopOpeningBalance' => $business->shopOpeningBalance - $sale->paidAmount
+                'shopOpeningBalance' => $business->shopOpeningBalance - $sale->paidAmount,
             ]);
 
             $sale->delete();
@@ -543,4 +542,3 @@ class ZSystSaleController extends Controller
         ]);
     }
 }
-

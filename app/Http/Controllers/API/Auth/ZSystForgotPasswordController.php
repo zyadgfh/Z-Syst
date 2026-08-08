@@ -2,28 +2,28 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use App\Models\User;
-use App\Mail\PasswordReset;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use App\Mail\PasswordReset;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
 class ZSystForgotPasswordController extends Controller
 {
-    public function sendResetCode(Request $request) : JsonResponse
+    public function sendResetCode(Request $request): JsonResponse
     {
         $request->validate([
-            'email' => 'required|email|exists:users,email'
+            'email' => 'required|email|exists:users,email',
         ]);
 
         $expire = now()->addHour();
-        $code = random_int(100000,999999);
-        $user = User::where('email',$request->email)->first();
+        $code = random_int(100000, 999999);
+        $user = User::where('email', $request->email)->first();
         $user->update(['remember_token' => $code, 'email_verified_at' => $expire]);
 
         $data = [
-            'code' => $code
+            'code' => $code,
         ];
 
         try {
@@ -32,11 +32,12 @@ class ZSystForgotPasswordController extends Controller
             } else {
                 Mail::to($request->email)->send(new PasswordReset($data));
             }
+
             return response()->json([
                 'message' => 'Password reset code has been sent to your email.',
             ]);
 
-        } catch (\Exception $exception){
+        } catch (\Exception $exception) {
             return response()->json([
                 'message' => $exception->getMessage(),
             ], 422);
@@ -55,21 +56,21 @@ class ZSystForgotPasswordController extends Controller
         if ($user->remember_token == $request->code) {
             if ($user->email_verified_at > now()) {
                 return response()->json([
-                    'message' => __('The code has been verified.')
+                    'message' => __('The code has been verified.'),
                 ]);
             } else {
                 return response()->json([
-                    'error' => __('The verification code has expired.')
+                    'error' => __('The verification code has expired.'),
                 ], 400);
             }
         } else {
             return response()->json([
-                'error' => __('Invalid Code.')
+                'error' => __('Invalid Code.'),
             ], 404);
         }
     }
 
-    public function resetPassword(Request $request) : JsonResponse
+    public function resetPassword(Request $request): JsonResponse
     {
         $request->validate([
             'email' => 'required|exists:users,email',

@@ -1,28 +1,21 @@
 <div class="sidebar-container">
     <nav class="side-bar">
         <div class="side-bar-logo">
-            <a href="{{ route('admin.dashboard.index') }}"><img
-                    src="{{ asset(get_option('general')['admin_logo'] ?? 'assets/images/logo/logo.png') }}"
-                    alt="Logo"></a>
-
+            <a href="{{ route('admin.dashboard.index') }}">
+                <img src="{{ asset(get_option('general')['admin_logo'] ?? 'assets/images/logo/logo.png') }}" alt="Logo">
+            </a>
             <button class="close-btn"><i class="fal fa-times"></i></button>
         </div>
         <div class="side-bar-manu">
             <ul>
                 @can('dashboard-read')
                     <li class="{{ Request::routeIs('admin.dashboard.index') ? 'active' : '' }}">
-                        <a href="{{ route('admin.dashboard.index') }}" class="active">
+                        <a href="{{ route('admin.dashboard.index') }}">
                             <span class="sidebar-icon">
-
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <g clip-path="url(#clip0_2632_3521)">
-                                        <path
-                                            d="M12.5001 14.1667C11.8339 14.6854 10.9586 15 10.0001 15C9.04156 15 8.1664 14.6854 7.50012 14.1667"
-                                            stroke="#00987F" stroke-width="1.5" stroke-linecap="round" />
-                                        <path
-                                            d="M1.95963 11.0113C1.66545 9.09685 1.51836 8.13971 1.88028 7.29117C2.2422 6.44262 3.04517 5.86205 4.65109 4.7009L5.85097 3.83335C7.84872 2.38891 8.84758 1.66669 10.0002 1.66669C11.1527 1.66669 12.1516 2.38891 14.1493 3.83335L15.3492 4.7009C16.9552 5.86205 17.7581 6.44262 18.12 7.29117C18.4819 8.13971 18.3348 9.09685 18.0407 11.0113L17.7898 12.6437C17.3727 15.3574 17.1642 16.7144 16.191 17.5239C15.2177 18.3334 13.7948 18.3334 10.9492 18.3334H9.05116C6.20543 18.3334 4.78257 18.3334 3.80931 17.5239C2.83605 16.7144 2.62753 15.3574 2.2105 12.6437L1.95963 11.0113Z"
-                                            stroke="#00987F" stroke-width="1.5" stroke-linejoin="round" />
+                                        <path d="M12.5001 14.1667C11.8339 14.6854 10.9586 15 10.0001 15C9.04156 15 8.1664 14.6854 7.50012 14.1667" stroke="white" stroke-width="1.5" stroke-linecap="round" />
+                                        <path d="M1.95963 11.0113C1.66545 9.09685 1.51836 8.13971 1.88028 7.29117C2.2422 6.44262 3.04517 5.86205 4.65109 4.7009L5.85097 3.83335C7.84872 2.38891 8.84758 1.66669 10.0002 1.66669C11.1527 1.66669 12.1516 2.38891 14.1493 3.83335L15.3492 4.7009C16.9552 5.86205 17.7581 6.44262 18.12 7.29117C18.4819 8.13971 18.3348 9.09685 18.0407 11.0113L17.7898 12.6437C17.3727 15.3574 17.1642 16.7144 16.191 17.5239C15.2177 18.3334 13.7948 18.3334 10.9492 18.3334H9.05116C6.20543 18.3334 4.78257 18.3334 3.80931 17.5239C2.83605 16.7144 2.62753 15.3574 2.2105 12.6437L1.95963 11.0113Z" stroke="white" stroke-width="1.5" stroke-linejoin="round" />
                                     </g>
                                     <defs>
                                         <clipPath id="clip0_2632_3521">
@@ -30,7 +23,6 @@
                                         </clipPath>
                                     </defs>
                                 </svg>
-
                             </span>
                             {{ __('Dashboard') }}
                         </a>
@@ -38,9 +30,8 @@
                 @endcan
 
                 @can('business-read')
-                <li
-                    class="{{ Request::routeIs('admin.business.index', 'admin.business.create', 'admin.business.edit') ? 'active' : '' }}">
-                    <a href="{{ route('admin.business.index') }}" class="active">
+                <li class="{{ Request::routeIs('admin.business.index', 'admin.business.create', 'admin.business.edit') ? 'active' : '' }}">
+                    <a href="{{ route('admin.business.index') }}">
                         <span class="sidebar-icon">
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
@@ -69,9 +60,8 @@
                 @endcan
 
                 @can('business-categories-read')
-                  <li
-                    class="{{ Request::routeIs('admin.business-categories.index', 'admin.business-categories.create', 'admin.business-categories.edit') ? 'active' : '' }}">
-                <a href="{{ route('admin.business-categories.index') }}" class="active">
+                  <li class="{{ Request::routeIs('admin.business-categories.index', 'admin.business-categories.create', 'admin.business-categories.edit') ? 'active' : '' }}">
+                <a href="{{ route('admin.business-categories.index') }}">
                     <span class="sidebar-icon">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
@@ -95,9 +85,8 @@
             @endcan
 
                 @can('banners-read')
-                    <li
-                        class="{{ Request::routeIs('admin.banners.index', 'admin.banners.create', 'admin.banners.edit') ? 'active' : '' }}">
-                        <a href="{{ route('admin.banners.index') }}" class="active">
+                    <li class="{{ Request::routeIs('admin.banners.index', 'admin.banners.create', 'admin.banners.edit') ? 'active' : '' }}">
+                        <a href="{{ route('admin.banners.index') }}">
                             <span class="sidebar-icon">
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -117,9 +106,8 @@
                 @endcan
 
                 @can('prescriptions-read')
-                    <li
-                        class="{{ Request::routeIs('admin.prescriptions.index', 'admin.prescriptions.create', 'admin.prescriptions.edit') ? 'active' : '' }}">
-                        <a href="{{ route('admin.prescriptions.index') }}" class="active">
+                    <li class="{{ Request::routeIs('admin.prescriptions.index', 'admin.prescriptions.create', 'admin.prescriptions.edit') ? 'active' : '' }}">
+                        <a href="{{ route('admin.prescriptions.index') }}">
                             <span class="sidebar-icon">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M9 12H15M9 16H15M17 21H7C5.89543 21 5 20.1046 5 19V5C5 3.89543 5.89543 3 7 3H12.5858C12.851 3 13.1054 3.10536 13.2929 3.29289L18.7071 8.70711C18.8946 8.89464 19 9.149 19 9.41421V19C19 20.1046 18.1046 21 17 21Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -390,6 +378,97 @@
                                     <a class="{{ Request::routeIs('admin.settings.index') ? 'active' : '' }}"
                                         href="{{ route('admin.settings.index') }}">{{ __('General Settings') }}</a>
                                 </li>
+                            @endcan
+                         </ul>
+                     </li>
+                 @endcanany
+
+                @canany(['warehouses-read', 'warehouses-create', 'warehouses-update', 'warehouses-delete'])
+                    <li class="dropdown {{ Route::is('admin.warehouses.*') ? 'active' : '' }}">
+                        <a href="#">
+                            <span class="sidebar-icon">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M2.5 7.5C2.5 5.567 4.067 4 6 4H14C15.933 4 17.5 5.567 17.5 7.5V12.5C17.5 14.433 15.933 16 14 16H6C4.067 16 2.5 14.433 2.5 12.5V7.5Z" stroke="white" stroke-width="1.5"/>
+                                    <path d="M7.5 2.5V5.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                    <path d="M12.5 2.5V5.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                            </span>
+                            {{ __('Warehouses') }}
+                        </a>
+                        <ul>
+                            @can('warehouses-read')
+                                <li><a class="dropdown-item {{ Route::is('admin.warehouses.index') ? 'active' : '' }}" href="{{ route('admin.warehouses.index') }}">{{ __('All Warehouses') }}</a></li>
+                            @endcan
+                            @can('warehouses-create')
+                                <li><a class="dropdown-item {{ Route::is('admin.warehouses.create') ? 'active' : '' }}" href="{{ route('admin.warehouses.create') }}">{{ __('Add Warehouse') }}</a></li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcanany
+
+                @canany(['traceability-read', 'recalls-create'])
+                    <li class="dropdown {{ Route::is('admin.traceability.*') ? 'active' : '' }}">
+                        <a href="#">
+                            <span class="sidebar-icon">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18Z" stroke="white" stroke-width="1.5"/>
+                                    <path d="M8 8C8 6.89543 8.89543 6 10 6C11.1046 6 12 6.89543 12 8C12 9.10457 11.1046 10 10 10C8.89543 10 8 9.10457 8 8Z" fill="white"/>
+                                    <path d="M15 15C14.5 14.5 13.5 13.5 12 13C12 14 12 15 12 16C12 17 10.5 18 10 18C9.5 18 8 17 8 16C8 15 8 14 8 13C6.5 13.5 5.5 14.5 5 15C5.5 16 7 17 8 18C8 16.5 9.5 15.5 10 15C11 15.5 12.5 16.5 13 18C13.5 17 14.5 16 15 15Z" stroke="white" stroke-width="1.5"/>
+                                </svg>
+                            </span>
+                            {{ __('Traceability') }}
+                        </a>
+                        <ul>
+                            @can('traceability-read')
+                                <li><a class="dropdown-item {{ Route::is('admin.traceability.batch-lots') ? 'active' : '' }}" href="{{ route('admin.traceability.batch-lots') }}">{{ __('Batch Lots') }}</a></li>
+                                <li><a class="dropdown-item {{ Route::is('admin.traceability.recalls') ? 'active' : '' }}" href="{{ route('admin.traceability.recalls') }}">{{ __('Recall Events') }}</a></li>
+                            @endcan
+                            @can('recalls-create')
+                                <li><a class="dropdown-item {{ Route::is('admin.traceability.initiate-recall') ? 'active' : '' }}" href="{{ route('admin.traceability.initiate-recall') }}">{{ __('Initiate Recall') }}</a></li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcanany
+
+                @canany(['loyalty-read', 'loyalty-create', 'loyalty-update', 'loyalty-delete'])
+                    <li class="dropdown {{ Route::is('admin.loyalty.*') ? 'active' : '' }}">
+                        <a href="#">
+                            <span class="sidebar-icon">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18Z" stroke="white" stroke-width="1.5"/>
+                                    <path d="M6 10C6 8.89543 6.89543 8 8 8C9.10457 8 10 8.89543 10 10C10 11.1046 9.10457 12 8 12C6.89543 12 6 11.1046 6 10Z" stroke="white" stroke-width="1.5"/>
+                                    <path d="M14 10C14 8.89543 14.8954 8 16 8C17.1045 8 18 8.89543 18 10C18 11.1046 17.1045 12 16 12C14.8955 12 14 11.1046 14 10Z" stroke="white" stroke-width="1.5"/>
+                                </svg>
+                            </span>
+                            {{ __('Loyalty & CRM') }}
+                        </a>
+                        <ul>
+                            @can('loyalty-read')
+                                <li><a class="dropdown-item {{ Route::is('admin.loyalty.programs') ? 'active' : '' }}" href="{{ route('admin.loyalty.programs') }}">{{ __('Programs') }}</a></li>
+                                <li><a class="dropdown-item {{ Route::is('admin.loyalty.transactions') ? 'active' : '' }}" href="{{ route('admin.loyalty.transactions') }}">{{ __('Transactions') }}</a></li>
+                                <li><a class="dropdown-item {{ Route::is('admin.loyalty.interactions') ? 'active' : '' }}" href="{{ route('admin.loyalty.interactions') }}">{{ __('Interactions') }}</a></li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcanany
+
+                @canany(['receipts-read', 'receipts-update'])
+                    <li class="dropdown {{ Route::is('admin.receipts.*') ? 'active' : '' }}">
+                        <a href="#">
+                            <span class="sidebar-icon">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4 4C4 2.89543 4.89543 2 6 2H14C15.1046 2 16 2.89543 16 4V16C16 17.1046 15.1046 18 14 18H6C4.89543 18 4 17.1046 4 16V4Z" stroke="white" stroke-width="1.5"/>
+                                    <path d="M4 8L16 8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                            </span>
+                            {{ __('Receipts') }}
+                        </a>
+                        <ul>
+                            @can('receipts-read')
+                                <li><a class="dropdown-item {{ Route::is('admin.receipts.index') ? 'active' : '' }}" href="{{ route('admin.receipts.index') }}">{{ __('All Receipts') }}</a></li>
+                            @endcan
+                            @can('receipts-update')
+                                <li><a class="dropdown-item {{ Route::is('admin.receipts.settings') ? 'active' : '' }}" href="{{ route('admin.receipts.settings') }}">{{ __('Settings') }}</a></li>
                             @endcan
                         </ul>
                     </li>

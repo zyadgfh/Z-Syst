@@ -2,20 +2,21 @@
 
 namespace App\Helpers;
 
+use App\Exceptions\RenderableException;
 use App\Exceptions\TransactionException;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class TransactionHelper
 {
     /**
      * Execute a callback within a database transaction with proper error handling.
      *
-     * @param callable $callback The business logic to execute
-     * @param string $operation A descriptive name of the operation
-     * @param array $context Additional context for logging
-     * @return mixed
-     * @throws TransactionException|\App\Exceptions\RenderableException
+     * @param  callable  $callback  The business logic to execute
+     * @param  string  $operation  A descriptive name of the operation
+     * @param  array  $context  Additional context for logging
+     *
+     * @throws TransactionException|RenderableException
      */
     public static function run(callable $callback, string $operation, array $context = []): mixed
     {
@@ -28,7 +29,7 @@ class TransactionHelper
 
             return $result;
 
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             DB::rollBack();
 
             throw new TransactionException($operation, array_merge($context, [
@@ -48,7 +49,7 @@ class TransactionHelper
             DB::rollBack();
 
             // Re-throw if it's already our custom exception
-            if ($e instanceof \App\Exceptions\RenderableException) {
+            if ($e instanceof RenderableException) {
                 throw $e;
             }
 
@@ -59,4 +60,3 @@ class TransactionHelper
         }
     }
 }
-

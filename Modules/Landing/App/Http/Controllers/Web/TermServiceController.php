@@ -2,8 +2,8 @@
 
 namespace Modules\Landing\App\Http\Controllers\Web;
 
-use App\Models\Option;
 use App\Http\Controllers\Controller;
+use App\Models\Option;
 
 class TermServiceController extends Controller
 {
@@ -16,6 +16,7 @@ class TermServiceController extends Controller
         ], (array) $generalOption->toArray()) : (object) ['value' => []];
         $general->value = is_array($general->value) ? $general->value : [];
         $term_condition = Option::where('key', 'term-condition')->first();
-        return view('landing::web.term.index', compact('page_data','general','term_condition'));
+
+        return view('landing::web.term.index', compact('page_data', 'general', 'term_condition'));
     }
 }

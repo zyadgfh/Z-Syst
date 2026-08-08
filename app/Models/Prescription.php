@@ -153,4 +153,3 @@ class Prescription extends Model
         return 'normal';
     }
 }
-

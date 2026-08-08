@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Prescription;
-use App\Models\Party;
-use App\Models\User;
 use App\Exceptions\BusinessRuleException;
 use App\Exceptions\Errors\ErrorCode;
 use App\Exceptions\TransactionException;
+use App\Exceptions\UploadException;
 use App\Helpers\HasUploader;
+use App\Http\Controllers\Controller;
+use App\Models\Party;
+use App\Models\Prescription;
+use App\Models\User;
 use App\Notifications\SendNotification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -33,12 +34,12 @@ class ZSystPrescriptionController extends Controller
     public function index(Request $request)
     {
         $prescriptions = Prescription::with(['party:id,name,phone', 'sale:id,invoiceNumber'])
-                            ->latest()
-                            ->paginate(10);
+            ->latest()
+            ->paginate(10);
 
         $parties = Party::where('business_id', Auth::user()?->business_id ?? null)
-                    ->select('id', 'name', 'phone')
-                    ->get();
+            ->select('id', 'name', 'phone')
+            ->get();
 
         $expiryAlertSummary = $this->buildExpiryAlertSummary();
 
@@ -48,25 +49,25 @@ class ZSystPrescriptionController extends Controller
     public function zsystFilter(Request $request)
     {
         $prescriptions = Prescription::with(['party:id,name,phone', 'sale:id,invoiceNumber'])
-                            ->when(request('search'), function ($q) {
-                                $q->where(function ($q) {
-                                    $q->where('notes', 'like', '%' . request('search') . '%')
-                                        ->orWhere('status', 'like', '%' . request('search') . '%')
-                                        ->orWhereHas('party', function ($query) {
-                                            $query->where('name', 'like', '%' . request('search') . '%')
-                                                ->orWhere('phone', 'like', '%' . request('search') . '%');
-                                        })
-                                        ->orWhereHas('sale', function ($query) {
-                                            $query->where('invoiceNumber', 'like', '%' . request('search') . '%');
-                                        });
-                                });
-                            })
-                            ->latest()
-                            ->paginate($request->per_page ?? 10);
+            ->when(request('search'), function ($q) {
+                $q->where(function ($q) {
+                    $q->where('notes', 'like', '%'.request('search').'%')
+                        ->orWhere('status', 'like', '%'.request('search').'%')
+                        ->orWhereHas('party', function ($query) {
+                            $query->where('name', 'like', '%'.request('search').'%')
+                                ->orWhere('phone', 'like', '%'.request('search').'%');
+                        })
+                        ->orWhereHas('sale', function ($query) {
+                            $query->where('invoiceNumber', 'like', '%'.request('search').'%');
+                        });
+                });
+            })
+            ->latest()
+            ->paginate($request->per_page ?? 10);
 
         if ($request->ajax()) {
             return response()->json([
-                'data' => view('admin.prescriptions.datas', compact('prescriptions'))->render()
+                'data' => view('admin.prescriptions.datas', compact('prescriptions'))->render(),
             ]);
         }
 
@@ -99,7 +100,7 @@ class ZSystPrescriptionController extends Controller
                 'notes' => $request->notes,
                 'image' => $request->image ? $this->upload($request, 'image') : null,
                 'status' => $request->status ?? 'pending',
-                'prescription_number' => $request->prescription_number ?? 'RX-' . Str::upper(Str::random(6)),
+                'prescription_number' => $request->prescription_number ?? 'RX-'.Str::upper(Str::random(6)),
                 'review_status' => $request->review_status ?? 'pending',
                 'review_notes' => $request->review_notes,
                 'expires_at' => $request->expires_at,
@@ -119,9 +120,9 @@ class ZSystPrescriptionController extends Controller
 
             return response()->json([
                 'message' => __('Prescription saved successfully'),
-                'redirect' => route('admin.prescriptions.index')
+                'redirect' => route('admin.prescriptions.index'),
             ]);
-        } catch (\App\Exceptions\UploadException $e) {
+        } catch (UploadException $e) {
             return response()->json([
                 'message' => $e->getMessage(),
                 'error_code' => $e->errorCode->value,
@@ -182,9 +183,9 @@ class ZSystPrescriptionController extends Controller
 
             return response()->json([
                 'message' => __('Prescription updated successfully'),
-                'redirect' => route('admin.prescriptions.index')
+                'redirect' => route('admin.prescriptions.index'),
             ]);
-        } catch (\App\Exceptions\UploadException $e) {
+        } catch (UploadException $e) {
             return response()->json([
                 'message' => $e->getMessage(),
                 'error_code' => $e->errorCode->value,
@@ -204,7 +205,7 @@ class ZSystPrescriptionController extends Controller
 
         return response()->json([
             'message' => __('Prescription deleted successfully'),
-            'redirect' => route('admin.prescriptions.index')
+            'redirect' => route('admin.prescriptions.index'),
         ]);
     }
 
@@ -212,6 +213,7 @@ class ZSystPrescriptionController extends Controller
     {
         $prescription = Prescription::findOrFail($id);
         $prescription->update(['status' => $request->status]);
+
         return response()->json(['message' => __('Status updated successfully')]);
     }
 
@@ -219,7 +221,7 @@ class ZSystPrescriptionController extends Controller
     {
         $idsToDelete = $request->input('ids');
 
-        if (!$idsToDelete || !is_array($idsToDelete)) {
+        if (! $idsToDelete || ! is_array($idsToDelete)) {
             throw new BusinessRuleException(
                 ErrorCode::VALIDATION_MISSING_FIELD,
                 __('validation.required', ['attribute' => 'ids']),
@@ -242,7 +244,7 @@ class ZSystPrescriptionController extends Controller
 
             return response()->json([
                 'message' => __('Selected prescriptions deleted successfully'),
-                'redirect' => route('admin.prescriptions.index')
+                'redirect' => route('admin.prescriptions.index'),
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -268,7 +270,7 @@ class ZSystPrescriptionController extends Controller
 
         return response()->json([
             'message' => __('Prescription linked to sale successfully'),
-            'redirect' => route('admin.prescriptions.index')
+            'redirect' => route('admin.prescriptions.index'),
         ]);
     }
 
@@ -279,7 +281,7 @@ class ZSystPrescriptionController extends Controller
         }
 
         $status = $prescription->getExpiryStatus();
-        if (!in_array($status, ['warning', 'critical', 'expired'], true)) {
+        if (! in_array($status, ['warning', 'critical', 'expired'], true)) {
             return;
         }
 
@@ -315,7 +317,7 @@ class ZSystPrescriptionController extends Controller
     {
         $businessId = Auth::user()?->business_id;
 
-        if (!$businessId) {
+        if (! $businessId) {
             return [
                 'expired' => 0,
                 'critical' => 0,
@@ -345,4 +347,3 @@ class ZSystPrescriptionController extends Controller
         return $summary;
     }
 }
-

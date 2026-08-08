@@ -4,12 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class InsuranceCompany extends Model
 {
     use HasFactory;
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\InsuranceCompanyFactory::new();
+    }
 
     protected $fillable = [
         'business_id',
@@ -34,21 +38,11 @@ class InsuranceCompany extends Model
     ];
 
     protected $casts = [
-        'metadata' => 'array',
-        'api_credentials' => 'encrypted:array',
+        'api_credentials' => 'encrypted',
         'default_coverage_percent' => 'decimal:2',
         'default_copay_percent' => 'decimal:2',
-        'settlement_days' => 'integer',
+        'metadata' => 'json',
     ];
-
-    protected $hidden = [
-        'api_credentials',
-    ];
-
-    public function business(): BelongsTo
-    {
-        return $this->belongsTo(Business::class);
-    }
 
     public function policies(): HasMany
     {
@@ -60,18 +54,35 @@ class InsuranceCompany extends Model
         return $this->hasMany(InsuranceClaim::class);
     }
 
-    public function coverages(): HasMany
+    public function business()
     {
-        return $this->hasMany(InsuranceCoverage::class);
-    }
-
-    public function scopeByBusiness($query, $businessId)
-    {
-        return $query->where('business_id', $businessId);
+        return $this->belongsTo(Business::class);
     }
 
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
+    }
+
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $query->where('business_id', $businessId);
+    }
+
+    /**
+     * Calculate default coverage for a given amount
+     */
+    public function calculateDefaultCoverage(float $amount): array
+    {
+        $coveredAmount = ($amount * $this->default_coverage_percent) / 100;
+        $copayAmount = ($amount * $this->default_copay_percent) / 100;
+        $patientResponsibility = $amount - $coveredAmount + $copayAmount;
+
+        return [
+            'covered_amount' => $coveredAmount,
+            'patient_responsibility' => $patientResponsibility,
+            'coverage_percent' => $this->default_coverage_percent,
+            'copay_percent' => $this->default_copay_percent,
+        ];
     }
 }

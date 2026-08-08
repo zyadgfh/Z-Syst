@@ -2,10 +2,10 @@
 
 namespace Modules\Landing\App\Http\Controllers\Web;
 
-use App\Models\Option;
-use Modules\Landing\App\Models\Message;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Option;
+use Illuminate\Http\Request;
+use Modules\Landing\App\Models\Message;
 
 class ContactController extends Controller
 {
@@ -17,6 +17,7 @@ class ContactController extends Controller
             'value' => [],
         ], (array) $generalOption->toArray()) : (object) ['value' => []];
         $general->value = is_array($general->value) ? $general->value : [];
+
         return view('landing::web.contact.index', compact('page_data', 'general'));
     }
 
@@ -33,8 +34,8 @@ class ContactController extends Controller
         Message::create($request->all());
 
         return response()->json([
-            'message'   => __('Your Message Submitted successfully'),
-            'redirect'  => route('contact.index')
+            'message' => __('Your Message Submitted successfully'),
+            'redirect' => route('contact.index'),
         ]);
     }
 }

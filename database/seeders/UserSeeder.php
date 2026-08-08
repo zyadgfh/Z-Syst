@@ -4,18 +4,43 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $users = array(
-            array('business_id' => 1,'email' => 'zsystteam@gmail.com','name' => 'Z-Syst Team','role' => 'shop-owner','phone' => '+8801712022529','image' => NULL,'lang' => 'en','visibility' => NULL,'status' => NULL,'password' => bcrypt('123456'),'email_verified_at' => NULL,'remember_token' => NULL,'created_at' => now(),'updated_at' => now()),
-        );
+        // Create Super Admin
+        $superAdmin = User::create([
+            'name' => 'Super Admin',
+            'email' => 'superadmin@z-syst.com',
+            'password' => Hash::make('SuperAdmin123!'),
+            'role' => 'superadmin',
+            'status' => 'active',
+            'email_verified_at' => now(),
+        ]);
 
-        User::insert($users);
+        // Create Test Admin User
+        $admin = User::create([
+            'name' => 'Test Admin',
+            'email' => 'admin@test.com',
+            'password' => Hash::make('Admin123!'),
+            'role' => 'admin',
+            'status' => 'active',
+            'email_verified_at' => now(),
+        ]);
+
+        // Create Test Staff User
+        $staff = User::create([
+            'name' => 'Test Staff',
+            'email' => 'staff@test.com',
+            'password' => Hash::make('Staff123!'),
+            'role' => 'staff',
+            'status' => 'active',
+            'email_verified_at' => now(),
+        ]);
+
+        $this->command->info('Users seeded successfully');
     }
 }

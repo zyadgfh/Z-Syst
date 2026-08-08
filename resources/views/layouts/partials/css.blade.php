@@ -17,6 +17,9 @@
 <!-- ApexChart -->
 <link rel="stylesheet" href="{{ asset('assets/css/apexcharts.css') }}">
 
+<!-- Design System -->
+<link rel="stylesheet" href="{{ asset('css/design-system.css') }}">
+
 @stack('css')
 
 @if (app()->getLocale() == 'ar')

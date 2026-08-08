@@ -16,4 +16,3 @@ class BusinessRuleException extends RenderableException
         parent::__construct($errorCode, $userMessage, $context, $debugData, $previous);
     }
 }
-

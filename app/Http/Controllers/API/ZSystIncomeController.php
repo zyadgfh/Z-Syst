@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Income;
-use App\Models\Business;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Business;
+use App\Models\Income;
+use Illuminate\Http\Request;
 
 class ZSystIncomeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $data = Income::with('category:id,categoryName')->where('business_id', auth()->user()->business_id)->latest()->paginate(10);
+        $data = Income::with('category:id,categoryName')->where('business_id', auth()->user()->business_id)->latest()->paginate($request->input('per_page', 10));
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -32,9 +32,9 @@ class ZSystIncomeController extends Controller
         Business::findOrFail(auth()->user()->business_id)->decrement('remainingShopBalance', $request->amount);
 
         $data = Income::create($request->except('user_id', 'business_id') + [
-                    'user_id' => auth()->id(),
-                    'business_id' => auth()->user()->business_id,
-                ]);
+            'user_id' => auth()->id(),
+            'business_id' => auth()->user()->business_id,
+        ]);
 
         return response()->json([
             'message' => __('Income saved successfully.'),
@@ -67,7 +67,8 @@ class ZSystIncomeController extends Controller
         ]);
     }
 
-    public function destroy($id) {
+    public function destroy($id)
+    {
 
         $income = Income::findOrFail($id);
         $income->delete();

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Notification;
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 
 class NotificationController extends Controller
@@ -15,10 +15,11 @@ class NotificationController extends Controller
 
     public function mtIndex()
     {
-          $notifications = auth()->user()->notifications()
+        $notifications = auth()->user()->notifications()
             ->whereDate('created_at', today())
             ->latest()
             ->get();
+
         return view('admin.notifications.index', compact('notifications'));
     }
 
@@ -28,7 +29,7 @@ class NotificationController extends Controller
 
         if ($request->ajax()) {
             return response()->json([
-                'data' => view('admin.notifications.datas', compact('notifications'))->render()
+                'data' => view('admin.notifications.datas', compact('notifications'))->render(),
             ]);
         }
 
@@ -41,6 +42,7 @@ class NotificationController extends Controller
         if ($notify) {
             $notify->read_at = now();
             $notify->save();
+
             return redirect($notify->data['url'] ?? '/');
         }
 
@@ -50,7 +52,7 @@ class NotificationController extends Controller
     public function mtReadAll()
     {
         auth()->user()->unreadNotifications()->update(['read_at' => now()]);
+
         return back();
     }
-
 }

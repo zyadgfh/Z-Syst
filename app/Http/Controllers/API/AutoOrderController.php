@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\AutoOrderRule;
 use App\Models\AutoOrderSuggestion;
 use App\Services\AutoOrderService;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 
 class AutoOrderController extends Controller
 {
@@ -20,13 +20,13 @@ class AutoOrderController extends Controller
     /**
      * Get auto-order settings (rules) for all products.
      */
-    public function settings()
+    public function settings(Request $request)
     {
         $businessId = auth()->user()->business_id;
 
         $rules = AutoOrderRule::where('business_id', $businessId)
             ->with('product:id,productName,productCode', 'preferredSupplier:id,name')
-            ->paginate(20);
+            ->paginate($request->input('per_page', 20));
 
         $stats = [
             'total_rules' => AutoOrderRule::where('business_id', $businessId)->count(),
@@ -98,7 +98,7 @@ class AutoOrderController extends Controller
             ->with('product:id,productName,productCode,sales_price', 'preferredSupplier:id,name,phone')
             ->first();
 
-        if (!$rule) {
+        if (! $rule) {
             return response()->json([
                 'message' => __('No rule found for this product.'),
                 'data' => null,
@@ -244,4 +244,3 @@ class AutoOrderController extends Controller
         ]);
     }
 }
-

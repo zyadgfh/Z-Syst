@@ -2,15 +2,15 @@
 
 namespace Modules\Landing\App\Http\Controllers\Web;
 
-use App\Models\Plan;
-use App\Models\Option;
-use App\Models\Gateway;
-use App\Models\BusinessCategory;
 use App\Http\Controllers\Controller;
+use App\Models\BusinessCategory;
+use App\Models\Gateway;
+use App\Models\Option;
+use App\Models\Plan;
 use Modules\Landing\App\Models\Blog;
 use Modules\Landing\App\Models\Feature;
-use Modules\Landing\App\Models\Testimonial;
 use Modules\Landing\App\Models\PosAppInterface;
+use Modules\Landing\App\Models\Testimonial;
 
 class WebController extends Controller
 {
@@ -33,7 +33,7 @@ class WebController extends Controller
         }
 
         try {
-            $general = Option::where('key','general')->first();
+            $general = Option::where('key', 'general')->first();
             $plans = Plan::whereStatus(1)->latest()->get();
             $gateways = Gateway::latest()->get();
             $business_categories = BusinessCategory::latest()->get();

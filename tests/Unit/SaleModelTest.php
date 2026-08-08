@@ -2,11 +2,12 @@
 
 namespace Tests\Unit;
 
+use App\Models\Business;
+use App\Models\Party;
 use App\Models\Sale;
 use App\Models\SaleDetails;
-use App\Models\Party;
-use App\Models\Business;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -34,7 +35,7 @@ class SaleModelTest extends TestCase
 
     public function test_sale_has_fillable_attributes()
     {
-        $fillable = (new Sale())->getFillable();
+        $fillable = (new Sale)->getFillable();
 
         $this->assertContains('totalAmount', $fillable);
         $this->assertContains('paidAmount', $fillable);
@@ -48,7 +49,7 @@ class SaleModelTest extends TestCase
 
     public function test_sale_has_casts()
     {
-        $casts = (new Sale())->getCasts();
+        $casts = (new Sale)->getCasts();
 
         $this->assertArrayHasKey('isPaid', $casts);
         $this->assertEquals('boolean', $casts['isPaid']);
@@ -90,7 +91,7 @@ class SaleModelTest extends TestCase
     {
         $sale = Sale::factory()->create();
 
-        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\HasMany::class, $sale->saleReturns());
+        $this->assertInstanceOf(HasMany::class, $sale->saleReturns());
     }
 
     public function test_sale_is_paid_flag_works()

@@ -120,4 +120,3 @@ class ProductInventoryAnalysis extends Model
         return $query->where('abc_category', 'C');
     }
 }
-

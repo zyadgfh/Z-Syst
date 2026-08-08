@@ -80,4 +80,3 @@ class AutoOrderSuggestion extends Model
         return $query->where('priority', $priority);
     }
 }
-

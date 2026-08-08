@@ -12,7 +12,7 @@ class BusinessCategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->unique()->word() . ' Pharmacy',
+            'name' => fake()->unique()->word().' Pharmacy',
             'description' => fake()->sentence(),
             'status' => true,
         ];

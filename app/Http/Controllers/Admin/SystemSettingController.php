@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SystemSettingRequest;
 use App\Models\Setting;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\File;
 
 class SystemSettingController extends Controller
 {
@@ -48,7 +48,7 @@ class SystemSettingController extends Controller
             ];
 
             foreach ($requiredFields as $field) {
-                if (!isset($json[$field])) {
+                if (! isset($json[$field])) {
                     return response()->json(['message' => "Missing required JSON field: $field"], 422);
                 }
             }
@@ -57,29 +57,29 @@ class SystemSettingController extends Controller
                 return response()->json(['message' => 'Invalid service account type.'], 422);
             }
 
-            if (!filter_var($json['client_email'], FILTER_VALIDATE_EMAIL)) {
+            if (! filter_var($json['client_email'], FILTER_VALIDATE_EMAIL)) {
                 return response()->json(['message' => 'Invalid client email address.'], 422);
             }
 
-            $name = 'service-account-' . time() . '-' . bin2hex(random_bytes(8)) . '.json';
+            $name = 'service-account-'.time().'-'.bin2hex(random_bytes(8)).'.json';
             $path = storage_path('app/private/firebase/');
 
-            if (!File::exists($path)) {
+            if (! File::exists($path)) {
                 File::makeDirectory($path, 0600, true);
             }
 
             $file->move($path, $name);
-            File::chmod($path . $name, 0600);
+            File::chmod($path.$name, 0600);
         }
 
         $storeKeys = [
             'APP_NAME', 'APP_ENV', 'APP_DEBUG', 'APP_URL', 'QUEUE_MAIL',
-            'MAIL_DRIVER_TYPE','MAIL_DRIVER','MAIL_HOST','MAIL_PORT','MAIL_USERNAME',
-            'MAIL_ENCRYPTION','MAIL_FROM_ADDRESS','MAIL_FROM_NAME','CACHE_DRIVER',
-            'QUEUE_CONNECTION','SESSION_DRIVER','SESSION_LIFETIME','FILESYSTEM_DISK',
-            'AWS_ACCESS_KEY_ID','AWS_DEFAULT_REGION','AWS_BUCKET',
-            'WAS_ACCESS_KEY_ID','WAS_DEFAULT_REGION','WAS_BUCKET','WAS_ENDPOINT',
-            'CACHE_LIFETIME','TIMEZONE'
+            'MAIL_DRIVER_TYPE', 'MAIL_DRIVER', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME',
+            'MAIL_ENCRYPTION', 'MAIL_FROM_ADDRESS', 'MAIL_FROM_NAME', 'CACHE_DRIVER',
+            'QUEUE_CONNECTION', 'SESSION_DRIVER', 'SESSION_LIFETIME', 'FILESYSTEM_DISK',
+            'AWS_ACCESS_KEY_ID', 'AWS_DEFAULT_REGION', 'AWS_BUCKET',
+            'WAS_ACCESS_KEY_ID', 'WAS_DEFAULT_REGION', 'WAS_BUCKET', 'WAS_ENDPOINT',
+            'CACHE_LIFETIME', 'TIMEZONE',
         ];
 
         foreach ($storeKeys as $k) {
@@ -95,7 +95,7 @@ class SystemSettingController extends Controller
 
         // Sensitive keys: encrypt before storing
         $sensitive = [
-            'MAIL_PASSWORD', 'AWS_SECRET_ACCESS_KEY', 'WAS_SECRET_ACCESS_KEY', 'APILAYER_API_KEY'
+            'MAIL_PASSWORD', 'AWS_SECRET_ACCESS_KEY', 'WAS_SECRET_ACCESS_KEY', 'APILAYER_API_KEY',
         ];
 
         foreach ($sensitive as $k) {

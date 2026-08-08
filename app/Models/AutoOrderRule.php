@@ -48,4 +48,3 @@ class AutoOrderRule extends Model
         return $this->belongsTo(Party::class, 'preferred_supplier_id');
     }
 }
-

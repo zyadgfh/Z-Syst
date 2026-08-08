@@ -27,13 +27,13 @@ class ExpenseCategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'categoryName' => 'required|unique:expense_categories,categoryName,NULL,id,business_id,' . auth()->user()->business_id,
+            'categoryName' => 'required|unique:expense_categories,categoryName,NULL,id,business_id,'.auth()->user()->business_id,
         ]);
 
         $data = ExpenseCategory::create($request->except('status') + [
-                    'business_id' => auth()->user()->business_id,
-                    'status' => $request->status == 'true' ? 1 : 0,
-                ]);
+            'business_id' => auth()->user()->business_id,
+            'status' => $request->status == 'true' ? 1 : 0,
+        ]);
 
         return response()->json([
             'message' => __('Data saved successfully.'),
@@ -51,7 +51,7 @@ class ExpenseCategoryController extends Controller
         $request->validate([
             'categoryName' => [
                 'required',
-                'unique:expense_categories,categoryName,' . $category->id . ',id,business_id,' . auth()->user()->business_id,
+                'unique:expense_categories,categoryName,'.$category->id.',id,business_id,'.auth()->user()->business_id,
             ],
         ]);
 
@@ -72,6 +72,7 @@ class ExpenseCategoryController extends Controller
     {
         $category = ExpenseCategory::findOrFail($id);
         $category->delete();
+
         return response()->json([
             'message' => __('Data deleted successfully.'),
         ]);

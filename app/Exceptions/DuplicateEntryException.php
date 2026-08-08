@@ -21,4 +21,3 @@ class DuplicateEntryException extends BusinessRuleException
         );
     }
 }
-

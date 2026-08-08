@@ -2,9 +2,9 @@
 
 namespace Tests\Unit;
 
-use App\Models\Stock;
-use App\Models\Product;
 use App\Models\Business;
+use App\Models\Product;
+use App\Models\Stock;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -30,7 +30,7 @@ class StockModelTest extends TestCase
 
     public function test_stock_has_fillable_attributes()
     {
-        $fillable = (new Stock())->getFillable();
+        $fillable = (new Stock)->getFillable();
 
         $this->assertContains('product_id', $fillable);
         $this->assertContains('business_id', $fillable);

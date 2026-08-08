@@ -22,15 +22,15 @@ class ZSystManufacturerController extends Controller
     {
         $business_id = auth()->user()->business_id;
         $request->validate([
-            'name' => 'required|unique:manufacturers,name,NULL,id,business_id,' . $business_id,
-            'description' => 'nullable|string'
+            'name' => 'required|unique:manufacturers,name,NULL,id,business_id,'.$business_id,
+            'description' => 'nullable|string',
         ]);
 
         $data = Manufacturer::create([
-                    'name' => $request->name,
-                    'description' => $request->description,
-                    'business_id' => $business_id
-                ]);
+            'name' => $request->name,
+            'description' => $request->description,
+            'business_id' => $business_id,
+        ]);
 
         return response()->json([
             'message' => __('Data saved successfully.'),
@@ -43,16 +43,16 @@ class ZSystManufacturerController extends Controller
         $request->validate([
             'name' => [
                 'required',
-                'unique:manufacturers,name,' . $manufacturer->id . ',id,business_id,' . auth()->user()->business_id,
+                'unique:manufacturers,name,'.$manufacturer->id.',id,business_id,'.auth()->user()->business_id,
             ],
-            'description' => 'nullable|string'
+            'description' => 'nullable|string',
         ]);
 
         $manufacturer = $manufacturer->update([
-                    'name' => $request->name,
-                    'description' => $request->description,
-                    'business_id' => auth()->user()->business_id
-                    ]);
+            'name' => $request->name,
+            'description' => $request->description,
+            'business_id' => auth()->user()->business_id,
+        ]);
 
         return response()->json([
             'message' => __('Data updated successfully.'),
@@ -63,6 +63,7 @@ class ZSystManufacturerController extends Controller
     public function destroy(Manufacturer $manufacturer)
     {
         $manufacturer->delete();
+
         return response()->json([
             'message' => __('Data deleted successfully.'),
         ]);

@@ -6,11 +6,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Carbon\Carbon;
 
 class InsurancePolicy extends Model
 {
     use HasFactory;
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\InsurancePolicyFactory::new();
+    }
 
     protected $fillable = [
         'business_id',
@@ -39,30 +43,30 @@ class InsurancePolicy extends Model
     ];
 
     protected $casts = [
-        'metadata' => 'array',
+        'holder_dob' => 'date',
         'start_date' => 'date',
         'end_date' => 'date',
-        'holder_dob' => 'date',
         'annual_limit' => 'decimal:2',
         'used_amount' => 'decimal:2',
         'remaining_limit' => 'decimal:2',
         'coverage_percent' => 'decimal:2',
         'copay_percent' => 'decimal:2',
+        'metadata' => 'json',
     ];
 
-    public function business(): BelongsTo
+    public function company(): BelongsTo
     {
-        return $this->belongsTo(Business::class);
-    }
-
-    public function insuranceCompany(): BelongsTo
-    {
-        return $this->belongsTo(InsuranceCompany::class);
+        return $this->belongsTo(InsuranceCompany::class, 'insurance_company_id');
     }
 
     public function customer(): BelongsTo
     {
-        return $this->belongsTo(Party::class, 'customer_id');
+        return $this->belongsTo(\App\Models\Party::class, 'customer_id');
+    }
+
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class);
     }
 
     public function claims(): HasMany
@@ -70,37 +74,44 @@ class InsurancePolicy extends Model
         return $this->hasMany(InsuranceClaim::class);
     }
 
-    public function isValid(?Carbon $onDate = null): bool
+    public function coverages(): HasMany
     {
-        $date = $onDate ?? now();
-
-        return $this->status === 'active'
-            && $this->start_date->lessThanOrEqualTo($date)
-            && $this->end_date->greaterThanOrEqualTo($date);
-    }
-
-    public function getRemainingLimitAttribute(): float
-    {
-        if ($this->annual_limit === null) {
-            return 0.0;
-        }
-
-        return (float) $this->annual_limit - (float) $this->used_amount;
-    }
-
-    public function scopeByBusiness($query, $businessId)
-    {
-        return $query->where('business_id', $businessId);
+        return $this->hasMany(InsuranceCoverage::class);
     }
 
     public function scopeActive($query)
     {
-        return $query->where('status', 'active');
+        return $query->where('status', 'active')
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now());
     }
 
-    public function scopeExpiringSoon($query, int $days = 30)
+    public function scopeForBusiness($query, $businessId)
     {
-        return $query->where('status', 'active')
-            ->whereBetween('end_date', [now(), now()->addDays($days)]);
+        return $query->where('business_id', $businessId);
+    }
+
+    public function scopeExpired($query)
+    {
+        return $query->where('end_date', '<', now());
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->end_date < now();
+    }
+
+    public function getRemainingLimitAttribute(): float
+    {
+        if ($this->annual_limit) {
+            return max(0, $this->annual_limit - $this->used_amount);
+        }
+        return 0;
+    }
+
+    public function hasSufficientLimit(float $amount): bool
+    {
+        $remaining = $this->getRemainingLimitAttribute();
+        return $remaining >= $amount;
     }
 }

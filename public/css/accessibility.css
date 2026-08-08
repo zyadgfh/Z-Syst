@@ -1,0 +1,736 @@
+/* Accessibility Features for Z-Syst Pharmacy Management System */
+
+/* ========== Accessibility Utilities ========== */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+.sr-only-focusable:focus,
+.sr-only-focusable:active {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+}
+
+/* ========== Focus Styles ========== */
+*:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+*:focus:not(:focus-visible) {
+    outline: none;
+}
+
+*:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* ========== Skip Links ========== */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: #3b82f6;
+    color: white;
+    padding: 0.5rem 1rem;
+    z-index: 100;
+    transition: top 0.3s;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* ========== Color Contrast ========== */
+/* Ensure minimum contrast ratio of 4.5:1 for normal text */
+.text-high-contrast {
+    color: #000000;
+}
+
+.text-medium-contrast {
+    color: #333333;
+}
+
+.text-low-contrast {
+    color: #666666;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    body {
+        background: #ffffff;
+        color: #000000;
+    }
+    
+    * {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border-color: #000000 !important;
+    }
+}
+
+/* ========== Reduced Motion ========== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+.reduced-motion {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* ========== Screen Reader Only ========== */
+[aria-hidden="true"] {
+    display: none;
+}
+
+[aria-live="polite"] {
+    border: 0;
+    clip: rect(0, 0, 0, 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+
+[aria-live="assertive"] {
+    border: 0;
+    clip: rect(0, 0, 0, 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+
+/* ========== ARIA Attributes ========== */
+[role="button"] {
+    cursor: pointer;
+}
+
+[role="button"]:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+[aria-expanded="true"] .icon-arrow {
+    transform: rotate(180deg);
+}
+
+[aria-selected="true"] {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+/* ========== Accessible Tables ========== */
+table {
+    border-collapse: collapse;
+    caption-side: bottom;
+}
+
+caption {
+    text-align: left;
+    padding: 0.5rem;
+    font-size: 0.875rem;
+    color: #666;
+}
+
+th,
+td {
+    padding: 0.75rem;
+    text-align: left;
+    border: 1px solid #e5e7eb;
+}
+
+th {
+    background: #f9fafb;
+    font-weight: 600;
+}
+
+tr:nth-child(even) {
+    background: #f9fafb;
+}
+
+/* ========== Accessible Forms ========== */
+fieldset {
+    border: 1px solid #d1d5db;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+legend {
+    font-weight: 600;
+    padding: 0 0.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+}
+
+input[type="checkbox"]:focus,
+input[type="radio"]:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* ========== Accessible Buttons ========== */
+button {
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.375rem;
+    background: #3b82f6;
+    color: white;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background: #2563eb;
+}
+
+button:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+button:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* ========== Accessible Links ========== */
+a {
+    color: #3b82f6;
+    text-decoration: underline;
+}
+
+a:hover {
+    color: #1d4ed8;
+}
+
+a:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+a[aria-disabled="true"] {
+    color: #9ca3af;
+    text-decoration: none;
+    pointer-events: none;
+}
+
+/* ========== Accessible Images ========== */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+img[alt=""] {
+    display: none;
+}
+
+figure {
+    margin: 0;
+}
+
+figcaption {
+    text-align: center;
+    font-size: 0.875rem;
+    color: #666;
+    padding: 0.5rem;
+}
+
+/* ========== Accessible Modals ========== */
+[role="dialog"] {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;
+}
+
+[role="dialog"]::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+[aria-modal="true"] {
+    z-index: 1000;
+}
+
+/* ========== Accessible Alerts ========== */
+[role="alert"] {
+    padding: 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+}
+
+[role="alert"][aria-live="polite"] {
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    color: #92400e;
+}
+
+[role="alert"][aria-live="assertive"] {
+    background: #fee2e2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+}
+
+[role="alert"][aria-live="polite"].success {
+    background: #d1fae5;
+    border: 1px solid #a7f3d0;
+    color: #065f46;
+}
+
+/* ========== Accessible Progress ========== */
+[role="progressbar"] {
+    background: #e5e7eb;
+    border-radius: 0.25rem;
+    height: 0.5rem;
+    overflow: hidden;
+}
+
+[role="progressbar"]::-webkit-progress-bar {
+    background: #3b82f6;
+}
+
+[role="progressbar"]::-moz-progress-bar {
+    background: #3b82f6;
+}
+
+[aria-valuenow] {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: #3b82f6;
+    color: white;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+}
+
+/* ========== Accessible Tooltips ========== */
+[role="tooltip"] {
+    position: absolute;
+    background: #1f2937;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    z-index: 1000;
+    max-width: 250px;
+}
+
+[role="tooltip"][aria-hidden="true"] {
+    display: none;
+}
+
+/* ========== Accessible Tabs ========== */
+[role="tablist"] {
+    display: flex;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 1rem;
+}
+
+[role="tab"] {
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #666;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+[role="tab"]:hover {
+    color: #333;
+}
+
+[role="tab"][aria-selected="true"] {
+    border-bottom-color: #3b82f6;
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+[role="tab"]:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: -2px;
+}
+
+[role="tabpanel"] {
+    padding: 1rem;
+}
+
+[role="tabpanel"][aria-hidden="true"] {
+    display: none;
+}
+
+/* ========== Accessible Menus ========== */
+[role="menu"] {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    padding: 0.5rem 0;
+    min-width: 200px;
+}
+
+[role="menuitem"] {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: #333;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+[role="menuitem"]:hover,
+[role="menuitem"]:focus {
+    background: #f3f4f6;
+    outline: none;
+}
+
+[role="menuitem"][aria-disabled="true"] {
+    color: #9ca3af;
+    pointer-events: none;
+}
+
+/* ========== Accessible Accordions ========== */
+[role="heading"] {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+[aria-expanded="false"] .icon-chevron {
+    transform: rotate(-90deg);
+}
+
+[aria-expanded="true"] .icon-chevron {
+    transform: rotate(0deg);
+}
+
+/* ========== Accessible Dropdowns ========== */
+[aria-haspopup="true"] {
+    position: relative;
+}
+
+[aria-expanded="true"] [role="listbox"] {
+    display: block;
+}
+
+[aria-expanded="false"] [role="listbox"] {
+    display: none;
+}
+
+/* ========== Accessible Date Pickers ========== */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+    /* Ensure date pickers are accessible */
+    min-height: 44px;
+}
+
+/* ========== Dark Mode Support ========== */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #1a1a1a;
+        color: #ffffff;
+    }
+    
+    .text-high-contrast {
+        color: #ffffff;
+    }
+    
+    .text-medium-contrast {
+        color: #e5e5e5;
+    }
+    
+    .text-low-contrast {
+        color: #a3a3a3;
+    }
+    
+    input,
+    select,
+    textarea {
+        background: #2a2a2a;
+        color: #ffffff;
+        border-color: #4a4a4a;
+    }
+    
+    input:focus,
+    select:focus,
+    textarea:focus {
+        outline-color: #60a5fa;
+    }
+    
+    button {
+        background: #60a5fa;
+    }
+    
+    button:hover {
+        background: #3b82f6;
+    }
+}
+
+/* ========== Print Accessibility ========== */
+@media print {
+    body {
+        background: white;
+        color: black;
+    }
+    
+    a {
+        color: black;
+        text-decoration: underline;
+    }
+    
+    button {
+        background: white;
+        color: black;
+        border: 1px solid black;
+    }
+    
+    [role="navigation"],
+    [role="complementary"] {
+        display: none;
+    }
+    
+    [role="main"] {
+        margin: 0;
+    }
+}
+
+/* ========== Text Scaling ========== */
+@media (min-resolution: 2dppx) {
+    /* High DPI displays */
+    body {
+        font-size: 100%;
+    }
+}
+
+/* ========== Large Text Support ========== */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1400px;
+    }
+}
+
+/* ========== Touch Target Sizes ========== */
+button,
+a,
+input,
+select,
+textarea {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+@media (hover: none) and (pointer: coarse) {
+    /* Touch devices */
+    button,
+    a,
+    input,
+    select,
+    textarea {
+        min-height: 48px;
+        min-width: 48px;
+    }
+}
+
+/* ========== Accessible Labels ========== */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* ========== Accessible Search ========== */
+[role="search"] input {
+    border-radius: 2rem 0 0 2rem;
+}
+
+[role="search"] button {
+    border-radius: 0 2rem 2rem 0;
+}
+
+/* ========== Accessible Notifications ========== */
+[role="status"] {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    padding: 1rem;
+    background: #3b82f6;
+    color: white;
+    border-radius: 0.375rem;
+    z-index: 1000;
+}
+
+[role="status"][aria-live="polite"] {
+    background: #10b981;
+}
+
+[role="status"][aria-live="assertive"] {
+    background: #ef4444;
+}
+
+/* ========== Accessible Breadcrumbs ========== */
+[aria-label="Breadcrumb"] {
+    padding: 0.5rem 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+[aria-label="Breadcrumb"] li {
+    display: flex;
+    align-items: center;
+}
+
+[aria-label="Breadcrumb"] li:not(:last-child)::after {
+    content: '/';
+    margin: 0 0.5rem;
+    color: #666;
+}
+
+[aria-label="Breadcrumb"] a {
+    color: #3b82f6;
+    text-decoration: none;
+}
+
+[aria-label="Breadcrumb"] a:hover {
+    text-decoration: underline;
+}
+
+[aria-current="page"] {
+    color: #333;
+    font-weight: 600;
+}
+
+/* ========== Accessible Buttons Group ========== */
+[role="group"] {
+    display: flex;
+    gap: 0.5rem;
+}
+
+[role="group"] button:first-child {
+    border-radius: 0.375rem 0 0 0.375rem;
+}
+
+[role="group"] button:last-child {
+    border-radius: 0 0.375rem 0.375rem 0;
+}
+
+/* ========== Accessible Loading States ========== */
+[aria-busy="true"] {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+[aria-busy="true"]::after {
+    content: '';
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #3b82f6;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ========== Accessible Disabled States ========== */
+[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ========== Accessible Error Messages ========== */
+[aria-invalid="true"] {
+    border-color: #ef4444;
+}
+
+[aria-invalid="true"]::placeholder {
+    color: #9ca3af;
+}
+
+[aria-errormessage] {
+    display: block;
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* ========== Accessible Success Messages ========== */
+[aria-invalid="false"] {
+    border-color: #10b981;
+}
+
+[aria-valid="true"]::placeholder {
+    color: #10b981;
+}

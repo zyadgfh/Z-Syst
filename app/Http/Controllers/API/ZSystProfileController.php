@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\User;
 use App\Helpers\HasUploader;
+use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\AuditLogger;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class ZSystProfileController extends Controller
 {
@@ -24,14 +24,14 @@ class ZSystProfileController extends Controller
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
-            'data' => $user
+            'data' => $user,
         ]);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'name'  => 'required|max:250',
+            'name' => 'required|max:250',
             'email' => ['required', 'email', Rule::unique('users')->ignore(auth()->id())],
             'image' => 'nullable|image|mimes:jpeg,png,gif|dimensions:max_width=2000,max_height=2000|max:1048',
         ]);
@@ -75,9 +75,9 @@ class ZSystProfileController extends Controller
 
         $user = auth()->user();
 
-        if (!Hash::check($request->current_password, $user->password)) {
+        if (! Hash::check($request->current_password, $user->password)) {
             return response()->json([
-                'error' => __('Current password does not match with old password.')
+                'error' => __('Current password does not match with old password.'),
             ], 422);
         }
 
@@ -90,7 +90,7 @@ class ZSystProfileController extends Controller
         ]);
 
         return response()->json([
-            'message'   => __('Password changed successfully.'),
+            'message' => __('Password changed successfully.'),
         ]);
     }
 }

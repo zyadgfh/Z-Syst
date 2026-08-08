@@ -11,7 +11,7 @@ class UserExport implements FromView
     public function view(): View
     {
         return view('admin.users.excel-csv', [
-            'users' => User::whereNotIn('role', ['superadmin', 'staff', 'shop-owner'])->latest()->get()
+            'users' => User::whereNotIn('role', ['superadmin', 'staff', 'shop-owner'])->latest()->get(),
         ]);
     }
 }

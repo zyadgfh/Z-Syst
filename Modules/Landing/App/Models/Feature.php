@@ -2,8 +2,8 @@
 
 namespace Modules\Landing\App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Feature extends Model
 {
@@ -15,4 +15,13 @@ class Feature extends Model
         'image',
         'status',
     ];
+
+    protected $casts = [
+        'status' => 'boolean',
+    ];
+
+    protected static function newFactory()
+    {
+        return \Modules\Landing\Database\Factories\FeatureFactory::new();
+    }
 }

@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Stock;
-use App\Models\Product;
 use App\Helpers\HasUploader;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\Product;
+use App\Models\Stock;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class ZSystProductController extends Controller
 {
@@ -18,33 +18,34 @@ class ZSystProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $data = Product::select('id', 'productName', 'productCode', 'purchase_with_tax', 'sales_price')
-                ->where('business_id', auth()->user()->business_id)
-                ->when(request('search'), function ($query) {
-                    $query->where('productName', 'like', '%' . request('search') . '%')
-                        ->orWhere('productCode', 'like', '%' . request('search') . '%');
-                })
-                ->when(request('expire_date'), function ($query) {
-                    $query->whereHas('stocks', function ($query) {
-                        $query->whereBetween('expire_date', [today(), request('expire_date')]);
-                    });
-                })
-                ->when(request('expired') == 'true', function ($query) {
-                    $query->whereHas('stocks', function ($query) {
-                        $query->where('expire_date', '<', today())
-                            ->where('productStock', '>', 0);
-                    });
-                })
-                ->withSum('stocks', 'productStock')
-                ->with(['expiring_item' => function ($query) {
-                    $query->select('expire_date', 'product_id')
-                        ->where('productStock', '>', 0)
-                        ->whereNotNull('expire_date');
-                }])
-                ->latest()
-                ->paginate(10);
+            ->where('business_id', auth()->user()->business_id)
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $term = '%'.$request->input('search').'%';
+                $query->where('productName', 'like', $term)
+                    ->orWhere('productCode', 'like', $term);
+            })
+            ->when($request->filled('expire_date'), function ($query) use ($request) {
+                $query->whereHas('stocks', function ($query) use ($request) {
+                    $query->whereBetween('expire_date', [today(), $request->input('expire_date')]);
+                });
+            })
+            ->when($request->input('expired') == 'true', function ($query) {
+                $query->whereHas('stocks', function ($query) {
+                    $query->where('expire_date', '<', today())
+                        ->where('productStock', '>', 0);
+                });
+            })
+            ->withSum('stocks', 'productStock')
+            ->with(['expiring_item' => function ($query) {
+                $query->select('expire_date', 'product_id')
+                    ->where('productStock', '>', 0)
+                    ->whereNotNull('expire_date');
+            }])
+            ->latest()
+            ->paginate($request->input('per_page', 10));
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -84,9 +85,9 @@ class ZSystProductController extends Controller
         try {
 
             $product = Product::create($request->except('images') + [
-                        'business_id' => $business_id,
-                        'images' => $request->images ? $this->multipleUpload($request, 'images') : NULL,
-                    ]);
+                'business_id' => $business_id,
+                'images' => $request->images ? $this->multipleUpload($request, 'images') : null,
+            ]);
 
             Stock::create($request->all() + [
                 'product_id' => $product->id,
@@ -102,6 +103,7 @@ class ZSystProductController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => __('Something was wrong.'),
             ], 406);
@@ -111,9 +113,9 @@ class ZSystProductController extends Controller
     public function show($id)
     {
         $data = Product::query()
-                    ->with('unit:id,unitName', 'medicine_type:id,name', 'manufacterer:id,name', 'box_size:id,name', 'category:id,categoryName', 'stocks:id,expire_date,product_id,batch_no,productStock', 'tax:id,rate')
-                    ->withSum('stocks', 'productStock')
-                    ->findOrFail($id);
+            ->with('unit:id,unitName', 'medicine_type:id,name', 'manufacterer:id,name', 'box_size:id,name', 'category:id,categoryName', 'stocks:id,expire_date,product_id,batch_no,productStock', 'tax:id,rate')
+            ->withSum('stocks', 'productStock')
+            ->findOrFail($id);
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -135,11 +137,11 @@ class ZSystProductController extends Controller
             'box_size_id' => 'nullable|integer|exists:box_sizes,id',
             'productCode' => [
                 'nullable',
-                'unique:products,productCode,' . $product->id . ',id,business_id,' . $business_id,
+                'unique:products,productCode,'.$product->id.',id,business_id,'.$business_id,
             ],
             'batch_no' => [
                 'nullable',
-                'unique:stocks,batch_no,' . $stock->id . ',id,business_id,' . $business_id,
+                'unique:stocks,batch_no,'.$stock->id.',id,business_id,'.$business_id,
             ],
         ]);
 
@@ -182,7 +184,7 @@ class ZSystProductController extends Controller
             }
 
             $product->update($request->except('images') + [
-                'images' => $merged_images
+                'images' => $merged_images,
             ]);
 
             DB::commit();
@@ -194,6 +196,7 @@ class ZSystProductController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => __('Something was wrong.'),
             ], 406);
@@ -242,11 +245,12 @@ class ZSystProductController extends Controller
 
             return response()->json([
                 'message' => __('Stock updated successfully.'),
-                'data' => $product
+                'data' => $product,
             ]);
 
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => __('Something was wrong.'),
             ], 406);
@@ -268,32 +272,33 @@ class ZSystProductController extends Controller
         ]);
     }
 
-    public function stocksWithProduct()
+    public function stocksWithProduct(Request $request)
     {
         $data = Stock::select('id', 'expire_date', 'product_id', 'batch_no', 'productStock')
-                    ->with([
-                        'product.tax:id,rate,name',
-                        'product:id,productName,purchase_without_tax,purchase_with_tax,profit_percent,sales_price,wholesale_price,tax_id,tax_type,productCode',
-                    ])
-                    ->when(request('search'), function ($query) {
-                        $query->where(function ($subQuery) {
-                            $subQuery->where('batch_no', 'like', '%' . request('search') . '%')
-                                ->orWhereHas('product', function ($query) {
-                                    $query->where('productName', 'like', '%' . request('search') . '%')
-                                        ->orWhere('productCode', 'like', '%' . request('search') . '%');
-                                });
+            ->with([
+                'product.tax:id,rate,name',
+                'product:id,productName,purchase_without_tax,purchase_with_tax,profit_percent,sales_price,wholesale_price,tax_id,tax_type,productCode',
+            ])
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $term = '%'.$request->input('search').'%';
+                $query->where(function ($subQuery) use ($term) {
+                    $subQuery->where('batch_no', 'like', $term)
+                        ->orWhereHas('product', function ($query) use ($term) {
+                            $query->where('productName', 'like', $term)
+                                ->orWhere('productCode', 'like', $term);
                         });
-                    })
-                    ->when(request('check_stock') == 'true', function ($query) {
-                        $query->where('productStock', '>', 0);
-                    })
-                    ->where('business_id', auth()->user()->business_id)
-                    ->latest()
-                    ->paginate(10);
+                });
+            })
+            ->when($request->input('check_stock') == 'true', function ($query) {
+                $query->where('productStock', '>', 0);
+            })
+            ->where('business_id', auth()->user()->business_id)
+            ->latest()
+            ->paginate($request->input('per_page', 10));
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
-            'data' => $data
+            'data' => $data,
         ]);
     }
 }

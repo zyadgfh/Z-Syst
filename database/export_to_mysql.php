@@ -1,9 +1,11 @@
 <?php
-require __DIR__ . '/../vendor/autoload.php';
-$app = require_once __DIR__ . '/../bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+
+require __DIR__.'/../vendor/autoload.php';
+$app = require_once __DIR__.'/../bootstrap/app.php';
+$kernel = $app->make(Kernel::class);
 $kernel->bootstrap();
 
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\DB;
 
 $tables = DB::select('SELECT name FROM sqlite_master WHERE type="table" AND name NOT LIKE "sqlite_%"');
@@ -17,7 +19,7 @@ foreach ($tables as $table) {
     $sql .= "DROP TABLE IF EXISTS `$tableName`;\n";
 
     $createTable = DB::select("SELECT sql FROM sqlite_master WHERE type='table' AND name=?", [$tableName]);
-    if ($createTable && !empty($createTable[0]->sql)) {
+    if ($createTable && ! empty($createTable[0]->sql)) {
         $createSql = $createTable[0]->sql;
         // Convert SQLite create table to MySQL
         $createSql = preg_replace('/INTEGER PRIMARY KEY AUTOINCREMENT/i', 'INT AUTO_INCREMENT PRIMARY KEY', $createSql);
@@ -38,20 +40,23 @@ foreach ($tables as $table) {
         // Fix foreign key syntax for MySQL
         $createSql = preg_replace('/foreign\s+key\s*\(([^)]+)\)\s*references\s*`?([^`]+)`?\s*\(([^)]+)\)\s*on\s+delete\s+cascade/i', 'FOREIGN KEY ($1) REFERENCES `$2`($3) ON DELETE CASCADE', $createSql);
         // Remove SQLite-specific rowid references if any
-        $sql .= $createSql . ";\n\n";
+        $sql .= $createSql.";\n\n";
     }
 
     $rows = DB::table($tableName)->get();
     foreach ($rows as $row) {
-        $columns = array_keys((array)$row);
-        $values = array_map(function($value) {
-            if ($value === null) return 'NULL';
-            return "'" . str_replace("'", "''", (string)$value) . "'";
-        }, array_values((array)$row));
-        $sql .= "INSERT INTO `$tableName` (`" . implode("`, `", $columns) . "`) VALUES (" . implode(", ", $values) . ");\n";
+        $columns = array_keys((array) $row);
+        $values = array_map(function ($value) {
+            if ($value === null) {
+                return 'NULL';
+            }
+
+            return "'".str_replace("'", "''", (string) $value)."'";
+        }, array_values((array) $row));
+        $sql .= "INSERT INTO `$tableName` (`".implode('`, `', $columns).'`) VALUES ('.implode(', ', $values).");\n";
     }
     $sql .= "\n";
 }
 
-file_put_contents(__DIR__ . '/database_export.sql', $sql);
+file_put_contents(__DIR__.'/database_export.sql', $sql);
 echo "Export completed: database_export.sql\n";

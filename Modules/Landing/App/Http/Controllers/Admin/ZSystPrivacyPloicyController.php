@@ -2,14 +2,13 @@
 
 namespace Modules\Landing\App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Option;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Cache;
 
 class ZSystPrivacyPloicyController extends Controller
 {
-
     public function __construct()
     {
         $this->middleware('permission:privacy-policy-read')->only('index');
@@ -19,6 +18,7 @@ class ZSystPrivacyPloicyController extends Controller
     public function index()
     {
         $privacy_policy = Option::where('key', 'privacy-policy')->first();
+
         return view('landing::admin.settings.privacy-policy.index', compact('privacy_policy'));
     }
 
@@ -34,6 +34,7 @@ class ZSystPrivacyPloicyController extends Controller
         );
 
         Cache::forget('privacy-policy');
+
         return response()->json(__('Privacy And Policy updated successfully.'));
     }
 }

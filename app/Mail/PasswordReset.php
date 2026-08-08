@@ -9,6 +9,7 @@ use Illuminate\Queue\SerializesModels;
 class PasswordReset extends Mailable
 {
     use Queueable, SerializesModels;
+
     protected $data;
 
     /**
@@ -27,7 +28,7 @@ class PasswordReset extends Mailable
             ->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
             ->view('mail.password-reset')
             ->with([
-                'data' => $this->data
+                'data' => $this->data,
             ]);
     }
 }

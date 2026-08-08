@@ -3,8 +3,8 @@
 namespace Modules\Landing\App\Http\Controllers\Admin;
 
 use App\Helpers\HasUploader;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\Landing\App\Exports\ExportMessage;
 use Modules\Landing\App\Models\Message;
@@ -16,13 +16,13 @@ class ZSystMessageController extends Controller
     public function __construct()
     {
         $this->middleware('permission:messages-read')->only('index');
-        $this->middleware('permission:messages-delete')->only('destroy','deleteAll');
+        $this->middleware('permission:messages-delete')->only('destroy', 'deleteAll');
     }
-
 
     public function index(Request $request)
     {
         $messages = Message::latest()->paginate(10);
+
         return view('landing::admin.messages.index', compact('messages'));
     }
 
@@ -30,11 +30,11 @@ class ZSystMessageController extends Controller
     {
         $messages = Message::when(request('search'), function ($q) {
             $q->where(function ($q) {
-                $q->where('name', 'like', '%' . request('search') . '%')
-                    ->orWhere('phone', 'like', '%' . request('search') . '%')
-                    ->orWhere('company_name', 'like', '%' . request('search') . '%')
-                    ->orWhere('message', 'like', '%' . request('search') . '%')
-                    ->orWhere('email', 'like', '%' . request('search') . '%');
+                $q->where('name', 'like', '%'.request('search').'%')
+                    ->orWhere('phone', 'like', '%'.request('search').'%')
+                    ->orWhere('company_name', 'like', '%'.request('search').'%')
+                    ->orWhere('message', 'like', '%'.request('search').'%')
+                    ->orWhere('email', 'like', '%'.request('search').'%');
             });
         })
             ->latest()
@@ -42,7 +42,7 @@ class ZSystMessageController extends Controller
 
         if ($request->ajax()) {
             return response()->json([
-                'data' => view('landing::admin.messages.datas', compact('messages'))->render()
+                'data' => view('landing::admin.messages.datas', compact('messages'))->render(),
             ]);
         }
 
@@ -56,8 +56,8 @@ class ZSystMessageController extends Controller
         $message->delete();
 
         return response()->json([
-            'message'   => __('Message deleted successfully'),
-            'redirect'  => route('admin.messages.index')
+            'message' => __('Message deleted successfully'),
+            'redirect' => route('admin.messages.index'),
         ]);
     }
 
@@ -69,7 +69,7 @@ class ZSystMessageController extends Controller
 
         return response()->json([
             'message' => __('Selected Messages deleted successfully'),
-            'redirect' => route('admin.messages.index')
+            'redirect' => route('admin.messages.index'),
         ]);
     }
 

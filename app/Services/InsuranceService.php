@@ -2,278 +2,339 @@
 
 namespace App\Services;
 
-use App\Models\InsuranceClaim;
 use App\Models\InsuranceCompany;
-use App\Models\InsuranceCoverage;
 use App\Models\InsurancePolicy;
-use Illuminate\Support\Carbon;
+use App\Models\InsuranceClaim;
+use App\Models\InsuranceCoverage;
+use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class InsuranceService
 {
     /**
-     * Generate a unique claim number for the business.
+     * Create new insurance company
      */
-    public function generateClaimNumber(int $businessId): string
+    public function createCompany(array $data): InsuranceCompany
     {
-        $prefix = 'CLM-' . date('Ymd') . '-';
-        $last = InsuranceClaim::where('business_id', $businessId)
-            ->where('claim_number', 'like', $prefix . '%')
-            ->orderBy('id', 'desc')
-            ->first();
-
-        $sequence = $last
-            ? (int) substr($last->claim_number, -4) + 1
-            : 1;
-
-        return $prefix . str_pad($sequence, 4, '0', STR_PAD_LEFT);
-    }
-
-    /**
-     * Generate a unique policy number for the business.
-     */
-    public function generatePolicyNumber(int $businessId): string
-    {
-        $prefix = 'POL-' . date('Ymd') . '-';
-        $last = InsurancePolicy::where('business_id', $businessId)
-            ->where('policy_number', 'like', $prefix . '%')
-            ->orderBy('id', 'desc')
-            ->first();
-
-        $sequence = $last
-            ? (int) substr($last->policy_number, -4) + 1
-            : 1;
-
-        return $prefix . str_pad($sequence, 4, '0', STR_PAD_LEFT);
-    }
-
-    /**
-     * Create a draft claim from a sale.
-     *
-     * @param  int  $saleId
-     * @param  int  $policyId
-     * @param  array<int, array<string, mixed>>  $lineItems
-     */
-    public function createClaimFromSale(int $businessId, int $saleId, int $policyId, array $lineItems = []): InsuranceClaim
-    {
-        return DB::transaction(function () use ($businessId, $saleId, $policyId, $lineItems) {
-            $policy = InsurancePolicy::where('business_id', $businessId)
-                ->findOrFail($policyId);
-
-            if (! $policy->isValid()) {
-                throw new \RuntimeException('Insurance policy is not currently valid.');
-            }
-
-            $sale = \App\Models\Sale::where('business_id', $businessId)
-                ->findOrFail($saleId);
-
-            $total = (float) $sale->total_amount;
-            $coverage = $this->resolveCoverage($policy, $total);
-            $covered = round($total * ($coverage / 100), 2);
-            $patient = round($total - $covered, 2);
-
-            return InsuranceClaim::create([
-                'business_id' => $businessId,
-                'insurance_company_id' => $policy->insurance_company_id,
-                'insurance_policy_id' => $policy->id,
-                'sale_id' => $sale->id,
-                'customer_id' => $policy->customer_id,
-                'user_id' => auth()->id(),
-                'claim_number' => $this->generateClaimNumber($businessId),
-                'service_date' => Carbon::now()->toDateString(),
-                'total_amount' => $total,
-                'covered_amount' => $covered,
-                'patient_responsibility' => $patient,
-                'status' => 'draft',
-                'line_items' => $lineItems,
-            ]);
+        return DB::transaction(function () use ($data) {
+            $data['code'] = $this->generateUniqueCompanyCode();
+            return InsuranceCompany::create($data);
         });
     }
 
     /**
-     * Submit a draft claim. Moves status from draft -> submitted.
+     * Update insurance company
+     */
+    public function updateCompany(InsuranceCompany $company, array $data): InsuranceCompany
+    {
+        $company->update($data);
+        return $company->fresh();
+    }
+
+    /**
+     * Create new insurance policy
+     */
+    public function createPolicy(array $data): InsurancePolicy
+    {
+        return DB::transaction(function () use ($data) {
+            $data['policy_number'] = $this->generateUniquePolicyNumber();
+            
+            // Calculate remaining limit if annual limit is provided
+            if (isset($data['annual_limit'])) {
+                $data['remaining_limit'] = $data['annual_limit'];
+            }
+
+            return InsurancePolicy::create($data);
+        });
+    }
+
+    /**
+     * Update insurance policy
+     */
+    public function updatePolicy(InsurancePolicy $policy, array $data): InsurancePolicy
+    {
+        $policy->update($data);
+        return $policy->fresh();
+    }
+
+    /**
+     * Create insurance claim
+     */
+    public function createClaim(array $data): InsuranceClaim
+    {
+        return DB::transaction(function () use ($data) {
+            $data['claim_number'] = $this->generateUniqueClaimNumber();
+            
+            // Auto-calculate coverage if not provided
+            if (!isset($data['covered_amount']) || !isset($data['patient_responsibility'])) {
+                $coverage = $this->calculateClaimCoverage($data);
+                $data['covered_amount'] = $coverage['covered_amount'];
+                $data['patient_responsibility'] = $coverage['patient_responsibility'];
+            }
+
+            $claim = InsuranceClaim::create($data);
+
+            // Update policy used amount
+            if ($claim->policy) {
+                $claim->policy->increment('used_amount', $claim->covered_amount);
+            }
+
+            return $claim;
+        });
+    }
+
+    /**
+     * Submit claim to insurance company
      */
     public function submitClaim(InsuranceClaim $claim): InsuranceClaim
     {
-        if ($claim->status !== 'draft') {
-            throw new \RuntimeException("Claim in status '{$claim->status}' cannot be submitted.");
-        }
-
         $claim->update([
             'status' => 'submitted',
-            'submission_date' => Carbon::now()->toDateString(),
+            'submission_date' => now(),
         ]);
 
-        Log::info('insurance.claim.submitted', [
-            'claim_id' => $claim->id,
-            'claim_number' => $claim->claim_number,
-        ]);
+        // Here you would integrate with the insurance company's API
+        // if integration_type is 'api' or 'hybrid'
+        $this->notifyInsuranceCompany($claim);
 
         return $claim->fresh();
     }
 
     /**
-     * Record insurer approval and update policy utilization.
+     * Process claim approval/rejection
      */
-    public function recordApproval(InsuranceClaim $claim, float $approvedAmount, ?string $externalRef = null): InsuranceClaim
+    public function processClaim(InsuranceClaim $claim, array $data): InsuranceClaim
     {
-        if (! in_array($claim->status, ['submitted', 'under_review'], true)) {
-            throw new \RuntimeException("Claim in status '{$claim->status}' cannot be approved.");
-        }
-
-        $approvedAmount = max(0.0, $approvedAmount);
-
-        return DB::transaction(function () use ($claim, $approvedAmount, $externalRef) {
+        return DB::transaction(function () use ($claim, $data) {
             $claim->update([
-                'status' => $approvedAmount >= (float) $claim->total_amount
-                    ? 'approved'
-                    : 'partially_approved',
-                'approved_amount' => $approvedAmount,
-                'rejected_amount' => round((float) $claim->total_amount - $approvedAmount, 2),
-                'external_reference' => $externalRef,
+                'status' => $data['status'],
+                'approved_amount' => $data['approved_amount'] ?? 0,
+                'rejected_amount' => $data['rejected_amount'] ?? 0,
+                'rejection_reason' => $data['rejection_reason'] ?? null,
+                'external_reference' => $data['external_reference'] ?? null,
             ]);
 
-            $policy = $claim->insurancePolicy;
-            $policy->used_amount = (float) $policy->used_amount + $approvedAmount;
-            if ($policy->annual_limit !== null) {
-                $policy->remaining_limit = (float) $policy->annual_limit - (float) $policy->used_amount;
+            // Update policy used amount based on approval
+            if ($claim->policy && $claim->isApproved()) {
+                $difference = $claim->approved_amount - $claim->covered_amount;
+                $claim->policy->increment('used_amount', $difference);
             }
-            $policy->save();
 
             return $claim->fresh();
         });
     }
 
     /**
-     * Reject a claim with a reason.
+     * Process claim payment
      */
-    public function rejectClaim(InsuranceClaim $claim, string $reason): InsuranceClaim
+    public function processPayment(InsuranceClaim $claim, float $amount): InsuranceClaim
     {
-        if (! in_array($claim->status, ['submitted', 'under_review'], true)) {
-            throw new \RuntimeException("Claim in status '{$claim->status}' cannot be rejected.");
-        }
+        return DB::transaction(function () use ($claim, $amount) {
+            $claim->update([
+                'status' => 'paid',
+                'paid_amount' => $claim->paid_amount + $amount,
+                'settlement_date' => now(),
+            ]);
 
-        $claim->update([
-            'status' => 'rejected',
-            'rejection_reason' => $reason,
-            'rejected_amount' => $claim->total_amount,
-        ]);
-
-        return $claim->fresh();
+            return $claim->fresh();
+        });
     }
 
     /**
-     * Mark a claim as paid by the insurer.
+     * Create coverage rule
      */
-    public function recordPayment(InsuranceClaim $claim, float $paidAmount, ?Carbon $settlementDate = null): InsuranceClaim
+    public function createCoverage(array $data): InsuranceCoverage
     {
-        if (! in_array($claim->status, ['approved', 'partially_approved'], true)) {
-            throw new \RuntimeException("Claim in status '{$claim->status}' cannot be marked as paid.");
-        }
-
-        $claim->update([
-            'status' => 'paid',
-            'paid_amount' => $paidAmount,
-            'settlement_date' => ($settlementDate ?? Carbon::now())->toDateString(),
-        ]);
-
-        return $claim->fresh();
+        return InsuranceCoverage::create($data);
     }
 
     /**
-     * Resolve the coverage percentage that applies to a given amount,
-     * honoring company defaults, policy overrides, and per-product rules.
+     * Update coverage rule
      */
-    public function resolveCoverage(InsurancePolicy $policy, float $amount, ?int $productId = null, ?int $categoryId = null): float
+    public function updateCoverage(InsuranceCoverage $coverage, array $data): InsuranceCoverage
     {
-        $company = $policy->insuranceCompany;
+        $coverage->update($data);
+        return $coverage->fresh();
+    }
 
-        // Per-product/per-category coverage wins if it matches and is active.
-        if ($productId) {
-            $rule = InsuranceCoverage::where('insurance_company_id', $company->id)
-                ->where('product_id', $productId)
-                ->where('is_active', true)
-                ->where(function ($q) {
-                    $q->whereNull('effective_from')->orWhere('effective_from', '<=', now());
-                })
-                ->where(function ($q) {
-                    $q->whereNull('effective_to')->orWhere('effective_to', '>=', now());
-                })
-                ->orderByDesc('id')
-                ->first();
+    /**
+     * Calculate coverage for a claim
+     */
+    public function calculateClaimCoverage(array $data): array
+    {
+        $policy = InsurancePolicy::find($data['insurance_policy_id']);
+        if (!$policy) {
+            return [
+                'covered_amount' => 0,
+                'patient_responsibility' => $data['total_amount'],
+            ];
+        }
 
-            if ($rule) {
-                return (float) $rule->coverage_percent;
+        // Get applicable coverage rules
+        $coverageRules = $this->getApplicableCoverageRules($policy, $data);
+        
+        if ($coverageRules->isEmpty()) {
+            // Use default company coverage
+            return $policy->company->calculateDefaultCoverage($data['total_amount']);
+        }
+
+        // Apply best coverage rule
+        $bestCoverage = $coverageRules->first();
+        return $bestCoverage->calculateCoverage($data['total_amount']);
+    }
+
+    /**
+     * Get applicable coverage rules for a claim
+     */
+    protected function getApplicableCoverageRules(InsurancePolicy $policy, array $data): \Illuminate\Database\Eloquent\Collection
+    {
+        $query = InsuranceCoverage::query()
+            ->forCompany($policy->insurance_company_id)
+            ->active();
+
+        // If product_id is provided, try product-specific coverage
+        if (isset($data['product_id'])) {
+            $productCoverage = (clone $query)->forProduct($data['product_id'])->get();
+            if ($productCoverage->isNotEmpty()) {
+                return $productCoverage;
             }
         }
 
-        if ($categoryId) {
-            $rule = InsuranceCoverage::where('insurance_company_id', $company->id)
-                ->where('category_id', $categoryId)
-                ->where('is_active', true)
-                ->orderByDesc('id')
-                ->first();
-
-            if ($rule) {
-                return (float) $rule->coverage_percent;
+        // If category_id is provided, try category-specific coverage
+        if (isset($data['category_id'])) {
+            $categoryCoverage = (clone $query)->forCategory($data['category_id'])->get();
+            if ($categoryCoverage->isNotEmpty()) {
+                return $categoryCoverage;
             }
         }
 
-        // Policy-level override
-        if ($policy->coverage_percent !== null) {
-            return (float) $policy->coverage_percent;
-        }
-
-        // Company default
-        return (float) $company->default_coverage_percent;
+        // Return general coverage
+        return $query->where('scope', 'all')->get();
     }
 
     /**
-     * Dashboard summary for a business.
-     *
-     * @return array<string, mixed>
+     * Validate policy eligibility
      */
-    public function getSummary(int $businessId): array
+    public function validatePolicyEligibility(InsurancePolicy $policy, float $amount): array
     {
-        $companyCount = InsuranceCompany::where('business_id', $businessId)->count();
-        $activeCompanyCount = InsuranceCompany::where('business_id', $businessId)
-            ->where('status', 'active')->count();
-        $policyCount = InsurancePolicy::where('business_id', $businessId)->count();
-        $activePolicyCount = InsurancePolicy::where('business_id', $businessId)
-            ->where('status', 'active')->count();
-        $expiringPolicyCount = InsurancePolicy::where('business_id', $businessId)
-            ->expiringSoon(30)->count();
+        if ($policy->isExpired()) {
+            return [
+                'eligible' => false,
+                'reason' => 'Policy expired',
+            ];
+        }
 
-        $claimStats = InsuranceClaim::where('business_id', $businessId)
-            ->selectRaw('status, COUNT(*) as count, COALESCE(SUM(total_amount),0) as total, COALESCE(SUM(paid_amount),0) as paid_total')
-            ->groupBy('status')
-            ->get()
-            ->keyBy('status')
-            ->map(fn ($row) => [
-                'count' => (int) $row->count,
-                'total' => (float) ($row->status === 'paid' ? ($row->paid_total ?? 0) : $row->total),
-            ])
-            ->all();
-
-        $pending = ($claimStats['submitted']['total'] ?? 0) + ($claimStats['under_review']['total'] ?? 0);
-        $paid = (float) ($claimStats['paid']['total'] ?? 0);
+        if (!$policy->hasSufficientLimit($amount)) {
+            return [
+                'eligible' => false,
+                'reason' => 'Insufficient annual limit',
+            ];
+        }
 
         return [
-            'companies' => [
-                'total' => $companyCount,
-                'active' => $activeCompanyCount,
-            ],
-            'policies' => [
-                'total' => $policyCount,
-                'active' => $activePolicyCount,
-                'expiring_soon' => $expiringPolicyCount,
-            ],
-            'claims' => [
-                'by_status' => $claimStats,
-                'pending_amount' => (float) $pending,
-                'paid_amount' => (float) $paid,
-            ],
+            'eligible' => true,
+            'reason' => null,
         ];
+    }
+
+    /**
+     * Generate unique company code
+     */
+    protected function generateUniqueCompanyCode(): string
+    {
+        do {
+            $code = 'INS-' . strtoupper(Str::random(8));
+        } while (InsuranceCompany::where('code', $code)->exists());
+
+        return $code;
+    }
+
+    /**
+     * Generate unique policy number
+     */
+    protected function generateUniquePolicyNumber(): string
+    {
+        do {
+            $number = 'POL-' . date('Ymd') . '-' . strtoupper(Str::random(6));
+        } while (InsurancePolicy::where('policy_number', $number)->exists());
+
+        return $number;
+    }
+
+    /**
+     * Generate unique claim number
+     */
+    protected function generateUniqueClaimNumber(): string
+    {
+        do {
+            $number = 'CLM-' . date('Ymd') . '-' . strtoupper(Str::random(8));
+        } while (InsuranceClaim::where('claim_number', $number)->exists());
+
+        return $number;
+    }
+
+    /**
+     * Notify insurance company (placeholder for API integration)
+     */
+    protected function notifyInsuranceCompany(InsuranceClaim $claim): void
+    {
+        // Implement API integration based on company's integration_type
+        // This would typically involve sending the claim data to the insurer's endpoint
+    }
+
+    /**
+     * Get claim statistics for a business
+     */
+    public function getClaimStatistics(int $businessId, array $filters = []): array
+    {
+        $query = InsuranceClaim::forBusiness($businessId);
+
+        if (isset($filters['date_from'])) {
+            $query->where('service_date', '>=', $filters['date_from']);
+        }
+
+        if (isset($filters['date_to'])) {
+            $query->where('service_date', '<=', $filters['date_to']);
+        }
+
+        if (isset($filters['company_id'])) {
+            $query->where('insurance_company_id', $filters['company_id']);
+        }
+
+        $claims = $query->get();
+
+        return [
+            'total_claims' => $claims->count(),
+            'total_amount' => $claims->sum('total_amount'),
+            'total_covered' => $claims->sum('covered_amount'),
+            'total_paid' => $claims->sum('paid_amount'),
+            'pending_claims' => $claims->where('status', 'submitted')->count(),
+            'approved_claims' => $claims->whereIn('status', ['approved', 'partially_approved'])->count(),
+            'rejected_claims' => $claims->where('status', 'rejected')->count(),
+            'paid_claims' => $claims->where('status', 'paid')->count(),
+            'average_processing_days' => $this->calculateAverageProcessingDays($claims),
+        ];
+    }
+
+    /**
+     * Calculate average processing days for claims
+     */
+    protected function calculateAverageProcessingDays($claims): float
+    {
+        $processedClaims = $claims->filter(function ($claim) {
+            return $claim->settlement_date && $claim->submission_date;
+        });
+
+        if ($processedClaims->isEmpty()) {
+            return 0;
+        }
+
+        $totalDays = $processedClaims->sum(function ($claim) {
+            return $claim->settlement_date->diffInDays($claim->submission_date);
+        });
+
+        return round($totalDays / $processedClaims->count(), 1);
     }
 }

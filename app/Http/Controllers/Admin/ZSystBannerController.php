@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Banner;
-use App\Helpers\HasUploader;
-use Illuminate\Http\Request;
 use App\Exports\BannerExport;
-use Illuminate\Support\Facades\DB;
+use App\Helpers\HasUploader;
 use App\Http\Controllers\Controller;
-use Maatwebsite\Excel\Facades\Excel;
+use App\Models\Banner;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ZSystBannerController extends Controller
 {
@@ -19,13 +19,14 @@ class ZSystBannerController extends Controller
     {
         $this->middleware('permission:banners-create')->only('create', 'store');
         $this->middleware('permission:banners-read')->only('index');
-        $this->middleware('permission:banners-update')->only('edit', 'update','status');
-        $this->middleware('permission:banners-delete')->only('destroy','deleteAll');
+        $this->middleware('permission:banners-update')->only('edit', 'update', 'status');
+        $this->middleware('permission:banners-delete')->only('destroy', 'deleteAll');
     }
 
     public function index(Request $request)
     {
         $banners = Banner::latest()->paginate(10);
+
         return view('admin.banners.index', compact('banners'));
     }
 
@@ -33,7 +34,7 @@ class ZSystBannerController extends Controller
     {
         $banners = Banner::when(request('search'), function ($q) {
             $q->where(function ($q) {
-                $q->where('name', 'like', '%' . request('search') . '%');
+                $q->where('name', 'like', '%'.request('search').'%');
             });
         })
             ->latest()
@@ -41,7 +42,7 @@ class ZSystBannerController extends Controller
 
         if ($request->ajax()) {
             return response()->json([
-                'data' => view('admin.banners.datas', compact('banners'))->render()
+                'data' => view('admin.banners.datas', compact('banners'))->render(),
             ]);
         }
 
@@ -53,28 +54,27 @@ class ZSystBannerController extends Controller
         $request->validate([
             'name' => 'required|max:250',
             'status' => 'nullable|in:on',
-            'imageUrl'  => 'required|image|mimes:jpeg,png,jpg,gif,svg',
+            'imageUrl' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
         ]);
 
         Banner::create([
             'name' => $request->name,
-            'imageUrl' => $request->imageUrl ? $this->upload($request, 'imageUrl') : NULL,
+            'imageUrl' => $request->imageUrl ? $this->upload($request, 'imageUrl') : null,
             'status' => $request->status ? 1 : 0,
         ]);
 
         return response()->json([
             'message' => __('Banner saved successfully'),
-            'redirect' => route('admin.banners.index')
+            'redirect' => route('admin.banners.index'),
         ]);
     }
-
 
     public function update(Request $request, string $id)
     {
         $request->validate([
             'name' => 'required|max:250',
             'status' => 'nullable|in:on',
-            'imageUrl'  => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+            'imageUrl' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
         ]);
 
         $banner = Banner::findOrFail($id);
@@ -87,10 +87,9 @@ class ZSystBannerController extends Controller
 
         return response()->json([
             'message' => __('Banner updated successfully'),
-            'redirect' => route('admin.banners.index')
+            'redirect' => route('admin.banners.index'),
         ]);
     }
-
 
     public function destroy(string $id)
     {
@@ -104,7 +103,7 @@ class ZSystBannerController extends Controller
 
         return response()->json([
             'message' => __('Banners deleted successfully'),
-            'redirect' => route('admin.banners.index')
+            'redirect' => route('admin.banners.index'),
         ]);
 
     }
@@ -113,6 +112,7 @@ class ZSystBannerController extends Controller
     {
         $banner = Banner::findOrFail($id);
         $banner->update(['status' => $request->status]);
+
         return response()->json(['message' => 'Banner']);
     }
 
@@ -134,10 +134,11 @@ class ZSystBannerController extends Controller
 
             return response()->json([
                 'message' => __('Selected Banners deleted successfully'),
-                'redirect' => route('admin.banners.index')
+                'redirect' => route('admin.banners.index'),
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(__('Something was wrong.'), 400);
         }
 

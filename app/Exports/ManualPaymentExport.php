@@ -15,10 +15,10 @@ class ManualPaymentExport implements FromView
                 'plan:id,subscriptionName',
                 'business:id,companyName,pictureUrl,business_category_id',
                 'business.category:id,name',
-                'gateway:id,name'
+                'gateway:id,name',
             ])->whereHas('gateway', function ($query) {
                 $query->where('name', 'Manual');
-            })->latest()->get()
+            })->latest()->get(),
         ]);
     }
 }

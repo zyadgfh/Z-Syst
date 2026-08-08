@@ -15,13 +15,12 @@ class ZSystInvoiceController extends Controller
     public function index(Request $request)
     {
         $request->validate([
-            'party_id' => 'required|exists:parties,id'
+            'party_id' => 'required|exists:parties,id',
         ]);
 
-        $party = Party::select('id', 'due', 'name', 'type', 'opening_balance')->find(request('party_id'));
+        $party = Party::select('id', 'due', 'name', 'type', 'opening_balance')->find($request->input('party_id'));
 
-        if ($party->type == 'Supplier')
-        {
+        if ($party->type == 'Supplier') {
             $data = $party->load('purchases_dues:id,party_id,dueAmount,paidAmount,totalAmount,invoiceNumber');
         } else {
             $data = $party->load('sales_dues:id,party_id,dueAmount,paidAmount,totalAmount,invoiceNumber');
@@ -36,7 +35,7 @@ class ZSystInvoiceController extends Controller
     public function newInvoice(Request $request)
     {
         $request->validate([
-            'platform' => 'required|in:sales,purchases,due_collects,sales_return,purchases_return'
+            'platform' => 'required|in:sales,purchases,due_collects,sales_return,purchases_return',
         ]);
 
         if ($request->platform == 'sales') {
@@ -56,7 +55,7 @@ class ZSystInvoiceController extends Controller
             $id = DueCollect::where('business_id', auth()->user()->business_id)->count();
         }
 
-        $invoice = $prefix . str_pad($id + 1, 5, '0', STR_PAD_LEFT);
+        $invoice = $prefix.str_pad($id + 1, 5, '0', STR_PAD_LEFT);
 
         return response()->json($invoice);
     }

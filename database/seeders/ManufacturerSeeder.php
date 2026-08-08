@@ -2,10 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Unit;
 use App\Models\Manufacturer;
 use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class ManufacturerSeeder extends Seeder
 {
@@ -14,13 +12,13 @@ class ManufacturerSeeder extends Seeder
      */
     public function run(): void
     {
-        $units = array(
-            array('name' => 'ACI Limited','business_id' => 1,'status' => 1,'created_at' => now(),'updated_at' => now()),
-            array('name' => 'ACME Laboratories Ltd.','business_id' => 1,'status' => 1,'created_at' => now(),'updated_at' => now()),
-            array('name' => 'Square Ltd.','business_id' => 1,'status' => 1,'created_at' => now(),'updated_at' => now()),
-            array('name' => 'APC Pharma Ltd.','business_id' => 1,'status' => 1,'created_at' => now(),'updated_at' => now()),
-            array('name' => 'Beximco','business_id' => 1,'status' => 1,'created_at' => now(),'updated_at' => now()),
-        );
+        $units = [
+            ['name' => 'ACI Limited', 'business_id' => 1, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'ACME Laboratories Ltd.', 'business_id' => 1, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Square Ltd.', 'business_id' => 1, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'APC Pharma Ltd.', 'business_id' => 1, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Beximco', 'business_id' => 1, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+        ];
 
         Manufacturer::insert($units);
     }

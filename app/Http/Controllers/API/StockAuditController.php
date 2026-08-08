@@ -3,18 +3,18 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreStockAuditRequest;
 use App\Http\Requests\StoreStockAuditDetailRequest;
+use App\Http\Requests\StoreStockAuditRequest;
 use App\Http\Requests\UpdateStockReconciliationRequest;
-use App\Services\StockAuditService;
+use App\Http\Resources\StockAuditDetailResource;
+use App\Http\Resources\StockAuditResource;
+use App\Http\Resources\StockReconciliationResource;
 use App\Models\StockAudit;
 use App\Models\StockAuditDetail;
 use App\Models\StockReconciliation;
-use App\Http\Resources\StockAuditResource;
-use App\Http\Resources\StockAuditDetailResource;
-use App\Http\Resources\StockReconciliationResource;
-use Illuminate\Support\Facades\Auth;
+use App\Services\StockAuditService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class StockAuditController extends Controller
 {
@@ -31,7 +31,7 @@ class StockAuditController extends Controller
     public function index(Request $request)
     {
         $businessId = Auth::user()->business_id;
-        
+
         $audits = StockAudit::byBusiness($businessId)
             ->with(['user:id,name', 'details'])
             ->when($request->status, function ($query) use ($request) {
@@ -41,7 +41,7 @@ class StockAuditController extends Controller
                 return $query->byType($request->audit_type);
             })
             ->latest()
-            ->paginate(10);
+            ->paginate($request->input('per_page', 10));
 
         return response()->json([
             'message' => __('Stock audits fetched successfully.'),
@@ -56,7 +56,7 @@ class StockAuditController extends Controller
     {
         $data = $request->validated();
         $data['business_id'] = Auth::user()->business_id;
-        
+
         $audit = $this->auditService->createAudit($data);
 
         return response()->json([
@@ -71,7 +71,7 @@ class StockAuditController extends Controller
     public function show(StockAudit $audit)
     {
         $this->authorizeAuditAccess($audit);
-        
+
         $audit->load(['user:id,name', 'details.product', 'details.stock', 'reconciliations']);
 
         $summary = $this->auditService->getAuditSummary($audit);
@@ -89,7 +89,7 @@ class StockAuditController extends Controller
     public function start(StockAudit $audit)
     {
         $this->authorizeAuditAccess($audit);
-        
+
         $audit = $this->auditService->startAudit($audit, Auth::id());
 
         return response()->json([
@@ -104,7 +104,7 @@ class StockAuditController extends Controller
     public function complete(StockAudit $audit)
     {
         $this->authorizeAuditAccess($audit);
-        
+
         $audit = $this->auditService->completeAudit($audit);
 
         return response()->json([
@@ -119,7 +119,7 @@ class StockAuditController extends Controller
     public function cancel(Request $request, StockAudit $audit)
     {
         $this->authorizeAuditAccess($audit);
-        
+
         $reason = $request->input('reason');
         $audit = $this->auditService->cancelAudit($audit, $reason);
 
@@ -135,7 +135,7 @@ class StockAuditController extends Controller
     public function autoPopulate(StockAudit $audit)
     {
         $this->authorizeAuditAccess($audit);
-        
+
         $details = $this->auditService->autoPopulateAudit($audit);
 
         return response()->json([
@@ -151,10 +151,10 @@ class StockAuditController extends Controller
     public function addDetail(StoreStockAuditDetailRequest $request)
     {
         $data = $request->validated();
-        
+
         $audit = StockAudit::findOrFail($data['stock_audit_id']);
         $this->authorizeAuditAccess($audit);
-        
+
         $detail = $this->auditService->addAuditDetail($audit, $data);
 
         return response()->json([
@@ -169,7 +169,7 @@ class StockAuditController extends Controller
     public function addBulkDetails(Request $request, StockAudit $audit)
     {
         $this->authorizeAuditAccess($audit);
-        
+
         $request->validate([
             'details' => 'required|array|min:1',
             'details.*.product_id' => 'required|exists:products,id',
@@ -193,7 +193,7 @@ class StockAuditController extends Controller
     public function varianceReport(StockAudit $audit)
     {
         $this->authorizeAuditAccess($audit);
-        
+
         $report = $this->auditService->getVarianceReport($audit);
 
         return response()->json([
@@ -208,7 +208,7 @@ class StockAuditController extends Controller
     public function createReconciliation(Request $request, StockAuditDetail $detail)
     {
         $this->authorizeDetailAccess($detail);
-        
+
         $request->validate([
             'reason' => 'nullable|string|max:500',
         ]);
@@ -231,7 +231,7 @@ class StockAuditController extends Controller
     public function postReconciliation(StockReconciliation $reconciliation)
     {
         $this->authorizeReconciliationAccess($reconciliation);
-        
+
         $reconciliation = $this->auditService->postReconciliation($reconciliation);
 
         return response()->json([
@@ -246,7 +246,7 @@ class StockAuditController extends Controller
     public function postAllReconciliations(StockAudit $audit)
     {
         $this->authorizeAuditAccess($audit);
-        
+
         $reconciliations = $this->auditService->postAllReconciliations($audit);
 
         return response()->json([
@@ -262,7 +262,7 @@ class StockAuditController extends Controller
     public function updateReconciliation(UpdateStockReconciliationRequest $request, StockReconciliation $reconciliation)
     {
         $this->authorizeReconciliationAccess($reconciliation);
-        
+
         if ($reconciliation->is_posted) {
             return response()->json([
                 'message' => __('Cannot update posted reconciliation.'),
@@ -283,7 +283,7 @@ class StockAuditController extends Controller
     public function deleteReconciliation(StockReconciliation $reconciliation)
     {
         $this->authorizeReconciliationAccess($reconciliation);
-        
+
         if ($reconciliation->is_posted) {
             return response()->json([
                 'message' => __('Cannot delete posted reconciliation.'),
@@ -303,9 +303,9 @@ class StockAuditController extends Controller
     public function deleteDetail(StockAuditDetail $detail)
     {
         $this->authorizeDetailAccess($detail);
-        
+
         $audit = $detail->stockAudit;
-        
+
         if ($audit->status === 'completed') {
             return response()->json([
                 'message' => __('Cannot delete detail from completed audit.'),

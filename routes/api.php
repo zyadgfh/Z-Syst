@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api as Api;
+use App\Http\Controllers\Api;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -13,9 +13,9 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::middleware('throttle:5,5')->group(function () {
-        Route::post('/send-reset-code',[Api\Auth\ZSystForgotPasswordController::class, 'sendResetCode']);
-        Route::post('/verify-reset-code',[Api\Auth\ZSystForgotPasswordController::class, 'verifyResetCode']);
-        Route::post('/password-reset',[Api\Auth\ZSystForgotPasswordController::class, 'resetPassword']);
+        Route::post('/send-reset-code', [Api\Auth\ZSystForgotPasswordController::class, 'sendResetCode']);
+        Route::post('/verify-reset-code', [Api\Auth\ZSystForgotPasswordController::class, 'verifyResetCode']);
+        Route::post('/password-reset', [Api\Auth\ZSystForgotPasswordController::class, 'resetPassword']);
     });
 
     Route::group(['middleware' => ['auth:sanctum']], function () {
@@ -41,9 +41,98 @@ Route::prefix('v1')->group(function () {
             Route::get('purchase-return-report', [Api\ReportsController::class, 'purchaseReturnReport']);
             Route::get('stock-audit-report', [Api\ReportsController::class, 'stockAuditReport']);
             Route::get('financial-audit-report', [Api\ReportsController::class, 'financialAuditReport']);
+
+            // Barcode API endpoints
+            Route::apiResource('barcodes', Api\BarcodeController::class)->except('show');
+            Route::get('barcodes/{barcode}', [Api\BarcodeController::class, 'show'])->name('barcodes.show');
+            Route::post('barcodes/generate-multiple', [Api\BarcodeController::class, 'generateMultiple'])->name('barcodes.generate-multiple');
+            Route::post('barcodes/generate-for-batch', [Api\BarcodeController::class, 'generateForBatch'])->name('barcodes.generate-for-batch');
+            Route::post('barcodes/{barcode}/print', [Api\BarcodeController::class, 'print'])->name('barcodes.print');
+            Route::post('barcodes/print-multiple', [Api\BarcodeController::class, 'printMultiple'])->name('barcodes.print-multiple');
+            Route::post('barcodes/print-for-product', [Api\BarcodeController::class, 'printForProduct'])->name('barcodes.print-for-product');
+            Route::post('barcodes/print-for-batch', [Api\BarcodeController::class, 'printForBatch'])->name('barcodes.print-for-batch');
+            Route::post('barcodes/{barcode}/reprint', [Api\BarcodeController::class, 'reprint'])->name('barcodes.reprint');
+            Route::get('barcodes/download/{filename}', [Api\BarcodeController::class, 'download'])->name('barcodes.download');
+            Route::get('barcodes/search', [Api\BarcodeController::class, 'search'])->name('barcodes.search');
+            Route::get('barcodes/settings', [Api\BarcodeController::class, 'settings'])->name('barcodes.settings');
+            Route::get('barcodes/not-printed', [Api\BarcodeController::class, 'notPrinted'])->name('barcodes.not-printed');
+            Route::get('barcodes/by-product/{productId}', [Api\BarcodeController::class, 'byProduct'])->name('barcodes.by-product');
+            Route::get('barcodes/by-batch/{batchId}', [Api\BarcodeController::class, 'byBatch'])->name('barcodes.by-batch');
+
+            // Supplier Invoice API endpoints
+            Route::apiResource('supplier-invoices', Api\SupplierInvoiceController::class)->except('show');
+            Route::get('supplier-invoices/{supplierInvoice}', [Api\SupplierInvoiceController::class, 'show'])->name('supplier-invoices.show');
+            Route::post('supplier-invoices/{supplierInvoice}/approve', [Api\SupplierInvoiceController::class, 'approve'])->name('supplier-invoices.approve');
+            Route::post('supplier-invoices/{supplierInvoice}/reject', [Api\SupplierInvoiceController::class, 'reject'])->name('supplier-invoices.reject');
+            Route::post('supplier-invoices/{supplierInvoice}/cancel', [Api\SupplierInvoiceController::class, 'cancel'])->name('supplier-invoices.cancel');
+            Route::post('supplier-invoices/{supplierInvoice}/add-payment', [Api\SupplierInvoiceController::class, 'addPayment'])->name('supplier-invoices.add-payment');
+            Route::post('supplier-invoices/payments/{paymentId}/approve', [Api\SupplierInvoiceController::class, 'approvePayment'])->name('supplier-invoices.approve-payment');
+            Route::get('supplier-invoices/pending', [Api\SupplierInvoiceController::class, 'pending'])->name('supplier-invoices.pending');
+            Route::get('supplier-invoices/overdue', [Api\SupplierInvoiceController::class, 'overdue'])->name('supplier-invoices.overdue');
+            Route::get('supplier-invoices/unpaid', [Api\SupplierInvoiceController::class, 'unpaid'])->name('supplier-invoices.unpaid');
+            Route::get('supplier-invoices/statistics', [Api\SupplierInvoiceController::class, 'statistics'])->name('supplier-invoices.statistics');
+            Route::get('supplier-invoices/aging-report', [Api\SupplierInvoiceController::class, 'agingReport'])->name('supplier-invoices.aging-report');
+            Route::post('supplier-invoices/create-from-purchase', [Api\SupplierInvoiceController::class, 'createFromPurchase'])->name('supplier-invoices.create-from-purchase');
+
+            // Doctor Attention API endpoints
+            Route::get('doctor-attention/dashboard', [Api\DoctorAttentionController::class, 'dashboard'])->name('doctor-attention.dashboard');
+            Route::get('doctor-attention/needing-attention', [Api\DoctorAttentionController::class, 'needingAttention'])->name('doctor-attention.needing-attention');
+            Route::get('doctor-attention/critical', [Api\DoctorAttentionController::class, 'critical'])->name('doctor-attention.critical');
+            Route::get('doctor-attention/alerts', [Api\DoctorAttentionController::class, 'alerts'])->name('doctor-attention.alerts');
+            Route::post('doctor-attention/alerts/{alertId}/read', [Api\DoctorAttentionController::class, 'markAsRead'])->name('doctor-attention.mark-read');
+            Route::post('doctor-attention/alerts/{alertId}/action', [Api\DoctorAttentionController::class, 'markAsActionTaken'])->name('doctor-attention.mark-action');
+            Route::get('doctor-attention/statistics', [Api\DoctorAttentionController::class, 'statistics'])->name('doctor-attention.statistics');
+            Route::put('doctor-attention/settings', [Api\DoctorAttentionController::class, 'updateSettings'])->name('doctor-attention.update-settings');
+            Route::get('doctor-attention/settings', [Api\DoctorAttentionController::class, 'getSettings'])->name('doctor-attention.get-settings');
+            Route::post('doctor-attention/calculate-scores', [Api\DoctorAttentionController::class, 'calculateScores'])->name('doctor-attention.calculate-scores');
+            Route::post('doctor-attention/record-activity', [Api\DoctorAttentionController::class, 'recordActivity'])->name('doctor-attention.record-activity');
+
+            // Purchase Orders API endpoints
+            Route::apiResource('purchase-orders', Api\PurchaseOrderController::class)->except('show');
+            Route::get('purchase-orders/{purchaseOrder}', [Api\PurchaseOrderController::class, 'show'])->name('purchase-orders.show');
+            Route::post('purchase-orders/{purchaseOrder}/send', [Api\PurchaseOrderController::class, 'send'])->name('purchase-orders.send');
+            Route::post('purchase-orders/{purchaseOrder}/approve', [Api\PurchaseOrderController::class, 'approve'])->name('purchase-orders.approve');
+            Route::post('purchase-orders/{purchaseOrder}/reject', [Api\PurchaseOrderController::class, 'reject'])->name('purchase-orders.reject');
+            Route::post('purchase-orders/{purchaseOrder}/cancel', [Api\PurchaseOrderController::class, 'cancel'])->name('purchase-orders.cancel');
+            Route::post('purchase-orders/{purchaseOrder}/convert', [Api\PurchaseOrderController::class, 'convertToPurchase'])->name('purchase-orders.convert');
+            Route::get('purchase-orders/pending', [Api\PurchaseOrderController::class, 'pending'])->name('purchase-orders.pending');
+            Route::get('purchase-orders/overdue', [Api\PurchaseOrderController::class, 'overdue'])->name('purchase-orders.overdue');
+            Route::get('purchase-orders/statistics', [Api\PurchaseOrderController::class, 'statistics'])->name('purchase-orders.statistics');
+
+            // GRN API endpoints
+            Route::apiResource('grn', Api\GRNController::class)->except('show');
+            Route::get('grn/{grn}', [Api\GRNController::class, 'show'])->name('grn.show');
+            Route::post('grn/{grn}/verify', [Api\GRNController::class, 'verify'])->name('grn.verify');
+            Route::post('grn/{grn}/accept', [Api\GRNController::class, 'accept'])->name('grn.accept');
+            Route::post('grn/{grn}/reject', [Api\GRNController::class, 'reject'])->name('grn.reject');
+            Route::get('grn/pending', [Api\GRNController::class, 'pending'])->name('grn.pending');
+            Route::get('grn/statistics', [Api\GRNController::class, 'statistics'])->name('grn.statistics');
+
+            // Supplier API endpoints
+            Route::apiResource('suppliers', Api\SupplierController::class)->except('show');
+            Route::get('suppliers/{supplier}', [Api\SupplierController::class, 'show'])->name('suppliers.show');
+            Route::post('suppliers/{supplier}/calculate-performance', [Api\SupplierController::class, 'calculatePerformance'])->name('suppliers.calculate-performance');
+            Route::get('suppliers/top-performers', [Api\SupplierController::class, 'topPerformers'])->name('suppliers.top-performers');
+
+            // Supplier Payment API endpoints
+            Route::apiResource('supplier-payments', Api\SupplierPaymentController::class)->except('show');
+            Route::get('supplier-payments/{supplierPayment}', [Api\SupplierPaymentController::class, 'show'])->name('supplier-payments.show');
+            Route::post('supplier-payments/{supplierPayment}/approve', [Api\SupplierPaymentController::class, 'approve'])->name('supplier-payments.approve');
+            Route::get('supplier-payments/generate-aging-report', [Api\SupplierPaymentController::class, 'generateAgingReport'])->name('supplier-payments.generate-aging-report');
+
+            // Subscription API endpoints
+            Route::apiResource('subscriptions', Api\SubscriptionController::class)->except('show');
+            Route::get('subscriptions/{subscription}', [Api\SubscriptionController::class, 'show'])->name('subscriptions.show');
+            Route::post('subscriptions/{subscription}/upgrade', [Api\SubscriptionController::class, 'upgrade'])->name('subscriptions.upgrade');
+            Route::post('subscriptions/{subscription}/downgrade', [Api\SubscriptionController::class, 'downgrade'])->name('subscriptions.downgrade');
+            Route::post('subscriptions/{subscription}/cancel', [Api\SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
+            Route::post('subscriptions/{subscription}/renew', [Api\SubscriptionController::class, 'renew'])->name('subscriptions.renew');
+            Route::post('subscriptions/{subscription}/generate-invoice', [Api\SubscriptionController::class, 'generateInvoice'])->name('subscriptions.generate-invoice');
+            Route::get('subscriptions/usage', [Api\SubscriptionController::class, 'usage'])->name('subscriptions.usage');
+            Route::get('subscriptions/check-limits', [Api\SubscriptionController::class, 'checkLimits'])->name('subscriptions.check-limits');
         });
 
-        Route::post('stock-update/{id}',[Api\ZSystProductController::class, 'updateStock']);
+        Route::post('stock-update/{id}', [Api\ZSystProductController::class, 'updateStock']);
         Route::get('stocks-with-product', [Api\ZSystProductController::class, 'stocksWithProduct']);
         Route::get('dues-list', [Api\ZSystDueController::class, 'duesList']);
 
@@ -210,5 +299,47 @@ Route::prefix('v1')->group(function () {
         Route::get('new-invoice', [Api\ZSystInvoiceController::class, 'newInvoice']);
         Route::get('/sign-out', [Api\Auth\AuthController::class, 'signOut']);
         Route::get('/refresh-token', [Api\Auth\AuthController::class, 'refreshToken']);
+
+        // Warehouse System
+        Route::prefix('warehouses')->group(function () {
+            Route::get('/', [Api\WarehouseController::class, 'index']);
+            Route::post('/', [Api\WarehouseController::class, 'store']);
+            Route::get('/{warehouse}', [Api\WarehouseController::class, 'show']);
+            Route::put('/{warehouse}', [Api\WarehouseController::class, 'update']);
+            Route::delete('/{warehouse}', [Api\WarehouseController::class, 'destroy']);
+            Route::get('/{warehouse}/stock', [Api\WarehouseController::class, 'stock']);
+        });
+
+        // Traceability & Recall System
+        Route::prefix('traceability')->group(function () {
+            Route::get('batch-lots', [Api\TraceabilityController::class, 'batchLots']);
+            Route::get('expiring-batches', [Api\TraceabilityController::class, 'expiringBatches']);
+            Route::get('expired-batches', [Api\TraceabilityController::class, 'expiredBatches']);
+            Route::get('recalls', [Api\TraceabilityController::class, 'recalls']);
+            Route::post('recalls', [Api\TraceabilityController::class, 'initiateRecall']);
+            Route::post('recalls/{recall}/resolve', [Api\TraceabilityController::class, 'resolveRecall']);
+            Route::get('traceability', [Api\TraceabilityController::class, 'traceability']);
+        });
+
+        // Loyalty & CRM System
+        Route::prefix('loyalty')->group(function () {
+            Route::get('/', [Api\LoyaltyController::class, 'index']);
+            Route::post('/', [Api\LoyaltyController::class, 'store']);
+            Route::put('/{program}', [Api\LoyaltyController::class, 'update']);
+            Route::delete('/{program}', [Api\LoyaltyController::class, 'destroy']);
+            Route::get('balance/{partyId?}', [Api\LoyaltyController::class, 'partyBalance']);
+            Route::get('history/{partyId?}', [Api\LoyaltyController::class, 'partyHistory']);
+            Route::get('interactions', [Api\LoyaltyController::class, 'interactions']);
+        });
+
+        // Receipt System
+        Route::prefix('receipts')->group(function () {
+            Route::get('settings', [Api\ReceiptController::class, 'settings']);
+            Route::put('settings', [Api\ReceiptController::class, 'updateSettings']);
+            Route::post('sales/{sale}', [Api\ReceiptController::class, 'generateForSale']);
+            Route::post('purchases/{purchase}', [Api\ReceiptController::class, 'generateForPurchase']);
+            Route::get('/{receipt}', [Api\ReceiptController::class, 'show']);
+            Route::get('/{receipt}/download', [Api\ReceiptController::class, 'download']);
+        });
     });
 });

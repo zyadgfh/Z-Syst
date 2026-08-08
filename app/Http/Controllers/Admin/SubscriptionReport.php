@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Exports\SubscriptionReportExport;
-use Illuminate\Http\Request;
-use App\Models\PlanSubscribe;
 use App\Http\Controllers\Controller;
+use App\Models\PlanSubscribe;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -13,7 +13,8 @@ class SubscriptionReport extends Controller
 {
     public function index(Request $request)
     {
-        $subscribers = PlanSubscribe::with(['plan:id,subscriptionName','business:id,companyName,pictureUrl,business_category_id','business.category:id,name'])->latest()->paginate(10);
+        $subscribers = PlanSubscribe::with(['plan:id,subscriptionName', 'business:id,companyName,pictureUrl,business_category_id', 'business.category:id,name'])->latest()->paginate(10);
+
         return view('admin.subscribers.index', compact('subscribers'));
     }
 
@@ -24,21 +25,21 @@ class SubscriptionReport extends Controller
         $subscribers = PlanSubscribe::with([
             'plan:id,subscriptionName',
             'business:id,companyName,business_category_id',
-            'business.category:id,name'
+            'business.category:id,name',
         ])
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($q) use ($search) {
-                    $q->where('duration', 'like', '%' . $search . '%')
+                    $q->where('duration', 'like', '%'.$search.'%')
                         ->orWhereHas('plan', function ($q) use ($search) {
-                            $q->where('subscriptionName', 'like', '%' . $search . '%');
+                            $q->where('subscriptionName', 'like', '%'.$search.'%');
                         })
                         ->orWhereHas('gateway', function ($q) use ($search) {
-                            $q->where('name', 'like', '%' . $search . '%');
+                            $q->where('name', 'like', '%'.$search.'%');
                         })
                         ->orWhereHas('business', function ($q) use ($search) {
-                            $q->where('companyName', 'like', '%' . $search . '%')
+                            $q->where('companyName', 'like', '%'.$search.'%')
                                 ->orWhereHas('category', function ($q) use ($search) {
-                                    $q->where('name', 'like', '%' . $search . '%');
+                                    $q->where('name', 'like', '%'.$search.'%');
                                 });
                         });
                 });
@@ -48,13 +49,12 @@ class SubscriptionReport extends Controller
 
         if ($request->ajax()) {
             return response()->json([
-                'data' => view('admin.subscribers.datas', compact('subscribers'))->render()
+                'data' => view('admin.subscribers.datas', compact('subscribers'))->render(),
             ]);
         }
 
         return redirect(url()->previous());
     }
-
 
     public function reject(Request $request, string $id)
     {
@@ -94,9 +94,9 @@ class SubscriptionReport extends Controller
             $updatedNotes = array_merge($existingNotes, ['reason' => $request->notes]);
 
             $subscribe->update($request->except('notes') + [
-                    'payment_status' => 'paid',
-                    'notes' => $updatedNotes,
-                ]);
+                'payment_status' => 'paid',
+                'notes' => $updatedNotes,
+            ]);
 
             $subscribe->business->update([
                 'subscriptionDate' => now(),
@@ -112,13 +112,15 @@ class SubscriptionReport extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['message' => 'request not found'], 404);
         }
     }
 
     public function getInvoice($invoice_id)
     {
-        $subscriber = PlanSubscribe::with(['plan:id,subscriptionName','business:id,companyName,business_category_id,phoneNumber,address','business.category:id,name','gateway:id,name'])->findOrFail($invoice_id);
+        $subscriber = PlanSubscribe::with(['plan:id,subscriptionName', 'business:id,companyName,business_category_id,phoneNumber,address', 'business.category:id,name', 'gateway:id,name'])->findOrFail($invoice_id);
+
         return view('admin.subscribers.invoice', compact('subscriber'));
     }
 

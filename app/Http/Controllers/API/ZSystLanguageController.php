@@ -10,6 +10,7 @@ class ZSystLanguageController extends Controller
     public function index()
     {
         $data = json_decode(file_get_contents(base_path('lang/langlist.json')), true);
+
         return response()->json([
             'message' => __('Data fetched successfully.'),
             'data' => $data,
@@ -19,15 +20,15 @@ class ZSystLanguageController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'lang' => 'required|max:30|min:1|string'
+            'lang' => 'required|max:30|min:1|string',
         ]);
 
         auth()->user()->update([
-            'lang' => $request->lang
+            'lang' => $request->lang,
         ]);
 
         return response()->json([
-            'message' => __('Language updated successfully.')
+            'message' => __('Language updated successfully.'),
         ]);
     }
 }

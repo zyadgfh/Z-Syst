@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Exports\CurrencyExport;
+use App\Http\Controllers\Controller;
 use App\Models\Currency;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ZSystCurrencyController extends Controller
@@ -21,6 +21,7 @@ class ZSystCurrencyController extends Controller
     public function index()
     {
         $currencies = Currency::orderBy('is_default', 'desc')->orderBy('status', 'desc')->paginate(10);
+
         return view('admin.currencies.index', compact('currencies'));
     }
 
@@ -28,10 +29,10 @@ class ZSystCurrencyController extends Controller
     {
         $currencies = Currency::orderBy('is_default', 'desc')->orderBy('status', 'desc')->when(request('search'), function ($q) {
             $q->where(function ($q) {
-                $q->where('name', 'like', '%' . request('search') . '%')
-                    ->orWhere('country_name', 'like', '%' . request('search') . '%')
-                    ->orWhere('code', 'like', '%' . request('search') . '%')
-                    ->orWhere('symbol', 'like', '%' . request('search') . '%');
+                $q->where('name', 'like', '%'.request('search').'%')
+                    ->orWhere('country_name', 'like', '%'.request('search').'%')
+                    ->orWhere('code', 'like', '%'.request('search').'%')
+                    ->orWhere('symbol', 'like', '%'.request('search').'%');
             });
         })
             ->latest()
@@ -39,7 +40,7 @@ class ZSystCurrencyController extends Controller
 
         if ($request->ajax()) {
             return response()->json([
-                'data' => view('admin.currencies.datas', compact('currencies'))->render()
+                'data' => view('admin.currencies.datas', compact('currencies'))->render(),
             ]);
         }
 
@@ -50,9 +51,9 @@ class ZSystCurrencyController extends Controller
     {
         $countries = base_path('lang/countrylist.json');
         $countries = json_decode(file_get_contents($countries), true);
+
         return view('admin.currencies.create', compact('countries'));
     }
-
 
     public function store(Request $request)
     {
@@ -70,25 +71,25 @@ class ZSystCurrencyController extends Controller
         Currency::create($request->all());
 
         return response()->json([
-            'message'   => __('Currency Created successfully'),
-            'redirect'  => route('admin.currencies.index')
+            'message' => __('Currency Created successfully'),
+            'redirect' => route('admin.currencies.index'),
         ]);
     }
-
 
     public function edit(Currency $currency)
     {
         $countries = base_path('lang/countrylist.json');
         $countries = json_decode(file_get_contents($countries), true);
+
         return view('admin.currencies.edit', compact('currency', 'countries'));
     }
 
     public function update(Request $request, Currency $currency)
     {
         $request->validate([
-            'name' => 'required|string|max:30|unique:currencies,name,' . $currency->id,
+            'name' => 'required|string|max:30|unique:currencies,name,'.$currency->id,
             'country_name' => 'nullable|string|max:255',
-            'code' => 'required|string|max:10|unique:currencies,code,' . $currency->id,
+            'code' => 'required|string|max:10|unique:currencies,code,'.$currency->id,
             'rate' => 'nullable|numeric|min:0',
             'symbol' => 'nullable|string|max:5',
             'position' => 'nullable|string|max:20',
@@ -99,8 +100,8 @@ class ZSystCurrencyController extends Controller
         $currency->update($request->all());
 
         return response()->json([
-            'message'   => __('Currency updated successfully'),
-            'redirect'  => route('admin.currencies.index')
+            'message' => __('Currency updated successfully'),
+            'redirect' => route('admin.currencies.index'),
         ]);
     }
 
@@ -121,7 +122,7 @@ class ZSystCurrencyController extends Controller
         if ($currency->is_default) {
             return response()->json([
                 'message' => __('You cannot delete it because it is default currency'),
-                'redirect' => route('admin.currencies.index')
+                'redirect' => route('admin.currencies.index'),
             ], 400);
         }
 
@@ -129,10 +130,9 @@ class ZSystCurrencyController extends Controller
 
         return response()->json([
             'message' => __('Currency deleted successfully'),
-            'redirect' => route('admin.currencies.index')
+            'redirect' => route('admin.currencies.index'),
         ], 200);
     }
-
 
     public function deleteAll(Request $request)
     {
@@ -141,7 +141,7 @@ class ZSystCurrencyController extends Controller
         if (count($request->ids) === 1 && in_array($default_currency_id, $request->ids)) {
             return response()->json([
                 'message' => __('You cannot delete the default currency.'),
-                'redirect' => route('admin.currencies.index')
+                'redirect' => route('admin.currencies.index'),
             ], 400);
         }
 
@@ -153,7 +153,7 @@ class ZSystCurrencyController extends Controller
 
         return response()->json([
             'message' => __('Selected currencies deleted successfully.'),
-            'redirect' => route('admin.currencies.index')
+            'redirect' => route('admin.currencies.index'),
         ]);
     }
 

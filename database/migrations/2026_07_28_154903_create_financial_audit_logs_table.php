@@ -29,7 +29,7 @@ return new class extends Migration
             $table->json('metadata')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();
-            
+
             $table->index(['business_id', 'status']);
             $table->index(['business_id', 'start_date', 'end_date']);
         });

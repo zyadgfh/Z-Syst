@@ -2,44 +2,43 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Party;
-use App\Models\Stock;
-use App\Models\Product;
-use App\Models\Business;
-use App\Models\Purchase;
-use Illuminate\Http\Request;
-use App\Models\PurchaseDetails;
 use App\Exceptions\BusinessRuleException;
 use App\Exceptions\Errors\ErrorCode;
-use App\Exceptions\TransactionException;
 use App\Helpers\TransactionHelper;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\Business;
+use App\Models\Party;
+use App\Models\Product;
+use App\Models\Purchase;
+use App\Models\PurchaseDetails;
+use App\Models\Stock;
+use Illuminate\Http\Request;
 
 class PurchaseController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $data = Purchase::select('id', 'party_id', 'invoiceNumber', 'purchaseDate', 'totalAmount', 'dueAmount', 'paidAmount', 'paymentType', 'note')
-                ->with('party:id,name,phone')
-                ->when(request('search'), function ($query) {
-                    $query->where(function ($subQuery) {
-                        $subQuery->where('paymentType', 'like', '%' . request('search') . '%')
-                            ->orWhere('invoiceNumber', 'like', '%' . request('search') . '%')
-                            ->orWhere('note', 'like', '%' . request('search') . '%')
-                            ->orWhereHas('party', function ($query) {
-                                $query->where('name', 'like', '%' . request('search') . '%')
-                                    ->orWhere('phone', 'like', '%' . request('search') . '%');
-                            });
-                    });
-                })
-                ->withCount('purchaseReturns')
-                ->where('business_id', auth()->user()->business_id)
-                ->latest()
-                ->paginate(10);
+            ->with('party:id,name,phone')
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $term = '%'.$request->input('search').'%';
+                $query->where(function ($subQuery) use ($term) {
+                    $subQuery->where('paymentType', 'like', $term)
+                        ->orWhere('invoiceNumber', 'like', $term)
+                        ->orWhere('note', 'like', $term)
+                        ->orWhereHas('party', function ($query) use ($term) {
+                            $query->where('name', 'like', $term)
+                                ->orWhere('phone', 'like', $term);
+                        });
+                });
+            })
+            ->withCount('purchaseReturns')
+            ->where('business_id', auth()->user()->business_id)
+            ->latest()
+            ->paginate($request->input('per_page', 10));
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -81,19 +80,19 @@ class PurchaseController extends Controller
             if ($request->dueAmount) {
                 $party = Party::findOrFail($request->party_id);
                 $party->update([
-                    'due' => $party->due + $request->dueAmount
+                    'due' => $party->due + $request->dueAmount,
                 ]);
             }
 
             $business = Business::findOrFail($business_id);
             $business->update([
-                'remainingShopBalance' => $business->remainingShopBalance - $request->paidAmount
+                'remainingShopBalance' => $business->remainingShopBalance - $request->paidAmount,
             ]);
 
             $purchase = Purchase::create($request->all() + [
-                            'user_id' => auth()->id(),
-                            'business_id' => $business_id,
-                        ]);
+                'user_id' => auth()->id(),
+                'business_id' => $business_id,
+            ]);
 
             $purchaseDetails = [];
             foreach ($request->products as $key => $product_data) {
@@ -166,14 +165,14 @@ class PurchaseController extends Controller
     public function show($id)
     {
         $data = Purchase::with([
-                    'tax',
-                    'user:id,name',
-                    'party:id,name,phone',
-                    'purchaseReturns.details',
-                    'details.product:id,productName,tax_type',
-                    'details:id,purchase_id,product_id,purchase_with_tax,quantities,batch_no,purchase_without_tax,profit_percent,sales_price,wholesale_price',
-                ])
-                ->findOrFail($id);
+            'tax',
+            'user:id,name',
+            'party:id,name,phone',
+            'purchaseReturns.details',
+            'details.product:id,productName,tax_type',
+            'details:id,purchase_id,product_id,purchase_with_tax,quantities,batch_no,purchase_without_tax,profit_percent,sales_price,wholesale_price',
+        ])
+            ->findOrFail($id);
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -221,7 +220,7 @@ class PurchaseController extends Controller
                 $prev_stock = $prev_stocks->where('batch_no', $req_item['batch_no'])->first();
                 $prev_purchase_detail = $prev_purchase_details->where('batch_no', $req_item['batch_no'])->first();
 
-                if (!empty($prev_purchase_detail) && $prev_purchase_detail->quantities > $req_item['quantities']) {
+                if (! empty($prev_purchase_detail) && $prev_purchase_detail->quantities > $req_item['quantities']) {
                     if ($prev_stock && $prev_stock->productStock < $req_item['quantities']) {
                         throw new BusinessRuleException(
                             ErrorCode::BUSINESS_BATCH_QUANTITY_MISMATCH,
@@ -293,20 +292,20 @@ class PurchaseController extends Controller
             if ($purchase->dueAmount || $request->dueAmount) {
                 $party = Party::findOrFail($request->party_id);
                 $party->update([
-                    'due' => $request->party_id == $purchase->party_id ? (($party->due - $purchase->dueAmount) + $request->dueAmount) : ($party->due + $request->dueAmount)
+                    'due' => $request->party_id == $purchase->party_id ? (($party->due - $purchase->dueAmount) + $request->dueAmount) : ($party->due + $request->dueAmount),
                 ]);
 
                 if ($request->party_id != $purchase->party_id) {
                     $prev_party = Party::findOrFail($purchase->party_id);
                     $prev_party->update([
-                        'due' => $prev_party->due - $purchase->dueAmount
+                        'due' => $prev_party->due - $purchase->dueAmount,
                     ]);
                 }
             }
 
             $business = Business::findOrFail(auth()->user()->business_id);
             $business->update([
-                'remainingShopBalance' => ($business->remainingShopBalance + $purchase->paidAmount) - $request->paidAmount
+                'remainingShopBalance' => ($business->remainingShopBalance + $purchase->paidAmount) - $request->paidAmount,
             ]);
 
             $purchase->update($request->all() + [
@@ -354,13 +353,13 @@ class PurchaseController extends Controller
             if ($purchase->dueAmount) {
                 $party = Party::findOrFail($purchase->party_id);
                 $party->update([
-                    'due' => $party->due - $purchase->dueAmount
+                    'due' => $party->due - $purchase->dueAmount,
                 ]);
             }
 
             $business = Business::findOrFail(auth()->user()->business_id);
             $business->update([
-                'remainingShopBalance' => $business->remainingShopBalance + $purchase->paidAmount
+                'remainingShopBalance' => $business->remainingShopBalance + $purchase->paidAmount,
             ]);
 
             $purchase->delete();
@@ -371,4 +370,3 @@ class PurchaseController extends Controller
         ]);
     }
 }
-

@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
+use App\Models\Business;
+use App\Models\Party;
 use App\Models\Purchase;
 use App\Models\PurchaseDetails;
-use App\Models\Party;
-use App\Models\Business;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -34,7 +34,7 @@ class PurchaseModelTest extends TestCase
 
     public function test_purchase_has_fillable_attributes()
     {
-        $fillable = (new Purchase())->getFillable();
+        $fillable = (new Purchase)->getFillable();
 
         $this->assertContains('totalAmount', $fillable);
         $this->assertContains('paidAmount', $fillable);
@@ -48,7 +48,7 @@ class PurchaseModelTest extends TestCase
 
     public function test_purchase_has_casts()
     {
-        $casts = (new Purchase())->getCasts();
+        $casts = (new Purchase)->getCasts();
 
         $this->assertArrayHasKey('isPaid', $casts);
         $this->assertEquals('boolean', $casts['isPaid']);

@@ -58,4 +58,3 @@ class PredictionSetting extends Model
         );
     }
 }
-

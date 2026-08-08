@@ -12,6 +12,6 @@ class MedicineType extends Model
     protected $fillable = [
         'name',
         'business_id',
-        'status'
+        'status',
     ];
 }

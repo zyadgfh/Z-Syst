@@ -60,6 +60,7 @@ class Product extends Model
     public function expiringStocks(int $graceDays = 30): HasMany
     {
         $threshold = now()->startOfDay()->addDays($graceDays);
+
         return $this->hasMany(Stock::class)
             ->where('productStock', '>', 0)
             ->whereNotNull('expire_date')
@@ -104,15 +105,31 @@ class Product extends Model
     }
 
     /**
+     * Get barcodes for the product.
+     */
+    public function barcodes(): HasMany
+    {
+        return $this->hasMany(Barcode::class);
+    }
+
+    /**
+     * Get active barcodes for the product.
+     */
+    public function activeBarcodes(): HasMany
+    {
+        return $this->hasMany(Barcode::class)->where('is_active', true);
+    }
+
+    /**
      * Scope: Products that have batches expiring within a given number of days.
      */
     public function scopeExpiringSoon($query, int $days = 30)
     {
         return $query->whereHas('stocks', function ($q) use ($days) {
             $q->whereNotNull('expire_date')
-              ->where('expire_date', '<=', now()->startOfDay()->addDays($days))
-              ->where('expire_date', '>=', now()->startOfDay())
-              ->where('productStock', '>', 0);
+                ->where('expire_date', '<=', now()->startOfDay()->addDays($days))
+                ->where('expire_date', '>=', now()->startOfDay())
+                ->where('productStock', '>', 0);
         });
     }
 
@@ -123,8 +140,8 @@ class Product extends Model
     {
         return $query->whereHas('stocks', function ($q) {
             $q->whereNotNull('expire_date')
-              ->where('expire_date', '<', now()->startOfDay())
-              ->where('productStock', '>', 0);
+                ->where('expire_date', '<', now()->startOfDay())
+                ->where('productStock', '>', 0);
         });
     }
 

@@ -2,12 +2,12 @@
 
 namespace Tests\Unit;
 
-use App\Models\Product;
-use App\Models\Category;
-use App\Models\Unit;
-use App\Models\Manufacturer;
-use App\Models\Stock;
 use App\Models\Business;
+use App\Models\Category;
+use App\Models\Manufacturer;
+use App\Models\Product;
+use App\Models\Stock;
+use App\Models\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -37,7 +37,7 @@ class ProductModelTest extends TestCase
 
     public function test_product_has_fillable_attributes()
     {
-        $fillable = (new Product())->getFillable();
+        $fillable = (new Product)->getFillable();
 
         $this->assertContains('productName', $fillable);
         $this->assertContains('business_id', $fillable);
@@ -50,7 +50,7 @@ class ProductModelTest extends TestCase
 
     public function test_product_has_casts()
     {
-        $casts = (new Product())->getCasts();
+        $casts = (new Product)->getCasts();
 
         $this->assertArrayHasKey('meta', $casts);
         $this->assertEquals('json', $casts['meta']);

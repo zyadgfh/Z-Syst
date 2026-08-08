@@ -33,8 +33,9 @@ class PurchaseReturnDetail extends Model
     {
         return $this->belongsTo(PurchaseReturn::class, 'purchase_return_id');
     }
+
     public function purchaseDetail()
     {
-        return $this->belongsTo(PurchaseDetails::class , 'purchase_detail_id');
+        return $this->belongsTo(PurchaseDetails::class, 'purchase_detail_id');
     }
 }

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,10 +11,33 @@ import 'package:mobile_pos/Screens/Expense/expense_list.dart';
 import 'package:mobile_pos/Screens/Home/home.dart';
 import 'package:mobile_pos/Screens/DrugInteraction/drug_interaction_check_screen.dart';
 import 'package:mobile_pos/Screens/ExpiryAlerts/expiry_alert_screen.dart';
+import 'package:mobile_pos/Screens/FinancialAudit/create_financial_audit_screen.dart';
+import 'package:mobile_pos/Screens/FinancialAudit/financial_audit_detail_screen.dart';
+import 'package:mobile_pos/Screens/FinancialAudit/financial_audit_execute_screen.dart';
+import 'package:mobile_pos/Screens/FinancialAudit/financial_audit_list_screen.dart';
+import 'package:mobile_pos/Screens/FinancialAudit/financial_audit_report_screen.dart';
+import 'package:mobile_pos/Screens/FinancialAudit/financial_audit_transactions_screen.dart';
 import 'package:mobile_pos/Screens/Prescription/prescription_list_screen.dart';
 import 'package:mobile_pos/Screens/Products/add%20product/add_product.dart';
 import 'package:mobile_pos/Screens/Products/product_list_screen.dart';
 import 'package:mobile_pos/Screens/Report/reports.dart';
+import 'package:mobile_pos/Screens/StockAudit/add_audit_item_screen.dart';
+import 'package:mobile_pos/Screens/StockAudit/add_stock_audit_detail_screen.dart';
+import 'package:mobile_pos/Screens/StockAudit/create_stock_audit_screen.dart';
+import 'package:mobile_pos/Screens/StockAudit/stock_audit_detail_screen.dart';
+import 'package:mobile_pos/Screens/StockAudit/stock_audit_list_screen.dart';
+import 'package:mobile_pos/Screens/StockAudit/stock_audit_reconciliation_screen.dart';
+import 'package:mobile_pos/Screens/StockAudit/stock_audit_variance_report_screen.dart';
+import 'package:mobile_pos/Screens/Insurance/insurance_claim_form_screen.dart';
+import 'package:mobile_pos/Screens/Insurance/insurance_claim_list_screen.dart';
+import 'package:mobile_pos/Screens/Insurance/insurance_company_form_screen.dart';
+import 'package:mobile_pos/Screens/Insurance/insurance_company_list_screen.dart';
+import 'package:mobile_pos/Screens/Insurance/insurance_coverage_list_screen.dart';
+import 'package:mobile_pos/Screens/Insurance/insurance_dashboard_screen.dart';
+import 'package:mobile_pos/Screens/Insurance/insurance_policy_detail_screen.dart';
+import 'package:mobile_pos/Screens/Insurance/insurance_policy_form_screen.dart';
+import 'package:mobile_pos/Screens/Insurance/insurance_policy_list_screen.dart';
+import 'package:mobile_pos/Screens/Insurance/model/insurance_model.dart';
 import 'package:mobile_pos/Screens/SplashScreen/on_board.dart';
 import 'package:mobile_pos/Screens/SplashScreen/splash_screen.dart';
 import 'package:mobile_pos/Screens/stock_list/stock_list.dart';
@@ -106,6 +129,70 @@ class _MyAppState extends ConsumerState<MyApp> {
                     '/ExpiryAlerts': (context) => const ExpiryAlertScreen(),
                     '/Prescriptions': (context) => const PrescriptionListScreen(),
                     '/DrugInteractionCheck': (context) => const DrugInteractionCheckScreen(),
+                    // Stock Audit Routes
+                    '/stock-audit-list': (context) => const StockAuditListScreen(),
+                    '/create-stock-audit': (context) => const CreateStockAuditScreen(),
+                    '/stock-audit-detail': (context) {
+                      final args = ModalRoute.of(context)!.settings.arguments as int;
+                      return StockAuditDetailScreen(auditId: args);
+                    },
+                    '/stock-audit-add-detail': (context) {
+                      final args = ModalRoute.of(context)!.settings.arguments as int;
+                      return StockAuditAddDetailScreen(auditId: args);
+                    },
+                    '/add-audit-item': (context) {
+                      final args = ModalRoute.of(context)!.settings.arguments as int;
+                      return StockAuditItemFormScreen(auditId: args);
+                    },
+                    '/stock-audit-variance': (context) {
+                      final args = ModalRoute.of(context)!.settings.arguments as int;
+                      return StockAuditVarianceScreen(auditId: args);
+                    },
+                    '/stock-audit-reconciliation': (context) {
+                      final args = ModalRoute.of(context)!.settings.arguments as int;
+                      return StockReconciliationScreen(auditId: args);
+                    },
+                    // Financial Audit Routes
+                    '/financial-audit-list': (context) => const FinancialAuditListScreen(),
+                    '/create-financial-audit': (context) => const CreateFinancialAuditScreen(),
+                    '/financial-audit-detail': (context) {
+                      final args = ModalRoute.of(context)!.settings.arguments as int;
+                      return FinancialAuditDetailScreen(auditId: args);
+                    },
+                    '/financial-audit-execute': (context) {
+                      final args = ModalRoute.of(context)!.settings.arguments as int;
+                      return FinancialAuditExecuteScreen(auditId: args);
+                    },
+                    '/financial-audit-report': (context) {
+                      final args = ModalRoute.of(context)!.settings.arguments as int;
+                      return FinancialAuditReportScreen(auditId: args);
+                    },
+                    '/financial-audit-transactions': (context) {
+                      final args = ModalRoute.of(context)!.settings.arguments as int;
+                      return FinancialAuditTransactionsScreen(auditId: args);
+                    },
+                    // Insurance Routes
+                    '/insurance-dashboard': (context) => const InsuranceDashboardScreen(),
+                    '/insurance-companies': (context) => const InsuranceCompanyListScreen(),
+                    '/add-edit-insurance-company': (context) {
+                      final args = ModalRoute.of(context)!.settings.arguments as InsuranceCompanyModel?;
+                      return AddEditInsuranceCompanyScreen(company: args);
+                    },
+                    '/insurance-policies': (context) => const InsurancePolicyListScreen(),
+                    '/add-edit-insurance-policy': (context) {
+                      final args = ModalRoute.of(context)!.settings.arguments as InsurancePolicyModel?;
+                      return AddEditInsurancePolicyScreen(policy: args);
+                    },
+                    '/insurance-policy-detail': (context) {
+                      final args = ModalRoute.of(context)!.settings.arguments as int;
+                      return InsurancePolicyDetailScreen(policyId: args);
+                    },
+                    '/insurance-claims': (context) => const InsuranceClaimListScreen(),
+                    '/add-edit-insurance-claim': (context) {
+                      final args = ModalRoute.of(context)!.settings.arguments as InsuranceClaimModel?;
+                      return AddEditInsuranceClaimScreen(claim: args);
+                    },
+                    '/insurance-coverages': (context) => const InsuranceCoverageListScreen(),
                   },
                 )),
       ),

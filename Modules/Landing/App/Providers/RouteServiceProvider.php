@@ -2,8 +2,8 @@
 
 namespace Modules\Landing\App\Providers;
 
-use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Route;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -27,6 +27,11 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function map(): void
     {
+        // Don't load routes during package discovery or console commands
+        if ($this->app->runningInConsole()) {
+            return;
+        }
+
         $this->mapApiRoutes();
 
         $this->mapWebRoutes();

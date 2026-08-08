@@ -20,4 +20,3 @@ class TransactionException extends RenderableException
         );
     }
 }
-

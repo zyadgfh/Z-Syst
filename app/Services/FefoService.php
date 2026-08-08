@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Stock;
-use App\Models\Product;
 use App\Models\FefoLog;
 use App\Models\FefoSetting;
-use App\Models\SaleDetails;
+use App\Models\Product;
+use App\Models\Stock;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -15,24 +15,19 @@ class FefoService
 {
     /**
      * Get the best batch(es) for a product based on FEFO (nearest expiry first).
-     *
-     * @param int $productId
-     * @param int $quantityNeeded
-     * @param int $businessId
-     * @return Collection
      */
     public function getBestBatches(int $productId, int $quantityNeeded, int $businessId): Collection
     {
         $settings = FefoSetting::getForBusiness($businessId);
 
-        if (!$settings->fefo_enabled) {
+        if (! $settings->fefo_enabled) {
             // Fallback: just return any available stock
             return Stock::where('product_id', $productId)
                 ->where('business_id', $businessId)
                 ->where('productStock', '>', 0)
                 ->where(function ($q) {
                     $q->whereNull('expire_date')
-                      ->orWhere('expire_date', '>=', now()->startOfDay());
+                        ->orWhere('expire_date', '>=', now()->startOfDay());
                 })
                 ->orderBy('id', 'asc')
                 ->take(10)
@@ -45,7 +40,7 @@ class FefoService
             ->where('productStock', '>', 0)
             ->where(function ($q) {
                 $q->whereNull('expire_date')
-                  ->orWhere('expire_date', '>=', now()->startOfDay());
+                    ->orWhere('expire_date', '>=', now()->startOfDay());
             })
             ->orderBy('expire_date', 'asc')
             ->orderBy('id', 'asc') // for same expiry dates, older stock first
@@ -73,11 +68,8 @@ class FefoService
      * Deduct stock from multiple batches following FEFO principle.
      * Returns array of deduction details.
      *
-     * @param int $productId
-     * @param int $totalQuantity
-     * @param int $businessId
-     * @param array $context ['sale_id' => ?, 'notes' => ?]
-     * @return array
+     * @param  array  $context  ['sale_id' => ?, 'notes' => ?]
+     *
      * @throws \RuntimeException if insufficient stock
      */
     public function deductFefo(int $productId, int $totalQuantity, int $businessId, array $context = []): array
@@ -136,9 +128,6 @@ class FefoService
     /**
      * Calculate FEFO priority score for a batch.
      * Lower score = should be sold first.
-     *
-     * @param Stock $stock
-     * @return float
      */
     public function calculateFefoScore(Stock $stock): float
     {
@@ -168,11 +157,6 @@ class FefoService
 
     /**
      * Get all batches for a product sorted by FEFO priority.
-     *
-     * @param int $productId
-     * @param int $businessId
-     * @param bool $includeExpired
-     * @return Collection
      */
     public function getFefoSortedBatches(int $productId, int $businessId, bool $includeExpired = false): Collection
     {
@@ -180,10 +164,10 @@ class FefoService
             ->where('business_id', $businessId)
             ->where('productStock', '>', 0);
 
-        if (!$includeExpired) {
+        if (! $includeExpired) {
             $query->where(function ($q) {
                 $q->whereNull('expire_date')
-                  ->orWhere('expire_date', '>=', now()->startOfDay());
+                    ->orWhere('expire_date', '>=', now()->startOfDay());
             });
         }
 
@@ -197,9 +181,6 @@ class FefoService
 
     /**
      * Validate if a batch can be used for sale (not expired).
-     *
-     * @param Stock $stock
-     * @return bool
      */
     public function isBatchValidForSale(Stock $stock): bool
     {
@@ -216,9 +197,6 @@ class FefoService
 
     /**
      * Get FEFO statistics for a business.
-     *
-     * @param int $businessId
-     * @return array
      */
     public function getFefoStatistics(int $businessId): array
     {
@@ -245,10 +223,11 @@ class FefoService
         ];
 
         foreach ($stocks as $stock) {
-            $expireDate = $stock->expire_date ? \Carbon\Carbon::parse($stock->expire_date)->startOfDay() : null;
-            if (!$expireDate) {
+            $expireDate = $stock->expire_date ? Carbon::parse($stock->expire_date)->startOfDay() : null;
+            if (! $expireDate) {
                 $stats['no_expiry_batches']++;
                 $stats['no_expiry_qty'] += $stock->productStock;
+
                 continue;
             }
 
@@ -273,7 +252,8 @@ class FefoService
             ->map(function ($productStocks) {
                 $product = $productStocks->first()->product;
                 $nearExpiryQty = $productStocks->filter(function ($s) {
-                    $expireDate = $s->expire_date ? \Carbon\Carbon::parse($s->expire_date)->startOfDay() : null;
+                    $expireDate = $s->expire_date ? Carbon::parse($s->expire_date)->startOfDay() : null;
+
                     return $expireDate && now()->startOfDay()->diffInDays($expireDate, false) <= 30;
                 })->sum('productStock');
 
@@ -336,21 +316,17 @@ class FefoService
 
     /**
      * Check if a batch is expiring soon (within grace period).
-     *
-     * @param Stock $stock
-     * @param int $businessId
-     * @return bool
      */
     public function isExpiringSoon(Stock $stock, int $businessId): bool
     {
-        if (!$stock->expire_date) {
+        if (! $stock->expire_date) {
             return false;
         }
 
         $settings = FefoSetting::getForBusiness($businessId);
         $graceDays = $settings->expiry_grace_days;
 
-        $expireDate = \Carbon\Carbon::parse($stock->expire_date)->startOfDay();
+        $expireDate = Carbon::parse($stock->expire_date)->startOfDay();
         $threshold = now()->startOfDay()->addDays($graceDays);
 
         return $expireDate <= $threshold && $expireDate >= now()->startOfDay();
@@ -359,9 +335,7 @@ class FefoService
     /**
      * Get FEFO suggestions for a sale: batch allocation recommendation.
      *
-     * @param array $cartItems [['product_id' => 1, 'quantity' => 5], ...]
-     * @param int $businessId
-     * @return array
+     * @param  array  $cartItems  [['product_id' => 1, 'quantity' => 5], ...]
      */
     public function getSaleSuggestions(array $cartItems, int $businessId): array
     {
@@ -398,13 +372,12 @@ class FefoService
     /**
      * Auto-deduct expired stock (soft removal - set to 0 with logging).
      *
-     * @param int $businessId
      * @return int Number of batches affected
      */
     public function autoRemoveExpiredStock(int $businessId): int
     {
         $settings = FefoSetting::getForBusiness($businessId);
-        if (!$settings->auto_deduct_expired_stock) {
+        if (! $settings->auto_deduct_expired_stock) {
             return 0;
         }
 
@@ -436,4 +409,3 @@ class FefoService
         return $count;
     }
 }
-

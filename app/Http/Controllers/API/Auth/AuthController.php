@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use App\Models\User;
-use App\Mail\WelcomeMail;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
-use Laravel\Sanctum\NewAccessToken;
 use App\Http\Controllers\Controller;
+use App\Mail\WelcomeMail;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Config;
+use Laravel\Sanctum\NewAccessToken;
 
 class AuthController extends Controller
 {
@@ -51,10 +51,10 @@ class AuthController extends Controller
         }
 
         $user = User::updateOrCreate(['email' => $request->email], $request->except('password') + [
-                    'remember_token' => $code,
-                    'email_verified_at' => $expire,
-                    'password' => Hash::make($request->password),
-                ]);
+            'remember_token' => $code,
+            'email_verified_at' => $expire,
+            'password' => Hash::make($request->password),
+        ]);
 
         return response()->json([
             'message' => 'An otp code has been sent to your email. Please check and confirm.',
@@ -71,7 +71,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'status' => 404,
                 'message' => __('User not found'),
@@ -88,7 +88,7 @@ class AuthController extends Controller
                 $this->setAccessTokenExpiration($accessToken);
 
                 $user->update([
-                    'remember_token' => NULL,
+                    'remember_token' => null,
                     'email_verified_at' => now(),
                 ]);
 
@@ -100,12 +100,12 @@ class AuthController extends Controller
 
             } else {
                 return response()->json([
-                    'error' => __('The verification otp has been expired.')
+                    'error' => __('The verification otp has been expired.'),
                 ], 400);
             }
         } else {
             return response()->json([
-                'error' => __('Invalid otp.')
+                'error' => __('Invalid otp.'),
             ], 404);
         }
     }
@@ -122,11 +122,11 @@ class AuthController extends Controller
 
             if ($user->role != 'staff' && $user->role != 'shop-owner') {
                 return response()->json([
-                    'message' => 'You can not login as ' .$user->role. ' from the app!'
+                    'message' => 'You can not login as '.$user->role.' from the app!',
                 ], 406);
             }
 
-            if ($user->remember_token && !$user->business_id) { // If user didn't verify email
+            if ($user->remember_token && ! $user->business_id) { // If user didn't verify email
 
                 $code = random_int(100000, 999999);
                 $expire = now()->addMinutes(env('OTP_VISIBILITY_TIME') ?? 3);
@@ -164,7 +164,7 @@ class AuthController extends Controller
             ]);
         } else {
             return response()->json([
-                'message' => 'Invalid email or password!'
+                'message' => 'Invalid email or password!',
             ], 404);
         }
     }
@@ -178,7 +178,7 @@ class AuthController extends Controller
             ->update(['expires_at' => $expiration]);
     }
 
-    public function signOut() : JsonResponse
+    public function signOut(): JsonResponse
     {
         if (auth()->user()->tokens()) {
             auth()->user()->tokens()->delete();
@@ -199,6 +199,7 @@ class AuthController extends Controller
 
             auth()->user()->currentAccessToken()->delete();
             $data['token'] = auth()->user()->createToken('createToken')->plainTextToken;
+
             return response()->json($data);
 
         } else {

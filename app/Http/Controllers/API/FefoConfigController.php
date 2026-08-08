@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\FefoSetting;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\FefoSetting;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class FefoConfigController extends Controller
 {
     /**
      * Get FEFO settings for the current business.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function index()
     {
@@ -27,8 +28,7 @@ class FefoConfigController extends Controller
     /**
      * Update FEFO settings.
      *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function update(Request $request)
     {
@@ -61,4 +61,3 @@ class FefoConfigController extends Controller
         ]);
     }
 }
-

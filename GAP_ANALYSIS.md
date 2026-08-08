@@ -1,263 +1,134 @@
-# Gap Analysis — Z-Syst Pharmacy Management System
+# GAP ANALYSIS
 
-> **Generated:** 2026-07-29  
-> **Scope:** Laravel Backend (`app/`, `Modules/`) ↔ Flutter Mobile App (`pharmacy-store-app-codecanyon-main/lib/`)
+## نظرة عامة
 
----
+تم جمع هذا التحليل بناءً على بنية المشروع الحالية في Laravel، والملفات الرئيسية مثل [routes/api.php](routes/api.php)، [Modules/Landing/routes/api.php](Modules/Landing/routes/api.php)، [firestore.rules](firestore.rules)، و [app/Http/Controllers/Admin/SystemSettingController.php](app/Http/Controllers/Admin/SystemSettingController.php). الهدف منه هو تحديد الفجوات الواقعية بين ما هو موجود بالفعل وبين ما يحتاجه المشروع ليصبح جاهزًا للمرحلة القادمة.
 
-## 1. Overview
+## الملخص التنفيذي
 
-This document maps every feature available in the **Laravel backend** (API + Admin) against the **Flutter mobile app** to identify what is implemented, partially implemented, or missing on each side.
+المشروع في وضع جيد نسبيًا الآن، ويحتوي على أساس قوي للأنظمة الطبية والصيدلانية، بما في ذلك:
 
-| Side | Status |
-|------|--------|
-| **Laravel API (Backend)** | ✅ Most features fully implemented |
-| **Laravel Admin (Blade)** | ✅ Admin panel complete for core CRUD |
-| **Flutter Mobile App** | ⚠️ Core pharmacy features present; newer features (Audit, Insurance) missing |
+- المصادقة وإدارة المستخدمين
+- سياق العمل متعدد الأعمال أو التenants
+- المنتجات، الأصناف، الموردين/العملاء، المخزون، المشتريات والمبيعات
+- الوصفات الطبية
+- أنظمة FEFO و Audits و Inventory Turnover
+- قواعد Firebase مع قيود على الوصول حسب المستخدم والمدير
 
----
+لكن لا تزال هناك فجوات مهمة تمنع المشروع من أن يكون جاهزًا بالكامل للنمو أو للإطلاق في بيئة إنتاجية متقدمة.
 
-## 2. Feature Comparison Matrix
+## ما هو موجود بالفعل
 
-### 2.1 Core Pharmacy Operations
+الميزات والطبقات التي تبدو مكتملة أو شبه مكتملة حاليًا:
 
-| Module | Backend API | Flutter App | Notes |
-|--------|:-----------:|:-----------:|-------|
-| **Authentication** (login, OTP, register, forgot password) | ✅ | ✅ | Complete on both sides |
-| **Profile Management** | ✅ | ✅ | |
-| **Products** (CRUD, barcode, stock update) | ✅ | ✅ | Full CRUD + barcode generation |
-| **Categories** | ✅ | ✅ | |
-| **Units** | ✅ | ❌ | No UI in Flutter (managed via web) |
-| **Manufacturers** | ✅ | ❌ | No UI in Flutter |
-| **Medicine Types** | ✅ | ❌ | No UI in Flutter |
-| **Box Sizes** | ✅ | ❌ | No UI in Flutter |
-| **Taxes** (single + group) | ✅ | ✅ | |
-| **Parties** (Customers/Suppliers) | ✅ | ✅ | CRUD + details |
-| **Purchases** (add, list, details) | ✅ | ✅ | |
-| **Purchase Returns** | ✅ | ✅ | |
-| **Sales** (add, list, details) | ✅ | ✅ | |
-| **Sale Returns** | ✅ | ✅ | |
-| **Stocks** (list, by product) | ✅ | ✅ | Stock list screen exists |
-| **Stock Movements** | ✅ | ❌ | **Missing** — No Flutter screen for movement log |
+- Authentication and user management
+- Business context and tenant-aware operations
+- Products, categories, parties, stock, purchases, sales
+- Prescription workflows
+- Stock audit and financial audit modules
+- Inventory turnover analysis
+- Firebase rules with ownership/admin controls
+- Settings persistence with encryption for sensitive values
 
-### 2.2 Financial Features
+## الفجوات الأساسية
 
-| Module | Backend API | Flutter App | Notes |
-|--------|:-----------:|:-----------:|-------|
-| **Expense Categories** | ✅ | ✅ | |
-| **Expenses** (add, list) | ✅ | ✅ | |
-| **Income Categories** | ✅ | ✅ | |
-| **Incomes** (add, list) | ✅ | ✅ | |
-| **Due Collections** | ✅ | ✅ | Due list + collection screen |
+### 1. Landing module غير مكتمل
 
-### 2.3 Advanced Pharmacy Features
+- الموقع: [Modules/Landing/routes/api.php](Modules/Landing/routes/api.php)
+- الوضع الحالي: المسار الحالي يمثل placeholder ويعيد بيانات المستخدم بدلًا من API حقيقي للصفحة الرئيسية أو المحتوى العام.
+- الأثر: لا توجد تجربة فعالة للواجهة العامة ولا يمكن استخدامه كواجهة جاهزة للعميل أو التسويق.
+- الأولوية: عالية
 
-| Module | Backend API | Flutter App | Notes |
-|--------|:-----------:|:-----------:|-------|
-| **Prescriptions** (upload, link to sale) | ✅ | ✅ | List screen exists; no upload screen |
-| **Drug Interactions** (check, bulk import) | ✅ | ✅ | Check + list screens |
-| **FEFO System** (settings, suggestions, logs, report) | ✅ | ✅ | Settings, report, logs screens |
-| **Expiry Alerts** (stats, list) | ✅ | ✅ | Alert screen + notification bell |
-| **AI Sales Predictions** (settings, forecast, demand report, reorder point) | ✅ | ✅ | Settings + forecast screens |
-| **Auto-Order System** (rules, suggestions, approve/reject) | ✅ | ✅ | Suggestions screen exists |
-| **Inventory Turnover Analysis** | ✅ | ✅ | Full screen with tabs (summary, products, slow-moving, ABC) |
+### 2. Insurance module غير مكتمل بالكامل
 
-### 2.4 Audit & Compliance (NEW — Added July 2026)
+- الوضع الحالي: توجد ممرات وأساليب أولية مرتبطة بالـ Insurance، لكن تدفق العمل الكامل ليس مكتملًا من قاعدة البيانات إلى الخدمة إلى الواجهة.
+- الأثر: لا يمكن تقديم خدمة تأمين كاملة للشركات أو السياسات أو المطالبات.
+- الأولوية: عالية
 
-| Module | Backend API | Flutter App | Notes |
-|--------|:-----------:|:-----------:|-------|
-| **Stock Audit** (create, start, complete, auto-populate, variance, reconciliation) | ✅ | ❌ | **CRITICAL GAP** — Completely missing from Flutter |
-| **Stock Reconciliation** (create, post, update, delete) | ✅ | ❌ | **CRITICAL GAP** — No Flutter screens |
-| **Financial Audit** (create, execute, complete, variance report, comparative) | ✅ | ❌ | **CRITICAL GAP** — Completely missing from Flutter |
+### 3. دعم Multi-Warehouse غير موجود
 
-### 2.5 Insurance System (NEW — Added July 2026)
+- الوضع الحالي: النظام يعتمد على إدارة مخزون واحدة بشكل أساسي، دون بنية كاملة للمستودعات والانتقالات بين المستودعات.
+- الأثر: لا يمكن دعم العمليات الموسعة أو الفروع أو التوزيع المتعدد.
+- الأولوية: عالية
 
-| Module | Backend API | Flutter App | Notes |
-|--------|:-----------:|:-----------:|-------|
-| **Insurance Companies** (CRUD) | ✅ | ❌ | **CRITICAL GAP** — No Flutter UI |
-| **Insurance Policies** (CRUD, validation, expiry tracking) | ✅ | ❌ | **CRITICAL GAP** — No Flutter UI |
-| **Insurance Claims** (create, submit, approve, reject, pay) | ✅ | ❌ | **CRITICAL GAP** — No Flutter UI |
-| **Insurance Coverage Rules** (product/category, pre-auth) | ✅ | ❌ | **CRITICAL GAP** — No Flutter UI |
-| **Insurance Summary/Dashboard** | ✅ | ❌ | **CRITICAL GAP** — No Flutter UI |
+### 4. Drug Recall و Traceability غير موجودين
 
-### 2.6 Reports
+- الوضع الحالي: لا يوجد دليل واضح على تتبع الدفعات أو السلاسل أو عمليات الاسترجاع والتتبع بين المورد والعميل.
+- الأثر: المشروع لا يفي بالمتطلبات التنظيمية أو التشغيلية المتقدمة في قطاع الصيدلة.
+- الأولوية: عالية
 
-| Report Type | Backend API | Flutter App | Notes |
-|-------------|:-----------:|:-----------:|-------|
-| Sales Report | ✅ | ✅ | |
-| Purchase Report | ✅ | ✅ | |
-| Due Collect Report | ✅ | ✅ | |
-| Loss/Profit Report | ✅ | ✅ | |
-| Income Report | ✅ | ✅ | |
-| Expense Report | ✅ | ✅ | |
-| Stock Report | ✅ | ✅ | |
-| Tax Report | ✅ | ✅ | |
-| Sale Return Report | ✅ | ✅ | |
-| Purchase Return Report | ✅ | ✅ | |
-| **Stock Audit Report** | ✅ | ❌ | Backend API exists; no Flutter report screen |
-| **Financial Audit Report** | ✅ | ❌ | Backend API exists; no Flutter report screen |
+### 5. Loyalty و CRM ما زالا بسيطين
 
-### 2.7 Admin / Business Management
+- الوضع الحالي: توجد سجلات العملاء الأساسية، لكن لا توجد ميزات متقدمة لبرامج الولاء أو إدارة العلاقات.
+- الأثر: لا يمكن بناء تجربة احتفاظ بالعملاء أو حملات تسويقية متقدمة.
+- الأولوية: متوسطة
 
-| Module | Backend API | Flutter App | Notes |
-|--------|:-----------:|:-----------:|-------|
-| Business Info (read/update) | ✅ | ✅ | |
-| Business Categories | ✅ | ✅ | |
-| Subscriptions & Plans | ✅ | ✅ | Plan list + subscribe |
-| Banners | ✅ | ✅ | |
-| Languages | ✅ | ✅ | Multi-language support |
-| Currencies | ✅ | ✅ | |
-| Roles & Permissions | ✅ | ❌ | No Flutter screens (admin web only) |
-| Users (staff management) | ✅ | ❌ | No staff CRUD in Flutter |
-| Settings (system) | ✅ | ✅ | Feature status screen exists |
+### 6. Receipts والطباعه غير مكتملة
 
-### 2.8 Missing Backend Features (Not Yet Implemented Anywhere)
+- الوضع الحالي: توجد إعدادات الدفع، لكن لا يوجد مسار واضح لطباعة الإيصالات أو المستندات المالية.
+- الأثر: العمليات اليومية على أرض الواقع تبقى غير مكتملة.
+- الأولوية: متوسطة
 
-| Feature | Status | Priority |
-|---------|--------|----------|
-| **Multi-Warehouse** (warehouses, warehouse_stocks, stock_transfers) | ❌ Not started | Medium |
-| **Drug Recall / Traceability** (batch_serial_numbers, recall_events, lot tracking) | ❌ Not started | Medium |
-| **Loyalty / CRM** (points, rewards, customer tiers) | ❌ Not started | Low |
-| **Insurance Claims Integration with Sales** (auto-claim from sale) | ❌ Not started | Medium |
-| **Receipt Printing Templates** (customizable) | ⚠️ Basic thermal only | Low |
+### 7. تغطية الاختبارات غير متوازنة
 
----
+- الوضع الحالي: توجد اختبارات لكن تغطية العمليات الحساسة مثل صلاحيات العمل، النسخ الاحتياطي، Logging، والوحدات الجديدة ما زالت محدودة.
+- الأثر: زيادة احتمالية الانهيار عند إضافة ميزات جديدة أو عند التغييرات في الإصدارات.
+- الأولوية: متوسطة
 
-## 3. Flutter Mobile App — Detailed Gap Analysis
+### 8. التحسينات التشغيلية ما زالت مطلوبة
 
-### 3.1 Critical Missing Screens
+- الوضع الحالي: النظام يحتاج مراجعة إضافية للـ permissions، إعدادات التخزين، queue/cache، وبيئة الإنتاج قبل أن يصبح جاهزًا بالكامل للرفع.
+- الأثر: قد تظهر مشاكل تشغيلية عند النشر أو عند وجود حمل كبير.
+- الأولوية: متوسطة
 
-These modules have **complete backend APIs** but **zero Flutter implementation**:
+## الملاحظات التقنية
 
-| Missing Screen | Backend Routes | Estimated Effort |
-|----------------|----------------|:----------------:|
-| **Stock Audit — List Screen** | `GET /api/v1/stock-audits` | Medium |
-| **Stock Audit — Create Screen** | `POST /api/v1/stock-audits` | Medium |
-| **Stock Audit — Detail/Execute Screen** | `GET /api/v1/stock-audits/{id}`, `POST .../start`, `POST .../complete` | Large |
-| **Stock Audit — Add Items Screen** | `POST .../details`, `POST .../bulk-details`, `POST .../auto-populate` | Medium |
-| **Stock Audit — Variance Report** | `GET .../variance-report` | Small |
-| **Stock Reconciliation — Create/Post** | `POST .../details/{detail}/reconcile`, `POST .../reconciliations/{id}/post` | Medium |
-| **Financial Audit — List/Create** | `GET /api/v1/financial-audits`, `POST /api/v1/financial-audits` | Medium |
-| **Financial Audit — Execute/Report** | `POST .../{audit}/execute`, `GET .../{audit}/report` | Large |
-| **Insurance — Company CRUD** | `GET/POST /api/v1/insurance/companies`, `PUT/DELETE .../{company}` | Medium |
-| **Insurance — Policy CRUD** | `GET/POST /api/v1/insurance/policies`, `PUT/DELETE .../{policy}` | Medium |
-| **Insurance — Claims Lifecycle** | All `POST .../claims/{claim}/{submit,approve,reject,pay}` | Large |
-| **Insurance — Coverage Rules** | `GET/POST /api/v1/insurance/coverages` | Medium |
-| **Insurance — Summary Dashboard** | `GET /api/v1/insurance/summary` | Small |
+### الجانب الأمني
 
-### 3.2 Partially Implemented / Needs Enhancement
+الأوضاع الحالية أفضل من النسخة السابقة، خصوصًا في ملفات Firebase والـ settings storage. ومع ذلك لا يزال من الضروري مراجعة:
 
-| Feature | Current State | What's Missing |
-|---------|---------------|----------------|
-| **Home Screen Grid Items** | 16 items (Parties, Sales, Purchase, Products, Due List, Sales List, Purchase List, Stock, Ledger, Loss/Profit, Expiring, Reports, Income, Expense, Tax) | Prescriptions, Drug Interactions, FEFO, Predictions, Inventory Turnover, Stock Audit, Insurance links not in grid |
-| **Prescriptions** | List screen only | No add/upload screen; no link-to-sale flow |
-| **Navigation** | 5 bottom tabs (Home, Dashboard, Add Product, Reports, Profile) | No deep navigation to newer features |
-| **Reports Screen** | 9 report types listed | Stock Audit Report, Financial Audit Report missing |
+- صلاحيات المدير والنسخ الاحتياطي
+- الوصول إلى التقارير الحساسة
+- تخزين القيم الحساسة
+- صلاحيات الوحدات الجديدة
 
-### 3.3 Code Quality Issues (from Flutter analysis)
+### الجانب المعماري
 
-| Issue Type | Count | Severity |
-|------------|:-----:|:--------:|
-| `avoid_print` (use `debugPrint` instead) | ~200 | 💡 Info |
-| `use_build_context_synchronously` | ~130 | ⚠️ Medium |
-| `deprecated_member_use` (withOpacity, WillPopScope) | ~35 | ⚠️ High (will break in future Flutter) |
-| `unused_import` | ~50 | 💡 Low |
-| `unused_result` | ~50 | 💡 Low |
+المشروع يمتلك بنية قوية نسبيًا، وتظهر فيه عناصر جيدة مثل Services و Controllers و Models المنفصلة. الفجوة الأساسية ليست في الأساس نفسه، بل في إكمال الوحدات المفقودة وتوحيدها مع نفس النمط المعماري المستخدم في الأنظمة الحالية.
 
----
+## خطة التنفيذ الموصى بها
 
-## 4. Action Plan — Priority Order
+### المرحلة الأولى: إكمال الأساس العملي
 
-### Phase 1: Critical (Week 1-2)
-| # | Task | Area |
-|---|------|------|
-| 1 | Create Stock Audit Flutter screens (list, detail, items, reconciliation) | Mobile |
-| 2 | Create Financial Audit Flutter screens (list, execute, report) | Mobile |
-| 3 | Add Stock Audit & Financial Audit report entries to Reports screen | Mobile |
-| 4 | Add navigation links in Home grid for Stock Audit, Financial Audit | Mobile |
+1. استبدال Landing placeholder بـ API حقيقي ومحتوى قابل للاستخدام.
+2. مراجعة صلاحيات النسخ الاحتياطي والتقارير والحماية الإدارية.
+3. إضافة اختبارات أساسية للـ authorization والـ audit-sensitive flows.
+4. مراجعة إعدادات الإنتاج والتخزين والشروط التشغيلية.
 
-### Phase 2: Insurance System (Week 3-4)
-| # | Task | Area |
-|---|------|------|
-| 5 | Create Insurance Company Flutter screens (list, add, edit) | Mobile |
-| 6 | Create Insurance Policy Flutter screens (list, add, edit, detail) | Mobile |
-| 7 | Create Insurance Claim Flutter screens (list, create, submit, approve, reject, pay) | Mobile |
-| 8 | Create Insurance Coverage rules screen | Mobile |
-| 9 | Add Insurance summary card to Dashboard | Mobile |
+### المرحلة الثانية: إكمال الوحدات المتقدمة
 
-### Phase 3: Enhancements (Week 5-6)
-| # | Task | Area |
-|---|------|------|
-| 10 | Add missing grid items to Home screen (Prescriptions, Drug Interactions, FEFO, Predictions, Inventory Turnover, Stock Audit, Insurance) | Mobile |
-| 11 | Add Prescription upload screen in Flutter | Mobile |
-| 12 | Create Stock Movement log viewer | Mobile |
-| 13 | Add Stock Audit and Financial Audit reports to Reports screen | Mobile |
+1. إكمال Insurance module بالكامل.
+2. إضافة Multi-Warehouse و Warehouse transfers.
+3. تنفيذ Drug Recall و Traceability.
 
-### Phase 4: Future Features (Long-term)
-| # | Task | Area |
-|---|------|------|
-| 14 | Multi-Warehouse system (DB + API + Flutter) | Backend + Mobile |
-| 15 | Drug Recall / Traceability system | Backend + Mobile |
-| 16 | Loyalty / CRM module | Backend + Mobile |
-| 17 | Fix deprecated Flutter API usage (withOpacity → withValues, WillPopScope → PopScope) | Mobile |
+### المرحلة الثالثة: تحسين تجربة التشغيل
 
----
+1. إضافة Loyalty و CRM.
+2. دعم الطباعة والإيصالات.
+3. تحسين جودة الاختبارات والـ CI/CD.
 
-## 5. API Route Coverage Summary
+## تعريف الإكمال للمرحلة القادمة
 
-| Prefix | Routes Exist | Flutter Integration | Coverage |
-|--------|:-----------:|:-------------------:|:--------:|
-| `/api/v1/auth` | ✅ 7 routes | ✅ | 100% |
-| `/api/v1/parties` | ✅ Full CRUD | ✅ | 100% |
-| `/api/v1/products` | ✅ Full CRUD + stock | ✅ | 100% |
-| `/api/v1/purchase` | ✅ Full CRUD | ✅ | 100% |
-| `/api/v1/sales` | ✅ Full CRUD | ✅ | 100% |
-| `/api/v1/sales-return` | ✅ Index, store, show | ✅ | 100% |
-| `/api/v1/purchases-return` | ✅ Index, store, show | ✅ | 100% |
-| `/api/v1/stocks` | ✅ Index | ✅ | 100% |
-| `/api/v1/prescriptions` | ✅ Full CRUD + review + link | ⚠️ Partial (list only) | 50% |
-| `/api/v1/drug-interactions` | ✅ Full CRUD + check + bulk | ✅ | 100% |
-| `/api/v1/expiry-alerts` | ✅ Stats + index | ✅ | 100% |
-| `/api/v1/fefo` | ✅ 8 routes | ✅ | 100% |
-| `/api/v1/predictions` | ✅ 8 routes | ✅ | 100% |
-| `/api/v1/auto-order` | ✅ 9 routes | ✅ | 100% |
-| `/api/v1/inventory-turnover` | ✅ 7 routes | ✅ | 100% |
-| `/api/v1/stock-audits` | ✅ **20 routes** | ❌ **0%** | **0%** |
-| `/api/v1/financial-audits` | ✅ **11 routes** | ❌ **0%** | **0%** |
-| `/api/v1/insurance` | ✅ **19 routes** | ❌ **0%** | **0%** |
-| `/api/v1/reports` | ✅ 12 report types | ⚠️ 10/12 implemented | 83% |
+يمكن اعتبار المشروع جاهزًا للمرحلة التالية إذا تحقق ما يلي:
 
----
+- أن يكون Landing API جاهزًا ومفيدًا فعليًا
+- أن تعمل Insurance companies, policies, claims بشكل كامل
+- أن تدعم النظام المستودعات المتعددة والانتقالات
+- أن توجد آليات تتبع للدفعات والمخاطر
+- أن تكون Loyalty/CRM قابلة للاستخدام
+- أن توجد آلية للطباعة والإيصالات
+- أن تغطي الاختبارات العمليات الحساسة والصلاحيات
 
-## 6. Technical Debt & Observations
+## الخلاصة
 
-### Backend
-- ✅ Error handling system well-implemented (`ErrorCode` enum, exception classes, `TransactionHelper`)
-- ✅ Service layer pattern consistently used
-- ✅ Form request validation classes exist
-- ✅ Proper multi-tenant isolation via `business_id`
-- ⚠️ Some controllers still use inline JSON responses instead of exceptions (needs refactoring per `ERROR_HANDLING_STRATEGY.md`)
-
-### Flutter
-- ⚠️ No repository pattern for Audit or Insurance APIs (need `stock_audit_repo.dart`, `financial_audit_repo.dart`, `insurance_repo.dart`)
-- ⚠️ No models for Audit or Insurance data
-- ⚠️ `withOpacity()` deprecated in Flutter 3.27+ — should use `withValues(alpha:)`
-- ⚠️ `WillPopScope` deprecated — should use `PopScope`
-- ⚠️ ~130 `use_build_context_synchronously` warnings — potential crashes after async operations
-- ⚠️ No centralized API error handling matching `ERROR_HANDLING_STRATEGY.md` patterns
-
----
-
-## 7. Recommendations
-
-1. **Immediate**: Build Stock Audit and Financial Audit Flutter screens — these are compliance-critical features already fully functional on the backend.
-2. **Immediate**: Add Insurance Flutter screens — the backend has a complete insurance system with 19 API routes that are completely inaccessible from mobile.
-3. **Short-term**: Add navigation entries for all advanced features in the Home screen grid.
-4. **Short-term**: Create Flutter models and repositories for Audit and Insurance following the existing `prediction_repo.dart` pattern.
-5. **Medium-term**: Implement remaining backend features (Multi-Warehouse, Drug Recall).
-6. **Ongoing**: Address Flutter technical debt (deprecated APIs, context usage warnings, print statements).
-
----
-
-*This analysis reflects the state of the repository as of 2026-07-29. The backend has outpaced the mobile app in feature development, particularly for modules added in late July 2026 (Audit, Insurance).*
-
+المشروع لم يعد مجرد starter أو قاعدة أولية. لديه أساس قوي ومجموعة من الميزات المتقدمة بالفعل. الفجوة الحالية ليست في البناء الأساسي بل في إكمال الوحدات الحيوية، وتثبيت النظام بشكل أكثر أمانًا وعمليًا قبل التوسع أكثر.

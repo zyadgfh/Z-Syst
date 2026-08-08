@@ -20,7 +20,7 @@ return new class extends Migration
             $table->double('discountAmount', 10, 2)->default(0);
             $table->double('dueAmount', 10, 2)->default(0);
             $table->boolean('isPaid')->default(0);
-            $table->double("tax_amount", 10, 2)->default(0);
+            $table->double('tax_amount', 10, 2)->default(0);
             $table->double('paidAmount', 10, 2)->default(0);
             $table->double('totalAmount', 10, 2)->default(0);
             $table->double('lossProfit', 10, 2)->default(0);

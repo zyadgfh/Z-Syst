@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use App\Models\FinancialAuditLog;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class FinancialAuditPolicy
@@ -39,7 +39,7 @@ class FinancialAuditPolicy
      */
     public function update(User $user, FinancialAuditLog $audit): bool
     {
-        return $user->business_id === $audit->business_id && 
+        return $user->business_id === $audit->business_id &&
                $audit->status !== 'completed';
     }
 
@@ -48,7 +48,7 @@ class FinancialAuditPolicy
      */
     public function delete(User $user, FinancialAuditLog $audit): bool
     {
-        return $user->business_id === $audit->business_id && 
+        return $user->business_id === $audit->business_id &&
                $audit->status === 'pending';
     }
 
@@ -57,7 +57,7 @@ class FinancialAuditPolicy
      */
     public function start(User $user, FinancialAuditLog $audit): bool
     {
-        return $user->business_id === $audit->business_id && 
+        return $user->business_id === $audit->business_id &&
                $audit->status === 'pending';
     }
 
@@ -66,7 +66,7 @@ class FinancialAuditPolicy
      */
     public function execute(User $user, FinancialAuditLog $audit): bool
     {
-        return $user->business_id === $audit->business_id && 
+        return $user->business_id === $audit->business_id &&
                $audit->status === 'in_progress';
     }
 
@@ -75,7 +75,7 @@ class FinancialAuditPolicy
      */
     public function complete(User $user, FinancialAuditLog $audit): bool
     {
-        return $user->business_id === $audit->business_id && 
+        return $user->business_id === $audit->business_id &&
                $audit->status === 'in_progress';
     }
 
@@ -84,7 +84,7 @@ class FinancialAuditPolicy
      */
     public function cancel(User $user, FinancialAuditLog $audit): bool
     {
-        return $user->business_id === $audit->business_id && 
+        return $user->business_id === $audit->business_id &&
                in_array($audit->status, ['pending', 'in_progress']);
     }
 
@@ -93,7 +93,7 @@ class FinancialAuditPolicy
      */
     public function viewReport(User $user, FinancialAuditLog $audit): bool
     {
-        return $user->business_id === $audit->business_id && 
+        return $user->business_id === $audit->business_id &&
                $audit->status === 'completed';
     }
 
@@ -102,7 +102,7 @@ class FinancialAuditPolicy
      */
     public function viewTransactions(User $user, FinancialAuditLog $audit): bool
     {
-        return $user->business_id === $audit->business_id && 
+        return $user->business_id === $audit->business_id &&
                in_array($audit->status, ['in_progress', 'completed']);
     }
 }

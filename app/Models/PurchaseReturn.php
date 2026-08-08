@@ -27,7 +27,7 @@ class PurchaseReturn extends Model
 
         static::creating(function ($model) {
             $id = PurchaseReturn::where('business_id', auth()->user()->business_id)->count() + 1;
-            $model->invoice_no = "PR-" . str_pad($id, 5, '0', STR_PAD_LEFT);
+            $model->invoice_no = 'PR-'.str_pad($id, 5, '0', STR_PAD_LEFT);
         });
     }
 

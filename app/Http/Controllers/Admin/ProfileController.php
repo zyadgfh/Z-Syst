@@ -15,8 +15,9 @@ class ProfileController extends Controller
 
     public function index()
     {
-        $user = User::where('id',Auth::user()->id)->first();
-        return view('admin.profile.index',compact('user'));
+        $user = User::where('id', Auth::user()->id)->first();
+
+        return view('admin.profile.index', compact('user'));
     }
 
     public function update(Request $request, string $id)
@@ -28,24 +29,24 @@ class ProfileController extends Controller
         ]);
         $user = User::findOrFail($id);
 
-        if( $request->password || $request->current_password){
-            if(Hash::check($request->current_password,$user->password)){
+        if ($request->password || $request->current_password) {
+            if (Hash::check($request->current_password, $user->password)) {
                 $request->validate([
                     'current_password' => 'required|string',
                     'password' => 'required|string|confirmed',
                 ]);
             } else {
-                return response()->json(__('Current Password does not match with old password'),404);
+                return response()->json(__('Current Password does not match with old password'), 404);
             }
         }
-        $user->update($request->except('image','password') + [
-                'image'     => $request->image ? $this->upload($request, 'image', $user->image) : $user->image,
-                'password'  => Hash::make($request->password),
-            ]);
+        $user->update($request->except('image', 'password') + [
+            'image' => $request->image ? $this->upload($request, 'image', $user->image) : $user->image,
+            'password' => Hash::make($request->password),
+        ]);
 
         return response()->json([
-            'message'   => __('Profile updated successfully'),
-            'redirect'  => route('admin.profiles.index')
+            'message' => __('Profile updated successfully'),
+            'redirect' => route('admin.profiles.index'),
         ]);
     }
 }

@@ -5,69 +5,111 @@
 @endsection
 
 @section('main_content')
-    <div class="footer position-relative">
-        <div class="footer-logo w-100  d-flex align-items-center justify-content-center">
-            <img src="{{ asset('assets/images/logo/logo.png') }}" alt="Z-Syst Logo">
-        </div>
-        <div class="mybazar-login-section ">
-            <div class="d-flex align-items-center justify-content-center ">
-                <div class="mybazar-login-wrapper ">
-                    <div class="login-wrapper">
-                        <div class="login-body w-100">
-                            <h2 class="text-center login-title">{{ __('Welcome to') }} <span>Z-Syst</span></h2>
-                            <h6 class="text-center login-para">{{ __('Welcome back, Please login in to your account') }}</h6>
-                            <form method="POST" action="{{ route('login') }}" class="ajaxform_instant_reload">
-                                @csrf
-                                <div class="input-group">
-                                    <span><img src="{{ asset('assets/images/icons/user.png') }}" alt="img"></span>
-                                    <input type="email" name="email" class="form-control email"
-                                        placeholder="{{ __('Enter your Email') }}">
-                                </div>
+    <div class="auth-container">
+        <div class="auth-wrapper">
+            <div class="auth-card">
+                <div class="auth-header text-center">
+                    <div class="auth-logo mb-4">
+                        <img src="{{ asset('assets/images/logo/logo.png') }}" alt="Z-Syst Logo">
+                    </div>
+                    <h2 class="auth-title">{{ __('Welcome to') }} <span class="text-primary">Z-Syst Pharmacy</span></h2>
+                    <p class="auth-subtitle">{{ __('Welcome back, Please login to your account') }}</p>
+                </div>
 
-                                <div class="input-group">
-                                    <span><img src="{{ asset('assets/images/icons/lock.png') }}" alt="img"></span>
-                                    <span class="hide-pass">
-                                        <img src="{{ asset('assets/images/icons/Hide.svg') }}" alt="img">
-                                        <img src="{{ asset('assets/images/icons/show.svg') }}" alt="img">
-                                    </span>
-                                    <input type="password" name="password" class="form-control password" placeholder="{{ __('Password') }}">
-                                </div>
+                <form method="POST" action="{{ route('login') }}" class="auth-form">
+                    @csrf
+                    
+                    <div class="form-group mb-3">
+                        <label class="form-label">{{ __('Email Address') }}</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <input type="email" name="email" class="form-control" placeholder="{{ __('Enter your Email') }}" required autofocus>
+                        </div>
+                        @error('email')
+                            <small class="text-danger">{{ $message }}</small>
+                        @enderror
+                    </div>
 
-                                <div class="mt-lg-3 mb-0 forget-password">
-                                    <label class="custom-control-label">
-                                        <input type="checkbox" name="remember" class="custom-control-input">
-                                        <span>{{ __('Remember me') }}</span>
-                                    </label>
-                                    <a href="{{ route('password.request') }}">{{ __('Forgot Password?') }}</a>
-                                </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label">{{ __('Password') }}</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" name="password" class="form-control" placeholder="{{ __('Password') }}" required>
+                            <button type="button" class="btn btn-outline-secondary toggle-password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        @error('password')
+                            <small class="text-danger">{{ $message }}</small>
+                        @enderror
+                    </div>
 
-                                <button type="submit" class="btn login-btn submit-btn">{{ __('Log In') }}</button>
+                    <div class="form-group mb-3 d-flex justify-content-between align-items-center">
+                        <div class="form-check">
+                            <input type="checkbox" name="remember" class="form-check-input" id="remember">
+                            <label class="form-check-label" for="remember">
+                                {{ __('Remember me') }}
+                            </label>
+                        </div>
+                        <a href="{{ route('password.request') }}" class="text-primary">
+                            {{ __('Forgot Password?') }}
+                        </a>
+                    </div>
 
+                    <button type="submit" class="btn btn-primary w-100 py-3">
+                        {{ __('Log In') }}
+                    </button>
 
-                                <div class="row d-flex flex-wrap mt-2 justify-content-between">
-                                    <div class="col">
-                                        <a href="{{ route('home') }}">{{ __("Back to Home") }}</a>
-                                    </div>
-                                    <div class="col text-end">
-                                        <a class="text-primary" href="javascript:void()" data-bs-target="#registration-modal" data-bs-toggle="modal">{{ __("Create an account.") }}</a>
-                                    </div>
-                                </div>
-                            </form>
+                    <div class="auth-footer mt-4 text-center">
+                        <div class="row">
+                            <div class="col-6">
+                                <a href="{{ route('home') }}" class="text-muted">
+                                    <i class="fas fa-arrow-left me-1"></i> {{ __('Back to Home') }}
+                                </a>
+                            </div>
+                            <div class="col-6 text-end">
+                                <a href="javascript:void()" data-bs-target="#registration-modal" data-bs-toggle="modal" class="text-primary">
+                                    {{ __('Create an account') }} <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
-        <img class="position-absolute illistration-img1  bottom-0" src="{{ asset('assets/images/login/loginillustrator2.svg') }}" alt="" srcset="">
-        <img class="position-absolute illistration-img2 bottom-0 " src="{{ asset('assets/images/login/loginillustrator1.svg') }}" alt="" srcset="">
     </div>
-    <input type="hidden" data-model="Login" id="auth">
 @endsection
 
 @push('modal')
 @include('landing::web.components.signup')
 @endpush
 
-@push('js')
-    <script src="{{ asset('assets/js/auth.js') }}"></script>
+@push('script')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle password visibility
+            const toggleButtons = document.querySelectorAll('.toggle-password');
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const input = this.previousElementSibling;
+                    const icon = this.querySelector('i');
+                    
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            });
+        });
+    </script>
 @endpush
+

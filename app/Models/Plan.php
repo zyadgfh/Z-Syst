@@ -30,5 +30,11 @@ class Plan extends Model
      */
     protected $casts = [
         'features' => 'json',
+        'status' => 'boolean',
     ];
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\PlanFactory::new();
+    }
 }

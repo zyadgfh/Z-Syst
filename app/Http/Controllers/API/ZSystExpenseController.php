@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Expense;
-use App\Models\Business;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Business;
+use App\Models\Expense;
+use Illuminate\Http\Request;
 
 class ZSystExpenseController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data = Expense::with('category:id,categoryName')->where('business_id', auth()->user()->business_id)->latest()->paginate(10);
+        $data = Expense::with('category:id,categoryName')->where('business_id', auth()->user()->business_id)->latest()->paginate($request->input('per_page', 10));
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -35,9 +35,9 @@ class ZSystExpenseController extends Controller
         Business::findOrFail(auth()->user()->business_id)->decrement('remainingShopBalance', $request->amount);
 
         $data = Expense::create($request->except('status') + [
-                    'user_id' => auth()->id(),
-                    'business_id' => auth()->user()->business_id,
-                ]);
+            'user_id' => auth()->id(),
+            'business_id' => auth()->user()->business_id,
+        ]);
 
         return response()->json([
             'message' => __('Expense saved successfully.'),
@@ -45,7 +45,8 @@ class ZSystExpenseController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id)
+    {
 
         $request->validate([
             'amount' => 'required|numeric',
@@ -59,7 +60,6 @@ class ZSystExpenseController extends Controller
 
         $business->increment('remainingShopBalance', $amountDifference);
 
-
         $expense->update($request->except('user_id', 'business_id') + [
             'user_id' => auth()->id(),
             'business_id' => auth()->user()->business_id,
@@ -72,7 +72,8 @@ class ZSystExpenseController extends Controller
         ]);
     }
 
-    public function destroy($id) {
+    public function destroy($id)
+    {
 
         $expense = Expense::findOrFail($id);
         $expense->delete();

@@ -3,26 +3,69 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Modules\Landing\Database\Seeders\OptionTableSeeder as LandingOptionTableSeeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
+        // Disable foreign key checks
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+        // Clear existing data
+        $this->clearTables();
+
+        // Enable foreign key checks
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        // Run seeders
         $this->call([
+            SubscriptionPlanSeeder::class,
             PlanSeeder::class,
-            BusinessCategorySeeder::class,
             PermissionSeeder::class,
-            OptionTableSeeder::class,
-            LandingOptionTableSeeder::class,
-            LanguageSeeder::class,
-            CurrencySeeder::class,
-            GatewaySeeder::class,
-            AdvertiseSeeder::class,
-            DrugInteractionSeeder::class,
+            UserSeeder::class,
+            BusinessSeeder::class,
         ]);
+    }
+
+    protected function clearTables(): void
+    {
+        $tables = [
+            'audit_logs',
+            'receipts',
+            'receipt_settings',
+            'loyalty_transactions',
+            'customer_interactions',
+            'loyalty_programs',
+            'stock_transfers',
+            'warehouse_stocks',
+            'warehouses',
+            'traceability_logs',
+            'recall_events',
+            'batch_lots',
+            'insurance_claims',
+            'insurance_policies',
+            'insurance_companies',
+            'sale_details',
+            'sales',
+            'purchase_details',
+            'purchases',
+            'stocks',
+            'products',
+            'parties',
+            'plan_subscribes',
+            'users',
+            'businesses',
+            'permissions',
+            'roles',
+            'plans',
+        ];
+
+        foreach ($tables as $table) {
+            if (Schema::hasTable($table)) {
+                DB::table($table)->truncate();
+            }
+        }
     }
 }

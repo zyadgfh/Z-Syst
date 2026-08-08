@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Sale extends Model
 {
@@ -23,7 +23,7 @@ class Sale extends Model
         'discountAmount',
         'dueAmount',
         'isPaid',
-        "tax_amount",
+        'tax_amount',
         'paidAmount',
         'totalAmount',
         'lossProfit',
@@ -39,17 +39,17 @@ class Sale extends Model
         return $this->hasMany(SaleDetails::class);
     }
 
-    public function tax() : BelongsTo
+    public function tax(): BelongsTo
     {
         return $this->belongsTo(Tax::class);
     }
 
-    public function party() : BelongsTo
+    public function party(): BelongsTo
     {
         return $this->belongsTo(Party::class);
     }
 
-    public function user() : BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
@@ -64,9 +64,9 @@ class Sale extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            if (!$model->invoiceNumber && auth()->check()) {
+            if (! $model->invoiceNumber && auth()->check()) {
                 $id = Sale::where('business_id', auth()->user()->business_id)->count() + 1;
-                $model->invoiceNumber = "S-" . str_pad($id, 5, '0', STR_PAD_LEFT);
+                $model->invoiceNumber = 'S-'.str_pad($id, 5, '0', STR_PAD_LEFT);
             }
         });
     }

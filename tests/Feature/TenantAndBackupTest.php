@@ -11,9 +11,10 @@ class TenantAndBackupTest extends TestCase
 {
     public function test_tenant_resolver_uses_authenticated_business_id(): void
     {
-        $resolver = new TenantResolver();
+        $resolver = new TenantResolver;
         $request = Request::create('/');
-        $request->setUserResolver(fn () => new class {
+        $request->setUserResolver(fn () => new class
+        {
             public int $business_id = 42;
         });
 

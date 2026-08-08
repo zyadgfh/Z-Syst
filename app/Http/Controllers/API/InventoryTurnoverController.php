@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Product;
+use App\Http\Controllers\Controller;
 use App\Models\InventoryTurnoverReport;
+use App\Models\Product;
 use App\Models\ProductInventoryAnalysis;
 use App\Services\InventoryTurnoverService;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 
 class InventoryTurnoverController extends Controller
 {
@@ -21,7 +23,7 @@ class InventoryTurnoverController extends Controller
     /**
      * Get inventory turnover summary with key metrics.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function summary()
     {
@@ -38,8 +40,7 @@ class InventoryTurnoverController extends Controller
     /**
      * Generate or get inventory turnover report for a period.
      *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function report(Request $request)
     {
@@ -51,7 +52,7 @@ class InventoryTurnoverController extends Controller
         ]);
 
         $reportType = $request->report_type ?? 'monthly';
-        $customDate = $request->date ? \Carbon\Carbon::parse($request->date) : null;
+        $customDate = $request->date ? Carbon::parse($request->date) : null;
 
         $result = $this->inventoryTurnoverService->generateReport($businessId, $reportType, $customDate);
 
@@ -64,8 +65,7 @@ class InventoryTurnoverController extends Controller
     /**
      * Get analysis for all products.
      *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function products(Request $request)
     {
@@ -117,7 +117,7 @@ class InventoryTurnoverController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('products.productName', 'like', "%{$search}%")
-                  ->orWhere('products.productCode', 'like', "%{$search}%");
+                    ->orWhere('products.productCode', 'like', "%{$search}%");
             });
         }
 
@@ -152,6 +152,7 @@ class InventoryTurnoverController extends Controller
                 'C' => 'منخفض القيمة',
                 default => 'غير مصنف',
             };
+
             return $item;
         });
 
@@ -173,9 +174,8 @@ class InventoryTurnoverController extends Controller
     /**
      * Get analysis for a specific product.
      *
-     * @param int $productId
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param  int  $productId
+     * @return JsonResponse
      */
     public function product($productId, Request $request)
     {
@@ -271,8 +271,7 @@ class InventoryTurnoverController extends Controller
     /**
      * Get slow-moving and dead stock products.
      *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function slowMoving(Request $request)
     {
@@ -295,8 +294,7 @@ class InventoryTurnoverController extends Controller
     /**
      * Get ABC analysis for products.
      *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function abcAnalysis(Request $request)
     {
@@ -331,8 +329,7 @@ class InventoryTurnoverController extends Controller
     /**
      * Get historical trends for inventory turnover.
      *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function trends(Request $request)
     {
@@ -353,6 +350,7 @@ class InventoryTurnoverController extends Controller
             ->get()
             ->map(function ($report) {
                 $meta = is_string($report->meta) ? json_decode($report->meta, true) : $report->meta;
+
                 return [
                     'id' => $report->id,
                     'period_label' => $meta['period_label'] ?? '',
@@ -418,4 +416,3 @@ class InventoryTurnoverController extends Controller
         return 'fluctuating';
     }
 }
-

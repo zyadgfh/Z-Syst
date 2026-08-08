@@ -15,6 +15,6 @@ class VerifyCsrfToken extends Middleware
         '/ssl-commerz/payment/success',
         '/ssl-commerz/payment/failed',
         'phonepe/status',
-        'paytm/status'
+        'paytm/status',
     ];
 }

@@ -34,28 +34,28 @@ class ZSystUserController extends Controller
         ]);
 
         $data = User::create([
-                    'role' => 'staff',
-                    'name' => $request->name,
-                    'email' => $request->email,
-                    'password' => Hash::make($request->password),
-                    'business_id' => auth()->user()->business_id,
-                    'visibility' => [
-                        'dashboardPermission' => $request->dashboardPermission == 'true' ? true : false,
-                        'addExpensePermission' => $request->addExpensePermission == 'true' ? true : false,
-                        'dueListPermission' => $request->dueListPermission == 'true' ? true : false,
-                        'lossProfitPermission' => $request->lossProfitPermission == 'true' ? true : false,
-                        'partiesPermission' => $request->partiesPermission == 'true' ? true : false,
-                        'productPermission' => $request->productPermission == 'true' ? true : false,
-                        'profileEditPermission' => $request->profileEditPermission == 'true' ? true : false,
-                        'purchaseListPermission' => $request->purchaseListPermission == 'true' ? true : false,
-                        'purchasePermission' => $request->purchasePermission == 'true' ? true : false,
-                        'reportsPermission' => $request->reportsPermission == 'true' ? true : false,
-                        'salePermission' => $request->salePermission == 'true' ? true : false,
-                        'salesListPermission' => $request->salesListPermission == 'true' ? true : false,
-                        'stockPermission' => $request->stockPermission == 'true' ? true : false,
-                        'addIncomePermission' => $request->addIncomePermission == 'true' ? true : false,
-                    ]
-                ]);
+            'role' => 'staff',
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'business_id' => auth()->user()->business_id,
+            'visibility' => [
+                'dashboardPermission' => $request->dashboardPermission == 'true' ? true : false,
+                'addExpensePermission' => $request->addExpensePermission == 'true' ? true : false,
+                'dueListPermission' => $request->dueListPermission == 'true' ? true : false,
+                'lossProfitPermission' => $request->lossProfitPermission == 'true' ? true : false,
+                'partiesPermission' => $request->partiesPermission == 'true' ? true : false,
+                'productPermission' => $request->productPermission == 'true' ? true : false,
+                'profileEditPermission' => $request->profileEditPermission == 'true' ? true : false,
+                'purchaseListPermission' => $request->purchaseListPermission == 'true' ? true : false,
+                'purchasePermission' => $request->purchasePermission == 'true' ? true : false,
+                'reportsPermission' => $request->reportsPermission == 'true' ? true : false,
+                'salePermission' => $request->salePermission == 'true' ? true : false,
+                'salesListPermission' => $request->salesListPermission == 'true' ? true : false,
+                'stockPermission' => $request->stockPermission == 'true' ? true : false,
+                'addIncomePermission' => $request->addIncomePermission == 'true' ? true : false,
+            ],
+        ]);
 
         return response()->json([
             'message' => __('Data saved successfully.'),
@@ -71,7 +71,7 @@ class ZSystUserController extends Controller
         $request->validate([
             'name' => 'required|max:30',
             'password' => 'nullable|min:4|max:15',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'email' => 'required|email|unique:users,email,'.$user->id,
         ]);
 
         $user->update([
@@ -94,11 +94,11 @@ class ZSystUserController extends Controller
                 'salesListPermission' => $request->salesListPermission == 'true' ? true : false,
                 'stockPermission' => $request->stockPermission == 'true' ? true : false,
                 'addIncomePermission' => $request->addIncomePermission == 'true' ? true : false,
-            ]
+            ],
         ]);
 
         return response()->json([
-            'message' => __('Data saved successfully.')
+            'message' => __('Data saved successfully.'),
         ]);
     }
 
@@ -108,6 +108,7 @@ class ZSystUserController extends Controller
     public function destroy(User $user)
     {
         $user->delete();
+
         return response()->json([
             'message' => __('Data deleted successfully.'),
         ]);

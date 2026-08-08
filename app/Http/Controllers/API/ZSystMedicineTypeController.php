@@ -21,12 +21,12 @@ class ZSystMedicineTypeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|unique:medicine_types,name,NULL,id,business_id,' . auth()->user()->business_id,
+            'name' => 'required|unique:medicine_types,name,NULL,id,business_id,'.auth()->user()->business_id,
         ]);
 
         $data = MedicineType::create($request->all() + [
-                    'business_id' => auth()->user()->business_id
-                ]);
+            'business_id' => auth()->user()->business_id,
+        ]);
 
         return response()->json([
             'message' => __('Data saved successfully.'),
@@ -39,7 +39,7 @@ class ZSystMedicineTypeController extends Controller
         $request->validate([
             'name' => [
                 'required',
-                'unique:medicine_types,name,' . $medicineType->id . ',id,business_id,' . auth()->user()->business_id,
+                'unique:medicine_types,name,'.$medicineType->id.',id,business_id,'.auth()->user()->business_id,
             ],
         ]);
 
@@ -54,6 +54,7 @@ class ZSystMedicineTypeController extends Controller
     public function destroy(MedicineType $medicineType)
     {
         $medicineType->delete();
+
         return response()->json([
             'message' => __('Data deleted successfully.'),
         ]);

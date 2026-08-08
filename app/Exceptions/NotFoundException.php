@@ -20,4 +20,3 @@ class NotFoundException extends RenderableException
         );
     }
 }
-

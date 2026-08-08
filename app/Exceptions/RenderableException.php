@@ -3,12 +3,15 @@
 namespace App\Exceptions;
 
 use App\Exceptions\Errors\ErrorCode;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
 abstract class RenderableException extends \Exception
 {
     public ErrorCode $errorCode;
+
     public array $context;
+
     public array $debugData;
 
     public function __construct(
@@ -22,14 +25,14 @@ abstract class RenderableException extends \Exception
         $this->context = $context;
         $this->debugData = $debugData;
 
-        $message = $userMessage ?: __('errors.' . $errorCode->value);
+        $message = $userMessage ?: __('errors.'.$errorCode->value);
         parent::__construct($message, $errorCode->httpStatus(), $previous);
     }
 
     /**
      * Render the exception as an HTTP response.
      */
-    public function render($request): \Illuminate\Http\JsonResponse
+    public function render($request): JsonResponse
     {
         $response = [
             'success' => false,
@@ -38,7 +41,7 @@ abstract class RenderableException extends \Exception
         ];
 
         // Add validation errors if present
-        if (!empty($this->context['errors'])) {
+        if (! empty($this->context['errors'])) {
             $response['errors'] = $this->context['errors'];
         }
 
@@ -86,4 +89,3 @@ abstract class RenderableException extends \Exception
         // No external alert integration configured yet.
     }
 }
-

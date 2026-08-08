@@ -2,14 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Models\Product;
 use App\Models\Business;
 use App\Models\Category;
-use App\Models\Unit;
 use App\Models\Manufacturer;
-use App\Models\MedicineType;
-use App\Models\BoxSize;
-use App\Models\Tax;
+use App\Models\Product;
+use App\Models\Unit;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ProductFactory extends Factory
@@ -20,7 +17,7 @@ class ProductFactory extends Factory
     {
         return [
             'business_id' => Business::factory(),
-            'productName' => fake()->unique()->word() . ' ' . fake()->randomElement(['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream']),
+            'productName' => fake()->unique()->word().' '.fake()->randomElement(['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream']),
             'category_id' => Category::factory(),
             'unit_id' => Unit::factory(),
             'manufacturer_id' => Manufacturer::factory(),

@@ -2,8 +2,8 @@
 
 namespace Modules\Landing\App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class PosAppInterface extends Model
 {
@@ -11,6 +11,6 @@ class PosAppInterface extends Model
 
     protected $fillable = [
         'image',
-        'status'
+        'status',
     ];
 }

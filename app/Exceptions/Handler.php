@@ -2,13 +2,15 @@
 
 namespace App\Exceptions;
 
-use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use App\Helpers\Logger;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -33,6 +35,7 @@ class Handler extends ExceptionHandler
         $this->renderable(function (ModelNotFoundException $e, $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 $model = class_basename($e->getModel());
+
                 return response()->json([
                     'success' => false,
                     'message' => __('errors.resource_not_found', ['resource' => $model]),
@@ -91,11 +94,12 @@ class Handler extends ExceptionHandler
     {
         if ($e instanceof RenderableException) {
             $e->report();
+
             return;
         }
 
         // Log all unhandled exceptions to errors channel
-        \App\Helpers\Logger::error($e);
+        Logger::error($e);
 
         parent::report($e);
     }
@@ -110,7 +114,7 @@ class Handler extends ExceptionHandler
 
             // Let parent handle renderable callbacks (AuthenticationException, ValidationException, etc.)
             $parentResponse = parent::render($request, $e);
-            if ($parentResponse instanceof \Illuminate\Http\JsonResponse) {
+            if ($parentResponse instanceof JsonResponse) {
                 return $parentResponse;
             }
 
@@ -142,4 +146,3 @@ class Handler extends ExceptionHandler
         return parent::render($request, $e);
     }
 }
-

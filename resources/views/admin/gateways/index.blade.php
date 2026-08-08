@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Gateway Settings') }}
+    {{ __('Payment Gateway Settings') }}
 @endsection
 
 @push('css')
@@ -20,6 +20,7 @@
                                 <div class="card-bodys">
                                     <div class="table-header border-0 p-16">
                                         <h4>{{ __('Payment Gateway Settings') }}</h4>
+                                        <p class="text-muted">{{ __('Configure Egyptian payment gateways and manual payment methods.') }}</p>
                                     </div>
                                 </div>
                             </div> <br>
@@ -33,6 +34,7 @@
 
                                                 <ul class="nav nav-pills flex-column flex-column shadow w-280 p-2">
                                                     @foreach ($gateways as $gateway)
+                                                        @if ($gateway->is_manual || $gateway->namespace)
                                                         <li class="nav-item">
                                                             <a href="#{{ str_replace(' ', '-', $gateway->name) }}"
                                                                 id="{{ str_replace(' ', '-', $gateway->name) }}-tab4"
@@ -42,6 +44,7 @@
                                                                 ])
                                                                 data-bs-toggle="tab">{{ $gateway->name }}</a>
                                                         </li>
+                                                        @endif
                                                     @endforeach
                                                 </ul>
 
@@ -51,6 +54,7 @@
                                                     <div class="card-body">
                                                         <div class="tab-content no-padding">
                                                             @foreach ($gateways as $gateway)
+                                                                @if ($gateway->is_manual || $gateway->namespace)
                                                                 <div @class([
                                                                     'tab-pane fade',
                                                                     'show active' => $loop->first ? true : false,
@@ -64,7 +68,7 @@
 
                                                                         <div class="row">
                                                                             <div class="col-11 align-self-center mb-2">
-                                                                                <label class="img-label">{{ __('GATEWAY IMAGE') }}</label>
+                                                                                <label class="img-label">{{ __('PAYMENT IMAGE') }}</label>
                                                                                 <input type="file" name="image"
                                                                                     class="form-control">
                                                                             </div>
@@ -75,23 +79,22 @@
                                                                             </div>
 
                                                                             <div class="col-12 mb-2">
-                                                                                <label>{{ __('GATEWAY NAME') }}</label>
+                                                                                <label>{{ __('PAYMENT NAME') }}</label>
                                                                                 <input type="text" name="name"
                                                                                     value="{{ $gateway->name }}" required
                                                                                     class="form-control">
                                                                             </div>
 
                                                                             <div class="col-12 mb-2">
-                                                                                <label>{{ __('Gateway Charge') }}</label>
+                                                                                <label>{{ __('Payment Charge') }}</label>
                                                                                 <input type="number" step="any"
                                                                                     name="charge"
-                                                                                    value="{{ $gateway->charge }}"
                                                                                     value="{{ $gateway->charge }}"
                                                                                     class="form-control">
                                                                             </div>
 
                                                                             <div class="col-12 mb-2">
-                                                                                <label>{{ __('Gateway Currency') }}</label>
+                                                                                <label>{{ __('Payment Currency') }}</label>
                                                                                 <div class="gpt-up-down-arrow position-relative">
                                                                                 <select class="form-control" required
                                                                                     name="currency_id">
@@ -105,39 +108,15 @@
                                                                                 </div>
                                                                             </div>
 
-                                                                            @if (!$gateway->is_manual)
-                                                                                @foreach ($gateway->data as $key => $data)
-                                                                                    <div class="col-12 mb-2">
-                                                                                        <label>{{ strtoupper(str_replace('_', ' ', $key)) }}</label>
-                                                                                        <input type="text" name="data[{{ $key }}]" value="{{ $data }}" required class="form-control">
-                                                                                    </div>
-                                                                                @endforeach
-
-                                                                                <div class="col-12 mb-2">
-                                                                                    <label>{{ __('Gateway Mode') }}</label>
-                                                                                    <div class="gpt-up-down-arrow position-relative">
-                                                                                    <select class="form-control" required name="mode">
-                                                                                        <option @selected($gateway->mode == 1) value="1">
-                                                                                            {{ __('Sandbox') }}
-                                                                                        </option>
-                                                                                        <option @selected($gateway->mode == 0) value="0">
-                                                                                            {{ __('Live') }}
-                                                                                        </option>
-                                                                                    </select>
-                                                                                    <span></span>
-                                                                                    </div>
-                                                                                </div>
-                                                                            @endif
-
                                                                             <div class="col-12 mb-2">
                                                                                 <label>{{ __('Status') }}</label>
                                                                                 <div class="gpt-up-down-arrow position-relative">
                                                                                 <select class="form-control" required
                                                                                     name="status">
-                                                                                    <option @selected($gateway->mode == 1)
+                                                                                    <option @selected($gateway->status == 1)
                                                                                         value="1">{{ __('Active') }}
                                                                                     </option>
-                                                                                    <option @selected($gateway->mode == 0)
+                                                                                    <option @selected($gateway->status == 0)
                                                                                         value="0">{{ __('Deactive') }}
                                                                                     </option>
                                                                                 </select>
@@ -145,24 +124,8 @@
                                                                                 </div>
                                                                             </div>
 
+                                                                            @if ($gateway->is_manual)
                                                                             <div class="col-12 mb-2">
-                                                                                <label>{{ __('Is Manual') }}</label>
-                                                                                <div class="gpt-up-down-arrow position-relative">
-                                                                                <select class="form-control" required
-                                                                                    name="is_manual">
-                                                                                    <option @selected($gateway->is_manual == 1)
-                                                                                        value="1">{{ __('Yes') }}
-                                                                                    </option>
-                                                                                    <option @selected($gateway->is_manual == 0)
-                                                                                        value="0">{{ __('No') }}
-                                                                                    </option>
-                                                                                </select>
-                                                                                <span></span>
-                                                                                </div>
-                                                                            </div>
-
-                                                                            <div
-                                                                                class="col-12 mb-2 {{ $gateway->is_manual ? '' : 'd-none' }}">
                                                                                 <label>{{ __('Accept Image') }}</label>
                                                                                 <div class="gpt-up-down-arrow position-relative">
                                                                                 <select class="form-control" required
@@ -178,8 +141,7 @@
                                                                                 </div>
                                                                             </div>
 
-                                                                            <div
-                                                                                class="col-12 mb-2 {{ $gateway->is_manual ? '' : 'd-none' }}">
+                                                                            <div class="col-12 mb-2">
                                                                                 <div class="manual-rows">
                                                                                     @foreach ($gateway->manual_data['label'] ?? [] as $key => $row)
                                                                                         <div class="row row-items">
@@ -196,7 +158,7 @@
                                                                                             <div class="col-sm-5">
                                                                                                 <label
                                                                                                     for="">{{ __('Select Required/Optionl') }}</label>
-                                                                                                    <div class="gpt-up-down-arrow position-relative">
+                                                                                                <div class="gpt-up-down-arrow position-relative">
                                                                                                 <select class="form-control"
                                                                                                     required
                                                                                                     name="manual_data[is_required][]">
@@ -212,43 +174,32 @@
                                                                                                     </option>
                                                                                                 </select>
                                                                                                 <span></span>
-                                                                                                    </div>
+                                                                                                </div>
                                                                                             </div>
-                                                                                            <div
-                                                                                                class="col-sm-2 align-self-center mt-3">
+                                                                                            <div class="col-sm-2">
+                                                                                                <label>&nbsp;</label>
                                                                                                 <button type="button"
-                                                                                                    class="btn text-danger trash remove-btn-features"><i
-                                                                                                        class="fas fa-trash"></i></button>
+                                                                                                    class="btn btn-danger remove_item mt-1">{{ __('Remove') }}</button>
                                                                                             </div>
                                                                                         </div>
                                                                                     @endforeach
                                                                                 </div>
-                                                                                <div class="row">
-                                                                                    <div class="col-12 mt-2">
-                                                                                        <a href="javascript:void(0)"
-                                                                                            class="fw-bold primary add-new-item"><i
-                                                                                                class="fas fa-plus-circle"></i>{{ __('Add new row') }}</a>
-                                                                                    </div>
-                                                                                </div>
                                                                             </div>
 
-                                                                            <div class="col-12 mb-2">
-                                                                                <label
-                                                                                    for="instructions">{{ __('INSTRUCTIONS') }}</label>
-                                                                                <textarea name="instructions" id="instructions" class="form-control summernote"
-                                                                                    placeholder="{{ __('Enter payment instructions here') }}">{{ $gateway->instructions }}</textarea>
+                                                                            <div class="col-12">
+                                                                                <button type="button"
+                                                                                    class="btn btn-primary add_item mb-2">{{ __('Add New Field') }}</button>
                                                                             </div>
+                                                                            @endif
 
-                                                                            <div class="col-lg-12">
-                                                                                <div class="button-group text-center mt-4">
-                                                                                    <button
-                                                                                        class="theme-btn m-2 submit-btn"><i
-                                                                                            class="far fa-save me-1"></i>{{ __('Save') }}</button>
-                                                                                </div>
+                                                                            <div class="col-12 mt-3">
+                                                                                <button type="submit"
+                                                                                    class="btn btn-success">{{ __('Update') }}</button>
                                                                             </div>
                                                                         </div>
                                                                     </form>
                                                                 </div>
+                                                                @endif
                                                             @endforeach
                                                         </div>
                                                     </div>
@@ -267,5 +218,37 @@
 @endsection
 
 @push('js')
-<script src="{{ asset('assets/js/summernote-lite.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+            $(document).on('click', '.remove_item', function() {
+                $(this).closest('.row-items').remove();
+            });
+
+            $('.add_item').click(function() {
+                let newField = `
+                    <div class="row row-items">
+                        <div class="col-sm-5">
+                            <label for="">{{ __('Label') }}</label>
+                            <input type="text" name="manual_data[label][]" class="form-control" required placeholder="{{ __('Enter label name') }}">
+                        </div>
+                        <div class="col-sm-5">
+                            <label for="">{{ __('Select Required/Optionl') }}</label>
+                            <div class="gpt-up-down-arrow position-relative">
+                                <select class="form-control" required name="manual_data[is_required][]">
+                                    <option value="1">{{ __('Required') }}</option>
+                                    <option value="0">{{ __('Optional') }}</option>
+                                </select>
+                                <span></span>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <label>&nbsp;</label>
+                            <button type="button" class="btn btn-danger remove_item mt-1">{{ __('Remove') }}</button>
+                        </div>
+                    </div>
+                `;
+                $('.manual-rows').append(newField);
+            });
+        });
+    </script>
 @endpush

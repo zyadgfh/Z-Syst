@@ -21,12 +21,12 @@ class ZSystBoxSizeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|unique:box_sizes,name,NULL,id,business_id,' . auth()->user()->business_id,
+            'name' => 'required|unique:box_sizes,name,NULL,id,business_id,'.auth()->user()->business_id,
         ]);
 
         $data = BoxSize::create($request->all() + [
-                    'business_id' => auth()->user()->business_id
-                ]);
+            'business_id' => auth()->user()->business_id,
+        ]);
 
         return response()->json([
             'message' => __('Data saved successfully.'),
@@ -34,13 +34,12 @@ class ZSystBoxSizeController extends Controller
         ]);
     }
 
-
     public function update(Request $request, BoxSize $boxSize)
     {
         $request->validate([
             'name' => [
                 'required',
-                'unique:box_sizes,name,' . $boxSize->id . ',id,business_id,' . auth()->user()->business_id,
+                'unique:box_sizes,name,'.$boxSize->id.',id,business_id,'.auth()->user()->business_id,
             ],
         ]);
 
@@ -55,6 +54,7 @@ class ZSystBoxSizeController extends Controller
     public function destroy(BoxSize $boxSize)
     {
         $boxSize->delete();
+
         return response()->json([
             'message' => __('Data deleted successfully.'),
         ]);

@@ -2,24 +2,24 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Models\Option;
-use Illuminate\View\View;
-use Illuminate\Http\Request;
-use App\Models\BusinessCategory;
-use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\Auth\LoginRequest;
-
+use App\Models\BusinessCategory;
+use App\Models\Option;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
+use Spatie\Permission\Models\Role;
 
 class AuthenticatedSessionController extends Controller
 {
     public function create(): View
     {
-        $login_page = Option::where('key','login-page')->first();
+        $login_page = Option::where('key', 'login-page')->first();
         $business_categories = BusinessCategory::latest()->get();
-        return view('auth.login',compact('login_page', 'business_categories'));
+
+        return view('auth.login', compact('login_page', 'business_categories'));
     }
 
     /**
@@ -37,6 +37,7 @@ class AuthenticatedSessionController extends Controller
 
         if ($user->role == 'shop-owner' || $user->role == 'staff') {
             Auth::logout();
+
             return response()->json([
                 'redirect' => route('login'),
                 'message' => __('You can not login as an business account right now.'),
@@ -45,7 +46,7 @@ class AuthenticatedSessionController extends Controller
             $role = Role::where('name', $user->role)->first();
             $first_role = $role->permissions->pluck('name')->all()[0];
             $page = explode('-', $first_role);
-            $redirect_url = route('admin.' . $page[0] . '.index');
+            $redirect_url = route('admin.'.$page[0].'.index');
         }
 
         return response()->json([

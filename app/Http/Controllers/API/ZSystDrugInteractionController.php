@@ -2,29 +2,29 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Product;
-use App\Models\DrugInteraction;
 use App\Helpers\TransactionHelper;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\DrugInteraction;
+use App\Models\Product;
+use Illuminate\Http\Request;
 
 class ZSystDrugInteractionController extends Controller
 {
     /**
      * Display a listing of drug interactions (paginated).
      */
-    public function index()
+    public function index(Request $request)
     {
         $data = DrugInteraction::query()
-                ->forBusiness(auth()->user()->business_id)
-                ->when(request('search'), function ($query) {
-                    $query->search(request('search'));
-                })
-                ->when(request('severity'), function ($query) {
-                    $query->severity(request('severity'));
-                })
-                ->latest()
-                ->paginate(10);
+            ->forBusiness(auth()->user()->business_id)
+            ->when($request->input('search'), function ($query) use ($request) {
+                $query->search($request->input('search'));
+            })
+            ->when($request->input('severity'), function ($query) use ($request) {
+                $query->severity($request->input('severity'));
+            })
+            ->latest()
+            ->paginate($request->input('per_page', 10));
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -160,8 +160,8 @@ class ZSystDrugInteractionController extends Controller
         ]);
 
         $products = Product::whereIn('id', $request->product_ids)
-                    ->where('business_id', auth()->user()->business_id)
-                    ->get();
+            ->where('business_id', auth()->user()->business_id)
+            ->get();
 
         if ($products->count() < 2) {
             return response()->json([
@@ -188,15 +188,15 @@ class ZSystDrugInteractionController extends Controller
 
         // Find interactions where drug_a and drug_b are in the list
         $interactions = DrugInteraction::forBusiness(auth()->user()->business_id)
-                ->where(function ($query) use ($allSearchNames) {
-                    foreach ($allSearchNames as $name) {
-                        $query->orWhere(function ($q) use ($name, $allSearchNames) {
-                            $q->where('drug_a_name', $name)
-                              ->whereIn('drug_b_name', $allSearchNames);
-                        });
-                    }
-                })
-                ->get();
+            ->where(function ($query) use ($allSearchNames) {
+                foreach ($allSearchNames as $name) {
+                    $query->orWhere(function ($q) use ($name, $allSearchNames) {
+                        $q->where('drug_a_name', $name)
+                            ->whereIn('drug_b_name', $allSearchNames);
+                    });
+                }
+            })
+            ->get();
 
         // Format results with product info
         $results = [];
@@ -313,4 +313,3 @@ class ZSystDrugInteractionController extends Controller
         ]);
     }
 }
-

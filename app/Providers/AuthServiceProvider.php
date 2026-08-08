@@ -2,11 +2,8 @@
 
 namespace App\Providers;
 
-use App\Models\StockAudit;
-use App\Models\FinancialAuditLog;
-use App\Policies\StockAuditPolicy;
-use App\Policies\FinancialAuditPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -16,8 +13,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        StockAudit::class => StockAuditPolicy::class,
-        FinancialAuditLog::class => FinancialAuditPolicy::class,
+        // 'App\Models\Model' => 'App\Policies\ModelPolicy',
     ];
 
     /**
@@ -25,6 +21,11 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $this->registerPolicies();
+
+        // Optional: Define gates here if needed
+        Gate::define('view-dashboard', function ($user) {
+            return in_array($user->role, ['admin', 'superadmin']);
+        });
     }
 }

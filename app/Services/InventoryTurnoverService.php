@@ -2,26 +2,21 @@
 
 namespace App\Services;
 
-use App\Models\Stock;
-use App\Models\Product;
-use App\Models\SaleDetails;
-use App\Models\PurchaseDetails;
 use App\Models\InventoryTurnoverReport;
+use App\Models\Product;
 use App\Models\ProductInventoryAnalysis;
+use App\Models\PurchaseDetails;
+use App\Models\SaleDetails;
+use App\Models\Stock;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class InventoryTurnoverService
 {
     /**
      * Generate a comprehensive inventory turnover report.
      *
-     * @param int $businessId
-     * @param string $reportType monthly, quarterly, yearly
-     * @param Carbon|null $customDate
-     * @return array
+     * @param  string  $reportType  monthly, quarterly, yearly
      */
     public function generateReport(int $businessId, string $reportType = 'monthly', ?Carbon $customDate = null): array
     {
@@ -127,12 +122,6 @@ class InventoryTurnoverService
 
     /**
      * Analyze a single product's inventory turnover.
-     *
-     * @param Product $product
-     * @param int $businessId
-     * @param Carbon $periodStart
-     * @param Carbon $periodEnd
-     * @return array
      */
     public function analyzeProduct(Product $product, int $businessId, Carbon $periodStart, Carbon $periodEnd): array
     {
@@ -207,11 +196,6 @@ class InventoryTurnoverService
 
     /**
      * Perform ABC analysis on products based on their sales value contribution.
-     *
-     * @param int $businessId
-     * @param Carbon $periodStart
-     * @param Carbon $periodEnd
-     * @return array
      */
     public function performABCAnalysis(int $businessId, Carbon $periodStart, Carbon $periodEnd): array
     {
@@ -264,13 +248,13 @@ class InventoryTurnoverService
         }
 
         // Count per category
-        $countA = count(array_filter($abcResults, fn($r) => $r['abc_category'] === 'A'));
-        $countB = count(array_filter($abcResults, fn($r) => $r['abc_category'] === 'B'));
-        $countC = count(array_filter($abcResults, fn($r) => $r['abc_category'] === 'C'));
+        $countA = count(array_filter($abcResults, fn ($r) => $r['abc_category'] === 'A'));
+        $countB = count(array_filter($abcResults, fn ($r) => $r['abc_category'] === 'B'));
+        $countC = count(array_filter($abcResults, fn ($r) => $r['abc_category'] === 'C'));
 
-        $valueA = array_sum(array_column(array_filter($abcResults, fn($r) => $r['abc_category'] === 'A'), 'total_sales_value'));
-        $valueB = array_sum(array_column(array_filter($abcResults, fn($r) => $r['abc_category'] === 'B'), 'total_sales_value'));
-        $valueC = array_sum(array_column(array_filter($abcResults, fn($r) => $r['abc_category'] === 'C'), 'total_sales_value'));
+        $valueA = array_sum(array_column(array_filter($abcResults, fn ($r) => $r['abc_category'] === 'A'), 'total_sales_value'));
+        $valueB = array_sum(array_column(array_filter($abcResults, fn ($r) => $r['abc_category'] === 'B'), 'total_sales_value'));
+        $valueC = array_sum(array_column(array_filter($abcResults, fn ($r) => $r['abc_category'] === 'C'), 'total_sales_value'));
 
         return [
             'business_id' => $businessId,
@@ -302,9 +286,7 @@ class InventoryTurnoverService
     /**
      * Get slow-moving and dead stock products.
      *
-     * @param int $businessId
-     * @param string $category slow or dead
-     * @return array
+     * @param  string  $category  slow or dead
      */
     public function getSlowMovingProducts(int $businessId, string $category = 'slow'): array
     {
@@ -324,7 +306,7 @@ class InventoryTurnoverService
         }
 
         // Sort by DIO descending (worst first)
-        usort($results, fn($a, $b) => $b['days_inventory_outstanding'] <=> $a['days_inventory_outstanding']);
+        usort($results, fn ($a, $b) => $b['days_inventory_outstanding'] <=> $a['days_inventory_outstanding']);
 
         $totalValue = array_sum(array_column($results, 'current_stock_value'));
         $totalQty = array_sum(array_column($results, 'current_stock_qty'));
@@ -345,9 +327,6 @@ class InventoryTurnoverService
 
     /**
      * Get comprehensive inventory turnover summary with trends.
-     *
-     * @param int $businessId
-     * @return array
      */
     public function getSummary(int $businessId): array
     {
@@ -455,12 +434,12 @@ class InventoryTurnoverService
 
         $purchasedQty = (float) PurchaseDetails::whereHas('purchase', function ($q) use ($businessId, $date) {
             $q->where('business_id', $businessId)
-              ->where('purchaseDate', '<=', $date);
+                ->where('purchaseDate', '<=', $date);
         })->sum('quantities');
 
         $soldQty = (float) SaleDetails::whereHas('sale', function ($q) use ($businessId, $date) {
             $q->where('business_id', $businessId)
-              ->where('saleDate', '<=', $date);
+                ->where('saleDate', '<=', $date);
         })->sum('quantities');
 
         $netStock = max(0, $purchasedQty - $soldQty);
@@ -488,7 +467,7 @@ class InventoryTurnoverService
         $purchases = (float) PurchaseDetails::where('product_id', $productId)
             ->whereHas('purchase', function ($q) use ($businessId, $start, $end) {
                 $q->where('business_id', $businessId)
-                  ->whereBetween('purchaseDate', [$start, $end]);
+                    ->whereBetween('purchaseDate', [$start, $end]);
             })
             ->sum('quantities');
 
@@ -496,7 +475,7 @@ class InventoryTurnoverService
         $sales = (float) SaleDetails::where('product_id', $productId)
             ->whereHas('sale', function ($q) use ($businessId, $start, $end) {
                 $q->where('business_id', $businessId)
-                  ->whereBetween('saleDate', [$start, $end]);
+                    ->whereBetween('saleDate', [$start, $end]);
             })
             ->sum('quantities');
 
@@ -615,4 +594,3 @@ class InventoryTurnoverService
         ];
     }
 }
-

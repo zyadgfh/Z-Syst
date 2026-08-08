@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
-use App\Models\Party;
-use App\Models\Sale;
-use App\Models\Purchase;
 use App\Models\Business;
+use App\Models\Party;
+use App\Models\Purchase;
+use App\Models\Sale;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -29,7 +29,7 @@ class PartyModelTest extends TestCase
 
     public function test_party_has_fillable_attributes()
     {
-        $fillable = (new Party())->getFillable();
+        $fillable = (new Party)->getFillable();
 
         $this->assertContains('name', $fillable);
         $this->assertContains('email', $fillable);
@@ -42,7 +42,7 @@ class PartyModelTest extends TestCase
 
     public function test_party_has_due_cast()
     {
-        $casts = (new Party())->getCasts();
+        $casts = (new Party)->getCasts();
 
         $this->assertArrayHasKey('due', $casts);
         $this->assertEquals('double', $casts['due']);

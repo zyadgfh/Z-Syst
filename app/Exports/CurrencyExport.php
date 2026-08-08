@@ -11,7 +11,7 @@ class CurrencyExport implements FromView
     public function view(): View
     {
         return view('admin.currencies.excel-csv', [
-            'currencies' => Currency::orderBy('is_default', 'desc')->orderBy('status', 'desc')->latest()->get()
+            'currencies' => Currency::orderBy('is_default', 'desc')->orderBy('status', 'desc')->latest()->get(),
         ]);
     }
 }

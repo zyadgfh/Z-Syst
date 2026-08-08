@@ -3,16 +3,15 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Schema;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class BackupAuthorizationTest extends TestCase
 {
     use RefreshDatabase;
+
     public function test_non_superadmin_cannot_create_backup()
     {
         $user = User::factory()->create();

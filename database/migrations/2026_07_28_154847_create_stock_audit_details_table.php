@@ -27,7 +27,7 @@ return new class extends Migration
             $table->enum('variance_type', ['none', 'positive', 'negative'])->default('none');
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             $table->index(['stock_audit_id', 'product_id']);
             $table->index(['business_id', 'product_id']);
         });

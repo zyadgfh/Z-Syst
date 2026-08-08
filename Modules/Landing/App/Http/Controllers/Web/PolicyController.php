@@ -2,8 +2,8 @@
 
 namespace Modules\Landing\App\Http\Controllers\Web;
 
-use App\Models\Option;
 use App\Http\Controllers\Controller;
+use App\Models\Option;
 
 class PolicyController extends Controller
 {
@@ -16,6 +16,7 @@ class PolicyController extends Controller
         ], (array) $generalOption->toArray()) : (object) ['value' => []];
         $general->value = is_array($general->value) ? $general->value : [];
         $privacy_policy = Option::where('key', 'privacy-policy')->first();
-        return view('landing::web.policy.index', compact('page_data','general','privacy_policy'));
+
+        return view('landing::web.policy.index', compact('page_data', 'general', 'privacy_policy'));
     }
 }

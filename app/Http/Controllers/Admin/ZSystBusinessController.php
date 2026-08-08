@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Exports\BusinessExport;
-use App\Models\Plan;
-use App\Models\User;
-use App\Models\Gateway;
-use App\Models\Business;
 use App\Helpers\HasUploader;
-use Illuminate\Http\Request;
-use App\Models\PlanSubscribe;
-use App\Models\BusinessCategory;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\Business;
+use App\Models\BusinessCategory;
+use App\Models\Gateway;
+use App\Models\Plan;
+use App\Models\PlanSubscribe;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -33,6 +33,7 @@ class ZSystBusinessController extends Controller
         $plans = Plan::latest()->get();
         $gateways = Gateway::latest()->get();
         $businesses = Business::with('enrolled_plan:id,plan_id', 'enrolled_plan.plan:id,subscriptionName', 'category:id,name')->latest()->paginate(10);
+
         return view('admin.business.index', compact('businesses', 'gateways', 'plans'));
     }
 
@@ -41,23 +42,23 @@ class ZSystBusinessController extends Controller
         $search = $request->input('search');
 
         $businesses = Business::with('enrolled_plan:id,plan_id', 'enrolled_plan.plan:id,subscriptionName', 'category:id,name')->when($search, function ($q) use ($search) {
-                            $q->where(function ($q) use ($search) {
-                                $q->where('companyName', 'like', '%' . $search . '%')
-                                    ->orWhere('phoneNumber', 'like', '%' . $search . '%')
-                                    ->orWhereHas('category', function ($q) use ($search) {
-                                        $q->where('name', 'like', '%' . $search . '%');
-                                    })
-                                    ->orWhereHas('enrolled_plan.plan', function ($q) use ($search) {
-                                        $q->where('subscriptionName', 'like', '%' . $search . '%');
-                                    });
-                            });
-                        })
-                        ->latest()
-                        ->paginate($request->per_page ?? 10);
+            $q->where(function ($q) use ($search) {
+                $q->where('companyName', 'like', '%'.$search.'%')
+                    ->orWhere('phoneNumber', 'like', '%'.$search.'%')
+                    ->orWhereHas('category', function ($q) use ($search) {
+                        $q->where('name', 'like', '%'.$search.'%');
+                    })
+                    ->orWhereHas('enrolled_plan.plan', function ($q) use ($search) {
+                        $q->where('subscriptionName', 'like', '%'.$search.'%');
+                    });
+            });
+        })
+            ->latest()
+            ->paginate($request->per_page ?? 10);
 
         if ($request->ajax()) {
             return response()->json([
-                'data' => view('admin.business.datas', compact('businesses'))->render()
+                'data' => view('admin.business.datas', compact('businesses'))->render(),
             ]);
         }
 
@@ -68,9 +69,9 @@ class ZSystBusinessController extends Controller
     {
         $plans = Plan::where('status', 1)->latest()->get();
         $categories = BusinessCategory::whereStatus(1)->latest()->get();
+
         return view('admin.business.create', compact('plans', 'categories'));
     }
-
 
     public function store(Request $request)
     {
@@ -95,21 +96,21 @@ class ZSystBusinessController extends Controller
             $business = Business::create([
                 'companyName' => $request->companyName,
                 'address' => $request->address,
-                'email' =>  $request->email,
+                'email' => $request->email,
                 'password' => $request->password,
                 'phoneNumber' => $request->phoneNumber,
                 'shopOpeningBalance' => $request->shopOpeningBalance,
                 'business_category_id' => $request->business_category_id,
-                'pictureUrl' => $request->pictureUrl ? $this->upload($request, 'pictureUrl') : NULL,
+                'pictureUrl' => $request->pictureUrl ? $this->upload($request, 'pictureUrl') : null,
                 'user_id' => $user->id,
             ]);
 
             User::create([
-                'business_id'=>$business->id,
+                'business_id' => $business->id,
                 'name' => $request->companyName,
-                'email' =>  $request->email,
+                'email' => $request->email,
                 'phone' => $request->phoneNumber,
-                'image' => $request->pictureUrl ? $this->upload($request, 'pictureUrl') : NULL,
+                'image' => $request->pictureUrl ? $this->upload($request, 'pictureUrl') : null,
                 'password' => Hash::make($request->password),
                 'user_id' => $user->id,
                 'lang' => 'en',
@@ -133,7 +134,7 @@ class ZSystBusinessController extends Controller
                     'will_expire' => now()->addDays($plan->duration),
                 ]);
 
-                sendNotification($subscribe->id, route('admin.subscription-reports.index', ['id' => $subscribe->id]), __('Plan subscribed by ' . $user->name));
+                sendNotification($subscribe->id, route('admin.subscription-reports.index', ['id' => $subscribe->id]), __('Plan subscribed by '.$user->name));
             }
 
             DB::commit();
@@ -144,6 +145,7 @@ class ZSystBusinessController extends Controller
             ]);
         } catch (\Throwable $th) {
             DB::rollback();
+
             return response()->json(__('Something went wrong.'), 403);
         }
     }
@@ -154,7 +156,8 @@ class ZSystBusinessController extends Controller
         $business = Business::findOrFail($id);
         $categories = BusinessCategory::whereStatus(1)->latest()->get();
         $user = User::where('business_id', $business->id)->firstOrFail();
-        return view('admin.business.edit', compact('business', 'plans', 'categories','user'));
+
+        return view('admin.business.edit', compact('business', 'plans', 'categories', 'user'));
     }
 
     public function update(Request $request, string $id)
@@ -212,7 +215,7 @@ class ZSystBusinessController extends Controller
                     'will_expire' => now()->addDays($plan->duration),
                 ]);
 
-                sendNotification($subscribe->id, route('admin.subscription-reports.index', ['id' => $subscribe->id]), __('Plan subscribed by ' . auth()->user()->name));
+                sendNotification($subscribe->id, route('admin.subscription-reports.index', ['id' => $subscribe->id]), __('Plan subscribed by '.auth()->user()->name));
             }
 
             DB::commit();
@@ -223,6 +226,7 @@ class ZSystBusinessController extends Controller
             ]);
         } catch (\Throwable $th) {
             DB::rollback();
+
             return response()->json(__('Something went wrong.'), 403);
         }
     }
@@ -231,9 +235,10 @@ class ZSystBusinessController extends Controller
     {
         $business = Business::findOrFail($id);
         $business->delete();
+
         return response()->json([
-            'message'   => __('Business deleted successfully'),
-            'redirect'  => route('admin.business.index')
+            'message' => __('Business deleted successfully'),
+            'redirect' => route('admin.business.index'),
         ]);
     }
 
@@ -242,8 +247,8 @@ class ZSystBusinessController extends Controller
         Business::whereIn('id', $request->ids)->delete();
 
         return response()->json([
-            'message'   => __('Selected Business deleted successfully'),
-            'redirect'  => route('admin.business.index')
+            'message' => __('Selected Business deleted successfully'),
+            'redirect' => route('admin.business.index'),
         ]);
     }
 
@@ -280,19 +285,20 @@ class ZSystBusinessController extends Controller
                 'will_expire' => now()->addDays($plan->duration),
             ]);
 
-            sendNotification($subscribe->id, route('admin.subscription-reports.index', ['id' => $subscribe->id]), __('Plan subscribed by ' . auth()->user()->name));
+            sendNotification($subscribe->id, route('admin.subscription-reports.index', ['id' => $subscribe->id]), __('Plan subscribed by '.auth()->user()->name));
 
             DB::commit();
+
             return response()->json([
                 'message' => __('Subscription enrolled successfully.'),
                 'redirect' => route('admin.subscription-reports.index'),
             ]);
         } catch (\Throwable $th) {
             DB::rollback();
+
             return response()->json(__('Something was wrong.'), 403);
         }
     }
-
 
     public function exportExcel()
     {

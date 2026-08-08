@@ -24,13 +24,13 @@ class ZSystIncomeCategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'categoryName' => 'required|unique:income_categories,categoryName,NULL,id,business_id,' . auth()->user()->business_id,
+            'categoryName' => 'required|unique:income_categories,categoryName,NULL,id,business_id,'.auth()->user()->business_id,
         ]);
 
         $data = IncomeCategory::create($request->except('status') + [
-                    'business_id' => auth()->user()->business_id,
-                    'status' => $request->status == 'true' ? 1 : 0,
-                ]);
+            'business_id' => auth()->user()->business_id,
+            'status' => $request->status == 'true' ? 1 : 0,
+        ]);
 
         return response()->json([
             'message' => __('Data saved successfully.'),
@@ -48,7 +48,7 @@ class ZSystIncomeCategoryController extends Controller
         $request->validate([
             'categoryName' => [
                 'required',
-                'unique:income_categories,categoryName,' . $category->id . ',id,business_id,' . auth()->user()->business_id,
+                'unique:income_categories,categoryName,'.$category->id.',id,business_id,'.auth()->user()->business_id,
             ],
         ]);
 
@@ -69,6 +69,7 @@ class ZSystIncomeCategoryController extends Controller
     {
         $category = IncomeCategory::findOrFail($id);
         $category->delete();
+
         return response()->json([
             'message' => __('Data deleted successfully.'),
         ]);

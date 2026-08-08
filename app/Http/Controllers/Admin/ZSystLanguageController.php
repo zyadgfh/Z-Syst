@@ -2,20 +2,21 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Language;
 use App\Helpers\HasUploader;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Language;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ZSystLanguageController extends Controller
 {
     use HasUploader;
+
     public function index(Request $request)
     {
         $languages = Language::when($request->has('search'), function ($q) use ($request) {
             $q->where(function ($query) use ($request) {
-                $query->where('name', 'like', '%' . $request->search . '%');
+                $query->where('name', 'like', '%'.$request->search.'%');
             });
         })
             ->latest();
@@ -24,11 +25,12 @@ class ZSystLanguageController extends Controller
             $languages = $languages->get();
 
             return response()->json([
-                'data' => view('admin.website-setting.languages.datas', compact('languages'))->render()
+                'data' => view('admin.website-setting.languages.datas', compact('languages'))->render(),
             ]);
         }
 
         $languages = $languages->paginate(10);
+
         return view('admin.website-setting.languages.index', compact('languages'));
     }
 
@@ -46,12 +48,12 @@ class ZSystLanguageController extends Controller
         ]);
 
         Language::create($request->except('icon') + [
-            'icon' => $request->icon ? $this->upload($request, 'icon') : NULL
+            'icon' => $request->icon ? $this->upload($request, 'icon') : null,
         ]);
 
         return response()->json([
             'message' => __('Laguage created successfully'),
-            'redirect' => route('admin.languages.index')
+            'redirect' => route('admin.languages.index'),
         ]);
     }
 
@@ -74,7 +76,7 @@ class ZSystLanguageController extends Controller
 
         return response()->json([
             'message' => __('Language updated successfully'),
-            'redirect' => route('admin.languages.index')
+            'redirect' => route('admin.languages.index'),
         ]);
     }
 
@@ -86,8 +88,8 @@ class ZSystLanguageController extends Controller
         $language->delete();
 
         return response()->json([
-            'message'   => __('Language deleted successfully'),
-            'redirect'  => route('admin.languages.index')
+            'message' => __('Language deleted successfully'),
+            'redirect' => route('admin.languages.index'),
         ]);
     }
 
@@ -95,9 +97,9 @@ class ZSystLanguageController extends Controller
     {
         $language = Language::findOrFail($id);
         $language->update(['status' => $request->status]);
+
         return response()->json(['message' => 'Language ']);
     }
-
 
     public function deleteAll(Request $request)
     {
@@ -112,7 +114,7 @@ class ZSystLanguageController extends Controller
 
         return response()->json([
             'message' => __('Selected Language deleted successfully'),
-            'redirect' => route('admin.languages.index')
+            'redirect' => route('admin.languages.index'),
         ]);
     }
 }

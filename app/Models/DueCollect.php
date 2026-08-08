@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class DueCollect extends Model
 {
@@ -35,26 +35,26 @@ class DueCollect extends Model
 
         static::creating(function ($model) {
             $id = DueCollect::where('business_id', auth()->user()->business_id)->count() + 1;
-            $model->invoiceNumber = "D-" . str_pad($id, 5, '0', STR_PAD_LEFT);
+            $model->invoiceNumber = 'D-'.str_pad($id, 5, '0', STR_PAD_LEFT);
         });
     }
 
-    public function user() : BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function party() : BelongsTo
+    public function party(): BelongsTo
     {
         return $this->belongsTo(Party::class);
     }
 
-    public function sale() : BelongsTo
+    public function sale(): BelongsTo
     {
         return $this->belongsTo(Sale::class);
     }
 
-    public function purchase() : BelongsTo
+    public function purchase(): BelongsTo
     {
         return $this->belongsTo(Purchase::class);
     }

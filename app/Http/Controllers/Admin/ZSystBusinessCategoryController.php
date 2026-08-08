@@ -13,6 +13,7 @@ class ZSystBusinessCategoryController extends Controller
     public function index()
     {
         $categories = BusinessCategory::latest()->paginate(10);
+
         return view('admin.business-categories.index', compact('categories'));
     }
 
@@ -20,8 +21,8 @@ class ZSystBusinessCategoryController extends Controller
     {
         $categories = BusinessCategory::when(request('search'), function ($q) {
             $q->where(function ($q) {
-                $q->where('name', 'like', '%' . request('search') . '%')
-                    ->orWhere('description', 'like', '%' . request('search') . '%');
+                $q->where('name', 'like', '%'.request('search').'%')
+                    ->orWhere('description', 'like', '%'.request('search').'%');
             });
         })
             ->latest()
@@ -29,13 +30,12 @@ class ZSystBusinessCategoryController extends Controller
 
         if ($request->ajax()) {
             return response()->json([
-                'data' => view('admin.business-categories.datas', compact('categories'))->render()
+                'data' => view('admin.business-categories.datas', compact('categories'))->render(),
             ]);
         }
 
         return redirect(url()->previous());
     }
-
 
     public function create()
     {
@@ -55,14 +55,15 @@ class ZSystBusinessCategoryController extends Controller
         ]);
 
         return response()->json([
-            'message'   => __('Category saved successfully'),
-            'redirect'  => route('admin.business-categories.index')
+            'message' => __('Category saved successfully'),
+            'redirect' => route('admin.business-categories.index'),
         ]);
     }
 
     public function edit($id)
     {
         $category = BusinessCategory::find($id);
+
         return view('admin.business-categories.edit', compact('category'));
     }
 
@@ -71,7 +72,7 @@ class ZSystBusinessCategoryController extends Controller
         $request->validate([
             'status' => 'in:on',
             'description' => 'nullable|string|max:255',
-            'name' => 'required|string|max:255|unique:business_categories,name,' . $id,
+            'name' => 'required|string|max:255|unique:business_categories,name,'.$id,
         ]);
 
         $category = BusinessCategory::find($id);
@@ -81,8 +82,8 @@ class ZSystBusinessCategoryController extends Controller
         ]);
 
         return response()->json([
-            'message'   => __('Category updated successfully'),
-            'redirect'  => route('admin.business-categories.index')
+            'message' => __('Category updated successfully'),
+            'redirect' => route('admin.business-categories.index'),
         ]);
     }
 
@@ -90,9 +91,10 @@ class ZSystBusinessCategoryController extends Controller
     {
         $category = BusinessCategory::findOrFail($id);
         $category->delete();
+
         return response()->json([
-            'message'   => __('Category deleted successfully'),
-            'redirect'  => route('admin.business-categories.index')
+            'message' => __('Category deleted successfully'),
+            'redirect' => route('admin.business-categories.index'),
         ]);
     }
 
@@ -101,8 +103,8 @@ class ZSystBusinessCategoryController extends Controller
         BusinessCategory::whereIn('id', $request->ids)->delete();
 
         return response()->json([
-            'message'   => __('Selected Category deleted successfully'),
-            'redirect'  => route('admin.business-categories.index')
+            'message' => __('Selected Category deleted successfully'),
+            'redirect' => route('admin.business-categories.index'),
         ]);
     }
 
@@ -110,6 +112,7 @@ class ZSystBusinessCategoryController extends Controller
     {
         $category = BusinessCategory::findOrFail($id);
         $category->update(['status' => $request->status]);
+
         return response()->json(['message' => 'Business category']);
     }
 

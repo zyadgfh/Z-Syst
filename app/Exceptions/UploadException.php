@@ -20,4 +20,3 @@ class UploadException extends RenderableException
         );
     }
 }
-

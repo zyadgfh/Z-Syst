@@ -54,7 +54,7 @@ class StockAuditDetail extends Model
     {
         $this->variance = $this->physical_quantity - $this->system_quantity;
         $this->variance_value = $this->variance * $this->unit_cost;
-        
+
         if ($this->variance > 0) {
             $this->variance_type = 'positive';
         } elseif ($this->variance < 0) {
@@ -62,7 +62,7 @@ class StockAuditDetail extends Model
         } else {
             $this->variance_type = 'none';
         }
-        
+
         return $this;
     }
 }

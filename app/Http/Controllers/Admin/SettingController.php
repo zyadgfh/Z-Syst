@@ -20,8 +20,9 @@ class SettingController extends Controller
 
     public function index()
     {
-        $general = Option::where('key','general')->first();
-        return view('admin.settings.general',compact('general'));
+        $general = Option::where('key', 'general')->first();
+
+        return view('admin.settings.general', compact('general'));
     }
 
     public function update(Request $request, $id)
@@ -39,16 +40,16 @@ class SettingController extends Controller
         $general = Option::findOrFail($id);
         Cache::forget($general->key);
         $general->update([
-            'value' => $request->except('_token','_method','logo','favicon','common_header_logo','footer_logo','admin_logo','frontend_logo') + [
-                    'favicon' => $request->favicon ? $this->upload($request, 'favicon', $general->favicon) : $general->value['favicon'],
-                    'admin_logo' => $request->admin_logo ? $this->upload($request, 'admin_logo', $general->admin_logo) : $general->value['admin_logo'],
-                    'frontend_logo' => $request->frontend_logo ? $this->upload($request, 'frontend_logo', $general->frontend_logo) : $general->value['frontend_logo'],
-                ]
+            'value' => $request->except('_token', '_method', 'logo', 'favicon', 'common_header_logo', 'footer_logo', 'admin_logo', 'frontend_logo') + [
+                'favicon' => $request->favicon ? $this->upload($request, 'favicon', $general->favicon) : $general->value['favicon'],
+                'admin_logo' => $request->admin_logo ? $this->upload($request, 'admin_logo', $general->admin_logo) : $general->value['admin_logo'],
+                'frontend_logo' => $request->frontend_logo ? $this->upload($request, 'frontend_logo', $general->frontend_logo) : $general->value['frontend_logo'],
+            ],
         ]);
 
         return response()->json([
-            'message'   => __('General Setting updated successfully'),
-            'redirect'  => route('admin.settings.index')
+            'message' => __('General Setting updated successfully'),
+            'redirect' => route('admin.settings.index'),
         ]);
     }
 }

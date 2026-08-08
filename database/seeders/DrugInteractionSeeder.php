@@ -229,7 +229,6 @@ class DrugInteractionSeeder extends Seeder
             DrugInteraction::create($interaction);
         }
 
-        $this->command->info('Seeded ' . count($interactions) . ' common drug interactions.');
+        $this->command->info('Seeded '.count($interactions).' common drug interactions.');
     }
 }
-

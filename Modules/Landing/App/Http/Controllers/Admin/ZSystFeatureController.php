@@ -3,12 +3,12 @@
 namespace Modules\Landing\App\Http\Controllers\Admin;
 
 use App\Helpers\HasUploader;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Modules\Landing\App\Models\Feature;
+use Maatwebsite\Excel\Facades\Excel;
 use Modules\Landing\App\Exports\ExportFeature;
+use Modules\Landing\App\Models\Feature;
 
 class ZSystFeatureController extends Controller
 {
@@ -18,13 +18,14 @@ class ZSystFeatureController extends Controller
     {
         $this->middleware('permission:features-read')->only('index');
         $this->middleware('permission:features-create')->only('create', 'store');
-        $this->middleware('permission:features-update')->only('edit', 'update','status');
-        $this->middleware('permission:features-delete')->only('destroy','deleteAll');
+        $this->middleware('permission:features-update')->only('edit', 'update', 'status');
+        $this->middleware('permission:features-delete')->only('destroy', 'deleteAll');
     }
 
     public function index(Request $request)
     {
         $features = Feature::latest()->paginate(10);
+
         return view('landing::admin.features.index', compact('features'));
 
     }
@@ -33,7 +34,7 @@ class ZSystFeatureController extends Controller
     {
         $features = Feature::when(request('search'), function ($q) {
             $q->where(function ($q) {
-                $q->where('title', 'like', '%' . request('search') . '%');
+                $q->where('title', 'like', '%'.request('search').'%');
             });
         })
             ->latest()
@@ -41,7 +42,7 @@ class ZSystFeatureController extends Controller
 
         if ($request->ajax()) {
             return response()->json([
-                'data' => view('landing::admin.features.datas', compact('features'))->render()
+                'data' => view('landing::admin.features.datas', compact('features'))->render(),
             ]);
         }
 
@@ -63,12 +64,12 @@ class ZSystFeatureController extends Controller
         ]);
 
         Feature::create($request->except('image') + [
-            'image' => $request->image ? $this->upload($request, 'image') : NULL
+            'image' => $request->image ? $this->upload($request, 'image') : null,
         ]);
 
         return response()->json([
             'message' => __('Feature created successfully'),
-            'redirect' => route('admin.features.index')
+            'redirect' => route('admin.features.index'),
         ]);
     }
 
@@ -92,7 +93,7 @@ class ZSystFeatureController extends Controller
 
         return response()->json([
             'message' => __('Feature updated successfully'),
-            'redirect' => route('admin.features.index')
+            'redirect' => route('admin.features.index'),
         ]);
     }
 
@@ -104,8 +105,8 @@ class ZSystFeatureController extends Controller
         $feature->delete();
 
         return response()->json([
-            'message'   => __('Feature deleted successfully'),
-            'redirect'  => route('admin.features.index')
+            'message' => __('Feature deleted successfully'),
+            'redirect' => route('admin.features.index'),
         ]);
     }
 
@@ -113,6 +114,7 @@ class ZSystFeatureController extends Controller
     {
         $feature = Feature::findOrFail($id);
         $feature->update(['status' => $request->status]);
+
         return response()->json(['message' => 'Feature ']);
     }
 
@@ -129,7 +131,7 @@ class ZSystFeatureController extends Controller
 
         return response()->json([
             'message' => __('Selected Feature deleted successfully'),
-            'redirect' => route('admin.features.index')
+            'redirect' => route('admin.features.index'),
         ]);
     }
 

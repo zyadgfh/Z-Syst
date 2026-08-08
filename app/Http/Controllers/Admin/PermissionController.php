@@ -11,7 +11,7 @@ class PermissionController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:permissions-read')->only('index','search');
+        $this->middleware('permission:permissions-read')->only('index', 'search');
         $this->middleware('permission:permissions-create')->only('store');
     }
 
@@ -19,6 +19,7 @@ class PermissionController extends Controller
     {
         $users = User::whereNotIn('role', ['superadmin', 'staff', 'admin'])->get();
         $roles = Role::where('name', '!=', 'superadmin')->get();
+
         return view('admin.permissions.index', compact('roles', 'users'));
     }
 
@@ -26,7 +27,7 @@ class PermissionController extends Controller
     {
         $request->validate([
             'user' => ['required', 'exists:users,id'],
-            'roles' => ['required', 'exists:roles,id']
+            'roles' => ['required', 'exists:roles,id'],
         ]);
 
         $user = User::findOrFail($request->input('user'));
@@ -34,7 +35,7 @@ class PermissionController extends Controller
 
         return response()->json([
             'message' => __('Role permissions assigned successfully.'),
-            'redirect' => route('admin.permissions.index')
+            'redirect' => route('admin.permissions.index'),
         ]);
     }
 }

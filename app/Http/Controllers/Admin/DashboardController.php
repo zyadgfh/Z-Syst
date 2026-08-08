@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Plan;
-use App\Models\User;
-use App\Models\Business;
-use App\Models\PlanSubscribe;
-use App\Models\BusinessCategory;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\Business;
+use App\Models\BusinessCategory;
+use App\Models\Plan;
+use App\Models\PlanSubscribe;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -21,6 +21,7 @@ class DashboardController extends Controller
     public function index()
     {
         $businesses = Business::with('enrolled_plan:id,plan_id', 'enrolled_plan.plan:id,subscriptionName', 'category:id,name')->latest()->take(5)->get();
+
         return view('admin.dashboard.index', compact('businesses'));
     }
 
@@ -56,10 +57,10 @@ class DashboardController extends Controller
         $year = $request->input('year', date('Y'));
 
         $subscriptions = PlanSubscribe::whereYear('created_at', request('year') ?? date('Y'))
-                            ->selectRaw('MONTHNAME(created_at) as month, SUM(price) as total_amount')
-                            ->whereYear('created_at', $year)
-                            ->groupBy('month')
-                            ->get();
+            ->selectRaw('MONTHNAME(created_at) as month, SUM(price) as total_amount')
+            ->whereYear('created_at', $year)
+            ->groupBy('month')
+            ->get();
 
         return response()->json($subscriptions);
     }

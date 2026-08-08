@@ -1,19 +1,16 @@
 <?php
 
-use App\Models\Business;
-use App\Models\User;
-use App\Models\Option;
-use App\Models\Gateway;
 use App\Models\Currency;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Date;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Http;
+use App\Models\Gateway;
+use App\Models\Option;
+use App\Models\User;
 use App\Notifications\SendNotification;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 
-function cache_remember(string $key, callable $callback, int $ttl = 1800): mixed {
+function cache_remember(string $key, callable $callback, int $ttl = 1800): mixed
+{
     return cache()->remember($key, env('CACHE_LIFETIME', $ttl), $callback);
 }
 
@@ -28,7 +25,8 @@ function normalize_manage_pages_option($value)
     return $value;
 }
 
-function get_option($key) {
+function get_option($key)
+{
     return cache_remember($key, function () use ($key) {
         try {
             $option = Option::where('key', $key)->first();
@@ -45,12 +43,13 @@ function get_option($key) {
     });
 }
 
-function formatted_date(string $date = null, string $format = 'd M, Y'): ?string
+function formatted_date(?string $date = null, string $format = 'd M, Y'): ?string
 {
-    return !empty($date) ? Date::parse($date)->format($format) : null;
+    return ! empty($date) ? Date::parse($date)->format($format) : null;
 }
 
-function sendNotification($id, $url, $message, $user = null) {
+function sendNotification($id, $url, $message, $user = null)
+{
     $notify = [
         'id' => $id,
         'url' => $url,
@@ -62,22 +61,22 @@ function sendNotification($id, $url, $message, $user = null) {
     Notification::send($notify_user, new SendNotification($notify));
 }
 
-function currency_format($amount, $type = "icon", $decimals = 2, $currency = null)
+function currency_format($amount, $type = 'icon', $decimals = 2, $currency = null)
 {
     $amount = number_format($amount, $decimals);
     $currency = $currency ?? default_currency();
 
-    if ($type == "icon" || $type == "symbol") {
-        if ($currency->position == "right") {
-            return $amount . $currency->symbol;
+    if ($type == 'icon' || $type == 'symbol') {
+        if ($currency->position == 'right') {
+            return $amount.$currency->symbol;
         } else {
-            return $currency->symbol . $amount;
+            return $currency->symbol.$amount;
         }
     } else {
-        if ($currency->position == "right") {
-            return $amount . ' ' . $currency->code;
+        if ($currency->position == 'right') {
+            return $amount.' '.$currency->code;
         } else {
-            return $currency->code . ' ' . $amount;
+            return $currency->code.' '.$amount;
         }
     }
 }
@@ -104,69 +103,74 @@ function payable(float|int $amount, Gateway $gateway)
     }
 }
 
-function convert_to_default_amount($amount, $currency) {
+function convert_to_default_amount($amount, $currency)
+{
     return $amount * $currency->rate;
 }
 
-function default_currency($key = null, Currency $currency = null): object|int|string
+function default_currency($key = null, ?Currency $currency = null): object|int|string
 {
     $currency = $currency ?? cache_remember('default_currency', function () {
-            $currency = Currency::whereIsDefault(1)->first();
+        $currency = Currency::whereIsDefault(1)->first();
 
-            if (!$currency) {
-                $currency = (object)['name' => 'US Dollar', 'code' => 'USD', 'rate' => 1, 'symbol' => '$', 'position' => 'left', 'status' => true, 'is_default' => true,];
-            }
+        if (! $currency) {
+            $currency = (object) ['name' => 'US Dollar', 'code' => 'USD', 'rate' => 1, 'symbol' => '$', 'position' => 'left', 'status' => true, 'is_default' => true];
+        }
 
-            return $currency;
-        });
+        return $currency;
+    });
 
     return $key ? $currency->$key : $currency;
 }
 
-function dueCollectMessage($data, $party, $business_name, $invoiceNumber) {
+function dueCollectMessage($data, $party, $business_name, $invoiceNumber)
+{
     if ($invoiceNumber) {
-        $message = "Dear ". $party->name ."
-We have received a payment of: ". $data->payDueAmount ."
-Your Total Previous Due: ". $party->due ."
-Thanks, ". $business_name;
+        $message = 'Dear '.$party->name.'
+We have received a payment of: '.$data->payDueAmount.'
+Your Total Previous Due: '.$party->due.'
+Thanks, '.$business_name;
     } else {
-        $message = "Dear ". $party->name ."
-Your Invoice : ". $data->invoiceNumber ."
-We have received a payment of: ". $data->payDueAmount ."
-Your Total Previous Due: ". $party->due ."
-Thanks, ". $business_name;
+        $message = 'Dear '.$party->name.'
+Your Invoice : '.$data->invoiceNumber.'
+We have received a payment of: '.$data->payDueAmount.'
+Your Total Previous Due: '.$party->due.'
+Thanks, '.$business_name;
     }
 
     return $message;
 }
 
-function saleMessage($sale, $party, $business_name) {
-    $message = "Dear ". $party->name ."
-Your Invoice No: ". $sale->invoiceNumber ."
-Total Bill: ". $sale->totalAmount ."
-Paid: ". $sale->paidAmount ."
-Due: ". $sale->dueAmount ."
-Total Previous Due: ". $party->due ."
-Thanks, ". $business_name;
+function saleMessage($sale, $party, $business_name)
+{
+    $message = 'Dear '.$party->name.'
+Your Invoice No: '.$sale->invoiceNumber.'
+Total Bill: '.$sale->totalAmount.'
+Paid: '.$sale->paidAmount.'
+Due: '.$sale->dueAmount.'
+Total Previous Due: '.$party->due.'
+Thanks, '.$business_name;
 
     return $message;
 }
 
-function dueMessage($party, $business_name) {
-    $message = "Dear ". $party->name ."
-You have pending payment of: ". $party->due ."
+function dueMessage($party, $business_name)
+{
+    $message = 'Dear '.$party->name.'
+You have pending payment of: '.$party->due.'
 Kindly pay it as soon as possible.
-Thanks, ". $business_name;
+Thanks, '.$business_name;
 
     return $message;
 }
 
-function sendMessage($numbers, $message) {
+function sendMessage($numbers, $message)
+{
     $settings = get_option('sms-settings');
     $response = Http::withHeaders([
-        'Authorization' => "Bearer " . $settings['api_token'],
-        'Content-Type' => "application/json",
-        'Accept' => "application/json",
+        'Authorization' => 'Bearer '.$settings['api_token'],
+        'Content-Type' => 'application/json',
+        'Accept' => 'application/json',
     ])->post($settings['api_url'], [
         'recipient' => $numbers,
         'sender_id' => $settings['sender_id'],
@@ -177,7 +181,8 @@ function sendMessage($numbers, $message) {
     return $response;
 }
 
-function languages() {
+function languages()
+{
     return [
         'en' => ['name' => 'English', 'flag' => 'us'],
         'ar' => ['name' => 'Arabic', 'flag' => 'sa'],

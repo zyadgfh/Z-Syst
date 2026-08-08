@@ -3,10 +3,10 @@
 namespace Tests\Unit;
 
 use App\Models\Business;
+use App\Models\PredictionSetting;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleDetails;
-use App\Models\PredictionSetting;
 use App\Models\SalesForecast;
 use App\Services\PredictionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;

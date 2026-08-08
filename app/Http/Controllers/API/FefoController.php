@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Stock;
-use App\Models\Product;
-use App\Models\FefoLog;
-use App\Services\FefoService;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\FefoLog;
+use App\Models\Product;
+use App\Models\Stock;
+use App\Services\FefoService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class FefoController extends Controller
 {
@@ -21,13 +22,12 @@ class FefoController extends Controller
     /**
      * Get FEFO suggestions for a product (batches sorted by nearest expiry).
      *
-     * @param int $productId
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function suggestions(int $productId)
+    public function suggestions(Request $request, int $productId)
     {
         $businessId = auth()->user()->business_id;
-        $quantity = request('quantity', 1);
+        $quantity = $request->input('quantity', 1);
 
         $product = Product::where('business_id', $businessId)->findOrFail($productId);
 
@@ -60,13 +60,12 @@ class FefoController extends Controller
     /**
      * Get all batches for a product sorted by FEFO.
      *
-     * @param int $productId
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function productBatches(int $productId)
+    public function productBatches(Request $request, int $productId)
     {
         $businessId = auth()->user()->business_id;
-        $includeExpired = request('include_expired', false) === 'true';
+        $includeExpired = $request->input('include_expired', false) === 'true';
 
         $product = Product::where('business_id', $businessId)->findOrFail($productId);
 
@@ -95,8 +94,7 @@ class FefoController extends Controller
     /**
      * Get FEFO sale suggestions for a full cart.
      *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function saleSuggestions(Request $request)
     {
@@ -118,7 +116,7 @@ class FefoController extends Controller
     /**
      * Get FEFO report (statistics and priority products).
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function report()
     {
@@ -134,25 +132,25 @@ class FefoController extends Controller
     /**
      * Get FEFO logs.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function logs()
+    public function logs(Request $request)
     {
         $businessId = auth()->user()->business_id;
 
         $logs = FefoLog::with(['product:id,productName', 'sale:id,invoiceNumber'])
             ->where('business_id', $businessId)
-            ->when(request('product_id'), function ($q) {
-                $q->where('product_id', request('product_id'));
+            ->when($request->input('product_id'), function ($q) use ($request) {
+                $q->where('product_id', $request->input('product_id'));
             })
-            ->when(request('from_date'), function ($q) {
-                $q->whereDate('created_at', '>=', request('from_date'));
+            ->when($request->input('from_date'), function ($q) use ($request) {
+                $q->whereDate('created_at', '>=', $request->input('from_date'));
             })
-            ->when(request('to_date'), function ($q) {
-                $q->whereDate('created_at', '<=', request('to_date'));
+            ->when($request->input('to_date'), function ($q) use ($request) {
+                $q->whereDate('created_at', '<=', $request->input('to_date'));
             })
             ->latest()
-            ->paginate(request('per_page', 20));
+            ->paginate($request->input('per_page', 20));
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -163,7 +161,7 @@ class FefoController extends Controller
     /**
      * Run auto-removal of expired stock.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function removeExpired()
     {
@@ -178,4 +176,3 @@ class FefoController extends Controller
         ]);
     }
 }
-

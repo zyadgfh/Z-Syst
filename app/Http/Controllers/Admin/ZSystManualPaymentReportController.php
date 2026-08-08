@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Http\Request;
-use App\Models\PlanSubscribe;
-use Illuminate\Support\Facades\DB;
 use App\Exports\ManualPaymentExport;
 use App\Http\Controllers\Controller;
+use App\Models\PlanSubscribe;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ZSystManualPaymentReportController extends Controller
@@ -17,7 +17,7 @@ class ZSystManualPaymentReportController extends Controller
             'plan:id,subscriptionName',
             'business:id,companyName,pictureUrl,business_category_id',
             'business.category:id,name',
-            'gateway:id,name'
+            'gateway:id,name',
         ])->whereHas('gateway', function ($query) {
             $query->where('name', 'Manual');
         })->latest()->paginate(10);
@@ -33,23 +33,23 @@ class ZSystManualPaymentReportController extends Controller
             'plan:id,subscriptionName',
             'business:id,companyName,pictureUrl,business_category_id',
             'business.category:id,name',
-            'gateway:id,name'
+            'gateway:id,name',
         ])->whereHas('gateway', function ($query) {
             $query->where('name', 'Manual');
         })
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($q) use ($search) {
-                    $q->where('duration', 'like', '%' . $search . '%')
+                    $q->where('duration', 'like', '%'.$search.'%')
                         ->orWhereHas('plan', function ($q) use ($search) {
-                            $q->where('subscriptionName', 'like', '%' . $search . '%');
+                            $q->where('subscriptionName', 'like', '%'.$search.'%');
                         })
                         ->orWhereHas('gateway', function ($q) use ($search) {
-                            $q->where('name', 'like', '%' . $search . '%');
+                            $q->where('name', 'like', '%'.$search.'%');
                         })
                         ->orWhereHas('business', function ($q) use ($search) {
-                            $q->where('companyName', 'like', '%' . $search . '%')
+                            $q->where('companyName', 'like', '%'.$search.'%')
                                 ->orWhereHas('category', function ($q) use ($search) {
-                                    $q->where('name', 'like', '%' . $search . '%');
+                                    $q->where('name', 'like', '%'.$search.'%');
                                 });
                         });
                 });
@@ -59,13 +59,12 @@ class ZSystManualPaymentReportController extends Controller
 
         if ($request->ajax()) {
             return response()->json([
-                'data' => view('admin.manual-payments.datas', compact('manual_payments'))->render()
+                'data' => view('admin.manual-payments.datas', compact('manual_payments'))->render(),
             ]);
         }
 
         return redirect(url()->previous());
     }
-
 
     public function reject(Request $request, string $id)
     {
@@ -105,9 +104,9 @@ class ZSystManualPaymentReportController extends Controller
             $updatedNotes = array_merge($existingNotes, ['reason' => $request->notes]);
 
             $subscribe->update($request->except('notes') + [
-                    'payment_status' => 'paid',
-                    'notes' => $updatedNotes,
-                ]);
+                'payment_status' => 'paid',
+                'notes' => $updatedNotes,
+            ]);
 
             $subscribe->business->update([
                 'subscriptionDate' => now(),
@@ -123,13 +122,15 @@ class ZSystManualPaymentReportController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['message' => 'request not found'], 404);
         }
     }
 
     public function getInvoice($invoice_id)
     {
-        $manual_payment = PlanSubscribe::with(['plan:id,subscriptionName','business:id,companyName,business_category_id,phoneNumber,address','business.category:id,name','gateway:id,name'])->findOrFail($invoice_id);
+        $manual_payment = PlanSubscribe::with(['plan:id,subscriptionName', 'business:id,companyName,business_category_id,phoneNumber,address', 'business.category:id,name', 'gateway:id,name'])->findOrFail($invoice_id);
+
         return view('admin.manual-payments.invoice', compact('manual_payment'));
     }
 

@@ -25,17 +25,17 @@ class PlanSubscribe extends Model
         'payment_status',
     ];
 
-    public function plan() : BelongsTo
+    public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
     }
 
-    public function business() : BelongsTo
+    public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
     }
 
-    public function gateway() : BelongsTo
+    public function gateway(): BelongsTo
     {
         return $this->belongsTo(Gateway::class);
     }

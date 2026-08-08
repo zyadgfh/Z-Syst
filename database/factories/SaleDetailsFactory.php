@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\SaleDetails;
-use App\Models\Sale;
 use App\Models\Product;
+use App\Models\Sale;
+use App\Models\SaleDetails;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class SaleDetailsFactory extends Factory

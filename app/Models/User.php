@@ -11,7 +11,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -32,6 +32,21 @@ class User extends Authenticatable
         'remember_token',
         'email_verified_at',
     ];
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted()
+    {
+        // Only apply tenant scope in non-admin contexts
+        static::addGlobalScope('tenant', function ($query) {
+            if (auth()->check() && 
+                auth()->user()->role !== 'superadmin' && 
+                !request()->is('admin/*')) {
+                $query->where('business_id', auth()->user()->business_id);
+            }
+        });
+    }
 
     /**
      * The attributes that should be hidden for serialization.

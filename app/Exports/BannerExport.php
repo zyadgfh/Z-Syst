@@ -11,7 +11,7 @@ class BannerExport implements FromView
     public function view(): View
     {
         return view('admin.banners.excel-csv', [
-            'banners' => Banner::latest()->get()
+            'banners' => Banner::latest()->get(),
         ]);
     }
 }

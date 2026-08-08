@@ -54,4 +54,3 @@ class InventoryTurnoverReport extends Model
         return $this->hasMany(ProductInventoryAnalysis::class, 'report_id');
     }
 }
-

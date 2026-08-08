@@ -2,9 +2,8 @@
 
 namespace Modules\Landing\App\Http\Controllers\Web;
 
-use App\Models\Option;
 use App\Http\Controllers\Controller;
-
+use App\Models\Option;
 
 class AboutController extends Controller
 {

@@ -82,4 +82,3 @@ class FefoLog extends Model
         return $this->belongsTo(SaleDetails::class, 'sale_detail_id');
     }
 }
-

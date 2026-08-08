@@ -3,10 +3,10 @@
 namespace Modules\Landing\App\Http\Controllers\Admin;
 
 use App\Helpers\HasUploader;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 use Modules\Landing\App\Exports\ExportTestimonial;
 use Modules\Landing\App\Models\Testimonial;
 
@@ -18,13 +18,14 @@ class ZSystTestimonialController extends Controller
     {
         $this->middleware('permission:testimonials-read')->only('index');
         $this->middleware('permission:testimonials-create')->only('create', 'store');
-        $this->middleware('permission:testimonials-update')->only('edit', 'update','status');
-        $this->middleware('permission:testimonials-delete')->only('destroy','deleteAll');
+        $this->middleware('permission:testimonials-update')->only('edit', 'update', 'status');
+        $this->middleware('permission:testimonials-delete')->only('destroy', 'deleteAll');
     }
 
     public function index(Request $request)
     {
         $testimonials = Testimonial::latest()->paginate(10);
+
         return view('landing::admin.testimonials.index', compact('testimonials'));
     }
 
@@ -32,9 +33,9 @@ class ZSystTestimonialController extends Controller
     {
         $testimonials = Testimonial::when(request('search'), function ($q) {
             $q->where(function ($q) {
-                $q->where('text', 'like', '%' . request('search') . '%')
-                    ->orWhere('client_name', 'like', '%' . request('search') . '%')
-                    ->orWhere('work_at', 'like', '%' . request('search') . '%');
+                $q->where('text', 'like', '%'.request('search').'%')
+                    ->orWhere('client_name', 'like', '%'.request('search').'%')
+                    ->orWhere('work_at', 'like', '%'.request('search').'%');
             });
         })
             ->latest()
@@ -42,7 +43,7 @@ class ZSystTestimonialController extends Controller
 
         if ($request->ajax()) {
             return response()->json([
-                'data' => view('landing::admin.testimonials.datas', compact('testimonials'))->render()
+                'data' => view('landing::admin.testimonials.datas', compact('testimonials'))->render(),
             ]);
         }
 
@@ -65,12 +66,12 @@ class ZSystTestimonialController extends Controller
         ]);
 
         Testimonial::create($request->except('client_image') + [
-            'client_image' => $request->client_image ? $this->upload($request, 'client_image') : NULL
+            'client_image' => $request->client_image ? $this->upload($request, 'client_image') : null,
         ]);
 
         return response()->json([
             'message' => __('Testimonial created successfully'),
-            'redirect' => route('admin.testimonials.index')
+            'redirect' => route('admin.testimonials.index'),
         ]);
     }
 
@@ -95,7 +96,7 @@ class ZSystTestimonialController extends Controller
 
         return response()->json([
             'message' => __('Testimonial updated successfully'),
-            'redirect' => route('admin.testimonials.index')
+            'redirect' => route('admin.testimonials.index'),
         ]);
     }
 
@@ -107,10 +108,11 @@ class ZSystTestimonialController extends Controller
         $testimonial->delete();
 
         return response()->json([
-            'message'   => __('Testimonial Deleted successfully'),
-            'redirect'  => route('admin.testimonials.index')
+            'message' => __('Testimonial Deleted successfully'),
+            'redirect' => route('admin.testimonials.index'),
         ]);
     }
+
     public function deleteAll(Request $request)
     {
         $testimonials = Testimonial::whereIn('id', $request->ids)->get();
@@ -124,7 +126,7 @@ class ZSystTestimonialController extends Controller
 
         return response()->json([
             'message' => __('Selected Testimonial deleted successfully'),
-            'redirect' => route('admin.testimonials.index')
+            'redirect' => route('admin.testimonials.index'),
         ]);
     }
 

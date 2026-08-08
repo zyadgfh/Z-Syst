@@ -2,11 +2,11 @@
 
 namespace Modules\Landing\App\Http\Controllers\Web;
 
-use Modules\Landing\App\Models\Blog;
-use App\Models\Option;
-use Modules\Landing\App\Models\Comment;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Option;
+use Illuminate\Http\Request;
+use Modules\Landing\App\Models\Blog;
+use Modules\Landing\App\Models\Comment;
 
 class BlogController extends Controller
 {
@@ -21,7 +21,7 @@ class BlogController extends Controller
         ], (array) $generalOption->toArray()) : (object) ['value' => []];
         $general->value = is_array($general->value) ? $general->value : [];
 
-        return view('landing::web.blog.index', compact('recent_blogs', 'blogs', 'page_data','general'));
+        return view('landing::web.blog.index', compact('recent_blogs', 'blogs', 'page_data', 'general'));
     }
 
     public function show(string $slug)
@@ -36,7 +36,7 @@ class BlogController extends Controller
         ], (array) $generalOption->toArray()) : (object) ['value' => []];
         $general->value = is_array($general->value) ? $general->value : [];
 
-        return view('landing::web.blog.show', compact('page_data','blog', 'recent_blogs','comments','general'));
+        return view('landing::web.blog.show', compact('page_data', 'blog', 'recent_blogs', 'comments', 'general'));
     }
 
     public function store(Request $request)
@@ -52,11 +52,10 @@ class BlogController extends Controller
         ]);
 
         return response()->json([
-            'message'   => __('Your Comment Submitted successfully'),
-            'redirect'  => route('blogs.show', $request->blog_slug)
+            'message' => __('Your Comment Submitted successfully'),
+            'redirect' => route('blogs.show', $request->blog_slug),
         ]);
     }
-
 
     public function filterBlogsByTag(Request $request)
     {
@@ -68,7 +67,7 @@ class BlogController extends Controller
             ->paginate(4);
 
         return response()->json([
-            'blogs' => $filtered_blogs
+            'blogs' => $filtered_blogs,
         ]);
     }
 }

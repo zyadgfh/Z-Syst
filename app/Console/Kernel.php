@@ -2,9 +2,12 @@
 
 namespace App\Console;
 
+use App\Console\Commands\RotateSettingsKey;
+use App\Console\Commands\BackupDatabase;
+use App\Console\Commands\CalculateDoctorAttentionScores;
+use App\Console\Commands\ManageSubscriptions;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use App\Console\Commands\RotateSettingsKey;
 
 class Kernel extends ConsoleKernel
 {
@@ -15,6 +18,9 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         RotateSettingsKey::class,
+        BackupDatabase::class,
+        CalculateDoctorAttentionScores::class,
+        ManageSubscriptions::class,
     ];
 
     /**
@@ -24,6 +30,8 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('expiry-alert:send')->dailyAt('08:00');
         $schedule->command('backup:database')->dailyAt('02:00');
+        $schedule->command('doctor-attention:calculate')->dailyAt('00:00');
+        $schedule->command('subscriptions:manage')->dailyAt('01:00');
     }
 
     /**

@@ -2,128 +2,105 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class PermissionSeeder extends Seeder
 {
-        /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        $rolesStructure = [
-            'Super Admin' => [
-                'dashboard' => 'r',
-                'users' => 'r,c,u,d',
-                'banners' => 'r,c,u,d',
-                'business' => 'r,c,u,d',
-                'business-categories' => 'r,c,u,d',
-                'plans' => 'r,c,u,d',
-                'subscription-reports' => 'r',
-                'blogs' => 'r,c,u,d',
-                'testimonials' => 'r,c,u,d',
-                'interfaces' => 'r,c,u,d',
-                'features' => 'r,c,u,d',
-                'term-condition' => 'r,u',
-                'privacy-policy' => 'r,u',
-                'messages' => 'r,c,u,d',
-                'manual-payment-reports' => 'r',
-                'active-store-reports' => 'r',
-                'expired-store-reports' => 'r',
-
-                // settings
-                'sms-settings' => 'r,u',
-                'gateways' => 'r,u',
-                'currencies' => 'r,c,u,d',
-                'settings' => 'r,u',
-                'web-settings' => 'r,u',
-                'roles' => 'r,c,u,d',
-                'permissions' => 'r,c',
-                'notifications' => 'r,u',
-            ],
-
-            'Admin' => [
-                'dashboard' => 'r',
-                'users' => 'r,c,u,d',
-                'banners' => 'r,c,u,d',
-                'business' => 'r,c,u,d',
-                'business-categories' => 'r,c,u,d',
-                'plans' => 'r,c,u,d',
-                'subscription-reports' => 'r',
-
-                // settings
-                'sms-settings' => 'r,u',
-                'addons' => 'r,c',
-                'gateways' => 'r,u',
-                'currencies' => 'r,c,u,d',
-                'notifications' => 'r,u',
-            ],
-
-            'Manager' => [
-                'dashboard' => 'r',
-                'users' => 'r,c,u,d',
-                'banners' => 'r,c,u,d',
-                'business' => 'r,c,u,d',
-                'business-categories' => 'r,c,u,d',
-                'plans' => 'r,c,u,d',
-                'subscription-reports' => 'r',
-            ],
+        // Create permissions
+        $permissions = [
+            // User Management
+            'users-view',
+            'users-create',
+            'users-edit',
+            'users-delete',
+            
+            // Product Management
+            'products-view',
+            'products-create',
+            'products-edit',
+            'products-delete',
+            
+            // Sales Management
+            'sales-view',
+            'sales-create',
+            'sales-edit',
+            'sales-delete',
+            
+            // Purchase Management
+            'purchases-view',
+            'purchases-create',
+            'purchases-edit',
+            'purchases-delete',
+            
+            // Inventory Management
+            'inventory-view',
+            'inventory-create',
+            'inventory-edit',
+            'inventory-delete',
+            
+            // Reports
+            'reports-view',
+            'reports-export',
+            
+            // Settings
+            'settings-view',
+            'settings-edit',
+            
+            // Loyalty
+            'loyalty-view',
+            'loyalty-create',
+            'loyalty-edit',
+            'loyalty-delete',
+            
+            // Receipts
+            'receipts-view',
+            'receipts-create',
+            'receipts-edit',
+            'receipts-delete',
+            
+            // Audit Logs
+            'audit-logs-view',
         ];
 
-        foreach ($rolesStructure as $key => $modules) {
-            // Create a new role
-            $role = Role::firstOrCreate([
-                'name' => str($key)->remove(' ')->lower(),
-                'guard_name' => 'web'
-            ]);
-            $permissions = [];
-
-            $this->command->info('Creating Role '. strtoupper($key));
-
-            // Reading role permission modules
-            foreach ($modules as $module => $value) {
-
-                foreach (explode(',', $value) as $perm) {
-
-                    $permissionValue = $this->permissionMap()->get($perm);
-
-                    $permissions[] = Permission::firstOrCreate([
-                        'name' => $module . '-' . $permissionValue,
-                        'guard_name' => 'web'
-                    ])->id;
-
-                    $this->command->info('Creating Permission to '.$permissionValue.' for '. $module);
-                }
-            }
-
-            // Attach all permissions to the role
-            $role->permissions()->sync($permissions);
-
-            $this->command->info("Creating '{$key}' user");
-            // Create default user for each role
-            $user = User::create([
-                'role' => str($key)->remove(' ')->lower(),
-                'name' => ucwords(str_replace('_', ' ', $key)),
-                'password' => bcrypt(str($key)->remove(' ')->lower()),
-                'email' => str($key)->remove(' ')->lower().'@z-syst.com',
-                'image' => 'assets/images/profile/'.str($key)->remove(' ')->lower().'.svg',
-            ]);
-
-            $user->assignRole($role);
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
         }
-    }
 
-    private function permissionMap() {
-        return collect([
-            'c' => 'create',
-            'r' => 'read',
-            'u' => 'update',
-            'd' => 'delete',
+        // Create roles and assign permissions
+        $superAdminRole = Role::firstOrCreate(['name' => 'Super Admin']);
+        $adminRole = Role::firstOrCreate(['name' => 'Admin']);
+        $staffRole = Role::firstOrCreate(['name' => 'Staff']);
+
+        // Give all permissions to Super Admin
+        $superAdminRole->givePermissionTo(Permission::all());
+
+        // Give most permissions to Admin
+        $adminRole->givePermissionTo([
+            'users-view', 'users-create', 'users-edit',
+            'products-view', 'products-create', 'products-edit', 'products-delete',
+            'sales-view', 'sales-create', 'sales-edit',
+            'purchases-view', 'purchases-create', 'purchases-edit',
+            'inventory-view', 'inventory-create', 'inventory-edit',
+            'reports-view', 'reports-export',
+            'settings-view', 'settings-edit',
+            'loyalty-view', 'loyalty-create', 'loyalty-edit',
+            'receipts-view', 'receipts-create',
+            'audit-logs-view',
         ]);
+
+        // Give limited permissions to Staff
+        $staffRole->givePermissionTo([
+            'products-view',
+            'sales-view', 'sales-create',
+            'purchases-view',
+            'inventory-view',
+            'reports-view',
+        ]);
+
+        $this->command->info('Permissions seeded successfully');
     }
 }

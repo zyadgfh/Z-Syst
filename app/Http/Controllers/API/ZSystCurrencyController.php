@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Currency;
 use App\Http\Controllers\Controller;
+use App\Models\Currency;
 
 class ZSystCurrencyController extends Controller
 {
@@ -13,7 +13,7 @@ class ZSystCurrencyController extends Controller
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
-            'data' => $currencies
+            'data' => $currencies,
         ]);
     }
 }

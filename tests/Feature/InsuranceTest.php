@@ -7,9 +7,7 @@ use App\Models\InsuranceClaim;
 use App\Models\InsuranceCompany;
 use App\Models\InsuranceCoverage;
 use App\Models\InsurancePolicy;
-use App\Models\Party;
 use App\Models\Product;
-use App\Models\Category;
 use App\Models\User;
 use App\Services\InsuranceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,7 +18,9 @@ class InsuranceTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private Business $business;
+
     private InsuranceCompany $company;
 
     protected function setUp(): void
@@ -352,7 +352,7 @@ class InsuranceTest extends TestCase
         return InsurancePolicy::create([
             'business_id' => $this->business->id,
             'insurance_company_id' => $this->company->id,
-            'policy_number' => 'POL-' . uniqid(),
+            'policy_number' => 'POL-'.uniqid(),
             'holder_name' => 'Test Holder',
             'plan_type' => 'individual',
             'status' => 'active',

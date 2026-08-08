@@ -2,11 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\Sale;
-use App\Models\Party;
 use App\Models\Business;
+use App\Models\Party;
+use App\Models\Sale;
 use App\Models\User;
-use App\Models\Tax;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class SaleFactory extends Factory
@@ -30,7 +29,7 @@ class SaleFactory extends Factory
             'isPaid' => $dueAmount == 0,
             'paymentType' => fake()->randomElement(['cash', 'card', 'credit']),
             'saleDate' => fake()->dateTimeThisYear()->format('Y-m-d'),
-            'invoiceNumber' => 'S-' . str_pad(fake()->unique()->numberBetween(1, 99999), 5, '0', STR_PAD_LEFT),
+            'invoiceNumber' => 'S-'.str_pad(fake()->unique()->numberBetween(1, 99999), 5, '0', STR_PAD_LEFT),
         ];
     }
 

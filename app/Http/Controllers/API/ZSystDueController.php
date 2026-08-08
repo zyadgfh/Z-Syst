@@ -2,30 +2,30 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Sale;
-use App\Models\Party;
-use App\Models\Business;
-use App\Models\Purchase;
-use App\Models\DueCollect;
 use App\Exceptions\BusinessRuleException;
 use App\Exceptions\Errors\ErrorCode;
-use App\Exceptions\NotFoundException;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Business;
+use App\Models\DueCollect;
+use App\Models\Party;
+use App\Models\Purchase;
+use App\Models\Sale;
+use Illuminate\Http\Request;
 
 class ZSystDueController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->input('search');
         $data = DueCollect::with('user:id,name', 'party:id,name,email,phone,type')
-                ->when(request('search'), function ($query) {
-                    $query->where('invoiceNumber', 'like', '%' . request('search') . '%')
-                        ->orWhere('totalDue', 'like', '%' . request('search') . '%')
-                        ->orWhere('paymentType', 'like', '%' . request('search') . '%');
-                })
-                ->where('business_id', auth()->user()->business_id)
-                ->latest()
-                ->paginate(10);
+            ->when($search, function ($query) use ($search) {
+                $query->where('invoiceNumber', 'like', '%'.$search.'%')
+                    ->orWhere('totalDue', 'like', '%'.$search.'%')
+                    ->orWhere('paymentType', 'like', '%'.$search.'%');
+            })
+            ->where('business_id', auth()->user()->business_id)
+            ->latest()
+            ->paginate($request->input('per_page', 10));
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -33,23 +33,25 @@ class ZSystDueController extends Controller
         ]);
     }
 
-    public function duesList()
+    public function duesList(Request $request)
     {
+        $search = $request->input('search');
+        $type = $request->input('type');
         $query = Party::select('id', 'name', 'type', 'due', 'phone')
-                ->when(request('search'), function ($query) {
-                    $query->where('name', 'like', '%' . request('search') . '%')
-                        ->orWhere('phone', 'like', '%' . request('search') . '%')
-                        ->orWhere('email', 'like', '%' . request('search') . '%')
-                        ->orWhere('type', 'like', '%' . request('search') . '%')
-                        ->orWhere('address', 'like', '%' . request('search') . '%');
-                })
-                ->when(request('type'), function ($query) {
-                    $query->where('type', request('type'));
-                })
-                ->where('due', '>', 0)
-                ->where('business_id', auth()->user()->business_id);
+            ->when($search, function ($query) use ($search) {
+                $query->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('phone', 'like', '%'.$search.'%')
+                    ->orWhere('email', 'like', '%'.$search.'%')
+                    ->orWhere('type', 'like', '%'.$search.'%')
+                    ->orWhere('address', 'like', '%'.$search.'%');
+            })
+            ->when($type, function ($query) use ($type) {
+                $query->where('type', $type);
+            })
+            ->where('due', '>', 0)
+            ->where('business_id', auth()->user()->business_id);
 
-        $data = (clone $query)->latest()->paginate(10);
+        $data = (clone $query)->latest()->paginate($request->input('per_page', 10));
         $total_payable = (clone $query)->where('type', 'Supplier')->sum('due');
         $total_receivable = (clone $query)->whereIn('type', ['Retailer', 'Wholesaler'])->sum('due');
 
@@ -70,7 +72,7 @@ class ZSystDueController extends Controller
             'paymentDate' => 'required|string',
             'payDueAmount' => 'required|numeric',
             'party_id' => 'required|exists:parties,id',
-            'invoiceNumber' => 'nullable|exists:' . ($party->type == 'Supplier' ? 'purchases' : 'sales') . ',invoiceNumber',
+            'invoiceNumber' => 'nullable|exists:'.($party->type == 'Supplier' ? 'purchases' : 'sales').',invoiceNumber',
         ]);
 
         // Find invoice if invoiceNumber provided
@@ -86,7 +88,7 @@ class ZSystDueController extends Controller
                     ->first();
             }
 
-            if (!isset($invoice)) {
+            if (! isset($invoice)) {
                 throw new BusinessRuleException(
                     ErrorCode::BUSINESS_INVOICE_NOT_FOUND,
                     __('errors.invoice_not_found'),
@@ -106,7 +108,7 @@ class ZSystDueController extends Controller
             }
         }
 
-        if (!$request->invoiceNumber) {
+        if (! $request->invoiceNumber) {
             if ($request->payDueAmount > $party->opening_balance) {
                 throw new BusinessRuleException(
                     ErrorCode::BUSINESS_OPENING_BALANCE_EXCEEDED,
@@ -120,24 +122,24 @@ class ZSystDueController extends Controller
         }
 
         $data = DueCollect::create($request->all() + [
-                    'user_id' => auth()->id(),
-                    'business_id' => auth()->user()->business_id,
-                    'sale_id' => $party->type != 'Supplier' && isset($invoice) ? $invoice->id : null,
-                    'purchase_id' => $party->type == 'Supplier' && isset($invoice) ? $invoice->id : null,
-                    'totalDue' => isset($invoice) ? $invoice->dueAmount : $party->due,
-                    'dueAmountAfterPay' => isset($invoice) ? ($invoice->dueAmount - $request->payDueAmount) : ($party->due - $request->payDueAmount),
-                ]);
+            'user_id' => auth()->id(),
+            'business_id' => auth()->user()->business_id,
+            'sale_id' => $party->type != 'Supplier' && isset($invoice) ? $invoice->id : null,
+            'purchase_id' => $party->type == 'Supplier' && isset($invoice) ? $invoice->id : null,
+            'totalDue' => isset($invoice) ? $invoice->dueAmount : $party->due,
+            'dueAmountAfterPay' => isset($invoice) ? ($invoice->dueAmount - $request->payDueAmount) : ($party->due - $request->payDueAmount),
+        ]);
 
         if (isset($invoice)) {
             $invoice->update([
-                'dueAmount' => $invoice->dueAmount - $request->payDueAmount
+                'dueAmount' => $invoice->dueAmount - $request->payDueAmount,
             ]);
         }
 
         $business = Business::findOrFail(auth()->user()->business_id);
         $business_name = $business->companyName;
         $business->update([
-            'remainingShopBalance' => $party->type == 'Supplier' ? ($business->remainingShopBalance - $request->payDueAmount) : ($business->remainingShopBalance + $request->payDueAmount)
+            'remainingShopBalance' => $party->type == 'Supplier' ? ($business->remainingShopBalance - $request->payDueAmount) : ($business->remainingShopBalance + $request->payDueAmount),
         ]);
 
         $party->update([
@@ -155,4 +157,3 @@ class ZSystDueController extends Controller
         ]);
     }
 }
-

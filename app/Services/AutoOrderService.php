@@ -2,17 +2,16 @@
 
 namespace App\Services;
 
-use App\Models\Stock;
-use App\Models\Party;
-use App\Models\Product;
-use App\Models\Purchase;
-use App\Models\Business;
-use App\Models\PurchaseDetails;
+use App\Helpers\TransactionHelper;
 use App\Models\AutoOrderRule;
 use App\Models\AutoOrderSuggestion;
-use App\Models\SalesForecast;
+use App\Models\Party;
 use App\Models\PredictionSetting;
-use App\Helpers\TransactionHelper;
+use App\Models\Product;
+use App\Models\Purchase;
+use App\Models\PurchaseDetails;
+use App\Models\SalesForecast;
+use App\Models\Stock;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -27,14 +26,11 @@ class AutoOrderService
 
     /**
      * Generate auto-order suggestions for all products that need reordering.
-     *
-     * @param int $businessId
-     * @return array
      */
     public function generateSuggestions(int $businessId): array
     {
         $settings = PredictionSetting::getForBusiness($businessId);
-        if (!$settings->prediction_enabled) {
+        if (! $settings->prediction_enabled) {
             return [
                 'success' => false,
                 'message' => 'التنبؤات معطلة. قم بتمكينها أولاً.',
@@ -72,8 +68,7 @@ class AutoOrderService
         }
 
         // Sort by priority (high first)
-        usort($suggestions, fn($a, $b) => 
-            $this->priorityWeight($b['priority']) <=> $this->priorityWeight($a['priority'])
+        usort($suggestions, fn ($a, $b) => $this->priorityWeight($b['priority']) <=> $this->priorityWeight($a['priority'])
         );
 
         return [
@@ -101,8 +96,8 @@ class AutoOrderService
 
         // Get pending purchases (not yet received)
         $pendingPurchases = (float) PurchaseDetails::whereHas('purchase', function ($q) use ($businessId) {
-                $q->where('business_id', $businessId);
-            })
+            $q->where('business_id', $businessId);
+        })
             ->where('product_id', $product->id)
             ->whereNull('expire_date') // not yet fully processed
             ->sum('quantities');
@@ -144,11 +139,11 @@ class AutoOrderService
         $availableStock = $currentStock + $pendingPurchases;
         $needsReorder = $availableStock <= $reorderPoint;
 
-        if (!$needsReorder && $rule->reorder_point) {
+        if (! $needsReorder && $rule->reorder_point) {
             $needsReorder = $availableStock <= $rule->reorder_point;
         }
 
-        if (!$needsReorder) {
+        if (! $needsReorder) {
             return null;
         }
 
@@ -254,7 +249,7 @@ class AutoOrderService
     public function approveSuggestion(int $suggestionId, int $userId): array
     {
         $suggestion = AutoOrderSuggestion::findOrFail($suggestionId);
-        
+
         $suggestion->update([
             'status' => 'approved',
             'approved_by' => $userId,
@@ -289,9 +284,7 @@ class AutoOrderService
     /**
      * Convert an approved suggestion into a purchase order.
      *
-     * @param int $suggestionId
-     * @param array $purchaseData Additional purchase data
-     * @return array
+     * @param  array  $purchaseData  Additional purchase data
      */
     public function convertToPurchase(int $suggestionId, array $purchaseData = []): array
     {
@@ -315,13 +308,13 @@ class AutoOrderService
         $product = $suggestion->product;
         $supplierId = $suggestion->preferred_supplier_id ?? $purchaseData['party_id'] ?? null;
 
-        if (!$supplierId) {
+        if (! $supplierId) {
             // Find a party that supplies this product
             $supplier = Party::where('business_id', $businessId)
                 ->where('type', 'supplier')
                 ->first();
 
-            if (!$supplier) {
+            if (! $supplier) {
                 return [
                     'success' => false,
                     'message' => 'لا يوجد مورد متاح. يرجى إضافة مورد أولاً.',
@@ -344,7 +337,7 @@ class AutoOrderService
                 'dueAmount' => $totalAmount,
                 'isPaid' => false,
                 'paymentType' => 'credit',
-                'note' => 'طلب تلقائي من نظام التنبؤ - ' . ($product->productName ?? ''),
+                'note' => 'طلب تلقائي من نظام التنبؤ - '.($product->productName ?? ''),
             ]);
 
             // Create purchase detail
@@ -357,7 +350,7 @@ class AutoOrderService
                 'sales_price' => $product->sales_price ?? 0,
                 'wholesale_price' => $product->wholesale_price ?? 0,
                 'quantities' => $suggestion->suggested_order_qty,
-                'batch_no' => 'AUTO-' . strtoupper(uniqid()),
+                'batch_no' => 'AUTO-'.strtoupper(uniqid()),
                 'expire_date' => now()->addYears(2)->format('Y-m-d'), // default 2 years
             ]);
 
@@ -372,7 +365,7 @@ class AutoOrderService
                 Stock::create([
                     'business_id' => $businessId,
                     'product_id' => $product->id,
-                    'batch_no' => 'AUTO-' . strtoupper(uniqid()),
+                    'batch_no' => 'AUTO-'.strtoupper(uniqid()),
                     'expire_date' => now()->addYears(2)->format('Y-m-d'),
                     'productStock' => $suggestion->suggested_order_qty,
                 ]);
@@ -411,18 +404,18 @@ class AutoOrderService
                 'preferredSupplier:id,name,phone',
             ]);
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
-        if (!empty($filters['priority'])) {
+        if (! empty($filters['priority'])) {
             $query->where('priority', $filters['priority']);
         }
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $query->whereHas('product', function ($q) use ($filters) {
                 $q->where('productName', 'like', "%{$filters['search']}%")
-                  ->orWhere('productCode', 'like', "%{$filters['search']}%");
+                    ->orWhere('productCode', 'like', "%{$filters['search']}%");
             });
         }
 
@@ -534,11 +527,19 @@ class AutoOrderService
      */
     private function determinePriority(float $stockRatio, ?float $confidence): string
     {
-        if ($stockRatio <= 0.1) return 'high';     // Critical (less than 10% of forecast)
-        if ($stockRatio <= 0.3) return 'high';     // Very low
-        if ($stockRatio <= 0.5) return 'medium';   // Low
-        if ($stockRatio <= 0.7) return 'medium';   // Below average
+        if ($stockRatio <= 0.1) {
+            return 'high';
+        }     // Critical (less than 10% of forecast)
+        if ($stockRatio <= 0.3) {
+            return 'high';
+        }     // Very low
+        if ($stockRatio <= 0.5) {
+            return 'medium';
+        }   // Low
+        if ($stockRatio <= 0.7) {
+            return 'medium';
+        }   // Below average
+
         return 'low';                                // Sufficient
     }
 }
-

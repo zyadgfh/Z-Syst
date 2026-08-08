@@ -28,14 +28,34 @@ class Party extends Model
         'opening_balance',
     ];
 
-    public function sales_dues() : HasMany
+    public function sales_dues(): HasMany
     {
         return $this->hasMany(Sale::class)->where('dueAmount', '>', 0);
     }
 
-    public function purchases_dues() : HasMany
+    public function purchases_dues(): HasMany
     {
         return $this->hasMany(Purchase::class)->where('dueAmount', '>', 0);
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(DoctorActivity::class, 'doctor_id');
+    }
+
+    public function attentionScores()
+    {
+        return $this->hasMany(DoctorAttentionScore::class, 'doctor_id');
+    }
+
+    public function attentionAlerts()
+    {
+        return $this->hasMany(DoctorAttentionAlert::class, 'doctor_id');
+    }
+
+    public function latestAttentionScore()
+    {
+        return $this->hasOne(DoctorAttentionScore::class, 'doctor_id')->latest('calculated_date');
     }
 
     /**

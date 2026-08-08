@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Sale;
-use App\Models\Prescription;
-use App\Models\User;
-use App\Notifications\SendNotification;
-use Illuminate\Http\Request;
 use App\Helpers\HasUploader;
 use App\Helpers\TransactionHelper;
 use App\Http\Controllers\Controller;
+use App\Models\Prescription;
+use App\Models\Sale;
+use App\Models\User;
+use App\Notifications\SendNotification;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -22,26 +23,27 @@ class ZSystPrescriptionController extends Controller
     /**
      * Display a listing of the prescriptions.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->input('search');
         $data = Prescription::select('id', 'business_id', 'sale_id', 'party_id', 'image', 'notes', 'status', 'created_at')
-                ->with(['party:id,name,phone', 'sale:id,invoiceNumber'])
-                ->where('business_id', Auth::user()?->business_id)
-                ->when(request('search'), function ($query) {
-                    $query->where(function ($subQuery) {
-                        $subQuery->where('notes', 'like', '%' . request('search') . '%')
-                            ->orWhere('status', 'like', '%' . request('search') . '%')
-                            ->orWhereHas('party', function ($q) {
-                                $q->where('name', 'like', '%' . request('search') . '%')
-                                    ->orWhere('phone', 'like', '%' . request('search') . '%');
-                            })
-                            ->orWhereHas('sale', function ($q) {
-                                $q->where('invoiceNumber', 'like', '%' . request('search') . '%');
-                            });
-                    });
-                })
-                ->latest()
-                ->paginate(10);
+            ->with(['party:id,name,phone', 'sale:id,invoiceNumber'])
+            ->where('business_id', Auth::user()?->business_id)
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($subQuery) use ($search) {
+                    $subQuery->where('notes', 'like', '%'.$search.'%')
+                        ->orWhere('status', 'like', '%'.$search.'%')
+                        ->orWhereHas('party', function ($q) use ($search) {
+                            $q->where('name', 'like', '%'.$search.'%')
+                                ->orWhere('phone', 'like', '%'.$search.'%');
+                        })
+                        ->orWhereHas('sale', function ($q) use ($search) {
+                            $q->where('invoiceNumber', 'like', '%'.$search.'%');
+                        });
+                });
+            })
+            ->latest()
+            ->paginate($request->input('per_page', 10));
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -77,7 +79,7 @@ class ZSystPrescriptionController extends Controller
                 'notes' => $request->notes,
                 'image' => $this->upload($request, 'image'),
                 'status' => 'pending',
-                'prescription_number' => $request->prescription_number ?? 'RX-' . Str::upper(Str::random(6)),
+                'prescription_number' => $request->prescription_number ?? 'RX-'.Str::upper(Str::random(6)),
                 'review_status' => $request->review_status ?? 'pending',
                 'review_notes' => $request->review_notes,
                 'expires_at' => $request->expires_at,
@@ -110,12 +112,12 @@ class ZSystPrescriptionController extends Controller
     public function show($id)
     {
         $data = Prescription::with([
-                    'party:id,name,phone,address',
-                    'sale:id,invoiceNumber,totalAmount,saleDate',
-                    'sale.details:id,sale_id,product_id,price,quantities',
-                    'sale.details.product:id,productName',
-                ])
-                ->findOrFail($id);
+            'party:id,name,phone,address',
+            'sale:id,invoiceNumber,totalAmount,saleDate',
+            'sale.details:id,sale_id,product_id,price,quantities',
+            'sale.details.product:id,productName',
+        ])
+            ->findOrFail($id);
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -198,7 +200,7 @@ class ZSystPrescriptionController extends Controller
         $prescription = Prescription::findOrFail($id);
 
         if (file_exists($prescription->image)) {
-            \Illuminate\Support\Facades\Storage::delete($prescription->image);
+            Storage::delete($prescription->image);
         }
 
         $prescription->delete();
@@ -246,7 +248,7 @@ class ZSystPrescriptionController extends Controller
         $prescription = TransactionHelper::run(function () use ($request) {
             $prescription = Prescription::findOrFail($request->prescription_id);
 
-            if (!$prescription->canBeUsed()) {
+            if (! $prescription->canBeUsed()) {
                 throw ValidationException::withMessages([
                     'prescription_id' => [__('The prescription must be approved and not expired before it can be used.')],
                 ]);
@@ -287,7 +289,7 @@ class ZSystPrescriptionController extends Controller
         }
 
         $status = $prescription->getExpiryStatus();
-        if (!in_array($status, ['warning', 'critical', 'expired'], true)) {
+        if (! in_array($status, ['warning', 'critical', 'expired'], true)) {
             return;
         }
 
@@ -323,7 +325,7 @@ class ZSystPrescriptionController extends Controller
     {
         $businessId = Auth::user()?->business_id;
 
-        if (!$businessId) {
+        if (! $businessId) {
             return [
                 'expired' => 0,
                 'critical' => 0,
@@ -353,4 +355,3 @@ class ZSystPrescriptionController extends Controller
         return $summary;
     }
 }
-

@@ -2,10 +2,10 @@
 
 namespace Modules\Landing\App\Http\Controllers\Web;
 
-use App\Models\Plan;
-use App\Models\Option;
-use App\Models\BusinessCategory;
 use App\Http\Controllers\Controller;
+use App\Models\BusinessCategory;
+use App\Models\Option;
+use App\Models\Plan;
 
 class PlanController extends Controller
 {
@@ -17,9 +17,9 @@ class PlanController extends Controller
             'value' => [],
         ], (array) $generalOption->toArray()) : (object) ['value' => []];
         $general->value = is_array($general->value) ? $general->value : [];
-        $plans = Plan::where('status',1)->latest()->get();
+        $plans = Plan::where('status', 1)->latest()->get();
         $business_categories = BusinessCategory::latest()->get();
 
-        return view('landing::web.plan.index', compact('page_data', 'general','plans', 'business_categories'));
+        return view('landing::web.plan.index', compact('page_data', 'general', 'plans', 'business_categories'));
     }
 }

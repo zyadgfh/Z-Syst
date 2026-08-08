@@ -20,17 +20,17 @@ class Purchase extends Model
         'business_id',
         'user_id',
         'tax_id',
-        "discountAmount",
-        "tax_amount",
-        "dueAmount",
-        "paidAmount",
-        "totalAmount",
-        "invoiceNumber",
-        "isPaid",
-        "paymentType",
-        "purchaseDate",
-        "purchase_data",
-        "note",
+        'discountAmount',
+        'tax_amount',
+        'dueAmount',
+        'paidAmount',
+        'totalAmount',
+        'invoiceNumber',
+        'isPaid',
+        'paymentType',
+        'purchaseDate',
+        'purchase_data',
+        'note',
     ];
 
     public function details()
@@ -38,17 +38,17 @@ class Purchase extends Model
         return $this->hasMany(PurchaseDetails::class);
     }
 
-    public function party() : BelongsTo
+    public function party(): BelongsTo
     {
         return $this->belongsTo(Party::class);
     }
 
-    public function tax() : BelongsTo
+    public function tax(): BelongsTo
     {
         return $this->belongsTo(Tax::class);
     }
 
-    public function user() : BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
@@ -58,14 +58,19 @@ class Purchase extends Model
         return $this->hasMany(PurchaseReturn::class, 'purchase_id');
     }
 
+    public function supplierInvoice()
+    {
+        return $this->hasOne(SupplierInvoice::class);
+    }
+
     public static function boot()
     {
         parent::boot();
 
         static::creating(function ($model) {
-            if (!$model->invoiceNumber && auth()->check()) {
+            if (! $model->invoiceNumber && auth()->check()) {
                 $id = Purchase::where('business_id', auth()->user()->business_id)->count() + 1;
-                $model->invoiceNumber = "P-" . str_pad($id, 5, '0', STR_PAD_LEFT);
+                $model->invoiceNumber = 'P-'.str_pad($id, 5, '0', STR_PAD_LEFT);
             }
         });
     }

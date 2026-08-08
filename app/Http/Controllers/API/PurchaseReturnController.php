@@ -2,31 +2,31 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Party;
-use App\Models\Stock;
-use App\Models\Purchase;
 use App\Exceptions\BusinessRuleException;
 use App\Exceptions\Errors\ErrorCode;
 use App\Helpers\TransactionHelper;
-use Illuminate\Http\Request;
-use App\Models\PurchaseReturn;
-use App\Models\PurchaseDetails;
 use App\Http\Controllers\Controller;
+use App\Models\Party;
+use App\Models\Purchase;
+use App\Models\PurchaseDetails;
+use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnDetail;
+use App\Models\Stock;
+use Illuminate\Http\Request;
 
 class PurchaseReturnController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $data = PurchaseReturn::with(
-                'purchase:id,party_id,isPaid,totalAmount,dueAmount,paidAmount,invoiceNumber',
-                'purchase.party:id,name',
-                'details'
-            )
-            ->whereBetween('return_date', [request()->start_date, request()->end_date])
+            'purchase:id,party_id,isPaid,totalAmount,dueAmount,paidAmount,invoiceNumber',
+            'purchase.party:id,name',
+            'details'
+        )
+            ->whereBetween('return_date', [$request->input('start_date'), $request->input('end_date')])
             ->where('business_id', auth()->user()->business_id)
             ->latest()
             ->get();
@@ -85,12 +85,12 @@ class PurchaseReturnController extends Controller
 
                 // Update stock for the specific batch
                 $batch = Stock::where('product_id', $purchase_detail->product_id)
-                            ->when($purchase_detail->batch_no ?? false, function ($query) use ($purchase_detail) {
-                                return $query->where('batch_no', $purchase_detail->batch_no);
-                            })
-                            ->first();
+                    ->when($purchase_detail->batch_no ?? false, function ($query) use ($purchase_detail) {
+                        return $query->where('batch_no', $purchase_detail->batch_no);
+                    })
+                    ->first();
 
-                if (!$batch) {
+                if (! $batch) {
                     throw new BusinessRuleException(
                         ErrorCode::NOT_FOUND_BATCH,
                         __('errors.batch_not_found'),
@@ -131,10 +131,10 @@ class PurchaseReturnController extends Controller
     public function show($id)
     {
         $data = PurchaseReturn::with(
-                'purchase:id,party_id,isPaid,totalAmount,dueAmount,paidAmount,invoiceNumber',
-                'purchase.party:id,name',
-                'details'
-            )
+            'purchase:id,party_id,isPaid,totalAmount,dueAmount,paidAmount,invoiceNumber',
+            'purchase.party:id,name',
+            'details'
+        )
             ->findOrFail($id);
 
         return response()->json([

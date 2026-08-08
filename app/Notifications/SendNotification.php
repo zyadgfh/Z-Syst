@@ -8,7 +8,9 @@ use Illuminate\Notifications\Notification;
 class SendNotification extends Notification
 {
     use Queueable;
+
     private $notify;
+
     /**
      * Create a new notification instance.
      *
@@ -42,7 +44,7 @@ class SendNotification extends Notification
             'id' => $this->notify['id'],
             'user' => $this->notify['user'],
             'message' => $this->notify['message'],
-            'url' => $this->notify['url']
+            'url' => $this->notify['url'],
         ];
     }
 }

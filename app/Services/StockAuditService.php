@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Product;
+use App\Models\Stock;
 use App\Models\StockAudit;
 use App\Models\StockAuditDetail;
-use App\Models\StockReconciliation;
 use App\Models\StockMovement;
-use App\Models\Stock;
-use App\Models\Product;
+use App\Models\StockReconciliation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -15,43 +15,33 @@ class StockAuditService
 {
     /**
      * Create a new stock audit.
-     *
-     * @param array $data
-     * @return StockAudit
      */
     public function createAudit(array $data): StockAudit
     {
         $data['audit_number'] = $this->generateAuditNumber($data['business_id']);
         $data['status'] = 'pending';
-        
+
         return StockAudit::create($data);
     }
 
     /**
      * Generate a unique audit number.
-     *
-     * @param int $businessId
-     * @return string
      */
     private function generateAuditNumber(int $businessId): string
     {
-        $prefix = 'AUD-' . date('Ymd') . '-';
+        $prefix = 'AUD-'.date('Ymd').'-';
         $lastAudit = StockAudit::where('business_id', $businessId)
-            ->where('audit_number', 'like', $prefix . '%')
+            ->where('audit_number', 'like', $prefix.'%')
             ->orderBy('id', 'desc')
             ->first();
-        
-        $sequence = $lastAudit ? (int)substr($lastAudit->audit_number, -4) + 1 : 1;
-        
-        return $prefix . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+
+        $sequence = $lastAudit ? (int) substr($lastAudit->audit_number, -4) + 1 : 1;
+
+        return $prefix.str_pad($sequence, 4, '0', STR_PAD_LEFT);
     }
 
     /**
      * Start a stock audit (change status to in_progress).
-     *
-     * @param StockAudit $audit
-     * @param int $userId
-     * @return StockAudit
      */
     public function startAudit(StockAudit $audit, int $userId): StockAudit
     {
@@ -66,9 +56,6 @@ class StockAuditService
 
     /**
      * Complete a stock audit.
-     *
-     * @param StockAudit $audit
-     * @return StockAudit
      */
     public function completeAudit(StockAudit $audit): StockAudit
     {
@@ -82,16 +69,12 @@ class StockAuditService
 
     /**
      * Cancel a stock audit.
-     *
-     * @param StockAudit $audit
-     * @param string|null $reason
-     * @return StockAudit
      */
     public function cancelAudit(StockAudit $audit, ?string $reason = null): StockAudit
     {
         $audit->update([
             'status' => 'cancelled',
-            'notes' => $reason ? $audit->notes . ' - Cancelled: ' . $reason : $audit->notes . ' - Cancelled',
+            'notes' => $reason ? $audit->notes.' - Cancelled: '.$reason : $audit->notes.' - Cancelled',
         ]);
 
         return $audit->fresh();
@@ -99,16 +82,12 @@ class StockAuditService
 
     /**
      * Add audit details for a product.
-     *
-     * @param StockAudit $audit
-     * @param array $detailData
-     * @return StockAuditDetail
      */
     public function addAuditDetail(StockAudit $audit, array $detailData): StockAuditDetail
     {
         $detailData['stock_audit_id'] = $audit->id;
         $detailData['business_id'] = $audit->business_id;
-        
+
         // Get system quantity from stock
         $stock = Stock::where('business_id', $audit->business_id)
             ->where('product_id', $detailData['product_id'])
@@ -133,10 +112,6 @@ class StockAuditService
 
     /**
      * Add multiple audit details in bulk.
-     *
-     * @param StockAudit $audit
-     * @param array $details
-     * @return array
      */
     public function addBulkAuditDetails(StockAudit $audit, array $details): array
     {
@@ -153,9 +128,6 @@ class StockAuditService
 
     /**
      * Auto-populate audit with all current stock.
-     *
-     * @param StockAudit $audit
-     * @return array
      */
     public function autoPopulateAudit(StockAudit $audit): array
     {
@@ -183,11 +155,6 @@ class StockAuditService
 
     /**
      * Create stock reconciliation from audit detail.
-     *
-     * @param StockAuditDetail $detail
-     * @param int $userId
-     * @param string|null $reason
-     * @return StockReconciliation
      */
     public function createReconciliation(StockAuditDetail $detail, int $userId, ?string $reason = null): StockReconciliation
     {
@@ -214,7 +181,7 @@ class StockAuditService
             'adjustment_value' => $detail->variance_value,
             'reference_type' => 'stock_audit',
             'reference_id' => $detail->stock_audit_id,
-            'reason' => $reason ?? 'Stock reconciliation from audit #' . $detail->stock_audit_id,
+            'reason' => $reason ?? 'Stock reconciliation from audit #'.$detail->stock_audit_id,
             'is_posted' => false,
         ]);
 
@@ -223,9 +190,6 @@ class StockAuditService
 
     /**
      * Post reconciliation to actual stock.
-     *
-     * @param StockReconciliation $reconciliation
-     * @return StockReconciliation
      */
     public function postReconciliation(StockReconciliation $reconciliation): StockReconciliation
     {
@@ -236,7 +200,7 @@ class StockAuditService
         DB::transaction(function () use ($reconciliation) {
             $stock = Stock::find($reconciliation->stock_id);
 
-            if (!$stock) {
+            if (! $stock) {
                 throw new \Exception('Stock record not found.');
             }
 
@@ -281,9 +245,6 @@ class StockAuditService
 
     /**
      * Post all reconciliations for an audit.
-     *
-     * @param StockAudit $audit
-     * @return array
      */
     public function postAllReconciliations(StockAudit $audit): array
     {
@@ -301,9 +262,6 @@ class StockAuditService
 
     /**
      * Get audit summary statistics.
-     *
-     * @param StockAudit $audit
-     * @return array
      */
     public function getAuditSummary(StockAudit $audit): array
     {
@@ -325,9 +283,6 @@ class StockAuditService
 
     /**
      * Get variance report for an audit.
-     *
-     * @param StockAudit $audit
-     * @return array
      */
     public function getVarianceReport(StockAudit $audit): array
     {

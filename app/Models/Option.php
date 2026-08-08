@@ -9,7 +9,7 @@ class Option extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['key','value','status'];
+    protected $fillable = ['key', 'value', 'status'];
 
     protected $casts = [
         'value' => 'json',
