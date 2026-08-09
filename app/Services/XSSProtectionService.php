@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Str;
-
 class XSSProtectionService
 {
     /**
@@ -13,28 +11,28 @@ class XSSProtectionService
     {
         // Remove script tags
         $html = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', '', $html);
-        
+
         // Remove iframe tags
         $html = preg_replace('/<iframe\b[^>]*>(.*?)<\/iframe>/is', '', $html);
-        
+
         // Remove object tags
         $html = preg_replace('/<object\b[^>]*>(.*?)<\/object>/is', '', $html);
-        
+
         // Remove embed tags
         $html = preg_replace('/<embed\b[^>]*>/is', '', $html);
-        
+
         // Remove javascript: protocol
         $html = preg_replace('/javascript:/i', '', $html);
-        
+
         // Remove on* event handlers
         $html = preg_replace('/on\w+\s*=/i', '', $html);
-        
+
         // Remove data: protocol with base64
         $html = preg_replace('/data:[^;]*;base64,[a-z0-9+/=]+/i', '', $html);
-        
+
         // Remove vbscript: protocol
         $html = preg_replace('/vbscript:/i', '', $html);
-        
+
         return $html;
     }
 
@@ -53,13 +51,13 @@ class XSSProtectionService
     {
         // Remove javascript: protocol
         $url = preg_replace('/^javascript:/i', '', $url);
-        
+
         // Remove data: protocol
         $url = preg_replace('/^data:/i', '', $url);
-        
+
         // Remove vbscript: protocol
         $url = preg_replace('/^vbscript:/i', '', $url);
-        
+
         return filter_var($url, FILTER_SANITIZE_URL);
     }
 
@@ -94,10 +92,10 @@ class XSSProtectionService
     {
         // First, escape HTML entities
         $cleaned = $this->escapeHTML($input);
-        
+
         // Then, remove any remaining dangerous patterns
         $cleaned = $this->sanitizeHTML($cleaned);
-        
+
         return $cleaned;
     }
 
@@ -107,6 +105,7 @@ class XSSProtectionService
     public function stripTagsExcept(string $html, array $allowedTags = ['<p>', '<br>', '<strong>', '<em>']): string
     {
         $allowedString = implode('', $allowedTags);
+
         return strip_tags($html, $allowedString);
     }
 
@@ -141,13 +140,13 @@ class XSSProtectionService
     {
         // Remove path traversal attempts
         $filename = str_replace(['../', '..\\', './', '.\\'], '', $filename);
-        
+
         // Remove null bytes
         $filename = str_replace("\0", '', $filename);
-        
+
         // Allow only safe characters
         $filename = preg_replace('/[^a-zA-Z0-9._-]/', '', $filename);
-        
+
         return $filename;
     }
 
@@ -158,13 +157,13 @@ class XSSProtectionService
     {
         // Remove javascript: in CSS
         $css = preg_replace('/javascript:/i', '', $css);
-        
+
         // Remove expression() in CSS (IE only)
         $css = preg_replace('/expression\s*\(/i', '', $css);
-        
+
         // Remove @import with javascript:
         $css = preg_replace('/@import\s+url\s*\(\s*["\']?javascript:/i', '', $css);
-        
+
         return $css;
     }
 }

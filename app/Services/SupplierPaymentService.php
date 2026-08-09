@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\SupplierPayment;
-use App\Models\PaymentSchedule;
 use App\Models\AgingReport;
+use App\Models\PaymentSchedule;
+use App\Models\Supplier;
+use App\Models\SupplierInvoice;
+use App\Models\SupplierPayment;
 use Illuminate\Support\Facades\DB;
 
 class SupplierPaymentService
@@ -13,6 +15,7 @@ class SupplierPaymentService
     {
         return DB::transaction(function () use ($data) {
             $data['payment_number'] = $this->generatePaymentNumber();
+
             return SupplierPayment::create($data);
         });
     }
@@ -41,13 +44,14 @@ class SupplierPaymentService
                 'approved_by' => $approvedBy,
                 'approved_at' => now(),
             ]);
+
             return $payment;
         });
     }
 
     public function generateAgingReport(int $businessId): void
     {
-        $suppliers = \App\Models\Supplier::forBusiness($businessId)->get();
+        $suppliers = Supplier::forBusiness($businessId)->get();
 
         foreach ($suppliers as $supplier) {
             AgingReport::create([
@@ -66,19 +70,20 @@ class SupplierPaymentService
 
     protected function calculatePeriod($supplier, $minDays, $maxDays): float
     {
-        $invoices = \App\Models\SupplierInvoice::where('supplier_id', $supplier->id)
+        $invoices = SupplierInvoice::where('supplier_id', $supplier->id)
             ->where('status', '!=', 'paid')
             ->get();
 
         return $invoices->sum(function ($invoice) use ($minDays, $maxDays) {
             $days = now()->diffInDays($invoice->invoice_date);
+
             return ($days >= $minDays && $days <= $maxDays) ? $invoice->balance : 0;
         });
     }
 
     protected function calculateTotalBalance($supplier): float
     {
-        return \App\Models\SupplierInvoice::where('supplier_id', $supplier->id)
+        return SupplierInvoice::where('supplier_id', $supplier->id)
             ->where('status', '!=', 'paid')
             ->sum('balance');
     }

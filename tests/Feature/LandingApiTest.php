@@ -2,11 +2,10 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
+use App\Models\Plan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Landing\App\Models\Feature;
-use Modules\Landing\App\Models\Blog;
-use App\Models\Plan;
+use Tests\TestCase;
 
 class LandingApiTest extends TestCase
 {

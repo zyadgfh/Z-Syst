@@ -5,8 +5,9 @@ namespace App\Services;
 use App\Models\GoodsReceivedNote;
 use App\Models\GRNItem;
 use App\Models\Product;
-use App\Models\Stock;
 use App\Models\ProductStock;
+use App\Models\PurchaseOrder;
+use App\Models\Stock;
 use Illuminate\Support\Facades\DB;
 
 class GRNService
@@ -93,7 +94,7 @@ class GRNService
      */
     public function verify(GoodsReceivedNote $grn, int $userId): GoodsReceivedNote
     {
-        if (!$grn->isPending()) {
+        if (! $grn->isPending()) {
             throw new \Exception('Only pending GRNs can be verified');
         }
 
@@ -152,9 +153,9 @@ class GRNService
         $totalOrdered = $purchaseOrder->items->sum('quantity');
 
         if ($totalReceived >= $totalOrdered) {
-            $purchaseOrder->update(['status' => \App\Models\PurchaseOrder::STATUS_RECEIVED]);
+            $purchaseOrder->update(['status' => PurchaseOrder::STATUS_RECEIVED]);
         } elseif ($totalReceived > 0) {
-            $purchaseOrder->update(['status' => \App\Models\PurchaseOrder::STATUS_PARTIALLY_RECEIVED]);
+            $purchaseOrder->update(['status' => PurchaseOrder::STATUS_PARTIALLY_RECEIVED]);
         }
     }
 
@@ -163,7 +164,7 @@ class GRNService
      */
     public function accept(GoodsReceivedNote $grn): GoodsReceivedNote
     {
-        if (!$grn->isVerified()) {
+        if (! $grn->isVerified()) {
             throw new \Exception('Only verified GRNs can be accepted');
         }
 
@@ -186,7 +187,7 @@ class GRNService
      */
     public function reject(GoodsReceivedNote $grn): GoodsReceivedNote
     {
-        if (!$grn->isVerified()) {
+        if (! $grn->isVerified()) {
             throw new \Exception('Only verified GRNs can be rejected');
         }
 

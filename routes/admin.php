@@ -98,11 +98,13 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
 
     // Gateway
     Route::resource('gateways', ADMIN\GatewayController::class)->only('index', 'update');
-    
-    // Tenant Payment Settings
-    Route::resource('tenant-payment-settings', ADMIN\TenantPaymentSettingController::class);
-    Route::post('tenant-payment-settings/{id}/toggle', [ADMIN\TenantPaymentSettingController::class, 'toggleStatus'])->name('tenant-payment-settings.toggle');
-    Route::get('tenant-payment-settings/tenant/{tenantId}', [ADMIN\TenantPaymentSettingController::class, 'getTenantSettings'])->name('tenant-payment-settings.tenant');
+
+    // Payment Gateways (Multi-tenant Egyptian payment gateways)
+    Route::resource('payment-gateways', ADMIN\PaymentGatewayController::class)->except('show');
+    Route::post('payment-gateways/toggle-status/{id}', [ADMIN\PaymentGatewayController::class, 'toggleStatus'])->name('payment-gateways.toggle-status');
+    Route::get('payment-gateways/{id}/transactions', [ADMIN\PaymentGatewayController::class, 'transactions'])->name('payment-gateways.transactions');
+    Route::get('payment-gateways/get-required-fields', [ADMIN\PaymentGatewayController::class, 'getRequiredFields'])->name('payment-gateways.get-required-fields');
+    Route::post('payment-gateways/test-configuration', [ADMIN\PaymentGatewayController::class, 'testConfiguration'])->name('payment-gateways.test-configuration');
 
     Route::resource('currencies', ADMIN\ZSystCurrencyController::class)->except('show');
     Route::post('currencies/filter', [ADMIN\ZSystCurrencyController::class, 'zsystFilter'])->name('currencies.filter');

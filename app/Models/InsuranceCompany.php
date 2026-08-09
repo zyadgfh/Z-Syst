@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\InsuranceCompanyFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,7 +13,7 @@ class InsuranceCompany extends Model
 
     protected static function newFactory()
     {
-        return \Database\Factories\InsuranceCompanyFactory::new();
+        return InsuranceCompanyFactory::new();
     }
 
     protected $fillable = [

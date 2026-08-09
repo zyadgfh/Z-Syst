@@ -24,8 +24,8 @@ class InsuranceClaimController extends Controller
     {
         $claims = InsuranceClaim::with(['company:id,name', 'policy:id,policy_number', 'business:id,companyName', 'customer'])
             ->when($request->search, function ($q) use ($request) {
-                $q->where('claim_number', 'like', '%' . $request->search . '%')
-                    ->orWhere('external_reference', 'like', '%' . $request->search . '%');
+                $q->where('claim_number', 'like', '%'.$request->search.'%')
+                    ->orWhere('external_reference', 'like', '%'.$request->search.'%');
             })
             ->when($request->status, function ($q) use ($request) {
                 $q->where('status', $request->status);
@@ -71,7 +71,7 @@ class InsuranceClaimController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error creating insurance claim: ') . $e->getMessage(),
+                'message' => __('Error creating insurance claim: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -79,6 +79,7 @@ class InsuranceClaimController extends Controller
     public function show(InsuranceClaim $claim)
     {
         $claim->load(['company', 'policy', 'business', 'customer', 'user', 'sale', 'prescription']);
+
         return view('admin.insurance.claims.show', compact('claim'));
     }
 
@@ -91,6 +92,7 @@ class InsuranceClaimController extends Controller
         }
 
         $claim->load(['company', 'policy']);
+
         return view('admin.insurance.claims.edit', compact('claim'));
     }
 
@@ -120,7 +122,7 @@ class InsuranceClaimController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error updating insurance claim: ') . $e->getMessage(),
+                'message' => __('Error updating insurance claim: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -142,7 +144,7 @@ class InsuranceClaimController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error deleting insurance claim: ') . $e->getMessage(),
+                'message' => __('Error deleting insurance claim: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -161,7 +163,7 @@ class InsuranceClaimController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error submitting insurance claim: ') . $e->getMessage(),
+                'message' => __('Error submitting insurance claim: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -188,7 +190,7 @@ class InsuranceClaimController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error processing insurance claim: ') . $e->getMessage(),
+                'message' => __('Error processing insurance claim: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -211,7 +213,7 @@ class InsuranceClaimController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error processing insurance claim payment: ') . $e->getMessage(),
+                'message' => __('Error processing insurance claim payment: ').$e->getMessage(),
             ], 500);
         }
     }

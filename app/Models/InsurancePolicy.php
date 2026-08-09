@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\InsurancePolicyFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +14,7 @@ class InsurancePolicy extends Model
 
     protected static function newFactory()
     {
-        return \Database\Factories\InsurancePolicyFactory::new();
+        return InsurancePolicyFactory::new();
     }
 
     protected $fillable = [
@@ -61,7 +62,7 @@ class InsurancePolicy extends Model
 
     public function customer(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Party::class, 'customer_id');
+        return $this->belongsTo(Party::class, 'customer_id');
     }
 
     public function business(): BelongsTo
@@ -106,12 +107,14 @@ class InsurancePolicy extends Model
         if ($this->annual_limit) {
             return max(0, $this->annual_limit - $this->used_amount);
         }
+
         return 0;
     }
 
     public function hasSufficientLimit(float $amount): bool
     {
         $remaining = $this->getRemainingLimitAttribute();
+
         return $remaining >= $amount;
     }
 }

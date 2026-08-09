@@ -40,9 +40,9 @@ class User extends Authenticatable
     {
         // Only apply tenant scope in non-admin contexts
         static::addGlobalScope('tenant', function ($query) {
-            if (auth()->check() && 
-                auth()->user()->role !== 'superadmin' && 
-                !request()->is('admin/*')) {
+            if (auth()->check() &&
+                auth()->user()->role !== 'superadmin' &&
+                ! request()->is('admin/*')) {
                 $query->where('business_id', auth()->user()->business_id);
             }
         });

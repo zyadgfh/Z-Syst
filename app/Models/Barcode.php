@@ -4,9 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Barcode extends Model
 {
@@ -52,22 +51,29 @@ class Barcode extends Model
      * Barcode types
      */
     const TYPE_CODE128 = 'CODE128';
+
     const TYPE_EAN13 = 'EAN13';
+
     const TYPE_UPC = 'UPC';
+
     const TYPE_QR = 'QR';
 
     /**
      * Print statuses
      */
     const STATUS_NOT_PRINTED = 'not_printed';
+
     const STATUS_PRINTED = 'printed';
+
     const STATUS_REPRINTED = 'reprinted';
 
     /**
      * Barcode sizes
      */
     const SIZE_SMALL = 'small';
+
     const SIZE_STANDARD = 'standard';
+
     const SIZE_LARGE = 'large';
 
     /**
@@ -212,8 +218,8 @@ class Barcode extends Model
     public function markAsPrinted(int $userId): void
     {
         $this->update([
-            'print_status' => $this->print_status === self::STATUS_NOT_PRINTED 
-                ? self::STATUS_PRINTED 
+            'print_status' => $this->print_status === self::STATUS_NOT_PRINTED
+                ? self::STATUS_PRINTED
                 : self::STATUS_REPRINTED,
             'printed_at' => now(),
             'printed_by' => $userId,
@@ -226,7 +232,7 @@ class Barcode extends Model
      */
     public static function generateBarcodeNumber(string $type = self::TYPE_CODE128): string
     {
-        return match($type) {
+        return match ($type) {
             self::TYPE_EAN13 => self::generateEAN13(),
             self::TYPE_UPC => self::generateUPC(),
             self::TYPE_QR => self::generateQRData(),
@@ -239,7 +245,7 @@ class Barcode extends Model
      */
     private static function generateCODE128(): string
     {
-        return 'BC' . str_pad(rand(100000000, 999999999), 9, '0', STR_PAD_LEFT);
+        return 'BC'.str_pad(rand(100000000, 999999999), 9, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -249,9 +255,10 @@ class Barcode extends Model
     {
         $prefix = '600'; // Country code for pharmacy
         $random = str_pad(rand(100000000, 999999999), 9, '0', STR_PAD_LEFT);
-        $base = $prefix . $random;
+        $base = $prefix.$random;
         $checksum = self::calculateEAN13Checksum($base);
-        return $base . $checksum;
+
+        return $base.$checksum;
     }
 
     /**
@@ -265,6 +272,7 @@ class Barcode extends Model
             $sum += ($i % 2 === 0) ? $digit : $digit * 3;
         }
         $checksum = (10 - ($sum % 10)) % 10;
+
         return $checksum;
     }
 
@@ -275,7 +283,8 @@ class Barcode extends Model
     {
         $random = str_pad(rand(100000000, 999999999), 9, '0', STR_PAD_LEFT);
         $checksum = self::calculateUPCChecksum($random);
-        return $random . $checksum;
+
+        return $random.$checksum;
     }
 
     /**
@@ -289,6 +298,7 @@ class Barcode extends Model
             $sum += ($i % 2 === 0) ? $digit * 3 : $digit;
         }
         $checksum = (10 - ($sum % 10)) % 10;
+
         return $checksum;
     }
 
@@ -297,7 +307,7 @@ class Barcode extends Model
      */
     private static function generateQRData(): string
     {
-        return 'QR-' . strtoupper(uniqid()) . '-' . time();
+        return 'QR-'.strtoupper(uniqid()).'-'.time();
     }
 
     /**

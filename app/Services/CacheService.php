@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Cache\RedisStore;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -90,6 +91,7 @@ class CacheService
     public function getBusinessStatistics(int $businessId): ?array
     {
         $key = $this->businessKey($businessId, 'statistics');
+
         return Cache::get($key);
     }
 
@@ -108,6 +110,7 @@ class CacheService
     public function getUserPermissions(int $userId): ?array
     {
         $key = $this->userKey($userId, 'permissions');
+
         return Cache::get($key);
     }
 
@@ -126,6 +129,7 @@ class CacheService
     public function getProduct(int $productId): ?array
     {
         $key = $this->productKey($productId, 'data');
+
         return Cache::get($key);
     }
 
@@ -161,11 +165,11 @@ class CacheService
      */
     protected function invalidatePattern(string $pattern): void
     {
-        if (Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
+        if (Cache::getStore() instanceof RedisStore) {
             $redis = Cache::getStore()->connection();
             $keys = $redis->keys($pattern);
-            
-            if (!empty($keys)) {
+
+            if (! empty($keys)) {
                 $redis->del($keys);
             }
         }
@@ -174,9 +178,10 @@ class CacheService
     /**
      * Cache query results
      */
-    public function cacheQuery(string $queryKey, callable $query, int $ttl = null)
+    public function cacheQuery(string $queryKey, callable $query, ?int $ttl = null)
     {
         $ttl = $ttl ?? $this->config['default_ttl'];
+
         return Cache::remember("query:{$queryKey}", $ttl, $query);
     }
 
@@ -190,7 +195,7 @@ class CacheService
             'enabled' => true,
         ];
 
-        if (Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
+        if (Cache::getStore() instanceof RedisStore) {
             $redis = Cache::getStore()->connection();
             $stats['redis'] = [
                 'info' => $redis->info(),

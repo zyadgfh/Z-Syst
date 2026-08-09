@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\InsuranceClaimFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ class InsuranceClaim extends Model
 
     protected static function newFactory()
     {
-        return \Database\Factories\InsuranceClaimFactory::new();
+        return InsuranceClaimFactory::new();
     }
 
     protected $fillable = [
@@ -67,17 +68,17 @@ class InsuranceClaim extends Model
 
     public function sale(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Sale::class);
+        return $this->belongsTo(Sale::class);
     }
 
     public function prescription(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Prescription::class);
+        return $this->belongsTo(Prescription::class);
     }
 
     public function customer(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Party::class, 'customer_id');
+        return $this->belongsTo(Party::class, 'customer_id');
     }
 
     public function user(): BelongsTo
@@ -138,7 +139,7 @@ class InsuranceClaim extends Model
     public function calculateCoverage(): array
     {
         $policy = $this->policy;
-        if (!$policy) {
+        if (! $policy) {
             return [
                 'covered_amount' => 0,
                 'patient_responsibility' => $this->total_amount,

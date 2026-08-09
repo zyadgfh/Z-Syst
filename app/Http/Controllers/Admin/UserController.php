@@ -248,7 +248,7 @@ class UserController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error cloning permissions: ') . $e->getMessage(),
+                'message' => __('Error cloning permissions: ').$e->getMessage(),
             ], 500);
         }
     }

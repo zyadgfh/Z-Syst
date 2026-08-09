@@ -46,9 +46,13 @@ class GoodsReceivedNote extends Model
      * Status constants
      */
     const STATUS_PENDING = 'pending';
+
     const STATUS_VERIFIED = 'verified';
+
     const STATUS_PARTIALLY_ACCEPTED = 'partially_accepted';
+
     const STATUS_ACCEPTED = 'accepted';
+
     const STATUS_REJECTED = 'rejected';
 
     /**
@@ -291,9 +295,12 @@ class GoodsReceivedNote extends Model
     public function getCompletionPercentageAttribute(): float
     {
         $totalOrdered = $this->items->sum('ordered_quantity');
-        if ($totalOrdered === 0) return 0;
+        if ($totalOrdered === 0) {
+            return 0;
+        }
 
         $totalReceived = $this->items->sum('received_quantity');
+
         return ($totalReceived / $totalOrdered) * 100;
     }
 }

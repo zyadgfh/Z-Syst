@@ -2,10 +2,14 @@
 
 namespace App\Services;
 
+use App\Models\GoodsReceivedNote;
+use App\Models\Product;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
+use App\Models\QualityCheck;
 use App\Models\Supplier;
-use App\Models\SupplierRating;
-use App\Models\SupplierContract;
 use App\Models\SupplierPerformance;
+use App\Models\SupplierRating;
 use Illuminate\Support\Facades\DB;
 
 class SupplierService
@@ -21,6 +25,7 @@ class SupplierService
     {
         return DB::transaction(function () use ($supplier, $data) {
             $supplier->update($data);
+
             return $supplier;
         });
     }
@@ -61,8 +66,10 @@ class SupplierService
 
     protected function calculateOnTimeDelivery(Supplier $supplier): float
     {
-        $grns = \App\Models\GoodsReceivedNote::where('supplier_id', $supplier->id)->get();
-        if ($grns->isEmpty()) return 100.0;
+        $grns = GoodsReceivedNote::where('supplier_id', $supplier->id)->get();
+        if ($grns->isEmpty()) {
+            return 100.0;
+        }
 
         $onTime = $grns->filter(function ($grn) {
             return $grn->received_date <= ($grn->purchaseOrder->expected_delivery_date ?? $grn->received_date);
@@ -73,29 +80,34 @@ class SupplierService
 
     protected function calculateQualityScore(Supplier $supplier): float
     {
-        $qualityChecks = \App\Models\QualityCheck::whereHas('grnItem.grn', function ($query) use ($supplier) {
+        $qualityChecks = QualityCheck::whereHas('grnItem.grn', function ($query) use ($supplier) {
             $query->where('supplier_id', $supplier->id);
         })->get();
 
-        if ($qualityChecks->isEmpty()) return 100.0;
+        if ($qualityChecks->isEmpty()) {
+            return 100.0;
+        }
 
         $passed = $qualityChecks->where('quality_status', 'passed')->count();
+
         return ($passed / $qualityChecks->count()) * 100;
     }
 
     protected function calculatePriceCompetitiveness(Supplier $supplier): float
     {
         // Compare with average market prices
-        $poItems = \App\Models\PurchaseOrderItem::whereHas('purchaseOrder', function ($query) use ($supplier) {
+        $poItems = PurchaseOrderItem::whereHas('purchaseOrder', function ($query) use ($supplier) {
             $query->where('supplier_id', $supplier->id);
         })->get();
 
-        if ($poItems->isEmpty()) return 85.0;
+        if ($poItems->isEmpty()) {
+            return 85.0;
+        }
 
         // Simple calculation - compare with product average purchase price
         $total = 0;
         foreach ($poItems as $item) {
-            $avgPrice = \App\Models\Product::find($item->product_id)?->purchase_without_tax ?? $item->unit_price;
+            $avgPrice = Product::find($item->product_id)?->purchase_without_tax ?? $item->unit_price;
             $ratio = $avgPrice > 0 ? ($avgPrice / $item->unit_price) * 100 : 100;
             $total += min($ratio, 100);
         }
@@ -106,10 +118,13 @@ class SupplierService
     protected function calculateResponsiveness(Supplier $supplier): float
     {
         // Calculate based on response time to POs
-        $pos = \App\Models\PurchaseOrder::where('supplier_id', $supplier->id)->get();
-        if ($pos->isEmpty()) return 85.0;
+        $pos = PurchaseOrder::where('supplier_id', $supplier->id)->get();
+        if ($pos->isEmpty()) {
+            return 85.0;
+        }
 
         $responded = $pos->whereNotNull('approved_at')->count();
+
         return ($responded / $pos->count()) * 100;
     }
 

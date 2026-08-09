@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Business;
 use App\Models\InsuranceClaim;
 use App\Models\InsuranceCompany;
 use App\Models\InsurancePolicy;
-use App\Models\Business;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class InsuranceClaimFactory extends Factory
 {
@@ -28,7 +28,7 @@ class InsuranceClaimFactory extends Factory
             'prescription_id' => null,
             'customer_id' => null,
             'user_id' => null,
-            'claim_number' => 'CLM-' . date('Ymd') . '-' . strtoupper(fake()->unique()->regexify('[A-Z0-9]{8}')),
+            'claim_number' => 'CLM-'.date('Ymd').'-'.strtoupper(fake()->unique()->regexify('[A-Z0-9]{8}')),
             'service_date' => $serviceDate,
             'submission_date' => fake()->optional()->dateTimeBetween($serviceDate, 'now'),
             'total_amount' => $totalAmount,

@@ -2,14 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Product;
+use App\Models\Purchase;
 use App\Models\SupplierInvoice;
 use App\Models\SupplierInvoiceItem;
 use App\Models\SupplierInvoicePayment;
-use App\Models\Purchase;
-use App\Models\PurchaseDetails;
-use App\Models\Product;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class SupplierInvoiceService
 {
@@ -163,7 +161,7 @@ class SupplierInvoiceService
      */
     public function approve(SupplierInvoice $invoice, int $userId): SupplierInvoice
     {
-        if (!$invoice->isPending()) {
+        if (! $invoice->isPending()) {
             throw new \Exception('Only pending invoices can be approved');
         }
 
@@ -180,7 +178,7 @@ class SupplierInvoiceService
      */
     public function reject(SupplierInvoice $invoice, int $userId, string $reason): SupplierInvoice
     {
-        if (!$invoice->isPending()) {
+        if (! $invoice->isPending()) {
             throw new \Exception('Only pending invoices can be rejected');
         }
 
@@ -241,7 +239,7 @@ class SupplierInvoiceService
      */
     public function approvePayment(SupplierInvoicePayment $payment, int $userId): SupplierInvoicePayment
     {
-        if (!$payment->isPending()) {
+        if (! $payment->isPending()) {
             throw new \Exception('Only pending payments can be approved');
         }
 
@@ -344,7 +342,7 @@ class SupplierInvoiceService
         $pending = SupplierInvoice::forBusiness($businessId)->pending()->count();
         $overdue = SupplierInvoice::forBusiness($businessId)->overdue()->count();
         $unpaid = SupplierInvoice::forBusiness($businessId)->unpaid()->count();
-        
+
         $totalAmount = SupplierInvoice::forBusiness($businessId)->sum('total_amount');
         $paidAmount = SupplierInvoice::forBusiness($businessId)->sum('paid_amount');
         $balance = SupplierInvoice::forBusiness($businessId)->sum('balance');
@@ -376,7 +374,7 @@ class SupplierInvoiceService
 
         foreach ($invoices as $invoice) {
             $daysOverdue = $invoice->getDaysUntilDue();
-            
+
             if ($daysOverdue <= 0) {
                 $period30 += $invoice->balance;
             } elseif ($daysOverdue <= -30) {
@@ -402,7 +400,7 @@ class SupplierInvoiceService
      */
     public function delete(SupplierInvoice $invoice): bool
     {
-        if (!$invoice->isPending()) {
+        if (! $invoice->isPending()) {
             throw new \Exception('Only pending invoices can be deleted');
         }
 

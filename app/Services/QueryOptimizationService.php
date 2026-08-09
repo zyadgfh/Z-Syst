@@ -115,7 +115,7 @@ class QueryOptimizationService
     public function suggestEagerLoading(Model $model, array $accessedRelations): array
     {
         $suggestions = [];
-        
+
         foreach ($accessedRelations as $relation) {
             if (method_exists($model, $relation)) {
                 $suggestions[] = [
@@ -139,7 +139,7 @@ class QueryOptimizationService
 
         foreach ($queries as $query) {
             $totalTime += $query['time'];
-            
+
             if ($query['time'] > 100) { // 100ms threshold
                 $slowQueries[] = [
                     'query' => $query['query'],
@@ -189,14 +189,14 @@ class QueryOptimizationService
     {
         $patterns = $this->optimizeCommonPatterns();
         $modelName = class_basename($modelClass);
-        
+
         if (isset($patterns[strtolower($modelName)])) {
             $pattern = $patterns[strtolower($modelName)];
-            
+
             if (isset($pattern['relations'])) {
                 $query = $query->with($pattern['relations']);
             }
-            
+
             if (isset($pattern['count_relations'])) {
                 $query = $query->withCount($pattern['count_relations']);
             }

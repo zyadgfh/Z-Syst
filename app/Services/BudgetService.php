@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\PurchaseBudget;
 use App\Models\BudgetAlert;
 use App\Models\BudgetTransaction;
+use App\Models\PurchaseBudget;
 use Illuminate\Support\Facades\DB;
 
 class BudgetService
@@ -13,6 +13,7 @@ class BudgetService
     {
         return DB::transaction(function () use ($data) {
             $data['remaining_amount'] = $data['budget_amount'];
+
             return PurchaseBudget::create($data);
         });
     }
@@ -73,8 +74,8 @@ class BudgetService
         return BudgetAlert::whereHas('budget', function ($query) use ($businessId) {
             $query->where('business_id', $businessId);
         })->unresolved()
-        ->with(['budget'])
-        ->latest()
-        ->get();
+            ->with(['budget'])
+            ->latest()
+            ->get();
     }
 }

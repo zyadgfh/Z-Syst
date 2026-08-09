@@ -25,7 +25,7 @@ class DoctorActivityResource extends JsonResource
             'details' => $this->details,
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),
-            
+
             // Relationships
             'doctor' => new PartyResource($this->whenLoaded('doctor')),
             'medical_rep' => new UserResource($this->whenLoaded('medicalRep')),

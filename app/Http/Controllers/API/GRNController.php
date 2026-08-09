@@ -5,11 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\GRNRequest;
 use App\Http\Resources\GRNResource;
-use App\Http\Resources\GRNItemResource;
 use App\Models\GoodsReceivedNote;
 use App\Services\GRNService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class GRNController extends Controller

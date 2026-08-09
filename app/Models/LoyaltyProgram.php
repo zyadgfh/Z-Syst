@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LoyaltyProgram extends Model
 {
@@ -67,6 +67,7 @@ class LoyaltyProgram extends Model
         if ($this->points_per_currency === 0) {
             return 0;
         }
+
         return $points / $this->points_per_currency;
     }
 

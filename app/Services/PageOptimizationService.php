@@ -2,9 +2,6 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Vite;
-use Illuminate\Support\Str;
-
 class PageOptimizationService
 {
     /**
@@ -14,13 +11,13 @@ class PageOptimizationService
     {
         // Remove comments
         $html = preg_replace('/<!--(.|\s)*?-->/', '', $html);
-        
+
         // Remove whitespace between tags
         $html = preg_replace('/>\s+</', '><', $html);
-        
+
         // Remove whitespace at start/end
         $html = trim($html);
-        
+
         return $html;
     }
 
@@ -31,13 +28,13 @@ class PageOptimizationService
     {
         // Remove comments
         $css = preg_replace('/\/\*.*?\*\//s', '', $css);
-        
+
         // Remove whitespace
         $css = preg_replace('/\s+/', ' ', $css);
-        
+
         // Remove unnecessary spaces
         $css = preg_replace('/\s*([{}:;,])\s*/', '$1', $css);
-        
+
         return trim($css);
     }
 
@@ -48,13 +45,13 @@ class PageOptimizationService
     {
         // Remove single-line comments
         $js = preg_replace('/\/\/.*$/m', '', $js);
-        
+
         // Remove multi-line comments
         $js = preg_replace('/\/\*.*?\*\//s', '', $js);
-        
+
         // Remove unnecessary whitespace
         $js = preg_replace('/\s+/', ' ', $js);
-        
+
         return trim($js);
     }
 
@@ -178,9 +175,9 @@ JS;
     public function getAssetURL(string $assetPath): string
     {
         $cdnUrl = config('app.asset_url');
-        
+
         if ($cdnUrl) {
-            return $cdnUrl . '/' . ltrim($assetPath, '/');
+            return $cdnUrl.'/'.ltrim($assetPath, '/');
         }
 
         return asset($assetPath);
@@ -201,7 +198,7 @@ JS;
             "frame-src 'none'",
         ];
 
-        return '<meta http-equiv="Content-Security-Policy" content="' . implode('; ', $policies) . '">';
+        return '<meta http-equiv="Content-Security-Policy" content="'.implode('; ', $policies).'">';
     }
 
     /**

@@ -7,8 +7,8 @@ use App\Http\Requests\SupplierRequest;
 use App\Http\Resources\SupplierResource;
 use App\Models\Supplier;
 use App\Services\SupplierService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class SupplierController extends Controller
 {

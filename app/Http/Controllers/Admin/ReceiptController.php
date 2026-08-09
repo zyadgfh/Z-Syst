@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Receipt;
-use App\Models\ReceiptSetting;
 use App\Services\ReceiptService;
 use Illuminate\Http\Request;
 
@@ -28,6 +27,7 @@ class ReceiptController extends Controller
             ->with(['sale:id,receipt_number,totalAmount', 'purchase:id,receipt_number,totalAmount', 'user:id,name']) // Fix N+1 with selective loading
             ->orderBy('created_at', 'desc')
             ->paginate(15);
+
         return view('admin.receipts.index', compact('receipts'));
     }
 
@@ -35,6 +35,7 @@ class ReceiptController extends Controller
     {
         $businessId = auth()->user()->business_id;
         $settings = $this->receiptService->getSettings($businessId);
+
         return view('admin.receipts.settings', compact('settings'));
     }
 
@@ -42,6 +43,7 @@ class ReceiptController extends Controller
     {
         $receipt->load(['sale', 'purchase', 'user']);
         $settings = $this->receiptService->getSettings($receipt->business_id);
+
         return view('admin.receipts.show', compact('receipt', 'settings'));
     }
 
@@ -89,7 +91,7 @@ class ReceiptController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error generating sale receipt: ') . $e->getMessage(),
+                'message' => __('Error generating sale receipt: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -117,7 +119,7 @@ class ReceiptController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error generating purchase receipt: ') . $e->getMessage(),
+                'message' => __('Error generating purchase receipt: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -131,7 +133,7 @@ class ReceiptController extends Controller
             return $this->receiptService->generatePdf($receipt);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error generating PDF: ') . $e->getMessage(),
+                'message' => __('Error generating PDF: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -143,10 +145,11 @@ class ReceiptController extends Controller
     {
         try {
             $html = $this->receiptService->generateHtml($receipt);
+
             return response($html)->header('Content-Type', 'text/html');
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error generating HTML: ') . $e->getMessage(),
+                'message' => __('Error generating HTML: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -165,7 +168,7 @@ class ReceiptController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error marking receipt as printed: ') . $e->getMessage(),
+                'message' => __('Error marking receipt as printed: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -185,7 +188,7 @@ class ReceiptController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error regenerating receipt: ') . $e->getMessage(),
+                'message' => __('Error regenerating receipt: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -204,7 +207,7 @@ class ReceiptController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error deleting receipt: ') . $e->getMessage(),
+                'message' => __('Error deleting receipt: ').$e->getMessage(),
             ], 500);
         }
     }

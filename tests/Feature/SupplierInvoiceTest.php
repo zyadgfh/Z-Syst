@@ -2,11 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\SupplierInvoice;
-use App\Models\SupplierInvoiceItem;
-use App\Models\SupplierInvoicePayment;
-use App\Models\Purchase;
 use App\Models\Product;
+use App\Models\Purchase;
+use App\Models\SupplierInvoice;
+use App\Models\SupplierInvoicePayment;
 use App\Models\User;
 use App\Services\SupplierInvoiceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -22,7 +21,7 @@ class SupplierInvoiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->invoiceService = new SupplierInvoiceService();
+        $this->invoiceService = new SupplierInvoiceService;
     }
 
     /**
@@ -204,12 +203,12 @@ class SupplierInvoiceTest extends TestCase
     public function test_invoice_scopes()
     {
         $businessId = 1;
-        
+
         SupplierInvoice::factory()->create([
             'business_id' => $businessId,
             'status' => SupplierInvoice::STATUS_PENDING,
         ]);
-        
+
         SupplierInvoice::factory()->create([
             'business_id' => $businessId,
             'status' => SupplierInvoice::STATUS_APPROVED,
@@ -272,7 +271,7 @@ class SupplierInvoiceTest extends TestCase
     public function test_invoice_number_generation()
     {
         $businessId = 1;
-        
+
         $invoice1 = SupplierInvoice::factory()->create(['business_id' => $businessId]);
         $invoice2 = SupplierInvoice::factory()->create(['business_id' => $businessId]);
 
@@ -287,7 +286,7 @@ class SupplierInvoiceTest extends TestCase
     public function test_payment_number_generation()
     {
         $businessId = 1;
-        
+
         $payment1 = SupplierInvoicePayment::factory()->create(['business_id' => $businessId]);
         $payment2 = SupplierInvoicePayment::factory()->create(['business_id' => $businessId]);
 

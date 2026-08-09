@@ -26,6 +26,22 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             UserSeeder::class,
             BusinessSeeder::class,
+            BranchSeeder::class,
+            PaymentGatewaySeeder::class,
+            CurrencySeeder::class,
+            CategorySeeder::class,
+            ManufacturerSeeder::class,
+            UnitSeeder::class,
+            TypeTableSeeder::class,
+            TaxTableSeeder::class,
+            ProductSeeder::class,
+            PartySeeder::class,
+            OptionTableSeeder::class,
+            BoxSizeSeeder::class,
+            BusinessCategorySeeder::class,
+            LanguageSeeder::class,
+            AdvertiseSeeder::class,
+            DrugInteractionSeeder::class,
         ]);
     }
 
@@ -60,6 +76,9 @@ class DatabaseSeeder extends Seeder
             'permissions',
             'roles',
             'plans',
+            'branches',
+            'company_payment_gateways',
+            'payment_transactions',
         ];
 
         foreach ($tables as $table) {

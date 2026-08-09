@@ -71,19 +71,28 @@ class PurchaseOrder extends Model
      * Status constants
      */
     const STATUS_DRAFT = 'draft';
+
     const STATUS_SENT = 'sent';
+
     const STATUS_ACCEPTED = 'accepted';
+
     const STATUS_PARTIALLY_RECEIVED = 'partially_received';
+
     const STATUS_RECEIVED = 'received';
+
     const STATUS_CANCELLED = 'cancelled';
+
     const STATUS_REJECTED = 'rejected';
 
     /**
      * Priority constants
      */
     const PRIORITY_LOW = 'low';
+
     const PRIORITY_NORMAL = 'normal';
+
     const PRIORITY_HIGH = 'high';
+
     const PRIORITY_URGENT = 'urgent';
 
     /**
@@ -380,9 +389,12 @@ class PurchaseOrder extends Model
     public function getCompletionPercentage(): float
     {
         $total = $this->getTotalQuantity();
-        if ($total === 0) return 0;
-        
+        if ($total === 0) {
+            return 0;
+        }
+
         $received = $this->getReceivedQuantity();
+
         return ($received / $total) * 100;
     }
 
@@ -419,6 +431,7 @@ class PurchaseOrder extends Model
     private static function generatePONumber(int $businessId): string
     {
         $count = self::where('business_id', $businessId)->count() + 1;
-        return 'PO-' . date('Y') . '-' . str_pad($count, 5, '0', STR_PAD_LEFT);
+
+        return 'PO-'.date('Y').'-'.str_pad($count, 5, '0', STR_PAD_LEFT);
     }
 }

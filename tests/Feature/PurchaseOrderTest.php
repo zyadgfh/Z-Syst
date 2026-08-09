@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\Party;
+use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
-use App\Models\Product;
-use App\Models\Party;
 use App\Models\User;
 use App\Services\PurchaseOrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;

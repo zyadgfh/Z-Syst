@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CustomerInteraction;
 use App\Models\LoyaltyProgram;
 use App\Models\LoyaltyTransaction;
-use App\Models\CustomerInteraction;
 use App\Services\LoyaltyService;
 use Illuminate\Http\Request;
 
@@ -34,6 +34,7 @@ class LoyaltyController extends Controller
             ->withCount('transactions') // Fix N+1 query
             ->orderBy('created_at', 'desc')
             ->paginate(15);
+
         return view('admin.loyalty.programs', compact('programs'));
     }
 
@@ -61,7 +62,7 @@ class LoyaltyController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error creating loyalty program: ') . $e->getMessage(),
+                'message' => __('Error creating loyalty program: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -89,7 +90,7 @@ class LoyaltyController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error updating loyalty program: ') . $e->getMessage(),
+                'message' => __('Error updating loyalty program: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -105,7 +106,7 @@ class LoyaltyController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error deleting loyalty program: ') . $e->getMessage(),
+                'message' => __('Error deleting loyalty program: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -117,6 +118,7 @@ class LoyaltyController extends Controller
             ->with(['party:id,name', 'program:id,name']) // Fix N+1
             ->orderBy('created_at', 'desc')
             ->paginate(15);
+
         return view('admin.loyalty.transactions', compact('transactions'));
     }
 
@@ -127,6 +129,7 @@ class LoyaltyController extends Controller
             ->with(['party:id,name', 'user:id,name', 'program:id,name']) // Fix N+1
             ->orderBy('created_at', 'desc')
             ->paginate(15);
+
         return view('admin.loyalty.interactions', compact('interactions'));
     }
 
@@ -152,7 +155,7 @@ class LoyaltyController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error creating customer interaction: ') . $e->getMessage(),
+                'message' => __('Error creating customer interaction: ').$e->getMessage(),
             ], 500);
         }
     }

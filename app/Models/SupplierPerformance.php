@@ -42,11 +42,10 @@ class SupplierPerformance extends Model
 
     public function getOverallScoreAttribute(): float
     {
-        return (
+        return
             $this->on_time_delivery_rate * 0.4 +
             $this->quality_score * 0.3 +
             $this->price_competitiveness * 0.2 +
-            $this->responsiveness * 0.1
-        );
+            $this->responsiveness * 0.1;
     }
 }

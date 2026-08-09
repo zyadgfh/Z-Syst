@@ -84,7 +84,10 @@ class GRNItem extends Model
      */
     public function getAcceptanceRateAttribute(): float
     {
-        if ($this->received_quantity === 0) return 0;
+        if ($this->received_quantity === 0) {
+            return 0;
+        }
+
         return ($this->accepted_quantity / $this->received_quantity) * 100;
     }
 }

@@ -17,51 +17,51 @@ class PermissionSeeder extends Seeder
             'users-create',
             'users-edit',
             'users-delete',
-            
+
             // Product Management
             'products-view',
             'products-create',
             'products-edit',
             'products-delete',
-            
+
             // Sales Management
             'sales-view',
             'sales-create',
             'sales-edit',
             'sales-delete',
-            
+
             // Purchase Management
             'purchases-view',
             'purchases-create',
             'purchases-edit',
             'purchases-delete',
-            
+
             // Inventory Management
             'inventory-view',
             'inventory-create',
             'inventory-edit',
             'inventory-delete',
-            
+
             // Reports
             'reports-view',
             'reports-export',
-            
+
             // Settings
             'settings-view',
             'settings-edit',
-            
+
             // Loyalty
             'loyalty-view',
             'loyalty-create',
             'loyalty-edit',
             'loyalty-delete',
-            
+
             // Receipts
             'receipts-view',
             'receipts-create',
             'receipts-edit',
             'receipts-delete',
-            
+
             // Audit Logs
             'audit-logs-view',
         ];

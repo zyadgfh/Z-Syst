@@ -3,9 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Supplier;
-use App\Models\SupplierRating;
-use App\Models\SupplierContract;
 use App\Models\SupplierPerformance;
+use App\Models\SupplierRating;
 use App\Models\User;
 use App\Services\SupplierService;
 use Illuminate\Foundation\Testing\RefreshDatabase;

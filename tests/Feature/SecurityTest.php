@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Services\SecurityService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class SecurityTest extends TestCase
@@ -13,7 +12,7 @@ class SecurityTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->securityService = new SecurityService();
+        $this->securityService = new SecurityService;
     }
 
     public function test_sql_injection_prevention()

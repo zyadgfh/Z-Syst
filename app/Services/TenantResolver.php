@@ -32,25 +32,21 @@ class TenantResolver
 
     /**
      * Get current tenant model
-     *
-     * @return Business|null
      */
     public function getCurrentTenant(): ?Business
     {
         $tenantId = app('tenant_id');
+
         return $tenantId ? Business::find($tenantId) : null;
     }
 
     /**
      * Check if current user can access specified tenant
-     *
-     * @param int $businessId
-     * @return bool
      */
     public function canAccessTenant(int $businessId): bool
     {
         $user = Auth::user();
-        
+
         // Super admin can access all tenants
         if ($user && $user->role === 'superadmin') {
             return true;

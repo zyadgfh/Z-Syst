@@ -2,12 +2,16 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Business;
-use App\Models\Product;
-use App\Models\Sale;
-use App\Models\Purchase;
 use App\Models\Party;
+use App\Models\Plan;
+use App\Models\PlanSubscribe;
+use App\Models\Product;
+use App\Models\Purchase;
+use App\Models\Sale;
+use App\Models\User;
+use App\Models\Warehouse;
+use App\Models\WarehouseStock;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -19,7 +23,7 @@ class IntegrationTest extends TestCase
     {
         // Create business
         $business = Business::factory()->create();
-        
+
         // Create admin user
         $admin = User::factory()->create([
             'business_id' => $business->id,
@@ -79,7 +83,7 @@ class IntegrationTest extends TestCase
     {
         // Create business
         $business = Business::factory()->create();
-        
+
         // Create admin user
         $admin = User::factory()->create([
             'business_id' => $business->id,
@@ -173,27 +177,27 @@ class IntegrationTest extends TestCase
     {
         // Create business
         $business = Business::factory()->create();
-        
+
         // Create Super Admin
         $superAdmin = User::factory()->create([
             'role' => 'superadmin',
         ]);
 
         // Create plans
-        $basicPlan = \App\Models\Plan::factory()->create([
+        $basicPlan = Plan::factory()->create([
             'subscriptionName' => 'Basic',
             'subscriptionPrice' => 29.99,
             'duration' => 30,
         ]);
 
-        $premiumPlan = \App\Models\Plan::factory()->create([
+        $premiumPlan = Plan::factory()->create([
             'subscriptionName' => 'Premium',
             'subscriptionPrice' => 99.99,
             'duration' => 30,
         ]);
 
         // Create subscription
-        $subscription = \App\Models\PlanSubscribe::factory()->create([
+        $subscription = PlanSubscribe::factory()->create([
             'business_id' => $business->id,
             'plan_id' => $basicPlan->id,
             'price' => 29.99,
@@ -222,7 +226,7 @@ class IntegrationTest extends TestCase
     {
         // Create business
         $business = Business::factory()->create();
-        
+
         // Create admin user
         $admin = User::factory()->create([
             'business_id' => $business->id,
@@ -270,7 +274,7 @@ class IntegrationTest extends TestCase
     {
         // Create business
         $business = Business::factory()->create();
-        
+
         // Create admin user
         $admin = User::factory()->create([
             'business_id' => $business->id,
@@ -324,7 +328,7 @@ class IntegrationTest extends TestCase
     {
         // Create business
         $business = Business::factory()->create();
-        
+
         // Create admin user
         $admin = User::factory()->create([
             'business_id' => $business->id,
@@ -334,12 +338,12 @@ class IntegrationTest extends TestCase
         $admin->givePermissionTo('stock-transfers-create');
 
         // Create warehouses
-        $warehouse1 = \App\Models\Warehouse::factory()->create([
+        $warehouse1 = Warehouse::factory()->create([
             'business_id' => $business->id,
             'name' => 'Warehouse 1',
         ]);
 
-        $warehouse2 = \App\Models\Warehouse::factory()->create([
+        $warehouse2 = Warehouse::factory()->create([
             'business_id' => $business->id,
             'name' => 'Warehouse 2',
         ]);
@@ -350,7 +354,7 @@ class IntegrationTest extends TestCase
             'stock' => 50,
         ]);
 
-        $stock1 = \App\Models\WarehouseStock::factory()->create([
+        $stock1 = WarehouseStock::factory()->create([
             'warehouse_id' => $warehouse1->id,
             'product_id' => $product->id,
             'quantity' => 30,
@@ -381,7 +385,7 @@ class IntegrationTest extends TestCase
     {
         // Create business
         $business = Business::factory()->create();
-        
+
         // Create user
         $user = User::factory()->create([
             'business_id' => $business->id,
@@ -411,7 +415,7 @@ class IntegrationTest extends TestCase
     {
         // Create business
         $business = Business::factory()->create();
-        
+
         // Create user without permission
         $user = User::factory()->create([
             'business_id' => $business->id,
@@ -469,7 +473,7 @@ class IntegrationTest extends TestCase
     {
         // Create business
         $business = Business::factory()->create();
-        
+
         // Create user
         $user = User::factory()->create([
             'business_id' => $business->id,

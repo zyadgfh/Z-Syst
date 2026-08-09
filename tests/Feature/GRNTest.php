@@ -4,10 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\GoodsReceivedNote;
 use App\Models\GRNItem;
-use App\Models\Product;
 use App\Models\Party;
+use App\Models\Product;
 use App\Models\User;
-use App\Models\PurchaseOrder;
 use App\Services\GRNService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;

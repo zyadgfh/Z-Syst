@@ -2,6 +2,14 @@
 
 namespace App\Services;
 
+use App\Models\GoodsReceivedNote;
+use App\Models\Purchase;
+use App\Models\PurchaseBudget;
+use App\Models\PurchaseOrder;
+use App\Models\Supplier;
+use App\Models\SupplierInvoice;
+use App\Models\SupplierPayment;
+
 class IntegrationService
 {
     /**
@@ -9,8 +17,10 @@ class IntegrationService
      */
     public function syncPOToPurchase(int $poId): void
     {
-        $po = \App\Models\PurchaseOrder::find($poId);
-        if (!$po) return;
+        $po = PurchaseOrder::find($poId);
+        if (! $po) {
+            return;
+        }
 
         app(PurchaseOrderService::class)->convertToPurchase($po);
     }
@@ -20,8 +30,10 @@ class IntegrationService
      */
     public function syncPOToGRN(int $poId): void
     {
-        $po = \App\Models\PurchaseOrder::find($poId);
-        if (!$po) return;
+        $po = PurchaseOrder::find($poId);
+        if (! $po) {
+            return;
+        }
 
         // Create GRN from PO items
         $grnData = [
@@ -50,8 +62,10 @@ class IntegrationService
      */
     public function syncGRNToStock(int $grnId): void
     {
-        $grn = \App\Models\GoodsReceivedNote::find($grnId);
-        if (!$grn) return;
+        $grn = GoodsReceivedNote::find($grnId);
+        if (! $grn) {
+            return;
+        }
 
         app(GRNService::class)->verify($grn, $grn->received_by);
     }
@@ -61,8 +75,10 @@ class IntegrationService
      */
     public function syncSupplierData(int $supplierId): void
     {
-        $supplier = \App\Models\Supplier::find($supplierId);
-        if (!$supplier) return;
+        $supplier = Supplier::find($supplierId);
+        if (! $supplier) {
+            return;
+        }
 
         // Update supplier references across all systems
         $supplier->calculatePerformanceScore();
@@ -73,11 +89,13 @@ class IntegrationService
      */
     public function syncPaymentToPurchase(int $paymentId): void
     {
-        $payment = \App\Models\SupplierPayment::find($paymentId);
-        if (!$payment) return;
+        $payment = SupplierPayment::find($paymentId);
+        if (! $payment) {
+            return;
+        }
 
         // Update related purchase invoices
-        \App\Models\SupplierInvoice::where('supplier_id', $payment->supplier_id)
+        SupplierInvoice::where('supplier_id', $payment->supplier_id)
             ->where('status', 'pending')
             ->update(['status' => 'paid']);
     }
@@ -87,8 +105,10 @@ class IntegrationService
      */
     public function syncQualityToPerformance(int $supplierId): void
     {
-        $supplier = \App\Models\Supplier::find($supplierId);
-        if (!$supplier) return;
+        $supplier = Supplier::find($supplierId);
+        if (! $supplier) {
+            return;
+        }
 
         app(SupplierService::class)->calculatePerformance($supplier);
     }
@@ -98,10 +118,12 @@ class IntegrationService
      */
     public function syncPurchaseToBudget(int $purchaseId): void
     {
-        $purchase = \App\Models\Purchase::find($purchaseId);
-        if (!$purchase) return;
+        $purchase = Purchase::find($purchaseId);
+        if (! $purchase) {
+            return;
+        }
 
-        $budget = \App\Models\PurchaseBudget::where('business_id', $purchase->business_id)
+        $budget = PurchaseBudget::where('business_id', $purchase->business_id)
             ->where('status', 'active')
             ->where('start_date', '<=', now())
             ->where('end_date', '>=', now())
@@ -130,7 +152,7 @@ class IntegrationService
         ];
 
         // Sync all suppliers
-        $suppliers = \App\Models\Supplier::forBusiness($businessId)->get();
+        $suppliers = Supplier::forBusiness($businessId)->get();
         foreach ($suppliers as $supplier) {
             $this->syncSupplierData($supplier->id);
             $results['suppliers_synced']++;

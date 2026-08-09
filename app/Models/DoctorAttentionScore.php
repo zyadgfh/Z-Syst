@@ -52,7 +52,9 @@ class DoctorAttentionScore extends Model
      * Status constants
      */
     const STATUS_ACTIVE = 'active';
+
     const STATUS_NEEDS_ATTENTION = 'needs_attention';
+
     const STATUS_CRITICAL = 'critical';
 
     /**
@@ -195,6 +197,7 @@ class DoctorAttentionScore extends Model
         } elseif ($this->hasLowScore()) {
             return 'medium';
         }
+
         return 'low';
     }
 }

@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Business;
+use App\Models\User;
 use App\Services\TenantResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Tests\TestCase;
 
 class TenantContextTest extends TestCase
 {
@@ -26,7 +26,7 @@ class TenantContextTest extends TestCase
             return $user;
         });
 
-        $resolver = new TenantResolver();
+        $resolver = new TenantResolver;
         $tenantId = $resolver->resolve($request);
 
         $this->assertEquals($business->id, $tenantId);
@@ -40,7 +40,7 @@ class TenantContextTest extends TestCase
         $business = Business::factory()->create();
         $superAdmin = User::factory()->create([
             'business_id' => $business->id,
-            'role' => 'superadmin'
+            'role' => 'superadmin',
         ]);
 
         $request = Request::create('/admin/test', 'GET');
@@ -48,7 +48,7 @@ class TenantContextTest extends TestCase
             return $superAdmin;
         });
 
-        $resolver = new TenantResolver();
+        $resolver = new TenantResolver;
         $tenantId = $resolver->resolve($request);
 
         $this->assertNull($tenantId);
@@ -61,9 +61,9 @@ class TenantContextTest extends TestCase
     {
         $business = Business::factory()->create();
 
-        $request = Request::create('/api/v1/test?business_id=' . $business->id, 'GET');
+        $request = Request::create('/api/v1/test?business_id='.$business->id, 'GET');
 
-        $resolver = new TenantResolver();
+        $resolver = new TenantResolver;
         $tenantId = $resolver->resolve($request);
 
         $this->assertEquals($business->id, $tenantId);
@@ -78,7 +78,7 @@ class TenantContextTest extends TestCase
         $business2 = Business::factory()->create();
         $user = User::factory()->create(['business_id' => $business1->id]);
 
-        $resolver = new TenantResolver();
+        $resolver = new TenantResolver;
         $canAccess = $resolver->canAccessTenant($business2->id);
 
         $this->assertFalse($canAccess);
@@ -92,7 +92,7 @@ class TenantContextTest extends TestCase
         $business = Business::factory()->create();
         $user = User::factory()->create(['business_id' => $business->id]);
 
-        $resolver = new TenantResolver();
+        $resolver = new TenantResolver;
         $canAccess = $resolver->canAccessTenant($business->id);
 
         $this->assertTrue($canAccess);
@@ -106,7 +106,7 @@ class TenantContextTest extends TestCase
         $business = Business::factory()->create();
         $superAdmin = User::factory()->create(['role' => 'superadmin']);
 
-        $resolver = new TenantResolver();
+        $resolver = new TenantResolver;
         $canAccess = $resolver->canAccessTenant($business->id);
 
         $this->assertTrue($canAccess);

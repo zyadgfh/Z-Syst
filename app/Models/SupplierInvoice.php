@@ -73,11 +73,17 @@ class SupplierInvoice extends Model
      * Status constants
      */
     const STATUS_PENDING = 'pending';
+
     const STATUS_APPROVED = 'approved';
+
     const STATUS_PARTIALLY_PAID = 'partially_paid';
+
     const STATUS_PAID = 'paid';
+
     const STATUS_OVERDUE = 'overdue';
+
     const STATUS_CANCELLED = 'cancelled';
+
     const STATUS_REJECTED = 'rejected';
 
     /**
@@ -254,7 +260,7 @@ class SupplierInvoice extends Model
      */
     public function isOverdue(): bool
     {
-        return $this->status === self::STATUS_OVERDUE || 
+        return $this->status === self::STATUS_OVERDUE ||
                ($this->status !== self::STATUS_PAID && $this->due_date < now());
     }
 
@@ -333,7 +339,7 @@ class SupplierInvoice extends Model
     {
         $this->increment('paid_amount', $amount);
         $this->decrement('balance', $amount);
-        
+
         // Update status based on balance
         if ($this->balance <= 0) {
             $this->markAsPaid();
@@ -359,7 +365,10 @@ class SupplierInvoice extends Model
      */
     public function getPaymentPercentage(): float
     {
-        if ($this->total_amount == 0) return 0;
+        if ($this->total_amount == 0) {
+            return 0;
+        }
+
         return ($this->paid_amount / $this->total_amount) * 100;
     }
 
@@ -426,6 +435,7 @@ class SupplierInvoice extends Model
     private static function generateInvoiceNumber(int $businessId): string
     {
         $count = self::where('business_id', $businessId)->count() + 1;
-        return 'INV-' . date('Y') . '-' . str_pad($count, 5, '0', STR_PAD_LEFT);
+
+        return 'INV-'.date('Y').'-'.str_pad($count, 5, '0', STR_PAD_LEFT);
     }
 }

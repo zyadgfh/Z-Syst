@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\CustomerInteraction;
 use App\Models\LoyaltyProgram;
 use App\Models\LoyaltyTransaction;
-use App\Models\CustomerInteraction;
 use App\Models\Party;
 use Illuminate\Support\Facades\DB;
 
@@ -24,13 +24,14 @@ class LoyaltyService
     public function updateProgram(LoyaltyProgram $program, array $data): LoyaltyProgram
     {
         $program->update($data);
+
         return $program->fresh();
     }
 
     /**
      * Earn points for a customer
      */
-    public function earnPoints(int $programId, int $partyId, float $amount, string $referenceType = null, int $referenceId = null): LoyaltyTransaction
+    public function earnPoints(int $programId, int $partyId, float $amount, ?string $referenceType = null, ?int $referenceId = null): LoyaltyTransaction
     {
         return DB::transaction(function () use ($programId, $partyId, $amount, $referenceType, $referenceId) {
             $program = LoyaltyProgram::findOrFail($programId);
@@ -52,7 +53,7 @@ class LoyaltyService
     /**
      * Redeem points for a customer
      */
-    public function redeemPoints(int $programId, int $partyId, int $points, string $notes = null): LoyaltyTransaction
+    public function redeemPoints(int $programId, int $partyId, int $points, ?string $notes = null): LoyaltyTransaction
     {
         return DB::transaction(function () use ($programId, $partyId, $points, $notes) {
             $program = LoyaltyProgram::findOrFail($programId);
@@ -62,7 +63,7 @@ class LoyaltyService
                 throw new \Exception('Insufficient points balance');
             }
 
-            if (!$program->canRedeemReward($points)) {
+            if (! $program->canRedeemReward($points)) {
                 throw new \Exception('Minimum points requirement not met');
             }
 
@@ -124,10 +125,10 @@ class LoyaltyService
     /**
      * Get loyalty program statistics
      */
-    public function getProgramStatistics(int $businessId, int $programId = null): array
+    public function getProgramStatistics(int $businessId, ?int $programId = null): array
     {
         $query = LoyaltyProgram::forBusiness($businessId);
-        
+
         if ($programId) {
             $query->where('id', $programId);
         }
@@ -142,11 +143,11 @@ class LoyaltyService
             $totalMembers += LoyaltyTransaction::where('loyalty_program_id', $program->id)
                 ->distinct('party_id')
                 ->count('party_id');
-            
+
             $totalPointsIssued += LoyaltyTransaction::where('loyalty_program_id', $program->id)
                 ->earned()
                 ->sum('points');
-            
+
             $totalPointsRedeemed += abs(LoyaltyTransaction::where('loyalty_program_id', $program->id)
                 ->redeemed()
                 ->sum('points'));
@@ -158,8 +159,8 @@ class LoyaltyService
             'total_members' => $totalMembers,
             'total_points_issued' => $totalPointsIssued,
             'total_points_redeemed' => $totalPointsRedeemed,
-            'redemption_rate' => $totalPointsIssued > 0 
-                ? round(($totalPointsRedeemed / $totalPointsIssued) * 100, 2) 
+            'redemption_rate' => $totalPointsIssued > 0
+                ? round(($totalPointsRedeemed / $totalPointsIssued) * 100, 2)
                 : 0,
         ];
     }
@@ -249,6 +250,7 @@ class LoyaltyService
 
         return $customerBalances->map(function ($item) {
             $party = Party::find($item->party_id);
+
             return [
                 'party_id' => $item->party_id,
                 'party_name' => $party?->name ?? 'Unknown',

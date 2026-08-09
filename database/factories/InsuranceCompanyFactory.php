@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\InsuranceCompany;
 use App\Models\Business;
+use App\Models\InsuranceCompany;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class InsuranceCompanyFactory extends Factory
 {
@@ -15,7 +15,7 @@ class InsuranceCompanyFactory extends Factory
         return [
             'business_id' => Business::factory(),
             'name' => fake()->company(),
-            'code' => 'INS-' . strtoupper(fake()->unique()->regexify('[A-Z0-9]{8}')),
+            'code' => 'INS-'.strtoupper(fake()->unique()->regexify('[A-Z0-9]{8}')),
             'contact_person' => fake()->name(),
             'phone' => fake()->phoneNumber(),
             'email' => fake()->companyEmail(),

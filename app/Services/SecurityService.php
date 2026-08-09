@@ -2,9 +2,6 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-
 class SecurityService
 {
     /**
@@ -88,6 +85,7 @@ class SecurityService
             if (is_array($input)) {
                 return $this->sanitizeArray($input);
             }
+
             return $input;
         }, $inputs);
     }
@@ -124,7 +122,7 @@ class SecurityService
         $html = preg_replace('/<iframe\b[^>]*>(.*?)<\/iframe>/is', '', $html);
         $html = preg_replace('/javascript:/i', '', $html);
         $html = preg_replace('/on\w+\s*=/i', '', $html);
-        
+
         return $html;
     }
 
@@ -149,6 +147,6 @@ class SecurityService
      */
     public function logSecurityEvent(string $event, array $context = []): void
     {
-        \Log::warning('Security Event: ' . $event, $context);
+        \Log::warning('Security Event: '.$event, $context);
     }
 }

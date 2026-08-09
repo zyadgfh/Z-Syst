@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\Product;
+use App\Models\StockTransfer;
 use App\Models\Warehouse;
 use App\Models\WarehouseStock;
-use App\Models\StockTransfer;
-use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -24,6 +24,7 @@ class WarehouseService
             }
 
             $data['code'] = $this->generateUniqueWarehouseCode($data['business_id']);
+
             return Warehouse::create($data);
         });
     }
@@ -35,13 +36,14 @@ class WarehouseService
     {
         return DB::transaction(function () use ($warehouse, $data) {
             // If this is set as default, remove default status from other warehouses
-            if (isset($data['is_default']) && $data['is_default'] && !$warehouse->is_default) {
+            if (isset($data['is_default']) && $data['is_default'] && ! $warehouse->is_default) {
                 Warehouse::where('business_id', $warehouse->business_id)
                     ->where('id', '!=', $warehouse->id)
                     ->update(['is_default' => false]);
             }
 
             $warehouse->update($data);
+
             return $warehouse->fresh();
         });
     }
@@ -75,6 +77,7 @@ class WarehouseService
             ]);
 
             $stock->increase($quantity);
+
             return $stock->fresh();
         });
     }
@@ -90,11 +93,11 @@ class WarehouseService
                 'product_id' => $productId,
             ])->first();
 
-            if (!$stock) {
+            if (! $stock) {
                 throw new \Exception('Stock not found');
             }
 
-            if (!$stock->decrease($quantity)) {
+            if (! $stock->decrease($quantity)) {
                 throw new \Exception('Insufficient stock');
             }
 
@@ -110,7 +113,7 @@ class WarehouseService
         return DB::transaction(function () use ($data) {
             // Validate source warehouse has sufficient stock
             $fromWarehouse = Warehouse::find($data['from_warehouse_id']);
-            if (!$fromWarehouse->hasSufficientStock($data['product_id'], $data['quantity'])) {
+            if (! $fromWarehouse->hasSufficientStock($data['product_id'], $data['quantity'])) {
                 throw new \Exception('Insufficient stock in source warehouse');
             }
 
@@ -128,7 +131,7 @@ class WarehouseService
      */
     public function completeTransfer(StockTransfer $transfer): StockTransfer
     {
-        if (!$transfer->complete()) {
+        if (! $transfer->complete()) {
             throw new \Exception('Cannot complete transfer');
         }
 
@@ -140,7 +143,7 @@ class WarehouseService
      */
     public function cancelTransfer(StockTransfer $transfer): StockTransfer
     {
-        if (!$transfer->cancel()) {
+        if (! $transfer->cancel()) {
             throw new \Exception('Cannot cancel transfer');
         }
 
@@ -180,10 +183,10 @@ class WarehouseService
     /**
      * Get warehouse statistics
      */
-    public function getWarehouseStatistics(int $businessId, int $warehouseId = null): array
+    public function getWarehouseStatistics(int $businessId, ?int $warehouseId = null): array
     {
         $query = Warehouse::forBusiness($businessId);
-        
+
         if ($warehouseId) {
             $query->where('id', $warehouseId);
         }
@@ -194,21 +197,21 @@ class WarehouseService
             'total_warehouses' => $warehouses->count(),
             'active_warehouses' => $warehouses->where('is_active', true)->count(),
             'total_products' => WarehouseStock::forBusiness($businessId)
-                ->when($warehouseId, fn($q) => $q->where('warehouse_id', $warehouseId))
+                ->when($warehouseId, fn ($q) => $q->where('warehouse_id', $warehouseId))
                 ->count(),
             'total_stock' => WarehouseStock::forBusiness($businessId)
-                ->when($warehouseId, fn($q) => $q->where('warehouse_id', $warehouseId))
+                ->when($warehouseId, fn ($q) => $q->where('warehouse_id', $warehouseId))
                 ->sum('quantity'),
             'low_stock_products' => WarehouseStock::forBusiness($businessId)
-                ->when($warehouseId, fn($q) => $q->where('warehouse_id', $warehouseId))
+                ->when($warehouseId, fn ($q) => $q->where('warehouse_id', $warehouseId))
                 ->lowStock()
                 ->count(),
             'out_of_stock_products' => WarehouseStock::forBusiness($businessId)
-                ->when($warehouseId, fn($q) => $q->where('warehouse_id', $warehouseId))
+                ->when($warehouseId, fn ($q) => $q->where('warehouse_id', $warehouseId))
                 ->outOfStock()
                 ->count(),
             'pending_transfers' => StockTransfer::forBusiness($businessId)
-                ->when($warehouseId, fn($q) => $q->where('from_warehouse_id', $warehouseId))
+                ->when($warehouseId, fn ($q) => $q->where('from_warehouse_id', $warehouseId))
                 ->pending()
                 ->count(),
         ];
@@ -257,7 +260,7 @@ class WarehouseService
     protected function generateUniqueWarehouseCode(int $businessId): string
     {
         do {
-            $code = 'WH-' . $businessId . '-' . strtoupper(Str::random(4));
+            $code = 'WH-'.$businessId.'-'.strtoupper(Str::random(4));
         } while (Warehouse::where('code', $code)->exists());
 
         return $code;

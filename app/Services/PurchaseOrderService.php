@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\Product;
+use App\Models\Purchase;
+use App\Models\PurchaseDetails;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
-use App\Models\Product;
-use App\Models\Party;
 use Illuminate\Support\Facades\DB;
 
 class PurchaseOrderService
@@ -99,7 +100,7 @@ class PurchaseOrderService
      */
     public function send(PurchaseOrder $po): PurchaseOrder
     {
-        if (!$po->isDraft()) {
+        if (! $po->isDraft()) {
             throw new \Exception('Only draft orders can be sent');
         }
 
@@ -116,7 +117,7 @@ class PurchaseOrderService
      */
     public function approve(PurchaseOrder $po, int $userId): PurchaseOrder
     {
-        if (!$po->isSent()) {
+        if (! $po->isSent()) {
             throw new \Exception('Only sent orders can be approved');
         }
 
@@ -133,7 +134,7 @@ class PurchaseOrderService
      */
     public function reject(PurchaseOrder $po, int $userId, string $reason): PurchaseOrder
     {
-        if (!$po->isSent()) {
+        if (! $po->isSent()) {
             throw new \Exception('Only sent orders can be rejected');
         }
 
@@ -167,7 +168,7 @@ class PurchaseOrderService
      */
     public function restore(PurchaseOrder $po): PurchaseOrder
     {
-        if (!$po->isCancelled()) {
+        if (! $po->isCancelled()) {
             throw new \Exception('Only cancelled orders can be restored');
         }
 
@@ -181,14 +182,14 @@ class PurchaseOrderService
     /**
      * Convert PO to Purchase.
      */
-    public function convertToPurchase(PurchaseOrder $po): \App\Models\Purchase
+    public function convertToPurchase(PurchaseOrder $po): Purchase
     {
-        if (!$po->isApproved()) {
+        if (! $po->isApproved()) {
             throw new \Exception('Only approved orders can be converted to purchases');
         }
 
         return DB::transaction(function () use ($po) {
-            $purchase = \App\Models\Purchase::create([
+            $purchase = Purchase::create([
                 'party_id' => $po->supplier_id,
                 'business_id' => $po->business_id,
                 'branch_id' => $po->branch_id,
@@ -211,7 +212,7 @@ class PurchaseOrderService
 
             // Add purchase details
             foreach ($po->items as $poItem) {
-                \App\Models\PurchaseDetails::create([
+                PurchaseDetails::create([
                     'purchase_id' => $purchase->id,
                     'product_id' => $poItem->product_id,
                     'purchase_without_tax' => $poItem->unit_price,
@@ -304,7 +305,7 @@ class PurchaseOrderService
      */
     public function delete(PurchaseOrder $po): bool
     {
-        if (!$po->isDraft()) {
+        if (! $po->isDraft()) {
             throw new \Exception('Only draft orders can be deleted');
         }
 

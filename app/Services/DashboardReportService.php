@@ -2,20 +2,19 @@
 
 namespace App\Services;
 
-use App\Models\Sale;
-use App\Models\Purchase;
-use App\Models\Product;
-use App\Models\Party;
 use App\Models\Business;
-use App\Models\PlanSubscribe;
-use App\Models\Receipt;
-use App\Models\Warehouse;
-use App\Models\StockTransfer;
-use App\Models\RecallEvent;
 use App\Models\LoyaltyTransaction;
+use App\Models\Party;
+use App\Models\PlanSubscribe;
+use App\Models\Product;
+use App\Models\Purchase;
+use App\Models\RecallEvent;
+use App\Models\Receipt;
+use App\Models\Sale;
+use App\Models\StockTransfer;
+use App\Models\Warehouse;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
 
 class DashboardReportService
 {
@@ -25,6 +24,7 @@ class DashboardReportService
     {
         $this->cacheService = $cacheService;
     }
+
     /**
      * Get overall dashboard statistics
      */
@@ -35,7 +35,7 @@ class DashboardReportService
         $dateTo = $filters['date_to'] ?? Carbon::now()->endOfMonth();
 
         $cacheKey = "statistics:{$businessId}:{$dateFrom}:{$dateTo}";
-        
+
         return $this->cacheService->remember($cacheKey, 300, function () use ($businessId, $dateFrom, $dateTo) {
             return [
                 'revenue' => $this->getRevenueStatistics($businessId, $dateFrom, $dateTo),
@@ -188,7 +188,7 @@ class DashboardReportService
         $sales = $query->get();
 
         $grouped = $sales->groupBy(function ($sale) use ($groupBy) {
-            return match($groupBy) {
+            return match ($groupBy) {
                 'hour' => $sale->saleDate->format('Y-m-d H:00'),
                 'day' => $sale->saleDate->format('Y-m-d'),
                 'week' => $sale->saleDate->startOfWeek()->format('Y-m-d'),

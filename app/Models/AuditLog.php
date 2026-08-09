@@ -68,7 +68,7 @@ class AuditLog extends Model
     public function scopeForModel($query, $modelType, $modelId = null)
     {
         $query->where('model_type', $modelType);
-        
+
         if ($modelId) {
             $query->where('model_id', $modelId);
         }
@@ -89,7 +89,7 @@ class AuditLog extends Model
      */
     public function getActionLabelAttribute(): string
     {
-        return match($this->action) {
+        return match ($this->action) {
             'created' => __('Created'),
             'updated' => __('Updated'),
             'deleted' => __('Deleted'),

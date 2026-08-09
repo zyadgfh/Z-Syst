@@ -22,7 +22,7 @@ class StockResource extends JsonResource
             'barcode' => $this->barcode,
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),
-            
+
             // Relationships
             'product' => new ProductResource($this->whenLoaded('product')),
         ];

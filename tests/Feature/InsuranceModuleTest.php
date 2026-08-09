@@ -2,13 +2,12 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
+use App\Models\InsuranceClaim;
 use App\Models\InsuranceCompany;
 use App\Models\InsurancePolicy;
-use App\Models\InsuranceClaim;
 use App\Services\InsuranceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
 
 class InsuranceModuleTest extends TestCase
 {
@@ -54,7 +53,7 @@ class InsuranceModuleTest extends TestCase
     public function test_can_create_insurance_policy()
     {
         $company = InsuranceCompany::factory()->create();
-        
+
         $data = [
             'business_id' => 1,
             'insurance_company_id' => $company->id,
@@ -189,7 +188,7 @@ class InsuranceModuleTest extends TestCase
     public function test_can_get_claim_statistics()
     {
         $businessId = 1;
-        
+
         InsuranceClaim::factory()->count(5)->create([
             'business_id' => $businessId,
             'status' => 'approved',

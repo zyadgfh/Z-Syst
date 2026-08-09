@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\RecallEventFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ class RecallEvent extends Model
 
     protected static function newFactory()
     {
-        return \Database\Factories\RecallEventFactory::new();
+        return RecallEventFactory::new();
     }
 
     protected $fillable = [
@@ -111,7 +112,7 @@ class RecallEvent extends Model
      */
     public function getDurationDaysAttribute(): ?int
     {
-        if (!$this->resolved_at) {
+        if (! $this->resolved_at) {
             return now()->diffInDays($this->initiated_at);
         }
 

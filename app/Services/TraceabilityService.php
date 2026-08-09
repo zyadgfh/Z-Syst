@@ -7,7 +7,6 @@ use App\Models\RecallEvent;
 use App\Models\TraceabilityLog;
 use App\Models\Warehouse;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class TraceabilityService
 {
@@ -25,6 +24,7 @@ class TraceabilityService
     public function updateBatchLot(BatchLot $batchLot, array $data): BatchLot
     {
         $batchLot->update($data);
+
         return $batchLot->fresh();
     }
 
@@ -62,6 +62,7 @@ class TraceabilityService
     public function resolveRecall(RecallEvent $recall): RecallEvent
     {
         $recall->resolve();
+
         return $recall->fresh();
     }
 
@@ -76,7 +77,7 @@ class TraceabilityService
     /**
      * Get complete traceability chain for a product
      */
-    public function getProductTraceability(int $businessId, int $productId, string $batchLotNumber = null): array
+    public function getProductTraceability(int $businessId, int $productId, ?string $batchLotNumber = null): array
     {
         $query = TraceabilityLog::forBusiness($businessId)
             ->forProduct($productId)

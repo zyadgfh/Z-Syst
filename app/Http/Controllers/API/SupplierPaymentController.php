@@ -7,8 +7,8 @@ use App\Http\Requests\SupplierPaymentRequest;
 use App\Http\Resources\SupplierPaymentResource;
 use App\Models\SupplierPayment;
 use App\Services\SupplierPaymentService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class SupplierPaymentController extends Controller

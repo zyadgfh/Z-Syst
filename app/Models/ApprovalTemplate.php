@@ -21,10 +21,28 @@ class ApprovalTemplate extends Model
         'is_default' => 'boolean',
     ];
 
-    public function business(): BelongsTo { return $this->belongsTo(Business::class); }
-    public function createdBy(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
-    public function updatedBy(): BelongsTo { return $this->belongsTo(User::class, 'updated_by'); }
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class);
+    }
 
-    public function scopeActive($query) { return $query->where('is_active', true); }
-    public function scopeDefault($query) { return $query->where('is_default', true); }
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeDefault($query)
+    {
+        return $query->where('is_default', true);
+    }
 }

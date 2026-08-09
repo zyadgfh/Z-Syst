@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use Database\Factories\WarehouseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Warehouse extends Model
 {
@@ -13,7 +14,7 @@ class Warehouse extends Model
 
     protected static function newFactory()
     {
-        return \Database\Factories\WarehouseFactory::new();
+        return WarehouseFactory::new();
     }
 
     protected $fillable = [
@@ -87,6 +88,7 @@ class Warehouse extends Model
     public function hasSufficientStock(int $productId, int $quantity): bool
     {
         $stock = $this->getStockForProduct($productId);
+
         return $stock && $stock->quantity >= $quantity;
     }
 }

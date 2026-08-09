@@ -14,6 +14,7 @@ use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\SecurityCheck;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\TenantAccessCheck;
 use App\Http\Middleware\TenantContextMiddleware;
 use App\Http\Middleware\TrimStrings;
 use App\Http\Middleware\TrustProxies;
@@ -112,7 +113,7 @@ class Kernel extends HttpKernel
         'role_or_permission' => RoleOrPermissionMiddleware::class,
         'admin' => AdminMiddleware::class,
         'business.context' => EnsureBusinessContext::class,
-        'tenant.check' => \App\Http\Middleware\TenantAccessCheck::class,
+        'tenant.check' => TenantAccessCheck::class,
         'subscription.limit' => CheckSubscriptionLimits::class,
         // 'token_expired' => \App\Http\Middleware\TokenExpired::class,
     ];

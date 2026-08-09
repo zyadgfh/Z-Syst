@@ -34,7 +34,7 @@ class GRNItemResource extends JsonResource
             'total' => $this->total,
             'acceptance_rate' => $this->acceptance_rate,
             'notes' => $this->notes,
-            'quality_checks_count' => $this->whenLoaded('qualityChecks', fn() => $this->qualityChecks->count()),
+            'quality_checks_count' => $this->whenLoaded('qualityChecks', fn () => $this->qualityChecks->count()),
             'quality_checks' => QualityCheckResource::collection($this->whenLoaded('qualityChecks')),
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),

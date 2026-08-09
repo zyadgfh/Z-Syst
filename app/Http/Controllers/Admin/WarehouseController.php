@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Warehouse;
-use App\Models\StockTransfer;
 use App\Services\WarehouseService;
 use Illuminate\Http\Request;
 
@@ -25,8 +24,8 @@ class WarehouseController extends Controller
     {
         $warehouses = Warehouse::with(['business:id,companyName'])
             ->when($request->search, function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                    ->orWhere('code', 'like', '%' . $request->search . '%');
+                $q->where('name', 'like', '%'.$request->search.'%')
+                    ->orWhere('code', 'like', '%'.$request->search.'%');
             })
             ->latest()
             ->paginate(10);
@@ -58,7 +57,7 @@ class WarehouseController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error creating warehouse: ') . $e->getMessage(),
+                'message' => __('Error creating warehouse: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -94,7 +93,7 @@ class WarehouseController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error updating warehouse: ') . $e->getMessage(),
+                'message' => __('Error updating warehouse: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -110,7 +109,7 @@ class WarehouseController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error deleting warehouse: ') . $e->getMessage(),
+                'message' => __('Error deleting warehouse: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -129,7 +128,7 @@ class WarehouseController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error setting default warehouse: ') . $e->getMessage(),
+                'message' => __('Error setting default warehouse: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -158,7 +157,7 @@ class WarehouseController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error adding stock: ') . $e->getMessage(),
+                'message' => __('Error adding stock: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -185,7 +184,7 @@ class WarehouseController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error removing stock: ') . $e->getMessage(),
+                'message' => __('Error removing stock: ').$e->getMessage(),
             ], 500);
         }
     }

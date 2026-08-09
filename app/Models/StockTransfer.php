@@ -100,6 +100,7 @@ class StockTransfer extends Model
         }
 
         $fromWarehouse = $this->fromWarehouse;
+
         return $fromWarehouse && $fromWarehouse->hasSufficientStock($this->product_id, $this->quantity);
     }
 
@@ -108,7 +109,7 @@ class StockTransfer extends Model
      */
     public function complete(): bool
     {
-        if (!$this->canBeCompleted()) {
+        if (! $this->canBeCompleted()) {
             return false;
         }
 
@@ -119,7 +120,7 @@ class StockTransfer extends Model
                 'product_id' => $this->product_id,
             ])->first();
 
-            if (!$fromStock || !$fromStock->decrease($this->quantity)) {
+            if (! $fromStock || ! $fromStock->decrease($this->quantity)) {
                 return false;
             }
 
@@ -156,7 +157,7 @@ class StockTransfer extends Model
      */
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'pending' => __('Pending'),
             'completed' => __('Completed'),
             'cancelled' => __('Cancelled'),

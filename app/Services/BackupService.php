@@ -2,29 +2,27 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\File;
 
 class BackupService
 {
     /**
      * Create database backup
      */
-    public function createDatabaseBackup(string $filename = null): string
+    public function createDatabaseBackup(?string $filename = null): string
     {
-        $filename = $filename ?? 'backup_' . Carbon::now()->format('Y_m_d_His') . '.sql';
-        $path = storage_path('app/backups/' . $filename);
+        $filename = $filename ?? 'backup_'.Carbon::now()->format('Y_m_d_His').'.sql';
+        $path = storage_path('app/backups/'.$filename);
 
         // Ensure backup directory exists
-        if (!File::exists(dirname($path))) {
+        if (! File::exists(dirname($path))) {
             File::makeDirectory(dirname($path), 0755, true);
         }
 
         // Get database configuration
         $dbConfig = config('database.connections.mysql');
-        
+
         // Build mysqldump command
         $command = sprintf(
             'mysqldump -h%s -u%s -p%s %s > %s',
@@ -48,11 +46,11 @@ class BackupService
     /**
      * Create full backup (database + files)
      */
-    public function createFullBackup(string $filename = null): array
+    public function createFullBackup(?string $filename = null): array
     {
         $timestamp = Carbon::now()->format('Y_m_d_His');
         $backupName = $filename ?? "full_backup_{$timestamp}";
-        
+
         $databaseBackup = $this->createDatabaseBackup("{$backupName}_database.sql");
         $filesBackup = $this->createFilesBackup($backupName);
 
@@ -68,10 +66,10 @@ class BackupService
      */
     public function createFilesBackup(string $backupName): string
     {
-        $zipFile = storage_path('app/backups/' . $backupName . '_files.zip');
-        
+        $zipFile = storage_path('app/backups/'.$backupName.'_files.zip');
+
         // Ensure backup directory exists
-        if (!File::exists(dirname($zipFile))) {
+        if (! File::exists(dirname($zipFile))) {
             File::makeDirectory(dirname($zipFile), 0755, true);
         }
 
@@ -80,7 +78,7 @@ class BackupService
             storage_path('app/uploads'),
         ];
 
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
         if ($zip->open($zipFile, \ZipArchive::CREATE) === true) {
             foreach ($directories as $directory) {
                 if (File::exists($directory)) {
@@ -102,12 +100,12 @@ class BackupService
      */
     public function restoreDatabase(string $backupPath): bool
     {
-        if (!File::exists($backupPath)) {
+        if (! File::exists($backupPath)) {
             throw new \Exception('Backup file not found');
         }
 
         $dbConfig = config('database.connections.mysql');
-        
+
         $command = sprintf(
             'mysql -h%s -u%s -p%s %s < %s',
             $dbConfig['host'],
@@ -132,8 +130,8 @@ class BackupService
     public function listBackups(): array
     {
         $backupDir = storage_path('app/backups');
-        
-        if (!File::exists($backupDir)) {
+
+        if (! File::exists($backupDir)) {
             return [];
         }
 
@@ -159,8 +157,8 @@ class BackupService
     {
         $backupDir = storage_path('app/backups');
         $cutoffDate = Carbon::now()->subDays($daysToKeep);
-        
-        if (!File::exists($backupDir)) {
+
+        if (! File::exists($backupDir)) {
             return 0;
         }
 
@@ -183,12 +181,13 @@ class BackupService
     public function getBackupSize(): string
     {
         $backupDir = storage_path('app/backups');
-        
-        if (!File::exists($backupDir)) {
+
+        if (! File::exists($backupDir)) {
             return '0 B';
         }
 
         $size = File::size($backupDir);
+
         return $this->formatFileSize($size);
     }
 
@@ -198,12 +197,12 @@ class BackupService
     protected function formatFileSize(int $bytes): string
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        
+
         for ($i = 0; $bytes > 1024; $i++) {
             $bytes /= 1024;
         }
 
-        return round($bytes, 2) . ' ' . $units[$i];
+        return round($bytes, 2).' '.$units[$i];
     }
 
     /**
@@ -214,10 +213,10 @@ class BackupService
         // This should be called from a scheduled command
         try {
             $backup = $this->createFullBackup();
-            
+
             // Clean old backups
             $this->deleteOldBackups(config('backup.retention_days', 30));
-            
+
             \Log::info('Backup created successfully', $backup);
         } catch (\Exception $e) {
             \Log::error('Backup failed', ['error' => $e->getMessage()]);
@@ -229,9 +228,9 @@ class BackupService
      */
     public function downloadBackup(string $filename)
     {
-        $path = storage_path('app/backups/' . $filename);
-        
-        if (!File::exists($path)) {
+        $path = storage_path('app/backups/'.$filename);
+
+        if (! File::exists($path)) {
             throw new \Exception('Backup file not found');
         }
 
@@ -243,9 +242,9 @@ class BackupService
      */
     public function deleteBackup(string $filename): bool
     {
-        $path = storage_path('app/backups/' . $filename);
-        
-        if (!File::exists($path)) {
+        $path = storage_path('app/backups/'.$filename);
+
+        if (! File::exists($path)) {
             return false;
         }
 

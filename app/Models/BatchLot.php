@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\BatchLotFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +14,7 @@ class BatchLot extends Model
 
     protected static function newFactory()
     {
-        return \Database\Factories\BatchLotFactory::new();
+        return BatchLotFactory::new();
     }
 
     protected $fillable = [
@@ -108,8 +109,8 @@ class BatchLot extends Model
      */
     public function isExpiringSoon(): bool
     {
-        return $this->expiry_date && 
-               $this->expiry_date <= now()->addDays(30) && 
+        return $this->expiry_date &&
+               $this->expiry_date <= now()->addDays(30) &&
                $this->expiry_date > now();
     }
 
@@ -118,7 +119,7 @@ class BatchLot extends Model
      */
     public function getDaysUntilExpiryAttribute(): ?int
     {
-        if (!$this->expiry_date) {
+        if (! $this->expiry_date) {
             return null;
         }
 

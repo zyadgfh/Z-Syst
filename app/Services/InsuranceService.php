@@ -2,12 +2,13 @@
 
 namespace App\Services;
 
-use App\Models\InsuranceCompany;
-use App\Models\InsurancePolicy;
-use App\Models\InsuranceClaim;
-use App\Models\InsuranceCoverage;
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\InsuranceClaim;
+use App\Models\InsuranceCompany;
+use App\Models\InsuranceCoverage;
+use App\Models\InsurancePolicy;
+use App\Models\Product;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -20,6 +21,7 @@ class InsuranceService
     {
         return DB::transaction(function () use ($data) {
             $data['code'] = $this->generateUniqueCompanyCode();
+
             return InsuranceCompany::create($data);
         });
     }
@@ -30,6 +32,7 @@ class InsuranceService
     public function updateCompany(InsuranceCompany $company, array $data): InsuranceCompany
     {
         $company->update($data);
+
         return $company->fresh();
     }
 
@@ -40,7 +43,7 @@ class InsuranceService
     {
         return DB::transaction(function () use ($data) {
             $data['policy_number'] = $this->generateUniquePolicyNumber();
-            
+
             // Calculate remaining limit if annual limit is provided
             if (isset($data['annual_limit'])) {
                 $data['remaining_limit'] = $data['annual_limit'];
@@ -56,6 +59,7 @@ class InsuranceService
     public function updatePolicy(InsurancePolicy $policy, array $data): InsurancePolicy
     {
         $policy->update($data);
+
         return $policy->fresh();
     }
 
@@ -66,9 +70,9 @@ class InsuranceService
     {
         return DB::transaction(function () use ($data) {
             $data['claim_number'] = $this->generateUniqueClaimNumber();
-            
+
             // Auto-calculate coverage if not provided
-            if (!isset($data['covered_amount']) || !isset($data['patient_responsibility'])) {
+            if (! isset($data['covered_amount']) || ! isset($data['patient_responsibility'])) {
                 $coverage = $this->calculateClaimCoverage($data);
                 $data['covered_amount'] = $coverage['covered_amount'];
                 $data['patient_responsibility'] = $coverage['patient_responsibility'];
@@ -156,6 +160,7 @@ class InsuranceService
     public function updateCoverage(InsuranceCoverage $coverage, array $data): InsuranceCoverage
     {
         $coverage->update($data);
+
         return $coverage->fresh();
     }
 
@@ -165,7 +170,7 @@ class InsuranceService
     public function calculateClaimCoverage(array $data): array
     {
         $policy = InsurancePolicy::find($data['insurance_policy_id']);
-        if (!$policy) {
+        if (! $policy) {
             return [
                 'covered_amount' => 0,
                 'patient_responsibility' => $data['total_amount'],
@@ -174,7 +179,7 @@ class InsuranceService
 
         // Get applicable coverage rules
         $coverageRules = $this->getApplicableCoverageRules($policy, $data);
-        
+
         if ($coverageRules->isEmpty()) {
             // Use default company coverage
             return $policy->company->calculateDefaultCoverage($data['total_amount']);
@@ -182,13 +187,14 @@ class InsuranceService
 
         // Apply best coverage rule
         $bestCoverage = $coverageRules->first();
+
         return $bestCoverage->calculateCoverage($data['total_amount']);
     }
 
     /**
      * Get applicable coverage rules for a claim
      */
-    protected function getApplicableCoverageRules(InsurancePolicy $policy, array $data): \Illuminate\Database\Eloquent\Collection
+    protected function getApplicableCoverageRules(InsurancePolicy $policy, array $data): Collection
     {
         $query = InsuranceCoverage::query()
             ->forCompany($policy->insurance_company_id)
@@ -226,7 +232,7 @@ class InsuranceService
             ];
         }
 
-        if (!$policy->hasSufficientLimit($amount)) {
+        if (! $policy->hasSufficientLimit($amount)) {
             return [
                 'eligible' => false,
                 'reason' => 'Insufficient annual limit',
@@ -245,7 +251,7 @@ class InsuranceService
     protected function generateUniqueCompanyCode(): string
     {
         do {
-            $code = 'INS-' . strtoupper(Str::random(8));
+            $code = 'INS-'.strtoupper(Str::random(8));
         } while (InsuranceCompany::where('code', $code)->exists());
 
         return $code;
@@ -257,7 +263,7 @@ class InsuranceService
     protected function generateUniquePolicyNumber(): string
     {
         do {
-            $number = 'POL-' . date('Ymd') . '-' . strtoupper(Str::random(6));
+            $number = 'POL-'.date('Ymd').'-'.strtoupper(Str::random(6));
         } while (InsurancePolicy::where('policy_number', $number)->exists());
 
         return $number;
@@ -269,7 +275,7 @@ class InsuranceService
     protected function generateUniqueClaimNumber(): string
     {
         do {
-            $number = 'CLM-' . date('Ymd') . '-' . strtoupper(Str::random(8));
+            $number = 'CLM-'.date('Ymd').'-'.strtoupper(Str::random(8));
         } while (InsuranceClaim::where('claim_number', $number)->exists());
 
         return $number;

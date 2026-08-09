@@ -20,7 +20,7 @@ class BarcodeTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->barcodeService = new BarcodeService();
+        $this->barcodeService = new BarcodeService;
     }
 
     /**
@@ -107,7 +107,7 @@ class BarcodeTest extends TestCase
     {
         $code = '600123456789';
         $checksum = Barcode::calculateEAN13Checksum($code);
-        
+
         $this->assertIsInt($checksum);
         $this->assertGreaterThanOrEqual(0, $checksum);
         $this->assertLessThanOrEqual(9, $checksum);
@@ -120,7 +120,7 @@ class BarcodeTest extends TestCase
     {
         $code = '12345678901';
         $checksum = Barcode::calculateUPCChecksum($code);
-        
+
         $this->assertIsInt($checksum);
         $this->assertGreaterThanOrEqual(0, $checksum);
         $this->assertLessThanOrEqual(9, $checksum);
@@ -352,7 +352,7 @@ class BarcodeTest extends TestCase
     {
         $product = Product::factory()->create();
         $businessId = 1;
-        
+
         Barcode::factory()->create([
             'product_id' => $product->id,
             'business_id' => $businessId,
@@ -375,7 +375,7 @@ class BarcodeTest extends TestCase
     {
         $stock = Stock::factory()->create();
         $businessId = 1;
-        
+
         Barcode::factory()->create([
             'batch_id' => $stock->id,
             'business_id' => $businessId,
@@ -397,7 +397,7 @@ class BarcodeTest extends TestCase
     public function test_can_get_not_printed_barcodes()
     {
         $businessId = 1;
-        
+
         Barcode::factory()->create([
             'print_status' => Barcode::STATUS_NOT_PRINTED,
             'business_id' => $businessId,

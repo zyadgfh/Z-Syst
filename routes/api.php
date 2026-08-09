@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api;
+use App\Http\Controllers\PosPaymentController;
+use App\Models\Branch;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -23,6 +25,21 @@ Route::prefix('v1')->group(function () {
         Route::get('summary', [Api\StatisticsController::class, 'summary']);
         Route::get('dashboard', [Api\StatisticsController::class, 'dashboard']);
         Route::get('features', [Api\FeatureStatusController::class, 'index']);
+
+        // POS Payment Routes
+        Route::prefix('payments')->group(function () {
+            Route::get('/gateways', [PosPaymentController::class, 'getAvailableGateways']);
+            Route::post('/process', [PosPaymentController::class, 'processPayment']);
+            Route::post('/verify', [PosPaymentController::class, 'verifyPayment']);
+            Route::post('/refund', [PosPaymentController::class, 'processRefund']);
+            Route::post('/calculate-change', [PosPaymentController::class, 'calculateChange']);
+            Route::get('/stats', [PosPaymentController::class, 'getPaymentStats']);
+        });
+
+        // Branch API for admin interface
+        Route::get('/branches/{companyId}', function ($companyId) {
+            return Branch::byCompany($companyId)->active()->get();
+        });
 
         Route::middleware(['business.context', 'throttle:20,1'])->group(function () {
             Route::post('backup', [Api\BackupController::class, 'store']);

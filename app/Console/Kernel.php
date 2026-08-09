@@ -2,10 +2,10 @@
 
 namespace App\Console;
 
-use App\Console\Commands\RotateSettingsKey;
 use App\Console\Commands\BackupDatabase;
 use App\Console\Commands\CalculateDoctorAttentionScores;
 use App\Console\Commands\ManageSubscriptions;
+use App\Console\Commands\RotateSettingsKey;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 

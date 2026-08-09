@@ -2,8 +2,8 @@
 
 namespace App\Http\Middleware;
 
-use App\Services\SecurityService;
 use App\Services\CSRFProtectionService;
+use App\Services\SecurityService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 class SecurityCheck
 {
     protected SecurityService $securityService;
+
     protected CSRFProtectionService $csrfService;
 
     public function __construct(
@@ -53,7 +54,7 @@ class SecurityCheck
                         'ip' => $request->ip(),
                         'user_agent' => $request->userAgent(),
                     ]);
-                    
+
                     // Optionally block the request
                     // abort(403, 'Security violation detected');
                 }
@@ -76,7 +77,7 @@ class SecurityCheck
                         'ip' => $request->ip(),
                         'user_agent' => $request->userAgent(),
                     ]);
-                    
+
                     // Sanitize the input
                     $request->merge([$key => $this->securityService->sanitizeHTML($value)]);
                 }
@@ -95,13 +96,13 @@ class SecurityCheck
         }
 
         $token = $request->input('_token') ?: $request->header('X-CSRF-TOKEN');
-        
-        if (!$token || !$this->csrfService->verifyToken($token)) {
+
+        if (! $token || ! $this->csrfService->verifyToken($token)) {
             Log::warning('CSRF token validation failed', [
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
-            
+
             abort(419, 'CSRF token mismatch');
         }
     }
