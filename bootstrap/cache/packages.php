@@ -11,6 +11,17 @@
       0 => 'Barryvdh\\DomPDF\\ServiceProvider',
     ),
   ),
+  'laravel/mcp' => 
+  array (
+    'aliases' => 
+    array (
+      'Mcp' => 'Laravel\\Mcp\\Server\\Facades\\Mcp',
+    ),
+    'providers' => 
+    array (
+      0 => 'Laravel\\Mcp\\Server\\McpServiceProvider',
+    ),
+  ),
   'laravel/sail' => 
   array (
     'providers' => 

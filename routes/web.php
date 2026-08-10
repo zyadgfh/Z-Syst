@@ -11,6 +11,9 @@ Route::post('/payments/{plan_id}/{gateway_id}', [Web\PaymentController::class, '
 Route::get('/payment/callback', [Web\PaymentController::class, 'paymentCallback'])->name('payment.callback');
 Route::get('/order-status', [Web\PaymentController::class, 'orderStatus'])->name('order.status');
 
+// Dark Mode Toggle
+Route::post('/toggle-dark-mode', [Web\Admin\SettingController::class, 'toggleDarkMode'])->name('toggle-dark-mode');
+
 // Payment Webhooks
 Route::post('/webhooks/vodafone-cash', [PaymentWebhookController::class, 'vodafoneCash'])->name('webhooks.vodafone-cash');
 Route::post('/webhooks/bank-card', [PaymentWebhookController::class, 'bankCard'])->name('webhooks.bank-card');

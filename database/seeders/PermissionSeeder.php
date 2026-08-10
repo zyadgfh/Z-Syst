@@ -64,6 +64,10 @@ class PermissionSeeder extends Seeder
 
             // Audit Logs
             'audit-logs-view',
+
+            // Maintenance Mode
+            'maintenance-read',
+            'maintenance-write',
         ];
 
         foreach ($permissions as $permission) {
@@ -90,6 +94,7 @@ class PermissionSeeder extends Seeder
             'loyalty-view', 'loyalty-create', 'loyalty-edit',
             'receipts-view', 'receipts-create',
             'audit-logs-view',
+            'maintenance-read',
         ]);
 
         // Give limited permissions to Staff

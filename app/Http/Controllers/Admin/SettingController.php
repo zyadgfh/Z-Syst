@@ -52,4 +52,17 @@ class SettingController extends Controller
             'redirect' => route('admin.settings.index'),
         ]);
     }
+
+    public function toggleDarkMode(Request $request)
+    {
+        $darkMode = $request->input('dark_mode', false);
+        session(['dark_mode' => $darkMode]);
+
+        // Set cookie for persistence
+        cookie()->queue('dark_mode', $darkMode ? 'true' : 'false', 525600); // 1 year
+
+        return response()->json([
+            'dark_mode' => $darkMode,
+        ]);
+    }
 }

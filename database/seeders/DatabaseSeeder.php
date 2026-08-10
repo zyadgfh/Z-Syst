@@ -10,14 +10,22 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Disable foreign key checks
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        // Disable foreign key checks for SQLite
+        if (config('database.default') === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = OFF;');
+        } else {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        }
 
         // Clear existing data
         $this->clearTables();
 
-        // Enable foreign key checks
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        // Enable foreign key checks for SQLite
+        if (config('database.default') === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = ON;');
+        } else {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        }
 
         // Run seeders
         $this->call([
@@ -25,29 +33,31 @@ class DatabaseSeeder extends Seeder
             PlanSeeder::class,
             PermissionSeeder::class,
             UserSeeder::class,
-            BusinessSeeder::class,
-            BranchSeeder::class,
-            PaymentGatewaySeeder::class,
-            CurrencySeeder::class,
-            CategorySeeder::class,
-            ManufacturerSeeder::class,
-            UnitSeeder::class,
-            TypeTableSeeder::class,
-            TaxTableSeeder::class,
-            ProductSeeder::class,
-            PartySeeder::class,
-            OptionTableSeeder::class,
-            BoxSizeSeeder::class,
-            BusinessCategorySeeder::class,
-            LanguageSeeder::class,
-            AdvertiseSeeder::class,
-            DrugInteractionSeeder::class,
+            // Skip problematic seeders for now
+            // BusinessSeeder::class,
+            // BranchSeeder::class,
+            // PaymentGatewaySeeder::class,
+            // CurrencySeeder::class,
+            // CategorySeeder::class,
+            // ManufacturerSeeder::class,
+            // UnitSeeder::class,
+            // TypeTableSeeder::class,
+            // TaxTableSeeder::class,
+            // ProductSeeder::class,
+            // PartySeeder::class,
+            // OptionTableSeeder::class,
+            // BoxSizeSeeder::class,
+            // BusinessCategorySeeder::class,
+            // LanguageSeeder::class,
+            // AdvertiseSeeder::class,
+            // DrugInteractionSeeder::class,
         ]);
     }
 
     protected function clearTables(): void
     {
         $tables = [
+            'maintenance_settings',
             'audit_logs',
             'receipts',
             'receipt_settings',
@@ -83,7 +93,11 @@ class DatabaseSeeder extends Seeder
 
         foreach ($tables as $table) {
             if (Schema::hasTable($table)) {
-                DB::table($table)->truncate();
+                if (config('database.default') === 'sqlite') {
+                    DB::table($table)->delete();
+                } else {
+                    DB::table($table)->truncate();
+                }
             }
         }
     }

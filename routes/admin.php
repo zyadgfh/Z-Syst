@@ -37,7 +37,7 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('plans-excel', [ADMIN\ZSystPlanController::class, 'exportExcel'])->name('plans.excel');
     Route::get('plans-csv', [ADMIN\ZSystPlanController::class, 'exportCsv'])->name('plans.csv');
     Route::get('plans/statistics', [ADMIN\ZSystPlanController::class, 'statistics'])->name('plans.statistics');
-    Route::get('plans/popular', [ADMIN\ZystPlanController::class, 'popularPlans'])->name('plans.popular');
+    Route::get('plans/popular', [ADMIN\ZSystPlanController::class, 'popularPlans'])->name('plans.popular');
     Route::get('plans/{plan}/usage', [ADMIN\ZSystPlanController::class, 'planUsage'])->name('plans.usage');
     Route::post('plans/calculate-proration', [ADMIN\ZSystPlanController::class, 'calculateProration'])->name('plans.calculate-proration');
 
@@ -95,6 +95,19 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     // Settings
     Route::resource('settings', ADMIN\SettingController::class)->only('index', 'update');
     Route::resource('system-settings', ADMIN\SystemSettingController::class)->only('index', 'store');
+
+    // Maintenance Mode
+    Route::get('maintenance', [ADMIN\MaintenanceController::class, 'index'])->name('maintenance.index');
+    Route::get('maintenance/status', [ADMIN\MaintenanceController::class, 'getStatus'])->name('maintenance.status');
+    Route::get('maintenance/history', [ADMIN\MaintenanceController::class, 'history'])->name('maintenance.history');
+    
+    // Maintenance Mode Actions (Super Admin Only)
+    Route::middleware(['role:superadmin'])->group(function () {
+        Route::post('maintenance/activate', [ADMIN\MaintenanceController::class, 'activate'])->name('maintenance.activate');
+        Route::post('maintenance/deactivate', [ADMIN\MaintenanceController::class, 'deactivate'])->name('maintenance.deactivate');
+        Route::post('maintenance/schedule', [ADMIN\MaintenanceController::class, 'schedule'])->name('maintenance.schedule');
+        Route::put('maintenance/{id}', [ADMIN\MaintenanceController::class, 'update'])->name('maintenance.update');
+    });
 
     // Gateway
     Route::resource('gateways', ADMIN\GatewayController::class)->only('index', 'update');
@@ -325,3 +338,5 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
         Route::get('claims/statistics', [ADMIN\InsuranceClaimController::class, 'statistics'])->name('claims.statistics');
     });
 });
+
+

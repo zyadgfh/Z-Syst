@@ -8,6 +8,7 @@ use App\Http\Middleware\CheckSubscriptionLimits;
 use App\Http\Middleware\DemoMode;
 use App\Http\Middleware\EncryptCookies;
 use App\Http\Middleware\EnsureBusinessContext;
+use App\Http\Middleware\MaintenanceMode;
 use App\Http\Middleware\PageOptimizationMiddleware;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RedirectIfAuthenticated;
@@ -80,11 +81,18 @@ class Kernel extends HttpKernel
             SubstituteBindings::class,
             SetLocale::class,
             DemoMode::class,
+            MaintenanceMode::class,
         ],
 
         'api' => [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            MaintenanceMode::class,
             ThrottleRequests::class.':api',
+            SubstituteBindings::class,
+        ],
+
+        'payment' => [
+            'throttle:10,1',
             SubstituteBindings::class,
         ],
     ];
@@ -107,6 +115,8 @@ class Kernel extends HttpKernel
         'precognitive' => HandlePrecognitiveRequests::class,
         'signed' => ValidateSignature::class,
         'throttle' => ThrottleRequests::class,
+        'throttle.auth' => 'throttle:5,1',
+        'throttle.payment' => 'throttle:10,1',
         'verified' => EnsureEmailIsVerified::class,
         'role' => RoleMiddleware::class,
         'permission' => PermissionMiddleware::class,

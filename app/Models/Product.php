@@ -69,7 +69,7 @@ class Product extends Model
             ->orderBy('expire_date', 'asc');
     }
 
-    public function expiring_item()
+    public function expiringItem()
     {
         return $this->hasOne(Stock::class, 'product_id');
     }
@@ -89,7 +89,7 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function manufacterer(): BelongsTo
+    public function manufacturer(): BelongsTo
     {
         return $this->belongsTo(Manufacturer::class, 'manufacturer_id');
     }

@@ -12,6 +12,8 @@
 <!-- Style -->
 <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
+<!-- Modern UI -->
+<link rel="stylesheet" href="{{ asset('assets/css/modern-ui.css') }}">
 <!-- Toaster -->
 <link rel="stylesheet" href="{{ asset('assets/css/toastr.min.css') }}">
 <!-- ApexChart -->

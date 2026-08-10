@@ -7,11 +7,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
-    Route::middleware('throttle:10,1')->group(function () {
+    Route::middleware('throttle:auth')->group(function () {
         Route::post('/sign-in', [Api\Auth\AuthController::class, 'login']);
         Route::post('/submit-otp', [Api\Auth\AuthController::class, 'submitOtp']);
         Route::post('/sign-up', [Api\Auth\AuthController::class, 'signUp']);
         Route::post('/resend-otp', [Api\Auth\AuthController::class, 'resendOtp']);
+        
+        // Supabase Authentication Routes
+        Route::post('/supabase/register', [Api\SupabaseAuthController::class, 'register']);
+        Route::post('/supabase/login', [Api\SupabaseAuthController::class, 'login']);
     });
 
     Route::middleware('throttle:5,5')->group(function () {
@@ -25,6 +29,25 @@ Route::prefix('v1')->group(function () {
         Route::get('summary', [Api\StatisticsController::class, 'summary']);
         Route::get('dashboard', [Api\StatisticsController::class, 'dashboard']);
         Route::get('features', [Api\FeatureStatusController::class, 'index']);
+
+        // Supabase Authentication Routes
+        Route::prefix('supabase')->group(function () {
+            Route::post('/logout', [Api\SupabaseAuthController::class, 'logout']);
+            Route::post('/refresh', [Api\SupabaseAuthController::class, 'refresh']);
+            Route::get('/me', [Api\SupabaseAuthController::class, 'me']);
+            Route::post('/forgot-password', [Api\SupabaseAuthController::class, 'forgotPassword']);
+            Route::post('/reset-password', [Api\SupabaseAuthController::class, 'resetPassword']);
+        });
+
+        // Supabase Storage Routes
+        Route::prefix('supabase/storage')->middleware('throttle.payment')->group(function () {
+            Route::post('/upload', [Api\SupabaseStorageController::class, 'upload']);
+            Route::post('/upload-multiple', [Api\SupabaseStorageController::class, 'uploadMultiple']);
+            Route::post('/delete', [Api\SupabaseStorageController::class, 'delete']);
+            Route::get('/list', [Api\SupabaseStorageController::class, 'listFiles']);
+            Route::get('/download', [Api\SupabaseStorageController::class, 'download']);
+            Route::get('/signed-url', [Api\SupabaseStorageController::class, 'createSignedUrl']);
+        });
 
         // POS Payment Routes
         Route::prefix('payments')->group(function () {

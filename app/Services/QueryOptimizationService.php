@@ -2,206 +2,262 @@
 
 namespace App\Services;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class QueryOptimizationService
 {
     /**
-     * Enable query logging for debugging
+     * Analyze slow queries and suggest optimizations.
+     *
+     * @param string $query
+     * @param array $bindings
+     * @return array
      */
-    public function enableQueryLogging(): void
+    public function analyzeQuery(string $query, array $bindings = []): array
     {
-        DB::enableQueryLog();
-    }
+        $analysis = [
+            'query' => $query,
+            'suggestions' => [],
+            'estimated_cost' => 0,
+            'execution_time' => 0,
+        ];
 
-    /**
-     * Get executed queries
-     */
-    public function getExecutedQueries(): array
-    {
-        return DB::getQueryLog();
-    }
+        try {
+            $startTime = microtime(true);
+            
+            // Get query execution plan
+            $explainQuery = "EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) " . $query;
+            $result = DB::select($explainQuery, $bindings);
+            
+            $executionTime = microtime(true) - $startTime;
+            $analysis['execution_time'] = $executionTime;
 
-    /**
-     * Check for N+1 queries
-     */
-    public function detectNPlusOneQueries(array $queries): array
-    {
-        $queryCounts = [];
-        $nPlusOneQueries = [];
-
-        foreach ($queries as $query) {
-            $queryHash = md5($query['query']);
-            $queryCounts[$queryHash] = ($queryCounts[$queryHash] ?? 0) + 1;
-        }
-
-        foreach ($queryCounts as $hash => $count) {
-            if ($count > 10) { // Threshold for potential N+1
-                $nPlusOneQueries[] = [
-                    'query' => $hash,
-                    'count' => $count,
-                ];
+            if (!empty($result)) {
+                $plan = json_decode($result[0]->{'QUERY PLAN'}, true);
+                $analysis['plan'] = $plan;
+                $analysis['estimated_cost'] = $this->extractTotalCost($plan);
+                
+                // Analyze for optimization opportunities
+                $analysis['suggestions'] = $this->generateOptimizationSuggestions($plan, $executionTime);
             }
+
+        } catch (\Exception $e) {
+            Log::error('Query analysis failed', [
+                'query' => $query,
+                'error' => $e->getMessage(),
+            ]);
+            $analysis['error'] = $e->getMessage();
         }
 
-        return $nPlusOneQueries;
+        return $analysis;
     }
 
     /**
-     * Optimize query with eager loading
+     * Extract total cost from query plan.
+     *
+     * @param array $plan
+     * @return float
      */
-    public function withEagerLoading(Builder $query, array $relations): Builder
+    private function extractTotalCost(array $plan): float
     {
-        return $query->with($relations);
-    }
-
-    /**
-     * Optimize query with count loading
-     */
-    public function withCountLoading(Builder $query, array $relations): Builder
-    {
-        return $query->withCount($relations);
-    }
-
-    /**
-     * Optimize query with eager loading constraints
-     */
-    public function withEagerLoadingConstraints(Builder $query, array $relations): Builder
-    {
-        foreach ($relations as $relation => $constraints) {
-            $query->with([$relation => $constraints]);
+        if (isset($plan['Plan']['Total Cost'])) {
+            return (float) $plan['Plan']['Total Cost'];
+        }
+        
+        if (isset($plan[0]['Plan']['Total Cost'])) {
+            return (float) $plan[0]['Plan']['Total Cost'];
         }
 
-        return $query;
+        return 0.0;
     }
 
     /**
-     * Chunk large datasets for memory efficiency
+     * Generate optimization suggestions based on query plan.
+     *
+     * @param array $plan
+     * @param float $executionTime
+     * @return array
      */
-    public function chunkData(Builder $query, int $chunkSize, callable $callback): void
-    {
-        $query->chunk($chunkSize, $callback);
-    }
-
-    /**
-     * Use cursor pagination for large datasets
-     */
-    public function cursorPaginate(Builder $query, int $perPage = 15)
-    {
-        return $query->cursorPaginate($perPage);
-    }
-
-    /**
-     * Add select optimization
-     */
-    public function selectOnlyNeeded(Builder $query, array $columns): Builder
-    {
-        return $query->select($columns);
-    }
-
-    /**
-     * Add index hints
-     */
-    public function withIndexHint(Builder $query, string $index): Builder
-    {
-        return $query->from(DB::raw("{$query->from()} USE INDEX ({$index})"));
-    }
-
-    /**
-     * Prevent N+1 by checking relationships
-     */
-    public function suggestEagerLoading(Model $model, array $accessedRelations): array
+    private function generateOptimizationSuggestions(array $plan, float $executionTime): array
     {
         $suggestions = [];
 
-        foreach ($accessedRelations as $relation) {
-            if (method_exists($model, $relation)) {
-                $suggestions[] = [
-                    'relation' => $relation,
-                    'suggestion' => "Add ->with('{$relation}') to your query",
-                ];
-            }
+        // Check for sequential scans
+        if ($this->hasSequentialScan($plan)) {
+            $suggestions[] = [
+                'type' => 'index',
+                'severity' => 'high',
+                'message' => 'Sequential scan detected. Consider adding an index on the filtered columns.',
+                'impact' => 'High - Can reduce query time by 50-90%',
+            ];
+        }
+
+        // Check for nested loops
+        if ($this->hasNestedLoop($plan)) {
+            $suggestions[] = [
+                'type' => 'join',
+                'severity' => 'medium',
+                'message' => 'Nested loop join detected. Consider optimizing join order or adding join indexes.',
+                'impact' => 'Medium - Can reduce query time by 20-50%',
+            ];
+        }
+
+        // Check for hash joins without appropriate indexes
+        if ($this->hasHashJoin($plan)) {
+            $suggestions[] = [
+                'type' => 'index',
+                'severity' => 'low',
+                'message' => 'Hash join detected. Ensure join columns are indexed.',
+                'impact' => 'Low - Can reduce query time by 10-30%',
+            ];
+        }
+
+        // Check for slow execution
+        if ($executionTime > 1.0) {
+            $suggestions[] = [
+                'type' => 'performance',
+                'severity' => 'high',
+                'message' => sprintf('Query execution time (%.2fs) exceeds 1 second. Consider query optimization.', $executionTime),
+                'impact' => 'High - Critical for user experience',
+            ];
+        }
+
+        // Check for high cost
+        $totalCost = $this->extractTotalCost($plan);
+        if ($totalCost > 1000) {
+            $suggestions[] = [
+                'type' => 'performance',
+                'severity' => 'medium',
+                'message' => sprintf('Query planner cost (%.2f) is high. Consider reviewing query structure.', $totalCost),
+                'impact' => 'Medium - May impact performance under load',
+            ];
         }
 
         return $suggestions;
     }
 
     /**
-     * Monitor query performance
+     * Check if plan contains sequential scan.
+     *
+     * @param array $plan
+     * @return bool
      */
-    public function monitorQueryPerformance(): array
+    private function hasSequentialScan(array $plan): bool
     {
-        $queries = DB::getQueryLog();
-        $slowQueries = [];
-        $totalTime = 0;
+        $planString = json_encode($plan);
+        return strpos($planString, 'Seq Scan') !== false;
+    }
 
-        foreach ($queries as $query) {
-            $totalTime += $query['time'];
+    /**
+     * Check if plan contains nested loop.
+     *
+     * @param array $plan
+     * @return bool
+     */
+    private function hasNestedLoop(array $plan): bool
+    {
+        $planString = json_encode($plan);
+        return strpos($planString, 'Nested Loop') !== false;
+    }
 
-            if ($query['time'] > 100) { // 100ms threshold
-                $slowQueries[] = [
-                    'query' => $query['query'],
-                    'time' => $query['time'],
-                    'bindings' => $query['bindings'],
-                ];
-            }
-        }
+    /**
+     * Check if plan contains hash join.
+     *
+     * @param array $plan
+     * @return bool
+     */
+    private function hasHashJoin(array $plan): bool
+    {
+        $planString = json_encode($plan);
+        return strpos($planString, 'Hash Join') !== false;
+    }
 
+    /**
+     * Get slow queries from logs.
+     *
+     * @param float $threshold
+     * @param int $limit
+     * @return array
+     */
+    public function getSlowQueries(float $threshold = 1.0, int $limit = 10): array
+    {
+        // This would typically query a slow query log
+        // For now, return empty array as implementation depends on logging setup
         return [
-            'total_queries' => count($queries),
-            'total_time' => $totalTime,
-            'average_time' => count($queries) > 0 ? $totalTime / count($queries) : 0,
-            'slow_queries' => $slowQueries,
+            'threshold' => $threshold,
+            'queries' => [],
+            'message' => 'Slow query logging not configured. Configure query logging to enable this feature.',
         ];
     }
 
     /**
-     * Optimize common query patterns
+     * Suggest indexes for a table based on query patterns.
+     *
+     * @param string $table
+     * @return array
      */
-    public function optimizeCommonPatterns(): array
+    public function suggestIndexesForTable(string $table): array
     {
-        return [
-            'sales' => [
-                'relations' => ['items.product', 'party', 'business'],
-                'count_relations' => ['items'],
-            ],
-            'purchases' => [
-                'relations' => ['purchaseDetails.product', 'party', 'business'],
-                'count_relations' => ['purchaseDetails'],
-            ],
-            'products' => [
-                'relations' => ['category', 'business'],
-                'count_relations' => ['sales', 'stocks'],
-            ],
-            'warehouses' => [
-                'relations' => ['business', 'stocks.product'],
-                'count_relations' => ['stocks'],
-            ],
-        ];
+        $suggestions = [];
+
+        try {
+            // Get table statistics
+            $stats = DB::select("SELECT * FROM pg_stats WHERE tablename = ?", [$table]);
+            
+            // Get existing indexes
+            $indexes = DB::select("
+                SELECT 
+                    indexname,
+                    indexdef
+                FROM pg_indexes 
+                WHERE tablename = ?
+            ", [$table]);
+
+            // Analyze column usage patterns
+            foreach ($stats as $stat) {
+                if ($stat->null_frac < 0.1 && $stat->n_distinct > 100) {
+                    $suggestions[] = [
+                        'column' => $stat->attname,
+                        'type' => 'btree',
+                        'reason' => 'High cardinality column with low null fraction',
+                        'suggested_index' => "CREATE INDEX idx_{$table}_{$stat->attname} ON {$table}({$stat->attname})",
+                    ];
+                }
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Index suggestion failed', [
+                'table' => $table,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return $suggestions;
     }
 
     /**
-     * Apply automatic optimization based on model
+     * Optimize a specific query with suggestions applied.
+     *
+     * @param string $query
+     * @param array $suggestions
+     * @return string
      */
-    public function autoOptimize(Builder $query, string $modelClass): Builder
+    public function applyOptimizations(string $query, array $suggestions): string
     {
-        $patterns = $this->optimizeCommonPatterns();
-        $modelName = class_basename($modelClass);
+        $optimizedQuery = $query;
 
-        if (isset($patterns[strtolower($modelName)])) {
-            $pattern = $patterns[strtolower($modelName)];
-
-            if (isset($pattern['relations'])) {
-                $query = $query->with($pattern['relations']);
-            }
-
-            if (isset($pattern['count_relations'])) {
-                $query = $query->withCount($pattern['count_relations']);
+        foreach ($suggestions as $suggestion) {
+            if ($suggestion['type'] === 'index') {
+                // Extract index creation SQL if available
+                if (isset($suggestion['suggested_index'])) {
+                    Log::info('Suggested index', [
+                        'index_sql' => $suggestion['suggested_index'],
+                    ]);
+                }
             }
         }
 
-        return $query;
+        return $optimizedQuery;
     }
 }

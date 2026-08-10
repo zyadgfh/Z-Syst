@@ -2,105 +2,70 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+
 class SecurityService
 {
     /**
-     * Sanitize input to prevent SQL injection
+     * Sanitize user input to prevent XSS attacks
      */
-    public function sanitizeInput(string $input): string
+    public function sanitizeInput(array $data): array
     {
-        // Remove potential SQL injection patterns
-        $patterns = [
-            '/(\bSELECT\b.*\bFROM\b)/i',
-            '/(\bINSERT\b.*\bINTO\b)/i',
-            '/(\bUPDATE\b.*\bSET\b)/i',
-            '/(\bDELETE\b.*\bFROM\b)/i',
-            '/(\bDROP\b.*\bTABLE\b)/i',
-            '/(\bUNION\b.*\bSELECT\b)/i',
-            '/(;|--|\/\*|\*\/)/',
-        ];
-
-        return preg_replace($patterns, '', $input);
+        return collect($data)->map(function ($value) {
+            if (is_string($value)) {
+                return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+            }
+            if (is_array($value)) {
+                return $this->sanitizeInput($value);
+            }
+            return $value;
+        })->toArray();
     }
 
     /**
-     * Validate SQL query to prevent injection
+     * Validate SQL injection attempts
      */
-    public function validateQuery(string $query): bool
+    public function detectSqlInjection(string $input): bool
     {
-        // Check for dangerous patterns
-        $dangerousPatterns = [
-            '/\bDROP\b.*\bTABLE\b/i',
-            '/\bTRUNCATE\b.*\bTABLE\b/i',
-            '/\bDELETE\b.*\bFROM\b.*\bWHERE\b.*1\s*=\s*1/i',
-            '/\bUNION\b.*\bSELECT\b/i',
-            '/;.*\bDROP\b/i',
-            '/;.*\bDELETE\b/i',
+        $sqlPatterns = [
+            '/\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|EXEC|ALTER|CREATE|TRUNCATE)\b/i',
+            '/\b(OR|AND)\s+\d+\s*=\s*\d+/i',
+            '/\b(OR|AND)\s+\w+\s*=\s*\w+/i',
+            '/[\'"]\s*(OR|AND)\s*[\'"]/i',
+            '/--/',
+            '/\/\*/',
+            '/\*.*\*\//',
+            '/;\s*DROP/',
+            '/;\s*DELETE/',
+            '/;\s*UPDATE/',
         ];
 
-        foreach ($dangerousPatterns as $pattern) {
-            if (preg_match($pattern, $query)) {
-                return false;
+        foreach ($sqlPatterns as $pattern) {
+            if (preg_match($pattern, $input)) {
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 
     /**
-     * Escape string for safe use in raw queries
+     * Validate XSS attempts
      */
-    public function escapeString(string $value): string
-    {
-        return addslashes($value);
-    }
-
-    /**
-     * Validate table name to prevent injection
-     */
-    public function validateTableName(string $tableName): bool
-    {
-        // Only allow alphanumeric and underscores
-        return preg_match('/^[a-zA-Z0-9_]+$/', $tableName) === 1;
-    }
-
-    /**
-     * Validate column name to prevent injection
-     */
-    public function validateColumnName(string $columnName): bool
-    {
-        // Only allow alphanumeric, underscores, and dots
-        return preg_match('/^[a-zA-Z0-9_.]+$/', $columnName) === 1;
-    }
-
-    /**
-     * Sanitize array of inputs
-     */
-    public function sanitizeArray(array $inputs): array
-    {
-        return array_map(function ($input) {
-            if (is_string($input)) {
-                return $this->sanitizeInput($input);
-            }
-            if (is_array($input)) {
-                return $this->sanitizeArray($input);
-            }
-
-            return $input;
-        }, $inputs);
-    }
-
-    /**
-     * Check for XSS in input
-     */
-    public function checkXSS(string $input): bool
+    public function detectXss(string $input): bool
     {
         $xssPatterns = [
             '/<script\b[^>]*>(.*?)<\/script>/is',
             '/<iframe\b[^>]*>(.*?)<\/iframe>/is',
+            '/<object\b[^>]*>(.*?)<\/object>/is',
+            '/<embed\b[^>]*>(.*?)<\/embed>/is',
+            '/on\w+\s*=/i',
             '/javascript:/i',
-            '/on\w+\s*=/i', // onclick=, onerror=, etc.
+            '/vbscript:/i',
+            '/data:text\/html/i',
             '/<\?php/i',
+            '/<\%/i',
         ];
 
         foreach ($xssPatterns as $pattern) {
@@ -113,40 +78,175 @@ class SecurityService
     }
 
     /**
-     * Sanitize HTML to prevent XSS
+     * Validate and sanitize file uploads
      */
-    public function sanitizeHTML(string $html): string
+    public function validateFileUpload($file, array $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf']): bool
     {
-        // Remove dangerous tags and attributes
-        $html = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', '', $html);
-        $html = preg_replace('/<iframe\b[^>]*>(.*?)<\/iframe>/is', '', $html);
-        $html = preg_replace('/javascript:/i', '', $html);
-        $html = preg_replace('/on\w+\s*=/i', '', $html);
+        if (!$file) {
+            return false;
+        }
 
-        return $html;
+        // Check file size (max 10MB)
+        if ($file->getSize() > 10 * 1024 * 1024) {
+            return false;
+        }
+
+        // Check MIME type
+        $mime = $file->getMimeType();
+        if (!in_array($mime, $allowedMimes)) {
+            return false;
+        }
+
+        // Check file extension
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'pdf'];
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (!in_array($extension, $allowedExtensions)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
-     * Generate CSRF token for forms
+     * Generate secure random token
      */
-    public function generateCSRFToken(): string
+    public function generateSecureToken(int $length = 32): string
     {
-        return bin2hex(random_bytes(32));
+        return Str::random($length);
     }
 
     /**
-     * Validate CSRF token
+     * Validate email format strictly
      */
-    public function validateCSRFToken(string $token, string $sessionToken): bool
+    public function validateEmail(string $email): bool
     {
-        return hash_equals($sessionToken, $token);
+        return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
     }
 
     /**
-     * Log security event
+     * Validate URL format
      */
-    public function logSecurityEvent(string $event, array $context = []): void
+    public function validateUrl(string $url): bool
     {
-        \Log::warning('Security Event: '.$event, $context);
+        return filter_var($url, FILTER_VALIDATE_URL) !== false;
+    }
+
+    /**
+     * Check for command injection
+     */
+    public function detectCommandInjection(string $input): bool
+    {
+        $commandPatterns = [
+            '/[;&|`$()]/',
+            '/>/',
+            '/</',
+            '/\|\|/',
+            '/&&/',
+        ];
+
+        foreach ($commandPatterns as $pattern) {
+            if (preg_match($pattern, $input)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Validate phone number format
+     */
+    public function validatePhone(string $phone): bool
+    {
+        return preg_match('/^[\d\s\-\+\(\)]{10,20}$/', $phone) === 1;
+    }
+
+    /**
+     * Sanitize filename
+     */
+    public function sanitizeFilename(string $filename): string
+    {
+        // Remove dangerous characters
+        $filename = preg_replace('/[^a-zA-Z0-9._-]/', '_', $filename);
+        
+        // Remove leading/trailing dots
+        $filename = trim($filename, '.');
+        
+        // Limit length
+        if (strlen($filename) > 255) {
+            $filename = substr($filename, 0, 255);
+        }
+        
+        return $filename;
+    }
+
+    /**
+     * Validate IP address
+     */
+    public function validateIp(string $ip): bool
+    {
+        return filter_var($ip, FILTER_VALIDATE_IP) !== false;
+    }
+
+    /**
+     * Rate limiting check
+     */
+    public function checkRateLimit(string $identifier, int $maxAttempts = 5, int $decayMinutes = 1): bool
+    {
+        $key = "rate_limit:{$identifier}";
+        $attempts = cache()->get($key, 0);
+        
+        if ($attempts >= $maxAttempts) {
+            return false;
+        }
+        
+        cache()->put($key, $attempts + 1, now()->addMinutes($decayMinutes));
+        return true;
+    }
+
+    /**
+     * Comprehensive security validation
+     */
+    public function validateRequest(array $data, array $rules): array
+    {
+        $validator = Validator::make($data, $rules);
+        
+        if ($validator->fails()) {
+            return [
+                'valid' => false,
+                'errors' => $validator->errors(),
+            ];
+        }
+
+        // Additional security checks
+        foreach ($data as $key => $value) {
+            if (is_string($value)) {
+                if ($this->detectSqlInjection($value)) {
+                    return [
+                        'valid' => false,
+                        'errors' => ["{$key} contains potentially malicious SQL pattern"],
+                    ];
+                }
+                
+                if ($this->detectXss($value)) {
+                    return [
+                        'valid' => false,
+                        'errors' => ["{$key} contains potentially malicious XSS pattern"],
+                    ];
+                }
+                
+                if ($this->detectCommandInjection($value)) {
+                    return [
+                        'valid' => false,
+                        'errors' => ["{$key} contains potentially malicious command pattern"],
+                    ];
+                }
+            }
+        }
+
+        return [
+            'valid' => true,
+            'errors' => [],
+        ];
     }
 }

@@ -2,187 +2,123 @@
 
 namespace App\Services;
 
-use Illuminate\Cache\RedisStore;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 
 class CacheService
 {
     /**
-     * Cache configuration
+     * Cache with tags for easy invalidation
      */
-    protected array $config = [
-        'default_ttl' => 3600, // 1 hour
-        'short_ttl' => 300, // 5 minutes
-        'long_ttl' => 86400, // 24 hours
-        'business_prefix' => 'business',
-        'user_prefix' => 'user',
-        'product_prefix' => 'product',
-    ];
-
-    /**
-     * Get cached data or execute callback
-     */
-    public function remember(string $key, int $ttl, callable $callback)
+    public function rememberWithTags(string $key, array $tags, $ttl, callable $callback)
     {
-        return Cache::remember($key, $ttl, $callback);
+        return Cache::tags($tags)->remember($key, $ttl, $callback);
     }
 
     /**
-     * Get cached data or execute callback forever
+     * Invalidate cache by tags
      */
-    public function rememberForever(string $key, callable $callback)
+    public function invalidateTags(array $tags): void
     {
-        return Cache::rememberForever($key, $callback);
+        Cache::tags($tags)->flush();
     }
 
     /**
-     * Forget cached data
+     * Cache frequently accessed data
      */
-    public function forget(string $key): bool
+    public function cacheProduct(int $productId, array $data, int $ttl = 3600): void
     {
-        return Cache::forget($key);
+        Cache::tags(['products', "product_{$productId}"])
+            ->put("product_{$productId}", $data, $ttl);
     }
 
     /**
-     * Clear all cache
+     * Get cached product
      */
-    public function flush(): bool
+    public function getCachedProduct(int $productId): ?array
     {
-        return Cache::flush();
+        return Cache::tags(['products', "product_{$productId}"])
+            ->get("product_{$productId}");
     }
 
     /**
-     * Generate cache key for business data
+     * Cache stock data
      */
-    public function businessKey(int $businessId, string $suffix): string
+    public function cacheStockData(int $productId, array $data, int $ttl = 300): void
     {
-        return "{$this->config['business_prefix']}:{$businessId}:{$suffix}";
+        Cache::tags(['stock', "stock_{$productId}"])
+            ->put("stock_{$productId}", $data, $ttl);
     }
 
     /**
-     * Generate cache key for user data
+     * Get cached stock data
      */
-    public function userKey(int $userId, string $suffix): string
+    public function getCachedStockData(int $productId): ?array
     {
-        return "{$this->config['user_prefix']}:{$userId}:{$suffix}";
-    }
-
-    /**
-     * Generate cache key for product data
-     */
-    public function productKey(int $productId, string $suffix): string
-    {
-        return "{$this->config['product_prefix']}:{$productId}:{$suffix}";
-    }
-
-    /**
-     * Cache business statistics
-     */
-    public function cacheBusinessStatistics(int $businessId, array $statistics): void
-    {
-        $key = $this->businessKey($businessId, 'statistics');
-        Cache::put($key, $statistics, $this->config['short_ttl']);
-    }
-
-    /**
-     * Get cached business statistics
-     */
-    public function getBusinessStatistics(int $businessId): ?array
-    {
-        $key = $this->businessKey($businessId, 'statistics');
-
-        return Cache::get($key);
+        return Cache::tags(['stock', "stock_{$productId}"])
+            ->get("stock_{$productId}");
     }
 
     /**
      * Cache user permissions
      */
-    public function cacheUserPermissions(int $userId, array $permissions): void
+    public function cacheUserPermissions(int $userId, array $permissions, int $ttl = 3600): void
     {
-        $key = $this->userKey($userId, 'permissions');
-        Cache::put($key, $permissions, $this->config['default_ttl']);
+        Cache::tags(['permissions', "user_{$userId}"])
+            ->put("user_permissions_{$userId}", $permissions, $ttl);
     }
 
     /**
      * Get cached user permissions
      */
-    public function getUserPermissions(int $userId): ?array
+    public function getCachedUserPermissions(int $userId): ?array
     {
-        $key = $this->userKey($userId, 'permissions');
-
-        return Cache::get($key);
+        return Cache::tags(['permissions', "user_{$userId}"])
+            ->get("user_permissions_{$userId}");
     }
 
     /**
-     * Cache product data
+     * Cache business settings
      */
-    public function cacheProduct(int $productId, array $productData): void
+    public function cacheBusinessSettings(int $businessId, array $settings, int $ttl = 7200): void
     {
-        $key = $this->productKey($productId, 'data');
-        Cache::put($key, $productData, $this->config['default_ttl']);
+        Cache::tags(['settings', "business_{$businessId}"])
+            ->put("business_settings_{$businessId}", $settings, $ttl);
     }
 
     /**
-     * Get cached product data
+     * Get cached business settings
      */
-    public function getProduct(int $productId): ?array
+    public function getCachedBusinessSettings(int $businessId): ?array
     {
-        $key = $this->productKey($productId, 'data');
-
-        return Cache::get($key);
+        return Cache::tags(['settings', "business_{$businessId}"])
+            ->get("business_settings_{$businessId}");
     }
 
     /**
-     * Invalidate business cache
+     * Clear all cache
      */
-    public function invalidateBusinessCache(int $businessId): void
+    public function clearAll(): void
     {
-        $pattern = "{$this->config['business_prefix']}:{$businessId}:*";
-        $this->invalidatePattern($pattern);
+        Cache::flush();
     }
 
     /**
-     * Invalidate user cache
+     * Clear specific tag cache
      */
-    public function invalidateUserCache(int $userId): void
+    public function clearTag(string $tag): void
     {
-        $pattern = "{$this->config['user_prefix']}:{$userId}:*";
-        $this->invalidatePattern($pattern);
+        Cache::tags([$tag])->flush();
     }
 
     /**
-     * Invalidate product cache
+     * Warm up cache for frequently accessed data
      */
-    public function invalidateProductCache(int $productId): void
+    public function warmupCache(array $data): void
     {
-        $pattern = "{$this->config['product_prefix']}:{$productId}:*";
-        $this->invalidatePattern($pattern);
-    }
-
-    /**
-     * Invalidate cache by pattern
-     */
-    protected function invalidatePattern(string $pattern): void
-    {
-        if (Cache::getStore() instanceof RedisStore) {
-            $redis = Cache::getStore()->connection();
-            $keys = $redis->keys($pattern);
-
-            if (! empty($keys)) {
-                $redis->del($keys);
-            }
+        foreach ($data as $key => $value) {
+            Cache::put($key, $value, now()->addHours(6));
         }
-    }
-
-    /**
-     * Cache query results
-     */
-    public function cacheQuery(string $queryKey, callable $query, ?int $ttl = null)
-    {
-        $ttl = $ttl ?? $this->config['default_ttl'];
-
-        return Cache::remember("query:{$queryKey}", $ttl, $query);
     }
 
     /**
@@ -190,58 +126,16 @@ class CacheService
      */
     public function getCacheStats(): array
     {
-        $stats = [
-            'driver' => Cache::getDefaultDriver(),
-            'enabled' => true,
-        ];
-
-        if (Cache::getStore() instanceof RedisStore) {
-            $redis = Cache::getStore()->connection();
-            $stats['redis'] = [
-                'info' => $redis->info(),
-                'keys_count' => count($redis->keys('*')),
+        if (Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
+            return [
+                'driver' => 'redis',
+                'stats' => Redis::info('stats'),
             ];
         }
 
-        return $stats;
-    }
-
-    /**
-     * Warm up cache for business
-     */
-    public function warmupBusinessCache(int $businessId): void
-    {
-        // Cache business data
-        $this->cacheBusinessStatistics($businessId, [
-            'total_products' => DB::table('products')->where('business_id', $businessId)->count(),
-            'total_sales' => DB::table('sales')->where('business_id', $businessId)->count(),
-            'total_customers' => DB::table('parties')->where('business_id', $businessId)->where('type', 'customer')->count(),
-        ]);
-    }
-
-    /**
-     * Clear expired cache entries
-     */
-    public function clearExpired(): int
-    {
-        // Redis handles TTL automatically
-        // For file cache, we could implement cleanup
-        return 0;
-    }
-
-    /**
-     * Check if cache is enabled
-     */
-    public function isEnabled(): bool
-    {
-        return config('cache.default') !== 'array';
-    }
-
-    /**
-     * Get cache key prefix
-     */
-    public function getPrefix(): string
-    {
-        return Cache::getStore()->getPrefix();
+        return [
+            'driver' => config('cache.default'),
+            'stats' => 'Not available for this driver',
+        ];
     }
 }

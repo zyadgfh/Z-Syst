@@ -32,6 +32,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('backup:database')->dailyAt('02:00');
         $schedule->command('doctor-attention:calculate')->dailyAt('00:00');
         $schedule->command('subscriptions:manage')->dailyAt('01:00');
+        $schedule->command('db:update-stats')->dailyAt('03:00');
     }
 
     /**

@@ -2,18 +2,28 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\InsufficientStockException;
+use App\Exceptions\StockNotFoundException;
 use App\Helpers\HasUploader;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
-use App\Models\Stock;
+use App\Services\ProductService;
+use App\Traits\WithTransactionalOperations;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class ZSystProductController extends Controller
 {
-    use HasUploader;
+    use HasUploader, WithTransactionalOperations;
+
+    protected ProductService $productService;
+
+    public function __construct(ProductService $productService)
+    {
+        $this->productService = $productService;
+    }
 
     /**
      * Display a listing of the resource.
@@ -39,7 +49,7 @@ class ZSystProductController extends Controller
                 });
             })
             ->withSum('stocks', 'productStock')
-            ->with(['expiring_item' => function ($query) {
+            ->with(['expiringItem' => function ($query) {
                 $query->select('expire_date', 'product_id')
                     ->where('productStock', '>', 0)
                     ->whereNotNull('expire_date');
@@ -60,60 +70,56 @@ class ZSystProductController extends Controller
     {
         $business_id = auth()->user()->business_id;
 
-        $request->validate([
-            'productName' => 'required|string',
-            'category_id' => 'required|integer|exists:categories,id',
-            'type_id' => 'nullable|integer|exists:medicine_types,id',
-            'unit_id' => 'nullable|integer|exists:units,id',
-            'manufacturer_id' => 'nullable|integer|exists:manufacturers,id',
-            'box_size_id' => 'nullable|integer|exists:box_sizes,id',
-            'productCode' => [
-                'nullable',
-                Rule::unique('products')->where(function ($query) use ($business_id) {
-                    return $query->where('business_id', $business_id);
-                }),
-            ],
-            'batch_no' => [
-                'nullable',
-                Rule::unique('stocks')->where(function ($query) use ($business_id) {
-                    return $query->where('business_id', $business_id);
-                }),
-            ],
-        ]);
-
-        DB::beginTransaction();
         try {
+            $validated = $request->validate([
+                'productName' => 'required|string',
+                'category_id' => 'required|integer|exists:categories,id',
+                'type_id' => 'nullable|integer|exists:medicine_types,id',
+                'unit_id' => 'nullable|integer|exists:units,id',
+                'manufacturer_id' => 'nullable|integer|exists:manufacturers,id',
+                'box_size_id' => 'nullable|integer|exists:box_sizes,id',
+                'productCode' => [
+                    'nullable',
+                    Rule::unique('products')->where(function ($query) use ($business_id) {
+                        return $query->where('business_id', $business_id);
+                    }),
+                ],
+                'batch_no' => [
+                    'nullable',
+                    Rule::unique('stocks')->where(function ($query) use ($business_id) {
+                        return $query->where('business_id', $business_id);
+                    }),
+                ],
+            ]);
 
-            $product = Product::create($request->except('images') + [
-                'business_id' => $business_id,
+            $data = $validated + [
                 'images' => $request->images ? $this->multipleUpload($request, 'images') : null,
-            ]);
+            ];
 
-            Stock::create($request->all() + [
-                'product_id' => $product->id,
-                'business_id' => $business_id,
-            ]);
-
-            DB::commit();
+            $product = $this->productService->createProduct($data, $business_id);
 
             return response()->json([
                 'message' => __('Data saved successfully.'),
                 'data' => $product,
             ]);
 
-        } catch (\Exception $e) {
-            DB::rollback();
-
+        } catch (ValidationException $e) {
             return response()->json([
-                'message' => __('Something was wrong.'),
-            ], 406);
+                'message' => __('Validation failed.'),
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => __('Internal server error.'),
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 
     public function show($id)
     {
         $data = Product::query()
-            ->with('unit:id,unitName', 'medicine_type:id,name', 'manufacterer:id,name', 'box_size:id,name', 'category:id,categoryName', 'stocks:id,expire_date,product_id,batch_no,productStock', 'tax:id,rate')
+            ->with('unit:id,unitName', 'medicine_type:id,name', 'manufacturer:id,name', 'box_size:id,name', 'category:id,categoryName', 'stocks:id,expire_date,product_id,batch_no,productStock', 'tax:id,rate')
             ->withSum('stocks', 'productStock')
             ->findOrFail($id);
 
@@ -128,144 +134,102 @@ class ZSystProductController extends Controller
         $business_id = auth()->user()->business_id;
         $stock = Stock::where('product_id', $product->id)->first();
 
-        $request->validate([
-            'productName' => 'required|string',
-            'category_id' => 'required|integer|exists:categories,id',
-            'type_id' => 'nullable|integer|exists:medicine_types,id',
-            'unit_id' => 'nullable|integer|exists:units,id',
-            'manufacturer_id' => 'nullable|integer|exists:manufacturers,id',
-            'box_size_id' => 'nullable|integer|exists:box_sizes,id',
-            'productCode' => [
-                'nullable',
-                'unique:products,productCode,'.$product->id.',id,business_id,'.$business_id,
-            ],
-            'batch_no' => [
-                'nullable',
-                'unique:stocks,batch_no,'.$stock->id.',id,business_id,'.$business_id,
-            ],
-        ]);
-
-        DB::beginTransaction();
         try {
-
-            if ($request->removed_images) {
-
-                $prev_images = array_diff($product->images ?? [], $request->removed_images);
-                foreach ($request->removed_images as $image) {
-                    if (Storage::exists($image)) {
-                        Storage::delete($image);
-                    }
-                }
-
-                $prev_images = array_values($prev_images);
-            } else {
-                $prev_images = $product->images ?? [];
-            }
-
-            $new_images = $request->images ? $this->multipleUpload($request, 'images') : [];
-            $merged_images = array_merge($prev_images, $new_images);
-
-            $stock = Stock::where('product_id', $product->id)->first();
-
-            if ($stock) {
-                $stock->update([
-                    'batch_no' => $request->batch_no,
-                    'expire_date' => $request->expire_date,
-                    'productStock' => $stock->productStock + $request->qty,
-                ]);
-            } else {
-                Stock::create($request->all() + [
-                    'product_id' => $product->id,
-                    'business_id' => $business_id,
-                    'productStock' => $request->qty,
-                    'batch_no' => $request->batch_no,
-                    'expire_date' => $request->expire_date,
-                ]);
-            }
-
-            $product->update($request->except('images') + [
-                'images' => $merged_images,
+            $validated = $request->validate([
+                'productName' => 'required|string',
+                'category_id' => 'required|integer|exists:categories,id',
+                'type_id' => 'nullable|integer|exists:medicine_types,id',
+                'unit_id' => 'nullable|integer|exists:units,id',
+                'manufacturer_id' => 'nullable|integer|exists:manufacturers,id',
+                'box_size_id' => 'nullable|integer|exists:box_sizes,id',
+                'productCode' => [
+                    'nullable',
+                    'unique:products,productCode,'.$product->id.',id,business_id,'.$business_id,
+                ],
+                'batch_no' => [
+                    'nullable',
+                    'unique:stocks,batch_no,'.$stock->id.',id,business_id,'.$business_id,
+                ],
             ]);
 
-            DB::commit();
+            $data = $validated + [
+                'images' => $request->images ? $this->multipleUpload($request, 'images') : [],
+                'removed_images' => $request->removed_images ?? null,
+                'qty' => $request->qty ?? 0,
+                'batch_no' => $request->batch_no ?? null,
+                'expire_date' => $request->expire_date ?? null,
+            ];
+
+            $updatedProduct = $this->productService->updateProduct($product, $data, $business_id);
 
             return response()->json([
                 'message' => __('Data updated successfully.'),
-                'data' => $product,
+                'data' => $updatedProduct,
             ]);
 
-        } catch (\Exception $e) {
-            DB::rollback();
-
+        } catch (ValidationException $e) {
             return response()->json([
-                'message' => __('Something was wrong.'),
-            ], 406);
+                'message' => __('Validation failed.'),
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => __('Internal server error.'),
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 
     public function updateStock(Request $request, $id)
     {
-        $request->validate([
-            'batch_no' => 'nullable|string',
-            'tax_type' => 'nullable|string',
-            'expire_date' => 'nullable|string',
-            'tax_id' => 'nullable|exists:taxes,id',
-            'purchase_without_tax' => 'required|numeric',
-            'purchase_with_tax' => 'required|numeric',
-            'profit_percent' => 'nullable|numeric',
-            'sales_price' => 'required|numeric',
-            'wholesale_price' => 'required|numeric',
-            'qty' => 'required|integer',
-        ]);
-
-        DB::beginTransaction();
         try {
+            $validated = $request->validate([
+                'batch_no' => 'nullable|string',
+                'tax_type' => 'nullable|string',
+                'expire_date' => 'nullable|string',
+                'tax_id' => 'nullable|exists:taxes,id',
+                'purchase_without_tax' => 'required|numeric',
+                'purchase_with_tax' => 'required|numeric',
+                'profit_percent' => 'nullable|numeric',
+                'sales_price' => 'required|numeric',
+                'wholesale_price' => 'required|numeric',
+                'qty' => 'required|integer',
+            ]);
 
-            $product = Product::findOrFail($id);
-            $product->update($request->all());
+            $data = $validated + [
+                'batch_no' => $request->batch_no ?? null,
+                'expire_date' => $request->expire_date ?? null,
+                'qty' => $request->qty ?? 0,
+            ];
 
-            $stock = Stock::where('product_id', $product->id)->where('batch_no', $request->batch_no)->first();
-
-            if ($stock) {
-                $stock->update([
-                    'batch_no' => $request->batch_no,
-                    'expire_date' => $request->expire_date,
-                    'productStock' => $stock->productStock + $request->qty,
-                ]);
-            } else {
-                Stock::create($request->all() + [
-                    'product_id' => $product->id,
-                    'productStock' => $request->qty,
-                    'expire_date' => $request->expire_date,
-                    'business_id' => auth()->user()->business_id,
-                ]);
-            }
-
-            DB::commit();
+            $product = $this->productService->updateStock($id, $data, auth()->user()->business_id);
 
             return response()->json([
                 'message' => __('Stock updated successfully.'),
                 'data' => $product,
             ]);
 
-        } catch (\Exception $e) {
-            DB::rollback();
-
+        } catch (ValidationException $e) {
             return response()->json([
-                'message' => __('Something was wrong.'),
-            ], 406);
+                'message' => __('Validation failed.'),
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (InsufficientStockException $e) {
+            return response()->json([
+                'message' => __('Insufficient stock available.'),
+                'error' => $e->getMessage(),
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => __('Internal server error.'),
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 
     public function destroy(Product $product)
     {
-        foreach ($product->images ?? [] as $image) {
-            if (Storage::exists($image)) {
-                Storage::delete($image);
-            }
-        }
-
-        $product->delete();
+        $this->productService->deleteProduct($product);
 
         return response()->json([
             'message' => __('Data deleted successfully.'),
@@ -274,27 +238,16 @@ class ZSystProductController extends Controller
 
     public function stocksWithProduct(Request $request)
     {
-        $data = Stock::select('id', 'expire_date', 'product_id', 'batch_no', 'productStock')
-            ->with([
-                'product.tax:id,rate,name',
-                'product:id,productName,purchase_without_tax,purchase_with_tax,profit_percent,sales_price,wholesale_price,tax_id,tax_type,productCode',
-            ])
-            ->when($request->filled('search'), function ($query) use ($request) {
-                $term = '%'.$request->input('search').'%';
-                $query->where(function ($subQuery) use ($term) {
-                    $subQuery->where('batch_no', 'like', $term)
-                        ->orWhereHas('product', function ($query) use ($term) {
-                            $query->where('productName', 'like', $term)
-                                ->orWhere('productCode', 'like', $term);
-                        });
-                });
-            })
-            ->when($request->input('check_stock') == 'true', function ($query) {
-                $query->where('productStock', '>', 0);
-            })
-            ->where('business_id', auth()->user()->business_id)
-            ->latest()
-            ->paginate($request->input('per_page', 10));
+        $filters = [
+            'search' => $request->input('search'),
+            'check_stock' => $request->input('check_stock'),
+        ];
+
+        $data = $this->productService->getProductsWithStock(
+            $filters,
+            auth()->user()->business_id,
+            $request->input('per_page', 10)
+        );
 
         return response()->json([
             'message' => __('Data fetched successfully.'),

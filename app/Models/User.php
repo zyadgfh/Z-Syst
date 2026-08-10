@@ -31,6 +31,10 @@ class User extends Authenticatable
         'visibility',
         'remember_token',
         'email_verified_at',
+        'supabase_id',
+        'supabase_access_token',
+        'supabase_refresh_token',
+        'supabase_token_expires_at',
     ];
 
     /**
@@ -56,6 +60,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'supabase_access_token',
+        'supabase_refresh_token',
     ];
 
     /**
@@ -67,6 +73,7 @@ class User extends Authenticatable
         'password' => 'hashed',
         'visibility' => 'json',
         'email_verified_at' => 'datetime',
+        'supabase_token_expires_at' => 'datetime',
     ];
 
     public function business(): BelongsTo
