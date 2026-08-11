@@ -4,26 +4,23 @@ namespace App\Http\Controllers\Api;
 
 use App\Exceptions\BusinessRuleException;
 use App\Exceptions\Errors\ErrorCode;
-use App\Helpers\TransactionHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Business;
-use App\Models\FefoSetting;
 use App\Models\Party;
-use App\Models\Product;
 use App\Models\Sale;
-use App\Models\SaleDetails;
-use App\Models\Stock;
 use App\Services\FefoService;
+use App\Services\SaleService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 
 class ZSystSaleController extends Controller
 {
     protected FefoService $fefoService;
+    protected SaleService $saleService;
 
-    public function __construct(FefoService $fefoService)
+    public function __construct(FefoService $fefoService, SaleService $saleService)
     {
         $this->fefoService = $fefoService;
+        $this->saleService = $saleService;
     }
 
     private function loadBusinessStocks(int $businessId, array $productIds): Collection

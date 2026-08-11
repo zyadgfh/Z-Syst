@@ -20,6 +20,7 @@ class InsuranceClaim extends Model
         'business_id',
         'insurance_company_id',
         'insurance_policy_id',
+        'party_id',
         'sale_id',
         'prescription_id',
         'customer_id',
@@ -79,6 +80,11 @@ class InsuranceClaim extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Party::class, 'customer_id');
+    }
+
+    public function party(): BelongsTo
+    {
+        return $this->belongsTo(Party::class, 'party_id');
     }
 
     public function user(): BelongsTo

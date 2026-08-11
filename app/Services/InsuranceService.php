@@ -8,6 +8,9 @@ use App\Models\InsuranceCompany;
 use App\Models\InsuranceCoverage;
 use App\Models\InsurancePolicy;
 use App\Models\Product;
+use App\Models\Sale;
+use App\Models\SaleDetails;
+use App\Models\Party;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -342,5 +345,242 @@ class InsuranceService
         });
 
         return round($totalDays / $processedClaims->count(), 1);
+    }
+
+    /**
+     * Process insurance claim from sale.
+     *
+     * @param Sale $sale
+     * @param array<string, mixed> $claimData
+     * @return InsuranceClaim
+     * @throws \Exception
+     */
+    public function processInsuranceClaimFromSale(Sale $sale, array $claimData): InsuranceClaim
+    {
+        return DB::transaction(function () use ($sale, $claimData) {
+            // Validate that the customer has an insurance policy
+            if (!$sale->party_id) {
+                throw new \Exception('Sale must have a customer to process insurance claim');
+            }
+
+            $customer = Party::findOrFail($sale->party_id);
+            $policy = InsurancePolicy::where('party_id', $customer->id)
+                ->where('business_id', $sale->business_id)
+                ->where('status', 'active')
+                ->first();
+
+            if (!$policy) {
+                throw new \Exception('No active insurance policy found for this customer');
+            }
+
+            // Validate policy eligibility
+            $eligibility = $this->validatePolicyEligibility($policy, $sale->totalAmount);
+            if (!$eligibility['eligible']) {
+                throw new \Exception('Policy not eligible: ' . $eligibility['reason']);
+            }
+
+            // Calculate claim coverage for each item
+            $claimItems = [];
+            $totalClaimAmount = 0;
+
+            foreach ($sale->details as $detail) {
+                $itemCoverage = $this->calculateClaimCoverage([
+                    'insurance_policy_id' => $policy->id,
+                    'product_id' => $detail->product_id,
+                    'total_amount' => $detail->price * $detail->quantities,
+                ]);
+
+                $claimItems[] = [
+                    'sale_detail_id' => $detail->id,
+                    'product_id' => $detail->product_id,
+                    'quantity' => $detail->quantities,
+                    'unit_price' => $detail->price,
+                    'total_amount' => $detail->price * $detail->quantities,
+                    'covered_amount' => $itemCoverage['covered_amount'],
+                    'patient_responsibility' => $itemCoverage['patient_responsibility'],
+                ];
+
+                $totalClaimAmount += $itemCoverage['covered_amount'];
+            }
+
+            // Create insurance claim
+            $claim = InsuranceClaim::create([
+                'business_id' => $sale->business_id,
+                'insurance_policy_id' => $policy->id,
+                'party_id' => $customer->id,
+                'sale_id' => $sale->id,
+                'claim_number' => $this->generateUniqueClaimNumber(),
+                'total_amount' => $sale->totalAmount,
+                'covered_amount' => $totalClaimAmount,
+                'patient_responsibility' => $sale->totalAmount - $totalClaimAmount,
+                'status' => 'draft',
+                'submission_date' => null,
+                'items' => json_encode($claimItems),
+                'notes' => $claimData['notes'] ?? 'Claim generated from sale #' . $sale->invoiceNumber,
+            ]);
+
+            // Update policy used amount
+            $policy->increment('used_amount', $totalClaimAmount);
+
+            return $claim->fresh(['policy.company', 'party', 'sale']);
+        });
+    }
+
+    /**
+     * Validate insurance coverage for sale items.
+     *
+     * @param array<int, array> $saleItems
+     * @param int $policyId
+     * @return array
+     */
+    public function validateInsuranceCoverage(array $saleItems, int $policyId): array
+    {
+        $policy = InsurancePolicy::findOrFail($policyId);
+        $validationResults = [];
+
+        foreach ($saleItems as $item) {
+            $coverage = $this->calculateClaimCoverage([
+                'insurance_policy_id' => $policyId,
+                'product_id' => $item['product_id'],
+                'total_amount' => $item['unit_price'] * $item['quantity'],
+            ]);
+
+            $validationResults[] = [
+                'product_id' => $item['product_id'],
+                'product_name' => Product::find($item['product_id'])?->productName ?? 'Unknown',
+                'total_amount' => $item['unit_price'] * $item['quantity'],
+                'covered_amount' => $coverage['covered_amount'],
+                'patient_responsibility' => $coverage['patient_responsibility'],
+                'coverage_percentage' => $coverage['covered_amount'] > 0 
+                    ? ($coverage['covered_amount'] / ($item['unit_price'] * $item['quantity'])) * 100 
+                    : 0,
+                'is_covered' => $coverage['covered_amount'] > 0,
+            ];
+        }
+
+        return [
+            'policy' => $policy,
+            'items' => $validationResults,
+            'total_claim_amount' => collect($validationResults)->sum('covered_amount'),
+            'total_patient_responsibility' => collect($validationResults)->sum('patient_responsibility'),
+            'eligibility' => $this->validatePolicyEligibility($policy, collect($validationResults)->sum('total_amount')),
+        ];
+    }
+
+    /**
+     * Calculate insurance reimbursement for a claim.
+     *
+     * @param array<string, mixed> $claimData
+     * @return array
+     */
+    public function calculateInsuranceReimbursement(array $claimData): array
+    {
+        $policy = InsurancePolicy::findOrFail($claimData['insurance_policy_id']);
+        $totalAmount = $claimData['total_amount'];
+        
+        // Get applicable coverage rules
+        $coverageRules = $this->getApplicableCoverageRules($policy, $claimData);
+        
+        if ($coverageRules->isEmpty()) {
+            // Use default company coverage
+            $coverage = $policy->company->calculateDefaultCoverage($totalAmount);
+        } else {
+            // Apply best coverage rule
+            $bestCoverage = $coverageRules->first();
+            $coverage = $bestCoverage->calculateCoverage($totalAmount);
+        }
+
+        // Check policy limits
+        $remainingLimit = $policy->annual_limit - $policy->used_amount;
+        $maxReimbursement = min($coverage['covered_amount'], $remainingLimit);
+
+        return [
+            'total_amount' => $totalAmount,
+            'covered_amount' => $coverage['covered_amount'],
+            'patient_responsibility' => $coverage['patient_responsibility'],
+            'policy_limit' => $policy->annual_limit,
+            'policy_used' => $policy->used_amount,
+            'policy_remaining' => $remainingLimit,
+            'max_reimbursement' => $maxReimbursement,
+            'reimbursement_percentage' => $totalAmount > 0 ? ($maxReimbursement / $totalAmount) * 100 : 0,
+        ];
+    }
+
+    /**
+     * Get customer insurance policies.
+     *
+     * @param int $customerId
+     * @param int $businessId
+     * @return Collection
+     */
+    public function getCustomerPolicies(int $customerId, int $businessId): Collection
+    {
+        return InsurancePolicy::where('party_id', $customerId)
+            ->where('business_id', $businessId)
+            ->with(['company', 'coverages'])
+            ->get()
+            ->map(function ($policy) {
+                return [
+                    'policy' => $policy,
+                    'company' => $policy->company,
+                    'is_active' => $policy->status === 'active' && !$policy->isExpired(),
+                    'remaining_limit' => $policy->annual_limit - $policy->used_amount,
+                    'utilization_percentage' => $policy->annual_limit > 0 
+                        ? ($policy->used_amount / $policy->annual_limit) * 100 
+                        : 0,
+                ];
+            });
+    }
+
+    /**
+     * Auto-submit eligible claims from sales.
+     *
+     * @param int $businessId
+     * @param array<int> $saleIds
+     * @return array
+     */
+    public function autoSubmitClaims(int $businessId, array $saleIds = []): array
+    {
+        $query = Sale::where('business_id', $businessId)
+            ->whereNotNull('party_id')
+            ->whereDoesntHave('insuranceClaim');
+
+        if (!empty($saleIds)) {
+            $query->whereIn('id', $saleIds);
+        }
+
+        $sales = $query->get();
+        $submittedClaims = [];
+        $failedClaims = [];
+
+        foreach ($sales as $sale) {
+            try {
+                $claim = $this->processInsuranceClaimFromSale($sale, [
+                    'notes' => 'Auto-submitted claim from sale',
+                ]);
+                
+                // Auto-submit if configured
+                $this->submitClaim($claim);
+                
+                $submittedClaims[] = [
+                    'sale_id' => $sale->id,
+                    'claim_id' => $claim->id,
+                    'claim_number' => $claim->claim_number,
+                ];
+            } catch (\Exception $e) {
+                $failedClaims[] = [
+                    'sale_id' => $sale->id,
+                    'reason' => $e->getMessage(),
+                ];
+            }
+        }
+
+        return [
+            'total_processed' => $sales->count(),
+            'successful_submissions' => count($submittedClaims),
+            'failed_submissions' => count($failedClaims),
+            'submitted_claims' => $submittedClaims,
+            'failed_claims' => $failedClaims,
+        ];
     }
 }
