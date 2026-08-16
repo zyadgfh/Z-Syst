@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleDetails;
 use App\Models\Stock;
+use App\Models\User;
 use App\Services\SaleService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -21,17 +22,20 @@ class SaleServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->saleService = new SaleService(new \App\Services\FefoService());
+        $this->saleService = new SaleService(
+            new \App\Services\FefoService(),
+            new \App\Services\AdvancedWorkflowService()
+        );
     }
 
     public function test_create_sale_with_stock_validation()
     {
-        $businessId = 1;
-        $userId = 1;
-        
-        $business = Business::factory()->create(['id' => $businessId, 'remainingShopBalance' => 1000]);
-        $party = Party::factory()->create(['business_id' => $businessId, 'type' => 'customer', 'due' => 0]);
-        $product = Product::factory()->create(['business_id' => $businessId, 'sales_price' => 50]);
+        $business = Business::factory()->create(['remainingShopBalance' => 1000]);
+        $user = User::factory()->create(['business_id' => $business->id]);
+        $party = Party::factory()->create(['business_id' => $business->id, 'type' => 'customer', 'due' => 0]);
+        $product = Product::factory()->create(['business_id' => $business->id, 'sales_price' => 50]);
+        $businessId = $business->id;
+        $userId = $user->id;
         
         $stock = Stock::factory()->create([
             'business_id' => $businessId,
@@ -79,13 +83,13 @@ class SaleServiceTest extends TestCase
 
     public function test_cannot_create_sale_with_insufficient_stock()
     {
-        $businessId = 1;
-        $userId = 1;
-        
-        $business = Business::factory()->create(['id' => $businessId, 'remainingShopBalance' => 1000]);
-        $party = Party::factory()->create(['business_id' => $businessId, 'type' => 'customer']);
-        $product = Product::factory()->create(['business_id' => $businessId]);
-        
+        $business = Business::factory()->create(['remainingShopBalance' => 1000]);
+        $user = User::factory()->create(['business_id' => $business->id]);
+        $party = Party::factory()->create(['business_id' => $business->id, 'type' => 'customer']);
+        $product = Product::factory()->create(['business_id' => $business->id]);
+        $businessId = $business->id;
+        $userId = $user->id;
+
         Stock::factory()->create([
             'business_id' => $businessId,
             'product_id' => $product->id,
@@ -117,12 +121,12 @@ class SaleServiceTest extends TestCase
 
     public function test_cannot_create_due_sale_for_walking_customer()
     {
-        $businessId = 1;
-        $userId = 1;
-        
-        $business = Business::factory()->create(['id' => $businessId, 'remainingShopBalance' => 1000]);
-        $product = Product::factory()->create(['business_id' => $businessId]);
-        
+        $business = Business::factory()->create(['remainingShopBalance' => 1000]);
+        $user = User::factory()->create(['business_id' => $business->id]);
+        $product = Product::factory()->create(['business_id' => $business->id]);
+        $businessId = $business->id;
+        $userId = $user->id;
+
         Stock::factory()->create([
             'business_id' => $businessId,
             'product_id' => $product->id,
@@ -151,13 +155,13 @@ class SaleServiceTest extends TestCase
 
     public function test_update_sale_restores_previous_stock()
     {
-        $businessId = 1;
-        $userId = 1;
-        
-        $business = Business::factory()->create(['id' => $businessId, 'remainingShopBalance' => 1000]);
-        $party = Party::factory()->create(['business_id' => $businessId, 'type' => 'customer']);
-        $product = Product::factory()->create(['business_id' => $businessId]);
-        
+        $business = Business::factory()->create(['remainingShopBalance' => 1000]);
+        $user = User::factory()->create(['business_id' => $business->id]);
+        $party = Party::factory()->create(['business_id' => $business->id, 'type' => 'customer']);
+        $product = Product::factory()->create(['business_id' => $business->id]);
+        $businessId = $business->id;
+        $userId = $user->id;
+
         $stock = Stock::factory()->create([
             'business_id' => $businessId,
             'product_id' => $product->id,
@@ -214,13 +218,13 @@ class SaleServiceTest extends TestCase
 
     public function test_delete_sale_restores_stock()
     {
-        $businessId = 1;
-        $userId = 1;
-        
-        $business = Business::factory()->create(['id' => $businessId, 'remainingShopBalance' => 1000]);
-        $party = Party::factory()->create(['business_id' => $businessId, 'type' => 'customer']);
-        $product = Product::factory()->create(['business_id' => $businessId]);
-        
+        $business = Business::factory()->create(['remainingShopBalance' => 1000]);
+        $user = User::factory()->create(['business_id' => $business->id]);
+        $party = Party::factory()->create(['business_id' => $business->id, 'type' => 'customer']);
+        $product = Product::factory()->create(['business_id' => $business->id]);
+        $businessId = $business->id;
+        $userId = $user->id;
+
         $stock = Stock::factory()->create([
             'business_id' => $businessId,
             'product_id' => $product->id,
@@ -258,16 +262,17 @@ class SaleServiceTest extends TestCase
 
     public function test_calculate_profit_loss()
     {
-        $businessId = 1;
-        
-        $business = Business::factory()->create(['id' => $businessId]);
-        $party = Party::factory()->create(['business_id' => $businessId, 'type' => 'customer']);
+        $business = Business::factory()->create();
+        $user = User::factory()->create(['business_id' => $business->id]);
+        $party = Party::factory()->create(['business_id' => $business->id, 'type' => 'customer']);
         $product = Product::factory()->create([
-            'business_id' => $businessId,
+            'business_id' => $business->id,
             'purchase_without_tax' => 30,
             'sales_price' => 50,
         ]);
-        
+        $businessId = $business->id;
+        $userId = $user->id;
+
         Stock::factory()->create([
             'business_id' => $businessId,
             'product_id' => $product->id,
@@ -291,7 +296,7 @@ class SaleServiceTest extends TestCase
             'paymentType' => 'Cash',
         ];
 
-        $sale = $this->saleService->createSale($data, $businessId, 1);
+        $sale = $this->saleService->createSale($data, $businessId, $userId);
 
         $profitLoss = $this->saleService->calculateProfitLoss($sale);
 
@@ -303,12 +308,13 @@ class SaleServiceTest extends TestCase
 
     public function test_generate_unique_invoice_number()
     {
-        $businessId = 1;
-        
-        $business = Business::factory()->create(['id' => $businessId]);
-        $party = Party::factory()->create(['business_id' => $businessId, 'type' => 'customer']);
-        $product = Product::factory()->create(['business_id' => $businessId]);
-        
+        $business = Business::factory()->create();
+        $user = User::factory()->create(['business_id' => $business->id]);
+        $party = Party::factory()->create(['business_id' => $business->id, 'type' => 'customer']);
+        $product = Product::factory()->create(['business_id' => $business->id]);
+        $businessId = $business->id;
+        $userId = $user->id;
+
         Stock::factory()->create([
             'business_id' => $businessId,
             'product_id' => $product->id,
@@ -332,8 +338,8 @@ class SaleServiceTest extends TestCase
             'paymentType' => 'Cash',
         ];
 
-        $sale1 = $this->saleService->createSale($data, $businessId, 1);
-        $sale2 = $this->saleService->createSale($data, $businessId, 1);
+        $sale1 = $this->saleService->createSale($data, $businessId, $userId);
+        $sale2 = $this->saleService->createSale($data, $businessId, $userId);
 
         $this->assertNotEquals($sale1->invoiceNumber, $sale2->invoiceNumber);
         $this->assertStringStartsWith('INV-', $sale1->invoiceNumber);

@@ -22,6 +22,11 @@ class SettingController extends Controller
     {
         $general = Option::where('key', 'general')->first();
 
+        // Check if design system view exists, otherwise use original
+        if (view()->exists('admin.settings.index')) {
+            return view('admin.settings.index', compact('general'));
+        }
+        
         return view('admin.settings.general', compact('general'));
     }
 

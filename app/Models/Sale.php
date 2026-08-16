@@ -32,6 +32,7 @@ class Sale extends Model
         'saleDate',
         'sale_data',
         'meta',
+        'status',
     ];
 
     public function details()

@@ -143,9 +143,13 @@ class ServiceTest extends TestCase
     {
         $service = new PageOptimizationService;
 
-        $js = 'function test() { return 1; }';
+        $js = 'function test() { // This is a comment
+    return 1;
+}';
         $minified = $service->minifyJS($js);
 
         $this->assertNotEquals($js, $minified);
+        $this->assertStringNotContainsString('//', $minified);
+        $this->assertStringNotContainsString("\n", $minified);
     }
 }

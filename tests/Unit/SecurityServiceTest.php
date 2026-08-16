@@ -49,8 +49,8 @@ class SecurityServiceTest extends TestCase
     {
         $input = "<script>alert('test')</script>Hello";
         $sanitized = $this->securityService->sanitizeInput(['content' => $input]);
-        
-        $this->assertNotStringContainsString('<script>', $sanitized['content']);
+
+        $this->assertStringNotContainsString('<script>', $sanitized['content']);
         $this->assertStringContainsString('Hello', $sanitized['content']);
     }
 
@@ -69,6 +69,6 @@ class SecurityServiceTest extends TestCase
     public function test_generates_secure_token()
     {
         $token = $this->securityService->generateSecureToken(32);
-        $this->assertStringLength($token, 32);
+        $this->assertEquals(32, strlen($token));
     }
 }

@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->integer('points_per_currency')->default(1);
-            $table->integer('min_points_for_reward')->default(100);
+            $table->integer('min_points_to_redeem')->default(100);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 

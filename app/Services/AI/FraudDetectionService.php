@@ -297,7 +297,7 @@ class FraudDetectionService
      * @param int $riskScore
      * @return string
      */
-    protected function determineRiskLevel(int $riskScore): string
+    public function determineRiskLevel(int $riskScore): string
     {
         if ($riskScore >= 100) {
             return 'critical';
@@ -317,7 +317,7 @@ class FraudDetectionService
      * @param string $riskLevel
      * @return string
      */
-    protected function getRecommendedAction(string $riskLevel): string
+    public function getRecommendedAction(string $riskLevel): string
     {
         switch ($riskLevel) {
             case 'critical':

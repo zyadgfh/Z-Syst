@@ -12,16 +12,19 @@ use App\Models\Purchase;
 use App\Models\PurchaseDetails;
 use App\Models\SalesForecast;
 use App\Models\Stock;
+use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class AutoOrderService
 {
     protected PredictionService $predictionService;
+    protected WhatsAppService $whatsappService;
 
-    public function __construct(PredictionService $predictionService)
+    public function __construct(PredictionService $predictionService, WhatsAppService $whatsappService)
     {
         $this->predictionService = $predictionService;
+        $this->whatsappService = $whatsappService;
     }
 
     /**
@@ -384,12 +387,17 @@ class AutoOrderService
             'converted_at' => now(),
         ]);
 
+        // Send WhatsApp message to supplier if enabled
+        $whatsappResult = $this->sendOrderToSupplierWhatsApp($purchase, $product, $supplierId, $businessId);
+
         return [
             'success' => true,
             'message' => 'تم تحويل الاقتراح إلى فاتورة شراء بنجاح.',
             'purchase_id' => $purchase->id,
             'invoice_number' => $purchase->invoiceNumber,
             'purchase' => $purchase->load('details.product:id,productName'),
+            'whatsapp_sent' => $whatsappResult['success'] ?? false,
+            'whatsapp_message' => $whatsappResult['message'] ?? null,
         ];
     }
 
@@ -541,5 +549,63 @@ class AutoOrderService
         }   // Below average
 
         return 'low';                                // Sufficient
+    }
+
+    /**
+     * Send order to supplier via WhatsApp
+     */
+    private function sendOrderToSupplierWhatsApp(
+        Purchase $purchase,
+        Product $product,
+        int $supplierId,
+        int $businessId
+    ): array {
+        try {
+            // Check if WhatsApp service is enabled
+            if (!$this->whatsappService->isEnabled()) {
+                return [
+                    'success' => false,
+                    'message' => 'خدمة واتساب معطلة',
+                ];
+            }
+
+            // Get supplier information
+            $supplier = Party::findOrFail($supplierId);
+            
+            // Get business name
+            $business = \App\Models\Business::findOrFail($businessId);
+
+            // Prepare order items
+            $orderItems = [];
+            foreach ($purchase->details as $detail) {
+                $orderItems[] = [
+                    'product_name' => $detail->product->productName ?? $product->productName,
+                    'quantity' => $detail->quantities,
+                    'product_code' => $detail->product->productCode ?? $product->productCode,
+                ];
+            }
+
+            // Send WhatsApp message
+            $result = $this->whatsappService->sendOrderToSupplier(
+                $supplier->phone,
+                $business->companyName,
+                $orderItems,
+                $purchase->note
+            );
+
+            Log::info('WhatsApp order sent', [
+                'purchase_id' => $purchase->id,
+                'supplier_id' => $supplierId,
+                'success' => $result['success'],
+            ]);
+
+            return $result;
+        } catch (\Exception $e) {
+            Log::error('Failed to send WhatsApp order: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'فشل إرسال واتساب: ' . $e->getMessage(),
+            ];
+        }
     }
 }

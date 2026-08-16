@@ -169,7 +169,7 @@ class ProductService
      * @param int $perPage
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public getProductsWithStock(array $filters, int $businessId, int $perPage = 10)
+    public function getProductsWithStock(array $filters, int $businessId, int $perPage = 10)
     {
         $query = Stock::select('id', 'expire_date', 'product_id', 'batch_no', 'productStock')
             ->with([

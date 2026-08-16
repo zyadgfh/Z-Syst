@@ -1,8 +1,8 @@
 <div class="sidebar-container">
     <nav class="side-bar">
         <div class="side-bar-logo">
-            <a href="{{ route('admin.dashboard.index') }}">
-                <img src="{{ asset(get_option('general')['admin_logo'] ?? 'assets/images/logo/logo.png') }}" alt="Logo">
+            <a href="{{ route('admin.dashboard.index') }}" class="logo-sidebar">
+                <img src="{{ asset('logo.png') }}" alt="Z-Syst Pharmacy Management" class="logo logo-large">
             </a>
             <button class="close-btn"><i class="fal fa-times"></i></button>
         </div>

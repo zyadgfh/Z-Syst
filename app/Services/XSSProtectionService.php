@@ -28,7 +28,7 @@ class XSSProtectionService
         $html = preg_replace('/on\w+\s*=/i', '', $html);
 
         // Remove data: protocol with base64
-        $html = preg_replace('/data:[^;]*;base64,[a-z0-9+/=]+/i', '', $html);
+        $html = preg_replace('#data:[^;]*;base64,[a-z0-9+/=]+#i', '', $html);
 
         // Remove vbscript: protocol
         $html = preg_replace('/vbscript:/i', '', $html);
@@ -73,7 +73,7 @@ class XSSProtectionService
             '/<embed\b/i',
             '/javascript:/i',
             '/on\w+\s*=/i',
-            '/data:[^;]*;base64/i',
+            '#data:[^;]*;base64#i',
         ];
 
         foreach ($dangerousPatterns as $pattern) {

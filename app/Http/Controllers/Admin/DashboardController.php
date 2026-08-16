@@ -25,6 +25,22 @@ class DashboardController extends Controller
         return view('admin.dashboard.index', compact('businesses'));
     }
 
+    public function designSystem()
+    {
+        // Dashboard KPI data
+        $totalSales = \App\Models\Sale::where('business_id', auth()->user()->business_id ?? 1)->sum('totalAmount');
+        $totalOrders = \App\Models\Sale::where('business_id', auth()->user()->business_id ?? 1)->count();
+        $lowStockItems = \App\Models\Stock::where('productStock', '<=', 10)->count();
+        $pendingApprovals = \App\Models\WorkflowInstance::where('status', 'pending')->count();
+
+        return view('admin.dashboard.design-system', compact(
+            'totalSales',
+            'totalOrders',
+            'lowStockItems',
+            'pendingApprovals'
+        ));
+    }
+
     public function getDashboardData()
     {
         $data['total_businesses'] = Business::count();

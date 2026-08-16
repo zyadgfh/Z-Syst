@@ -8,6 +8,12 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('/get-dashboard', [ADMIN\DashboardController::class, 'getDashboardData'])->name('dashboard.data');
     Route::get('/yearly-subscriptions', [ADMIN\DashboardController::class, 'yearlySubscriptions'])->name('dashboard.subscriptions');
     Route::get('/plans-overview', [ADMIN\DashboardController::class, 'subscriptionPlan'])->name('dashboard.plans-overview');
+    
+    // Design System Dashboard
+    Route::get('/dashboard/design-system', [ADMIN\DashboardController::class, 'designSystem'])->name('dashboard.design-system');
+    
+    // Analytics - design system view
+    Route::get('/analytics', [ADMIN\AnalyticsController::class, 'index'])->name('analytics.index');
 
     Route::resource('users', ADMIN\UserController::class)->except('show');
     Route::post('users/filter', [ADMIN\UserController::class, 'zsystFilter'])->name('users.filter');

@@ -5,6 +5,11 @@ use App\Http\Controllers\PaymentWebhookController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
+// Root route - redirect to login
+Route::get('/', function () {
+    return redirect('/login');
+})->name('home');
+
 // Payment Routes (Egyptian payment gateways + legacy manual)
 Route::get('/payments-gateways/{plan_id}/{business_id}', [Web\PaymentController::class, 'index'])->name('payments-gateways.index');
 Route::post('/payments/{plan_id}/{gateway_id}', [Web\PaymentController::class, 'payment'])->name('payments-gateways.payment');

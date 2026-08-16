@@ -12,18 +12,22 @@ use App\Models\Sale;
 use App\Models\SaleDetails;
 use App\Models\Stock;
 use App\Services\FefoService;
+use App\Services\AdvancedWorkflowService;
 use App\Traits\WithTransactionalOperations;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class SaleService
 {
     use WithTransactionalOperations;
 
     protected FefoService $fefoService;
+    protected AdvancedWorkflowService $workflowService;
 
-    public function __construct(FefoService $fefoService)
+    public function __construct(FefoService $fefoService, AdvancedWorkflowService $workflowService)
     {
         $this->fefoService = $fefoService;
+        $this->workflowService = $workflowService;
     }
 
     /**
@@ -87,10 +91,16 @@ class SaleService
                 'invoiceNumber' => $this->generateInvoiceNumber($businessId),
                 'saleDate' => $data['saleDate'] ?? now(),
                 'meta' => $data['meta'] ?? null,
+                'status' => 'completed', // Default status before workflow
             ]);
 
             // Create sale details and deduct stock
             $this->processSaleItems($sale, $data['products'], $businessStocks, $fefoSettings, $businessId);
+
+            // Initiate workflow if required
+            if ($this->requiresWorkflowApproval($businessId, 'sale')) {
+                $this->initiateWorkflow($sale, $businessId, $userId);
+            }
 
             return $sale->fresh(['details.product', 'party', 'tax']);
         });
@@ -389,5 +399,55 @@ class SaleService
             ->count() + 1;
 
         return sprintf('%s-%s-%04d', $prefix, $date, $sequence);
+    }
+
+    /**
+     * Check if sale requires workflow approval.
+     *
+     * @param int $businessId
+     * @param string $entityType
+     * @return bool
+     */
+    protected function requiresWorkflowApproval(int $businessId, string $entityType): bool
+    {
+        return \App\Models\WorkflowDefinition::active()
+            ->forBusiness($businessId)
+            ->forEntityType($entityType)
+            ->exists();
+    }
+
+    /**
+     * Initiate workflow for an entity.
+     *
+     * @param Sale $sale
+     * @param int $businessId
+     * @param int $userId
+     * @return void
+     */
+    protected function initiateWorkflow(Sale $sale, int $businessId, int $userId): void
+    {
+        try {
+            $workflowInstance = $this->workflowService->createInstance(
+                'sale',
+                $sale->id,
+                $businessId,
+                $userId,
+                null,
+                ['sale_amount' => $sale->totalAmount]
+            );
+
+            // Update sale status to pending approval
+            $sale->update(['status' => 'pending_approval']);
+
+            Log::info("Workflow initiated for sale {$sale->id}", [
+                'workflow_instance_id' => $workflowInstance->id,
+                'status' => $workflowInstance->status,
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Failed to initiate workflow for sale {$sale->id}", [
+                'error' => $e->getMessage(),
+            ]);
+            // Don't fail the sale if workflow fails
+        }
     }
 }
