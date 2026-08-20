@@ -71,6 +71,6 @@ class StockModelTest extends TestCase
 
         $stock->delete();
 
-        $this->assertDatabaseMissing('stocks', ['id' => $stockId]);
+        $this->assertSoftDeleted('stocks', ['id' => $stockId]);
     }
 }

@@ -85,16 +85,17 @@ class WarehouseStockTest extends TestCase
         $business1 = \App\Models\Business::factory()->create();
         $business2 = \App\Models\Business::factory()->create();
         $warehouse = Warehouse::factory()->create(['business_id' => $business1->id]);
-        $product = Product::factory()->create();
+        $product1 = Product::factory()->create(['business_id' => $business1->id]);
+        $product2 = Product::factory()->create(['business_id' => $business2->id]);
 
         WarehouseStock::factory()->create([
             'warehouse_id' => $warehouse->id,
-            'product_id' => $product->id,
+            'product_id' => $product1->id,
             'business_id' => $business1->id,
         ]);
         WarehouseStock::factory()->create([
             'warehouse_id' => $warehouse->id,
-            'product_id' => $product->id,
+            'product_id' => $product2->id,
             'business_id' => $business2->id,
         ]);
 
@@ -130,6 +131,7 @@ class WarehouseStockTest extends TestCase
         $warehouse = Warehouse::factory()->create();
         $product1 = Product::factory()->create();
         $product2 = Product::factory()->create();
+        $product3 = Product::factory()->create();
 
         WarehouseStock::factory()->create([
             'warehouse_id' => $warehouse->id,
@@ -143,7 +145,7 @@ class WarehouseStockTest extends TestCase
         ]);
         WarehouseStock::factory()->create([
             'warehouse_id' => $warehouse->id,
-            'product_id' => $product2->id,
+            'product_id' => $product3->id,
             'quantity' => 10,
         ]);
 
