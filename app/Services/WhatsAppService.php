@@ -14,10 +14,10 @@ class WhatsAppService
 
     public function __construct()
     {
-        $this->apiUrl = env('WHATSAPP_API_URL', 'https://graph.facebook.com/v18.0');
-        $this->apiKey = env('WHATSAPP_API_KEY');
-        $this->phoneNumberId = env('WHATSAPP_PHONE_NUMBER_ID');
-        $this->enabled = env('WHATSAPP_ENABLED', false);
+        $this->apiUrl = config('services.whatsapp.api_url');
+        $this->apiKey = config('services.whatsapp.api_key');
+        $this->phoneNumberId = config('services.whatsapp.phone_number_id');
+        $this->enabled = config('services.whatsapp.enabled');
     }
 
     /**

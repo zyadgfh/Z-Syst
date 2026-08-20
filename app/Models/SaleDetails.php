@@ -18,6 +18,7 @@ class SaleDetails extends Model
     protected $fillable = [
         'sale_id',
         'product_id',
+        'stock_id',
         'price',
         'lossProfit',
         'batch_no',
@@ -36,5 +37,15 @@ class SaleDetails extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function stock(): BelongsTo
+    {
+        return $this->belongsTo(Stock::class, 'stock_id');
+    }
+
+    public function sale(): BelongsTo
+    {
+        return $this->belongsTo(Sale::class, 'sale_id');
     }
 }

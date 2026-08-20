@@ -13,7 +13,7 @@ class AdminSeeder extends Seeder
             User::create([
                 'name' => 'Admin',
                 'email' => 'admin@zsyst.com',
-                'password' => bcrypt('password'),
+                'password' => bcrypt(env('ADMIN_INITIAL_PASSWORD', 'Admin@Secure2026!')),
                 'role' => 'superadmin',
             ]);
         }

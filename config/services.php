@@ -31,4 +31,28 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | WhatsApp API
+    |--------------------------------------------------------------------------
+    */
+    'whatsapp' => [
+        'api_url' => env('WHATSAPP_API_URL', 'https://graph.facebook.com/v18.0'),
+        'api_key' => env('WHATSAPP_API_KEY'),
+        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'enabled' => (bool) env('WHATSAPP_ENABLED', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Payment Gateway Secrets
+    |--------------------------------------------------------------------------
+    */
+    'payment' => [
+        'vodafone_cash_api_secret' => env('VODAFONE_CASH_API_SECRET'),
+        'bank_card_api_secret' => env('BANK_CARD_API_SECRET'),
+        'fawry_security_key' => env('FAWRY_SECURITY_KEY'),
+        'orange_cash_api_secret' => env('ORANGE_CASH_API_SECRET'),
+        'instapay_api_secret' => env('INSTAPAY_API_SECRET'),
+    ],
 ];

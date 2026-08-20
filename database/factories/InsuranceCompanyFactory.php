@@ -22,7 +22,7 @@ class InsuranceCompanyFactory extends Factory
             'address' => fake()->address(),
             'city' => fake()->city(),
             'country' => fake()->country(),
-            'tax_id' => fake()->taxId(),
+            'tax_id' => strtoupper(fake()->bothify('??-########')),
             'status' => 'active',
             'integration_type' => 'manual',
             'api_endpoint' => null,

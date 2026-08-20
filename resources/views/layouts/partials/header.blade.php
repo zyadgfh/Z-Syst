@@ -83,6 +83,9 @@
                         </div>
                     @endif
                 </div>
+                @if(env('VITE_CLERK_PUBLISHABLE_KEY'))
+                <div id="clerk-user-button" class="me-3"></div>
+                @endif
                 <div class="profile-info dropdown">
                     <a href="#" data-bs-toggle="dropdown" class="d-flex align-items-center gap-2">
                         <img src="{{ asset(Auth::user()->image ?? 'assets/images/icons/default-user.png') }}" alt="Profile">

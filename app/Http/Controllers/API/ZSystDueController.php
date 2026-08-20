@@ -147,7 +147,7 @@ class ZSystDueController extends Controller
             'opening_balance' => $request->invoiceNumber ? $party->opening_balance : $party->opening_balance - $request->payDueAmount,
         ]);
 
-        if (env('MESSAGE_ENABLED')) {
+        if (config('zsyst.message_enabled')) {
             sendMessage($party->phone, dueCollectMessage($data, $party, $business_name, $request->invoiceNumber));
         }
 

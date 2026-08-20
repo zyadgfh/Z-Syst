@@ -24,7 +24,7 @@ class InsurancePolicyFactory extends Factory
             'member_id' => fake()->optional()->numerify('MEM########'),
             'card_number' => fake()->optional()->creditCardNumber(),
             'holder_name' => fake()->name(),
-            'holder_dob' => fake()->dateBetween('-80 years', '-18 years'),
+            'holder_dob' => fake()->dateTimeBetween('-80 years', '-18 years'),
             'holder_gender' => fake()->randomElement(['male', 'female', 'other']),
             'holder_phone' => fake()->phoneNumber(),
             'holder_email' => fake()->email(),

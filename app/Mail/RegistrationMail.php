@@ -26,8 +26,8 @@ class RegistrationMail extends Mailable
      */
     public function envelope(): Envelope
     {
-        $fromAddress = env('MAIL_FROM_ADDRESS', 'default@example.com');
-        $fromName = env('MAIL_FROM_NAME', 'Default Name');
+        $fromAddress = config('mail.from.address');
+        $fromName = config('mail.from.name');
 
         return new Envelope(
             from: new Address($fromAddress, $fromName),

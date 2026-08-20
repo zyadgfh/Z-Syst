@@ -25,7 +25,7 @@ class AuthController extends Controller
         ]);
 
         $code = random_int(100000, 999999);
-        $expire = now()->addMinutes(env('OTP_VISIBILITY_TIME') ?? 3);
+        $expire = now()->addMinutes(config('zsyst.otp.visibility_time'));
         $data = [
             'code' => $code,
             'name' => $request->name,
@@ -38,8 +38,8 @@ class AuthController extends Controller
             ], 406);
         }
 
-        if (env('MAIL_USERNAME')) {
-            if (env('QUEUE_MAIL')) {
+        if (config('mail.mailers.smtp.username')) {
+            if (config('zsyst.queue_mail')) {
                 Mail::to($request->email)->queue(new WelcomeMail($data));
             } else {
                 Mail::to($request->email)->send(new WelcomeMail($data));
@@ -129,14 +129,14 @@ class AuthController extends Controller
             if ($user->remember_token && ! $user->business_id) { // If user didn't verify email
 
                 $code = random_int(100000, 999999);
-                $expire = now()->addMinutes(env('OTP_VISIBILITY_TIME') ?? 3);
+                $expire = now()->addMinutes(config('zsyst.otp.visibility_time'));
                 $data = [
                     'code' => $code,
                     'name' => $request->name,
                 ];
 
-                if (env('MAIL_USERNAME')) {
-                    if (env('QUEUE_MAIL')) {
+                if (config('mail.mailers.smtp.username')) {
+                    if (config('zsyst.queue_mail')) {
                         Mail::to($request->email)->queue(new WelcomeMail($data));
                     } else {
                         Mail::to($request->email)->send(new WelcomeMail($data));
@@ -216,14 +216,14 @@ class AuthController extends Controller
         ]);
 
         $code = random_int(100000, 999999);
-        $expire = now()->addMinutes(env('OTP_VISIBILITY_TIME') ?? 3);
+        $expire = now()->addMinutes(config('zsyst.otp.visibility_time'));
         $data = [
             'code' => $code,
             'name' => $request->name,
         ];
 
-        if (env('MAIL_USERNAME')) {
-            if (env('QUEUE_MAIL')) {
+        if (config('mail.mailers.smtp.username')) {
+            if (config('zsyst.queue_mail')) {
                 Mail::to($request->email)->queue(new WelcomeMail($data));
             } else {
                 Mail::to($request->email)->send(new WelcomeMail($data));

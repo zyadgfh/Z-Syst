@@ -129,7 +129,9 @@ class BarcodeController extends Controller
             'size' => 'nullable|in:small,standard,large',
         ]);
 
-        $product = Product::findOrFail($request->product_id);
+        $product = Product::where('id', $request->product_id)
+            ->where('business_id', auth()->user()->business_id)
+            ->firstOrFail();
         $barcodes = $this->barcodeService->generateMultipleForProduct(
             $product,
             $request->quantity,
@@ -155,7 +157,9 @@ class BarcodeController extends Controller
             'size' => 'nullable|in:small,standard,large',
         ]);
 
-        $batch = Stock::findOrFail($request->batch_id);
+        $batch = Stock::where('id', $request->batch_id)
+            ->where('business_id', auth()->user()->business_id)
+            ->firstOrFail();
         $barcodes = $this->barcodeService->generateMultipleForBatch(
             $batch,
             $request->quantity,
@@ -221,7 +225,9 @@ class BarcodeController extends Controller
             'quantity' => 'required|integer|min:1|max:100',
         ]);
 
-        $product = Product::findOrFail($request->product_id);
+        $product = Product::where('id', $request->product_id)
+            ->where('business_id', auth()->user()->business_id)
+            ->firstOrFail();
         $pdfPath = $this->barcodeService->printForProduct(
             $product,
             $request->quantity,
@@ -248,7 +254,9 @@ class BarcodeController extends Controller
             'quantity' => 'required|integer|min:1|max:100',
         ]);
 
-        $batch = Stock::findOrFail($request->batch_id);
+        $batch = Stock::where('id', $request->batch_id)
+            ->where('business_id', auth()->user()->business_id)
+            ->firstOrFail();
         $pdfPath = $this->barcodeService->printForBatch(
             $batch,
             $request->quantity,

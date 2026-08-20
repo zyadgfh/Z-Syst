@@ -16,6 +16,7 @@
         "vite": "^3.0.0"
     },
     "dependencies": {
+        "@clerk/clerk-js": "^6.29.2",
         "@dataconnect/generated": "file:src/dataconnect-generated",
         "@supabase/server": "^1.4.1",
         "@supabase/ssr": "^0.12.4",

@@ -2,48 +2,32 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
-
-class StoreInsuranceCompanyRequest extends FormRequest
+class StoreInsuranceCompanyRequest extends BaseFormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('create', \App\Models\InsuranceCompany::class);
     }
 
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:200',
-            'code' => 'required|string|max:50|unique:insurance_companies,code',
-            'contact_person' => 'nullable|string|max:200',
-            'phone' => 'nullable|string|max:50',
-            'email' => 'nullable|email|max:200',
+            'business_id' => 'required|exists:businesses,id',
+            'name' => 'required|string|max:255',
+            'code' => 'nullable|string|max:50|unique:insurance_companies,code,NULL,id,business_id,' . auth()->user()?->business_id,
+            'contact_person' => 'nullable|string|max:255',
+            'phone' => $this->phoneRules(),
+            'email' => 'nullable|email|max:255',
             'address' => 'nullable|string|max:500',
-            'city' => 'nullable|string|max:100',
-            'country' => 'nullable|string|max:100',
-            'tax_id' => 'nullable|string|max:100',
-            'status' => 'nullable|in:active,inactive,suspended',
-            'integration_type' => 'nullable|in:manual,api,hybrid',
-            'api_endpoint' => 'nullable|url|max:500',
-            'api_credentials' => 'nullable|array',
-            'default_coverage_percent' => 'nullable|numeric|min:0|max:100',
-            'default_copay_percent' => 'nullable|numeric|min:0|max:100',
-            'settlement_days' => 'nullable|integer|min:0|max:365',
-            'notes' => 'nullable|string|max:1000',
-            'metadata' => 'nullable|array',
+            'is_active' => 'boolean',
         ];
     }
 
-    protected function failedValidation(Validator $validator)
+    public function messages(): array
     {
-        throw new HttpResponseException(
-            response()->json([
-                'message' => 'Validation failed.',
-                'errors' => $validator->errors(),
-            ], 422)
-        );
+        return [
+            'name.required' => __('Company name is required'),
+            'code.unique' => __('Company code already exists'),
+        ];
     }
 }

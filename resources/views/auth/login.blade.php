@@ -140,271 +140,28 @@
                         </p>
                     </div>
                 </form>
+
+                <!-- Clerk Authentication -->
+                @if(env('VITE_CLERK_PUBLISHABLE_KEY'))
+                <div class="clerk-divider">
+                    <span>or</span>
+                </div>
+                <div class="clerk-auth-section">
+                    <p class="text-center text-sm text-gray-500 mb-3">{{ __('Sign in with Clerk') }}</p>
+                    <div id="clerk-sign-in"></div>
+                    <div id="clerk-sign-up" style="display: none;"></div>
+                    <div class="text-center mt-3">
+                        <button type="button" id="clerk-toggle" class="text-sm text-blue-600 hover:underline">
+                            {{ __('Need an account? Sign up') }}
+                        </button>
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
     </div>
 </div>
 @endsection
-
-@push('style')
-<style>
-/* Login Container */
-.login-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--color-background);
-    padding: var(--space-lg);
-}
-
-.login-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-2xl);
-    max-width: 1200px;
-    width: 100%;
-    background: var(--color-background);
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    box-shadow: var(--shadow-xl);
-}
-
-@media (max-width: 1024px) {
-    .login-wrapper {
-        grid-template-columns: 1fr;
-        max-width: 500px;
-    }
-    
-    .login-branding {
-        display: none;
-    }
-}
-
-/* Left Side - Branding */
-.login-branding {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
-    padding: var(--space-3xl);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-}
-
-.login-branding::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 0C22.3858 0 0 22.3858 0 50C0 77.6142 22.3858 100 50 100C77.6142 100 100 77.6142 100 50C100 22.3858 77.6142 0 50 0ZM50 90C27.9086 90 10 72.0914 10 50C10 27.9086 27.9086 10 50 10C72.0914 10 90 27.9086 90 50Z' fill='rgba(255,255,255,0.05)'/%3E%3C/svg%3E");
-    opacity: 0.5;
-}
-
-.branding-content {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    color: white;
-}
-
-.branding-logo {
-    margin-bottom: var(--space-xl);
-}
-
-.branding-logo img {
-    max-width: 200px;
-    height: auto;
-}
-
-.branding-title {
-    font-size: 32px;
-    font-weight: 700;
-    font-family: 'Poppins', sans-serif;
-    margin-bottom: var(--space-sm);
-    color: white;
-}
-
-.branding-subtitle {
-    font-size: 16px;
-    font-weight: 400;
-    font-family: 'Open Sans', sans-serif;
-    margin-bottom: var(--space-2xl);
-    color: rgba(255, 255, 255, 0.9);
-}
-
-.branding-features {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-lg);
-    text-align: left;
-}
-
-.feature-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
-    color: white;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.feature-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: var(--radius-md);
-    flex-shrink: 0;
-}
-
-/* Right Side - Login Form */
-.login-form-container {
-    padding: var(--space-3xl);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.login-card {
-    width: 100%;
-    max-width: 400px;
-}
-
-.login-header {
-    text-align: center;
-    margin-bottom: var(--space-2xl);
-}
-
-.login-title {
-    font-size: 28px;
-    font-weight: 700;
-    font-family: 'Poppins', sans-serif;
-    color: var(--color-foreground);
-    margin-bottom: var(--space-sm);
-}
-
-.login-subtitle {
-    font-size: 14px;
-    font-weight: 400;
-    font-family: 'Open Sans', sans-serif;
-    color: var(--color-muted);
-}
-
-.login-form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-lg);
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-}
-
-.input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.input-icon {
-    position: absolute;
-    left: var(--space-md);
-    color: var(--color-muted);
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-}
-
-.input-wrapper .input {
-    padding-left: 48px;
-    padding-right: 48px;
-}
-
-.input-action {
-    position: absolute;
-    right: var(--space-md);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: var(--space-xs);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-muted);
-    transition: color 200ms ease;
-}
-
-.input-action:hover {
-    color: var(--color-primary);
-}
-
-.form-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.checkbox-wrapper {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    cursor: pointer;
-}
-
-.checkbox-wrapper input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    accent-color: var(--color-primary);
-    cursor: pointer;
-}
-
-.checkbox-label {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--color-foreground);
-}
-
-.forgot-link {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--color-primary);
-    text-decoration: none;
-    transition: color 200ms ease;
-}
-
-.forgot-link:hover {
-    color: var(--color-accent);
-}
-
-.login-footer {
-    text-align: center;
-    margin-top: var(--space-xl);
-}
-
-.footer-text {
-    font-size: 14px;
-    color: var(--color-muted);
-}
-
-.footer-link {
-    color: var(--color-primary);
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 200ms ease;
-}
-
-.footer-link:hover {
-    color: var(--color-accent);
-}
-</style>
-@endpush
 
 @push('script')
 <script>
@@ -433,6 +190,21 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Clerk sign-in/sign-up toggle
+    const clerkToggle = document.getElementById('clerk-toggle');
+    const clerkSignIn = document.getElementById('clerk-sign-in');
+    const clerkSignUp = document.getElementById('clerk-sign-up');
+    if (clerkToggle && clerkSignIn && clerkSignUp) {
+        clerkToggle.addEventListener('click', function() {
+            const isSignIn = clerkSignIn.style.display !== 'none';
+            clerkSignIn.style.display = isSignIn ? 'none' : 'block';
+            clerkSignUp.style.display = isSignIn ? 'block' : 'none';
+            clerkToggle.textContent = isSignIn
+                ? '{{ __('Already have an account? Sign in') }}'
+                : '{{ __('Need an account? Sign up') }}';
+        });
+    }
 });
 </script>
 @endpush

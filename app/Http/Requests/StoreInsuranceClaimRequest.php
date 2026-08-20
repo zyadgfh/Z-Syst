@@ -2,41 +2,36 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
-
-class StoreInsuranceClaimRequest extends FormRequest
+class StoreInsuranceClaimRequest extends BaseFormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('create', \App\Models\InsuranceClaim::class);
     }
 
     public function rules(): array
     {
         return [
-            'insurance_policy_id' => 'required|exists:insurance_policies,id',
-            'sale_id' => 'nullable|exists:sales,id',
-            'prescription_id' => 'nullable|exists:prescriptions,id',
-            'service_date' => 'required|date',
-            'total_amount' => 'required|numeric|min:0',
-            'line_items' => 'nullable|array',
-            'line_items.*.description' => 'required_with:line_items|string|max:255',
-            'line_items.*.amount' => 'required_with:line_items|numeric|min:0',
-            'line_items.*.covered' => 'nullable|numeric|min:0',
-            'notes' => 'nullable|string|max:1000',
-            'metadata' => 'nullable|array',
+            'business_id' => 'required|exists:businesses,id',
+            'company_id' => 'required|exists:insurance_companies,id',
+            'policy_id' => 'required|exists:insurance_policies,id',
+            'patient_name' => 'required|string|max:255',
+            'patient_phone' => 'nullable|string|max:20',
+            'claim_amount' => 'required|numeric|min:0',
+            'claim_date' => 'required|date',
+            'description' => 'nullable|string|max:2000',
+            'documents' => 'nullable|array',
+            'documents.*' => 'file|max:10240',
         ];
     }
 
-    protected function failedValidation(Validator $validator)
+    public function messages(): array
     {
-        throw new HttpResponseException(
-            response()->json([
-                'message' => 'Validation failed.',
-                'errors' => $validator->errors(),
-            ], 422)
-        );
+        return [
+            'company_id.required' => __('Insurance company is required'),
+            'policy_id.required' => __('Insurance policy is required'),
+            'patient_name.required' => __('Patient name is required'),
+            'claim_amount.required' => __('Claim amount is required'),
+        ];
     }
 }

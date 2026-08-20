@@ -1,7 +1,7 @@
 /* Z-Syst Pharmacy Design System - Main CSS Variables */
 
 :root {
-  /* Primary Colors - Medical Green Theme */
+  /* Primary Colors - Pharmacy Green + Trust Blue */
   --color-primary: #15803D;
   --color-on-primary: #FFFFFF;
   --color-secondary: #22C55E;
@@ -25,14 +25,14 @@
   --color-border-dark: #334155;
   --color-card-dark: #1E293B;
 
-  /* Spacing - Density 7/10 (Dashboard Optimized) */
-  --space-xs: 8px;
-  --space-sm: 12px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-2xl: 48px;
-  --space-3xl: 64px;
+  /* Spacing - Density 8/10 (Dense / Dashboard) */
+  --space-xs: 2px;
+  --space-sm: 4px;
+  --space-md: 8px;
+  --space-lg: 12px;
+  --space-xl: 16px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -67,7 +67,7 @@
 }
 
 body {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Fira Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 16px;
   line-height: 1.5;
   color: var(--color-foreground);
@@ -78,7 +78,7 @@ body {
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Fira Code', 'Fira Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 600;
   line-height: 1.2;
   color: var(--color-foreground);
@@ -112,13 +112,13 @@ p {
   }
 }
 
-/* Buttons */
+/* Buttons - matches z-syst-pharmacy-web design system */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 12px 24px;
-  border-radius: var(--radius-md);
+  border-radius: 8px;
   font-weight: 600;
   font-size: 16px;
   cursor: pointer;
@@ -135,25 +135,24 @@ p {
 }
 
 .btn-primary {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: #0369A1;
+  color: white;
 }
 
 .btn-primary:hover {
   opacity: 0.9;
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
   background: transparent;
-  color: var(--color-primary);
-  border: 2px solid var(--color-primary);
+  color: #15803D;
+  border: 2px solid #15803D;
 }
 
 .btn-secondary:hover {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: #15803D;
+  color: white;
 }
 
 .btn-destructive {
@@ -165,6 +164,39 @@ p {
   opacity: 0.9;
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
+}
+
+.btn-success {
+  background: var(--color-success);
+  color: white;
+}
+
+.btn-success:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-warning {
+  background: var(--color-warning);
+  color: white;
+}
+
+.btn-warning:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+}
+
+.btn-outline:hover {
+  background: var(--color-primary);
+  color: white;
 }
 
 .btn-sm {
@@ -181,14 +213,14 @@ p {
   min-width: 52px;
 }
 
-/* Cards */
+/* Cards - matches z-syst-pharmacy-web design system */
 .card {
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-lg);
+  background: #F0FDF4;
+  border-radius: 12px;
+  padding: 24px;
   box-shadow: var(--shadow-md);
   transition: all 200ms ease;
+  cursor: pointer;
 }
 
 .card:hover {
@@ -212,22 +244,22 @@ p {
   margin-top: var(--space-md);
 }
 
-/* Inputs */
+/* Inputs - matches z-syst-pharmacy-web design system */
 .input {
   padding: 12px 16px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
   font-size: 16px;
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Fira Sans', sans-serif;
   transition: border-color 200ms ease;
   width: 100%;
   min-height: 44px;
 }
 
 .input:focus {
-  border-color: var(--color-primary);
+  border-color: #15803D;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.1);
+  box-shadow: 0 0 0 3px #15803D20;
 }
 
 .input-error {
@@ -293,6 +325,21 @@ p {
   background: rgba(21, 128, 61, 0.05);
 }
 
+/* Modals - matches z-syst-pharmacy-web design system */
+.modal-overlay {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: var(--shadow-xl);
+  max-width: 500px;
+  width: 90%;
+}
+
 /* Utility Classes */
 .text-primary { color: var(--color-primary); }
 .text-secondary { color: var(--color-secondary); }
@@ -312,7 +359,7 @@ p {
 .bg-info { background-color: var(--color-info); }
 .bg-muted { background-color: var(--color-muted); }
 
-/* Spacing Utilities */
+/* Spacing Utilities - Density 8/10 */
 .mt-xs { margin-top: var(--space-xs); }
 .mt-sm { margin-top: var(--space-sm); }
 .mt-md { margin-top: var(--space-md); }
@@ -336,6 +383,15 @@ p {
 .p-xl { padding: var(--space-xl); }
 .p-2xl { padding: var(--space-2xl); }
 .p-3xl { padding: var(--space-3xl); }
+
+/* Gap utilities */
+.gap-xs { gap: var(--space-xs); }
+.gap-sm { gap: var(--space-sm); }
+.gap-md { gap: var(--space-md); }
+.gap-lg { gap: var(--space-lg); }
+.gap-xl { gap: var(--space-xl); }
+.gap-2xl { gap: var(--space-2xl); }
+.gap-3xl { gap: var(--space-3xl); }
 
 /* Logo Styles */
 .logo {

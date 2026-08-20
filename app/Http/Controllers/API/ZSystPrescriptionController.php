@@ -3,22 +3,20 @@
 namespace App\Http\Controllers\Api;
 
 use App\Helpers\HasUploader;
-use App\Helpers\TransactionHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Prescription;
-use App\Models\Sale;
-use App\Models\User;
-use App\Notifications\SendNotification;
+use App\Services\PrescriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class ZSystPrescriptionController extends Controller
 {
     use HasUploader;
+
+    public function __construct(
+        private PrescriptionService $prescriptionService
+    ) {}
 
     /**
      * Display a listing of the prescriptions.
@@ -26,20 +24,20 @@ class ZSystPrescriptionController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
-        $data = Prescription::select('id', 'business_id', 'sale_id', 'party_id', 'image', 'notes', 'status', 'created_at')
-            ->with(['party:id,name,phone', 'sale:id,invoiceNumber'])
+        $data = Prescription::select('id', 'business_id', 'sale_id', 'party_id', 'patient_id', 'doctor_id', 'image', 'notes', 'status', 'created_at')
+            ->with([
+                'party:id,name,phone', 
+                'sale:id,invoiceNumber',
+                'patient:id,name,national_id',
+                'doctor:id,name,specialization'
+            ])
             ->where('business_id', Auth::user()?->business_id)
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($subQuery) use ($search) {
                     $subQuery->where('notes', 'like', '%'.$search.'%')
                         ->orWhere('status', 'like', '%'.$search.'%')
-                        ->orWhereHas('party', function ($q) use ($search) {
-                            $q->where('name', 'like', '%'.$search.'%')
-                                ->orWhere('phone', 'like', '%'.$search.'%');
-                        })
-                        ->orWhereHas('sale', function ($q) use ($search) {
-                            $q->where('invoiceNumber', 'like', '%'.$search.'%');
-                        });
+                        ->orWhere('patient_name', 'like', '%'.$search.'%')
+                        ->orWhere('doctor_name', 'like', '%'.$search.'%');
                 });
             })
             ->latest()
@@ -58,11 +56,11 @@ class ZSystPrescriptionController extends Controller
     {
         $request->validate([
             'party_id' => 'nullable|exists:parties,id',
+            'patient_id' => 'nullable|exists:patients,id',
+            'doctor_id' => 'nullable|exists:doctors,id',
             'notes' => 'nullable|string|max:1000',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
             'prescription_number' => 'nullable|string|max:50',
-            'review_status' => 'nullable|in:pending,approved,rejected',
-            'review_notes' => 'nullable|string|max:2000',
             'expires_at' => 'nullable|date',
             'patient_name' => 'nullable|string|max:255',
             'patient_phone' => 'nullable|string|max:20',
@@ -70,40 +68,38 @@ class ZSystPrescriptionController extends Controller
             'doctor_license' => 'nullable|string|max:100',
             'batch_no' => 'nullable|string|max:100',
             'expiry_date' => 'nullable|date',
+            'items' => 'nullable|array',
+            'items.*.product_id' => 'required_with:items|exists:products,id',
+            'items.*.quantity' => 'required_with:items|integer|min:1',
+            'items.*.dosage' => 'nullable|string|max:255',
+            'items.*.frequency' => 'nullable|string|max:255',
+            'items.*.duration' => 'nullable|string|max:255',
+            'items.*.instructions' => 'nullable|string|max:1000',
         ]);
 
-        $prescription = TransactionHelper::run(function () use ($request) {
-            $prescription = Prescription::create([
-                'business_id' => Auth::user()?->business_id,
-                'party_id' => $request->party_id,
-                'notes' => $request->notes,
-                'image' => $this->upload($request, 'image'),
-                'status' => 'pending',
-                'prescription_number' => $request->prescription_number ?? 'RX-'.Str::upper(Str::random(6)),
-                'review_status' => $request->review_status ?? 'pending',
-                'review_notes' => $request->review_notes,
-                'expires_at' => $request->expires_at,
-                'patient_name' => $request->patient_name,
-                'patient_phone' => $request->patient_phone,
-                'doctor_name' => $request->doctor_name,
-                'doctor_license' => $request->doctor_license,
-                'meta' => [
-                    'uploaded_by' => Auth::id(),
-                    'uploaded_at' => now()->toDateTimeString(),
-                    'batch_no' => $request->batch_no,
-                    'expiry_date' => $request->expiry_date,
-                ],
+        try {
+            $data = $request->all();
+            $data['image'] = $this->upload($request, 'image');
+
+            if ($request->has('batch_no')) {
+                $data['meta']['batch_no'] = $request->batch_no;
+            }
+            if ($request->has('expiry_date')) {
+                $data['meta']['expiry_date'] = $request->expiry_date;
+            }
+
+            $prescription = $this->prescriptionService->createPrescription($data, Auth::user()->business_id);
+
+            return response()->json([
+                'message' => __('Prescription saved successfully.'),
+                'data' => $prescription->load(['party:id,name,phone', 'patient:id,name', 'doctor:id,name']),
             ]);
-
-            $this->notifyIfExpiringSoon($prescription);
-
-            return $prescription;
-        }, 'prescription:store', ['party_id' => $request->party_id]);
-
-        return response()->json([
-            'message' => __('Prescription saved successfully.'),
-            'data' => $prescription->load(['party:id,name,phone']),
-        ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => __('Error saving prescription.'),
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -113,11 +109,14 @@ class ZSystPrescriptionController extends Controller
     {
         $data = Prescription::with([
             'party:id,name,phone,address',
+            'patient:id,name,national_id,date_of_birth',
+            'doctor:id,name,specialization,license_number',
             'sale:id,invoiceNumber,totalAmount,saleDate',
             'sale.details:id,sale_id,product_id,price,quantities',
             'sale.details.product:id,productName',
-        ])
-            ->findOrFail($id);
+            'items',
+            'items.product:id,productName'
+        ])->findOrFail($id);
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -132,6 +131,8 @@ class ZSystPrescriptionController extends Controller
     {
         $request->validate([
             'party_id' => 'nullable|exists:parties,id',
+            'patient_id' => 'nullable|exists:patients,id',
+            'doctor_id' => 'nullable|exists:doctors,id',
             'notes' => 'nullable|string|max:1000',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
             'prescription_number' => 'nullable|string|max:50',
@@ -144,52 +145,42 @@ class ZSystPrescriptionController extends Controller
             'doctor_license' => 'nullable|string|max:100',
             'batch_no' => 'nullable|string|max:100',
             'expiry_date' => 'nullable|date',
+            'items' => 'nullable|array',
+            'items.*.product_id' => 'required_with:items|exists:products,id',
+            'items.*.quantity' => 'required_with:items|integer|min:1',
+            'items.*.dosage' => 'nullable|string|max:255',
+            'items.*.frequency' => 'nullable|string|max:255',
+            'items.*.duration' => 'nullable|string|max:255',
+            'items.*.instructions' => 'nullable|string|max:1000',
         ]);
 
-        $prescription = TransactionHelper::run(function () use ($request, $id) {
+        try {
             $prescription = Prescription::findOrFail($id);
-            $reviewStatus = $request->review_status ?? $prescription->review_status ?? 'pending';
-            $meta = (array) ($prescription->meta ?? []);
+            $data = $request->all();
+
+            if ($request->hasFile('image')) {
+                $data['image'] = $this->upload($request, 'image', $prescription->image);
+            }
 
             if ($request->has('batch_no')) {
-                $meta['batch_no'] = $request->batch_no;
+                $data['meta']['batch_no'] = $request->batch_no;
             }
-
             if ($request->has('expiry_date')) {
-                $meta['expiry_date'] = $request->expiry_date;
+                $data['meta']['expiry_date'] = $request->expiry_date;
             }
 
-            $payload = [
-                'party_id' => $request->party_id ?? $prescription->party_id,
-                'notes' => $request->notes ?? $prescription->notes,
-                'image' => $request->image ? $this->upload($request, 'image', $prescription->image) : $prescription->image,
-                'prescription_number' => $request->prescription_number ?? $prescription->prescription_number,
-                'review_status' => $reviewStatus,
-                'review_notes' => $request->review_notes ?? $prescription->review_notes,
-                'expires_at' => $request->expires_at ?? $prescription->expires_at,
-                'patient_name' => $request->patient_name ?? $prescription->patient_name,
-                'patient_phone' => $request->patient_phone ?? $prescription->patient_phone,
-                'doctor_name' => $request->doctor_name ?? $prescription->doctor_name,
-                'doctor_license' => $request->doctor_license ?? $prescription->doctor_license,
-                'meta' => $meta,
-            ];
+            $updatedPrescription = $this->prescriptionService->updatePrescription($prescription, $data);
 
-            if ($reviewStatus !== $prescription->review_status) {
-                $payload['reviewed_by'] = Auth::id();
-                $payload['reviewed_at'] = now();
-            }
-
-            $prescription->update($payload);
-            $this->notifyIfExpiringSoon($prescription->fresh());
-
-            return $prescription->fresh()->load(['party:id,name,phone']);
-        }, 'prescription:update', ['prescription_id' => $id]);
-
-        return response()->json([
-            'message' => __('Prescription updated successfully.'),
-            'data' => $prescription,
-            'expiry_alerts' => $this->buildExpiryAlertSummary(),
-        ]);
+            return response()->json([
+                'message' => __('Prescription updated successfully.'),
+                'data' => $updatedPrescription,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => __('Error updating prescription.'),
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -198,16 +189,19 @@ class ZSystPrescriptionController extends Controller
     public function destroy($id)
     {
         $prescription = Prescription::findOrFail($id);
+        
+        try {
+            $this->prescriptionService->deletePrescription($prescription);
 
-        if (file_exists($prescription->image)) {
-            Storage::delete($prescription->image);
+            return response()->json([
+                'message' => __('Prescription deleted successfully.'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => __('Error deleting prescription.'),
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $prescription->delete();
-
-        return response()->json([
-            'message' => __('Prescription deleted successfully.'),
-        ]);
     }
 
     /**
@@ -216,7 +210,7 @@ class ZSystPrescriptionController extends Controller
     public function review(Request $request)
     {
         $businessId = Auth::user()?->business_id;
-        $query = Prescription::with(['party:id,name,phone', 'sale:id,invoiceNumber'])
+        $query = Prescription::with(['party:id,name,phone', 'sale:id,invoiceNumber', 'patient:id,name', 'doctor:id,name'])
             ->where('business_id', $businessId)
             ->whereIn('review_status', ['pending', 'approved']);
 
@@ -229,7 +223,6 @@ class ZSystPrescriptionController extends Controller
         return response()->json([
             'message' => __('Data fetched successfully.'),
             'data' => $data,
-            'expiry_alerts' => $this->buildExpiryAlertSummary(),
         ]);
     }
 
@@ -245,113 +238,32 @@ class ZSystPrescriptionController extends Controller
             'expiry_date' => 'nullable|date',
         ]);
 
-        $prescription = TransactionHelper::run(function () use ($request) {
+        try {
             $prescription = Prescription::findOrFail($request->prescription_id);
-
-            if (! $prescription->canBeUsed()) {
-                throw ValidationException::withMessages([
-                    'prescription_id' => [__('The prescription must be approved and not expired before it can be used.')],
-                ]);
+            $data = $request->only(['batch_no', 'expiry_date']);
+            
+            $prescription->load('sale');
+            if (!$prescription->sale) {
+                 // The old method was in the controller, but the service one requires a sale object, not just ID. 
+                 // Wait, linkToSale in PrescriptionService: public function linkToSale(Prescription $prescription, Sale $sale): Prescription
             }
+            
+            // To match the old behaviour where linkToSale could update using Sale ID.
+            $sale = \App\Models\Sale::findOrFail($request->sale_id);
 
-            $meta = (array) ($prescription->meta ?? []);
-            if ($request->has('batch_no')) {
-                $meta['batch_no'] = $request->batch_no;
-            }
-            if ($request->has('expiry_date')) {
-                $meta['expiry_date'] = $request->expiry_date;
-            }
+            $linkedPrescription = $this->prescriptionService->linkToSale($prescription, $sale);
 
-            $prescription->update([
-                'sale_id' => $request->sale_id,
-                'status' => 'used',
-                'used_at' => now(),
-                'meta' => $meta,
+            return response()->json([
+                'message' => __('Prescription linked to sale successfully.'),
+                'data' => $linkedPrescription,
             ]);
-
-            return $prescription->load(['party:id,name,phone', 'sale:id,invoiceNumber']);
-        }, 'prescription:link-to-sale', [
-            'prescription_id' => $request->prescription_id,
-            'sale_id' => $request->sale_id,
-        ]);
-
-        return response()->json([
-            'message' => __('Prescription linked to sale successfully.'),
-            'data' => $prescription,
-            'expiry_alerts' => $this->buildExpiryAlertSummary(),
-        ]);
-    }
-
-    protected function notifyIfExpiringSoon(Prescription $prescription): void
-    {
-        if (empty($prescription->expires_at)) {
-            return;
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => __('Error linking prescription to sale.'),
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $status = $prescription->getExpiryStatus();
-        if (! in_array($status, ['warning', 'critical', 'expired'], true)) {
-            return;
-        }
-
-        $businessId = $prescription->business_id;
-        $users = User::where('business_id', $businessId)->get();
-
-        if ($users->isEmpty()) {
-            return;
-        }
-
-        $days = $prescription->isExpired()
-            ? 0
-            : (int) now()->startOfDay()->diffInDays($prescription->expires_at, false);
-
-        $label = $prescription->isExpired()
-            ? __('expired')
-            : __('expires in :days day(s)', ['days' => $days]);
-
-        $message = __('Prescription :number is :label and needs review.', [
-            'number' => $prescription->prescription_number ?? $prescription->id,
-            'label' => $label,
-        ]);
-
-        Notification::send($users, new SendNotification([
-            'id' => uniqid(),
-            'user' => Auth::user()?->name ?? 'System',
-            'message' => $message,
-            'url' => '/admin/prescriptions',
-        ]));
-    }
-
-    protected function buildExpiryAlertSummary(): array
-    {
-        $businessId = Auth::user()?->business_id;
-
-        if (! $businessId) {
-            return [
-                'expired' => 0,
-                'critical' => 0,
-                'warning' => 0,
-                'total' => 0,
-            ];
-        }
-
-        $items = Prescription::where('business_id', $businessId)
-            ->whereNotNull('expires_at')
-            ->get();
-
-        $summary = [
-            'expired' => 0,
-            'critical' => 0,
-            'warning' => 0,
-            'total' => $items->count(),
-        ];
-
-        foreach ($items as $item) {
-            $status = $item->getExpiryStatus();
-            if ($status !== 'none' && isset($summary[$status])) {
-                $summary[$status]++;
-            }
-        }
-
-        return $summary;
     }
 }

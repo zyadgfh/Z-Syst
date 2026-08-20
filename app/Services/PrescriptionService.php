@@ -31,6 +31,8 @@ class PrescriptionService
                 'business_id' => $businessId,
                 'sale_id' => $data['sale_id'] ?? null,
                 'party_id' => $data['party_id'] ?? null,
+                'patient_id' => $data['patient_id'] ?? null,
+                'doctor_id' => $data['doctor_id'] ?? null,
                 'image' => $data['image'] ?? null,
                 'notes' => $data['notes'] ?? null,
                 'status' => 'pending',
@@ -100,6 +102,8 @@ class PrescriptionService
 
             $prescription->update([
                 'party_id' => $data['party_id'] ?? $prescription->party_id,
+                'patient_id' => $data['patient_id'] ?? $prescription->patient_id,
+                'doctor_id' => $data['doctor_id'] ?? $prescription->doctor_id,
                 'image' => $data['image'] ?? $prescription->image,
                 'notes' => $data['notes'] ?? $prescription->notes,
                 'patient_name' => $data['patient_name'] ?? $prescription->patient_name,

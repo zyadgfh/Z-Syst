@@ -2,35 +2,28 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
-
-class InitiateRecallRequest extends FormRequest
+class InitiateRecallRequest extends BaseFormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('create', \App\Models\RecallEvent::class);
     }
 
     public function rules(): array
     {
         return [
+            'business_id' => 'required|exists:businesses,id',
             'product_id' => 'nullable|exists:products,id',
-            'batch_lot_number' => 'required|string|max:255',
+            'batch_lot_number' => 'nullable|string|max:255',
             'reason' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'initiated_at' => 'required|date',
+            'description' => 'nullable|string|max:2000',
         ];
     }
 
-    protected function failedValidation(Validator $validator)
+    public function messages(): array
     {
-        throw new HttpResponseException(
-            response()->json([
-                'message' => 'Validation failed.',
-                'errors' => $validator->errors(),
-            ], 422)
-        );
+        return [
+            'reason.required' => __('Recall reason is required'),
+        ];
     }
 }

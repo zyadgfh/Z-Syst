@@ -2,35 +2,32 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
-
-class StoreWarehouseRequest extends FormRequest
+class StoreWarehouseRequest extends BaseFormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('create', \App\Models\Warehouse::class);
     }
 
     public function rules(): array
     {
         return [
+            'business_id' => 'required|exists:businesses,id',
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:warehouses,code',
-            'location' => 'nullable|string|max:500',
-            'is_default' => 'sometimes|boolean',
-            'is_active' => 'sometimes|boolean',
+            'code' => 'nullable|string|max:50|unique:warehouses,code,NULL,id,business_id,' . auth()->user()?->business_id,
+            'location' => 'nullable|string|max:255',
+            'is_default' => 'boolean',
+            'is_active' => 'boolean',
+            'capacity' => 'nullable|integer|min:0',
+            'manager_id' => 'nullable|exists:users,id',
         ];
     }
 
-    protected function failedValidation(Validator $validator)
+    public function messages(): array
     {
-        throw new HttpResponseException(
-            response()->json([
-                'message' => 'Validation failed.',
-                'errors' => $validator->errors(),
-            ], 422)
-        );
+        return [
+            'name.required' => __('Warehouse name is required'),
+            'code.unique' => __('Warehouse code already exists'),
+        ];
     }
 }

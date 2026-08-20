@@ -1,4 +1,4 @@
-<!-- Modal Component -->
+<!-- Modal Component - matches z-syst-pharmacy-web design system -->
 <div class="modal-overlay" id="{{ $id ?? 'modal' }}" style="display: {{ $show ?? 'none' }};">
     <div class="modal">
         <div class="modal-header">
@@ -37,12 +37,12 @@
 }
 
 .modal {
-    background: var(--color-background);
-    border-radius: var(--radius-xl);
-    padding: var(--space-2xl);
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
     box-shadow: var(--shadow-xl);
     max-width: 500px;
-    width: 100%;
+    width: 90%;
     max-height: 90vh;
     overflow-y: auto;
 }

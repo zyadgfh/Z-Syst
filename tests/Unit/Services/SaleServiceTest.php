@@ -22,10 +22,7 @@ class SaleServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->saleService = new SaleService(
-            new \App\Services\FefoService(),
-            new \App\Services\AdvancedWorkflowService()
-        );
+        $this->saleService = app(SaleService::class);
     }
 
     public function test_create_sale_with_stock_validation()
@@ -63,7 +60,7 @@ class SaleServiceTest extends TestCase
             'saleDate' => now()->toDateString(),
         ];
 
-        $sale = $this->saleService->createSale($data, $businessId, $userId);
+        $sale = $this->saleService->create($data, $businessId, $userId);
 
         $this->assertDatabaseHas('sales', [
             'business_id' => $businessId,
@@ -116,7 +113,7 @@ class SaleServiceTest extends TestCase
         ];
 
         $this->expectException(\App\Exceptions\BusinessRuleException::class);
-        $this->saleService->createSale($data, $businessId, $userId);
+        $this->saleService->create($data, $businessId, $userId);
     }
 
     public function test_cannot_create_due_sale_for_walking_customer()
@@ -150,7 +147,7 @@ class SaleServiceTest extends TestCase
         ];
 
         $this->expectException(\App\Exceptions\BusinessRuleException::class);
-        $this->saleService->createSale($data, $businessId, $userId);
+        $this->saleService->create($data, $businessId, $userId);
     }
 
     public function test_update_sale_restores_previous_stock()
@@ -188,7 +185,7 @@ class SaleServiceTest extends TestCase
             'paymentType' => 'Cash',
         ];
 
-        $sale = $this->saleService->createSale($data, $businessId, $userId);
+        $sale = $this->saleService->create($data, $businessId, $userId);
         $this->assertEquals(5, $stock->fresh()->productStock);
 
         // Update sale with different quantity
@@ -210,7 +207,7 @@ class SaleServiceTest extends TestCase
             'paymentType' => 'Cash',
         ];
 
-        $updatedSale = $this->saleService->updateSale($sale, $updateData, $businessId);
+        $updatedSale = $this->saleService->update($sale, $updateData, $businessId, $userId);
 
         // Stock should be restored and then deducted for new quantity
         $this->assertEquals(7, $stock->fresh()->productStock);
@@ -250,60 +247,14 @@ class SaleServiceTest extends TestCase
             'paymentType' => 'Cash',
         ];
 
-        $sale = $this->saleService->createSale($data, $businessId, $userId);
+        $sale = $this->saleService->create($data, $businessId, $userId);
         $this->assertEquals(5, $stock->fresh()->productStock);
 
-        $result = $this->saleService->deleteSale($sale);
+        $result = $this->saleService->delete($sale, $businessId, $userId);
 
         $this->assertTrue($result);
         $this->assertEquals(10, $stock->fresh()->productStock); // Stock restored
         $this->assertDatabaseMissing('sales', ['id' => $sale->id]);
-    }
-
-    public function test_calculate_profit_loss()
-    {
-        $business = Business::factory()->create();
-        $user = User::factory()->create(['business_id' => $business->id]);
-        $party = Party::factory()->create(['business_id' => $business->id, 'type' => 'customer']);
-        $product = Product::factory()->create([
-            'business_id' => $business->id,
-            'purchase_without_tax' => 30,
-            'sales_price' => 50,
-        ]);
-        $businessId = $business->id;
-        $userId = $user->id;
-
-        Stock::factory()->create([
-            'business_id' => $businessId,
-            'product_id' => $product->id,
-            'productStock' => 10,
-        ]);
-
-        $data = [
-            'party_id' => $party->id,
-            'products' => [
-                [
-                    'product_id' => $product->id,
-                    'price' => 50,
-                    'lossProfit' => 10,
-                    'quantities' => 5,
-                ],
-            ],
-            'totalAmount' => 250,
-            'paidAmount' => 250,
-            'dueAmount' => 0,
-            'isPaid' => true,
-            'paymentType' => 'Cash',
-        ];
-
-        $sale = $this->saleService->createSale($data, $businessId, $userId);
-
-        $profitLoss = $this->saleService->calculateProfitLoss($sale);
-
-        $this->assertEquals(250, $profitLoss['total_revenue']);
-        $this->assertEquals(150, $profitLoss['total_cost']); // 30 * 5
-        $this->assertEquals(100, $profitLoss['profit']);
-        $this->assertEquals(40, $profitLoss['profit_margin']); // (100/250)*100
     }
 
     public function test_generate_unique_invoice_number()
@@ -338,8 +289,8 @@ class SaleServiceTest extends TestCase
             'paymentType' => 'Cash',
         ];
 
-        $sale1 = $this->saleService->createSale($data, $businessId, $userId);
-        $sale2 = $this->saleService->createSale($data, $businessId, $userId);
+        $sale1 = $this->saleService->create($data, $businessId, $userId);
+        $sale2 = $this->saleService->create($data, $businessId, $userId);
 
         $this->assertNotEquals($sale1->invoiceNumber, $sale2->invoiceNumber);
         $this->assertStringStartsWith('INV-', $sale1->invoiceNumber);

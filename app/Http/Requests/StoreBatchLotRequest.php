@@ -2,49 +2,53 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 
-class StoreBatchLotRequest extends FormRequest
+class StoreBatchLotRequest extends BaseFormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return auth()->check() && auth()->user()->business_id !== null;
     }
 
     public function rules(): array
     {
         return [
-            'product_id' => 'required|exists:products,id',
-            'batch_number' => 'required|string|max:100',
-            'lot_number' => 'nullable|string|max:100',
-            'quantity' => 'required|numeric|min:0',
-            'manufacturing_date' => 'nullable|date',
-            'expiry_date' => 'nullable|date|after_or_equal:manufacturing_date',
-            'supplier_id' => 'nullable|exists:parties,id',
-            'purchase_id' => 'nullable|exists:purchases,id',
-            'storage_location' => 'nullable|string|max:255',
-            'cost_per_unit' => 'nullable|numeric|min:0',
-            'status' => 'nullable|in:available,sold,expired,recalled,damaged',
+            'product_id' => ['required', 'integer', 'exists:products,id'],
+            'batch_number' => ['required', 'string', 'max:100'],
+            'lot_number' => ['nullable', 'string', 'max:100'],
+            'manufacture_date' => ['nullable', 'date', 'before_or_equal:today'],
+            'expiry_date' => ['required', 'date', 'after:manufacture_date'],
+            'recall_date' => ['nullable', 'date', 'after:manufacture_date'],
+            'supplier_name' => ['nullable', 'string', 'max:255'],
+            'notes' => ['nullable', 'string', 'max:1000'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'product_id.exists' => 'Invalid product selected.',
-            'expiry_date.after_or_equal' => 'Expiry date must be after or equal to manufacturing date.',
+            'product_id.required' => __('Product is required.'),
+            'product_id.exists' => __('Selected product does not exist.'),
+            'batch_number.required' => __('Batch number is required.'),
+            'manufacture_date.before_or_equal' => __('Manufacture date cannot be in the future.'),
+            'expiry_date.required' => __('Expiry date is required.'),
+            'expiry_date.after' => __('Expiry date must be after manufacture date.'),
+            'recall_date.after' => __('Recall date must be after manufacture date.'),
         ];
     }
 
-    protected function failedValidation(Validator $validator)
+    public function attributes(): array
     {
-        throw new HttpResponseException(
-            response()->json([
-                'message' => 'Validation failed.',
-                'errors' => $validator->errors(),
-            ], 422)
-        );
+        return [
+            'product_id' => __('Product'),
+            'batch_number' => __('Batch Number'),
+            'lot_number' => __('Lot Number'),
+            'manufacture_date' => __('Manufacture Date'),
+            'expiry_date' => __('Expiry Date'),
+            'recall_date' => __('Recall Date'),
+            'supplier_name' => __('Supplier Name'),
+            'notes' => __('Notes'),
+        ];
     }
 }

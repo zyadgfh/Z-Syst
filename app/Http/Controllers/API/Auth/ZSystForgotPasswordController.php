@@ -27,7 +27,7 @@ class ZSystForgotPasswordController extends Controller
         ];
 
         try {
-            if (env('QUEUE_MAIL')) {
+            if (config('zsyst.queue_mail')) {
                 Mail::to($request->email)->queue(new PasswordReset($data));
             } else {
                 Mail::to($request->email)->send(new PasswordReset($data));

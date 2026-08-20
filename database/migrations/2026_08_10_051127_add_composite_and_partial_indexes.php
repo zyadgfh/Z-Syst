@@ -34,19 +34,20 @@ return new class extends Migration
             $table->index(['business_id', 'party_type'], 'idx_parties_business_type');
         });
         
-        // Partial indexes for filtered queries
-        
-        // Unpaid sales
-        DB::statement("CREATE INDEX idx_sales_unpaid_partial ON sales(id) WHERE isPaid = false");
-        
-        // Sales with due amounts
-        DB::statement("CREATE INDEX idx_sales_with_due_partial ON sales(id) WHERE dueAmount > 0");
-        
-        // Available stock
-        DB::statement("CREATE INDEX idx_stocks_available_partial ON stocks(id) WHERE productStock > 0");
-        
-        // Stocks with expiry dates
-        DB::statement("CREATE INDEX idx_stocks_with_expiry_partial ON stocks(id) WHERE expire_date IS NOT NULL");
+        // Partial indexes for filtered queries (skip on SQLite - not supported)
+        if (DB::getDriverName() !== 'sqlite') {
+            // Unpaid sales
+            DB::statement("CREATE INDEX idx_sales_unpaid_partial ON sales(id) WHERE isPaid = false");
+            
+            // Sales with due amounts
+            DB::statement("CREATE INDEX idx_sales_with_due_partial ON sales(id) WHERE dueAmount > 0");
+            
+            // Available stock
+            DB::statement("CREATE INDEX idx_stocks_available_partial ON stocks(id) WHERE productStock > 0");
+            
+            // Stocks with expiry dates
+            DB::statement("CREATE INDEX idx_stocks_with_expiry_partial ON stocks(id) WHERE expire_date IS NOT NULL");
+        }
     }
 
     /**
@@ -71,10 +72,12 @@ return new class extends Migration
             $table->dropIndex('idx_parties_business_type');
         });
         
-        // Drop partial indexes
-        DB::statement("DROP INDEX IF EXISTS idx_sales_unpaid_partial");
-        DB::statement("DROP INDEX IF EXISTS idx_sales_with_due_partial");
-        DB::statement("DROP INDEX IF EXISTS idx_stocks_available_partial");
-        DB::statement("DROP INDEX IF EXISTS idx_stocks_with_expiry_partial");
+        // Drop partial indexes (skip on SQLite)
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("DROP INDEX IF EXISTS idx_sales_unpaid_partial");
+            DB::statement("DROP INDEX IF EXISTS idx_sales_with_due_partial");
+            DB::statement("DROP INDEX IF EXISTS idx_stocks_available_partial");
+            DB::statement("DROP INDEX IF EXISTS idx_stocks_with_expiry_partial");
+        }
     }
 };

@@ -32,26 +32,12 @@ return new class extends Migration
             DB::statement("ALTER TABLE purchases ADD CONSTRAINT check_discount_amount CHECK (discountAmount >= 0)");
         }
 
-        // Add UNIQUE constraints for tenant-level uniqueness (supported in SQLite)
-        Schema::table('products', function (Blueprint $table) {
-            // Ensure unique SKU per business/branch
-            $table->unique(['business_id', 'branch_id', 'productCode'], 'unique_product_sku_tenant');
-        });
-
-        Schema::table('stocks', function (Blueprint $table) {
-            // Ensure unique batch per business/branch/product
-            $table->unique(['business_id', 'branch_id', 'product_id', 'batch_no'], 'unique_stock_batch_tenant');
-        });
-
-        Schema::table('sales', function (Blueprint $table) {
-            // Ensure unique invoice number per business/branch
-            $table->unique(['business_id', 'branch_id', 'invoiceNumber'], 'unique_sale_invoice_tenant');
-        });
-
-        Schema::table('purchases', function (Blueprint $table) {
-            // Ensure unique invoice number per business/branch
-            $table->unique(['business_id', 'branch_id', 'invoiceNumber'], 'unique_purchase_invoice_tenant');
-        });
+        // UNIQUE constraints for tenant-level uniqueness are already defined in:
+        // - add_branch_id_to_products_table (unique_product_sku)
+        // - add_branch_id_to_stocks_table (unique_stock_batch)
+        // - add_branch_id_to_sales_table (unique_sale_invoice)
+        // - add_branch_id_to_purchases_table (unique_purchase_invoice)
+        // No need to duplicate them here.
     }
 
     /**
@@ -77,21 +63,7 @@ return new class extends Migration
             DB::statement("ALTER TABLE purchase_details DROP CONSTRAINT check_positive_quantity");
         }
 
-        // Remove UNIQUE constraints
-        Schema::table('products', function (Blueprint $table) {
-            $table->dropUnique('unique_product_sku_tenant');
-        });
-
-        Schema::table('stocks', function (Blueprint $table) {
-            $table->dropUnique('unique_stock_batch_tenant');
-        });
-
-        Schema::table('sales', function (Blueprint $table) {
-            $table->dropUnique('unique_sale_invoice_tenant');
-        });
-
-        Schema::table('purchases', function (Blueprint $table) {
-            $table->dropUnique('unique_purchase_invoice_tenant');
-        });
+        // UNIQUE constraints are managed by their original migrations
+        // (add_branch_id_to_* tables). No drops needed here.
     }
 };

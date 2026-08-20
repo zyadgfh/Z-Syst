@@ -77,7 +77,9 @@ class PosPaymentController extends Controller
                 'customer_email' => 'nullable|email',
             ]);
 
-            $gateway = CompanyPaymentGateway::findOrFail($request->gateway_id);
+            $gateway = CompanyPaymentGateway::where('id', $request->gateway_id)
+                ->where('business_id', auth()->user()->business_id)
+                ->firstOrFail();
 
             if (! $gateway->is_active) {
                 return response()->json([

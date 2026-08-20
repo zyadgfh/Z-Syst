@@ -198,18 +198,18 @@ def predict_customer_churn(customer_id):
 
 ```php
 // البوابات المقترحة للسوق المصري:
-1. Payfort (من Amazon)
-2. Telr
+1. Vodafone Cash
+2. Orange Cash
 3. Fawry
-4. Paymob
-5. Google Pay
-6. Apple Pay
+4. Etisalat Cash
+5. InstaPay
+
 ```
 
-**الملفات المطلوبة:**
+**الملفات الطلوبة:**
 ```
 app/Services/Payment/PayfortService.php
-app/Services/Payment/TelrService.php
+app/Services/PaymeVodafoneCashelrService.php
 app/Services/Payment/FawryService.php
 database/migrations/xxx_create_payment_transactions_table.php
 ```
@@ -217,12 +217,11 @@ database/migrations/xxx_create_payment_transactions_table.php
 **التقدير الزمني:** 2-3 أسابيع
 
 #### 3.2 SMS & Notification Integration
-**الفكرة:** إرسال تنبيهات عبر SMS و Email
+**الفكرة:** إرسال تنبيهات عاشعارات الموقع او التطبيق او واتسابail
 
 ```php
 // الخدمات المقترحة:
-1. Twilio (SMS + WhatsApp)
-2. AWS SES (Email)
+1. TwiliSMS + WhatsApil)
 3. Firebase Cloud Messaging (Push Notifications)
 4. OneSignal (Multi-channel)
 ```
@@ -450,7 +449,8 @@ resources/views/sw.blade.php
 
 ### 1. Market Expansion
 **الأسواق المحتملة:**
-- الخليج (السعودية، الإمارات، الكويت)
+- مصر ) 
+- الخليج (السعودية، الإمارات، الك)ويت)
 - الشرق الأوسط (لبنان، الأردن، فلسطين)
 - شمال إفريقيا (المغرب، الجزائر، تونس)
 

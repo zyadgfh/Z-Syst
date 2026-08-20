@@ -7,20 +7,22 @@ use App\Http\Requests\StoreWarehouseRequest;
 use App\Http\Requests\UpdateWarehouseRequest;
 use App\Http\Resources\WarehouseResource;
 use App\Models\Warehouse;
-use App\Services\WarehouseStockService;
+use App\Services\WarehouseService;
 use Illuminate\Http\Request;
 
 class WarehouseController extends Controller
 {
-    protected WarehouseStockService $stockService;
+    protected WarehouseService $warehouseService;
 
-    public function __construct(WarehouseStockService $stockService)
+    public function __construct(WarehouseService $warehouseService)
     {
-        $this->stockService = $stockService;
+        $this->warehouseService = $warehouseService;
     }
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Warehouse::class);
+
         $warehouses = Warehouse::where('business_id', $request->user()->business_id)
             ->with('stocks')
             ->get();
@@ -33,11 +35,12 @@ class WarehouseController extends Controller
 
     public function store(StoreWarehouseRequest $request)
     {
-        $validated = $request->validated();
+        $this->authorize('create', Warehouse::class);
 
+        $validated = $request->validated();
         $validated['business_id'] = $request->user()->business_id;
 
-        $warehouse = $this->stockService->createWarehouse($validated);
+        $warehouse = $this->warehouseService->createWarehouse($validated);
 
         return response()->json([
             'message' => __('Warehouse created successfully.'),
@@ -47,7 +50,7 @@ class WarehouseController extends Controller
 
     public function show(Request $request, Warehouse $warehouse)
     {
-        $this->authorizeWarehouseAccess($request, $warehouse);
+        $this->authorize('view', $warehouse);
 
         $warehouse->load('stocks.product');
 
@@ -59,11 +62,11 @@ class WarehouseController extends Controller
 
     public function update(UpdateWarehouseRequest $request, Warehouse $warehouse)
     {
-        $this->authorizeWarehouseAccess($request, $warehouse);
+        $this->authorize('update', $warehouse);
 
         $validated = $request->validated();
 
-        $warehouse = $this->stockService->updateWarehouse($warehouse, $validated);
+        $warehouse = $this->warehouseService->updateWarehouse($warehouse, $validated);
 
         return response()->json([
             'message' => __('Warehouse updated successfully.'),
@@ -73,7 +76,7 @@ class WarehouseController extends Controller
 
     public function destroy(Request $request, Warehouse $warehouse)
     {
-        $this->authorizeWarehouseAccess($request, $warehouse);
+        $this->authorize('delete', $warehouse);
 
         $warehouse->delete();
 
@@ -84,7 +87,7 @@ class WarehouseController extends Controller
 
     public function stock(Request $request, Warehouse $warehouse)
     {
-        $this->authorizeWarehouseAccess($request, $warehouse);
+        $this->authorize('view', $warehouse);
 
         $warehouse->load('stocks.product');
 
@@ -92,12 +95,5 @@ class WarehouseController extends Controller
             'message' => __('Data fetched successfully.'),
             'data' => $warehouse->stocks,
         ]);
-    }
-
-    protected function authorizeWarehouseAccess(Request $request, Warehouse $warehouse): void
-    {
-        if ($warehouse->business_id !== $request->user()->business_id) {
-            abort(403, __('Forbidden.'));
-        }
     }
 }

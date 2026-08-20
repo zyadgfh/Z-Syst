@@ -236,8 +236,12 @@ class UserController extends Controller
             'target_user_id' => 'required|exists:users,id',
         ]);
 
-        $sourceUser = User::findOrFail($request->source_user_id);
-        $targetUser = User::findOrFail($request->target_user_id);
+        $sourceUser = User::where('id', $request->source_user_id)
+            ->where('business_id', auth()->user()->business_id)
+            ->firstOrFail();
+        $targetUser = User::where('id', $request->target_user_id)
+            ->where('business_id', auth()->user()->business_id)
+            ->firstOrFail();
 
         try {
             $user = $this->userManagementService->cloneUserPermissions($sourceUser, $targetUser);

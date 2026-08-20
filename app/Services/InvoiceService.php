@@ -25,6 +25,9 @@ class InvoiceService
     public function generateInvoiceFromSale(Sale $sale): Invoice
     {
         return $this->executeTransaction(function () use ($sale) {
+            // Eager load details and product to avoid N+1 queries
+            $sale->loadMissing('details.product:id,productName');
+
             $invoice = Invoice::create([
                 'business_id' => $sale->business_id,
                 'branch_id' => $sale->branch_id ?? null,
@@ -49,7 +52,7 @@ class InvoiceService
                 InvoiceItem::create([
                     'invoice_id' => $invoice->id,
                     'product_id' => $detail->product_id,
-                    'description' => $detail->product->productName ?? 'Product',
+                    'description' => optional($detail->product)->productName ?? 'Product',
                     'quantity' => $detail->quantities,
                     'unit_price' => $detail->price,
                     'discount' => 0,
@@ -122,6 +125,8 @@ class InvoiceService
      */
     public function calculateInvoiceTotals(Invoice $invoice): array
     {
+        $invoice->loadMissing('items');
+
         $subtotal = $invoice->items->sum(function ($item) {
             return $item->unit_price * $item->quantity;
         });

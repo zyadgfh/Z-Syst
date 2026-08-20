@@ -125,6 +125,7 @@ class Kernel extends HttpKernel
         'business.context' => EnsureBusinessContext::class,
         'tenant.check' => TenantAccessCheck::class,
         'subscription.limit' => CheckSubscriptionLimits::class,
+        'clerk.auth' => \App\Http\Middleware\ClerkSessionAuth::class,
         // 'token_expired' => \App\Http\Middleware\TokenExpired::class,
     ];
 }

@@ -228,7 +228,7 @@ class PaymentWebhookController extends Controller
      */
     protected function verifyVodafoneSignature(string $payload, ?string $signature): bool
     {
-        $secret = env('VODAFONE_CASH_API_SECRET');
+        $secret = config('services.payment.vodafone_cash_api_secret');
         if (! $secret || ! $signature) {
             return false;
         }
@@ -243,7 +243,7 @@ class PaymentWebhookController extends Controller
      */
     protected function verifyBankCardSignature(string $payload, ?string $signature): bool
     {
-        $secret = env('BANK_CARD_API_SECRET');
+        $secret = config('services.payment.bank_card_api_secret');
         if (! $secret || ! $signature) {
             return false;
         }
@@ -258,7 +258,7 @@ class PaymentWebhookController extends Controller
      */
     protected function verifyFawrySignature(string $payload, ?string $signature): bool
     {
-        $secret = env('FAWRY_SECURITY_KEY');
+        $secret = config('services.payment.fawry_security_key');
         if (! $secret || ! $signature) {
             return false;
         }
@@ -273,7 +273,7 @@ class PaymentWebhookController extends Controller
      */
     protected function verifyOrangeSignature(string $payload, ?string $signature): bool
     {
-        $secret = env('ORANGE_CASH_API_SECRET');
+        $secret = config('services.payment.orange_cash_api_secret');
         if (! $secret || ! $signature) {
             return false;
         }
@@ -288,7 +288,7 @@ class PaymentWebhookController extends Controller
      */
     protected function verifyInstaPaySignature(string $payload, ?string $signature): bool
     {
-        $secret = env('INSTAPAY_API_SECRET');
+        $secret = config('services.payment.instapay_api_secret');
         if (! $secret || ! $signature) {
             return false;
         }

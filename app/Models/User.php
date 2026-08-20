@@ -31,6 +31,7 @@ class User extends Authenticatable
         'visibility',
         'remember_token',
         'email_verified_at',
+        'clerk_id',
         'supabase_id',
         'supabase_access_token',
         'supabase_refresh_token',
@@ -60,6 +61,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'clerk_id',
         'supabase_access_token',
         'supabase_refresh_token',
     ];
