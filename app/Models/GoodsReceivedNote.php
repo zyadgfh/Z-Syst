@@ -22,6 +22,7 @@ class GoodsReceivedNote extends Model
         'supplier_id',
         'business_id',
         'branch_id',
+        'warehouse_id',
         'received_by',
         'verified_by',
         'grn_number',
@@ -45,6 +46,8 @@ class GoodsReceivedNote extends Model
     /**
      * Status constants
      */
+    const STATUS_DRAFT = 'draft';
+
     const STATUS_PENDING = 'pending';
 
     const STATUS_VERIFIED = 'verified';
@@ -109,6 +112,17 @@ class GoodsReceivedNote extends Model
     public function items(): HasMany
     {
         return $this->hasMany(GRNItem::class, 'grn_id');
+    }
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (GoodsReceivedNote $grn) {
+            if (empty($grn->grn_number)) {
+                $grn->grn_number = self::generateGRNNumber();
+            }
+        });
     }
 
     /**

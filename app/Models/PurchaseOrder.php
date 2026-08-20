@@ -21,6 +21,7 @@ class PurchaseOrder extends Model
         'supplier_id',
         'business_id',
         'branch_id',
+        'warehouse_id',
         'created_by',
         'approved_by',
         'po_number',
@@ -44,6 +45,7 @@ class PurchaseOrder extends Model
         'rejected_at',
         'rejection_reason',
         'is_active',
+        'shipping_cost',
     ];
 
     /**

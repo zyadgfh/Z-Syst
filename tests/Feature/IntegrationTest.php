@@ -395,11 +395,11 @@ class IntegrationTest extends TestCase
         // Create product
         $product = Product::factory()->create([
             'business_id' => $business->id,
-            'name' => 'Test Product',
+            'productName' => 'Test Product',
         ]);
 
         // Update product (should trigger audit log)
-        $product->update(['name' => 'Updated Product']);
+        $product->update(['productName' => 'Updated Product']);
 
         // Verify audit log was created
         $this->assertDatabaseHas('audit_logs', [
@@ -425,7 +425,7 @@ class IntegrationTest extends TestCase
         // Try to create product without permission
         $productData = [
             'business_id' => $business->id,
-            'name' => 'Test Product',
+            'productName' => 'Test Product',
             'price' => 10.00,
         ];
 
@@ -434,7 +434,7 @@ class IntegrationTest extends TestCase
 
         $response->assertStatus(403);
         $this->assertDatabaseMissing('products', [
-            'name' => 'Test Product',
+            'productName' => 'Test Product',
         ]);
     }
 
@@ -458,7 +458,7 @@ class IntegrationTest extends TestCase
         // Create product for business 1
         $product1 = Product::factory()->create([
             'business_id' => $business1->id,
-            'name' => 'Business 1 Product',
+            'productName' => 'Business 1 Product',
         ]);
 
         // User 2 should not see business 1's product
@@ -487,7 +487,7 @@ class IntegrationTest extends TestCase
         // Update data
         Product::factory()->create([
             'business_id' => $business->id,
-            'name' => 'New Product',
+            'productName' => 'New Product',
         ]);
 
         // Get statistics again (should reflect new data)

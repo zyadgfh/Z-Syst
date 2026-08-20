@@ -40,11 +40,13 @@ class GRNTest extends TestCase
 
     protected function createGRN(array $overrides = []): GoodsReceivedNote
     {
+        $grnNumber = GoodsReceivedNote::generateGRNNumber();
         $data = array_merge([
             'business_id' => $this->business->id,
             'warehouse_id' => $this->warehouse->id,
             'supplier_id' => $this->supplier->id,
-            'user_id' => $this->user->id,
+            'received_by' => $this->user->id,
+            'grn_number' => $grnNumber,
             'status' => GoodsReceivedNote::STATUS_DRAFT,
             'received_date' => now()->toDateString(),
             'notes' => $this->faker->sentence,
@@ -59,7 +61,8 @@ class GRNTest extends TestCase
             'business_id' => $this->business->id,
             'supplier_id' => $this->supplier->id,
             'warehouse_id' => $this->warehouse->id,
-            'user_id' => $this->user->id,
+            'created_by' => $this->user->id,
+            'po_number' => 'PO-' . fake()->numerify('#####'),
             'status' => 'accepted',
             'order_date' => now()->toDateString(),
             'expected_delivery_date' => now()->addWeek()->toDateString(),

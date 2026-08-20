@@ -220,6 +220,35 @@ class ReceiptService
     }
 
     /**
+     * Get or create receipt settings for a business.
+     */
+    public function getOrCreateSettings(int $businessId): ReceiptSetting
+    {
+        $setting = ReceiptSetting::forBusiness($businessId)->first();
+
+        if ($setting) {
+            return $setting;
+        }
+
+        return ReceiptSetting::create([
+            'business_id' => $businessId,
+            'receipt_header' => 'Receipt',
+            'receipt_footer' => 'Thank you for your purchase!',
+            'show_barcode' => true,
+            'show_qr_code' => false,
+            'is_active' => true,
+        ]);
+    }
+
+    /**
+     * Generate receipt for a sale model instance.
+     */
+    public function generateForSale(Sale $sale, string $format = 'pdf'): Receipt
+    {
+        return $this->generateSaleReceipt($sale->id, $format);
+    }
+
+    /**
      * Generate unique receipt number
      */
     protected function generateReceiptNumber(string $prefix): string

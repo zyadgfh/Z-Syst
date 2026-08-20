@@ -533,6 +533,63 @@ class InsuranceService
     }
 
     /**
+     * Generate a policy number for the given business.
+     */
+    public function generatePolicyNumber(int $businessId): string
+    {
+        return $this->generateUniquePolicyNumber();
+    }
+
+    /**
+     * Record a payment against an insurance claim.
+     */
+    public function recordPayment(InsuranceClaim $claim, float $amount, ?array $paymentData = null): InsuranceClaim
+    {
+        return $this->processPayment($claim, $amount);
+    }
+
+    /**
+     * Record approval for an insurance claim.
+     */
+    public function recordApproval(InsuranceClaim $claim, float $approvedAmount, ?string $externalReference = null): InsuranceClaim
+    {
+        return $this->processClaim($claim, [
+            'status' => 'approved',
+            'approved_amount' => $approvedAmount,
+            'external_reference' => $externalReference,
+        ]);
+    }
+
+    /**
+     * Get summary statistics for a business.
+     */
+    public function getSummary(int $businessId): array
+    {
+        $companies = InsuranceCompany::forBusiness($businessId)->count();
+        $policies = InsurancePolicy::where('business_id', $businessId)->count();
+        $activePolicies = InsurancePolicy::where('business_id', $businessId)->where('status', 'active')->count();
+        $claims = InsuranceClaim::forBusiness($businessId);
+
+        return [
+            'total_companies' => $companies,
+            'total_policies' => $policies,
+            'active_policies' => $activePolicies,
+            'total_claims' => $claims->count(),
+            'total_claim_amount' => (clone $claims)->sum('total_amount'),
+            'total_paid' => (clone $claims)->sum('paid_amount'),
+            'pending_claims' => (clone $claims)->where('status', 'submitted')->count(),
+        ];
+    }
+
+    /**
+     * Resolve coverage for a policy given a total amount.
+     */
+    public function resolveCoverage(InsurancePolicy $policy, float $total): array
+    {
+        return $policy->company->calculateDefaultCoverage($total);
+    }
+
+    /**
      * Auto-submit eligible claims from sales.
      *
      * @param int $businessId

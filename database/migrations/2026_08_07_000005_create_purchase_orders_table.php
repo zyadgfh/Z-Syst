@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('supplier_id')->nullable()->constrained('parties')->nullOnDelete();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('warehouse_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
 
@@ -30,6 +31,7 @@ return new class extends Migration
             $table->decimal('tax_amount', 10, 2)->default(0);
             $table->decimal('discount_amount', 10, 2)->default(0);
             $table->decimal('total_amount', 10, 2)->default(0);
+            $table->decimal('shipping_cost', 10, 2)->default(0);
 
             $table->text('terms')->nullable();
             $table->text('internal_notes')->nullable();
