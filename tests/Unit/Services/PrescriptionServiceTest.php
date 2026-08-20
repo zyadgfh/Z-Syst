@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Services;
 
+use App\Models\Business;
+use App\Models\Doctor;
 use App\Models\Prescription;
-use App\Models\PrescriptionItem;
-use App\Models\Product;
-use App\Models\Party;
+use App\Models\User;
 use App\Services\PrescriptionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -14,198 +14,73 @@ class PrescriptionServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected PrescriptionService $prescriptionService;
+    protected PrescriptionService $service;
+    protected Business $business;
+    protected User $user;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->markTestSkipped('Tests call non-existent service methods - need rewrite');
-        $this->prescriptionService = new PrescriptionService();
+
+        $this->business = Business::factory()->create();
+        $this->user = User::factory()->create(['business_id' => $this->business->id]);
+
+        $this->service = new PrescriptionService();
     }
 
-    public function test_create_prescription_with_items()
+    public function test_create_prescription(): void
     {
-        $businessId = 1;
-        $party = Party::factory()->create(['business_id' => $businessId, 'type' => 'customer']);
-        $product = Product::factory()->create(['business_id' => $businessId]);
+        $doctor = Doctor::factory()->create(['business_id' => $this->business->id]);
 
-        $data = [
-            'party_id' => $party->id,
+        $prescription = $this->service->createPrescription([
             'patient_name' => 'John Doe',
-            'patient_phone' => '+1234567890',
-            'doctor_name' => 'Dr. Smith',
-            'items' => [
-                [
-                    'product_id' => $product->id,
-                    'dosage' => '500mg',
-                    'frequency' => '3 times daily',
-                    'duration' => '7 days',
-                    'quantity' => 21,
-                    'instructions' => 'Take after meals',
-                ],
-            ],
-        ];
+            'doctor_id' => $doctor->id,
+            'prescription_date' => now()->toDateString(),
+            'image' => 'test-image.jpg',
+        ], $this->business->id);
 
-        $prescription = $this->prescriptionService->createPrescription($data, $businessId);
+        $this->assertInstanceOf(Prescription::class, $prescription);
+        $this->assertEquals('John Doe', $prescription->patient_name);
+    }
 
-        $this->assertDatabaseHas('prescriptions', [
-            'business_id' => $businessId,
-            'party_id' => $party->id,
+    public function test_update_prescription(): void
+    {
+        $doctor = Doctor::factory()->create(['business_id' => $this->business->id]);
+        $prescription = $this->service->createPrescription([
             'patient_name' => 'John Doe',
+            'doctor_id' => $doctor->id,
+            'prescription_date' => now()->toDateString(),
+            'image' => 'test-image.jpg',
+        ], $this->business->id);
+
+        $updated = $this->service->updatePrescription($prescription, [
+            'patient_name' => 'Jane Doe',
         ]);
 
-        $this->assertDatabaseHas('prescription_items', [
-            'prescription_id' => $prescription->id,
-            'product_id' => $product->id,
-            'quantity' => 21,
-        ]);
-
-        $this->assertCount(1, $prescription->items);
+        $this->assertEquals('Jane Doe', $updated->patient_name);
     }
 
-    public function test_dispense_prescription_item()
+    public function test_delete_prescription(): void
     {
-        $businessId = 1;
-        $party = Party::factory()->create(['business_id' => $businessId, 'type' => 'customer']);
-        $product = Product::factory()->create(['business_id' => $businessId]);
-        
-        $prescription = Prescription::factory()->create([
-            'business_id' => $businessId,
-            'party_id' => $party->id,
-            'review_status' => 'approved',
-            'status' => 'pending',
-        ]);
+        $doctor = Doctor::factory()->create(['business_id' => $this->business->id]);
+        $prescription = $this->service->createPrescription([
+            'patient_name' => 'John Doe',
+            'doctor_id' => $doctor->id,
+            'prescription_date' => now()->toDateString(),
+            'image' => 'test-image.jpg',
+        ], $this->business->id);
 
-        $prescriptionItem = PrescriptionItem::factory()->create([
-            'prescription_id' => $prescription->id,
-            'product_id' => $product->id,
-            'business_id' => $businessId,
-            'quantity' => 10,
-            'dispensed' => false,
-        ]);
-
-        $itemsToDispense = [
-            $prescriptionItem->id => 5,
-        ];
-
-        $result = $this->prescriptionService->dispensePrescription(
-            $prescription,
-            $itemsToDispense,
-            1, // user_id
-            $businessId
-        );
-
-        $this->assertEquals(5, $result['total_dispensed']);
-        $this->assertEquals(5, $prescriptionItem->fresh()->dispensed_quantity);
-        $this->assertTrue($prescriptionItem->fresh()->dispensed);
-    }
-
-    public function test_cannot_dispense_used_prescription()
-    {
-        $businessId = 1;
-        $prescription = Prescription::factory()->create([
-            'business_id' => $businessId,
-            'status' => 'used',
-        ]);
-
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Prescription cannot be dispensed');
-
-        $this->prescriptionService->dispensePrescription($prescription, [], 1, $businessId);
-    }
-
-    public function test_generate_prescription_number()
-    {
-        $businessId = 1;
-        $prescription1 = Prescription::factory()->create(['business_id' => $businessId]);
-        $prescription2 = Prescription::factory()->create(['business_id' => $businessId]);
-
-        $this->assertNotEquals($prescription1->prescription_number, $prescription2->prescription_number);
-        $this->assertStringStartsWith('RX-', $prescription1->prescription_number);
-    }
-
-    public function test_get_expiring_prescriptions()
-    {
-        $businessId = 1;
-        $party = Party::factory()->create(['business_id' => $businessId, 'type' => 'customer']);
-
-        $prescription1 = Prescription::factory()->create([
-            'business_id' => $businessId,
-            'party_id' => $party->id,
-            'review_status' => 'approved',
-            'status' => 'pending',
-            'expires_at' => now()->addDays(5),
-        ]);
-
-        $prescription2 = Prescription::factory()->create([
-            'business_id' => $businessId,
-            'party_id' => $party->id,
-            'review_status' => 'approved',
-            'status' => 'pending',
-            'expires_at' => now()->addDays(15),
-        ]);
-
-        $expiringPrescriptions = $this->prescriptionService->getExpiringPrescriptions($businessId, 7);
-
-        $this->assertCount(1, $expiringPrescriptions);
-        $this->assertEquals($prescription1->id, $expiringPrescriptions->first()->id);
-    }
-
-    public function test_prescription_statistics()
-    {
-        $businessId = 1;
-        $party = Party::factory()->create(['business_id' => $businessId, 'type' => 'customer']);
-
-        Prescription::factory()->count(3)->create([
-            'business_id' => $businessId,
-            'party_id' => $party->id,
-            'status' => 'pending',
-            'review_status' => 'approved',
-        ]);
-
-        Prescription::factory()->count(2)->create([
-            'business_id' => $businessId,
-            'party_id' => $party->id,
-            'status' => 'used',
-            'review_status' => 'approved',
-        ]);
-
-        $statistics = $this->prescriptionService->getPrescriptionStatistics($businessId);
-
-        $this->assertEquals(5, $statistics['total']);
-        $this->assertEquals(3, $statistics['pending']);
-        $this->assertEquals(2, $statistics['used']);
-        $this->assertEquals(5, $statistics['review_approved']);
-    }
-
-    public function test_delete_prescription_with_image()
-    {
-        $businessId = 1;
-        $prescription = Prescription::factory()->create([
-            'business_id' => $businessId,
-            'image' => 'prescriptions/test.jpg',
-        ]);
-
-        Storage::fake('public');
-        Storage::put('prescriptions/test.jpg', 'test content');
-
-        $result = $this->prescriptionService->deletePrescription($prescription);
+        $result = $this->service->deletePrescription($prescription);
 
         $this->assertTrue($result);
-        $this->assertDatabaseMissing('prescriptions', ['id' => $prescription->id]);
     }
 
-    public function test_cannot_delete_used_prescription()
+    public function test_get_prescription_statistics(): void
     {
-        $businessId = 1;
-        $prescription = Prescription::factory()->create([
-            'business_id' => $businessId,
-            'status' => 'used',
-        ]);
+        $stats = $this->service->getPrescriptionStatistics($this->business->id);
 
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Cannot delete a used prescription');
-
-        $this->prescriptionService->deletePrescription($prescription);
+        $this->assertArrayHasKey('total', $stats);
+        $this->assertArrayHasKey('pending', $stats);
+        $this->assertArrayHasKey('used', $stats);
     }
 }

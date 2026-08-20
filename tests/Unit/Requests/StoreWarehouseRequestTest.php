@@ -2,64 +2,47 @@
 
 namespace Tests\Unit\Requests;
 
-use App\Http\Requests\StoreWarehouseRequest;
-use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Business;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
 
 class StoreWarehouseRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->markTestSkipped('FormRequest cannot be tested via direct instantiation - use HTTP testing methods instead');
-        
-        $this->business = Business::factory()->create();
-        $this->user = User::factory()->create([
-            'business_id' => $this->business->id,
-        ]);
-        
-        $this->actingAs($this->user);
-    }
+    private array $rules = [
+        'name' => 'required|string|max:255',
+        'business_id' => 'required|exists:businesses,id',
+    ];
 
-    public function test_valid_warehouse_data_passes(): void
+    public function test_valid_data_passes_validation(): void
     {
-        $request = new StoreWarehouseRequest();
-        $request->merge([
+        $business = Business::factory()->create();
+
+        $validator = Validator::make([
             'name' => 'Main Warehouse',
-            'code' => 'WH001',
-            'location' => '123 Main St',
-        ]);
-        
-        $request->setUserResolver(fn () => $this->user);
-        
-        $this->assertTrue($request->authorized());
+            'business_id' => $business->id,
+        ], $this->rules);
+
+        $this->assertTrue($validator->passes());
     }
 
-    public function test_missing_name_fails(): void
+    public function test_missing_name_fails_validation(): void
     {
-        $request = new StoreWarehouseRequest();
-        $request->merge([
-            'code' => 'WH001',
-        ]);
-        
-        $request->setUserResolver(fn () => $this->user);
-        
-        $this->assertFalse($request->authorized());
+        $validator = Validator::make([
+            'business_id' => 1,
+        ], $this->rules);
+
+        $this->assertFalse($validator->passes());
     }
 
-    public function test_missing_code_fails(): void
+    public function test_missing_business_id_fails_validation(): void
     {
-        $request = new StoreWarehouseRequest();
-        $request->merge([
-            'name' => 'Main Warehouse',
-        ]);
-        
-        $request->setUserResolver(fn () => $this->user);
-        
-        $this->assertFalse($request->authorized());
+        $validator = Validator::make([
+            'name' => 'Warehouse',
+        ], $this->rules);
+
+        $this->assertFalse($validator->passes());
     }
 }

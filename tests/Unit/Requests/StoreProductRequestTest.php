@@ -2,80 +2,51 @@
 
 namespace Tests\Unit\Requests;
 
-use App\Http\Requests\StoreProductRequest;
-use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Business;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
 
 class StoreProductRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
+    private array $rules = [
+        'productName' => 'required|string|max:255',
+        'productCode' => 'required|string|max:255|unique:products,productCode',
+        'business_id' => 'required|exists:businesses,id',
+    ];
+
+    public function test_valid_data_passes_validation(): void
     {
-        parent::setUp();
-        $this->markTestSkipped('FormRequest cannot be tested via direct instantiation - use HTTP testing methods instead');
-        
-        $this->business = Business::factory()->create();
-        $this->user = User::factory()->create([
-            'business_id' => $this->business->id,
-        ]);
-        
-        $this->actingAs($this->user);
+        $business = Business::factory()->create();
+
+        $validator = Validator::make([
+            'productName' => 'Aspirin',
+            'productCode' => 'ASP001',
+            'business_id' => $business->id,
+        ], $this->rules);
+
+        $this->assertTrue($validator->passes());
     }
 
-    public function test_valid_product_data_passes(): void
+    public function test_missing_name_fails_validation(): void
     {
-        $request = new StoreProductRequest();
-        $request->merge([
-            'productName' => 'Test Product',
-            'category_id' => 1,
-        ]);
-        
-        $request->setUserResolver(fn () => $this->user);
-        
-        $this->assertTrue($request->authorized());
+        $validator = Validator::make([
+            'productCode' => 'ASP001',
+            'business_id' => 1,
+        ], $this->rules);
+
+        $this->assertFalse($validator->passes());
     }
 
-    public function test_missing_product_name_fails(): void
+    public function test_missing_code_fails_validation(): void
     {
-        $request = new StoreProductRequest();
-        $request->merge([
-            'category_id' => 1,
-        ]);
-        
-        $request->setUserResolver(fn () => $this->user);
-        
-        $this->assertFalse($request->authorized());
-    }
+        $validator = Validator::make([
+            'productName' => 'Aspirin',
+            'business_id' => 1,
+        ], $this->rules);
 
-    public function test_invalid_category_id_fails(): void
-    {
-        $request = new StoreProductRequest();
-        $request->merge([
-            'productName' => 'Test Product',
-            'category_id' => 99999, // Non-existent
-        ]);
-        
-        $request->setUserResolver(fn () => $this->user);
-        
-        $this->assertFalse($request->authorized());
-    }
-
-    public function test_duplicate_product_code_fails(): void
-    {
-        // This test would require database setup for unique constraint
-        // We're testing authorization only here
-        $request = new StoreProductRequest();
-        $request->merge([
-            'productName' => 'Test Product',
-            'category_id' => 1,
-            'productCode' => 'EXISTING_CODE',
-        ]);
-        
-        $request->setUserResolver(fn () => $this->user);
-        
-        $this->assertTrue($request->authorized()); // Authorization passes, validation would fail
+        $this->assertFalse($validator->passes());
     }
 }

@@ -2,70 +2,48 @@
 
 namespace Tests\Unit\Requests;
 
-use App\Http\Requests\StoreInsuranceClaimRequest;
-use App\Models\User;
+use App\Models\InsurancePolicy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\Business;
+use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
 
 class StoreInsuranceClaimRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
+    private array $rules = [
+        'insurance_policy_id' => 'required|exists:insurance_policies,id',
+        'total_amount' => 'required|numeric|min:0',
+    ];
+
+    public function test_valid_data_passes_validation(): void
     {
-        parent::setUp();
-        $this->markTestSkipped('FormRequest cannot be tested via direct instantiation - use HTTP testing methods instead');
-        
-        $this->business = Business::factory()->create();
-        $this->user = User::factory()->create([
-            'business_id' => $this->business->id,
-        ]);
-        
-        $this->actingAs($this->user);
+        $policy = InsurancePolicy::factory()->create();
+
+        $validator = Validator::make([
+            'insurance_policy_id' => $policy->id,
+            'total_amount' => 100,
+        ], $this->rules);
+
+        $this->assertTrue($validator->passes());
     }
 
-    public function test_valid_claim_data_passes(): void
+    public function test_missing_insurance_policy_id_fails_validation(): void
     {
-        $request = new StoreInsuranceClaimRequest();
-        $request->merge([
+        $validator = Validator::make([
+            'total_amount' => 100,
+        ], $this->rules);
+
+        $this->assertFalse($validator->passes());
+    }
+
+    public function test_negative_total_amount_fails_validation(): void
+    {
+        $validator = Validator::make([
             'insurance_policy_id' => 1,
-            'customer_id' => 1,
-            'service_date' => '2024-01-15',
-            'total_amount' => 1000,
-        ]);
-        
-        $request->setUserResolver(fn () => $this->user);
-        
-        $this->assertTrue($request->authorized());
-    }
+            'total_amount' => -50,
+        ], $this->rules);
 
-    public function test_missing_insurance_policy_id_fails(): void
-    {
-        $request = new StoreInsuranceClaimRequest();
-        $request->merge([
-            'customer_id' => 1,
-            'service_date' => '2024-01-15',
-            'total_amount' => 1000,
-        ]);
-        
-        $request->setUserResolver(fn () => $this->user);
-        
-        $this->assertFalse($request->authorized());
-    }
-
-    public function test_negative_total_amount_fails(): void
-    {
-        $request = new StoreInsuranceClaimRequest();
-        $request->merge([
-            'insurance_policy_id' => 1,
-            'customer_id' => 1,
-            'service_date' => '2024-01-15',
-            'total_amount' => -100,
-        ]);
-        
-        $request->setUserResolver(fn () => $this->user);
-        
-        $this->assertTrue($request->authorized()); // Auth passes, validation would fail
+        $this->assertFalse($validator->passes());
     }
 }

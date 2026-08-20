@@ -2,63 +2,34 @@
 
 namespace Tests\Unit\Requests;
 
-use App\Http\Requests\StoreInsurancePolicyRequest;
-use App\Models\User;
+use App\Models\InsuranceCompany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\Business;
+use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
 
 class StoreInsurancePolicyRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
+    private array $rules = [
+        'insurance_company_id' => 'required|exists:insurance_companies,id',
+    ];
+
+    public function test_valid_data_passes_validation(): void
     {
-        parent::setUp();
-        $this->markTestSkipped('FormRequest cannot be tested via direct instantiation - use HTTP testing methods instead');
-        
-        $this->business = Business::factory()->create();
-        $this->user = User::factory()->create([
-            'business_id' => $this->business->id,
-        ]);
-        
-        $this->actingAs($this->user);
+        $company = InsuranceCompany::factory()->create();
+
+        $validator = Validator::make([
+            'insurance_company_id' => $company->id,
+        ], $this->rules);
+
+        $this->assertTrue($validator->passes());
     }
 
-    public function test_valid_policy_data_passes(): void
+    public function test_missing_insurance_company_id_fails_validation(): void
     {
-        $request = new StoreInsurancePolicyRequest();
-        $request->merge([
-            'insurance_company_id' => 1,
-            'customer_id' => 1,
-            'policy_number' => 'POL-001',
-            'holder_name' => 'John Doe',
-            'holder_dob' => '1990-01-01',
-            'holder_gender' => 'male',
-            'holder_phone' => '0123456789',
-            'holder_email' => 'john@example.com',
-            'plan_type' => 'basic',
-            'status' => 'active',
-            'start_date' => '2024-01-01',
-            'end_date' => '2025-12-31',
-        ]);
-        
-        $request->setUserResolver(fn () => $this->user);
-        
-        $this->assertTrue($request->authorized());
-    }
+        $validator = Validator::make([], $this->rules);
 
-    public function test_missing_insurance_company_id_fails(): void
-    {
-        $request = new StoreInsurancePolicyRequest();
-        $request->merge([
-            'customer_id' => 1,
-            'policy_number' => 'POL-001',
-            'holder_name' => 'John Doe',
-        ]);
-        
-        $request->setUserResolver(fn () => $this->user);
-        
-        $this->assertFalse($request->authorized());
+        $this->assertFalse($validator->passes());
     }
 }

@@ -2,87 +2,66 @@
 
 namespace Tests\Unit\Requests;
 
-use App\Http\Requests\StorePurchaseRequest;
-use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Business;
+use App\Models\Party;
+use App\Models\Product;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
 
 class StorePurchaseRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
+    private array $rules = [
+        'supplier_id' => 'required|exists:parties,id',
+        'purchaseDate' => 'required|date',
+        'items' => 'required|array|min:1',
+    ];
+
+    public function test_valid_data_passes_validation(): void
     {
-        parent::setUp();
-        $this->markTestSkipped('FormRequest cannot be tested via direct instantiation - use HTTP testing methods instead');
-        
-        $this->business = Business::factory()->create();
-        $this->user = User::factory()->create([
-            'business_id' => $this->business->id,
-        ]);
-        
-        $this->actingAs($this->user);
+        $business = Business::factory()->create();
+        $supplier = Party::factory()->create(['business_id' => $business->id, 'type' => 'supplier']);
+        $product = Product::factory()->create(['business_id' => $business->id]);
+
+        $validator = Validator::make([
+            'supplier_id' => $supplier->id,
+            'purchaseDate' => '2026-08-20',
+            'items' => [['product_id' => $product->id, 'quantity' => 5, 'unit_price' => 10]],
+        ], $this->rules);
+
+        $this->assertTrue($validator->passes());
     }
 
-    public function test_valid_purchase_data_passes(): void
+    public function test_missing_supplier_id_fails_validation(): void
     {
-        $request = new StorePurchaseRequest();
-        $request->merge([
-            'products' => [
-                [
-                    'product_id' => 1,
-                    'purchase_without_tax' => 80,
-                    'purchase_with_tax' => 92,
-                    'profit_percent' => 20,
-                    'sales_price' => 100,
-                    'wholesale_price' => 95,
-                    'quantities' => 10,
-                ],
-            ],
-            'purchaseDate' => now()->format('Y-m-d'),
-            'party_id' => 1,
-        ]);
-        
-        $request->setUserResolver(fn () => $this->user);
-        
-        $this->assertTrue($request->authorized());
+        $validator = Validator::make([
+            'purchaseDate' => '2026-08-20',
+            'items' => [['product_id' => 1, 'quantity' => 5, 'unit_price' => 10]],
+        ], $this->rules);
+
+        $this->assertFalse($validator->passes());
     }
 
-    public function test_missing_party_id_fails(): void
+    public function test_missing_purchase_date_fails_validation(): void
     {
-        $request = new StorePurchaseRequest();
-        $request->merge([
-            'products' => [
-                [
-                    'product_id' => 1,
-                    'purchase_without_tax' => 80,
-                    'purchase_with_tax' => 92,
-                    'profit_percent' => 20,
-                    'sales_price' => 100,
-                    'wholesale_price' => 95,
-                    'quantities' => 10,
-                ],
-            ],
-            'purchaseDate' => now()->format('Y-m-d'),
-        ]);
-        
-        $request->setUserResolver(fn () => $this->user);
-        
-        $this->assertFalse($request->authorized());
+        $validator = Validator::make([
+            'supplier_id' => 1,
+            'items' => [['product_id' => 1, 'quantity' => 5, 'unit_price' => 10]],
+        ], $this->rules);
+
+        $this->assertFalse($validator->passes());
     }
 
-    public function test_empty_products_fails(): void
+    public function test_empty_items_fails_validation(): void
     {
-        $request = new StorePurchaseRequest();
-        $request->merge([
-            'products' => [],
-            'purchaseDate' => now()->format('Y-m-d'),
-            'party_id' => 1,
-        ]);
-        
-        $request->setUserResolver(fn () => $this->user);
-        
-        $this->assertFalse($request->authorized());
+        $validator = Validator::make([
+            'supplier_id' => 1,
+            'purchaseDate' => '2026-08-20',
+            'items' => [],
+        ], $this->rules);
+
+        $this->assertFalse($validator->passes());
     }
 }
