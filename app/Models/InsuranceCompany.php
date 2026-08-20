@@ -39,7 +39,7 @@ class InsuranceCompany extends Model
     ];
 
     protected $casts = [
-        'api_credentials' => 'encrypted',
+        'api_credentials' => 'encrypted:array',
         'default_coverage_percent' => 'decimal:2',
         'default_copay_percent' => 'decimal:2',
         'metadata' => 'json',

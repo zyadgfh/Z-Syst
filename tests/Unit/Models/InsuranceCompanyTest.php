@@ -67,6 +67,20 @@ class InsuranceCompanyTest extends TestCase
 
     public function test_api_credentials_encrypted(): void
     {
-        $this->markTestSkipped('Encrypted cast receives array but openssl_encrypt expects string');
+        $company = InsuranceCompany::factory()->create([
+            'api_credentials' => ['api_key' => 'test-key-123', 'api_secret' => 'test-secret-456'],
+        ]);
+
+        // Reload from DB to verify encryption roundtrip
+        $fresh = $company->fresh();
+
+        $this->assertEquals(
+            ['api_key' => 'test-key-123', 'api_secret' => 'test-secret-456'],
+            $fresh->api_credentials
+        );
+
+        // Raw DB value should be encrypted (not plaintext JSON)
+        $raw = \DB::table('insurance_companies')->where('id', $company->id)->value('api_credentials');
+        $this->assertStringNotContainsString('test-key-123', $raw);
     }
 }
