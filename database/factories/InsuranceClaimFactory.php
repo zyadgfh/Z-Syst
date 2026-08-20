@@ -45,6 +45,7 @@ class InsuranceClaimFactory extends Factory
             'line_items' => fake()->optional()->randomElements([
                 ['product_id' => 1, 'amount' => 50, 'coverage' => 80],
                 ['product_id' => 2, 'amount' => 30, 'coverage' => 90],
+                ['product_id' => 3, 'amount' => 20, 'coverage' => 85],
             ], rand(1, 3)),
         ];
     }
