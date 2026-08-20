@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('gateways', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('currency_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('currency_id')->nullable()->constrained()->nullOnDelete();
             $table->string('mode'); // 1 = Sandbox || 0 = Live
             $table->string('status');
             $table->boolean('charge')->default(0);
