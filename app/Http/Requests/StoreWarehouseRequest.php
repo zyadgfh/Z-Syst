@@ -12,7 +12,6 @@ class StoreWarehouseRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'business_id' => 'required|exists:businesses,id',
             'name' => 'required|string|max:255',
             'code' => 'nullable|string|max:50|unique:warehouses,code,NULL,id,business_id,' . auth()->user()?->business_id,
             'location' => 'nullable|string|max:255',

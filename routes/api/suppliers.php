@@ -4,22 +4,22 @@ use App\Http\Controllers\Api;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['business.context', 'throttle:20,1'])->group(function () {
-    // Barcodes
-    Route::apiResource('barcodes', Api\BarcodeController::class)->except('show');
-    Route::get('barcodes/{barcode}', [Api\BarcodeController::class, 'show'])->name('barcodes.show');
-    Route::post('barcodes/generate-multiple', [Api\BarcodeController::class, 'generateMultiple'])->name('barcodes.generate-multiple');
-    Route::post('barcodes/generate-for-batch', [Api\BarcodeController::class, 'generateForBatch'])->name('barcodes.generate-for-batch');
-    Route::post('barcodes/{barcode}/print', [Api\BarcodeController::class, 'print'])->name('barcodes.print');
-    Route::post('barcodes/print-multiple', [Api\BarcodeController::class, 'printMultiple'])->name('barcodes.print-multiple');
-    Route::post('barcodes/print-for-product', [Api\BarcodeController::class, 'printForProduct'])->name('barcodes.print-for-product');
-    Route::post('barcodes/print-for-batch', [Api\BarcodeController::class, 'printForBatch'])->name('barcodes.print-for-batch');
-    Route::post('barcodes/{barcode}/reprint', [Api\BarcodeController::class, 'reprint'])->name('barcodes.reprint');
-    Route::get('barcodes/download/{filename}', [Api\BarcodeController::class, 'download'])->name('barcodes.download');
+    // Barcodes - specific routes before wildcard
     Route::get('barcodes/search', [Api\BarcodeController::class, 'search'])->name('barcodes.search');
     Route::get('barcodes/settings', [Api\BarcodeController::class, 'settings'])->name('barcodes.settings');
     Route::get('barcodes/not-printed', [Api\BarcodeController::class, 'notPrinted'])->name('barcodes.not-printed');
+    Route::get('barcodes/download/{filename}', [Api\BarcodeController::class, 'download'])->name('barcodes.download');
     Route::get('barcodes/by-product/{productId}', [Api\BarcodeController::class, 'byProduct'])->name('barcodes.by-product');
     Route::get('barcodes/by-batch/{batchId}', [Api\BarcodeController::class, 'byBatch'])->name('barcodes.by-batch');
+    Route::post('barcodes/generate-multiple', [Api\BarcodeController::class, 'generateMultiple'])->name('barcodes.generate-multiple');
+    Route::post('barcodes/generate-for-batch', [Api\BarcodeController::class, 'generateForBatch'])->name('barcodes.generate-for-batch');
+    Route::post('barcodes/print-multiple', [Api\BarcodeController::class, 'printMultiple'])->name('barcodes.print-multiple');
+    Route::post('barcodes/print-for-product', [Api\BarcodeController::class, 'printForProduct'])->name('barcodes.print-for-product');
+    Route::post('barcodes/print-for-batch', [Api\BarcodeController::class, 'printForBatch'])->name('barcodes.print-for-batch');
+    Route::apiResource('barcodes', Api\BarcodeController::class)->except('show');
+    Route::get('barcodes/{barcode}', [Api\BarcodeController::class, 'show'])->name('barcodes.show');
+    Route::post('barcodes/{barcode}/print', [Api\BarcodeController::class, 'print'])->name('barcodes.print');
+    Route::post('barcodes/{barcode}/reprint', [Api\BarcodeController::class, 'reprint'])->name('barcodes.reprint');
 
     // Supplier Invoices
     Route::apiResource('supplier-invoices', Api\SupplierInvoiceController::class)->except('show');
@@ -61,11 +61,11 @@ Route::middleware(['business.context', 'throttle:20,1'])->group(function () {
     Route::get('purchase-orders/statistics', [Api\PurchaseOrderController::class, 'statistics'])->name('purchase-orders.statistics');
 
     // GRN (Goods Received Notes)
+    Route::get('grn/pending', [Api\GRNController::class, 'pending'])->name('grn.pending');
+    Route::get('grn/statistics', [Api\GRNController::class, 'statistics'])->name('grn.statistics');
     Route::apiResource('grn', Api\GRNController::class)->except('show');
     Route::get('grn/{grn}', [Api\GRNController::class, 'show'])->name('grn.show');
     Route::post('grn/{grn}/verify', [Api\GRNController::class, 'verify'])->name('grn.verify');
     Route::post('grn/{grn}/accept', [Api\GRNController::class, 'accept'])->name('grn.accept');
     Route::post('grn/{grn}/reject', [Api\GRNController::class, 'reject'])->name('grn.reject');
-    Route::get('grn/pending', [Api\GRNController::class, 'pending'])->name('grn.pending');
-    Route::get('grn/statistics', [Api\GRNController::class, 'statistics'])->name('grn.statistics');
 });

@@ -19,6 +19,10 @@ class ReturnService
 {
     use WithTransactionalOperations;
 
+    public function __construct(
+        private SupplierLedgerService $supplierLedgerService,
+    ) {}
+
     /**
      * Process a sale return.
      *
@@ -173,11 +177,16 @@ class ReturnService
             ]);
 
             // Update party due if credit is pending
-            if ($purchase->party_id && $returnData['credit_type'] === 'credit') {
+            if ($purchase->party_id && ($returnData['credit_type'] ?? 'credit') === 'credit') {
                 $party = $purchase->party;
                 $party->update([
                     'due' => $party->due - $totalCredit,
                 ]);
+            }
+
+            // Record in supplier ledger for backward compatibility
+            if ($purchase->party_id) {
+                $this->supplierLedgerService->recordPurchaseReturn($purchaseReturn, $totalCredit, $userId);
             }
 
             // Create financial transaction for credit

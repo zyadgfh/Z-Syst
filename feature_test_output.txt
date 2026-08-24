@@ -1,0 +1,13 @@
+
+Warning: Module "xsl" is already loaded in Unknown on line 0
+
+Warning: require(D:\Zyad\laragon\www\vendor\composer/../laravel/prompts/src/helpers.php): Failed to open stream: No such file or directory in D:\Zyad\laragon\www\vendor\composer\autoload_real.php on line 41
+
+Fatal error: Uncaught Error: Failed opening required 'D:\Zyad\laragon\www\vendor\composer/../laravel/prompts/src/helpers.php' (include_path='.;D:/Zyad/laragon/etc/php/pear') in D:\Zyad\laragon\www\vendor\composer\autoload_real.php:41
+Stack trace:
+#0 D:\Zyad\laragon\www\vendor\composer\autoload_real.php(45): {closure}('47e1160838b5e5a...', 'D:\\Zyad\\laragon...')
+#1 D:\Zyad\laragon\www\vendor\autoload.php(22): ComposerAutoloaderInit87b1cbfeb48932014221e60e6973965c::getLoader()
+#2 D:\Zyad\laragon\www\vendor\phpunit\phpunit\phpunit(72): require('D:\\Zyad\\laragon...')
+#3 D:\Zyad\laragon\www\vendor\bin\phpunit(122): include('D:\\Zyad\\laragon...')
+#4 {main}
+  thrown in D:\Zyad\laragon\www\vendor\composer\autoload_real.php on line 41

@@ -125,8 +125,7 @@ class InsuranceService
 
             // Update policy used amount based on approval
             if ($claim->policy && $claim->isApproved()) {
-                $difference = $claim->approved_amount - $claim->covered_amount;
-                $claim->policy->increment('used_amount', $difference);
+                $claim->policy->increment('used_amount', $claim->approved_amount);
             }
 
             return $claim->fresh();
@@ -270,6 +269,14 @@ class InsuranceService
         } while (InsurancePolicy::where('policy_number', $number)->exists());
 
         return $number;
+    }
+
+    /**
+     * Generate unique claim number (public alias)
+     */
+    public function generateClaimNumber(?int $businessId = null): string
+    {
+        return $this->generateUniqueClaimNumber();
     }
 
     /**
@@ -571,22 +578,40 @@ class InsuranceService
         $claims = InsuranceClaim::forBusiness($businessId);
 
         return [
-            'total_companies' => $companies,
-            'total_policies' => $policies,
-            'active_policies' => $activePolicies,
-            'total_claims' => $claims->count(),
-            'total_claim_amount' => (clone $claims)->sum('total_amount'),
-            'total_paid' => (clone $claims)->sum('paid_amount'),
-            'pending_claims' => (clone $claims)->where('status', 'submitted')->count(),
+            'companies' => [
+                'total' => $companies,
+            ],
+            'policies' => [
+                'total' => $policies,
+                'active' => $activePolicies,
+            ],
+            'claims' => [
+                'total' => $claims->count(),
+                'total_amount' => (clone $claims)->sum('total_amount'),
+                'paid_amount' => (float) (clone $claims)->sum('paid_amount'),
+                'pending' => (clone $claims)->where('status', 'submitted')->count(),
+            ],
         ];
     }
 
     /**
      * Resolve coverage for a policy given a total amount.
      */
-    public function resolveCoverage(InsurancePolicy $policy, float $total): array
+    public function resolveCoverage(InsurancePolicy $policy, float $total, ?int $productId = null): float
     {
-        return $policy->company->calculateDefaultCoverage($total);
+        if ($productId) {
+            $coverage = InsuranceCoverage::where('insurance_company_id', $policy->insurance_company_id)
+                ->where('product_id', $productId)
+                ->where('scope', 'product')
+                ->where('is_active', true)
+                ->first();
+
+            if ($coverage) {
+                return $coverage->coverage_percent;
+            }
+        }
+
+        return $policy->coverage_percent ?? $policy->company->default_coverage_percent ?? 0;
     }
 
     /**

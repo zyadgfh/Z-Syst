@@ -49,3 +49,10 @@ Route::prefix('v1')->group(function () {
         require __DIR__.'/api/advanced.php';
     });
 });
+
+// ── API v2: Items Module ──
+Route::prefix('v2')->group(function () {
+    Route::group(['middleware' => ['auth:sanctum']], function () {
+        require __DIR__.'/api/v2.php';
+    });
+});

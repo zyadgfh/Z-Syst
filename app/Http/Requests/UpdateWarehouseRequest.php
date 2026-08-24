@@ -6,7 +6,11 @@ class UpdateWarehouseRequest extends BaseFormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('update', \App\Models\Warehouse::findOrFail($this->route('warehouse')));
+        $warehouse = $this->route('warehouse');
+        if (!$warehouse) {
+            return false;
+        }
+        return $this->user()->can('update', $warehouse);
     }
 
     public function rules(): array

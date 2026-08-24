@@ -32,6 +32,7 @@ class DatabaseSeeder extends Seeder
             SubscriptionPlanSeeder::class,
             PlanSeeder::class,
             PermissionSeeder::class,
+            ItemsPermissionsSeeder::class,
             UserSeeder::class,
             // Skip problematic seeders for now
             // BusinessSeeder::class,

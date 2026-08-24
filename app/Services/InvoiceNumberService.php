@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Lock;
 
 class InvoiceNumberService
 {
@@ -16,31 +15,26 @@ class InvoiceNumberService
      */
     public function generateInvoiceNumber(string $type, int $businessId): string
     {
-        $lockKey = "invoice_number_{$type}_{$businessId}";
+        return DB::transaction(function () use ($type, $businessId) {
+            // Get the maximum invoice number for this business and type
+            $tableName = $this->getTableNameForType($type);
+            $prefix = $this->getPrefixForType($type);
 
-        return Lock::lock($lockKey, 10)->block(5, function () use ($type, $businessId) {
-            return DB::transaction(function () use ($type, $businessId) {
-                // Get the maximum invoice number for this business and type
-                $tableName = $this->getTableNameForType($type);
-                $prefix = $this->getPrefixForType($type);
+            $lastNumber = DB::table($tableName)
+                ->where('business_id', $businessId)
+                ->where('invoiceNumber', 'like', "{$prefix}%")
+                ->max('invoiceNumber');
 
-                $lastNumber = DB::table($tableName)
-                    ->where('business_id', $businessId)
-                    ->where('invoiceNumber', 'like', "{$prefix}%")
-                    ->lockForUpdate()
-                    ->max('invoiceNumber');
+            // Extract the numeric part or start from 1
+            if ($lastNumber) {
+                $lastId = (int) str_replace($prefix, '', $lastNumber);
+                $newId = $lastId + 1;
+            } else {
+                $newId = 1;
+            }
 
-                // Extract the numeric part or start from 1
-                if ($lastNumber) {
-                    $lastId = (int) str_replace($prefix, '', $lastNumber);
-                    $newId = $lastId + 1;
-                } else {
-                    $newId = 1;
-                }
-
-                // Generate the new invoice number
-                return $prefix . str_pad($newId, 5, '0', STR_PAD_LEFT);
-            });
+            // Generate the new invoice number
+            return $prefix . str_pad($newId, 5, '0', STR_PAD_LEFT);
         });
     }
 

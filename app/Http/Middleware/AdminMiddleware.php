@@ -16,11 +16,20 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && (Auth::user()->role != 'shop-owner' && Auth::user()->role != 'staff')) {
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
+
+        $user = Auth::user();
+
+        // Only allow shop-owner and staff (admin-level roles) to access admin routes
+        $adminRoles = ['shop-owner', 'staff'];
+
+        if (in_array($user->role, $adminRoles)) {
             return $next($request);
         }
 
-        // Redirect if the user is not an admin
+        // Redirect non-admin users
         return redirect('/');
     }
 }

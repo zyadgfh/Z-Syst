@@ -15,6 +15,11 @@ class GoodsReceivedNoteFactory extends Factory
 
     public function definition(): array
     {
+        static $grnCounter = 0;
+        $grnCounter++;
+        $date = now()->format('Ymd');
+        $seq = str_pad($grnCounter, 6, '0', STR_PAD_LEFT);
+
         return [
             'purchase_order_id' => PurchaseOrder::factory(),
             'supplier_id' => Party::factory(),
@@ -22,7 +27,7 @@ class GoodsReceivedNoteFactory extends Factory
             'branch_id' => null,
             'received_by' => User::factory(),
             'verified_by' => null,
-            'grn_number' => GoodsReceivedNote::generateGRNNumber(),
+            'grn_number' => 'GRN-' . $date . '-' . $seq,
             'received_date' => fake()->dateTimeBetween('-1 week', 'now'),
             'location' => fake()->optional()->city(),
             'status' => GoodsReceivedNote::STATUS_PENDING,

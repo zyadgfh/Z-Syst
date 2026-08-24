@@ -264,7 +264,7 @@ class Barcode extends Model
     /**
      * Calculate EAN13 checksum.
      */
-    private static function calculateEAN13Checksum(string $code): int
+    public static function calculateEAN13Checksum(string $code): int
     {
         $sum = 0;
         for ($i = 0; $i < 12; $i++) {
@@ -281,7 +281,7 @@ class Barcode extends Model
      */
     private static function generateUPC(): string
     {
-        $random = str_pad(rand(100000000, 999999999), 9, '0', STR_PAD_LEFT);
+        $random = str_pad((string) mt_rand(0, 99999999999), 11, '0', STR_PAD_LEFT);
         $checksum = self::calculateUPCChecksum($random);
 
         return $random.$checksum;
@@ -290,7 +290,7 @@ class Barcode extends Model
     /**
      * Calculate UPC checksum.
      */
-    private static function calculateUPCChecksum(string $code): int
+    public static function calculateUPCChecksum(string $code): int
     {
         $sum = 0;
         for ($i = 0; $i < 11; $i++) {

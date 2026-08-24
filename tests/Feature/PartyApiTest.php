@@ -101,6 +101,7 @@ class PartyApiTest extends TestCase
             ->putJson("/api/v1/parties/{$party->id}", [
                 'name' => 'Updated Name',
                 'phone' => $party->phone,
+                'type' => $party->party_type ?? 'customer',
                 'due' => 100,
             ]);
 

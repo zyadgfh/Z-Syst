@@ -386,4 +386,14 @@ class FinancialTransactionService
             ], $businessId);
         });
     }
+
+    /**
+     * Delete all financial transactions linked to a given purchase.
+     */
+    public function deleteTransactionFor(\App\Models\Purchase $purchase): bool
+    {
+        return FinancialTransaction::where('reference_type', 'purchase')
+            ->where('reference_id', $purchase->id)
+            ->delete() > 0;
+    }
 }

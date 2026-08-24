@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\MaintenanceSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class MaintenanceModeTest extends TestCase
@@ -13,7 +14,7 @@ class MaintenanceModeTest extends TestCase
 
     public function test_maintenance_status_can_be_retrieved()
     {
-        $response = $this->getJson('/api/v1/maintenance/status');
+        $response = $this->getJson('/admin/maintenance/status');
         
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -23,13 +24,20 @@ class MaintenanceModeTest extends TestCase
             ]);
     }
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Role::create(['name' => 'superadmin', 'guard_name' => 'web']);
+        Role::create(['name' => 'superadmin', 'guard_name' => 'sanctum']);
+    }
+
     public function test_maintenance_can_be_activated_by_superadmin()
     {
         $superadmin = User::factory()->create();
         $superadmin->assignRole('superadmin');
 
         $response = $this->actingAs($superadmin, 'sanctum')
-            ->postJson('/api/v1/maintenance/activate', [
+            ->postJson('/admin/maintenance/activate', [
                 'title' => 'Scheduled Maintenance',
                 'message' => 'System will be down for maintenance',
                 'estimated_duration_minutes' => 30,
@@ -45,7 +53,7 @@ class MaintenanceModeTest extends TestCase
 
     public function test_maintenance_can_be_deactivated_by_superadmin()
     {
-        $superadmin = User::factory()->create();
+        $superadmin = User::factory()->create(['is_superadmin' => true]);
         $superadmin->assignRole('superadmin');
 
         // First activate maintenance
@@ -56,7 +64,7 @@ class MaintenanceModeTest extends TestCase
         ]);
 
         $response = $this->actingAs($superadmin, 'sanctum')
-            ->postJson('/api/v1/maintenance/deactivate');
+            ->postJson('/admin/maintenance/deactivate');
 
         $response->assertStatus(200);
         
@@ -70,7 +78,7 @@ class MaintenanceModeTest extends TestCase
         $user = User::factory()->create();
 
         $response = $this->actingAs($user, 'sanctum')
-            ->postJson('/api/v1/maintenance/activate', [
+            ->postJson('/admin/maintenance/activate', [
                 'title' => 'Test',
                 'message' => 'Test',
             ]);

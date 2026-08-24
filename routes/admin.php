@@ -98,9 +98,102 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::resource('roles', ADMIN\RoleController::class)->except('show');
     Route::resource('permissions', ADMIN\PermissionController::class)->only('index', 'store');
 
-    // Settings
+    // Settings (legacy)
     Route::resource('settings', ADMIN\SettingController::class)->only('index', 'update');
     Route::resource('system-settings', ADMIN\SystemSettingController::class)->only('index', 'store');
+
+    // Application Settings & User Preferences
+    Route::get('app-settings', [ADMIN\SettingsController::class, 'index'])->name('app-settings.index');
+    Route::get('app-settings/module/{module}', [ADMIN\SettingsController::class, 'getModuleSettings'])->name('app-settings.module');
+    Route::post('app-settings/update-system', [ADMIN\SettingsController::class, 'updateSystem'])->name('app-settings.update-system');
+    Route::post('app-settings/update-organization', [ADMIN\SettingsController::class, 'updateOrganization'])->name('app-settings.update-organization');
+    Route::post('app-settings/update-branch', [ADMIN\SettingsController::class, 'updateBranch'])->name('app-settings.update-branch');
+    Route::post('app-settings/update-role', [ADMIN\SettingsController::class, 'updateRole'])->name('app-settings.update-role');
+    Route::post('app-settings/update-user', [ADMIN\SettingsController::class, 'updateUser'])->name('app-settings.update-user');
+    Route::post('app-settings/update-bulk', [ADMIN\SettingsController::class, 'updateBulk'])->name('app-settings.update-bulk');
+    Route::post('app-settings/reset', [ADMIN\SettingsController::class, 'resetToInherited'])->name('app-settings.reset');
+    Route::post('app-settings/search', [ADMIN\SettingsController::class, 'search'])->name('app-settings.search');
+    Route::get('app-settings/audit-log', [ADMIN\SettingsController::class, 'getAuditLog'])->name('app-settings.audit-log');
+    Route::get('app-settings/definitions', [ADMIN\SettingsController::class, 'getDefinitions'])->name('app-settings.definitions');
+    Route::get('app-settings/effective', [ADMIN\SettingsController::class, 'getEffective'])->name('app-settings.effective');
+    Route::get('app-settings/module-meta', [ADMIN\SettingsController::class, 'getModuleMeta'])->name('app-settings.module-meta');
+    Route::post('app-settings/seed-defaults', [ADMIN\SettingsController::class, 'seedDefaults'])->name('app-settings.seed-defaults');
+
+    // Branch Settings (shortcut)
+    Route::get('branches/{branch}/settings', function ($branch) {
+        return redirect()->route('admin.app-settings.index', ['scope_type' => 'branch', 'scope_id' => $branch]);
+    })->name('branches.settings');
+
+    // Items / Products Management Module
+    Route::get('items', [ADMIN\ProductController::class, 'index'])->name('items.index');
+    Route::get('items/create', [ADMIN\ProductController::class, 'create'])->name('items.create');
+    Route::post('items/store', [ADMIN\ProductController::class, 'store'])->name('items.store');
+    Route::get('items/{id}', [ADMIN\ProductController::class, 'show'])->name('items.show');
+    Route::get('items/{id}/edit', [ADMIN\ProductController::class, 'edit'])->name('items.edit');
+    Route::put('items/{product}/update', [ADMIN\ProductController::class, 'update'])->name('items.update');
+    Route::delete('items/{product}', [ADMIN\ProductController::class, 'destroy'])->name('items.destroy');
+    Route::get('items/search', [ADMIN\ProductController::class, 'search'])->name('items.search');
+    Route::get('items/export', [ADMIN\ProductController::class, 'export'])->name('items.export');
+    Route::get('items/generate-code', [ADMIN\ProductController::class, 'generateInternalCode'])->name('items.generate-code');
+    Route::get('items/statistics', [ADMIN\ProductController::class, 'statistics'])->name('items.statistics');
+    Route::middleware('throttle:20,1')->group(function () {
+        Route::post('items/{id}/stock-adjust', [ADMIN\ProductController::class, 'stockAdjust'])->name('items.stock-adjust');
+    });
+
+    // Sensitive items actions — rate-limited to prevent abuse
+    Route::middleware('throttle:30,1')->group(function () {
+        Route::post('items/check-duplicates', [ADMIN\ProductController::class, 'checkDuplicates'])->name('items.check-duplicates');
+        Route::post('items/search-barcode', [ADMIN\ProductController::class, 'searchByBarcode'])->name('items.search-barcode');
+        Route::post('items/{id}/print-barcode', [ADMIN\ProductController::class, 'printBarcode'])->name('items.print-barcode');
+    });
+    Route::middleware('throttle:5,1')->group(function () {
+        Route::post('items/bulk-update', [ADMIN\ProductController::class, 'bulkUpdate'])->name('items.bulk-update');
+        Route::post('items/import', [ADMIN\ProductController::class, 'import'])->name('items.import');
+    });
+
+    // Legacy Products routes (redirect to items)
+    Route::get('products', function () {
+        return redirect()->route('admin.items.index');
+    })->name('products.index');
+
+    // Purchase Invoices (Admin Web)
+    Route::get('purchases', [ADMIN\PurchaseInvoiceController::class, 'index'])->name('purchases.index');
+    Route::get('purchases/create', [ADMIN\PurchaseInvoiceController::class, 'create'])->name('purchases.create');
+    Route::post('purchases/store-ajax', [ADMIN\PurchaseInvoiceController::class, 'storeAjax'])->name('purchases.store-ajax');
+    Route::get('purchases/{purchase}', [ADMIN\PurchaseInvoiceController::class, 'show'])->name('purchases.show');
+    Route::get('purchases/{purchase}/edit', [ADMIN\PurchaseInvoiceController::class, 'edit'])->name('purchases.edit');
+    Route::put('purchases/{purchase}/update-ajax', [ADMIN\PurchaseInvoiceController::class, 'updateAjax'])->name('purchases.update-ajax');
+    Route::post('purchases/{purchase}/cancel', [ADMIN\PurchaseInvoiceController::class, 'cancel'])->name('purchases.cancel');
+    Route::post('purchases/search-barcode', [ADMIN\PurchaseInvoiceController::class, 'searchBarcode'])->name('purchases.search-barcode');
+    Route::post('purchases/search-products', [ADMIN\PurchaseInvoiceController::class, 'searchProducts'])->name('purchases.search-products');
+    Route::get('purchases/statistics', [ADMIN\PurchaseInvoiceController::class, 'statistics'])->name('purchases.statistics');
+
+    // Purchase Returns (Admin Web)
+    Route::get('purchases/returns', [ADMIN\PurchaseReturnController::class, 'index'])->name('purchases.returns.index');
+    Route::get('purchases/returns/create', [ADMIN\PurchaseReturnController::class, 'create'])->name('purchases.returns.create');
+    Route::post('purchases/returns/store', [ADMIN\PurchaseReturnController::class, 'store'])->name('purchases.returns.store');
+    Route::get('purchases/returns/{purchaseReturn}', [ADMIN\PurchaseReturnController::class, 'show'])->name('purchases.returns.show');
+
+    // Supplier Dashboard
+    Route::get('suppliers/{supplier}/dashboard', [ADMIN\SupplierDashboardController::class, 'index'])->name('suppliers.dashboard');
+    Route::get('suppliers/{supplier}/ledger', [ADMIN\SupplierDashboardController::class, 'ledger'])->name('suppliers.ledger');
+    Route::post('suppliers/{supplier}/payment', [ADMIN\SupplierDashboardController::class, 'recordPayment'])->name('suppliers.payment');
+
+    // Purchase Reports
+    Route::get('purchases/reports', [ADMIN\PurchaseReportController::class, 'index'])->name('purchases.reports');
+    Route::get('purchases/reports/supplier-balance', [ADMIN\PurchaseReportController::class, 'supplierBalance'])->name('purchases.supplier-balance');
+    Route::get('purchases/reports/stock-movements', [ADMIN\PurchaseReportController::class, 'stockMovements'])->name('purchases.stock-movements');
+
+    // Security Dashboard
+    Route::get('security-dashboard', [ADMIN\SecurityDashboardController::class, 'index'])->name('security-dashboard.index');
+
+    // Vulnerability Exception Tracking
+    Route::resource('vulnerability-exceptions', ADMIN\VulnerabilityExceptionController::class)->except('edit', 'update', 'destroy');
+    Route::post('vulnerability-exceptions/{vulnerabilityException}/approve', [ADMIN\VulnerabilityExceptionController::class, 'approve'])->name('vulnerability-exceptions.approve');
+    Route::post('vulnerability-exceptions/{vulnerabilityException}/reject', [ADMIN\VulnerabilityExceptionController::class, 'reject'])->name('vulnerability-exceptions.reject');
+    Route::post('vulnerability-exceptions/{vulnerabilityException}/revoke', [ADMIN\VulnerabilityExceptionController::class, 'revoke'])->name('vulnerability-exceptions.revoke');
+    Route::post('vulnerability-exceptions/process-expirations', [ADMIN\VulnerabilityExceptionController::class, 'processExpirations'])->name('vulnerability-exceptions.process-expirations');
+    Route::get('vulnerability-exceptions/statistics', [ADMIN\VulnerabilityExceptionController::class, 'statistics'])->name('vulnerability-exceptions.statistics');
 
     // Maintenance Mode
     Route::get('maintenance', [ADMIN\MaintenanceController::class, 'index'])->name('maintenance.index');

@@ -3,7 +3,7 @@
 namespace Modules\Landing\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Modules\Landing\Models\Feature;
+use Modules\Landing\App\Models\Feature;
 
 class FeatureFactory extends Factory
 {
@@ -13,8 +13,7 @@ class FeatureFactory extends Factory
     {
         return [
             'title' => fake()->sentence(),
-            'description' => fake()->paragraph(),
-            'icon' => fake()->randomElement(['heroicon-o-star', 'heroicon-o-heart', 'heroicon-o-bolt']),
+            'bg_color' => fake()->hexColor(),
             'status' => 1,
         ];
     }

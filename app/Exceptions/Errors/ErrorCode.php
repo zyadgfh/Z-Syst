@@ -11,11 +11,14 @@ class ErrorCode
     public const BUSINESS_INVALID_DATE_RANGE = 'BUSINESS_INVALID_DATE_RANGE';
     public const BUSINESS_INSUFFICIENT_PERMISSION = 'BUSINESS_INSUFFICIENT_PERMISSION';
     public const BUSINESS_DUE_SALE_WALKING_CUSTOMER = 'BUSINESS_DUE_SALE_WALKING_CUSTOMER';
+    public const BUSINESS_BATCH_QUANTITY_MISMATCH = 'BUSINESS_BATCH_QUANTITY_MISMATCH';
     public const BUSINESS_SUBSCRIPTION_EXPIRED = 'BUSINESS_SUBSCRIPTION_EXPIRED';
     public const BUSINESS_SUBSCRIPTION_LIMIT_EXCEEDED = 'BUSINESS_SUBSCRIPTION_LIMIT_EXCEEDED';
 
     // Validation Errors
     public const VALIDATION_FAILED = 'VALIDATION_FAILED';
+    public const VALIDATION_ERROR = 'VALIDATION_ERROR';
+    public const NOT_FOUND_BATCH = 'NOT_FOUND_BATCH';
     public const VALIDATION_ROUTE_NOT_FOUND = 'VALIDATION_ROUTE_NOT_FOUND';
     public const VALIDATION_METHOD_NOT_ALLOWED = 'VALIDATION_METHOD_NOT_ALLOWED';
 
@@ -48,9 +51,12 @@ class ErrorCode
             self::BUSINESS_INVALID_DATE_RANGE => __('Invalid date range'),
             self::BUSINESS_INSUFFICIENT_PERMISSION => __('Insufficient permissions'),
             self::BUSINESS_DUE_SALE_WALKING_CUSTOMER => __('Due sale not allowed for walking customers'),
+            self::BUSINESS_BATCH_QUANTITY_MISMATCH => __('Batch quantity mismatch'),
             self::BUSINESS_SUBSCRIPTION_EXPIRED => __('Subscription has expired'),
             self::BUSINESS_SUBSCRIPTION_LIMIT_EXCEEDED => __('Subscription limit exceeded'),
             self::VALIDATION_FAILED => __('Validation failed'),
+            self::VALIDATION_ERROR => __('Validation error'),
+            self::NOT_FOUND_BATCH => __('Batch not found'),
             self::AUTH_UNAUTHORIZED => __('Unauthorized'),
             self::AUTH_FORBIDDEN => __('Forbidden'),
             self::SYSTEM_INTERNAL_ERROR => __('Internal server error'),

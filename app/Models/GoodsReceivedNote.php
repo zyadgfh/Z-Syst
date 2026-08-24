@@ -56,6 +56,8 @@ class GoodsReceivedNote extends Model
 
     const STATUS_ACCEPTED = 'accepted';
 
+    const STATUS_RECEIVED = 'received';
+    const STATUS_PARTIALLY_RECEIVED = 'partially_received';
     const STATUS_REJECTED = 'rejected';
 
     /**
@@ -72,6 +74,14 @@ class GoodsReceivedNote extends Model
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Party::class, 'supplier_id');
+    }
+
+    /**
+     * Get the warehouse for the GRN.
+     */
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class);
     }
 
     /**

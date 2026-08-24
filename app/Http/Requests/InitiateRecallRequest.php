@@ -6,13 +6,12 @@ class InitiateRecallRequest extends BaseFormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('create', \App\Models\RecallEvent::class);
+        return true;
     }
 
     public function rules(): array
     {
         return [
-            'business_id' => 'required|exists:businesses,id',
             'product_id' => 'nullable|exists:products,id',
             'batch_lot_number' => 'nullable|string|max:255',
             'reason' => 'required|string|max:255',

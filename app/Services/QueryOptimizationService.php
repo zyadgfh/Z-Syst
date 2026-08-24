@@ -201,6 +201,12 @@ class QueryOptimizationService
     {
         $suggestions = [];
 
+        // Validate table name contains only safe characters (alphanumeric + underscores)
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
+            Log::warning('Invalid table name provided to suggestIndexesForTable', ['table' => $table]);
+            return $suggestions;
+        }
+
         try {
             // Get table statistics
             $stats = DB::select("SELECT * FROM pg_stats WHERE tablename = ?", [$table]);

@@ -2,103 +2,86 @@
 
 namespace App\Services;
 
-use App\Models\AgingReport;
-use App\Models\PaymentSchedule;
-use App\Models\Supplier;
-use App\Models\SupplierInvoice;
-use App\Models\SupplierPayment;
+use App\Models\Party;
+use App\Models\SupplierLedger;
 use Illuminate\Support\Facades\DB;
 
 class SupplierPaymentService
 {
-    public function create(array $data): SupplierPayment
+    public function __construct(
+        private SupplierLedgerService $ledgerService,
+        private FinancialTransactionService $financialTransactionService,
+    ) {}
+
+    /**
+     * Record a payment to a supplier.
+     */
+    public function recordPayment(array $data, int $businessId, int $userId): array
     {
-        return DB::transaction(function () use ($data) {
-            $data['payment_number'] = $this->generatePaymentNumber();
+        return DB::transaction(function () use ($data, $businessId, $userId) {
+            $partyId = $data['party_id'];
+            $amount = (float) $data['amount'];
 
-            return SupplierPayment::create($data);
-        });
-    }
+            if ($amount <= 0) {
+                throw new \InvalidArgumentException(__('Payment amount must be greater than zero.'));
+            }
 
-    protected function generatePaymentNumber(): string
-    {
-        $date = now()->format('Ymd');
-        $lastPayment = SupplierPayment::where('payment_number', 'like', "PAY-{$date}%")
-            ->orderBy('id', 'desc')->first();
+            $party = Party::where('id', $partyId)
+                ->where('business_id', $businessId)
+                ->firstOrFail();
 
-        if ($lastPayment) {
-            $lastNumber = (int) substr($lastPayment->payment_number, -6);
-            $newNumber = str_pad($lastNumber + 1, 6, '0', STR_PAD_LEFT);
-        } else {
-            $newNumber = '000001';
-        }
+            // Record in supplier ledger
+            $ledgerEntry = $this->ledgerService->recordPayment(
+                $businessId,
+                $partyId,
+                $amount,
+                $data['invoice_number'] ?? null,
+                $userId,
+                $data['notes'] ?? null
+            );
 
-        return "PAY-{$date}-{$newNumber}";
-    }
+            // Update Party.due for backward compatibility
+            $party->update(['due' => max(0, $party->due - $amount)]);
 
-    public function approve(SupplierPayment $payment, int $approvedBy): SupplierPayment
-    {
-        return DB::transaction(function () use ($payment, $approvedBy) {
-            $payment->update([
-                'status' => 'approved',
-                'approved_by' => $approvedBy,
-                'approved_at' => now(),
+            // Record financial transaction
+            $this->financialTransactionService->recordTransaction([
+                'type' => 'expense',
+                'amount' => $amount,
+                'reference_type' => 'supplier_payment',
+                'reference_id' => $ledgerEntry->id,
+                'description' => "Payment to supplier {$party->name}",
+                'transaction_date' => $data['payment_date'] ?? now(),
+                'category' => 'supplier_payments',
+                'payment_method' => $data['payment_method'] ?? 'cash',
+                'notes' => $data['notes'] ?? null,
+            ], $businessId);
+
+            // Audit log
+            AuditLogger::log('supplier_payment', "Paid {$amount} to supplier {$party->name}", [
+                'party_id' => $partyId,
+                'amount' => $amount,
+                'payment_method' => $data['payment_method'] ?? 'cash',
             ]);
 
-            return $payment;
+            return [
+                'ledger_entry' => $ledgerEntry,
+                'new_balance' => $ledgerEntry->balance_after,
+                'party_due' => $party->fresh()->due,
+            ];
         });
     }
 
-    public function generateAgingReport(int $businessId): void
+    /**
+     * Get payment history for a supplier.
+     */
+    public function getPaymentHistory(int $businessId, int $partyId, int $limit = 50)
     {
-        $suppliers = Supplier::forBusiness($businessId)->get();
-
-        foreach ($suppliers as $supplier) {
-            AgingReport::create([
-                'supplier_id' => $supplier->id,
-                'business_id' => $businessId,
-                'report_date' => now(),
-                'period_30' => $this->calculatePeriod($supplier, 0, 30),
-                'period_60' => $this->calculatePeriod($supplier, 31, 60),
-                'period_90' => $this->calculatePeriod($supplier, 61, 90),
-                'period_90_plus' => $this->calculatePeriod($supplier, 91, 9999),
-                'total' => $this->calculateTotalBalance($supplier),
-                'generated_at' => now(),
-            ]);
-        }
-    }
-
-    protected function calculatePeriod($supplier, $minDays, $maxDays): float
-    {
-        $invoices = SupplierInvoice::where('supplier_id', $supplier->id)
-            ->where('status', '!=', 'paid')
-            ->get();
-
-        return $invoices->sum(function ($invoice) use ($minDays, $maxDays) {
-            $days = now()->diffInDays($invoice->invoice_date);
-
-            return ($days >= $minDays && $days <= $maxDays) ? $invoice->balance : 0;
-        });
-    }
-
-    protected function calculateTotalBalance($supplier): float
-    {
-        return SupplierInvoice::where('supplier_id', $supplier->id)
-            ->where('status', '!=', 'paid')
-            ->sum('balance');
-    }
-
-    public function createSchedule(array $data): PaymentSchedule
-    {
-        return PaymentSchedule::create($data);
-    }
-
-    public function getPendingPayments(int $businessId)
-    {
-        return SupplierPayment::forBusiness($businessId)
-            ->pending()
-            ->with(['supplier', 'createdBy'])
-            ->latest()
+        return SupplierLedger::where('business_id', $businessId)
+            ->where('party_id', $partyId)
+            ->where('transaction_type', SupplierLedger::TYPE_PAYMENT)
+            ->with('user:id,name')
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
             ->get();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Business;
 use App\Models\InsuranceClaim;
 use App\Models\InsuranceCompany;
 use App\Models\InsurancePolicy;
@@ -14,11 +15,13 @@ class InsuranceModuleTest extends TestCase
     use RefreshDatabase;
 
     protected InsuranceService $insuranceService;
+    protected Business $business;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->insuranceService = app(InsuranceService::class);
+        $this->business = Business::factory()->create();
     }
 
     /**
@@ -27,7 +30,7 @@ class InsuranceModuleTest extends TestCase
     public function test_can_create_insurance_company()
     {
         $data = [
-            'business_id' => 1,
+            'business_id' => $this->business->id,
             'name' => 'Test Insurance Company',
             'contact_person' => 'John Doe',
             'phone' => '+1234567890',
@@ -55,7 +58,7 @@ class InsuranceModuleTest extends TestCase
         $company = InsuranceCompany::factory()->create();
 
         $data = [
-            'business_id' => 1,
+            'business_id' => $this->business->id,
             'insurance_company_id' => $company->id,
             'holder_name' => 'Jane Doe',
             'plan_type' => 'individual',
@@ -79,7 +82,10 @@ class InsuranceModuleTest extends TestCase
      */
     public function test_can_create_insurance_claim()
     {
-        $company = InsuranceCompany::factory()->create();
+        $company = InsuranceCompany::factory()->create([
+            'default_coverage_percent' => 80,
+            'default_copay_percent' => 20,
+        ]);
         $policy = InsurancePolicy::factory()->create([
             'insurance_company_id' => $company->id,
             'annual_limit' => 5000,
@@ -87,7 +93,7 @@ class InsuranceModuleTest extends TestCase
         ]);
 
         $data = [
-            'business_id' => 1,
+            'business_id' => $this->business->id,
             'insurance_company_id' => $company->id,
             'insurance_policy_id' => $policy->id,
             'service_date' => now(),
@@ -111,11 +117,13 @@ class InsuranceModuleTest extends TestCase
         $expiredPolicy = InsurancePolicy::factory()->create([
             'end_date' => now()->subDay(),
             'annual_limit' => 1000,
+            'used_amount' => 0,
         ]);
 
         $activePolicy = InsurancePolicy::factory()->create([
             'end_date' => now()->addYear(),
             'annual_limit' => 1000,
+            'used_amount' => 0,
         ]);
 
         $expiredResult = $this->insuranceService->validatePolicyEligibility($expiredPolicy, 500);
@@ -202,6 +210,7 @@ class InsuranceModuleTest extends TestCase
             'status' => 'rejected',
             'total_amount' => 50,
             'covered_amount' => 0,
+            'paid_amount' => 0,
         ]);
 
         $statistics = $this->insuranceService->getClaimStatistics($businessId);

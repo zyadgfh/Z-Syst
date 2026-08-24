@@ -20,6 +20,7 @@ class Purchase extends Model
     protected $fillable = [
         'party_id',
         'business_id',
+        'branch_id',
         'user_id',
         'tax_id',
         'discountAmount',
@@ -56,6 +57,11 @@ class Purchase extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
     }
 
     public function purchaseReturns()

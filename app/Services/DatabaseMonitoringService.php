@@ -182,9 +182,9 @@ class DatabaseMonitoringService
                     query
                 FROM pg_stat_activity 
                 WHERE state != 'idle' 
-                AND now() - query_start > interval '" . $thresholdSeconds . " seconds'
+                AND now() - query_start > interval '? seconds'
                 ORDER BY duration DESC
-            ");
+            ", [$thresholdSeconds]);
 
             return array_map(function ($query) {
                 return [

@@ -15,9 +15,10 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
 
         // Prevent model observers (CacheInvalidationObserver, etc.) from firing
-        // during tests. This avoids memory accumulation from event/listener chains
-        // across hundreds of test methods. Tests that need events can call
-        // Event::fake(null) to restore real dispatching.
+        // during tests. This avoids memory accumulation from event/listener chains.
+        // Note: This also blocks eloquent model events (creating, created), so
+        // auto-generation of po_number, invoice_number, payment_number must be
+        // handled by factories and services, not model boot() methods.
         Event::fake();
     }
 

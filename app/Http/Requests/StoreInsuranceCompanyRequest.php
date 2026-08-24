@@ -12,7 +12,6 @@ class StoreInsuranceCompanyRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'business_id' => 'required|exists:businesses,id',
             'name' => 'required|string|max:255',
             'code' => 'nullable|string|max:50|unique:insurance_companies,code,NULL,id,business_id,' . auth()->user()?->business_id,
             'contact_person' => 'nullable|string|max:255',
@@ -27,7 +26,7 @@ class StoreInsuranceCompanyRequest extends BaseFormRequest
     {
         return [
             'name.required' => __('Company name is required'),
-            'code.unique' => __('Company code already exists'),
+            'code.unique' => __('The company code has already been taken'),
         ];
     }
 }

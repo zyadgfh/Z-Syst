@@ -23,7 +23,7 @@ class SupplierInvoiceFactory extends Factory
             'purchase_order_id' => null,
             'created_by' => null,
             'approved_by' => null,
-            'invoice_number' => 'SI-' . strtoupper(fake()->unique()->bothify('??-#####')),
+            'invoice_number' => 'INV-' . date('Y') . '-' . strtoupper(fake()->unique()->bothify('??-#####')),
             'invoice_date' => fake()->dateTimeBetween('-1 month', 'now'),
             'due_date' => fake()->dateTimeBetween('+1 week', '+1 month'),
             'subtotal' => fake()->randomFloat(2, 100, 5000),

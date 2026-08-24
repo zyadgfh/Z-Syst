@@ -104,7 +104,7 @@ class LoyaltyController extends Controller
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
-            'data' => LoyaltyTransactionResource::collection($history),
+            'data' => $history,
         ]);
     }
 

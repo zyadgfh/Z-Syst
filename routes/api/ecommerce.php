@@ -29,6 +29,40 @@ Route::middleware(['business.context', 'throttle:20,1'])->group(function () {
     Route::apiResource('products', Api\ZSystProductController::class);
     Route::apiResource('stocks', Api\StockController::class)->only('index');
 
+    // Global Item Search (used across sales, purchases, returns, reports)
+    Route::get('items/search', function (\Illuminate\Http\Request $request) {
+        $term = $request->input('q', '');
+        $businessId = $request->user()->business_id;
+        $branchId = $request->user()->branch_id;
+
+        $service = app(\App\Services\ProductService::class);
+        $products = $service->searchProducts($term, $businessId, $branchId);
+
+        return response()->json([
+            'success' => true,
+            'data' => $products,
+        ]);
+    });
+    Route::get('items/search-barcode', function (\Illuminate\Http\Request $request) {
+        $barcode = $request->input('barcode', '');
+        $businessId = $request->user()->business_id;
+
+        $service = app(\App\Services\ProductService::class);
+        $product = $service->searchByBarcode($barcode, $businessId);
+
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => __('No product found with this barcode.'),
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $product,
+        ]);
+    });
+
     // Parties (Customers/Suppliers)
     Route::apiResource('parties', Api\PartyController::class);
 

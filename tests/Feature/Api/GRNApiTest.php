@@ -5,7 +5,7 @@ namespace Tests\Feature\Api;
 use App\Models\User;
 use App\Models\Business;
 use App\Models\Warehouse;
-use App\Models\Supplier;
+use App\Models\Party;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\GoodsReceivedNote;
@@ -21,7 +21,7 @@ class GRNApiTest extends TestCase
     protected Business $business;
     protected User $user;
     protected Warehouse $warehouse;
-    protected Supplier $supplier;
+    protected Party $supplier;
 
     protected function setUp(): void
     {
@@ -30,7 +30,7 @@ class GRNApiTest extends TestCase
         $this->business = Business::factory()->create();
         $this->user = User::factory()->create(['business_id' => $this->business->id]);
         $this->warehouse = Warehouse::factory()->create(['business_id' => $this->business->id]);
-        $this->supplier = Supplier::factory()->create(['business_id' => $this->business->id]);
+        $this->supplier = Party::factory()->create(['business_id' => $this->business->id, 'type' => 'Supplier']);
     }
 
     // -----------------------------------------------------------------------
@@ -130,7 +130,7 @@ class GRNApiTest extends TestCase
                     'quantity_received' => 100,
                     'quantity_accepted' => 98,
                     'quantity_rejected' => 2,
-                    'unit_cost' => $item->unit_cost,
+                    'unit_cost' => $item->unit_price ?? 10.00,
                     'batch_number' => $this->faker->bothify('BATCH-####'),
                     'expiry_date' => now()->addYear()->toDateString(),
                     'notes' => '2 items damaged',
@@ -154,13 +154,13 @@ class GRNApiTest extends TestCase
         $this->assertDatabaseHas('goods_received_notes', [
             'business_id' => $this->business->id,
             'purchase_order_id' => $purchaseOrder->id,
-            'status' => 'draft',
+            'status' => 'pending',
         ]);
 
         $this->assertDatabaseHas('grn_items', [
-            'purchase_order_item_id' => $item->id,
-            'quantity_received' => 100,
-            'quantity_accepted' => 98,
+            'product_id' => $item->product_id,
+            'received_quantity' => 100,
+            'accepted_quantity' => 98,
         ]);
     }
 

@@ -23,7 +23,9 @@ class WarehouseService
                     ->update(['is_default' => false]);
             }
 
-            $data['code'] = $this->generateUniqueWarehouseCode($data['business_id']);
+            if (!isset($data['code'])) {
+                $data['code'] = $this->generateUniqueWarehouseCode($data['business_id']);
+            }
 
             return Warehouse::create($data);
         });

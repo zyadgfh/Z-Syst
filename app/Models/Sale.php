@@ -52,6 +52,11 @@ class Sale extends Model
         return $this->belongsTo(Party::class);
     }
 
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

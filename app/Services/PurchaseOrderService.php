@@ -17,10 +17,14 @@ class PurchaseOrderService
     public function create(array $data): PurchaseOrder
     {
         return DB::transaction(function () use ($data) {
+            $count = PurchaseOrder::where('business_id', $data['business_id'])->count() + 1;
+            $po_number = 'PO-' . date('Y') . '-' . str_pad($count, 6, '0', STR_PAD_LEFT);
+
             $po = PurchaseOrder::create([
                 'supplier_id' => $data['supplier_id'] ?? null,
                 'business_id' => $data['business_id'],
                 'branch_id' => $data['branch_id'] ?? null,
+                'po_number' => $po_number,
                 'status' => PurchaseOrder::STATUS_DRAFT,
                 'priority' => $data['priority'] ?? PurchaseOrder::PRIORITY_NORMAL,
                 'expected_delivery_date' => $data['expected_delivery_date'] ?? null,

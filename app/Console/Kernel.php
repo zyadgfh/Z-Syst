@@ -33,6 +33,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('doctor-attention:calculate')->dailyAt('00:00');
         $schedule->command('subscriptions:manage')->dailyAt('01:00');
         $schedule->command('db:update-stats')->dailyAt('03:00');
+        $schedule->command('vulnerability-exceptions:expire')->dailyAt('06:00');
     }
 
     /**

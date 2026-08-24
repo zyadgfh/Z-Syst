@@ -70,14 +70,18 @@ class InsuranceCompany extends Model
         return $query->where('business_id', $businessId);
     }
 
+    public function scopeByBusiness($query, $businessId)
+    {
+        return $query->where('business_id', $businessId);
+    }
+
     /**
      * Calculate default coverage for a given amount
      */
     public function calculateDefaultCoverage(float $amount): array
     {
         $coveredAmount = ($amount * $this->default_coverage_percent) / 100;
-        $copayAmount = ($amount * $this->default_copay_percent) / 100;
-        $patientResponsibility = $amount - $coveredAmount + $copayAmount;
+        $patientResponsibility = $amount - $coveredAmount;
 
         return [
             'covered_amount' => $coveredAmount,

@@ -68,7 +68,7 @@ class AuditLoggingTest extends TestCase
             $this->markTestSkipped('Spatie Role model not found');
         }
 
-        Role::firstOrCreate(['name' => 'superadmin']);
+        Role::firstOrCreate(['name' => 'superadmin', 'guard_name' => 'web']);
         $business = Business::factory()->create();
         $user = User::factory()->create([
             'business_id' => $business->id,

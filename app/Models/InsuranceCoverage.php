@@ -77,6 +77,11 @@ class InsuranceCoverage extends Model
         return $query->where('business_id', $businessId);
     }
 
+    public function scopeByBusiness($query, $businessId)
+    {
+        return $query->where('business_id', $businessId);
+    }
+
     public function scopeForCompany($query, $companyId)
     {
         return $query->where('insurance_company_id', $companyId);

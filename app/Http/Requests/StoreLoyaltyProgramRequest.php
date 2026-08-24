@@ -12,7 +12,6 @@ class StoreLoyaltyProgramRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'business_id' => 'required|exists:businesses,id',
             'name' => 'required|string|max:255',
             'points_per_currency' => 'required|integer|min:1|max:1000',
             'min_points_for_reward' => 'required|integer|min:1|max:100000',

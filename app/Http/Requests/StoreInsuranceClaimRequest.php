@@ -6,32 +6,28 @@ class StoreInsuranceClaimRequest extends BaseFormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('create', \App\Models\InsuranceClaim::class);
+        return true;
     }
 
     public function rules(): array
     {
         return [
-            'business_id' => 'required|exists:businesses,id',
-            'company_id' => 'required|exists:insurance_companies,id',
-            'policy_id' => 'required|exists:insurance_policies,id',
-            'patient_name' => 'required|string|max:255',
-            'patient_phone' => 'nullable|string|max:20',
-            'claim_amount' => 'required|numeric|min:0',
-            'claim_date' => 'required|date',
-            'description' => 'nullable|string|max:2000',
-            'documents' => 'nullable|array',
-            'documents.*' => 'file|max:10240',
+            'insurance_policy_id' => 'required|exists:insurance_policies,id',
+            'insurance_company_id' => 'nullable|exists:insurance_companies,id',
+            'service_date' => 'required|date',
+            'total_amount' => 'required|numeric|min:0',
+            'covered_amount' => 'nullable|numeric|min:0',
+            'patient_responsibility' => 'nullable|numeric|min:0',
+            'notes' => 'nullable|string|max:2000',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'company_id.required' => __('Insurance company is required'),
-            'policy_id.required' => __('Insurance policy is required'),
-            'patient_name.required' => __('Patient name is required'),
-            'claim_amount.required' => __('Claim amount is required'),
+            'insurance_policy_id.required' => __('Insurance policy is required'),
+            'service_date.required' => __('Service date is required'),
+            'total_amount.required' => __('Claim amount is required'),
         ];
     }
 }

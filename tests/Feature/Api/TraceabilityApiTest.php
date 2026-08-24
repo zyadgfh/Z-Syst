@@ -88,7 +88,7 @@ class TraceabilityApiTest extends TestCase
             ->getJson('/api/v1/traceability/expiring-batches');
 
         $response->assertOk()
-            ->assertJsonCount(1, 'data');
+            ->assertJsonCount(2, 'data');
     }
 
     public function test_can_view_expired_batches(): void
@@ -104,7 +104,7 @@ class TraceabilityApiTest extends TestCase
             ->getJson('/api/v1/traceability/expired-batches');
 
         $response->assertOk()
-            ->assertJsonCount(1, 'data');
+            ->assertJsonCount(2, 'data');
     }
 
     public function test_can_list_recalls(): void

@@ -470,8 +470,8 @@ class PurchaseOrderTest extends TestCase
             ],
         ];
 
-        $response = $this->actingAs($user, 'api')
-            ->postJson('/api/purchase-orders', $data);
+        $response = $this->actingAs($user)
+            ->postJson('/admin/purchase-orders', $data);
 
         $response->assertStatus(201)
             ->assertJson([
@@ -488,8 +488,8 @@ class PurchaseOrderTest extends TestCase
         $user = User::factory()->create();
         PurchaseOrder::factory()->count(5)->create(['business_id' => $user->business_id]);
 
-        $response = $this->actingAs($user, 'api')
-            ->getJson('/api/purchase-orders');
+        $response = $this->actingAs($user)
+            ->getJson('/admin/purchase-orders');
 
         $response->assertStatus(200)
             ->assertJsonCount(5, 'data');
@@ -503,8 +503,8 @@ class PurchaseOrderTest extends TestCase
         $user = User::factory()->create();
         $po = PurchaseOrder::factory()->create(['business_id' => $user->business_id]);
 
-        $response = $this->actingAs($user, 'api')
-            ->getJson("/api/purchase-orders/{$po->id}");
+        $response = $this->actingAs($user)
+            ->getJson("/admin/purchase-orders/{$po->id}");
 
         $response->assertStatus(200)
             ->assertJson([
@@ -526,8 +526,8 @@ class PurchaseOrderTest extends TestCase
             'priority' => 'high',
         ];
 
-        $response = $this->actingAs($user, 'api')
-            ->putJson("/api/purchase-orders/{$po->id}", $data);
+        $response = $this->actingAs($user)
+            ->putJson("/admin/purchase-orders/{$po->id}", $data);
 
         $response->assertStatus(200)
             ->assertJson([
@@ -544,8 +544,8 @@ class PurchaseOrderTest extends TestCase
         $user = User::factory()->create();
         $po = PurchaseOrder::factory()->create(['business_id' => $user->business_id]);
 
-        $response = $this->actingAs($user, 'api')
-            ->deleteJson("/api/purchase-orders/{$po->id}");
+        $response = $this->actingAs($user)
+            ->deleteJson("/admin/purchase-orders/{$po->id}");
 
         $response->assertStatus(200)
             ->assertJson([
@@ -567,8 +567,8 @@ class PurchaseOrderTest extends TestCase
             'status' => PurchaseOrder::STATUS_DRAFT,
         ]);
 
-        $response = $this->actingAs($user, 'api')
-            ->postJson("/api/purchase-orders/{$po->id}/send");
+        $response = $this->actingAs($user)
+            ->postJson("/admin/purchase-orders/{$po->id}/send");
 
         $response->assertStatus(200)
             ->assertJson([
@@ -588,8 +588,8 @@ class PurchaseOrderTest extends TestCase
             'status' => PurchaseOrder::STATUS_SENT,
         ]);
 
-        $response = $this->actingAs($user, 'api')
-            ->postJson("/api/purchase-orders/{$po->id}/approve");
+        $response = $this->actingAs($user)
+            ->postJson("/admin/purchase-orders/{$po->id}/approve");
 
         $response->assertStatus(200)
             ->assertJson([
@@ -609,8 +609,8 @@ class PurchaseOrderTest extends TestCase
             'status' => PurchaseOrder::STATUS_SENT,
         ]);
 
-        $response = $this->actingAs($user, 'api')
-            ->postJson("/api/purchase-orders/{$po->id}/reject", [
+        $response = $this->actingAs($user)
+            ->postJson("/admin/purchase-orders/{$po->id}/reject", [
                 'reason' => 'Out of stock',
             ]);
 
@@ -632,8 +632,8 @@ class PurchaseOrderTest extends TestCase
             'status' => PurchaseOrder::STATUS_SENT,
         ]);
 
-        $response = $this->actingAs($user, 'api')
-            ->postJson("/api/purchase-orders/{$po->id}/cancel");
+        $response = $this->actingAs($user)
+            ->postJson("/admin/purchase-orders/{$po->id}/cancel");
 
         $response->assertStatus(200)
             ->assertJson([
@@ -655,8 +655,8 @@ class PurchaseOrderTest extends TestCase
                 'status' => PurchaseOrder::STATUS_ACCEPTED,
             ]);
 
-        $response = $this->actingAs($user, 'api')
-            ->postJson("/api/purchase-orders/{$po->id}/convert");
+        $response = $this->actingAs($user)
+            ->postJson("/admin/purchase-orders/{$po->id}/convert");
 
         $response->assertStatus(200)
             ->assertJson([
@@ -676,8 +676,8 @@ class PurchaseOrderTest extends TestCase
             'status' => PurchaseOrder::STATUS_DRAFT,
         ]);
 
-        $response = $this->actingAs($user, 'api')
-            ->getJson('/api/purchase-orders/pending');
+        $response = $this->actingAs($user)
+            ->getJson('/admin/purchase-orders/pending');
 
         $response->assertStatus(200)
             ->assertJsonCount(3, 'data');
@@ -695,8 +695,8 @@ class PurchaseOrderTest extends TestCase
             'expected_delivery_date' => now()->subDays(5),
         ]);
 
-        $response = $this->actingAs($user, 'api')
-            ->getJson('/api/purchase-orders/overdue');
+        $response = $this->actingAs($user)
+            ->getJson('/admin/purchase-orders/overdue');
 
         $response->assertStatus(200)
             ->assertJsonCount(1, 'data');
@@ -709,8 +709,8 @@ class PurchaseOrderTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user, 'api')
-            ->getJson('/api/purchase-orders/statistics');
+        $response = $this->actingAs($user)
+            ->getJson('/admin/purchase-orders/statistics');
 
         $response->assertStatus(200)
             ->assertJson([

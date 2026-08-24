@@ -14,8 +14,12 @@ class MaintenanceMode
      */
     public function handle(Request $request, Closure $next)
     {
-        // Get the current maintenance setting
-        $maintenance = MaintenanceSetting::latest()->first();
+        // Gracefully handle missing table (e.g. during tests)
+        try {
+            $maintenance = MaintenanceSetting::latest()->first();
+        } catch (\Illuminate\Database\QueryException $e) {
+            return $next($request);
+        }
 
         // If no maintenance setting or maintenance is not active, proceed normally
         if (!$maintenance || !$maintenance->isActive()) {

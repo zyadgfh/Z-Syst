@@ -46,6 +46,12 @@ class PermissionSeeder extends Seeder
             'reports-view',
             'reports-export',
 
+            // Purchases
+            'purchases-view',
+            'purchases-create',
+            'purchases-edit',
+            'purchases-delete',
+
             // Settings
             'settings-view',
             'settings-edit',
@@ -61,6 +67,12 @@ class PermissionSeeder extends Seeder
             'receipts-create',
             'receipts-edit',
             'receipts-delete',
+
+            // Supplier Management
+            'suppliers-view',
+            'suppliers-create',
+            'suppliers-edit',
+            'suppliers-delete',
 
             // Audit Logs
             'audit-logs-view',
@@ -89,11 +101,10 @@ class PermissionSeeder extends Seeder
             'sales-view', 'sales-create', 'sales-edit',
             'purchases-view', 'purchases-create', 'purchases-edit',
             'inventory-view', 'inventory-create', 'inventory-edit',
-            'reports-view', 'reports-export',
-            'settings-view', 'settings-edit',
+            'reports-view', 'reports-export',            'settings-view', 'settings-edit',
+            'suppliers-view', 'suppliers-create', 'suppliers-edit',
             'loyalty-view', 'loyalty-create', 'loyalty-edit',
-            'receipts-view', 'receipts-create',
-            'audit-logs-view',
+            'receipts-view', 'receipts-create', 'audit-logs-view',
             'maintenance-read',
         ]);
 

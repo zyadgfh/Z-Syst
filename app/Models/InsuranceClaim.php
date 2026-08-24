@@ -102,6 +102,11 @@ class InsuranceClaim extends Model
         return $query->where('business_id', $businessId);
     }
 
+    public function scopeByBusiness($query, $businessId)
+    {
+        return $query->where('business_id', $businessId);
+    }
+
     public function scopePending($query)
     {
         return $query->whereIn('status', ['draft', 'submitted', 'under_review']);
