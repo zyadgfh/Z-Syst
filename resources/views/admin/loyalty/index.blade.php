@@ -100,6 +100,32 @@
             </div>
         </div>
 
+        <!-- Expiring Points Widget -->
+        <div class="row g-3 mb-4">
+            <div class="col-12">
+                <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; overflow: hidden;">
+                    <div class="card-body" style="padding: 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #f0f0f2; background: linear-gradient(135deg, #fff3e0 0%, #fff8e1 100%);">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 24px;">⏰</span>
+                                <div>
+                                    <h5 style="margin: 0; font-size: 16px; font-weight: 700; color: #1d1d1f;">نقاط على وشك الانتهاء</h5>
+                                    <p style="margin: 0; font-size: 12px; color: #86868b;">النقاط التي ستنتهي خلال 30 يوماً</p>
+                                </div>
+                            </div>
+                            <button onclick="loadExpiringPoints()" style="background: #ff9500; color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer; transition: transform 150ms ease;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                                تحديث
+                            </button>
+                        </div>
+                        <div id="expiringPointsList" style="padding: 8px 0;">
+                            <div style="padding: 20px; text-align: center; color: #86868b; font-size: 13px;">جاري التحميل...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Top Customers -->
         <div class="erp-table-section">
             <div class="card">
@@ -165,7 +191,7 @@
         </div>
     </div>
 
-    @push('script')
+    @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 // Initialize counters
@@ -191,6 +217,111 @@
                     }
                 }, 30);
             }
+
+            // ── Expiring Points Widget ──
+            function loadExpiringPoints() {
+                var listEl = document.getElementById('expiringPointsList');
+                if (!listEl) return;
+                listEl.innerHTML = '<div style="padding:20px;text-align:center;color:#86868b;font-size:13px;">جاري التحميل...</div>';
+
+                fetch('{{ route("admin.loyalty.expiring-soonest") }}?days=90', {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (!data.success || !data.data || data.data.length === 0) {
+                        listEl.innerHTML = '<div style="padding:24px;text-align:center;color:#86868b;font-size:14px;">✅ لا توجد نقاط على وشك الانتهاء حالياً</div>';
+                        return;
+                    }
+
+                    var html = '<div style="overflow-x:auto;">';
+                    html += '<table class="table table-hover" style="font-size:13px;margin:0;">';
+                    html += '<thead style="background:#fafafa;">';
+                    html += '<tr>';
+                    html += '<th style="padding:10px 16px;border:none;font-weight:600;color:#6e6e73;font-size:11px;text-transform:uppercase;">العميل</th>';
+                    html += '<th style="padding:10px 16px;border:none;font-weight:600;color:#6e6e73;font-size:11px;text-transform:uppercase;">النقاط المهددة</th>';
+                    html += '<th style="padding:10px 16px;border:none;font-weight:600;color:#6e6e73;font-size:11px;text-transform:uppercase;">تنتهي خلال</th>';
+                    html += '<th style="padding:10px 16px;border:none;font-weight:600;color:#6e6e73;font-size:11px;text-transform:uppercase;">إجراء</th>';
+                    html += '</tr></thead><tbody>';
+
+                    data.data.forEach(function(item) {
+                        var user = item.user;
+                        var daysColor = item.days_left <= 7 ? '#ff3b30' : (item.days_left <= 14 ? '#ff9500' : '#ffcc00');
+                        html += '<tr style="border-bottom:1px solid #f0f0f2;">';
+                        html += '<td style="padding:12px 16px;">';
+                        html += '<div style="display:flex;align-items:center;gap:8px;">';
+                        if (user && user.image) {
+                            html += '<img src="/storage/' + user.image + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">';
+                        } else {
+                            html += '<div style="width:32px;height:32px;border-radius:50%;background:#e8f0fe;color:#007aff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">' + (user ? user.name.charAt(0) : '?') + '</div>';
+                        }
+                        html += '<div><div style="font-weight:600;color:#1d1d1f;">' + (user ? user.name : 'غير معروف') + '</div>';
+                        html += '<div style="font-size:11px;color:#86868b;">' + (user ? user.email : '') + '</div></div>';
+                        html += '</div></td>';
+                        html += '<td style="padding:12px 16px;text-align:center;">';
+                        html += '<span style="background:#fff3e0;color:#e65100;padding:4px 10px;border-radius:6px;font-weight:700;">' + item.total_points + ' نقطة</span>';
+                        html += '</td>';
+                        html += '<td style="padding:12px 16px;text-align:center;">';
+                        html += '<span style="color:' + daysColor + ';font-weight:700;">' + item.days_left + ' يوم</span>';
+                        html += '</td>';
+                        html += '<td style="padding:12px 16px;text-align:center;">';
+                        html += '<button onclick="sendExpiryReminder(' + item.user_id + ', this)" style="background:#007aff;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:transform 150ms ease;" onmousedown="this.style.transform=\'scale(0.95)\'" onmouseup="this.style.transform=\'scale(1)\'">';
+                        html += '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:3px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>';
+                        html += 'إرسال تذكير</button>';
+                        html += '</td></tr>';
+                    });
+
+                    html += '</tbody></table></div>';
+                    listEl.innerHTML = html;
+                })
+                .catch(function() {
+                    listEl.innerHTML = '<div style="padding:16px;text-align:center;color:#ff3b30;font-size:13px;">فشل تحميل البيانات</div>';
+                });
+            }
+
+            function sendExpiryReminder(userId, btn) {
+                var originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;animation:spin 1s linear infinite;"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> جاري الإرسال...';
+                btn.style.opacity = '0.7';
+
+                fetch('{{ route("admin.loyalty.send-expiry-reminder") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify({ user_id: userId }),
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        btn.style.background = '#34c759';
+                        btn.innerHTML = '✓ تم الإرسال';
+                        setTimeout(function() {
+                            btn.innerHTML = originalText;
+                            btn.style.background = '#007aff';
+                            btn.disabled = false;
+                            btn.style.opacity = '1';
+                        }, 2500);
+                    } else {
+                        alert(data.message || 'فشل الإرسال');
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                    }
+                })
+                .catch(function() {
+                    alert('حدث خطأ في الاتصال');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                });
+            }
+
+            // Load expiring points on page load
+            setTimeout(loadExpiringPoints, 500);
         </script>
     @endpush
 @endsection

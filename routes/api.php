@@ -45,6 +45,11 @@ Route::prefix('v1')->group(function () {
         // E-invoicing, marketing automation, tenant onboarding
         require __DIR__.'/api/einvoicing.php';
 
+        // Push Notifications (FCM)
+        Route::post('push-tokens', [App\Http\Controllers\Api\PushTokenController::class, 'store']);
+        Route::delete('push-tokens', [App\Http\Controllers\Api\PushTokenController::class, 'destroy']);
+        Route::post('push-tokens/test', [App\Http\Controllers\Api\PushTokenController::class, 'test']);
+
         // Advanced features: FEFO, predictions, auto-order, audits, insurance, warehouses, etc.
         require __DIR__.'/api/advanced.php';
     });

@@ -3,11 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\LoyaltyPointsExpiringMail;
 use App\Models\CustomerInteraction;
+use App\Models\LoyaltyPoint;
 use App\Models\LoyaltyProgram;
 use App\Models\LoyaltyTransaction;
+use App\Models\User;
 use App\Services\LoyaltyService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class LoyaltyController extends Controller
 {
@@ -240,5 +245,106 @@ class LoyaltyController extends Controller
         $topCustomers = $this->loyaltyService->getTopLoyalCustomers($businessId, $request->program_id, $limit);
 
         return response()->json($topCustomers);
+    }
+
+    /**
+     * Get loyalty points expiring soonest across all customers.
+     */
+    public function expiringSoonest(Request $request)
+    {
+        $businessId = auth()->user()->business_id;
+        $days = $request->integer('days', 90);
+
+        $expiringByUser = LoyaltyPoint::where('business_id', $businessId)
+            ->where('type', 'earned')
+            ->where('points', '>', 0)
+            ->whereNotNull('expires_at')
+            ->where('expires_at', '>', now())
+            ->where('expires_at', '<=', now()->addDays($days))
+            ->where('expiration_notification_sent', false)
+            ->select(
+                'user_id',
+                DB::raw('SUM(points) as total_points'),
+                DB::raw('MIN(expires_at) as earliest_expiry'),
+                DB::raw('COUNT(*) as record_count')
+            )
+            ->groupBy('user_id')
+            ->orderBy('earliest_expiry')
+            ->limit(20)
+            ->get();
+
+        // Hydrate user info
+        $result = $expiringByUser->map(function ($row) {
+            $user = User::select('id', 'name', 'email', 'image')->find($row->user_id);
+            return [
+                'user'            => $user,
+                'user_id'         => $row->user_id,
+                'total_points'    => (int) $row->total_points,
+                'earliest_expiry' => $row->earliest_expiry,
+                'days_left'       => (int) now()->diffInDays($row->earliest_expiry, false),
+                'record_count'    => (int) $row->record_count,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data'    => $result,
+        ]);
+    }
+
+    /**
+     * Send a one-click reminder email for a specific user's expiring points.
+     */
+    public function sendExpiryReminder(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $userId = $request->integer('user_id');
+        $user = User::find($userId);
+
+        if (!$user || !$user->email) {
+            return response()->json([
+                'success' => false,
+                'message' => 'المستخدم لا يملك بريد إلكتروني',
+            ], 400);
+        }
+
+        $expiringPoints = LoyaltyPoint::where('user_id', $userId)
+            ->where('type', 'earned')
+            ->where('points', '>', 0)
+            ->whereNotNull('expires_at')
+            ->where('expires_at', '>', now())
+            ->where('expires_at', '<=', now()->addDays(30))
+            ->get();
+
+        if ($expiringPoints->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا توجد نقاط على وشك الانتهاء لهذا المستخدم',
+            ], 404);
+        }
+
+        $totalPoints = $expiringPoints->sum('points');
+        $daysUntilExpiry = (int) now()->diffInDays($expiringPoints->min('expires_at'), false);
+
+        try {
+            Mail::to($user->email)->send(new LoyaltyPointsExpiringMail(
+                $user,
+                $totalPoints,
+                max($daysUntilExpiry, 1),
+            ));
+
+            return response()->json([
+                'success' => true,
+                'message' => "تم إرسال تذكير الانتهاء لـ {$user->name} بنجاح",
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'فشل إرسال البريد: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

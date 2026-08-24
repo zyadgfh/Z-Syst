@@ -25,3 +25,9 @@ Broadcast::channel('item.{productId}.stock', function ($user, $productId) {
     }
     return false;
 });
+
+// Inventory alerts — only admins from the same business
+Broadcast::channel('inventory-alerts.{businessId}', function ($user, $businessId) {
+    return in_array($user->role, ['admin', 'superadmin']) &&
+           (int) $user->business_id === (int) $businessId;
+});

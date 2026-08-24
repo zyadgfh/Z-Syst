@@ -305,6 +305,8 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('loyalty/customer-loyalty', [ADMIN\LoyaltyController::class, 'customerLoyalty'])->name('loyalty.customer-loyalty');
     Route::get('loyalty/customer-interactions', [ADMIN\LoyaltyController::class, 'customerInteractions'])->name('loyalty.customer-interactions');
     Route::get('loyalty/top-loyal-customers', [ADMIN\LoyaltyController::class, 'topLoyalCustomers'])->name('loyalty.top-loyal-customers');
+    Route::get('loyalty/expiring-soonest', [ADMIN\LoyaltyController::class, 'expiringSoonest'])->name('loyalty.expiring-soonest');
+    Route::post('loyalty/send-expiry-reminder', [ADMIN\LoyaltyController::class, 'sendExpiryReminder'])->name('loyalty.send-expiry-reminder');
 
     // Receipts
     Route::get('receipts', [ADMIN\ReceiptController::class, 'index'])->name('receipts.index');
@@ -436,6 +438,45 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
         Route::post('claims/{claim}/payment', [ADMIN\InsuranceClaimController::class, 'processPayment'])->name('claims.payment');
         Route::get('claims/statistics', [ADMIN\InsuranceClaimController::class, 'statistics'])->name('claims.statistics');
     });
+
+    // Online Store - Customer Orders
+    Route::get('customer-orders', [ADMIN\CustomerOrderController::class, 'index'])->name('customer-orders.index');
+    Route::get('customer-orders/{customerOrder}', [ADMIN\CustomerOrderController::class, 'show'])->name('customer-orders.show');
+    Route::put('customer-orders/{customerOrder}/status', [ADMIN\CustomerOrderController::class, 'updateStatus'])->name('customer-orders.update-status');
+    Route::put('customer-orders/{customerOrder}/payment', [ADMIN\CustomerOrderController::class, 'updatePayment'])->name('customer-orders.update-payment');
+    Route::get('customer-orders/export/csv', [ADMIN\CustomerOrderController::class, 'exportCsv'])->name('customer-orders.export-csv');
+
+    // Online Store Analytics Dashboard
+    Route::get('online-store', [ADMIN\OnlineStoreController::class, 'index'])->name('online-store.index');
+
+    // Product Reviews Management
+    Route::get('reviews', [ADMIN\ReviewController::class, 'index'])->name('reviews.index');
+    Route::post('reviews/{review}/approve', [ADMIN\ReviewController::class, 'approve'])->name('reviews.approve');
+    Route::post('reviews/{review}/reject', [ADMIN\ReviewController::class, 'reject'])->name('reviews.reject');
+    Route::delete('reviews/{review}', [ADMIN\ReviewController::class, 'destroy'])->name('reviews.destroy');
+
+    // Coupons Management
+    Route::resource('coupons', ADMIN\CouponController::class);
+    Route::post('coupons/{coupon}/toggle-status', [ADMIN\CouponController::class, 'toggleStatus'])->name('coupons.toggle-status');
+    Route::get('coupons/analytics', [ADMIN\CouponAnalyticsController::class, 'index'])->name('coupons.analytics');
+    Route::get('coupons/import', [ADMIN\CouponImportController::class, 'index'])->name('coupons.import');
+    Route::post('coupons/import/preview', [ADMIN\CouponImportController::class, 'preview'])->name('coupons.import.preview');
+    Route::post('coupons/import/confirm', [ADMIN\CouponImportController::class, 'confirm'])->name('coupons.import.confirm');
+    Route::get('coupons/import/sample', [ADMIN\CouponImportController::class, 'downloadSample'])->name('coupons.import.sample');
+    Route::get('coupons/bulk-generate', [ADMIN\CouponController::class, 'bulkGenerateForm'])->name('coupons.bulk-generate');
+    Route::post('coupons/bulk-generate', [ADMIN\CouponController::class, 'bulkGenerate'])->name('coupons.bulk-generate.store');
+    Route::post('coupons/export-codes', [ADMIN\CouponController::class, 'exportCodes'])->name('coupons.export-codes');
+    Route::post('coupons/export-csv', [ADMIN\CouponController::class, 'exportCsv'])->name('coupons.export-csv');
+    Route::get('coupons/qr-codes', [ADMIN\CouponController::class, 'qrCodes'])->name('coupons.qr-codes');
+
+    // Inventory Alerts
+    Route::get('inventory-alerts', [ADMIN\InventoryAlertController::class, 'index'])->name('inventory-alerts.index');
+    Route::post('inventory-alerts/{alert}/acknowledge', [ADMIN\InventoryAlertController::class, 'acknowledge'])->name('inventory-alerts.acknowledge');
+    Route::post('inventory-alerts/acknowledge-all', [ADMIN\InventoryAlertController::class, 'acknowledgeAll'])->name('inventory-alerts.acknowledge-all');
+    Route::post('inventory-alerts/scan', [ADMIN\InventoryAlertController::class, 'runScan'])->name('inventory-alerts.scan');
+    Route::get('inventory-alerts/chart-data', [ADMIN\InventoryAlertController::class, 'chartData'])->name('inventory-alerts.chart-data');
+    Route::get('inventory-alerts/bell-data', [ADMIN\InventoryAlertController::class, 'bellData'])->name('inventory-alerts.bell-data');
+    Route::post('inventory-alerts/{alert}/acknowledge-alert', [ADMIN\InventoryAlertController::class, 'acknowledgeAlert'])->name('inventory-alerts.acknowledge-alert');
 });
 
 

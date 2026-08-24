@@ -55,4 +55,15 @@ return [
         'orange_cash_api_secret' => env('ORANGE_CASH_API_SECRET'),
         'instapay_api_secret' => env('INSTAPAY_API_SECRET'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Firebase Cloud Messaging
+    |--------------------------------------------------------------------------
+    */
+    'firebase' => [
+        'project_id'   => env('VITE_FIREBASE_PROJECT_ID', 'z-syst'),
+        'server_key'   => env('FIREBASE_SERVER_KEY'),
+        'credentials'  => env('FIREBASE_SERVICE_ACCOUNT_PATH'),
+    ],
 ];
