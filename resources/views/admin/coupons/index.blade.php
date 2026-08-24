@@ -71,12 +71,35 @@
             </div>
         </div>
 
+        {{-- Bulk Actions Bar --}}
+        <div id="bulkActionsBar" style="display: none; background: #f0f7ff; border-radius: 12px; padding: 12px 20px; margin-bottom: 16px; display: none; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span id="selectedCount" style="font-size: 14px; font-weight: 600; color: #007aff;">0 محدد</span>
+                <button onclick="bulkToggleStatus(true)" style="background: #34c759; color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 2px;"><polyline points="20 6 9 17 4 12"/></svg>
+                    تفعيل المحدد
+                </button>
+                <button onclick="bulkToggleStatus(false)" style="background: #ff9500; color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 2px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    تعطيل المحدد
+                </button>
+                <button onclick="bulkDelete()" style="background: #ff3b30; color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 2px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    حذف المحدد
+                </button>
+            </div>
+            <button onclick="clearSelection()" style="background: none; border: none; color: #86868b; font-size: 13px; cursor: pointer; font-weight: 600;">إلغاء التحديد</button>
+        </div>
+
         {{-- Coupons Table --}}
         <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; overflow: hidden;">
             <div class="table-responsive">
                 <table class="table table-hover mb-0" style="font-size: 14px;">
                     <thead style="background: #f5f5f7;">
                         <tr>
+                            <th style="border: none; padding: 12px 16px; width: 40px;">
+                                <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" style="width: 18px; height: 18px; border-radius: 4px; cursor: pointer;">
+                            </th>
                             <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">الكود</th>
                             <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">النوع والقيمة</th>
                             <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">الحد الأدنى</th>
@@ -88,7 +111,10 @@
                     </thead>
                     <tbody>
                         @forelse ($coupons as $coupon)
-                            <tr style="border-bottom: 1px solid #f0f0f2;">
+                            <tr style="border-bottom: 1px solid #f0f0f2;" data-coupon-id="{{ $coupon->id }}">
+                                <td style="padding: 14px 16px; vertical-align: middle;">
+                                    <input type="checkbox" class="coupon-checkbox" value="{{ $coupon->id }}" onchange="updateBulkActions()" style="width: 18px; height: 18px; border-radius: 4px; cursor: pointer;">
+                                </td>
                                 <td style="padding: 14px 16px; vertical-align: middle;">
                                     <code style="background: #f5f5f7; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 14px; letter-spacing: 0.04em;">{{ $coupon->code }}</code>
                                 </td>
@@ -156,7 +182,7 @@
             fetch(`/admin/coupons/${couponId}/toggle-status`, {
                 method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-CSRF-TOKEN': document.querySelector('meta["csrf-token"]').content,
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                 },
@@ -171,6 +197,101 @@
                     btn.style.background = '#f8d7da';
                     btn.style.color = '#721c24';
                     btn.textContent = 'معطّل';
+                }
+            });
+        }
+
+        // ── Bulk Actions ──
+        function getSelectedIds() {
+            var ids = [];
+            document.querySelectorAll('.coupon-checkbox:checked').forEach(function(cb) {
+                ids.push(parseInt(cb.value));
+            });
+            return ids;
+        }
+
+        function toggleSelectAll(checkbox) {
+            document.querySelectorAll('.coupon-checkbox').forEach(function(cb) {
+                cb.checked = checkbox.checked;
+            });
+            updateBulkActions();
+        }
+
+        function updateBulkActions() {
+            var ids = getSelectedIds();
+            var bar = document.getElementById('bulkActionsBar');
+            var countEl = document.getElementById('selectedCount');
+            if (ids.length > 0) {
+                bar.style.display = 'flex';
+                countEl.textContent = ids.length + ' محدد';
+            } else {
+                bar.style.display = 'none';
+            }
+            // Update select all checkbox
+            var allCbs = document.querySelectorAll('.coupon-checkbox');
+            document.getElementById('selectAll').checked = allCbs.length > 0 && allCbs.length === ids.length;
+        }
+
+        function clearSelection() {
+            document.querySelectorAll('.coupon-checkbox').forEach(function(cb) { cb.checked = false; });
+            document.getElementById('selectAll').checked = false;
+            updateBulkActions();
+        }
+
+        function bulkToggleStatus(active) {
+            var ids = getSelectedIds();
+            if (ids.length === 0) return;
+
+            var action = active ? 'تفعيل' : 'تعطيل';
+            if (!confirm('هل تريد ' + action + ' ' + ids.length + ' كوبون؟')) return;
+
+            fetch('{{ route("admin.coupons.bulk-toggle-status") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta["csrf-token"]').content,
+                },
+                body: JSON.stringify({ ids: ids, active: active }),
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                }
+            });
+        }
+
+        function bulkDelete() {
+            var ids = getSelectedIds();
+            if (ids.length === 0) return;
+
+            if (!confirm('هل تريد حذف ' + ids.length + ' كوبون نهائياً؟ لا يمكن التراجع عن هذا الإجراء.')) return;
+
+            fetch('{{ route("admin.coupons.bulk-delete") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta["csrf-token"]').content,
+                },
+                body: JSON.stringify({ ids: ids }),
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove deleted rows
+                    ids.forEach(function(id) {
+                        var row = document.querySelector('tr[data-coupon-id="' + id + '"]');
+                        if (row) {
+                            row.style.transition = 'opacity 0.3s';
+                            row.style.opacity = '0';
+                            setTimeout(function() { row.remove(); }, 300);
+                        }
+                    });
+                    clearSelection();
+                    alert(data.message);
                 }
             });
         }

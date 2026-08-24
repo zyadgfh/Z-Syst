@@ -126,6 +126,20 @@
             </div>
         </div>
 
+        <!-- Analytics Link -->
+        <div class="row g-3 mb-4">
+            <div class="col-12">
+                <a href="{{ route('admin.loyalty.analytics') }}" style="display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border-radius: 14px; padding: 16px 20px; text-decoration: none; transition: transform 150ms ease;" onmouseenter="this.style.transform='scale(1.01)'" onmouseleave="this.style.transform='scale(1)'">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    <div>
+                        <div style="font-weight: 700; font-size: 15px;">تحليلات نقاط الولاء</div>
+                        <div style="font-size: 12px; opacity: 0.8;">عرض الرسوم البيانية والاتجاهات الشهرية</div>
+                    </div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: auto;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+        </div>
+
         <!-- Top Customers -->
         <div class="erp-table-section">
             <div class="card">

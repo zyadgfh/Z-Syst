@@ -248,6 +248,91 @@ class LoyaltyController extends Controller
     }
 
     /**
+     * Loyalty points analytics dashboard with charts.
+     */
+    public function analytics()
+    {
+        $businessId = auth()->user()->business_id;
+
+        // Points earned vs redeemed over last 12 months (monthly)
+        $monthlyTrend = LoyaltyPoint::where('business_id', $businessId)
+            ->where('created_at', '>=', now()->subMonths(12))
+            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month")
+            ->selectRaw("SUM(CASE WHEN type = 'earned' AND points > 0 THEN points ELSE 0 END) as earned")
+            ->selectRaw("SUM(CASE WHEN type = 'redeemed' THEN ABS(points) ELSE 0 END) as redeemed")
+            ->selectRaw("SUM(CASE WHEN type = 'expired' THEN ABS(points) ELSE 0 END) as expired")
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        // Points by type (earned, redeemed, expired)
+        $byType = LoyaltyPoint::where('business_id', $businessId)
+            ->selectRaw('type, SUM(ABS(points)) as total')
+            ->groupBy('type')
+            ->pluck('total', 'type');
+
+        // Top point earners (users with most earned points)
+        $topEarners = LoyaltyPoint::where('business_id', $businessId)
+            ->where('type', 'earned')
+            ->where('points', '>', 0)
+            ->select('user_id', DB::raw('SUM(points) as total_earned'), DB::raw('COUNT(*) as transactions'))
+            ->groupBy('user_id')
+            ->orderByDesc('total_earned')
+            ->limit(10)
+            ->get()
+            ->map(function ($row) {
+                $user = User::select('id', 'name', 'email', 'image')->find($row->user_id);
+                return [
+                    'user'          => $user,
+                    'total_earned'  => (int) $row->total_earned,
+                    'transactions'  => (int) $row->transactions,
+                ];
+            });
+
+        // Points by status (active, expiring soon, expired)
+        $activePoints = LoyaltyPoint::where('business_id', $businessId)
+            ->where('type', 'earned')
+            ->where('points', '>', 0)
+            ->where(function ($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
+            ->sum('points');
+
+        $expiringSoonPoints = LoyaltyPoint::where('business_id', $businessId)
+            ->where('type', 'earned')
+            ->where('points', '>', 0)
+            ->whereNotNull('expires_at')
+            ->where('expires_at', '>', now())
+            ->where('expires_at', '<=', now()->addDays(30))
+            ->sum('points');
+
+        $expiredPoints = LoyaltyPoint::where('business_id', $businessId)
+            ->where('type', 'expired')
+            ->sum(DB::raw('ABS(points)'));
+
+        // Summary stats
+        $totalIssued = LoyaltyPoint::where('business_id', $businessId)
+            ->where('type', 'earned')
+            ->where('points', '>', 0)
+            ->sum('points');
+
+        $totalRedeemed = LoyaltyPoint::where('business_id', $businessId)
+            ->where('type', 'redeemed')
+            ->sum(DB::raw('ABS(points)'));
+
+        $uniqueMembers = LoyaltyPoint::where('business_id', $businessId)
+            ->where('type', 'earned')
+            ->distinct('user_id')
+            ->count('user_id');
+
+        return view('admin.loyalty.analytics', compact(
+            'monthlyTrend', 'byType', 'topEarners',
+            'activePoints', 'expiringSoonPoints', 'expiredPoints',
+            'totalIssued', 'totalRedeemed', 'uniqueMembers'
+        ));
+    }
+
+    /**
      * Get loyalty points expiring soonest across all customers.
      */
     public function expiringSoonest(Request $request)

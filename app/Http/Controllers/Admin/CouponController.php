@@ -193,6 +193,48 @@ class CouponController extends Controller
     }
 
     /**
+     * Bulk delete selected coupons.
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'exists:coupons,id',
+        ]);
+
+        $deleted = Coupon::whereIn('id', $request->ids)->delete();
+
+        return response()->json([
+            'success' => true,
+            'deleted' => $deleted,
+            'message' => "تم حذف {$deleted} كوبون بنجاح",
+        ]);
+    }
+
+    /**
+     * Bulk toggle active status for selected coupons.
+     */
+    public function bulkToggleStatus(Request $request)
+    {
+        $request->validate([
+            'ids'    => 'required|array|min:1',
+            'ids.*'  => 'exists:coupons,id',
+            'active' => 'required|boolean',
+        ]);
+
+        $count = Coupon::whereIn('id', $request->ids)
+            ->update(['active' => $request->boolean('active')]);
+
+        $status = $request->boolean('active') ? 'تفعيل' : 'تعطيل';
+
+        return response()->json([
+            'success' => true,
+            'count'   => $count,
+            'message' => "تم {$status} {$count} كوبون بنجاح",
+        ]);
+    }
+
+    /**
      * Export codes as a text file.
      */
     public function exportCodes(Request $request)

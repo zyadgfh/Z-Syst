@@ -305,6 +305,7 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('loyalty/customer-loyalty', [ADMIN\LoyaltyController::class, 'customerLoyalty'])->name('loyalty.customer-loyalty');
     Route::get('loyalty/customer-interactions', [ADMIN\LoyaltyController::class, 'customerInteractions'])->name('loyalty.customer-interactions');
     Route::get('loyalty/top-loyal-customers', [ADMIN\LoyaltyController::class, 'topLoyalCustomers'])->name('loyalty.top-loyal-customers');
+    Route::get('loyalty/analytics', [ADMIN\LoyaltyController::class, 'analytics'])->name('loyalty.analytics');
     Route::get('loyalty/expiring-soonest', [ADMIN\LoyaltyController::class, 'expiringSoonest'])->name('loyalty.expiring-soonest');
     Route::post('loyalty/send-expiry-reminder', [ADMIN\LoyaltyController::class, 'sendExpiryReminder'])->name('loyalty.send-expiry-reminder');
 
@@ -458,6 +459,8 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     // Coupons Management
     Route::resource('coupons', ADMIN\CouponController::class);
     Route::post('coupons/{coupon}/toggle-status', [ADMIN\CouponController::class, 'toggleStatus'])->name('coupons.toggle-status');
+    Route::post('coupons/bulk-delete', [ADMIN\CouponController::class, 'bulkDelete'])->name('coupons.bulk-delete');
+    Route::post('coupons/bulk-toggle-status', [ADMIN\CouponController::class, 'bulkToggleStatus'])->name('coupons.bulk-toggle-status');
     Route::get('coupons/analytics', [ADMIN\CouponAnalyticsController::class, 'index'])->name('coupons.analytics');
     Route::get('coupons/import', [ADMIN\CouponImportController::class, 'index'])->name('coupons.import');
     Route::post('coupons/import/preview', [ADMIN\CouponImportController::class, 'preview'])->name('coupons.import.preview');
@@ -477,6 +480,17 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('inventory-alerts/chart-data', [ADMIN\InventoryAlertController::class, 'chartData'])->name('inventory-alerts.chart-data');
     Route::get('inventory-alerts/bell-data', [ADMIN\InventoryAlertController::class, 'bellData'])->name('inventory-alerts.bell-data');
     Route::post('inventory-alerts/{alert}/acknowledge-alert', [ADMIN\InventoryAlertController::class, 'acknowledgeAlert'])->name('inventory-alerts.acknowledge-alert');
+
+    // Push Notification Preferences & Device Management
+    Route::get('push-notifications', [ADMIN\PushNotificationPreferencesController::class, 'index'])->name('push-notifications.index');
+    Route::post('push-notifications/update-preferences', [ADMIN\PushNotificationPreferencesController::class, 'updatePreferences'])->name('push-notifications.update-preferences');
+    Route::post('push-notifications/toggle-type', [ADMIN\PushNotificationPreferencesController::class, 'toggleType'])->name('push-notifications.toggle-type');
+    Route::post('push-notifications/devices/{device}/deactivate', [ADMIN\PushNotificationPreferencesController::class, 'deactivateDevice'])->name('push-notifications.deactivate-device');
+    Route::delete('push-notifications/devices/{device}/remove', [ADMIN\PushNotificationPreferencesController::class, 'removeDevice'])->name('push-notifications.remove-device');
+    Route::post('push-notifications/deactivate-all', [ADMIN\PushNotificationPreferencesController::class, 'deactivateAllDevices'])->name('push-notifications.deactivate-all');
+
+    // Comparison Analytics
+    Route::get('comparison-analytics', [ADMIN\ComparisonAnalyticsController::class, 'index'])->name('comparison-analytics.index');
 });
 
 
