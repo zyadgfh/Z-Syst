@@ -7,8 +7,10 @@ use App\Models\Warehouse;
 use App\Models\Product;
 use App\Models\WarehouseStock;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
+#[Group('accounting')]
 class StockTransferTest extends TestCase
 {
     use RefreshDatabase;

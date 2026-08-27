@@ -27,3 +27,8 @@ yarn-error.log
 *.log
 *.sqlite
 *.sqlite3
+.phpunit.cache/
+*.bak
+coverage/
+coverage-*.xml
+composer.lock

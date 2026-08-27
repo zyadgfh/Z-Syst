@@ -50,12 +50,11 @@ jobs:
           vendor/bin/phpunit --testsuite="CI-NewFeatures" \
             --coverage-clover=coverage-new-features.xml \
             --coverage-html=coverage/new-features/html \
-            --no-configuration \
-            --bootstrap vendor/autoload.php \
-            -D DB_CONNECTION=sqlite \
-            -D DB_DATABASE=:memory:
+            --coverage-text
         env:
           APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
           CACHE_DRIVER: array
           SESSION_DRIVER: array
           QUEUE_CONNECTION: sync
@@ -241,7 +240,7 @@ jobs:
       - name: Run accounting tests with coverage
         run: |
           vendor/bin/phpunit \
-            --group=accounting \
+            --testsuite="Coverage-Accounting" \
             --coverage-clover=coverage-accounting.xml \
             --coverage-html=coverage/accounting/html \
             --coverage-text
@@ -270,12 +269,11 @@ jobs:
           path: coverage/accounting/html/
           retention-days: 30
 
-      - name: Generate coverage badge
-        uses: davelosert/vitest-coverage-report-action@v2
+      - name: Upload accounting coverage summary
         if: github.ref == 'refs/heads/main'
-        with:
-          json-summary-path: coverage/accounting/html/summary.json
-          coverage-summary-path: coverage/accounting/html/index.html
+        run: |
+          echo "### Accounting Coverage" >> $GITHUB_STEP_SUMMARY
+          echo "Coverage report uploaded as artifact. See coverage/accounting/html/ for details." >> $GITHUB_STEP_SUMMARY
 
   coverage-recall:
     name: "Coverage: Recall & Traceability Suite"
@@ -310,7 +308,7 @@ jobs:
       - name: Run recall/traceability tests with coverage
         run: |
           vendor/bin/phpunit \
-            --group=recall,traceability \
+            --testsuite="Coverage-Recall" \
             --coverage-clover=coverage-recall.xml \
             --coverage-html=coverage/recall/html \
             --coverage-text

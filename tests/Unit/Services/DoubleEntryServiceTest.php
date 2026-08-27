@@ -9,8 +9,10 @@ use App\Models\JournalEntry;
 use App\Models\User;
 use App\Services\DoubleEntryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
+#[Group('accounting')]
 class DoubleEntryServiceTest extends TestCase
 {
     use RefreshDatabase;

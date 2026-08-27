@@ -10,8 +10,11 @@ use App\Models\TraceabilityLog;
 use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
+#[Group('recall')]
+#[Group('traceability')]
 class TraceabilityApiTest extends TestCase
 {
     use RefreshDatabase;
