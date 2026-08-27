@@ -51,26 +51,98 @@
     <div class="row">
         <!-- Order Info -->
         <div class="col-lg-8">
-            <!-- Status Badges -->
+            <!-- Status Badges + Visual Progress -->
             <div class="card mb-4">
-                <div class="card-body d-flex gap-3 align-items-center">
-                    <span class="badge p-2" style="font-size: 14px; background: {{ match($order->status) {
-                        'pending' => '#fef3c7; color: #92400e',
-                        'confirmed' => '#dbeafe; color: #1e40af',
-                        'processing' => '#ede9fe; color: #5b21b6',
-                        'shipped' => '#e0e7ff; color: #3730a3',
-                        'delivered' => '#f0fdf4; color: #166534',
-                        'cancelled' => '#fef2f2; color: #991b1b',
-                        default => '#f3f4f6; color: #374151',
-                    } }}">
-                        {{ ucfirst($order->status) }}
-                    </span>
-                    <span class="badge p-2" style="font-size: 14px; background: {{ $order->payment_status === 'paid' ? '#f0fdf4; color: #166534' : '#fef2f2; color: #991b1b' }}">
-                        {{ ucfirst(str_replace('_', ' ', $order->payment_status)) }}
-                    </span>
-                    <span class="ms-auto text-muted" style="font-size: 13px;">{{ $order->created_at->format('M d, Y g:i A') }}</span>
+                <div class="card-body">
+                    <div class="d-flex gap-3 align-items-center mb-4">
+                        <span class="badge p-2" style="font-size: 14px; background: {{ match($order->status) {
+                            'pending' => '#fef3c7; color: #92400e',
+                            'confirmed' => '#dbeafe; color: #1e40af',
+                            'processing' => '#ede9fe; color: #5b21b6',
+                            'shipped' => '#e0e7ff; color: #3730a3',
+                            'delivered' => '#f0fdf4; color: #166534',
+                            'cancelled' => '#fef2f2; color: #991b1b',
+                            default => '#f3f4f6; color: #374151',
+                        } }}">
+                            {{ ucfirst($order->status) }}
+                        </span>
+                        <span class="badge p-2" style="font-size: 14px; background: {{ $order->payment_status === 'paid' ? '#f0fdf4; color: #166534' : '#fef2f2; color: #991b1b' }}">
+                            {{ ucfirst(str_replace('_', ' ', $order->payment_status)) }}
+                        </span>
+                        <span class="ms-auto text-muted" style="font-size: 13px;">{{ $order->created_at->format('M d, Y g:i A') }}</span>
+                    </div>
+
+                    {{-- Visual Progress Bar --}}
+                    @php
+                        $statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
+                        $statusLabels = ['pending' => 'Placed', 'confirmed' => 'Confirmed', 'processing' => 'Processing', 'shipped' => 'Shipped', 'delivered' => 'Delivered'];
+                        $currentIndex = array_search($order->status, $statuses);
+                        if ($currentIndex === false) $currentIndex = -1;
+                    @endphp
+                    <div style="display: flex; align-items: center; gap: 0;">
+                        @foreach ($statuses as $index => $st)
+                            <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                                <div style="width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; background: {{ $index <= $currentIndex ? '#15803d' : '#e5e7eb' }}; color: {{ $index <= $currentIndex ? '#fff' : '#9ca3af' }};">
+                                    {{ $index <= $currentIndex ? '✓' : ($index + 1) }}
+                                </div>
+                                <div style="font-size: 11px; font-weight: 500; margin-top: 4px; color: {{ $index <= $currentIndex ? '#111827' : '#9ca3af' }};">{{ $statusLabels[$st] }}</div>
+                            </div>
+                            @if ($index < count($statuses) - 1)
+                                <div style="flex: 1; height: 3px; background: {{ $index < $currentIndex ? '#15803d' : '#e5e7eb' }};"></div>
+                            @endif
+                        @endforeach
+                    </div>
                 </div>
             </div>
+
+            <!-- Status History Timeline -->
+            @if ($order->statusHistory->count() > 0)
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ __('Status History') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; padding-left: 24px;">
+                        {{-- Vertical line --}}
+                        <div style="position: absolute; left: 10px; top: 4px; bottom: 4px; width: 2px; background: #e5e7eb;"></div>
+
+                        @foreach ($order->statusHistory->sortByDesc('changed_at') as $idx => $history)
+                            @php
+                                $statusColors = [
+                                    'pending' => '#f59e0b', 'confirmed' => '#3b82f6', 'processing' => '#8b5cf6',
+                                    'shipped' => '#6366f1', 'delivered' => '#22c55e', 'cancelled' => '#ef4444',
+                                ];
+                                $color = $statusColors[$history->status] ?? '#6b7280';
+                            @endphp
+                            <div style="position: relative; padding-bottom: 20px; {{ $loop->last ? 'padding-bottom: 0;' : '' }}">
+                                {{-- Dot --}}
+                                <div style="position: absolute; left: -20px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: {{ $color }}; border: 3px solid #fff; box-shadow: 0 0 0 2px {{ $color }}; z-index: 1;"></div>
+
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 14px; color: #111827;">
+                                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: {{ $color }}; margin-right: 6px;"></span>
+                                            {{ ucfirst($history->status) }}
+                                        </div>
+                                        @if ($history->note)
+                                            <div style="background: #f3f4f6; border-radius: 8px; padding: 8px 12px; margin-top: 6px; font-size: 13px; color: #4b5563; max-width: 400px;">
+                                                💬 {{ $history->note }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div style="text-align: right; flex-shrink: 0;">
+                                        <div style="font-size: 12px; color: #6b7280;">{{ $history->changed_at->format('M d, Y g:i A') }}</div>
+                                        @if ($history->changedByUser)
+                                            <div style="font-size: 11px; color: #9ca3af; margin-top: 2px;">by {{ $history->changedByUser->name }}</div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @endif
 
             <!-- Order Items -->
             <div class="card mb-4">
@@ -203,6 +275,7 @@
 
 <script>
 function updateOrderStatus(status) {
+    var note = prompt('Add a note for this status change (optional):') || '';
     fetch('{{ route("admin.customer-orders.update-status", $order) }}', {
         method: 'PUT',
         headers: {
@@ -210,7 +283,7 @@ function updateOrderStatus(status) {
             'Accept': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
         },
-        body: JSON.stringify({ status: status })
+        body: JSON.stringify({ status: status, note: note })
     })
     .then(r => r.json())
     .then(data => {

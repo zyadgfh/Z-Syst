@@ -272,22 +272,29 @@ class LoyaltyController extends Controller
             ->pluck('total', 'type');
 
         // Top point earners (users with most earned points)
-        $topEarners = LoyaltyPoint::where('business_id', $businessId)
+        $topEarnersRows = LoyaltyPoint::where('business_id', $businessId)
             ->where('type', 'earned')
             ->where('points', '>', 0)
             ->select('user_id', DB::raw('SUM(points) as total_earned'), DB::raw('COUNT(*) as transactions'))
             ->groupBy('user_id')
             ->orderByDesc('total_earned')
             ->limit(10)
+            ->get();
+
+        // Batch-load users to avoid N+1 User::find() per row
+        $userIds = $topEarnersRows->pluck('user_id')->filter()->values()->all();
+        $usersById = User::select('id', 'name', 'email', 'image')
+            ->whereIn('id', $userIds)
             ->get()
-            ->map(function ($row) {
-                $user = User::select('id', 'name', 'email', 'image')->find($row->user_id);
-                return [
-                    'user'          => $user,
-                    'total_earned'  => (int) $row->total_earned,
-                    'transactions'  => (int) $row->transactions,
-                ];
-            });
+            ->keyBy('id');
+
+        $topEarners = $topEarnersRows->map(function ($row) use ($usersById) {
+            return [
+                'user'          => $usersById->get($row->user_id),
+                'total_earned'  => (int) $row->total_earned,
+                'transactions'  => (int) $row->transactions,
+            ];
+        });
 
         // Points by status (active, expiring soon, expired)
         $activePoints = LoyaltyPoint::where('business_id', $businessId)
@@ -358,11 +365,16 @@ class LoyaltyController extends Controller
             ->limit(20)
             ->get();
 
-        // Hydrate user info
-        $result = $expiringByUser->map(function ($row) {
-            $user = User::select('id', 'name', 'email', 'image')->find($row->user_id);
+        // Batch-load users to avoid N+1 User::find() per row
+        $userIds = $expiringByUser->pluck('user_id')->filter()->values()->all();
+        $usersById = User::select('id', 'name', 'email', 'image')
+            ->whereIn('id', $userIds)
+            ->get()
+            ->keyBy('id');
+
+        $result = $expiringByUser->map(function ($row) use ($usersById) {
             return [
-                'user'            => $user,
+                'user'            => $usersById->get($row->user_id),
                 'user_id'         => $row->user_id,
                 'total_points'    => (int) $row->total_points,
                 'earliest_expiry' => $row->earliest_expiry,

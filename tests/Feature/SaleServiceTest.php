@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Services\SaleService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class SaleServiceTest extends TestCase
@@ -33,7 +34,7 @@ class SaleServiceTest extends TestCase
         $this->customer = Party::factory()->create(['business_id' => $this->business->id]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_create_a_sale_with_single_product()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -80,7 +81,7 @@ class SaleServiceTest extends TestCase
         $this->assertEquals(90, $stock->productStock);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_create_a_sale_with_multiple_products()
     {
         $product1 = Product::factory()->create(['business_id' => $this->business->id]);
@@ -132,7 +133,7 @@ class SaleServiceTest extends TestCase
         $this->assertEquals(27, $stock2->productStock);
     }
 
-    /** @test */
+    #[Test]
     public function it_fails_to_create_sale_with_insufficient_stock()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -164,7 +165,7 @@ class SaleServiceTest extends TestCase
         $this->saleService->create($saleData, $this->business->id, $this->user->id);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_update_an_existing_sale()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -220,7 +221,7 @@ class SaleServiceTest extends TestCase
         $this->assertEquals(85, $stock->productStock);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_delete_a_sale_and_restore_stock()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -251,8 +252,8 @@ class SaleServiceTest extends TestCase
 
         $this->saleService->delete($sale, $this->business->id, $this->user->id);
 
-        $this->assertDatabaseMissing('sales', ['id' => $sale->id]);
-        $this->assertDatabaseMissing('sale_details', ['sale_id' => $sale->id]);
+        $this->assertSoftDeleted('sales', ['id' => $sale->id]);
+        $this->assertSoftDeleted('sale_details', ['sale_id' => $sale->id]);
 
         // Verify stock was restored
         $stock->refresh();

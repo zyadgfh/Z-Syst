@@ -386,9 +386,9 @@ class PurchaseOrder extends Model
     }
 
     /**
-     * Get completion percentage.
+     * Get completion percentage (accessor).
      */
-    public function getCompletionPercentage(): float
+    public function getCompletionPercentageAttribute(): float
     {
         $total = $this->getTotalQuantity();
         if ($total === 0) {
@@ -397,7 +397,15 @@ class PurchaseOrder extends Model
 
         $received = $this->getReceivedQuantity();
 
-        return ($received / $total) * 100;
+        return round(($received / $total) * 100);
+    }
+
+    /**
+     * Get completion percentage (method).
+     */
+    public function getCompletionPercentage(): float
+    {
+        return $this->completion_percentage;
     }
 
     /**

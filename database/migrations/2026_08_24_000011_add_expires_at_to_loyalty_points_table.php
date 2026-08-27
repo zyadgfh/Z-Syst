@@ -14,10 +14,18 @@ return new class extends Migration
         });
 
         // Backfill: set expires_at for all existing earned points (12 months from created_at)
-        DB::table('loyalty_points')
-            ->where('type', 'earned')
-            ->whereNull('expires_at')
-            ->update(['expires_at' => DB::raw("DATE_ADD(created_at, INTERVAL 12 MONTH)")]);
+        $driver = DB::getDriverName();
+        if ($driver === 'sqlite') {
+            DB::table('loyalty_points')
+                ->where('type', 'earned')
+                ->whereNull('expires_at')
+                ->update(['expires_at' => DB::raw("datetime(created_at, '+12 months')")]);
+        } else {
+            DB::table('loyalty_points')
+                ->where('type', 'earned')
+                ->whereNull('expires_at')
+                ->update(['expires_at' => DB::raw("DATE_ADD(created_at, INTERVAL 12 MONTH)")]);
+        }
     }
 
     public function down(): void

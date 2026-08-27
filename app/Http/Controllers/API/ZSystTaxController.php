@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreTaxRequest;
+use App\Http\Requests\UpdateTaxRequest;
 use App\Models\Tax;
 use Illuminate\Http\Request;
 
@@ -29,13 +31,8 @@ class ZSystTaxController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreTaxRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'tax_ids' => 'required_if:rate,null',
-            'rate' => 'required_if:rate,null|numeric',
-        ]);
 
         if ($request->rate && ! $request->tax_ids) {
 
@@ -78,13 +75,8 @@ class ZSystTaxController extends Controller
         ]);
     }
 
-    public function update(Request $request, Tax $tax)
+    public function update(UpdateTaxRequest $request, Tax $tax)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'tax_ids' => 'required_if:rate,null',
-            'rate' => 'required_if:rate,null|numeric',
-        ]);
 
         if ($request->rate && ! $request->tax_ids) {
 

@@ -406,12 +406,8 @@ class ReportsController extends Controller
         $cacheKey = $this->generateCacheKey('sale_return_report', $businessId, $request);
 
         $result = $this->cacheService->remember($cacheKey, 300, function () use ($request, $businessId) {
-            $baseQuery = SaleReturn::where('business_id', $businessId);
-
-            $default_total_return = SaleReturnDetails::whereIn('sale_return_id', $baseQuery->pluck('id'))->sum('return_amount');
-            $default_total_qty = SaleReturnDetails::whereIn('sale_return_id', $baseQuery->pluck('id'))->sum('return_qty');
-
-            $filteredQuery = $baseQuery->select('id', 'sale_id', 'return_date', 'invoice_no')
+            $filteredQuery = SaleReturn::where('business_id', $businessId)
+                ->select('id', 'sale_id', 'return_date', 'invoice_no')
                 ->with([
                     'details:id,sale_return_id,return_qty,return_amount',
                     'sale:id,party_id,invoiceNumber,totalAmount',
@@ -429,19 +425,18 @@ class ReportsController extends Controller
                     $query->whereBetween('return_date', [$request->input('from_date'), $request->input('to_date')]);
                 });
 
-            $filtered_ids = (clone $filteredQuery)->pluck('id');
-            $filtered_total_return = SaleReturnDetails::whereIn('sale_return_id', $filtered_ids)->sum('return_amount');
-            $filtered_total_qty = SaleReturnDetails::whereIn('sale_return_id', $filtered_ids)->sum('return_qty');
+            // Single query for both aggregate sums instead of separate queries
+            $filteredIds = (clone $filteredQuery)->pluck('id');
+            $totals = SaleReturnDetails::whereIn('sale_return_id', $filteredIds)
+                ->selectRaw('COALESCE(SUM(return_amount), 0) as total_return, COALESCE(SUM(return_qty), 0) as total_qty')
+                ->first();
 
             $data = $filteredQuery->latest()->paginate($request->input('per_page', 10));
 
-            $total_return = $filtered_total_return ?: $default_total_return;
-            $total_qty = $filtered_total_qty ?: $default_total_qty;
-
             return [
                 'data' => $data,
-                'total_return' => (float) $total_return,
-                'total_qty' => (float) $total_qty,
+                'total_return' => (float) $totals->total_return,
+                'total_qty' => (float) $totals->total_qty,
             ];
         });
 
@@ -459,12 +454,8 @@ class ReportsController extends Controller
         $cacheKey = $this->generateCacheKey('purchase_return_report', $businessId, $request);
 
         $result = $this->cacheService->remember($cacheKey, 300, function () use ($request, $businessId) {
-            $baseQuery = PurchaseReturn::where('business_id', $businessId);
-
-            $default_total_return = PurchaseReturnDetail::whereIn('purchase_return_id', $baseQuery->pluck('id'))->sum('return_amount');
-            $default_total_qty = PurchaseReturnDetail::whereIn('purchase_return_id', $baseQuery->pluck('id'))->sum('return_qty');
-
-            $filteredQuery = $baseQuery->select('id', 'purchase_id', 'return_date', 'invoice_no')
+            $filteredQuery = PurchaseReturn::where('business_id', $businessId)
+                ->select('id', 'purchase_id', 'return_date', 'invoice_no')
                 ->with([
                     'details:id,purchase_return_id,return_qty,return_amount',
                     'purchase:id,party_id,invoiceNumber,totalAmount',
@@ -482,19 +473,18 @@ class ReportsController extends Controller
                     $query->whereBetween('return_date', [$request->input('from_date'), $request->input('to_date')]);
                 });
 
-            $filtered_ids = (clone $filteredQuery)->pluck('id');
-            $filtered_total_return = PurchaseReturnDetail::whereIn('purchase_return_id', $filtered_ids)->sum('return_amount');
-            $filtered_total_qty = PurchaseReturnDetail::whereIn('purchase_return_id', $filtered_ids)->sum('return_qty');
+            // Single query for both aggregate sums instead of separate queries
+            $filteredIds = (clone $filteredQuery)->pluck('id');
+            $totals = PurchaseReturnDetail::whereIn('purchase_return_id', $filteredIds)
+                ->selectRaw('COALESCE(SUM(return_amount), 0) as total_return, COALESCE(SUM(return_qty), 0) as total_qty')
+                ->first();
 
             $data = $filteredQuery->latest()->paginate($request->input('per_page', 10));
 
-            $total_return = $filtered_total_return ?: $default_total_return;
-            $total_qty = $filtered_total_qty ?: $default_total_qty;
-
             return [
                 'data' => $data,
-                'total_return' => (float) $total_return,
-                'total_qty' => (float) $total_qty,
+                'total_return' => (float) $totals->total_return,
+                'total_qty' => (float) $totals->total_qty,
             ];
         });
 
@@ -539,24 +529,18 @@ class ReportsController extends Controller
 
             $data = (clone $query)->latest()->paginate($request->input('per_page', 10));
 
-            // Calculate summary statistics
-            $total_audits = StockAudit::where('business_id', $businessId)
-                ->when($request->filled('from_date') || $request->filled('to_date'), function ($query) use ($request) {
-                    $query->whereBetween('audit_date', [$request->input('from_date'), $request->input('to_date')]);
+            // Single aggregate query instead of separate count() calls with duplicated filters
+            $stats = StockAudit::where('business_id', $businessId)
+                ->when($request->filled('from_date') || $request->filled('to_date'), function ($q) use ($request) {
+                    $q->whereBetween('audit_date', [$request->input('from_date'), $request->input('to_date')]);
                 })
-                ->count();
-
-            $completed_audits = StockAudit::where('business_id', $businessId)
-                ->where('status', 'completed')
-                ->when($request->filled('from_date') || $request->filled('to_date'), function ($query) use ($request) {
-                    $query->whereBetween('audit_date', [$request->input('from_date'), $request->input('to_date')]);
-                })
-                ->count();
+                ->selectRaw('COUNT(*) as total_audits, SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed_audits', ['completed'])
+                ->first();
 
             return [
                 'data' => $data,
-                'total_audits' => $total_audits,
-                'completed_audits' => $completed_audits,
+                'total_audits' => (int) $stats->total_audits,
+                'completed_audits' => (int) $stats->completed_audits,
             ];
         });
 
@@ -600,24 +584,18 @@ class ReportsController extends Controller
 
             $data = (clone $query)->latest()->paginate($request->input('per_page', 10));
 
-            // Calculate summary statistics
-            $total_audits = FinancialAuditLog::where('business_id', $businessId)
-                ->when($request->filled('from_date') || $request->filled('to_date'), function ($query) use ($request) {
-                    $query->whereBetween('start_date', [$request->input('from_date'), $request->input('to_date')]);
+            // Single aggregate query instead of separate count/sum calls with duplicated filters
+            $stats = FinancialAuditLog::where('business_id', $businessId)
+                ->when($request->filled('from_date') || $request->filled('to_date'), function ($q) use ($request) {
+                    $q->whereBetween('start_date', [$request->input('from_date'), $request->input('to_date')]);
                 })
-                ->count();
-
-            $total_variance = FinancialAuditLog::where('business_id', $businessId)
-                ->where('status', 'completed')
-                ->when($request->filled('from_date') || $request->filled('to_date'), function ($query) use ($request) {
-                    $query->whereBetween('start_date', [$request->input('from_date'), $request->input('to_date')]);
-                })
-                ->sum('variance');
+                ->selectRaw('COUNT(*) as total_audits, COALESCE(SUM(CASE WHEN status = ? THEN variance ELSE 0 END), 0) as total_variance', ['completed'])
+                ->first();
 
             return [
                 'data' => $data,
-                'total_audits' => $total_audits,
-                'total_variance' => $total_variance,
+                'total_audits' => (int) $stats->total_audits,
+                'total_variance' => (float) $stats->total_variance,
             ];
         });
 

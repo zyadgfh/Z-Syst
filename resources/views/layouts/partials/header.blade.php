@@ -4,7 +4,7 @@
             <div class="header-left">
                 <div class="sidebar-opener"><i class="fal fa-bars" aria-hidden="true"></i></div>
                 <!-- Z-Syst Logo -->
-                <a href="{{ route('admin.dashboard') }}" class="logo-container">
+                <a href="{{ route('admin.dashboard.index') }}" class="logo-container">
                     <img src="{{ asset('logo.png') }}" alt="Z-Syst Pharmacy Management" class="logo logo-small">
                 </a>
                 <a target="_blank" class="view-website" href="{{ route('home') }}">

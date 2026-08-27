@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreCategoryRequest;
+use App\Http\Requests\UpdateCategoryRequest;
 use App\Models\Category;
-use Illuminate\Http\Request;
 
 class ZSystCategoryController extends Controller
 {
@@ -24,13 +25,9 @@ class ZSystCategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreCategoryRequest $request)
     {
         $business_id = auth()->user()->business_id;
-        $request->validate([
-            'categoryName' => 'required|unique:categories,categoryName,NULL,id,business_id,'.$business_id,
-            'description' => 'nullable|string',
-        ]);
 
         $data = Category::create([
             'categoryName' => $request->categoryName,
@@ -47,15 +44,8 @@ class ZSystCategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Category $category)
+    public function update(UpdateCategoryRequest $request, Category $category)
     {
-        $request->validate([
-            'categoryName' => [
-                'required',
-                'unique:categories,categoryName,'.$category->id.',id,business_id,'.auth()->user()->business_id,
-            ],
-            'description' => 'nullable|string',
-        ]);
 
         $category = $category->update([
             'categoryName' => $request->categoryName,

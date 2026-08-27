@@ -10,6 +10,8 @@ class ItemPrintHistory extends Model
 {
     use HasFactory;
 
+    protected $table = 'item_print_history';
+
     protected $fillable = [
         'product_id', 'business_id', 'user_id', 'barcode_number',
         'quantity', 'size', 'options', 'batch_no', 'pdf_filename',

@@ -29,6 +29,7 @@ class SupplierInvoiceService
                 'due_date' => $data['due_date'] ?? now()->addDays(30),
                 'tax_amount' => $data['tax_amount'] ?? 0,
                 'discount_amount' => $data['discount_amount'] ?? 0,
+                'status' => SupplierInvoice::STATUS_PENDING,
                 'currency' => $data['currency'] ?? 'SAR',
                 'payment_terms' => $data['payment_terms'] ?? 'net_30',
                 'notes' => $data['notes'] ?? null,
@@ -70,6 +71,7 @@ class SupplierInvoiceService
                 'due_date' => now()->addDays(30),
                 'tax_amount' => $purchase->tax_amount ?? 0,
                 'discount_amount' => $purchase->discountAmount ?? 0,
+                'status' => SupplierInvoice::STATUS_PENDING,
                 'currency' => 'SAR',
                 'payment_terms' => 'net_30',
                 'notes' => "Created from Purchase: {$purchase->invoiceNumber}",
@@ -104,15 +106,22 @@ class SupplierInvoiceService
     {
         $product = Product::find($itemData['product_id'] ?? null);
 
+        $unitPrice = $itemData['unit_price'];
+        $quantity = $itemData['quantity'];
+        $discount = $itemData['discount'] ?? 0;
+        $tax = $itemData['tax'] ?? 0;
+        $total = ($unitPrice * $quantity) - $discount + $tax;
+
         $invoiceItem = SupplierInvoiceItem::create([
             'supplier_invoice_id' => $invoice->id,
             'product_id' => $itemData['product_id'] ?? null,
             'purchase_detail_id' => $itemData['purchase_detail_id'] ?? null,
             'description' => $itemData['description'] ?? ($product->name ?? 'Item'),
-            'quantity' => $itemData['quantity'],
-            'unit_price' => $itemData['unit_price'],
-            'discount' => $itemData['discount'] ?? 0,
-            'tax' => $itemData['tax'] ?? 0,
+            'quantity' => $quantity,
+            'unit_price' => $unitPrice,
+            'discount' => $discount,
+            'tax' => $tax,
+            'total' => $total,
             'batch_number' => $itemData['batch_number'] ?? null,
             'expiry_date' => $itemData['expiry_date'] ?? null,
             'notes' => $itemData['notes'] ?? null,
@@ -120,7 +129,7 @@ class SupplierInvoiceService
 
         $invoice->calculateTotal();
 
-        return $invoiceItem;
+        return $invoiceItem->refresh();
     }
 
     /**

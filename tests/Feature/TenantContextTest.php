@@ -132,8 +132,8 @@ class TenantContextTest extends TestCase
 
         $users = User::all();
 
-        // Should only return users from business1
-        $this->assertCount(2, $users);
+        // Should return users from business1 (2 pre-created + acting user = 3)
+        $this->assertCount(3, $users);
         foreach ($users as $user) {
             $this->assertEquals($business1->id, $user->business_id);
         }
@@ -156,7 +156,7 @@ class TenantContextTest extends TestCase
 
         $users = User::all();
 
-        // Should return all users since superadmin is not filtered
-        $this->assertCount(2, $users);
+        // Should return all users since superadmin is not filtered (2 + acting superadmin = 3)
+        $this->assertCount(3, $users);
     }
 }

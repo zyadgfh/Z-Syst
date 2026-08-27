@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Traits\EncryptableAttribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -11,7 +13,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasRoles, Notifiable;
+    use HasApiTokens, EncryptableAttribute, HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -21,7 +23,7 @@ class User extends Authenticatable
     protected $fillable = [
         'business_id',
         'name',
-        'role',
+        // 'role' intentionally excluded — must be set via explicit assignment, never mass-filled
         'email',
         'phone',
         'image',
@@ -71,6 +73,8 @@ class User extends Authenticatable
      *
      * @var array<string, string>
      */
+    protected $encryptable = ['phone'];
+
     protected $casts = [
         'password' => 'hashed',
         'visibility' => 'json',
@@ -81,5 +85,10 @@ class User extends Authenticatable
     public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
+    }
+
+    public function twoFactorAuth(): HasOne
+    {
+        return $this->hasOne(TwoFactorAuth::class);
     }
 }

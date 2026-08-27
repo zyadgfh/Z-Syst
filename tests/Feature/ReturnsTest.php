@@ -12,6 +12,7 @@ use App\Models\Stock;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ReturnsTest extends TestCase
@@ -31,7 +32,7 @@ class ReturnsTest extends TestCase
         $this->customer = Party::factory()->create(['business_id' => $this->business->id]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_create_a_sale_return()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -87,7 +88,7 @@ class ReturnsTest extends TestCase
         $this->assertEquals(250.00, $return->fresh()->total_amount);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_restore_stock_on_sale_return()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -143,7 +144,7 @@ class ReturnsTest extends TestCase
         $this->assertEquals(100, $stock->fresh()->productStock);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_create_partial_sale_return()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -209,7 +210,7 @@ class ReturnsTest extends TestCase
         $this->assertEquals(85, $stock->fresh()->productStock); // 100 - 20 + 5 = 85
     }
 
-    /** @test */
+    #[Test]
     public function it_cannot_return_more_than_sold_quantity()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -252,7 +253,7 @@ class ReturnsTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function it_can_track_return_reasons()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -300,7 +301,7 @@ class ReturnsTest extends TestCase
         $this->assertCount(5, SaleReturn::where('sale_id', $sale->id)->get());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_returns_by_status()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);

@@ -119,20 +119,18 @@
                 <div class="barcode-image">
                     @php
                         $barcodeType = match(strtoupper($barcodeType ?? 'CODE128')) {
-                            'EAN13' => \Picqer\Barcode\BarcodeGeneratorHTML::BARCODE_TYPE_EAN_13,
-                            'EAN8' => \Picqer\Barcode\BarcodeGeneratorHTML::BARCODE_TYPE_EAN_8,
-                            'UPC' => \Picqer\Barcode\BarcodeGeneratorHTML::BARCODE_TYPE_UPC_A,
-                            'UPCA' => \Picqer\Barcode\BarcodeGeneratorHTML::BARCODE_TYPE_UPC_A,
-                            'CODE39' => \Picqer\Barcode\BarcodeGeneratorHTML::BARCODE_TYPE_CODE_39,
-                            'ITF' => \Picqer\Barcode\BarcodeGeneratorHTML::BARCODE_TYPE_INTERLEAVED_2_5,
-                            'MSI' => \Picqer\Barcode\BarcodeGeneratorHTML::BARCODE_TYPE_MSI,
-                            'CODE128', 'CODE_128' => \Picqer\Barcode\BarcodeGeneratorHTML::BARCODE_TYPE_CODE_128,
-                            default => \Picqer\Barcode\BarcodeGeneratorHTML::BARCODE_TYPE_CODE_128,
+                            'EAN13' => \Picqer\Barcode\BarcodeGenerator::TYPE_EAN_13,
+                            'EAN8' => \Picqer\Barcode\BarcodeGenerator::TYPE_EAN_8,
+                            'UPC' => \Picqer\Barcode\BarcodeGenerator::TYPE_UPC_A,
+                            'UPCA' => \Picqer\Barcode\BarcodeGenerator::TYPE_UPC_A,
+                            'CODE39' => \Picqer\Barcode\BarcodeGenerator::TYPE_CODE_39,
+                            'ITF' => \Picqer\Barcode\BarcodeGenerator::TYPE_INTERLEAVED_2_5,
+                            'CODE128', 'CODE_128' => \Picqer\Barcode\BarcodeGenerator::TYPE_CODE_128,
+                            default => \Picqer\Barcode\BarcodeGenerator::TYPE_CODE_128,
                         };
                         $generator = new \Picqer\Barcode\BarcodeGeneratorHTML();
-                        $generator->setBarWidth(2);
-                        $generator->setBarHeight($size === 'large' ? 50 : ($size === 'small' ? 25 : 35));
-                        $barcodeHtml = $generator->getBarcode($barcodeNumber, $barcodeType);
+                        $barcodeHeight = $size === 'large' ? 50 : ($size === 'small' ? 25 : 35);
+                        $barcodeHtml = $generator->getBarcode($barcodeNumber, $barcodeType, 2, $barcodeHeight);
                     @endphp
                     {!! $barcodeHtml !!}
                 </div>

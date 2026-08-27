@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\NotifyRecallAffectedCustomers;
 use App\Models\BatchLot;
 use App\Models\RecallEvent;
 use App\Models\TraceabilityLog;
@@ -29,7 +30,7 @@ class TraceabilityService
     }
 
     /**
-     * Initiate recall event
+     * Initiate recall event with affected batch detection
      */
     public function initiateRecall(array $data): RecallEvent
     {
@@ -45,15 +46,30 @@ class TraceabilityService
                 'user_id' => $data['user_id'] ?? auth()->id(),
             ]);
 
-            // Mark batch as recalled if batch_lot_number is provided
-            if ($data['batch_lot_number']) {
-                BatchLot::where('batch_number', $data['batch_lot_number'])
-                    ->orWhere('lot_number', $data['batch_lot_number'])
-                    ->update(['recall_date' => now()]);
+            // Detect and link affected batches
+            $affectedBatches = $this->detectAffectedBatches(
+                $data['business_id'],
+                $data['product_id'] ?? null,
+                $data['batch_lot_number'] ?? null
+            );
+
+            foreach ($affectedBatches as $batch) {
+                $recall->affectedBatches()->attach($batch->id, [
+                    'quarantine_status' => 'pending',
+                    'quantity_affected' => $batch->quantity,
+                ]);
+
+                // Mark batch as recalled
+                $batch->update(['recall_date' => now()]);
             }
 
             return $recall;
         });
+
+        // Dispatch customer notifications after transaction commits
+        NotifyRecallAffectedCustomers::dispatch($recall);
+
+        return $recall;
     }
 
     /**
@@ -64,6 +80,151 @@ class TraceabilityService
         $recall->resolve();
 
         return $recall->fresh();
+    }
+
+    /**
+     * Detect all affected batches for a recall scenario.
+     */
+    public function detectAffectedBatches(
+        int $businessId,
+        ?int $productId = null,
+        ?string $batchLotNumber = null
+    ): \Illuminate\Support\Collection {
+        $query = BatchLot::forBusiness($businessId)
+            ->whereNull('recall_date')
+            ->activeBatches();
+
+        if ($productId) {
+            $query->where('product_id', $productId);
+        }
+
+        if ($batchLotNumber) {
+            $query->where(function ($q) use ($batchLotNumber) {
+                $q->where('batch_number', $batchLotNumber)
+                    ->orWhere('lot_number', $batchLotNumber);
+            });
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * Quarantine an affected batch in a recall
+     */
+    public function quarantineAffectedBatch(
+        RecallEvent $recall,
+        BatchLot $batchLot,
+        ?string $notes = null
+    ): RecallEvent {
+        $recall->affectedBatches()->updateExistingPivot($batchLot->id, [
+            'quarantine_status' => 'quarantined',
+            'quarantined_at' => now(),
+            'notes' => $notes,
+        ]);
+
+        $batchLot->quarantine();
+
+        // Log traceability event
+        $this->logTraceability([
+            'business_id' => $recall->business_id,
+            'product_id' => $batchLot->product_id,
+            'batch_lot_number' => $batchLot->batch_number ?? $batchLot->lot_number,
+            'type' => 'recall',
+            'quantity' => $batchLot->quantity,
+            'user_id' => auth()->id() ?? $recall->user_id,
+            'notes' => "Quarantined via recall #{$recall->id}: {$recall->reason}",
+        ]);
+
+        return $recall->fresh();
+    }
+
+    /**
+     * Release an affected batch from quarantine
+     */
+    public function releaseAffectedBatch(
+        RecallEvent $recall,
+        BatchLot $batchLot
+    ): RecallEvent {
+        $recall->affectedBatches()->updateExistingPivot($batchLot->id, [
+            'quarantine_status' => 'released',
+            'resolved_at' => now(),
+        ]);
+
+        $batchLot->release();
+
+        return $recall->fresh();
+    }
+
+    /**
+     * Dispose of an affected batch
+     */
+    public function disposeAffectedBatch(
+        RecallEvent $recall,
+        BatchLot $batchLot,
+        ?string $notes = null
+    ): RecallEvent {
+        $recall->affectedBatches()->updateExistingPivot($batchLot->id, [
+            'quarantine_status' => 'disposed',
+            'resolved_at' => now(),
+            'notes' => $notes,
+        ]);
+
+        $batchLot->update([
+            'status' => 'disposed',
+            'quantity' => 0,
+        ]);
+
+        $this->logTraceability([
+            'business_id' => $recall->business_id,
+            'product_id' => $batchLot->product_id,
+            'batch_lot_number' => $batchLot->batch_number ?? $batchLot->lot_number,
+            'type' => 'recall',
+            'quantity' => 0,
+            'user_id' => auth()->id() ?? $recall->user_id,
+            'notes' => "Disposed via recall #{$recall->id}" . ($notes ? ": {$notes}" : ''),
+        ]);
+
+        return $recall->fresh();
+    }
+
+    /**
+     * Get recall summary with affected batch details
+     */
+    public function getRecallSummary(RecallEvent $recall): array
+    {
+        $recall->load(['affectedBatches.product', 'product']);
+
+        $batches = $recall->affectedBatches;
+
+        return [
+            'recall' => [
+                'id' => $recall->id,
+                'reason' => $recall->reason,
+                'status' => $recall->status,
+                'initiated_at' => $recall->initiated_at->toIso8601String(),
+                'resolved_at' => $recall->resolved_at?->toIso8601String(),
+                'product_name' => $recall->product?->name,
+            ],
+            'affected_batches' => $batches->map(fn($b) => [
+                'id' => $b->id,
+                'batch_number' => $b->batch_number,
+                'lot_number' => $b->lot_number,
+                'product_name' => $b->product?->name,
+                'quantity' => $b->quantity,
+                'expiry_date' => $b->expiry_date?->toIso8601String(),
+                'quarantine_status' => $b->pivot->quarantine_status,
+                'quarantined_at' => $b->pivot->quarantined_at?->toIso8601String(),
+                'quantity_affected' => $b->pivot->quantity_affected,
+            ])->toArray(),
+            'summary' => [
+                'total_batches' => $batches->count(),
+                'total_quantity_affected' => $batches->sum('pivot.quantity_affected'),
+                'quarantined_count' => $batches->where('pivot.quarantine_status', 'quarantined')->count(),
+                'released_count' => $batches->where('pivot.quarantine_status', 'released')->count(),
+                'disposed_count' => $batches->where('pivot.quarantine_status', 'disposed')->count(),
+                'pending_count' => $batches->where('pivot.quarantine_status', 'pending')->count(),
+            ],
+        ];
     }
 
     /**
@@ -124,38 +285,16 @@ class TraceabilityService
     }
 
     /**
-     * Get affected products for a recall
+     * Get affected products for a recall (legacy method, delegates to getRecallSummary)
      */
     public function getAffectedProductsForRecall(int $businessId, RecallEvent $recall): array
     {
-        $query = BatchLot::forBusiness($businessId);
-
-        if ($recall->product_id) {
-            $query->where('product_id', $recall->product_id);
-        }
-
-        if ($recall->batch_lot_number) {
-            $query->where('batch_number', $recall->batch_lot_number)
-                ->orWhere('lot_number', $recall->batch_lot_number);
-        }
-
-        $batches = $query->with('product')->get();
+        $summary = $this->getRecallSummary($recall);
 
         return [
             'recall_id' => $recall->id,
-            'total_affected_batches' => $batches->count(),
-            'batches' => $batches->map(function ($batch) {
-                return [
-                    'id' => $batch->id,
-                    'identifier' => $batch->identifier,
-                    'batch_number' => $batch->batch_number,
-                    'lot_number' => $batch->lot_number,
-                    'product_name' => $batch->product?->name,
-                    'expiry_date' => $batch->expiry_date?->toIso8601String(),
-                    'is_expired' => $batch->isExpired(),
-                    'supplier_name' => $batch->supplier_name,
-                ];
-            })->toArray(),
+            'total_affected_batches' => $summary['summary']['total_batches'],
+            'batches' => $summary['affected_batches'],
         ];
     }
 

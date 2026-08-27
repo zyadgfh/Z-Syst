@@ -30,7 +30,7 @@ class OrderController extends Controller
     public function checkout()
     {
         $cartItems = CartItem::where('user_id', Auth::id())
-            ->with('product')
+            ->with(['product' => fn ($q) => $q->withSum('allStocks', 'productStock')])
             ->get();
 
         if ($cartItems->isEmpty()) {
@@ -66,7 +66,7 @@ class OrderController extends Controller
         ]);
 
         $cartItems = CartItem::where('user_id', Auth::id())
-            ->with('product')
+            ->with(['product' => fn ($q) => $q->withSum('allStocks', 'productStock')])
             ->get();
 
         if ($cartItems->isEmpty()) {
@@ -74,9 +74,10 @@ class OrderController extends Controller
                 ->with('warning', __('Your cart is empty.'));
         }
 
-        // Validate stock availability
+        // Validate stock availability (uses pre-computed withSum to avoid N+1)
         foreach ($cartItems as $item) {
-            if ($item->product->track_inventory && $item->product->getTotalStockAttribute() < $item->quantity) {
+            $totalStock = (int) ($item->product->all_stocks_sum_productstock ?? 0);
+            if ($item->product->track_inventory && $totalStock < $item->quantity) {
                 return back()->with('error', __(':product has insufficient stock.', [
                     'product' => $item->product->productName,
                 ]));

@@ -1258,12 +1258,17 @@
     }
 
     // ── Price History Chart ──
-    const priceHistoryData = @json($priceHistory->sortBy('created_at')->values()->map(fn($p) => [
-        'date' => $p->created_at->format('d M Y'),
-        'purchase' => (float) $p->purchase_with_tax,
-        'selling' => (float) $p->sales_price,
-        'wholesale' => (float) $p->wholesale_price,
-    ]));
+    <?php
+    $priceChartData = collect($priceHistory)->sortBy('created_at')->values()->map(function($p) {
+        return [
+            'date' => $p->created_at->format('d M Y'),
+            'purchase' => (float) $p->purchase_with_tax,
+            'selling' => (float) $p->sales_price,
+            'wholesale' => (float) $p->wholesale_price,
+        ];
+    });
+    ?>
+    const priceHistoryData = <?php echo json_encode($priceChartData); ?>;
 
     if (priceHistoryData.length > 0) {
         const ctx = document.getElementById('priceHistoryChart');

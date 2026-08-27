@@ -312,4 +312,61 @@ class CacheService
         
         $this->invalidateTags($tags);
     }
+
+    // ===== Reference Data Cache (Categories, Units, Manufacturers) =====
+
+    /**
+     * Cache categories for a business (rarely change).
+     */
+    public function getCachedCategories(int $businessId): ?array
+    {
+        return $this->rememberForBusiness($businessId, 'ref:categories', self::TTL_LONG, function () use ($businessId) {
+            return \App\Models\Category::where('business_id', $businessId)
+                ->where('status', 1)
+                ->select('id', 'categoryName')
+                ->orderBy('categoryName')
+                ->get()
+                ->toArray();
+        });
+    }
+
+    /**
+     * Cache units for a business (rarely change).
+     */
+    public function getCachedUnits(int $businessId): ?array
+    {
+        return $this->rememberForBusiness($businessId, 'ref:units', self::TTL_LONG, function () use ($businessId) {
+            return \App\Models\Unit::where('business_id', $businessId)
+                ->where('status', 1)
+                ->select('id', 'unitName')
+                ->orderBy('unitName')
+                ->get()
+                ->toArray();
+        });
+    }
+
+    /**
+     * Cache manufacturers for a business (rarely change).
+     */
+    public function getCachedManufacturers(int $businessId): ?array
+    {
+        return $this->rememberForBusiness($businessId, 'ref:manufacturers', self::TTL_LONG, function () use ($businessId) {
+            return \App\Models\Manufacturer::where('business_id', $businessId)
+                ->where('status', 1)
+                ->select('id', 'name')
+                ->orderBy('name')
+                ->get()
+                ->toArray();
+        });
+    }
+
+    /**
+     * Invalidate all reference data cache for a business.
+     */
+    public function invalidateReferenceData(int $businessId): void
+    {
+        $this->forget("business:{$businessId}:ref:categories");
+        $this->forget("business:{$businessId}:ref:units");
+        $this->forget("business:{$businessId}:ref:manufacturers");
+    }
 }

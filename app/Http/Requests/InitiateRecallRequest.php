@@ -12,6 +12,7 @@ class InitiateRecallRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'business_id' => 'required|exists:businesses,id',
             'product_id' => 'nullable|exists:products,id',
             'batch_lot_number' => 'nullable|string|max:255',
             'reason' => 'required|string|max:255',
@@ -23,6 +24,7 @@ class InitiateRecallRequest extends BaseFormRequest
     {
         return [
             'reason.required' => __('Recall reason is required'),
+            'reason.max' => __('Recall reason must not exceed 255 characters'),
         ];
     }
 }

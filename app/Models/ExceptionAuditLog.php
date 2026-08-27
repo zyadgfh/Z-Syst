@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ExceptionAuditLog extends Model
 {
+    protected $table = 'exception_audit_log';
+
     protected $fillable = [
         'exception_id',
         'business_id',

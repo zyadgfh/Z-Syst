@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreItemV2Request;
+use App\Http\Requests\UpdateItemV2Request;
 use App\Models\Product;
 use App\Models\Stock;
 use App\Models\StockMovement;
@@ -233,29 +235,9 @@ class ItemController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function store(Request $request): JsonResponse
+    public function store(StoreItemV2Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'productName' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'unit_id' => 'required|exists:units,id',
-            'manufacturer_id' => 'nullable|exists:manufacturers,id',
-            'barcode' => 'nullable|string|max:50',
-            'sku' => 'nullable|string|max:50',
-            'purchase_without_tax' => 'required|numeric|min:0',
-            'purchase_with_tax' => 'required|numeric|min:0',
-            'sales_price' => 'required|numeric|min:0',
-            'wholesale_price' => 'nullable|numeric|min:0',
-            'alert_qty' => 'nullable|integer|min:0',
-            'tax_type' => 'nullable|in:exclusive,inclusive',
-            'product_type' => 'nullable|string',
-            'dosage_form' => 'nullable|string',
-            'strength' => 'nullable|string',
-            'scientific_name' => 'nullable|string',
-            'description' => 'nullable|string',
-            'batch_no' => 'nullable|string',
-            'qty' => 'nullable|integer|min:0',
-        ]);
+        $validated = $request->validated();
 
         $product = $this->productService->createProduct($validated, $request->user()->business_id);
 
@@ -297,7 +279,7 @@ class ItemController extends Controller
             new OA\Response(response: 404, description: 'Item not found'),
         ]
     )]
-    public function update(Request $request, int $id): JsonResponse
+    public function update(UpdateItemV2Request $request, int $id): JsonResponse
     {
         $businessId = $request->user()->business_id;
 
@@ -305,22 +287,7 @@ class ItemController extends Controller
             ->where('business_id', $businessId)
             ->firstOrFail();
 
-        $validated = $request->validate([
-            'productName' => 'sometimes|required|string|max:255',
-            'category_id' => 'sometimes|required|exists:categories,id',
-            'unit_id' => 'sometimes|required|exists:units,id',
-            'manufacturer_id' => 'nullable|exists:manufacturers,id',
-            'barcode' => 'nullable|string|max:50',
-            'sku' => 'nullable|string|max:50',
-            'purchase_without_tax' => 'sometimes|required|numeric|min:0',
-            'purchase_with_tax' => 'sometimes|required|numeric|min:0',
-            'sales_price' => 'sometimes|required|numeric|min:0',
-            'wholesale_price' => 'nullable|numeric|min:0',
-            'alert_qty' => 'nullable|integer|min:0',
-            'tax_type' => 'nullable|in:exclusive,inclusive',
-            'is_active' => 'nullable|boolean',
-            'active' => 'nullable|boolean',
-        ]);
+        $validated = $request->validated();
 
         $updated = $this->productService->updateProduct($product, $validated, $businessId);
 

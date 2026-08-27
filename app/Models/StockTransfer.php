@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\TraceabilityLog;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockTransfer extends Model
@@ -135,6 +136,18 @@ class StockTransfer extends Model
 
             // Update transfer status
             $this->update(['status' => 'completed']);
+
+            // Log traceability for batch-level tracking
+            TraceabilityLog::create([
+                'business_id' => $this->business_id,
+                'product_id' => $this->product_id,
+                'from_warehouse_id' => $this->from_warehouse_id,
+                'to_warehouse_id' => $this->to_warehouse_id,
+                'type' => 'transfer',
+                'quantity' => $this->quantity,
+                'user_id' => $this->user_id ?? auth()->id(),
+                'notes' => "Stock transfer #{$this->id} completed",
+            ]);
 
             return true;
         });

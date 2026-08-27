@@ -15,6 +15,46 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
+    // Health check (public, no auth required)
+    Route::get('/health', function () {
+        $checks = [
+            'app' => 'ok',
+            'database' => 'unknown',
+            'cache' => 'unknown',
+            'queue' => 'unknown',
+        ];
+
+        try {
+            \Illuminate\Support\Facades\DB::select('SELECT 1');
+            $checks['database'] = 'ok';
+        } catch (\Exception $e) {
+            $checks['database'] = 'error: ' . $e->getMessage();
+        }
+
+        try {
+            \Illuminate\Support\Facades\Cache::put('health_check', true, 10);
+            $checks['cache'] = 'ok';
+        } catch (\Exception $e) {
+            $checks['cache'] = 'error: ' . $e->getMessage();
+        }
+
+        try {
+            \Illuminate\Support\Facades\Queue::size();
+            $checks['queue'] = 'ok';
+        } catch (\Exception $e) {
+            $checks['queue'] = 'error: ' . $e->getMessage();
+        }
+
+        $allOk = !in_array('error: ' , array_map(fn($v) => str_starts_with($v, 'error:') ? $v : '', $checks));
+
+        return response()->json([
+            'status' => $allOk ? 'healthy' : 'degraded',
+            'checks' => $checks,
+            'timestamp' => now()->toIso8601String(),
+            'version' => config('app.version', '1.0.0'),
+        ], $allOk ? 200 : 503);
+    });
+
     // Public: Authentication (login, signup, OTP, password reset)
     require __DIR__.'/api/auth.php';
 

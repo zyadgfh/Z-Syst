@@ -72,6 +72,11 @@ class CustomerOrder extends Model
         return $this->hasMany(CustomerOrderItem::class);
     }
 
+    public function statusHistory(): HasMany
+    {
+        return $this->hasMany(OrderStatusHistory::class, 'customer_order_id');
+    }
+
     // ── Scopes ──
 
     public function scopeByStatus($query, string $status)

@@ -85,7 +85,7 @@ class SupplierInvoiceItem extends Model
         parent::boot();
 
         static::creating(function ($item) {
-            $item->calculateTotal();
+            $item->total = ($item->unit_price * $item->quantity) - $item->discount + $item->tax;
         });
 
         static::updating(function ($item) {

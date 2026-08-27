@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreStockTransferRequest;
 use App\Models\StockTransfer;
 use App\Models\Warehouse;
 use App\Services\WarehouseService;
@@ -58,19 +59,13 @@ class StockTransferController extends Controller
         return view('admin.stock-transfers.create', compact('warehouses'));
     }
 
-    public function store(Request $request)
+    public function store(StoreStockTransferRequest $request)
     {
-        $request->validate([
-            'business_id' => 'required|exists:businesses,id',
-            'from_warehouse_id' => 'required|exists:warehouses,id',
-            'to_warehouse_id' => 'required|exists:warehouses,id|different:from_warehouse_id',
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1',
-            'notes' => 'nullable|string',
-        ]);
-
         try {
-            $transfer = $this->warehouseService->createTransfer($request->all());
+            $validated = $request->validated();
+            $validated['business_id'] = auth()->user()->business_id;
+
+            $transfer = $this->warehouseService->createTransfer($validated);
 
             return response()->json([
                 'message' => __('Stock transfer created successfully'),

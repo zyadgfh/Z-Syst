@@ -60,6 +60,8 @@
 
     @include('landing::layouts.web.partials.footer')
 
+    @include('customer.compare.floating-bar')
+
     @include('landing::layouts.web.partials.script')
 </body>
 

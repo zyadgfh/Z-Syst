@@ -26,6 +26,7 @@ Route::resource('blogs', Web\BlogController::class)->only('index', 'show', 'stor
 // Public Product Catalog
 Route::get('/catalog', [Web\CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/catalog/{id}', [Web\CatalogController::class, 'show'])->name('catalog.show');
+Route::get('/catalog/autocomplete', [Web\CatalogController::class, 'autocomplete'])->name('catalog.autocomplete');
 Route::get('/plans', [Web\PlanController::class, 'index'])->name('plan.index');
 Route::get('/filter-blogs-by-tag', [Web\BlogController::class, 'filterBlogsByTag'])->name('frontend.tag.filter');
 

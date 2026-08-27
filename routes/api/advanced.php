@@ -141,6 +141,15 @@ Route::middleware(['business.context', 'throttle:20,1'])->group(function () {
         Route::get('/{warehouse}/stock', [Api\WarehouseController::class, 'stock']);
     });
 
+    // Stock Transfers
+    Route::prefix('stock-transfers')->group(function () {
+        Route::get('/', [Api\WarehouseController::class, 'transfers']);
+        Route::post('/', [Api\WarehouseController::class, 'storeTransfer']);
+        Route::post('/{stockTransfer}/complete', [Api\WarehouseController::class, 'completeTransfer']);
+        Route::post('/{stockTransfer}/cancel', [Api\WarehouseController::class, 'cancelTransfer']);
+        Route::get('/statistics', [Api\WarehouseController::class, 'transferStatistics']);
+    });
+
     // Traceability & Recall
     Route::prefix('traceability')->group(function () {
         Route::get('batch-lots', [Api\TraceabilityController::class, 'batchLots']);
@@ -150,6 +159,11 @@ Route::middleware(['business.context', 'throttle:20,1'])->group(function () {
         Route::post('recalls', [Api\TraceabilityController::class, 'initiateRecall']);
         Route::post('recalls/{recall}/resolve', [Api\TraceabilityController::class, 'resolveRecall']);
         Route::get('traceability', [Api\TraceabilityController::class, 'traceability']);
+        Route::get('recalls/{recall}/summary', [Api\TraceabilityController::class, 'recallSummary']);
+        Route::post('recalls/{recall}/quarantine', [Api\TraceabilityController::class, 'quarantineBatch']);
+        Route::post('recalls/{recall}/release', [Api\TraceabilityController::class, 'releaseBatch']);
+        Route::post('recalls/{recall}/dispose', [Api\TraceabilityController::class, 'disposeBatch']);
+        Route::get('detect-affected', [Api\TraceabilityController::class, 'detectAffectedBatches']);
     });
 
     // Loyalty & CRM
@@ -161,6 +175,22 @@ Route::middleware(['business.context', 'throttle:20,1'])->group(function () {
         Route::get('balance/{partyId?}', [Api\LoyaltyController::class, 'partyBalance']);
         Route::get('history/{partyId?}', [Api\LoyaltyController::class, 'partyHistory']);
         Route::get('interactions', [Api\LoyaltyController::class, 'interactions']);
+    });
+
+    // Double-Entry Bookkeeping / Accounting
+    Route::prefix('accounting')->group(function () {
+        Route::get('accounts', [Api\AccountingController::class, 'accounts']);
+        Route::post('accounts', [Api\AccountingController::class, 'storeAccount']);
+        Route::get('accounts/{id}', [Api\AccountingController::class, 'showAccount']);
+        Route::get('journal-entries', [Api\AccountingController::class, 'journalEntries']);
+        Route::post('journal-entries', [Api\AccountingController::class, 'storeJournalEntry']);
+        Route::get('journal-entries/{id}', [Api\AccountingController::class, 'showJournalEntry']);
+        Route::post('journal-entries/{id}/post', [Api\AccountingController::class, 'postJournalEntry']);
+        Route::post('journal-entries/{id}/void', [Api\AccountingController::class, 'voidJournalEntry']);
+        Route::get('trial-balance', [Api\AccountingController::class, 'trialBalance']);
+        Route::get('income-statement', [Api\AccountingController::class, 'incomeStatement']);
+        Route::get('balance-sheet', [Api\AccountingController::class, 'balanceSheet']);
+        Route::get('general-ledger/{accountId}', [Api\AccountingController::class, 'generalLedger']);
     });
 
     // Receipts

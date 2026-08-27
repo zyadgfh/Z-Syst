@@ -30,13 +30,21 @@ class FEFODispensingService
             ->get();
 
         if ($stockBatches->isEmpty()) {
-            throw new InsufficientStockException($productId, $quantity, 0);
+            throw new InsufficientStockException('Insufficient stock available', [
+                'product_id' => $productId,
+                'requested' => $quantity,
+                'available' => 0,
+            ]);
         }
 
         $totalAvailable = $stockBatches->sum('productStock');
 
         if ($totalAvailable < $quantity) {
-            throw new InsufficientStockException($productId, $quantity, $totalAvailable);
+            throw new InsufficientStockException('Insufficient stock available', [
+                'product_id' => $productId,
+                'requested' => $quantity,
+                'available' => $totalAvailable,
+            ]);
         }
 
         $dispensingPlan = [];

@@ -45,33 +45,54 @@
 
             {{-- Full Search & Filter Bar --}}
             <div id="catalog-filters-full" class="catalog-filters" style="background: #fff; border-radius: 16px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 36px;" data-aos="fade-up">
-                <form method="GET" action="{{ route('catalog.index') }}" class="row g-3 align-items-end">
-                    <div class="col-md-5">
+                <form method="GET" action="{{ route('catalog.index') }}" id="catalogForm">
+                    {{-- Search with Autocomplete --}}
+                    <div style="position: relative; margin-bottom: 16px;">
                         <label style="font-size: 12px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">{{ __('Search Products') }}</label>
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('Search by name, brand, or barcode...') }}" class="form-control" style="border-radius: 10px; border: 1px solid #d2d2d7; padding: 10px 14px; font-size: 15px;">
+                        <div style="position: relative;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#86868b" stroke-width="2" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); pointer-events: none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" name="search" id="catalogSearchInput" value="{{ request('search') }}" placeholder="{{ __('Search by name, brand, or barcode...') }}" autocomplete="off" style="width: 100%; border-radius: 10px; border: 1px solid #d2d2d7; padding: 12px 14px 12px 42px; font-size: 15px; outline: none;" onfocus="this.style.borderColor='#007aff'; this.style.boxShadow='0 0 0 3px rgba(0,122,255,0.15)'" onblur="setTimeout(()=>{this.style.borderColor='#d2d2d7'; this.style.boxShadow='none'; document.getElementById('autocomplete-dropdown').style.display='none'}, 200)">
+                            <div id="autocomplete-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); border: 1px solid #e5e5ea; z-index: 200; max-height: 320px; overflow-y: auto; margin-top: 4px;"></div>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <label style="font-size: 12px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">{{ __('Category') }}</label>
-                        <select name="category" class="form-select" style="border-radius: 10px; border: 1px solid #d2d2d7; padding: 10px 14px; font-size: 15px;">
-                            <option value="">{{ __('All Categories') }}</option>
+
+                    {{-- Category Pills --}}
+                    <div style="margin-bottom: 16px;">
+                        <label style="font-size: 12px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">{{ __('Categories') }}</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <a href="{{ route('catalog.index', array_merge(request()->except('category', 'page'), ['category' => ''])) }}" style="padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; text-decoration: none; border: 1px solid {{ !request('category') ? '#007aff' : '#d2d2d7' }}; background: {{ !request('category') ? '#007aff' : '#fff' }}; color: {{ !request('category') ? '#fff' : '#6e6e73' }}; transition: all 150ms ease;">
+                                {{ __('All') }}
+                            </a>
                             @foreach ($categories as $cat)
-                                <option value="{{ $cat->id }}" {{ request('category') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                                <a href="{{ route('catalog.index', array_merge(request()->except('category', 'page'), ['category' => $cat->id])) }}" style="padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; text-decoration: none; border: 1px solid {{ request('category') == $cat->id ? '#007aff' : '#d2d2d7' }}; background: {{ request('category') == $cat->id ? '#007aff' : '#fff' }}; color: {{ request('category') == $cat->id ? '#fff' : '#6e6e73' }}; transition: all 150ms ease;">
+                                    {{ $cat->name }}
+                                </a>
                             @endforeach
-                        </select>
+                        </div>
                     </div>
-                    <div class="col-md-2">
-                        <label style="font-size: 12px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">{{ __('Sort By') }}</label>
-                        <select name="sort" class="form-select" style="border-radius: 10px; border: 1px solid #d2d2d7; padding: 10px 14px; font-size: 15px;">
-                            <option value="newest" {{ request('sort') === 'newest' ? 'selected' : '' }}>{{ __('Newest') }}</option>
-                            <option value="name" {{ request('sort') === 'name' ? 'selected' : '' }}>{{ __('Name') }}</option>
-                            <option value="price_low" {{ request('sort') === 'price_low' ? 'selected' : '' }}>{{ __('Price: Low → High') }}</option>
-                            <option value="price_high" {{ request('sort') === 'price_high' ? 'selected' : '' }}>{{ __('Price: High → Low') }}</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn w-100" style="background: #1d1d1f; color: #fff; border-radius: 10px; padding: 10px 14px; font-weight: 600; transition: transform 150ms ease, opacity 150ms ease;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
-                            {{ __('Search') }}
-                        </button>
+
+                    {{-- Price Range + Sort + Submit --}}
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label style="font-size: 12px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">{{ __('Min Price') }}</label>
+                            <input type="number" name="price_min" value="{{ request('price_min') }}" placeholder="{{ __('Min') }}" step="0.01" min="0" style="width: 100%; border-radius: 10px; border: 1px solid #d2d2d7; padding: 10px 14px; font-size: 15px;">
+                        </div>
+                        <div class="col-md-3">
+                            <label style="font-size: 12px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">{{ __('Max Price') }}</label>
+                            <input type="number" name="price_max" value="{{ request('price_max') }}" placeholder="{{ __('Max') }}" step="0.01" min="0" style="width: 100%; border-radius: 10px; border: 1px solid #d2d2d7; padding: 10px 14px; font-size: 15px;">
+                        </div>
+                        <div class="col-md-3">
+                            <label style="font-size: 12px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">{{ __('Sort By') }}</label>
+                            <select name="sort" class="form-select" style="border-radius: 10px; border: 1px solid #d2d2d7; padding: 10px 14px; font-size: 15px;">
+                                <option value="newest" {{ request('sort') === 'newest' ? 'selected' : '' }}>{{ __('Newest') }}</option>
+                                <option value="name" {{ request('sort') === 'name' ? 'selected' : '' }}>{{ __('Name') }}</option>
+                                <option value="price_low" {{ request('sort') === 'price_low' ? 'selected' : '' }}>{{ __('Price: Low → High') }}</option>
+                                <option value="price_high" {{ request('sort') === 'price_high' ? 'selected' : '' }}>{{ __('Price: High → Low') }}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn w-100" style="background: #1d1d1f; color: #fff; border-radius: 10px; padding: 10px 14px; font-weight: 600; transition: transform 150ms ease;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">{{ __('Search') }}</button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -126,9 +147,13 @@
                                             @else
                                                 <span style="font-size: 14px; color: #86868b;">{{ __('Contact for price') }}</span>
                                             @endif
-                                            @if ($product->manufacturer)
-                                                <span style="font-size: 12px; color: #86868b;">{{ $product->manufacturer->name }}</span>
-                                            @endif
+                                            <div style="display: flex; align-items: center; gap: 6px;">
+                                                @if ($product->manufacturer)
+                                                    <span style="font-size: 12px; color: #86868b;">{{ $product->manufacturer->name }}</span>
+                                                @endif
+                                                @include('customer.wishlist.toggle-button', ['product' => $product])
+                                                @include('customer.compare.compare-button', ['product' => $product])
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -182,6 +207,47 @@
     @push('js')
     <script>
         (function() {
+            // ── Autocomplete ──
+            const searchInput = document.getElementById('catalogSearchInput');
+            const dropdown = document.getElementById('autocomplete-dropdown');
+            let debounceTimer = null;
+
+            if (searchInput && dropdown) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(debounceTimer);
+                    const q = this.value.trim();
+                    if (q.length < 2) { dropdown.style.display = 'none'; return; }
+                    debounceTimer = setTimeout(function() {
+                        fetch('{{ route("catalog.autocomplete") }}?q=' + encodeURIComponent(q))
+                            .then(r => r.json())
+                            .then(data => {
+                                if (!data.data || data.data.length === 0) {
+                                    dropdown.style.display = 'none';
+                                    return;
+                                }
+                                let html = '';
+                                data.data.forEach(function(p) {
+                                    html += '<a href="' + p.url + '" style="display:flex;align-items:center;gap:12px;padding:10px 14px;text-decoration:none;color:inherit;border-bottom:1px solid #f0f0f2;transition:background 100ms;" onmouseenter="this.style.background='#f8f9fa'" onmouseleave="this.style.background='transparent'">';
+                                    if (p.image) {
+                                        html += '<img src="' + p.image + '" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;">';
+                                    } else {
+                                        html += '<div style="width:40px;height:40px;border-radius:8px;background:#f5f5f7;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">💊</div>';
+                                    }
+                                    html += '<div style="flex:1;min-width:0;">';
+                                    html += '<div style="font-weight:600;font-size:14px;color:#1d1d1f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.name + '</div>';
+                                    if (p.subtitle) html += '<div style="font-size:12px;color:#86868b;margin-top:1px;">' + p.subtitle + '</div>';
+                                    html += '</div>';
+                                    if (p.price) html += '<span style="font-weight:700;font-size:14px;color:#1d1d1f;">' + p.price + '</span>';
+                                    html += '</a>';
+                                });
+                                dropdown.innerHTML = html;
+                                dropdown.style.display = 'block';
+                            });
+                    }, 250);
+                });
+            }
+
+            // ── Sticky Search Bar ──
             const stickyBar = document.getElementById('sticky-search-bar');
             const fullFilters = document.getElementById('catalog-filters-full');
             if (!stickyBar || !fullFilters) return;

@@ -125,17 +125,18 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     })->name('branches.settings');
 
     // Items / Products Management Module
+    // Specific routes MUST come before wildcard {id} to avoid capture
     Route::get('items', [ADMIN\ProductController::class, 'index'])->name('items.index');
     Route::get('items/create', [ADMIN\ProductController::class, 'create'])->name('items.create');
     Route::post('items/store', [ADMIN\ProductController::class, 'store'])->name('items.store');
-    Route::get('items/{id}', [ADMIN\ProductController::class, 'show'])->name('items.show');
-    Route::get('items/{id}/edit', [ADMIN\ProductController::class, 'edit'])->name('items.edit');
-    Route::put('items/{product}/update', [ADMIN\ProductController::class, 'update'])->name('items.update');
-    Route::delete('items/{product}', [ADMIN\ProductController::class, 'destroy'])->name('items.destroy');
     Route::get('items/search', [ADMIN\ProductController::class, 'search'])->name('items.search');
     Route::get('items/export', [ADMIN\ProductController::class, 'export'])->name('items.export');
     Route::get('items/generate-code', [ADMIN\ProductController::class, 'generateInternalCode'])->name('items.generate-code');
     Route::get('items/statistics', [ADMIN\ProductController::class, 'statistics'])->name('items.statistics');
+    Route::get('items/{id}', [ADMIN\ProductController::class, 'show'])->name('items.show');
+    Route::get('items/{id}/edit', [ADMIN\ProductController::class, 'edit'])->name('items.edit');
+    Route::put('items/{product}/update', [ADMIN\ProductController::class, 'update'])->name('items.update');
+    Route::delete('items/{product}', [ADMIN\ProductController::class, 'destroy'])->name('items.destroy');
     Route::middleware('throttle:20,1')->group(function () {
         Route::post('items/{id}/stock-adjust', [ADMIN\ProductController::class, 'stockAdjust'])->name('items.stock-adjust');
     });

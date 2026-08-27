@@ -27,11 +27,6 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function map(): void
     {
-        // Don't load routes during package discovery or console commands
-        if ($this->app->runningInConsole()) {
-            return;
-        }
-
         $this->mapApiRoutes();
 
         $this->mapWebRoutes();

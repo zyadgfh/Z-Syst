@@ -150,4 +150,100 @@ class TraceabilityController extends Controller
             'data' => TraceabilityLogResource::collection($logs),
         ]);
     }
+
+    public function recallSummary(Request $request, RecallEvent $recall)
+    {
+        if ($recall->business_id !== $request->user()->business_id) {
+            abort(403, __('Forbidden.'));
+        }
+
+        $summary = $this->traceabilityService->getRecallSummary($recall);
+
+        return response()->json([
+            'message' => __('Data fetched successfully.'),
+            'data' => $summary,
+        ]);
+    }
+
+    public function quarantineBatch(Request $request, RecallEvent $recall)
+    {
+        if ($recall->business_id !== $request->user()->business_id) {
+            abort(403, __('Forbidden.'));
+        }
+
+        $validated = $request->validate([
+            'batch_lot_id' => 'required|exists:batch_lots,id',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $batchLot = BatchLot::where('business_id', $request->user()->business_id)
+            ->findOrFail($validated['batch_lot_id']);
+
+        $this->traceabilityService->quarantineAffectedBatch($recall, $batchLot, $validated['notes'] ?? null);
+
+        return response()->json([
+            'message' => __('Batch quarantined successfully.'),
+        ]);
+    }
+
+    public function releaseBatch(Request $request, RecallEvent $recall)
+    {
+        if ($recall->business_id !== $request->user()->business_id) {
+            abort(403, __('Forbidden.'));
+        }
+
+        $validated = $request->validate([
+            'batch_lot_id' => 'required|exists:batch_lots,id',
+        ]);
+
+        $batchLot = BatchLot::where('business_id', $request->user()->business_id)
+            ->findOrFail($validated['batch_lot_id']);
+
+        $this->traceabilityService->releaseAffectedBatch($recall, $batchLot);
+
+        return response()->json([
+            'message' => __('Batch released from quarantine.'),
+        ]);
+    }
+
+    public function disposeBatch(Request $request, RecallEvent $recall)
+    {
+        if ($recall->business_id !== $request->user()->business_id) {
+            abort(403, __('Forbidden.'));
+        }
+
+        $validated = $request->validate([
+            'batch_lot_id' => 'required|exists:batch_lots,id',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $batchLot = BatchLot::where('business_id', $request->user()->business_id)
+            ->findOrFail($validated['batch_lot_id']);
+
+        $this->traceabilityService->disposeAffectedBatch($recall, $batchLot, $validated['notes'] ?? null);
+
+        return response()->json([
+            'message' => __('Batch disposed successfully.'),
+        ]);
+    }
+
+    public function detectAffectedBatches(Request $request)
+    {
+        $validated = $request->validate([
+            'product_id' => 'nullable|exists:products,id',
+            'batch_lot_number' => 'nullable|string|max:255',
+        ]);
+
+        $batches = $this->traceabilityService->detectAffectedBatches(
+            $request->user()->business_id,
+            $validated['product_id'] ?? null,
+            $validated['batch_lot_number'] ?? null
+        );
+
+        return response()->json([
+            'message' => __('Data fetched successfully.'),
+            'data' => BatchLotResource::collection($batches),
+            'total' => $batches->count(),
+        ]);
+    }
 }

@@ -30,6 +30,7 @@ class PurchaseFactory extends Factory
             'paymentType' => fake()->randomElement(['cash', 'credit']),
             'purchaseDate' => fake()->dateTimeThisYear()->format('Y-m-d'),
             'invoiceNumber' => 'P-'.str_pad(fake()->unique()->numberBetween(1, 99999), 5, '0', STR_PAD_LEFT),
+            'status' => 'pending',
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\StockTransfer;
 use App\Models\StockTransferAudit;
+use App\Models\TraceabilityLog;
 use App\Models\Warehouse;
 use App\Models\WarehouseStock;
 use Illuminate\Support\Collection;
@@ -156,6 +157,18 @@ class WarehouseTransferServiceV2
 
             // Update transfer status
             $transfer->update(['status' => 'completed']);
+
+            // Log traceability for batch-level tracking
+            TraceabilityLog::create([
+                'business_id' => $transfer->business_id,
+                'product_id' => $transfer->product_id,
+                'from_warehouse_id' => $transfer->from_warehouse_id,
+                'to_warehouse_id' => $transfer->to_warehouse_id,
+                'type' => 'transfer',
+                'quantity' => $transfer->quantity,
+                'user_id' => $userId,
+                'notes' => "Stock transfer #{$transfer->id} completed",
+            ]);
 
             // Audit: completed
             $this->logAudit(

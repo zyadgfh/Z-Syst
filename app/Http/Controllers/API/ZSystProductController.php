@@ -70,7 +70,7 @@ class ZSystProductController extends Controller
         $product = clone(Product::findOrFail($id)); // Check existence
         $this->authorize('view', $product);
 
-        $data = $this->productService->show($id);
+        $data = $this->productService->show($id, auth()->user()->business_id);
 
         return response()->json([
             'message' => __('Data fetched successfully.'),

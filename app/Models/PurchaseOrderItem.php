@@ -118,7 +118,7 @@ class PurchaseOrderItem extends Model
 
         static::creating(function ($item) {
             $item->pending_quantity = $item->quantity;
-            $item->calculateTotal();
+            $item->total = ($item->unit_price * $item->quantity) - $item->discount + $item->tax;
         });
 
         static::updating(function ($item) {

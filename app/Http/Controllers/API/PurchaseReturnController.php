@@ -6,6 +6,7 @@ use App\Exceptions\BusinessRuleException;
 use App\Exceptions\Errors\ErrorCode;
 use App\Helpers\TransactionHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdatePurchaseReturnRequest;
 use App\Models\Party;
 use App\Models\Purchase;
 use App\Models\PurchaseDetails;
@@ -40,15 +41,8 @@ class PurchaseReturnController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(UpdatePurchaseReturnRequest $request)
     {
-        $request->validate([
-            'purchase_id' => 'required|exists:purchases,id',
-            'return_date' => 'required',
-            'purchase_detail_id' => 'required|array',
-            'return_amount' => 'required|array',
-            'return_qty' => 'required|array',
-        ]);
 
         $purchase_return = TransactionHelper::run(function () use ($request) {
             $business_id = auth()->user()->business_id;

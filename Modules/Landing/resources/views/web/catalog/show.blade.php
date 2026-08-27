@@ -99,6 +99,12 @@
                         </div>
                     @endif
 
+                    {{-- Wishlist Button --}}
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 24px;">
+                        @include('customer.wishlist.toggle-button', ['product' => $product])
+                        <span style="font-size: 14px; color: #6e6e73;">{{ __('Add to Wishlist') }}</span>
+                    </div>
+
                     {{-- Quick Info Badges --}}
                     <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px;">
                         @if ($product->prescription_required)
@@ -194,6 +200,45 @@
             </div>
         </div>
     </section>
+
+    {{-- Recommended Products --}}
+    @if (isset($recommendedProducts) && $recommendedProducts->count() > 0)
+    <section style="padding: 0 0 80px;">
+        <div class="container">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                <h2 style="font-size: clamp(1.2rem, 2.5vw, 1.5rem); font-weight: 700; letter-spacing: -0.02em; margin: 0;">
+                    {{ __('You May Also Like') }}
+                </h2>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;">
+                @foreach ($recommendedProducts as $rec)
+                    <a href="{{ route('catalog.show', $rec->id) }}" style="text-decoration: none; color: inherit;">
+                        <div style="background: #fff; border-radius: 14px; overflow: hidden; border: 1px solid #f0f0f2; transition: transform 200ms cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 200ms ease; height: 100%;"
+                             onmouseenter="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.06)'"
+                             onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <div style="height: 150px; background: #f5f5f7; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                @if ($rec->images && is_array($rec->images) && count($rec->images) > 0)
+                                    <img src="{{ asset($rec->images[0]) }}" alt="{{ e($rec->productName) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                @else
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                @endif
+                            </div>
+                            <div style="padding: 12px 14px;">
+                                @if ($rec->category)
+                                    <span style="font-size: 10px; font-weight: 600; color: #007aff; text-transform: uppercase; letter-spacing: 0.05em;">{{ $rec->category->name }}</span>
+                                @endif
+                                <h4 style="font-size: 14px; font-weight: 600; margin: 4px 0 8px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ $rec->productName }}</h4>
+                                @if ($rec->sales_price)
+                                    <span style="font-size: 16px; font-weight: 700; color: #1d1d1f;">{{ number_format($rec->sales_price, 2) }}</span>
+                                @endif
+                            </div>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
 
     @push('css')
     <style>

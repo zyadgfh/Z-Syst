@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\HasUploader;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ChangePasswordRequest;
+use App\Http\Requests\UpdateProfileRequest;
 use App\Models\User;
 use App\Services\AuditLogger;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
 
 class ZSystProfileController extends Controller
 {
@@ -28,13 +28,8 @@ class ZSystProfileController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(UpdateProfileRequest $request)
     {
-        $request->validate([
-            'name' => 'required|max:250',
-            'email' => ['required', 'email', Rule::unique('users')->ignore(auth()->id())],
-            'image' => 'nullable|image|mimes:jpeg,png,gif|dimensions:max_width=2000,max_height=2000|max:1048',
-        ]);
 
         $user = User::findOrFail(auth()->id());
 
@@ -65,13 +60,8 @@ class ZSystProfileController extends Controller
         ]);
     }
 
-    public function changePassword(Request $request)
+    public function changePassword(ChangePasswordRequest $request)
     {
-        $request->validate([
-            'current_password' => 'required',
-            'password' => 'required|confirmed|string|min:6',
-            'password_confirmation' => 'required',
-        ]);
 
         $user = auth()->user();
 

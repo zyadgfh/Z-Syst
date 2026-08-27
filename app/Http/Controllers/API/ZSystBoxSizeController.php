@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreBoxSizeRequest;
+use App\Http\Requests\UpdateBoxSizeRequest;
 use App\Models\BoxSize;
 use Illuminate\Http\Request;
 
@@ -18,11 +20,8 @@ class ZSystBoxSizeController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreBoxSizeRequest $request)
     {
-        $request->validate([
-            'name' => 'required|unique:box_sizes,name,NULL,id,business_id,'.auth()->user()->business_id,
-        ]);
 
         $data = BoxSize::create($request->all() + [
             'business_id' => auth()->user()->business_id,
@@ -34,14 +33,8 @@ class ZSystBoxSizeController extends Controller
         ]);
     }
 
-    public function update(Request $request, BoxSize $boxSize)
+    public function update(UpdateBoxSizeRequest $request, BoxSize $boxSize)
     {
-        $request->validate([
-            'name' => [
-                'required',
-                'unique:box_sizes,name,'.$boxSize->id.',id,business_id,'.auth()->user()->business_id,
-            ],
-        ]);
 
         $boxSize = $boxSize->update($request->all());
 

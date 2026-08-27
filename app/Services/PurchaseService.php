@@ -21,6 +21,7 @@ class PurchaseService
         private StockAllocationService $stockAllocationService,
         private FinancialTransactionService $financialTransactionService,
         private SupplierLedgerService $supplierLedgerService,
+        private CacheService $cacheService
     ) {}
 
     /**
@@ -28,28 +29,32 @@ class PurchaseService
      */
     public function list(array $filters, int $businessId, int $perPage = 10)
     {
-        return Purchase::select('id', 'party_id', 'branch_id', 'invoiceNumber', 'purchaseDate', 'totalAmount', 'dueAmount', 'paidAmount', 'paymentType', 'status', 'note')
-            ->with('party:id,name,phone')
-            ->when(!empty($filters['search']), function ($query) use ($filters) {
-                $term = '%' . $filters['search'] . '%';
-                $query->where(function ($subQuery) use ($term) {
-                    $subQuery->where('invoiceNumber', 'like', $term)
-                        ->orWhere('note', 'like', $term)
-                        ->orWhereHas('party', function ($q) use ($term) {
-                            $q->where('name', 'like', $term)
-                                ->orWhere('phone', 'like', $term);
-                        });
-                });
-            })
-            ->when(!empty($filters['status']), fn($q) => $q->where('status', $filters['status']))
-            ->when(!empty($filters['party_id']), fn($q) => $q->where('party_id', $filters['party_id']))
-            ->when(!empty($filters['branch_id']), fn($q) => $q->where('branch_id', $filters['branch_id']))
-            ->when(!empty($filters['from_date']), fn($q) => $q->where('purchaseDate', '>=', $filters['from_date']))
-            ->when(!empty($filters['to_date']), fn($q) => $q->where('purchaseDate', '<=', $filters['to_date']))
-            ->withCount('purchaseReturns')
-            ->where('business_id', $businessId)
-            ->latest()
-            ->paginate($perPage);
+        $cacheKey = 'purchases:list:' . $businessId . ':' . md5(serialize($filters) . $perPage);
+
+        return $this->cacheService->remember($cacheKey, CacheService::TTL_SHORT, function () use ($filters, $businessId, $perPage) {
+            return Purchase::select('id', 'party_id', 'branch_id', 'invoiceNumber', 'purchaseDate', 'totalAmount', 'dueAmount', 'paidAmount', 'paymentType', 'status', 'note')
+                ->with('party:id,name,phone')
+                ->when(!empty($filters['search']), function ($query) use ($filters) {
+                    $term = '%' . $filters['search'] . '%';
+                    $query->where(function ($subQuery) use ($term) {
+                        $subQuery->where('invoiceNumber', 'like', $term)
+                            ->orWhere('note', 'like', $term)
+                            ->orWhereHas('party', function ($q) use ($term) {
+                                $q->where('name', 'like', $term)
+                                    ->orWhere('phone', 'like', $term);
+                            });
+                    });
+                })
+                ->when(!empty($filters['status']), fn($q) => $q->where('status', $filters['status']))
+                ->when(!empty($filters['party_id']), fn($q) => $q->where('party_id', $filters['party_id']))
+                ->when(!empty($filters['branch_id']), fn($q) => $q->where('branch_id', $filters['branch_id']))
+                ->when(!empty($filters['from_date']), fn($q) => $q->where('purchaseDate', '>=', $filters['from_date']))
+                ->when(!empty($filters['to_date']), fn($q) => $q->where('purchaseDate', '<=', $filters['to_date']))
+                ->withCount('purchaseReturns')
+                ->where('business_id', $businessId)
+                ->latest()
+                ->paginate($perPage);
+        });
     }
 
     /**
@@ -155,10 +160,13 @@ class PurchaseService
                 'remaining' => $purchase->dueAmount,
             ]);
 
+            // Invalidate cached purchase list for this business
+            $this->cacheService->forget('purchases:list:' . $businessId . ':' . md5(serialize([]) . 10));
+
             return $purchase->load([
                 'tax:id,name,rate',
                 'party:id,name,phone',
-                'details.product:id,productName',
+                'details.product:id,productName,productCode',
                 'details:id,purchase_id,product_id,purchase_with_tax,quantities,batch_no',
             ]);
         });
@@ -170,11 +178,12 @@ class PurchaseService
     public function show(int $id)
     {
         return Purchase::with([
-            'tax',
+            'tax:id,name,rate',
             'user:id,name',
-            'party:id,name,phone',
+            'party:id,name,phone,due',
             'branch:id,branch_name',
-            'purchaseReturns.details',
+            'purchaseReturns:id,purchase_id,invoice_no,return_date,total_amount,credit_amount,status',
+            'purchaseReturns.details:id,purchase_return_id,product_id,return_qty,return_amount,unit_price',
             'details.product:id,productName,productCode,tax_type',
             'details:id,purchase_id,product_id,purchase_with_tax,quantities,batch_no,purchase_without_tax,profit_percent,sales_price,wholesale_price',
         ])->findOrFail($id);
@@ -251,6 +260,9 @@ class PurchaseService
             $this->financialTransactionService->deleteTransactionFor($purchase);
             $this->financialTransactionService->createFromPurchase($purchase->id, $businessId);
 
+            // Invalidate cached purchase list for this business
+            $this->cacheService->forget('purchases:list:' . $businessId . ':' . md5(serialize([]) . 10));
+
             return $purchase;
         });
     }
@@ -310,6 +322,9 @@ class PurchaseService
                 'purchase_id' => $purchase->id,
                 'invoice_number' => $purchase->invoiceNumber,
             ]);
+
+            // Invalidate cached purchase list for this business
+            $this->cacheService->forget('purchases:list:' . $businessId . ':' . md5(serialize([]) . 10));
 
             return true;
         });

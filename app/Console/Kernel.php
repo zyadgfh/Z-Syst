@@ -2,9 +2,10 @@
 
 namespace App\Console;
 
-use App\Console\Commands\BackupDatabase;
+use App\Console\Commands\BackupDatabaseCommand;
 use App\Console\Commands\CalculateDoctorAttentionScores;
 use App\Console\Commands\ExpireLoyaltyPoints;
+use App\Console\Commands\InitializeBookkeeping;
 use App\Console\Commands\ManageSubscriptions;
 use App\Console\Commands\RotateSettingsKey;
 use App\Console\Commands\ScanInventoryAlerts;
@@ -20,11 +21,12 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         RotateSettingsKey::class,
-        BackupDatabase::class,
+        BackupDatabaseCommand::class,
         CalculateDoctorAttentionScores::class,
         ManageSubscriptions::class,
         ScanInventoryAlerts::class,
         ExpireLoyaltyPoints::class,
+        InitializeBookkeeping::class,
     ];
 
     /**

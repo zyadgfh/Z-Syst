@@ -53,21 +53,28 @@ class PurchaseOrderService
     {
         $product = Product::findOrFail($itemData['product_id']);
 
+        $unitPrice = $itemData['unit_price'] ?? $product->purchase_without_tax ?? 0;
+        $quantity = $itemData['quantity'];
+        $discount = $itemData['discount'] ?? 0;
+        $tax = $itemData['tax'] ?? 0;
+        $total = ($unitPrice * $quantity) - $discount + $tax;
+
         $poItem = PurchaseOrderItem::create([
             'purchase_order_id' => $po->id,
             'product_id' => $product->id,
-            'quantity' => $itemData['quantity'],
+            'quantity' => $quantity,
             'received_quantity' => 0,
-            'pending_quantity' => $itemData['quantity'],
-            'unit_price' => $itemData['unit_price'] ?? $product->purchase_without_tax ?? 0,
-            'discount' => $itemData['discount'] ?? 0,
-            'tax' => $itemData['tax'] ?? 0,
+            'pending_quantity' => $quantity,
+            'unit_price' => $unitPrice,
+            'discount' => $discount,
+            'tax' => $tax,
+            'total' => $total,
             'notes' => $itemData['notes'] ?? null,
         ]);
 
         $po->calculateTotal();
 
-        return $poItem;
+        return $poItem->refresh();
     }
 
     /**

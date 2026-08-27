@@ -2,53 +2,34 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-
 class StoreBatchLotRequest extends BaseFormRequest
 {
     public function authorize(): bool
     {
-        return auth()->check() && auth()->user()->business_id !== null;
+        return true;
     }
 
     public function rules(): array
     {
         return [
-            'product_id' => ['required', 'integer', 'exists:products,id'],
-            'batch_number' => ['required', 'string', 'max:100'],
-            'lot_number' => ['nullable', 'string', 'max:100'],
-            'manufacture_date' => ['nullable', 'date', 'before_or_equal:today'],
-            'expiry_date' => ['required', 'date', 'after:manufacture_date'],
-            'recall_date' => ['nullable', 'date', 'after:manufacture_date'],
-            'supplier_name' => ['nullable', 'string', 'max:255'],
-            'notes' => ['nullable', 'string', 'max:1000'],
+            'business_id' => 'required|exists:businesses,id',
+            'product_id' => 'required|exists:products,id',
+            'batch_number' => 'nullable|string|max:255',
+            'lot_number' => 'nullable|string|max:255',
+            'quantity' => 'nullable|integer|min:0',
+            'manufacture_date' => 'nullable|date',
+            'expiry_date' => 'nullable|date|after:manufacture_date',
+            'supplier_name' => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:1000',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'product_id.required' => __('Product is required.'),
-            'product_id.exists' => __('Selected product does not exist.'),
-            'batch_number.required' => __('Batch number is required.'),
-            'manufacture_date.before_or_equal' => __('Manufacture date cannot be in the future.'),
-            'expiry_date.required' => __('Expiry date is required.'),
-            'expiry_date.after' => __('Expiry date must be after manufacture date.'),
-            'recall_date.after' => __('Recall date must be after manufacture date.'),
-        ];
-    }
-
-    public function attributes(): array
-    {
-        return [
-            'product_id' => __('Product'),
-            'batch_number' => __('Batch Number'),
-            'lot_number' => __('Lot Number'),
-            'manufacture_date' => __('Manufacture Date'),
-            'expiry_date' => __('Expiry Date'),
-            'recall_date' => __('Recall Date'),
-            'supplier_name' => __('Supplier Name'),
-            'notes' => __('Notes'),
+            'business_id.required' => __('Business is required'),
+            'product_id.required' => __('Product is required'),
+            'expiry_date.after' => __('Expiry date must be after manufacture date'),
         ];
     }
 }

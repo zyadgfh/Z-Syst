@@ -41,6 +41,21 @@
                 </a>
 
                     <div class="get-btn-container d-flex align-items-center gap-2">
+                    {{-- Wishlist Icon --}}
+                    <a href="{{ route('wishlist.index') }}" class="lang-switcher-btn position-relative" aria-label="{{ __('Wishlist') }}" style="text-decoration: none;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                        <span id="wishlist-count-badge" class="wishlist-count-badge position-absolute" style="display:none; top:-4px; right:-4px; width:18px; height:18px; border-radius:50%; background:#ff3b30; color:white; font-size:10px; font-weight:700; align-items:center; justify-content:center;">0</span>
+                    </a>
+                    {{-- Cart Icon --}}
+                    <button onclick="openCartDrawer()" class="lang-switcher-btn position-relative" aria-label="{{ __('Shopping Cart') }}">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+                        </svg>
+                        <span id="cart-badge" class="position-absolute" style="display:none; top:-4px; right:-4px; width:18px; height:18px; border-radius:50%; background:#ef4444; color:white; font-size:10px; font-weight:700; align-items:center; justify-content:center;">0</span>
+                    </button>
                     {{-- Language Switcher --}}
                     <form method="POST" action="{{ route('locale.switch') }}" id="lang-switcher-form" class="d-inline">
                         @csrf
@@ -96,6 +111,21 @@
                 </a>
 
                 <div class="get-btn-container login-sm-device d-flex align-items-center gap-2">
+                    {{-- Wishlist Icon (Mobile) --}}
+                    <a href="{{ route('wishlist.index') }}" class="lang-switcher-btn position-relative" aria-label="{{ __('Wishlist') }}" style="text-decoration: none;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                        <span id="wishlist-count-badge-mobile" class="wishlist-count-badge position-absolute" style="display:none; top:-4px; right:-4px; width:18px; height:18px; border-radius:50%; background:#ff3b30; color:white; font-size:10px; font-weight:700; align-items:center; justify-content:center;">0</span>
+                    </a>
+                    {{-- Cart Icon (Mobile) --}}
+                    <button onclick="openCartDrawer()" class="lang-switcher-btn position-relative" aria-label="{{ __('Shopping Cart') }}">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+                        </svg>
+                        <span id="cart-badge-mobile" class="position-absolute" style="display:none; top:-4px; right:-4px; width:18px; height:18px; border-radius:50%; background:#ef4444; color:white; font-size:10px; font-weight:700; align-items:center; justify-content:center;">0</span>
+                    </button>
                     {{-- Language Switcher (Mobile) --}}
                     <form method="POST" action="{{ route('locale.switch') }}" class="d-inline">
                         @csrf
@@ -205,3 +235,6 @@
         </div>
     </nav>
 </header>
+
+{{-- Cart Drawer --}}
+@include('customer.cart.drawer')

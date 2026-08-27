@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StorePushTokenRequest;
+use App\Http\Requests\DestroyPushTokenRequest;
 use App\Models\PushToken;
 use App\Services\FirebasePushService;
 use Illuminate\Http\JsonResponse;
@@ -13,12 +15,8 @@ class PushTokenController extends Controller
     /**
      * Register a new FCM push token for the authenticated user.
      */
-    public function store(Request $request): JsonResponse
+    public function store(StorePushTokenRequest $request): JsonResponse
     {
-        $request->validate([
-            'token'    => 'required|string|max:512',
-            'platform' => 'nullable|string|in:web,android,ios',
-        ]);
 
         $pushToken = PushToken::register(
             $request->user()->id,
@@ -36,11 +34,8 @@ class PushTokenController extends Controller
     /**
      * Remove/deactivate a push token (e.g. on logout).
      */
-    public function destroy(Request $request): JsonResponse
+    public function destroy(DestroyPushTokenRequest $request): JsonResponse
     {
-        $request->validate([
-            'token' => 'required|string',
-        ]);
 
         PushToken::deactivate($request->input('token'));
 

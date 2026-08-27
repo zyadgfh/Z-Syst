@@ -67,4 +67,12 @@ class Stock extends Model
     {
         return $this->hasMany(Barcode::class, 'batch_id')->where('is_active', true);
     }
+
+    /**
+     * Get stock movements for this batch.
+     */
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class, 'stock_id');
+    }
 }

@@ -6,6 +6,7 @@ use Database\Factories\RecallEventFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class RecallEvent extends Model
 {
@@ -48,6 +49,13 @@ class RecallEvent extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function affectedBatches(): BelongsToMany
+    {
+        return $this->belongsToMany(BatchLot::class, 'recall_affected_batches')
+            ->withPivot(['quarantine_status', 'quarantined_at', 'resolved_at', 'quantity_affected', 'notes'])
+            ->withTimestamps();
+    }
+
     /**
      * Scope for business
      */
@@ -78,6 +86,14 @@ class RecallEvent extends Model
     public function scopePending($query)
     {
         return $query->whereNull('resolved_at');
+    }
+
+    /**
+     * Scope for by status string
+     */
+    public function scopeStatus($query, string $status)
+    {
+        return $query->where('status', $status);
     }
 
     /**
@@ -117,5 +133,21 @@ class RecallEvent extends Model
         }
 
         return $this->resolved_at->diffInDays($this->initiated_at);
+    }
+
+    /**
+     * Get count of affected batches.
+     */
+    public function getAffectedBatchesCountAttribute(): int
+    {
+        return $this->affectedBatches()->count();
+    }
+
+    /**
+     * Get total quantity affected across all batches.
+     */
+    public function getTotalQuantityAffectedAttribute(): int
+    {
+        return $this->affectedBatches()->sum('recall_affected_batches.quantity_affected');
     }
 }

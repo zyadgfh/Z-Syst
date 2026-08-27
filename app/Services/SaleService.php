@@ -21,7 +21,8 @@ class SaleService
     public function __construct(
         private StockAllocationService $stockAllocationService,
         private FefoService $fefoService,
-        private FinancialTransactionService $financialTransactionService
+        private FinancialTransactionService $financialTransactionService,
+        private CacheService $cacheService
     ) {}
 
     private function loadBusinessStocks(int $businessId, array $productIds): Collection
@@ -53,24 +54,28 @@ class SaleService
 
     public function list(array $filters, int $businessId, int $perPage = 10)
     {
-        return Sale::select('id', 'party_id', 'invoiceNumber', 'saleDate', 'totalAmount', 'dueAmount', 'paidAmount', 'paymentType')
-            ->with('party:id,name,phone')
-            ->when(!empty($filters['search']), function ($query) use ($filters) {
-                $term = '%' . $filters['search'] . '%';
-                $query->where(function ($subQuery) use ($term) {
-                    $subQuery->where('paymentType', 'like', $term)
-                        ->orWhere('invoiceNumber', 'like', $term)
-                        ->orWhere('meta', 'like', $term)
-                        ->orWhereHas('party', function ($query) use ($term) {
-                            $query->where('name', 'like', $term)
-                                ->orWhere('phone', 'like', $term);
-                        });
-                });
-            })
-            ->withCount('saleReturns')
-            ->where('business_id', $businessId)
-            ->latest()
-            ->paginate($perPage);
+        $cacheKey = 'sales:list:' . $businessId . ':' . md5(serialize($filters) . $perPage);
+
+        return $this->cacheService->remember($cacheKey, CacheService::TTL_SHORT, function () use ($filters, $businessId, $perPage) {
+            return Sale::select('id', 'party_id', 'invoiceNumber', 'saleDate', 'totalAmount', 'dueAmount', 'paidAmount', 'paymentType')
+                ->with('party:id,name,phone')
+                ->when(!empty($filters['search']), function ($query) use ($filters) {
+                    $term = '%' . $filters['search'] . '%';
+                    $query->where(function ($subQuery) use ($term) {
+                        $subQuery->where('paymentType', 'like', $term)
+                            ->orWhere('invoiceNumber', 'like', $term)
+                            ->orWhere('meta', 'like', $term)
+                            ->orWhereHas('party', function ($query) use ($term) {
+                                $query->where('name', 'like', $term)
+                                    ->orWhere('phone', 'like', $term);
+                            });
+                    });
+                })
+                ->withCount('saleReturns')
+                ->where('business_id', $businessId)
+                ->latest()
+                ->paginate($perPage);
+        });
     }
 
     public function create(array $data, int $businessId, int $userId): Sale
@@ -270,6 +275,9 @@ class SaleService
             // Record financial transaction for this sale
             $this->financialTransactionService->createFromSale($sale->id, $businessId);
 
+            // Invalidate cached sale list for this business
+            $this->cacheService->forget('sales:list:' . $businessId . ':' . md5(serialize([]) . 10));
+
             return $sale->load([
                 'tax:id,name,rate',
                 'party:id,name,phone',
@@ -283,10 +291,11 @@ class SaleService
     {
         return Sale::where('business_id', $businessId)
             ->with([
-                'tax',
-                'party',
+                'tax:id,name,rate',
+                'party:id,name,phone,due',
                 'user:id,name',
-                'saleReturns.details',
+                'saleReturns:id,sale_id,invoice_no,return_date',
+                'saleReturns.details:id,sale_return_id,return_qty,return_amount',
                 'details:id,sale_id,product_id,price,quantities,purchase_price,batch_no,expire_date',
                 'details.product' => function ($query) {
                     $query->select('id', 'productName')
@@ -407,6 +416,9 @@ class SaleService
             $this->financialTransactionService->deleteTransactionFor($sale);
             $this->financialTransactionService->createFromSale($sale->id, $businessId);
 
+            // Invalidate cached sale list for this business
+            $this->cacheService->forget('sales:list:' . $businessId . ':' . md5(serialize([]) . 10));
+
             return $sale;
         });
     }
@@ -414,6 +426,8 @@ class SaleService
     public function delete(Sale $sale, int $businessId, int $userId)
     {
         return DB::transaction(function () use ($sale, $businessId, $userId) {
+            // Eager-load details to avoid lazy loading on the route-model-bound $sale
+            $sale->load('details');
             $productIds = $sale->details->pluck('product_id')->filter()->unique()->values()->all();
             $businessStocks = $this->loadBusinessStocks($businessId, $productIds);
 
@@ -456,6 +470,10 @@ class SaleService
             $this->financialTransactionService->deleteTransactionFor($sale);
 
             $sale->delete();
+
+            // Invalidate cached sale list for this business
+            $this->cacheService->forget('sales:list:' . $businessId . ':' . md5(serialize([]) . 10));
+
             return true;
         });
     }

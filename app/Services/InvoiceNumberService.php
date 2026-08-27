@@ -16,16 +16,17 @@ class InvoiceNumberService
     public function generateInvoiceNumber(string $type, int $businessId): string
     {
         return DB::transaction(function () use ($type, $businessId) {
-            // Get the maximum invoice number for this business and type
             $tableName = $this->getTableNameForType($type);
             $prefix = $this->getPrefixForType($type);
 
+            // lockForUpdate prevents concurrent transactions from reading the same
+            // max value, eliminating the race condition that count()+1 has.
             $lastNumber = DB::table($tableName)
                 ->where('business_id', $businessId)
                 ->where('invoiceNumber', 'like', "{$prefix}%")
+                ->lockForUpdate()
                 ->max('invoiceNumber');
 
-            // Extract the numeric part or start from 1
             if ($lastNumber) {
                 $lastId = (int) str_replace($prefix, '', $lastNumber);
                 $newId = $lastId + 1;
@@ -33,7 +34,6 @@ class InvoiceNumberService
                 $newId = 1;
             }
 
-            // Generate the new invoice number
             return $prefix . str_pad($newId, 5, '0', STR_PAD_LEFT);
         });
     }

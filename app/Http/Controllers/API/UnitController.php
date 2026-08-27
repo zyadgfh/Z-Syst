@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreUnitRequest;
+use App\Http\Requests\UpdateUnitRequest;
 use App\Models\Unit;
-use Illuminate\Http\Request;
 
 class UnitController extends Controller
 {
@@ -24,11 +25,8 @@ class UnitController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreUnitRequest $request)
     {
-        $request->validate([
-            'unitName' => 'required|unique:units,unitName,NULL,id,business_id,'.auth()->user()->business_id,
-        ]);
 
         $data = Unit::create($request->all() + [
             'business_id' => auth()->user()->business_id,
@@ -43,14 +41,8 @@ class UnitController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Unit $unit)
+    public function update(UpdateUnitRequest $request, Unit $unit)
     {
-        $request->validate([
-            'unitName' => [
-                'required',
-                'unique:units,unitName,'.$unit->id.',id,business_id,'.auth()->user()->business_id,
-            ],
-        ]);
 
         $unit = $unit->update($request->all());
 

@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\FEFODispensingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class StockMovementTest extends TestCase
@@ -27,7 +28,7 @@ class StockMovementTest extends TestCase
         $this->user = User::factory()->create(['business_id' => $this->business->id]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_create_stock_in_movement()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -42,22 +43,21 @@ class StockMovementTest extends TestCase
             'product_id' => $product->id,
             'stock_id' => $stock->id,
             'user_id' => $this->user->id,
-            'type' => 'in',
+            'movement_type' => 'in',
             'quantity' => 20,
             'reference_type' => 'App\Models\Purchase',
             'reference_id' => 1,
             'notes' => 'Initial stock addition',
-            'movement_date' => now(),
         ]);
 
         $this->assertDatabaseHas('stock_movements', [
             'id' => $movement->id,
-            'type' => 'in',
+            'movement_type' => 'in',
             'quantity' => 20,
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_create_stock_out_movement()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -72,22 +72,21 @@ class StockMovementTest extends TestCase
             'product_id' => $product->id,
             'stock_id' => $stock->id,
             'user_id' => $this->user->id,
-            'type' => 'out',
+            'movement_type' => 'out',
             'quantity' => 10,
             'reference_type' => 'App\Models\Sale',
             'reference_id' => 1,
             'notes' => 'Sale stock deduction',
-            'movement_date' => now(),
         ]);
 
         $this->assertDatabaseHas('stock_movements', [
             'id' => $movement->id,
-            'type' => 'out',
+            'movement_type' => 'out',
             'quantity' => 10,
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_create_stock_transfer_movement()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -102,22 +101,21 @@ class StockMovementTest extends TestCase
             'product_id' => $product->id,
             'stock_id' => $stock->id,
             'user_id' => $this->user->id,
-            'type' => 'transfer',
+            'movement_type' => 'transfer',
             'quantity' => 15,
             'reference_type' => 'App\Models\StockTransfer',
             'reference_id' => 1,
             'notes' => 'Transfer to warehouse',
-            'movement_date' => now(),
         ]);
 
         $this->assertDatabaseHas('stock_movements', [
             'id' => $movement->id,
-            'type' => 'transfer',
+            'movement_type' => 'transfer',
             'quantity' => 15,
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_create_stock_adjustment_movement()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -132,22 +130,21 @@ class StockMovementTest extends TestCase
             'product_id' => $product->id,
             'stock_id' => $stock->id,
             'user_id' => $this->user->id,
-            'type' => 'adjustment',
+            'movement_type' => 'adjustment',
             'quantity' => 5,
             'reference_type' => 'App\Models\StockAdjustment',
             'reference_id' => 1,
             'notes' => 'Physical count adjustment',
-            'movement_date' => now(),
         ]);
 
         $this->assertDatabaseHas('stock_movements', [
             'id' => $movement->id,
-            'type' => 'adjustment',
+            'movement_type' => 'adjustment',
             'quantity' => 5,
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function fefo_service_dispenses_from_earliest_expiring_batch()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -189,7 +186,7 @@ class StockMovementTest extends TestCase
         $this->assertEquals(5, $dispensingPlan[1]['quantity']); // 5 from BATCH-001
     }
 
-    /** @test */
+    #[Test]
     public function fefo_service_throws_exception_when_insufficient_stock()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -206,7 +203,7 @@ class StockMovementTest extends TestCase
         $fefoService->dispense($product->id, 20, $this->business->id);
     }
 
-    /** @test */
+    #[Test]
     public function fefo_service_can_dispense_from_specific_batch()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -235,7 +232,7 @@ class StockMovementTest extends TestCase
         $this->assertEquals(15, $dispensingPlan[0]['quantity']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_expiring_batches()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -269,7 +266,7 @@ class StockMovementTest extends TestCase
         $this->assertEquals($stock1->id, $expiringBatches->first()->id);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_expired_batches()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -296,7 +293,7 @@ class StockMovementTest extends TestCase
         $this->assertEquals($stock1->id, $expiredBatches->first()->id);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_batch_movement_history()
     {
         $product = Product::factory()->create(['business_id' => $this->business->id]);
@@ -312,9 +309,9 @@ class StockMovementTest extends TestCase
             'product_id' => $product->id,
             'stock_id' => $stock->id,
             'user_id' => $this->user->id,
-            'type' => 'in',
+            'movement_type' => 'in',
             'quantity' => 20,
-            'movement_date' => now()->subDays(5),
+            'created_at' => now()->subDays(5),
         ]);
 
         StockMovement::create([
@@ -322,9 +319,9 @@ class StockMovementTest extends TestCase
             'product_id' => $product->id,
             'stock_id' => $stock->id,
             'user_id' => $this->user->id,
-            'type' => 'out',
+            'movement_type' => 'out',
             'quantity' => 10,
-            'movement_date' => now()->subDays(2),
+            'created_at' => now()->subDays(2),
         ]);
 
         $fefoService = app(FEFODispensingService::class);
@@ -332,6 +329,6 @@ class StockMovementTest extends TestCase
         $movementHistory = $fefoService->getBatchMovementHistory($stock->id);
 
         $this->assertCount(2, $movementHistory->stockMovements);
-        $this->assertEquals('out', $movementHistory->stockMovements->first()->type); // Most recent first
+        $this->assertEquals('out', $movementHistory->stockMovements->first()->movement_type); // Most recent first
     }
 }
