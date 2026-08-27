@@ -6,6 +6,7 @@ use App\Models\AuditLog;
 use App\Models\Business;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -74,6 +75,14 @@ class AuditLoggingTest extends TestCase
             'business_id' => $business->id,
         ]);
         $user->assignRole('superadmin');
+
+        // Mock the artisan backup command to succeed in test env
+        \Illuminate\Support\Facades\Artisan::shouldReceive('call')
+            ->once()
+            ->andReturn(null);
+        \Illuminate\Support\Facades\Artisan::shouldReceive('output')
+            ->once()
+            ->andReturn('Backup completed successfully.');
 
         $this->actingAs($user, 'sanctum')
             ->postJson('/api/v1/backup')

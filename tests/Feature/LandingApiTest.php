@@ -11,6 +11,15 @@ class LandingApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        if (! class_exists(Feature::class)) {
+            $this->markTestSkipped('Landing module not available');
+        }
+    }
+
     /**
      * Test landing API returns required data structure
      */

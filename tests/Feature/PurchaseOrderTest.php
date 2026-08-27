@@ -453,7 +453,7 @@ class PurchaseOrderTest extends TestCase
      */
     public function test_api_can_create_purchase_order(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'shop-owner']);
         $supplier = Party::factory()->create(['type' => 'supplier']);
         $product = Product::factory()->create();
 
@@ -485,7 +485,7 @@ class PurchaseOrderTest extends TestCase
      */
     public function test_api_can_list_purchase_orders(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'shop-owner']);
         PurchaseOrder::factory()->count(5)->create(['business_id' => $user->business_id]);
 
         $response = $this->actingAs($user)
@@ -500,7 +500,7 @@ class PurchaseOrderTest extends TestCase
      */
     public function test_api_can_show_purchase_order(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'shop-owner']);
         $po = PurchaseOrder::factory()->create(['business_id' => $user->business_id]);
 
         $response = $this->actingAs($user)
@@ -517,13 +517,21 @@ class PurchaseOrderTest extends TestCase
      */
     public function test_api_can_update_purchase_order(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'shop-owner']);
         $po = PurchaseOrder::factory()->create(['business_id' => $user->business_id]);
         $newSupplier = Party::factory()->create(['type' => 'supplier']);
+        $product = Product::factory()->create();
 
         $data = [
             'supplier_id' => $newSupplier->id,
             'priority' => 'high',
+            'items' => [
+                [
+                    'product_id' => $product->id,
+                    'quantity' => 5,
+                    'unit_price' => 100.00,
+                ],
+            ],
         ];
 
         $response = $this->actingAs($user)
@@ -541,7 +549,7 @@ class PurchaseOrderTest extends TestCase
      */
     public function test_api_can_delete_purchase_order(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'shop-owner']);
         $po = PurchaseOrder::factory()->create(['business_id' => $user->business_id]);
 
         $response = $this->actingAs($user)
@@ -561,7 +569,7 @@ class PurchaseOrderTest extends TestCase
      */
     public function test_api_can_send_purchase_order(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'shop-owner']);
         $po = PurchaseOrder::factory()->create([
             'business_id' => $user->business_id,
             'status' => PurchaseOrder::STATUS_DRAFT,
@@ -582,7 +590,7 @@ class PurchaseOrderTest extends TestCase
      */
     public function test_api_can_approve_purchase_order(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'shop-owner']);
         $po = PurchaseOrder::factory()->create([
             'business_id' => $user->business_id,
             'status' => PurchaseOrder::STATUS_SENT,
@@ -603,7 +611,7 @@ class PurchaseOrderTest extends TestCase
      */
     public function test_api_can_reject_purchase_order(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'shop-owner']);
         $po = PurchaseOrder::factory()->create([
             'business_id' => $user->business_id,
             'status' => PurchaseOrder::STATUS_SENT,
@@ -626,7 +634,7 @@ class PurchaseOrderTest extends TestCase
      */
     public function test_api_can_cancel_purchase_order(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'shop-owner']);
         $po = PurchaseOrder::factory()->create([
             'business_id' => $user->business_id,
             'status' => PurchaseOrder::STATUS_SENT,
@@ -647,7 +655,7 @@ class PurchaseOrderTest extends TestCase
      */
     public function test_api_can_convert_po_to_purchase(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'shop-owner']);
         $po = PurchaseOrder::factory()
             ->has(PurchaseOrderItem::factory()->count(2), 'items')
             ->create([
@@ -670,7 +678,7 @@ class PurchaseOrderTest extends TestCase
      */
     public function test_api_can_get_pending_purchase_orders(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'shop-owner']);
         PurchaseOrder::factory()->count(3)->create([
             'business_id' => $user->business_id,
             'status' => PurchaseOrder::STATUS_DRAFT,
@@ -688,7 +696,7 @@ class PurchaseOrderTest extends TestCase
      */
     public function test_api_can_get_overdue_purchase_orders(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'shop-owner']);
         PurchaseOrder::factory()->create([
             'business_id' => $user->business_id,
             'status' => PurchaseOrder::STATUS_SENT,
@@ -707,7 +715,7 @@ class PurchaseOrderTest extends TestCase
      */
     public function test_api_can_get_purchase_order_statistics(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'shop-owner']);
 
         $response = $this->actingAs($user)
             ->getJson('/admin/purchase-orders/statistics');

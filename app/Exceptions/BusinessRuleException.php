@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use App\Exceptions\Errors\ErrorCode;
 use Exception;
 use Illuminate\Http\JsonResponse;
 
@@ -10,9 +11,9 @@ class BusinessRuleException extends Exception
     protected string $errorCode;
     protected array $context;
 
-    public function __construct(string $errorCode, string $message, array $context = [])
+    public function __construct(string|ErrorCode $errorCode, string $message, array $context = [])
     {
-        $this->errorCode = $errorCode;
+        $this->errorCode = $errorCode instanceof ErrorCode ? $errorCode->value : $errorCode;
         $this->context = $context;
         parent::__construct($message);
     }

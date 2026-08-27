@@ -16,7 +16,13 @@ class SupplierRating extends Model
      * @var array
      */
     protected $fillable = [
+        'supplier_id',
         'business_id',
+        'rating',
+        'category',
+        'review',
+        'rated_by',
+        'rated_at',
         'party_id',
         'purchase_order_id',
         'rating_quality',
@@ -24,7 +30,6 @@ class SupplierRating extends Model
         'rating_price',
         'rating_communication',
         'overall_rating',
-        'review',
         'is_public',
         'created_by',
     ];
@@ -35,12 +40,14 @@ class SupplierRating extends Model
      * @var array
      */
     protected $casts = [
+        'rating' => 'decimal:1',
         'rating_quality' => 'integer',
         'rating_delivery' => 'integer',
         'rating_price' => 'integer',
         'rating_communication' => 'integer',
         'overall_rating' => 'decimal:1',
         'is_public' => 'boolean',
+        'rated_at' => 'datetime',
     ];
 
     /**

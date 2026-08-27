@@ -92,6 +92,7 @@ class TenantContextTest extends TestCase
         $business = Business::factory()->create();
         $user = User::factory()->create(['business_id' => $business->id]);
 
+        $this->actingAs($user);
         $resolver = new TenantResolver;
         $canAccess = $resolver->canAccessTenant($business->id);
 
@@ -106,6 +107,7 @@ class TenantContextTest extends TestCase
         $business = Business::factory()->create();
         $superAdmin = User::factory()->create(['role' => 'superadmin']);
 
+        $this->actingAs($superAdmin);
         $resolver = new TenantResolver;
         $canAccess = $resolver->canAccessTenant($business->id);
 
@@ -124,11 +126,9 @@ class TenantContextTest extends TestCase
         User::factory()->create(['business_id' => $business1->id]);
         User::factory()->create(['business_id' => $business2->id]);
 
-        // Simulate authenticated user from business1
-        auth()->shouldReceive('check')->andReturn(true);
-        auth()->shouldReceive('user')->andReturn(
-            User::factory()->make(['business_id' => $business1->id, 'role' => 'staff'])
-        );
+        // Authenticate as user from business1
+        $actingUser = User::factory()->create(['business_id' => $business1->id, 'role' => 'staff']);
+        $this->actingAs($actingUser);
 
         $users = User::all();
 
@@ -150,11 +150,9 @@ class TenantContextTest extends TestCase
         User::factory()->create(['business_id' => $business1->id]);
         User::factory()->create(['business_id' => $business2->id]);
 
-        // Simulate superadmin
-        auth()->shouldReceive('check')->andReturn(true);
-        auth()->shouldReceive('user')->andReturn(
-            User::factory()->make(['role' => 'superadmin'])
-        );
+        // Authenticate as superadmin
+        $actingSuperAdmin = User::factory()->create(['role' => 'superadmin']);
+        $this->actingAs($actingSuperAdmin);
 
         $users = User::all();
 

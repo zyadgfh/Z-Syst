@@ -11,9 +11,17 @@ class NotFoundException extends RenderableException
         array $context = [],
         ?\Throwable $previous = null
     ) {
+        $vars = ['resource' => $resource];
+        $message = __('errors.resource_not_found', $vars);
+
+        // If translation is not available, use default format
+        if ($message === 'errors.resource_not_found') {
+            $message = $resource . ' not found';
+        }
+
         parent::__construct(
-            ErrorCode::NOT_FOUND_RESOURCE,
-            __('errors.resource_not_found', ['resource' => $resource]),
+            ErrorCode::RESOURCE_NOT_FOUND,
+            $message,
             $context,
             [],
             $previous

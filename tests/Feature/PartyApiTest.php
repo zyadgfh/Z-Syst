@@ -67,11 +67,12 @@ class PartyApiTest extends TestCase
                 'message' => __('Data saved successfully.'),
             ]);
 
-        $this->assertDatabaseHas('parties', [
-            'name' => 'Test Supplier',
-            'phone' => '01234567890',
-            'business_id' => $this->business->id,
-        ]);
+        // Phone is encrypted in DB, so verify via model
+        $party = Party::where('name', 'Test Supplier')
+            ->where('business_id', $this->business->id)
+            ->first();
+        $this->assertNotNull($party);
+        $this->assertEquals('01234567890', $party->phone);
     }
 
     public function test_cannot_create_party_with_duplicate_phone()

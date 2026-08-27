@@ -176,7 +176,7 @@
                                             <td class="table-single-content">
                                                 <input type="checkbox" class="form-check-input item-checkbox" value="{{ $product->id }}">
                                             </td>
-                                            <td class="table-single-content">{{ $products->firstItem + $loop->index }}</td>
+                                            <td class="table-single-content">{{ ($products->firstItem() ?? 1) + $loop->index }}</td>
                                             <td class="table-single-content col-item" data-col="name">
                                                 <div class="d-flex align-items-center gap-2">
                                                     <div class="product-avatar-sm rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:var(--primary-lighter);color:var(--primary);font-weight:600;font-size:14px">
@@ -283,7 +283,7 @@
                         @if($products->hasPages())
                             <div class="d-flex justify-content-between align-items-center px-3 pb-3">
                                 <div class="text-muted">
-                                    {{ __('Showing') }} {{ $products->firstItem }} {{ __('to') }} {{ $products->lastItem }} {{ __('of') }} {{ $products->total() }} {{ __('items') }}
+                                    {{ __('Showing') }} {{ $products->firstItem() ?? 0 }} {{ __('to') }} {{ $products->lastItem() ?? 0 }} {{ __('of') }} {{ $products->total() }} {{ __('items') }}
                                 </div>
                                 {{ $products->appends(request()->query())->links() }}
                             </div>

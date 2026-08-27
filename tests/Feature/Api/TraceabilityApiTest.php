@@ -141,6 +141,7 @@ class TraceabilityApiTest extends TestCase
 
         $response = $this->actingAs($this->user)
             ->postJson('/api/v1/traceability/recalls', [
+                'business_id' => $this->business->id,
                 'product_id' => $this->product->id,
                 'batch_lot_number' => 'LOT-001',
                 'reason' => 'Contamination detected',

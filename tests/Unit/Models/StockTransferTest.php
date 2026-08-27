@@ -13,6 +13,12 @@ class StockTransferTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        app()->setLocale('en');
+    }
+
     public function test_can_create_stock_transfer(): void
     {
         $warehouse1 = Warehouse::factory()->create();

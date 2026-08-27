@@ -11,7 +11,8 @@ class RateLimitingTest extends TestCase
 
     public function test_sign_in_endpoint_has_rate_limiting(): void
     {
-        for ($i = 0; $i < 15; $i++) {
+        // sign-in has throttle:5,1 middleware
+        for ($i = 0; $i < 6; $i++) {
             $response = $this->postJson('/api/v1/sign-in', [
                 'email' => 'test@example.com',
                 'password' => 'wrongpassword',
@@ -23,7 +24,8 @@ class RateLimitingTest extends TestCase
 
     public function test_sign_up_endpoint_has_rate_limiting(): void
     {
-        for ($i = 0; $i < 15; $i++) {
+        // sign-up has throttle:3,1 middleware
+        for ($i = 0; $i < 4; $i++) {
             $response = $this->postJson('/api/v1/sign-up', [
                 'name' => 'Test User',
                 'email' => "test$i@example.com",
@@ -38,7 +40,8 @@ class RateLimitingTest extends TestCase
 
     public function test_password_reset_endpoints_have_rate_limiting(): void
     {
-        for ($i = 0; $i < 10; $i++) {
+        // send-reset-code has throttle:5,5 middleware (5 per 5 min)
+        for ($i = 0; $i < 6; $i++) {
             $response = $this->postJson('/api/v1/send-reset-code', [
                 'reset_value' => 'test@example.com',
             ]);

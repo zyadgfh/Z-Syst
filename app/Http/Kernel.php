@@ -37,7 +37,9 @@ use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Laravel\LaravelInstaller\Middleware\CheckToken;
+// CheckToken middleware disabled - it deletes vendor/laravel on every web request
+// when vendor/autoload1.php is missing, which is destructive in production.
+// use Laravel\LaravelInstaller\Middleware\CheckToken;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
@@ -73,7 +75,7 @@ class Kernel extends HttpKernel
         'web' => [
             EncryptCookies::class,
             AddQueuedCookiesToResponse::class,
-            CheckToken::class,
+            // CheckToken::class, // Disabled: deletes vendor/laravel on every web request
             StartSession::class,
             ShareErrorsFromSession::class,
             VerifyCsrfToken::class,

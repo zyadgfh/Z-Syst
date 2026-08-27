@@ -10,6 +10,7 @@
          stopOnFailure="false"
          cacheDirectory=".phpunit.cache"
          backupGlobals="false"
+         backupStaticProperties="false"
 >
     <testsuites>
         <testsuite name="Unit">
@@ -20,6 +21,21 @@
         </testsuite>
         <testsuite name="Integration">
             <directory>tests/Integration</directory>
+        </testsuite>
+        <!-- CI subset: new features only (recall, traceability, accounting) -->
+        <testsuite name="CI-NewFeatures">
+            <file>tests/Feature/AccountingApiTest.php</file>
+            <file>tests/Feature/RecallTraceabilityTest.php</file>
+        </testsuite>
+        <!-- Coverage-focused suites (used by CI coverage jobs) -->
+        <testsuite name="Coverage-Accounting">
+            <file>tests/Unit/Services/DoubleEntryServiceTest.php</file>
+            <file>tests/Unit/Models/InsuranceCompanyTest.php</file>
+            <file>tests/Unit/Models/StockTransferTest.php</file>
+        </testsuite>
+        <testsuite name="Coverage-Recall">
+            <file>tests/Feature/Api/TraceabilityApiTest.php</file>
+            <file>tests/Feature/InsuranceTest.php</file>
         </testsuite>
     </testsuites>
 

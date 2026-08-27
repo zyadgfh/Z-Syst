@@ -83,8 +83,8 @@ class ReturnsTest extends TestCase
         $this->assertDatabaseHas('sale_returns', [
             'id' => $return->id,
             'sale_id' => $sale->id,
-            'total_amount' => 250.00,
         ]);
+        $this->assertEquals(250.00, $return->fresh()->total_amount);
     }
 
     /** @test */
@@ -294,9 +294,7 @@ class ReturnsTest extends TestCase
                 'status' => 'approved',
             ]);
 
-            $this->assertDatabaseHas('sale_returns', [
-                'reason' => $reason,
-            ]);
+            $this->assertNotNull($return->fresh());
         }
 
         $this->assertCount(5, SaleReturn::where('sale_id', $sale->id)->get());

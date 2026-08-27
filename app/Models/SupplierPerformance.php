@@ -10,6 +10,8 @@ class SupplierPerformance extends Model
 {
     use HasFactory;
 
+    protected $table = 'supplier_performance';
+
     protected $fillable = [
         'supplier_id',
         'business_id',

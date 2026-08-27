@@ -13,12 +13,9 @@ class SaleReturn extends Model
      * The attributes that are mass assignable.
      *
      * @var array
-     */
-    protected $fillable = [
-        'business_id',
-        'sale_id',
-        'invoice_no',
-        'return_date',
+     */    protected $fillable = [
+        'business_id', 'sale_id', 'invoice_no', 'return_date',
+        'user_id', 'reason', 'total_amount', 'refund_amount', 'status',
     ];
 
     public static function boot()

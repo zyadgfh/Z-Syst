@@ -25,6 +25,11 @@ class ReceiptPolicy
         return $user->business_id !== null;
     }
 
+    public function generate(User $user): bool
+    {
+        return $user->business_id !== null;
+    }
+
     public function update(User $user, Receipt $receipt): bool
     {
         return $user->business_id === $receipt->business_id;

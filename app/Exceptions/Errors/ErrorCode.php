@@ -2,47 +2,126 @@
 
 namespace App\Exceptions\Errors;
 
-class ErrorCode
+/**
+ * Error codes for the application's exception system.
+ *
+ * Each code carries metadata: HTTP status, log level, and alert flag.
+ */
+enum ErrorCode: string
 {
     // Business Rule Errors
-    public const BUSINESS_INSUFFICIENT_STOCK = 'BUSINESS_INSUFFICIENT_STOCK';
-    public const BUSINESS_PRODUCT_NOT_FOUND = 'BUSINESS_PRODUCT_NOT_FOUND';
-    public const BUSINESS_DUPLICATE_INVOICE = 'BUSINESS_DUPLICATE_INVOICE';
-    public const BUSINESS_INVALID_DATE_RANGE = 'BUSINESS_INVALID_DATE_RANGE';
-    public const BUSINESS_INSUFFICIENT_PERMISSION = 'BUSINESS_INSUFFICIENT_PERMISSION';
-    public const BUSINESS_DUE_SALE_WALKING_CUSTOMER = 'BUSINESS_DUE_SALE_WALKING_CUSTOMER';
-    public const BUSINESS_BATCH_QUANTITY_MISMATCH = 'BUSINESS_BATCH_QUANTITY_MISMATCH';
-    public const BUSINESS_SUBSCRIPTION_EXPIRED = 'BUSINESS_SUBSCRIPTION_EXPIRED';
-    public const BUSINESS_SUBSCRIPTION_LIMIT_EXCEEDED = 'BUSINESS_SUBSCRIPTION_LIMIT_EXCEEDED';
+    case BUSINESS_INSUFFICIENT_STOCK = 'BUSINESS_INSUFFICIENT_STOCK';
+    case BUSINESS_PRODUCT_NOT_FOUND = 'BUSINESS_PRODUCT_NOT_FOUND';
+    case BUSINESS_DUPLICATE_INVOICE = 'BUSINESS_DUPLICATE_INVOICE';
+    case BUSINESS_INVALID_DATE_RANGE = 'BUSINESS_INVALID_DATE_RANGE';
+    case BUSINESS_INSUFFICIENT_PERMISSION = 'BUSINESS_INSUFFICIENT_PERMISSION';
+    case BUSINESS_DUE_SALE_WALKING_CUSTOMER = 'BUSINESS_DUE_SALE_WALKING_CUSTOMER';
+    case BUSINESS_BATCH_QUANTITY_MISMATCH = 'BUSINESS_BATCH_QUANTITY_MISMATCH';
+    case BUSINESS_SUBSCRIPTION_EXPIRED = 'BUSINESS_SUBSCRIPTION_EXPIRED';
+    case BUSINESS_SUBSCRIPTION_LIMIT_EXCEEDED = 'BUSINESS_SUBSCRIPTION_LIMIT_EXCEEDED';
 
     // Validation Errors
-    public const VALIDATION_FAILED = 'VALIDATION_FAILED';
-    public const VALIDATION_ERROR = 'VALIDATION_ERROR';
-    public const NOT_FOUND_BATCH = 'NOT_FOUND_BATCH';
-    public const VALIDATION_ROUTE_NOT_FOUND = 'VALIDATION_ROUTE_NOT_FOUND';
-    public const VALIDATION_METHOD_NOT_ALLOWED = 'VALIDATION_METHOD_NOT_ALLOWED';
+    case VALIDATION_FAILED = 'VALIDATION_FAILED';
+    case VALIDATION_ERROR = 'VALIDATION_ERROR';
+    case NOT_FOUND_BATCH = 'NOT_FOUND_BATCH';
+    case VALIDATION_ROUTE_NOT_FOUND = 'VALIDATION_ROUTE_NOT_FOUND';
+    case VALIDATION_METHOD_NOT_ALLOWED = 'VALIDATION_METHOD_NOT_ALLOWED';
 
     // Authentication Errors
-    public const AUTH_UNAUTHORIZED = 'AUTH_UNAUTHORIZED';
-    public const AUTH_FORBIDDEN = 'AUTH_FORBIDDEN';
-    public const AUTH_TOKEN_EXPIRED = 'AUTH_TOKEN_EXPIRED';
-    public const AUTH_INVALID_CREDENTIALS = 'AUTH_INVALID_CREDENTIALS';
+    case AUTH_UNAUTHORIZED = 'AUTH_UNAUTHORIZED';
+    case AUTH_FORBIDDEN = 'AUTH_FORBIDDEN';
+    case AUTH_TOKEN_EXPIRED = 'AUTH_TOKEN_EXPIRED';
+    case AUTH_INVALID_CREDENTIALS = 'AUTH_INVALID_CREDENTIALS';
 
     // System Errors
-    public const SYSTEM_INTERNAL_ERROR = 'SYSTEM_INTERNAL_ERROR';
-    public const SYSTEM_DATABASE_ERROR = 'SYSTEM_DATABASE_ERROR';
-    public const SYSTEM_EXTERNAL_SERVICE_ERROR = 'SYSTEM_EXTERNAL_SERVICE_ERROR';
-    public const SYSTEM_RATE_LIMIT_EXCEEDED = 'SYSTEM_RATE_LIMIT_EXCEEDED';
+    case SYSTEM_INTERNAL_ERROR = 'SYSTEM_INTERNAL_ERROR';
+    case SYSTEM_DATABASE_ERROR = 'SYSTEM_DATABASE_ERROR';
+    case SYSTEM_EXTERNAL_SERVICE_ERROR = 'SYSTEM_EXTERNAL_SERVICE_ERROR';
+    case SYSTEM_RATE_LIMIT_EXCEEDED = 'SYSTEM_RATE_LIMIT_EXCEEDED';
 
     // Resource Errors
-    public const RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND';
-    public const RESOURCE_ALREADY_EXISTS = 'RESOURCE_ALREADY_EXISTS';
-    public const RESOURCE_CONFLICT = 'RESOURCE_CONFLICT';
+    case RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND';
+    case RESOURCE_ALREADY_EXISTS = 'RESOURCE_ALREADY_EXISTS';
+    case RESOURCE_CONFLICT = 'RESOURCE_CONFLICT';
+
+    // Invoice/Due Errors
+    case BUSINESS_INVOICE_NOT_FOUND = 'BUSINESS_INVOICE_NOT_FOUND';
+    case BUSINESS_INVOICE_DUE_EXCEEDED = 'BUSINESS_INVOICE_DUE_EXCEEDED';
+    case BUSINESS_OPENING_BALANCE_EXCEEDED = 'BUSINESS_OPENING_BALANCE_EXCEEDED';
+    case BUSINESS_DUPLICATE_ENTRY = 'BUSINESS_DUPLICATE_ENTRY';
+
+    // Validation/Upload Errors
+    case VALIDATION_MISSING_FIELD = 'VALIDATION_MISSING_FIELD';
+    case UPLOAD_STORAGE_FAILED = 'UPLOAD_STORAGE_FAILED';
+    case SYSTEM_TRANSACTION_FAILED = 'SYSTEM_TRANSACTION_FAILED';
+    case RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED';
+    case EXTERNAL_MAIL_FAILED = 'EXTERNAL_MAIL_FAILED';
 
     /**
-     * Get human-readable message for error code
+     * Get the appropriate HTTP status code for this error.
      */
-    public static function getMessage(string $code): string
+    public function httpStatus(): int
+    {
+        return match ($this) {
+            self::AUTH_UNAUTHORIZED => 401,
+            self::AUTH_FORBIDDEN,
+            self::AUTH_TOKEN_EXPIRED,
+            self::AUTH_INVALID_CREDENTIALS => 403,
+            self::VALIDATION_FAILED,
+            self::VALIDATION_ERROR,
+            self::VALIDATION_ROUTE_NOT_FOUND,
+            self::VALIDATION_METHOD_NOT_ALLOWED,
+            self::BUSINESS_INSUFFICIENT_STOCK,
+            self::BUSINESS_PRODUCT_NOT_FOUND,
+            self::BUSINESS_DUPLICATE_INVOICE,
+            self::BUSINESS_INVALID_DATE_RANGE,
+            self::BUSINESS_INSUFFICIENT_PERMISSION,
+            self::BUSINESS_DUE_SALE_WALKING_CUSTOMER,
+            self::BUSINESS_BATCH_QUANTITY_MISMATCH,
+            self::BUSINESS_SUBSCRIPTION_EXPIRED,
+            self::BUSINESS_SUBSCRIPTION_LIMIT_EXCEEDED,
+            self::NOT_FOUND_BATCH => 422,
+            self::RESOURCE_NOT_FOUND => 404,
+            self::RESOURCE_ALREADY_EXISTS,
+            self::RESOURCE_CONFLICT => 409,
+            default => 500,
+        };
+    }
+
+    /**
+     * Get the log level for this error.
+     */
+    public function logLevel(): string
+    {
+        return match ($this) {
+            self::SYSTEM_INTERNAL_ERROR,
+            self::SYSTEM_DATABASE_ERROR,
+            self::SYSTEM_EXTERNAL_SERVICE_ERROR => 'critical',
+            self::AUTH_UNAUTHORIZED,
+            self::AUTH_FORBIDDEN,
+            self::AUTH_TOKEN_EXPIRED,
+            self::AUTH_INVALID_CREDENTIALS => 'warning',
+            default => 'error',
+        };
+    }
+
+    /**
+     * Whether this error should trigger an alert.
+     */
+    public function shouldAlert(): bool
+    {
+        return match ($this) {
+            self::SYSTEM_INTERNAL_ERROR,
+            self::SYSTEM_DATABASE_ERROR,
+            self::SYSTEM_EXTERNAL_SERVICE_ERROR => true,
+            default => false,
+        };
+    }
+
+    /**
+     * Get human-readable message for error code.
+     */
+    public static function getMessage(ErrorCode $code): string
     {
         return match ($code) {
             self::BUSINESS_INSUFFICIENT_STOCK => __('Insufficient stock available'),

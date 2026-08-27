@@ -262,7 +262,7 @@ class GRNTest extends TestCase
 
     public function test_cannot_verify_non_pending_grn(): void
     {
-        $grn = $this->createGRN(['status' => GoodsReceivedNote::STATUS_DRAFT]);
+        $grn = $this->createGRN(['status' => GoodsReceivedNote::STATUS_ACCEPTED]);
 
         $this->expectException(\Exception::class);
         $this->grnService->verify($grn, []);

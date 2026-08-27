@@ -35,7 +35,7 @@ class InsuranceCompanyTest extends TestCase
         $coverage = $company->calculateDefaultCoverage(1000);
 
         $this->assertEquals(800.00, $coverage['covered_amount']);
-        $this->assertEquals(400.00, $coverage['patient_responsibility']); // 1000 - 800 + 200
+        $this->assertEquals(200.00, $coverage['patient_responsibility']); // 1000 - 800
         $this->assertEquals(80.00, $coverage['coverage_percent']);
         $this->assertEquals(20.00, $coverage['copay_percent']);
     }

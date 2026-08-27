@@ -288,6 +288,11 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('traceability/recall-statistics', [ADMIN\TraceabilityController::class, 'recallStatistics'])->name('traceability.recall-statistics');
     Route::get('traceability/expiring-batches', [ADMIN\TraceabilityController::class, 'expiringBatches'])->name('traceability.expiring-batches');
     Route::get('traceability/expired-batches', [ADMIN\TraceabilityController::class, 'expiredBatches'])->name('traceability.expired-batches');
+    Route::get('traceability/recalls/{recall}/summary', [ADMIN\TraceabilityController::class, 'recallSummary'])->name('traceability.recall-summary');
+    Route::post('traceability/recalls/{recall}/quarantine', [ADMIN\TraceabilityController::class, 'quarantineBatch'])->name('traceability.quarantine-batch');
+    Route::post('traceability/recalls/{recall}/release', [ADMIN\TraceabilityController::class, 'releaseBatch'])->name('traceability.release-batch');
+    Route::post('traceability/recalls/{recall}/dispose', [ADMIN\TraceabilityController::class, 'disposeBatch'])->name('traceability.dispose-batch');
+    Route::get('traceability/detect-affected', [ADMIN\TraceabilityController::class, 'detectAffectedBatches'])->name('traceability.detect-affected');
 
     // Loyalty & CRM
     Route::get('loyalty', [ADMIN\LoyaltyController::class, 'index'])->name('loyalty.index');
@@ -353,7 +358,10 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
 
     // Purchase Orders
     Route::resource('purchase-orders', ADMIN\PurchaseOrderController::class)->except('show');
-    Route::get('purchase-orders/{purchaseOrder}', [ADMIN\PurchaseOrderController::class, 'show'])->name('purchase-orders.show');
+    // Specific routes BEFORE wildcard to avoid {purchaseOrder} capturing them
+    Route::get('purchase-orders/pending', [ADMIN\PurchaseOrderController::class, 'pending'])->name('purchase-orders.pending');
+    Route::get('purchase-orders/overdue', [ADMIN\PurchaseOrderController::class, 'overdue'])->name('purchase-orders.overdue');
+    Route::get('purchase-orders/statistics', [ADMIN\PurchaseOrderController::class, 'statistics'])->name('purchase-orders.statistics');
     Route::post('purchase-orders/{purchaseOrder}/send', [ADMIN\PurchaseOrderController::class, 'send'])->name('purchase-orders.send');
     Route::post('purchase-orders/{purchaseOrder}/approve', [ADMIN\PurchaseOrderController::class, 'approve'])->name('purchase-orders.approve');
     Route::post('purchase-orders/{purchaseOrder}/reject', [ADMIN\PurchaseOrderController::class, 'reject'])->name('purchase-orders.reject');
@@ -361,9 +369,7 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::post('purchase-orders/{purchaseOrder}/restore', [ADMIN\PurchaseOrderController::class, 'restore'])->name('purchase-orders.restore');
     Route::post('purchase-orders/{purchaseOrder}/convert', [ADMIN\PurchaseOrderController::class, 'convertToPurchase'])->name('purchase-orders.convert');
     Route::get('purchase-orders/{purchaseOrder}/pdf', [ADMIN\PurchaseOrderController::class, 'pdf'])->name('purchase-orders.pdf');
-    Route::get('purchase-orders/pending', [ADMIN\PurchaseOrderController::class, 'pending'])->name('purchase-orders.pending');
-    Route::get('purchase-orders/overdue', [ADMIN\PurchaseOrderController::class, 'overdue'])->name('purchase-orders.overdue');
-    Route::get('purchase-orders/statistics', [ADMIN\PurchaseOrderController::class, 'statistics'])->name('purchase-orders.statistics');
+    Route::get('purchase-orders/{purchaseOrder}', [ADMIN\PurchaseOrderController::class, 'show'])->name('purchase-orders.show');
 
     // GRN (Goods Received Notes)
     Route::resource('grn', ADMIN\GRNController::class)->except('show');
@@ -491,6 +497,10 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
 
     // Comparison Analytics
     Route::get('comparison-analytics', [ADMIN\ComparisonAnalyticsController::class, 'index'])->name('comparison-analytics.index');
+
+    // Sales Report
+    Route::get('sales-report', [ADMIN\SalesReportController::class, 'index'])->name('sales-report.index');
+    Route::get('sales-report/chart-data', [ADMIN\SalesReportController::class, 'chartData'])->name('sales-report.chart-data');
 });
 
 

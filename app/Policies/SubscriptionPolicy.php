@@ -34,4 +34,14 @@ class SubscriptionPolicy
     {
         return $user->business_id === $subscription->business_id;
     }
+
+    public function manage(User $user): bool
+    {
+        return $user->business_id !== null;
+    }
+
+    public function renew(User $user): bool
+    {
+        return $user->business_id !== null;
+    }
 }

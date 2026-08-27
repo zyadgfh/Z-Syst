@@ -390,10 +390,11 @@ class FinancialTransactionService
     /**
      * Delete all financial transactions linked to a given purchase.
      */
-    public function deleteTransactionFor(\App\Models\Purchase $purchase): bool
+    public function deleteTransactionFor(\Illuminate\Database\Eloquent\Model $model): bool
     {
-        return FinancialTransaction::where('reference_type', 'purchase')
-            ->where('reference_id', $purchase->id)
+        $type = class_basename($model) === 'Sale' ? 'sale' : 'purchase';
+        return FinancialTransaction::where('reference_type', $type)
+            ->where('reference_id', $model->id)
             ->delete() > 0;
     }
 }
