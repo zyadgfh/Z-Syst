@@ -1,4 +1,4 @@
-@foreach($categories as $category)
+@forelse($categories as $category)
     <tr class="table-content">
         <td class="w-60 checkbox table-single-content d-print-none">
             <label class="table-custom-checkbox">
@@ -53,4 +53,19 @@
             </div>
         </td>
     </tr>
-@endforeach
+@empty
+    <tr>
+        <td colspan="7" class="text-center py-5">
+            <div class="d-flex flex-column align-items-center">
+                <i class="fas fa-th-large fa-3x mb-3" style="color: #d1d5db;"></i>
+                <h5 style="color: #374151; font-weight: 600;">{{ __('No categories yet') }}</h5>
+                <p style="color: #6b7280; font-size: 14px;">{{ __('Create your first category to organize products.') }}</p>
+                @can('business-categories-create')
+                    <a href="{{ route('admin.business-categories.create') }}" class="btn btn-primary mt-2">
+                        <i class="fas fa-plus me-1"></i>{{ __('Add Category') }}
+                    </a>
+                @endcan
+            </div>
+        </td>
+    </tr>
+@endforelse

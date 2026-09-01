@@ -48,6 +48,7 @@
     @stack('modal')
 </div>
 
+@include('layouts.partials.flash-messages')
 @include('layouts.partials.script')
 </body>
 </html>

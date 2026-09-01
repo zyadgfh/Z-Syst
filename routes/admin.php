@@ -11,6 +11,16 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     
     // Design System Dashboard
     Route::get('/dashboard/design-system', [ADMIN\DashboardController::class, 'designSystem'])->name('dashboard.design-system');
+
+    // Onboarding Wizard
+    Route::get('/onboarding', [ADMIN\OnboardingController::class, 'index'])->name('onboarding.index');
+    Route::get('/onboarding/step/{step}', [ADMIN\OnboardingController::class, 'step'])->name('onboarding.step')->where('step', '[1-4]');
+    Route::post('/onboarding/save/step1', [ADMIN\OnboardingController::class, 'saveStep1'])->name('onboarding.saveStep1');
+    Route::post('/onboarding/save/step2', [ADMIN\OnboardingController::class, 'saveStep2'])->name('onboarding.saveStep2');
+    Route::post('/onboarding/save/step3', [ADMIN\OnboardingController::class, 'saveStep3'])->name('onboarding.saveStep3');
+    Route::get('/onboarding/complete', [ADMIN\OnboardingController::class, 'complete'])->name('onboarding.complete');
+    Route::get('/onboarding/skip', [ADMIN\OnboardingController::class, 'skip'])->name('onboarding.skip');
+
     
     // Analytics - design system view
     Route::get('/analytics', [ADMIN\AnalyticsController::class, 'index'])->name('analytics.index');

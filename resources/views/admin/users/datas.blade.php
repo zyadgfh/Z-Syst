@@ -1,4 +1,4 @@
-@foreach ($users as $user)
+@forelse ($users as $user)
     <tr class="table-content">
 
         <td class="w-60 checkbox table-single-content d-print-none">
@@ -59,4 +59,14 @@
             </div>
         </td>
     </tr>
-@endforeach
+@empty
+    <tr>
+        <td colspan="6" class="text-center py-5">
+            <div class="d-flex flex-column align-items-center">
+                <i class="fas fa-users fa-3x mb-3" style="color: #d1d5db;"></i>
+                <h5 style="color: #374151; font-weight: 600;">{{ __('No users yet') }}</h5>
+                <p style="color: #6b7280; font-size: 14px;">{{ __('Users will appear here once they register.') }}</p>
+            </div>
+        </td>
+    </tr>
+@endforelse
