@@ -32,6 +32,7 @@
                     <i class="far fa-ellipsis-v"></i>
                 </button>
                 <ul class="dropdown-menu">
+                    @can('business-update')
                     <li>
                         <a href="#business-upgrade-modal" class="business-upgrade-plan" data-bs-toggle="modal"
                             data-id="{{ $business->id }}" data-name="{{ $business->companyName }}" data-url="{{ route('admin.business.upgrade.plan', $business->id) }}">
@@ -42,6 +43,8 @@
                             {{ __('Upgrade Plan') }}
                         </a>
                     </li>
+                    @endcan
+                    @can('business-read')
                     <li>
                         <a href="#business-view-modal" class="business-view" data-bs-toggle="modal"
                             data-image="{{ asset($business->pictureUrl ?? 'assets/img/default-shop.svg') }}"
@@ -60,6 +63,8 @@
                         </a>
 
                     </li>
+                    @endcan
+                    @can('business-update')
                     <li>
                         <a href="{{ route('admin.business.edit', $business->id) }}" class="">
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -70,6 +75,8 @@
                             {{ __('Edit') }}
                         </a>
                     </li>
+                    @endcan
+                    @can('business-delete')
                     <li>
                         <a href="{{ route('admin.business.destroy', $business->id) }}" class="confirm-action"
                             data-method="DELETE">
@@ -80,6 +87,7 @@
                             {{ __('Delete') }}
                         </a>
                     </li>
+                    @endcan
                 </ul>
             </div>
         </td>

@@ -53,7 +53,7 @@ class LoyaltyServiceTest extends TestCase
             'business_id' => $this->business->id,
             'name' => 'Custom Program',
             'points_per_currency' => 2,
-            'min_points_for_reward' => 200,
+            'min_points_to_redeem' => 200,
             'is_active' => true,
         ]);
 
@@ -96,10 +96,10 @@ class LoyaltyServiceTest extends TestCase
     {
         $this->service->earnPoints($this->business->id, $this->party->id, 200.0);
 
-        $transaction = $this->service->redeemPoints($this->business->id, $this->party->id, 50);
+        $transaction = $this->service->redeemPoints($this->business->id, $this->party->id, 100);
 
         $this->assertEquals('redeemed', $transaction->type);
-        $this->assertEquals(-50, $transaction->points);
+        $this->assertEquals(-100, $transaction->points);
     }
 
     public function test_redeem_points_throws_on_insufficient_balance(): void
@@ -131,21 +131,21 @@ class LoyaltyServiceTest extends TestCase
     {
         $this->service->earnPoints($this->business->id, $this->party->id, 100.0);
         $this->service->earnPoints($this->business->id, $this->party->id, 50.0);
-        $this->service->redeemPoints($this->business->id, $this->party->id, 30);
+        $this->service->redeemPoints($this->business->id, $this->party->id, 100);
 
         $balance = $this->service->getBalance($this->business->id, $this->party->id);
 
-        $this->assertEquals(120, $balance);
+        $this->assertEquals(50, $balance);
     }
 
     public function test_get_history_returns_transactions(): void
     {
         $this->service->earnPoints($this->business->id, $this->party->id, 100.0);
-        $this->service->redeemPoints($this->business->id, $this->party->id, 50);
+        $this->service->redeemPoints($this->business->id, $this->party->id, 100);
 
         $history = $this->service->getHistory($this->business->id, $this->party->id);
 
-        $this->assertCount(2, $history);
+        $this->assertCount(2, $history['transactions']);
     }
 
     public function test_log_interaction_creates_record(): void
@@ -178,7 +178,7 @@ class LoyaltyServiceTest extends TestCase
             'saleDate' => now()->toDateString(),
         ]);
 
-        $transaction = $this->service->earnPoints($this->business->id, $this->party->id, 100.0, $sale);
+        $transaction = $this->service->earnPoints($this->business->id, $this->party->id, 100.0, Sale::class, $sale->id);
 
         $this->assertNotNull($transaction->reference_id);
         $this->assertEquals(Sale::class, $transaction->reference_type);

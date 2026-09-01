@@ -1,56 +1,69 @@
 <?php
 
 use App\Http\Controllers as Web;
+use App\Http\Controllers\PaymentWebhookController;
+use App\Http\Controllers\Webhook\ClerkWebhookController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
-// Manual Payment Routes (kept for supplier payments)
-Route::get('/payments-gateways/{plan_id}/{business_id}', [Web\PaymentController::class, 'index'])->name('payments-gateways.index');
-Route::post('/payments/{plan_id}/{gateway_id}', [Web\PaymentController::class, 'payment'])->name('payments-gateways.payment');
-Route::get('/order-status', [Web\PaymentController::class, 'orderStatus'])->name('order.status');
+// Root route is handled by Landing module (Modules/Landing/Routes/web.php)
+// Removed redirect to /login to allow public homepage
 
-// Egyptian Payment Gateway Routes
-Route::group([
-    'namespace' => 'App\Library',
-], function () {
-    // Vodafone Cash
-    Route::get('/vodafone-cash', 'VodafoneCash@view')->name('vodafone-cash.view');
-    Route::post('/vodafone-cash/status', 'VodafoneCash@status')->name('vodafone-cash.status');
-    
-    // Orange Cash
-    Route::get('/orange-cash', 'OrangeCash@view')->name('orange-cash.view');
-    Route::post('/orange-cash/status', 'OrangeCash@status')->name('orange-cash.status');
-    
-    // InstaPay
-    Route::get('/instapay', 'InstaPay@view')->name('instapay.view');
-    Route::post('/instapay/status', 'InstaPay@status')->name('instapay.status');
-    
-    // Bank Card
-    Route::get('/bank-card', 'BankCard@view')->name('bank-card.view');
-    Route::post('/bank-card/status', 'BankCard@status')->name('bank-card.status');
-    
-    // Fawry
-    Route::get('/fawry', 'Fawry@view')->name('fawry.view');
-    Route::post('/fawry/status', 'Fawry@status')->name('fawry.status');
-    
-    // Cash Payment
-    Route::get('/cash-payment', 'CashPayment@view')->name('cash-payment.view');
-    Route::post('/cash-payment/status', 'CashPayment@status')->name('cash-payment.status');
-});
+// Payment Routes (Egyptian payment gateways + legacy manual)
+Route::get('/payments-gateways/{plan_id}/{business_id}', [Web\PaymentController::class, 'index'])
+    ->name('payments-gateways.index')
+    ->middleware('throttle:60,1');
+Route::post('/payments/{plan_id}/{gateway_id}', [Web\PaymentController::class, 'payment'])
+    ->name('payments-gateways.payment')
+    ->middleware('throttle:10,1');
+Route::get('/payment/callback', [Web\PaymentController::class, 'paymentCallback'])
+    ->name('payment.callback')
+    ->middleware('throttle:100,1');
+Route::get('/order-status', [Web\PaymentController::class, 'orderStatus'])
+    ->name('order.status')
+    ->middleware('throttle:60,1');
 
-// Payment success/failed routes
-Route::get('/payment/success', [Web\PaymentController::class, 'success'])->name('payment.success');
-Route::get('/payment/failed', [Web\PaymentController::class, 'failed'])->name('payment.failed');
+// Dark Mode Toggle
+Route::post('/toggle-dark-mode', [Web\Admin\SettingController::class, 'toggleDarkMode'])->name('toggle-dark-mode');
+
+// Clerk Webhook
+Route::post('/webhooks/clerk', [ClerkWebhookController::class, 'handle'])
+    ->name('webhooks.clerk');
+
+// Payment Webhooks
+Route::post('/webhooks/vodafone-cash', [PaymentWebhookController::class, 'vodafoneCash'])
+    ->name('webhooks.vodafone-cash')
+    ->middleware('throttle:100,1');
+Route::post('/webhooks/bank-card', [PaymentWebhookController::class, 'bankCard'])
+    ->name('webhooks.bank-card')
+    ->middleware('throttle:100,1');
+Route::post('/webhooks/fawry', [PaymentWebhookController::class, 'fawry'])
+    ->name('webhooks.fawry')
+    ->middleware('throttle:100,1');
+Route::post('/webhooks/orange-cash', [PaymentWebhookController::class, 'orangeCash'])
+    ->name('webhooks.orange-cash')
+    ->middleware('throttle:100,1');
+Route::post('/webhooks/instapay', [PaymentWebhookController::class, 'instaPay'])
+    ->name('webhooks.instapay')
+    ->middleware('throttle:100,1');
 Route::get('/cache-clear', function () {
+    if (!auth()->check() || !in_array(auth()->user()->role, ['admin', 'superadmin'])) {
+        abort(403, 'Unauthorized');
+    }
+
     Artisan::call('cache:clear');
     Artisan::call('config:clear');
     Artisan::call('route:clear');
     Artisan::call('view:clear');
 
     return back()->with('success', __('Cache has been cleared.'));
-});
+})->middleware('auth');
 
 Route::get('/update', function () {
+    if (!auth()->check() || !in_array(auth()->user()->role, ['superadmin'])) {
+        abort(403, 'Unauthorized - Superadmin access only');
+    }
+
     if (file_exists(base_path('storage/installed'))) {
         touch(base_path('vendor/autoload1.php'));
     }
@@ -66,6 +79,7 @@ Route::get('/update', function () {
     Artisan::call('view:clear');
 
     return redirect('/')->with('message', __('System updated successfully.'));
-});
+})->middleware('auth');
 
 require __DIR__.'/auth.php';
+require __DIR__.'/customer.php';

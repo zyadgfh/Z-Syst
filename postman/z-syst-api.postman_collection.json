@@ -1,0 +1,629 @@
+{
+  "info": {
+    "name": "Z-Syst API — New Endpoints",
+    "description": "Pre-configured requests for all new API endpoints added during the Laravel 12 upgrade: Accounting (double-entry bookkeeping), Traceability & Recall, Insurance, Two-Factor Auth, FEFO Dispensing, Loyalty Programs, and Stock Transfers.\n\nAll requests require a Bearer token from the sign-in endpoint. Set the `{{baseUrl}}` variable to your API host (default: http://localhost:8000/api/v1).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "codebuff"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api/v1"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Accounting (Double-Entry Bookkeeping)",
+      "description": "Chart of accounts, journal entries, trial balance, income statement, and balance sheet.",
+      "item": [
+        {
+          "name": "List Accounts",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/accounting/accounts", "host": ["{{baseUrl}}"], "path": ["accounting", "accounts"] },
+            "description": "List all chart of accounts for the current business."
+          }
+        },
+        {
+          "name": "Create Account",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/accounting/accounts", "host": ["{{baseUrl}}"], "path": ["accounting", "accounts"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cash\",\n  \"code\": \"1001\",\n  \"type\": \"asset\",\n  \"description\": \"Main cash account\"\n}"
+            },
+            "description": "Create a new account in the chart of accounts."
+          }
+        },
+        {
+          "name": "Show Account",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/accounting/accounts/1", "host": ["{{baseUrl}}"], "path": ["accounting", "accounts", "1"] },
+            "description": "Get a specific account by ID."
+          }
+        },
+        {
+          "name": "List Journal Entries",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/accounting/journal-entries", "host": ["{{baseUrl}}"], "path": ["accounting", "journal-entries"] },
+            "description": "List all journal entries with pagination."
+          }
+        },
+        {
+          "name": "Create Journal Entry",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/accounting/journal-entries", "host": ["{{baseUrl}}"], "path": ["accounting", "journal-entries"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-08-27\",\n  \"description\": \"Initial cash deposit\",\n  \"reference_type\": \"manual\",\n  \"lines\": [\n    {\n      \"account_id\": 1,\n      \"debit\": 1000.00,\n      \"credit\": 0,\n      \"description\": \"Cash received\"\n    },\n    {\n      \"account_id\": 2,\n      \"debit\": 0,\n      \"credit\": 1000.00,\n      \"description\": \"Revenue earned\"\n    }\n  ]\n}"
+            },
+            "description": "Create a double-entry journal entry. Debits must equal credits."
+          }
+        },
+        {
+          "name": "Show Journal Entry",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/accounting/journal-entries/1", "host": ["{{baseUrl}}"], "path": ["accounting", "journal-entries", "1"] },
+            "description": "Get a specific journal entry by ID."
+          }
+        },
+        {
+          "name": "Post Journal Entry",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/accounting/journal-entries/1/post", "host": ["{{baseUrl}}"], "path": ["accounting", "journal-entries", "1", "post"] },
+            "description": "Post a draft journal entry to make it effective."
+          }
+        },
+        {
+          "name": "Void Journal Entry",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/accounting/journal-entries/1/void", "host": ["{{baseUrl}}"], "path": ["accounting", "journal-entries", "1", "void"] },
+            "description": "Void a posted journal entry (creates reversing entry)."
+          }
+        },
+        {
+          "name": "Trial Balance",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/accounting/trial-balance", "host": ["{{baseUrl}}"], "path": ["accounting", "trial-balance"] },
+            "description": "Get trial balance report. Total debits must equal total credits."
+          }
+        },
+        {
+          "name": "Income Statement",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/accounting/income-statement", "host": ["{{baseUrl}}"], "path": ["accounting", "income-statement"] },
+            "description": "Get income statement (profit & loss) for the current period."
+          }
+        },
+        {
+          "name": "Balance Sheet",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/accounting/balance-sheet", "host": ["{{baseUrl}}"], "path": ["accounting", "balance-sheet"] },
+            "description": "Get balance sheet report."
+          }
+        },
+        {
+          "name": "General Ledger",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/accounting/general-ledger/1", "host": ["{{baseUrl}}"], "path": ["accounting", "general-ledger", "1"] },
+            "description": "Get general ledger for a specific account."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Traceability & Recall",
+      "description": "Batch lot tracking, expiry management, and product recall workflows.",
+      "item": [
+        {
+          "name": "List Batch Lots",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/traceability/batch-lots", "host": ["{{baseUrl}}"], "path": ["traceability", "batch-lots"] },
+            "description": "List all batch lots with filtering."
+          }
+        },
+        {
+          "name": "Detect Affected Batches",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/traceability/detect-affected?product_id=1", "host": ["{{baseUrl}}"], "path": ["traceability", "detect-affected"], "query": [{ "key": "product_id", "value": "1" }] },
+            "description": "Detect batches affected by a product issue."
+          }
+        },
+        {
+          "name": "Expiring Batches",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/traceability/expiring-batches?days=30", "host": ["{{baseUrl}}"], "path": ["traceability", "expiring-batches"], "query": [{ "key": "days", "value": "30" }] },
+            "description": "Get batches expiring within N days."
+          }
+        },
+        {
+          "name": "Expired Batches",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/traceability/expired-batches", "host": ["{{baseUrl}}"], "path": ["traceability", "expired-batches"] },
+            "description": "Get all expired batches."
+          }
+        },
+        {
+          "name": "List Recalls",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/traceability/recalls", "host": ["{{baseUrl}}"], "path": ["traceability", "recalls"] },
+            "description": "List all recall events."
+          }
+        },
+        {
+          "name": "Initiate Recall",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/traceability/recalls", "host": ["{{baseUrl}}"], "path": ["traceability", "recalls"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": 1,\n  \"reason\": \"Contamination detected\",\n  \"severity\": \"high\",\n  \"batch_ids\": [1, 2, 3],\n  \"description\": \"Batch contaminated with foreign material\"\n}"
+            },
+            "description": "Initiate a product recall event."
+          }
+        },
+        {
+          "name": "Quarantine Batch",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/traceability/recalls/1/quarantine", "host": ["{{baseUrl}}"], "path": ["traceability", "recalls", "1", "quarantine"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"batch_id\": 1,\n  \"reason\": \"Under investigation\"\n}" },
+            "description": "Quarantine a batch as part of a recall."
+          }
+        },
+        {
+          "name": "Release Batch",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/traceability/recalls/1/release", "host": ["{{baseUrl}}"], "path": ["traceability", "recalls", "1", "release"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"batch_id\": 1,\n  \"reason\": \"Investigation complete — no issue found\"\n}" },
+            "description": "Release a quarantined batch."
+          }
+        },
+        {
+          "name": "Dispose Batch",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/traceability/recalls/1/dispose", "host": ["{{baseUrl}}"], "path": ["traceability", "recalls", "1", "dispose"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"batch_id\": 1,\n  \"disposal_method\": \"incineration\",\n  \"notes\": \"Disposed per safety protocol\"\n}" },
+            "description": "Dispose of a recalled batch."
+          }
+        },
+        {
+          "name": "Resolve Recall",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/traceability/recalls/1/resolve", "host": ["{{baseUrl}}"], "path": ["traceability", "recalls", "1", "resolve"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"resolution\": \"All affected batches quarantined and disposed\",\n  \"notes\": \"Recall completed successfully\"\n}" },
+            "description": "Mark a recall event as resolved."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Insurance",
+      "description": "Insurance companies, policies, coverages, and claims management.",
+      "item": [
+        {
+          "name": "List Insurance Companies",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/insurance/companies", "host": ["{{baseUrl}}"], "path": ["insurance", "companies"] },
+            "description": "List all insurance companies."
+          }
+        },
+        {
+          "name": "Create Insurance Company",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/insurance/companies", "host": ["{{baseUrl}}"], "path": ["insurance", "companies"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"BlueCross Insurance\",\n  \"phone\": \"+1-555-0100\",\n  \"email\": \"claims@bluecross.com\",\n  \"address\": \"123 Insurance Ave\"\n}" },
+            "description": "Register a new insurance company."
+          }
+        },
+        {
+          "name": "Show Insurance Company",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/insurance/companies/1", "host": ["{{baseUrl}}"], "path": ["insurance", "companies", "1"] },
+            "description": "Get a specific insurance company."
+          }
+        },
+        {
+          "name": "Update Insurance Company",
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/insurance/companies/1", "host": ["{{baseUrl}}"], "path": ["insurance", "companies", "1"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"phone\": \"+1-555-0200\"\n}" },
+            "description": "Update insurance company details."
+          }
+        },
+        {
+          "name": "Delete Insurance Company",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/insurance/companies/1", "host": ["{{baseUrl}}"], "path": ["insurance", "companies", "1"] },
+            "description": "Delete an insurance company."
+          }
+        },
+        {
+          "name": "List Policies",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/insurance/policies", "host": ["{{baseUrl}}"], "path": ["insurance", "policies"] },
+            "description": "List all insurance policies."
+          }
+        },
+        {
+          "name": "Create Policy",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/insurance/policies", "host": ["{{baseUrl}}"], "path": ["insurance", "policies"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"insurance_company_id\": 1,\n  \"party_id\": 1,\n  \"policy_number\": \"POL-2026-001\",\n  \"start_date\": \"2026-01-01\",\n  \"end_date\": \"2026-12-31\",\n  \"coverage_amount\": 50000.00,\n  \"premium\": 1200.00\n}" },
+            "description": "Create a new insurance policy."
+          }
+        },
+        {
+          "name": "List Coverages",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/insurance/coverages", "host": ["{{baseUrl}}"], "path": ["insurance", "coverages"] },
+            "description": "List all coverage types."
+          }
+        },
+        {
+          "name": "Create Coverage",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/insurance/coverages", "host": ["{{baseUrl}}"], "path": ["insurance", "coverages"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Full Coverage\",\n  \"description\": \"Covers all medical expenses\",\n  \"coverage_percentage\": 100\n}" },
+            "description": "Create a coverage type."
+          }
+        },
+        {
+          "name": "List Claims",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/insurance/claims", "host": ["{{baseUrl}}"], "path": ["insurance", "claims"] },
+            "description": "List all insurance claims."
+          }
+        },
+        {
+          "name": "Submit Claim",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/insurance/claims", "host": ["{{baseUrl}}"], "path": ["insurance", "claims"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"insurance_policy_id\": 1,\n  \"sale_id\": 1,\n  \"claim_amount\": 250.00,\n  \"description\": \"Patient medication reimbursement\"\n}" },
+            "description": "Submit a new insurance claim."
+          }
+        },
+        {
+          "name": "Approve Claim",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/insurance/claims/1/approve", "host": ["{{baseUrl}}"], "path": ["insurance", "claims", "1", "approve"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"approved_amount\": 200.00,\n  \"notes\": \"Approved with reduced amount\"\n}" },
+            "description": "Approve an insurance claim."
+          }
+        },
+        {
+          "name": "Reject Claim",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/insurance/claims/1/reject", "host": ["{{baseUrl}}"], "path": ["insurance", "claims", "1", "reject"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Not covered under current policy\"\n}" },
+            "description": "Reject an insurance claim."
+          }
+        },
+        {
+          "name": "Pay Claim",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/insurance/claims/1/pay", "host": ["{{baseUrl}}"], "path": ["insurance", "claims", "1", "pay"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"payment_method\": \"bank_transfer\",\n  \"reference_number\": \"TXN-2026-001\"\n}" },
+            "description": "Record payment for an approved claim."
+          }
+        },
+        {
+          "name": "Insurance Summary",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/insurance/summary", "host": ["{{baseUrl}}"], "path": ["insurance", "summary"] },
+            "description": "Get insurance summary statistics."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Two-Factor Authentication",
+      "description": "2FA setup, verification, recovery codes, and management.",
+      "item": [
+        {
+          "name": "Get 2FA Status",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/2fa/status", "host": ["{{baseUrl}}"], "path": ["2fa", "status"] },
+            "description": "Check 2FA status for the authenticated user."
+          }
+        },
+        {
+          "name": "Setup 2FA",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/2fa/setup", "host": ["{{baseUrl}}"], "path": ["2fa", "setup"] },
+            "description": "Initialize 2FA setup — returns QR code secret and recovery codes."
+          }
+        },
+        {
+          "name": "Confirm 2FA Setup",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/2fa/confirm", "host": ["{{baseUrl}}"], "path": ["2fa", "confirm"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"123456\"\n}" },
+            "description": "Confirm 2FA setup by verifying a TOTP code."
+          }
+        },
+        {
+          "name": "Verify 2FA Code",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/2fa/verify", "host": ["{{baseUrl}}"], "path": ["2fa", "verify"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"123456\"\n}" },
+            "description": "Verify a TOTP code during login."
+          }
+        },
+        {
+          "name": "Disable 2FA",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/2fa/disable", "host": ["{{baseUrl}}"], "path": ["2fa", "disable"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"password\": \"current_password\"\n}" },
+            "description": "Disable 2FA for the authenticated user."
+          }
+        },
+        {
+          "name": "Regenerate Recovery Codes",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/2fa/recovery-codes", "host": ["{{baseUrl}}"], "path": ["2fa", "recovery-codes"] },
+            "description": "Regenerate backup recovery codes."
+          }
+        }
+      ]
+    },
+    {
+      "name": "FEFO Dispensing",
+      "description": "First-Expired-First-Out batch dispensing, expiry alerts, and batch management.",
+      "item": [
+        {
+          "name": "FEFO Settings",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/fefo/settings", "host": ["{{baseUrl}}"], "path": ["fefo", "settings"] },
+            "description": "Get FEFO configuration settings."
+          }
+        },
+        {
+          "name": "Update FEFO Settings",
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/fefo/settings", "host": ["{{baseUrl}}"], "path": ["fefo", "settings"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"enabled\": true,\n  \"expiry_warning_days\": 30,\n  \"auto_remove_expired\": false\n}" },
+            "description": "Update FEFO configuration."
+          }
+        },
+        {
+          "name": "FEFO Report",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/fefo/report", "host": ["{{baseUrl}}"], "path": ["fefo", "report"] },
+            "description": "Get FEFO compliance report."
+          }
+        },
+        {
+          "name": "Product Batches",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/fefo/product-batches/1", "host": ["{{baseUrl}}"], "path": ["fefo", "product-batches", "1"] },
+            "description": "Get batches for a specific product."
+          }
+        },
+        {
+          "name": "Batch Suggestions",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/fefo/suggestions/1", "host": ["{{baseUrl}}"], "path": ["fefo", "suggestions", "1"] },
+            "description": "Get FEFO dispensing suggestions for a product."
+          }
+        },
+        {
+          "name": "Sale Suggestions",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/fefo/sale-suggestions", "host": ["{{baseUrl}}"], "path": ["fefo", "sale-suggestions"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"product_id\": 1,\n  \"quantity\": 5\n}" },
+            "description": "Get FEFO batch allocation plan for a sale."
+          }
+        },
+        {
+          "name": "Remove Expired",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/fefo/remove-expired", "host": ["{{baseUrl}}"], "path": ["fefo", "remove-expired"] },
+            "description": "Remove all expired batches from active stock."
+          }
+        },
+        {
+          "name": "FEFO Logs",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/fefo/logs", "host": ["{{baseUrl}}"], "path": ["fefo", "logs"] },
+            "description": "Get FEFO dispensing activity logs."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Loyalty Programs",
+      "description": "Loyalty programs, points, balances, and customer history.",
+      "item": [
+        {
+          "name": "List Loyalty Programs",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/loyalty", "host": ["{{baseUrl}}"], "path": ["loyalty"] },
+            "description": "List all loyalty programs."
+          }
+        },
+        {
+          "name": "Create Loyalty Program",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/loyalty", "host": ["{{baseUrl}}"], "path": ["loyalty"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Points Program\",\n  \"points_per_currency\": 1,\n  \"redemption_rate\": 0.01,\n  \"min_redemption_points\": 100\n}" },
+            "description": "Create a new loyalty program."
+          }
+        },
+        {
+          "name": "Update Loyalty Program",
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/loyalty/1", "host": ["{{baseUrl}}"], "path": ["loyalty", "1"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"points_per_currency\": 2\n}" },
+            "description": "Update a loyalty program."
+          }
+        },
+        {
+          "name": "Delete Loyalty Program",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/loyalty/1", "host": ["{{baseUrl}}"], "path": ["loyalty", "1"] },
+            "description": "Delete a loyalty program."
+          }
+        },
+        {
+          "name": "Party Balance",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/loyalty/balance/1", "host": ["{{baseUrl}}"], "path": ["loyalty", "balance", "1"] },
+            "description": "Get loyalty points balance for a customer."
+          }
+        },
+        {
+          "name": "Party History",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/loyalty/history/1", "host": ["{{baseUrl}}"], "path": ["loyalty", "history", "1"] },
+            "description": "Get loyalty points history for a customer."
+          }
+        },
+        {
+          "name": "Interactions",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/loyalty/interactions", "host": ["{{baseUrl}}"], "path": ["loyalty", "interactions"] },
+            "description": "List all loyalty point interactions."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Stock Transfers",
+      "description": "Warehouse-to-warehouse stock transfers and statistics.",
+      "item": [
+        {
+          "name": "List Stock Transfers",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/stock-transfers", "host": ["{{baseUrl}}"], "path": ["stock-transfers"] },
+            "description": "List all stock transfers."
+          }
+        },
+        {
+          "name": "Create Stock Transfer",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/stock-transfers", "host": ["{{baseUrl}}"], "path": ["stock-transfers"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"from_warehouse_id\": 1,\n  \"to_warehouse_id\": 2,\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 10\n    }\n  ],\n  \"notes\": \"Monthly stock rebalancing\"\n}" },
+            "description": "Create a new stock transfer between warehouses."
+          }
+        },
+        {
+          "name": "Transfer Statistics",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/stock-transfers/statistics", "host": ["{{baseUrl}}"], "path": ["stock-transfers", "statistics"] },
+            "description": "Get stock transfer statistics."
+          }
+        },
+        {
+          "name": "Complete Transfer",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/stock-transfers/1/complete", "host": ["{{baseUrl}}"], "path": ["stock-transfers", "1", "complete"] },
+            "description": "Mark a stock transfer as completed."
+          }
+        },
+        {
+          "name": "Cancel Transfer",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/stock-transfers/1/cancel", "host": ["{{baseUrl}}"], "path": ["stock-transfers", "1", "cancel"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Supplier delayed shipment\"\n}" },
+            "description": "Cancel a pending stock transfer."
+          }
+        }
+      ]
+    }
+  ]
+}

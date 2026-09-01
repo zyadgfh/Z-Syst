@@ -80,7 +80,7 @@ class RegisteredUserController extends Controller
 
             // Generate OTP
             $code = random_int(100000, 999999);
-            $visibility_time = env('OTP_VISIBILITY_TIME', 3);
+            $visibility_time = config('zsyst.otp.visibility_time');
             $expire = now()->addSeconds($visibility_time * 60);
 
             $data = [
@@ -93,8 +93,8 @@ class RegisteredUserController extends Controller
                 'email_verified_at' => $expire,
             ]);
 
-            if (env('MAIL_USERNAME')) {
-                if (env('QUEUE_MAIL')) {
+            if (config('mail.mailers.smtp.username')) {
+                if (config('zsyst.queue_mail')) {
                     Mail::to($request->email)->queue(new RegistrationMail($data));
                 } else {
                     Mail::to($request->email)->send(new RegistrationMail($data));
@@ -130,7 +130,7 @@ class RegisteredUserController extends Controller
         ]);
 
         $code = random_int(100000, 999999);
-        $visibility_time = env('OTP_VISIBILITY_TIME', 3);
+        $visibility_time = config('zsyst.otp.visibility_time');
         $expire = now()->addSeconds($visibility_time * 60);
 
         $data = [
@@ -138,8 +138,8 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
         ];
 
-        if (env('MAIL_USERNAME')) {
-            if (env('QUEUE_MAIL')) {
+        if (config('mail.mailers.smtp.username')) {
+            if (config('zsyst.queue_mail')) {
                 Mail::to($request->email)->queue(new WelcomeMail($data));
             } else {
                 Mail::to($request->email)->send(new WelcomeMail($data));

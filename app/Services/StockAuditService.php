@@ -2,17 +2,20 @@
 
 namespace App\Services;
 
+use App\Exceptions\InsufficientStockException;
+use App\Exceptions\StockNotFoundException;
 use App\Models\Product;
 use App\Models\Stock;
 use App\Models\StockAudit;
 use App\Models\StockAuditDetail;
 use App\Models\StockMovement;
 use App\Models\StockReconciliation;
-use Illuminate\Support\Facades\DB;
+use App\Traits\WithTransactionalOperations;
 use Illuminate\Support\Facades\Log;
 
 class StockAuditService
 {
+    use WithTransactionalOperations;
     /**
      * Create a new stock audit.
      */
@@ -115,15 +118,13 @@ class StockAuditService
      */
     public function addBulkAuditDetails(StockAudit $audit, array $details): array
     {
-        $createdDetails = [];
-
-        DB::transaction(function () use ($audit, $details, &$createdDetails) {
+        return $this->executeTransaction(function () use ($audit, $details) {
+            $createdDetails = [];
             foreach ($details as $detailData) {
                 $createdDetails[] = $this->addAuditDetail($audit, $detailData);
             }
+            return $createdDetails;
         });
-
-        return $createdDetails;
     }
 
     /**
@@ -136,9 +137,8 @@ class StockAuditService
             ->with('product')
             ->get();
 
-        $details = [];
-
-        DB::transaction(function () use ($audit, $stocks, &$details) {
+        return $this->executeTransaction(function () use ($audit, $stocks) {
+            $details = [];
             foreach ($stocks as $stock) {
                 $detail = $this->addAuditDetail($audit, [
                     'product_id' => $stock->product_id,
@@ -148,9 +148,8 @@ class StockAuditService
                 ]);
                 $details[] = $detail;
             }
+            return $details;
         });
-
-        return $details;
     }
 
     /**
@@ -197,11 +196,11 @@ class StockAuditService
             throw new \Exception('Reconciliation already posted.');
         }
 
-        DB::transaction(function () use ($reconciliation) {
+        return $this->executeTransaction(function () use ($reconciliation) {
             $stock = Stock::find($reconciliation->stock_id);
 
             if (! $stock) {
-                throw new \Exception('Stock record not found.');
+                throw new StockNotFoundException($reconciliation->stock_id);
             }
 
             $beforeQuantity = $stock->productStock;
@@ -210,7 +209,11 @@ class StockAuditService
                 $stock->increment('productStock', $reconciliation->adjustment_quantity);
             } else {
                 if ($stock->productStock < $reconciliation->adjustment_quantity) {
-                    throw new \Exception('Insufficient stock for decrease adjustment.');
+                    throw new InsufficientStockException(
+                        $reconciliation->product_id,
+                        $reconciliation->adjustment_quantity,
+                        $stock->productStock
+                    );
                 }
                 $stock->decrement('productStock', $reconciliation->adjustment_quantity);
             }
@@ -238,9 +241,9 @@ class StockAuditService
                 'is_posted' => true,
                 'posted_at' => now(),
             ]);
-        });
 
-        return $reconciliation->fresh();
+            return $reconciliation->fresh();
+        });
     }
 
     /**
@@ -249,15 +252,14 @@ class StockAuditService
     public function postAllReconciliations(StockAudit $audit): array
     {
         $pendingReconciliations = $audit->reconciliations()->where('is_posted', false)->get();
-        $postedReconciliations = [];
 
-        DB::transaction(function () use ($pendingReconciliations, &$postedReconciliations) {
+        return $this->executeTransaction(function () use ($pendingReconciliations) {
+            $postedReconciliations = [];
             foreach ($pendingReconciliations as $reconciliation) {
                 $postedReconciliations[] = $this->postReconciliation($reconciliation);
             }
+            return $postedReconciliations;
         });
-
-        return $postedReconciliations;
     }
 
     /**

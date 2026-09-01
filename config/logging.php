@@ -19,7 +19,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single', 'slack'],
+            'channels' => array_filter(['single', env('LOG_SLACK_WEBHOOK_URL') ? 'slack' : null]),
             'ignore_exceptions' => false,
         ],
 
@@ -86,6 +86,14 @@ return [
             'path' => storage_path('logs/audit.log'),
             'level' => 'info',
             'days' => 90,
+        ],
+
+        // Error Logging (used by App\Helpers\Logger)
+        'errors' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/errors.log'),
+            'level' => 'error',
+            'days' => 30,
         ],
     ],
 ];

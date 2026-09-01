@@ -77,7 +77,7 @@ class Subscription extends Model
 
     public function isActive(): bool
     {
-        return $this->status === 'active' && (!$this->ends_at || $this->ends_at->isFuture());
+        return $this->status === 'active' && (! $this->ends_at || $this->ends_at->isFuture());
     }
 
     public function isCancelled(): bool
@@ -92,18 +92,24 @@ class Subscription extends Model
 
     public function hasGracePeriod(): bool
     {
-        return $this->cancelled_at && (!$this->ends_at || $this->ends_at->isFuture());
+        return $this->cancelled_at && (! $this->ends_at || $this->ends_at->isFuture());
     }
 
     public function daysUntilRenewal(): int
     {
-        if (!$this->ends_at) return 0;
+        if (! $this->ends_at) {
+            return 0;
+        }
+
         return max(0, now()->diffInDays($this->ends_at, false));
     }
 
     public function daysInTrial(): int
     {
-        if (!$this->trial_ends_at) return 0;
+        if (! $this->trial_ends_at) {
+            return 0;
+        }
+
         return max(0, now()->diffInDays($this->trial_ends_at, false));
     }
 }

@@ -8,7 +8,7 @@
     <div class="erp-table-section">
         <div class="container-fluid">
             <div class="card shadow-sm">
-                <div class="card-bodys ">
+                <div class="card-body ">
                     <div class="table-header p-16">
                         <h4>{{ __('Interfaces List') }}</h4>
                         <a href="{{ route('admin.interfaces.create') }}" class="theme-btn print-btn text-light">
@@ -37,6 +37,14 @@
                                     </select>
                                     <span></span>
                                 </div>
+
+                                <div class="table-search position-relative">
+                                    <input class="form-control searchInput" type="text" name="search"
+                                        placeholder="{{ __('Search...') }}" value="{{ request('search') }}">
+                                    <span class="position-absolute">
+                                        <img src="{{ asset('assets/images/search.svg') }}" alt="">
+                                    </span>
+                                </div>
                             </div>
                         </form>
 
@@ -55,12 +63,14 @@
                     </div>
                 </div>
 
+                @can('interfaces-delete')
                 <div class="delete-item delete-show d-none multi-delete-container">
                     <div class="delete-item-show d-flex align-items-center justify-content-between w-100">
                         <p class="fw-bold"><span class="selected-count"></span> {{ __('items selected') }}</p>
                         <button data-bs-toggle="modal" class="trigger-modal" data-bs-target="#multi-delete-modal" data-url="{{ route('admin.interfaces.delete-all') }}">{{ __('Delete') }}</button>
                     </div>
                 </div>
+                @endcan
 
                 <div class="responsive-table table-container">
                     <table class="table" id="datatable">
@@ -89,7 +99,7 @@
                     </table>
                 </div>
                 <div>
-                    {{ $interfaces->links('pagination::bootstrap-5') }}
+                    {{ $interfaces->links('vendor.pagination.bootstrap-5') }}
                 </div>
             </div>
         </div>

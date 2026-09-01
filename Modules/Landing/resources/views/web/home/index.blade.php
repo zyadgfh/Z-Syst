@@ -181,6 +181,68 @@
         </div>
     </section>
 
+    {{-- Featured Products Section --}}
+    @if ($featured_products->count() > 0)
+    <section class="featured-products-section" style="padding: 80px 0; background: #fafafa;">
+        <div class="container">
+            <div class="section-heading text-center" data-aos="fade-up" style="margin-bottom: 48px;">
+                <span class="hero-pill">{{ __('Our Products') }}</span>
+                <h2 style="margin-top: 12px;">{{ __('Featured Pharmacy Items') }}</h2>
+                <p style="color: #6e6e73; max-width: 560px; margin: 12px auto 0;">{{ __('Browse our curated selection of quality pharmaceutical products available for your pharmacy.') }}</p>
+            </div>
+
+            <div class="row g-4">
+                @foreach ($featured_products as $product)
+                    <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ ($loop->index % 3) * 100 }}">
+                        <a href="{{ route('catalog.show', $product->id) }}" style="text-decoration: none; color: inherit; display: block;">
+                            <div class="product-home-card" style="background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: transform 200ms cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 200ms ease; height: 100%; display: flex; flex-direction: column;" onmouseenter="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.08)'" onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.04)'">
+                                {{-- Image --}}
+                                <div style="height: 180px; background: #f5f5f7; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;">
+                                    @if ($product->images && is_array($product->images) && count($product->images) > 0)
+                                        <img src="{{ asset($product->images[0]) }}" alt="{{ e($product->productName) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    @else
+                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#86868b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                                            <polyline points="21 15 16 10 5 21"/>
+                                        </svg>
+                                    @endif
+                                    @if ($product->prescription_required)
+                                        <span style="position: absolute; top: 10px; left: 10px; background: #ff9500; color: #fff; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px;">{{ __('Rx') }}</span>
+                                    @endif
+                                </div>
+                                {{-- Info --}}
+                                <div style="padding: 16px 20px; flex: 1; display: flex; flex-direction: column;">
+                                    @if ($product->category)
+                                        <span style="font-size: 11px; font-weight: 600; color: #007aff; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">{{ $product->category->name }}</span>
+                                    @endif
+                                    <h4 style="font-size: 15px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 4px; line-height: 1.3;">{{ $product->productName }}</h4>
+                                    @if ($product->strength)
+                                        <p style="font-size: 13px; color: #86868b; margin: 0 0 12px;">{{ $product->strength }} {{ $product->dosage_form ?? '' }}</p>
+                                    @endif
+                                    <div style="margin-top: auto; display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid #f5f5f7;">
+                                        @if ($product->sales_price)
+                                            <span style="font-size: 17px; font-weight: 700; color: #1d1d1f;">{{ number_format($product->sales_price, 2) }}</span>
+                                        @endif
+                                        <span style="font-size: 12px; color: #007aff; font-weight: 500;">{{ __('View') }} →</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="text-center" style="margin-top: 40px;" data-aos="fade-up">
+                <a href="{{ route('catalog.index') }}" class="btn btn-hero-primary" style="display: inline-flex; align-items: center; gap: 8px;">
+                    {{ __('Browse Full Catalog') }}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+                </a>
+            </div>
+        </div>
+    </section>
+    @endif
+
     <section class="integration-section">
         <div class="container">
             <div class="row g-4 align-items-stretch">
@@ -273,6 +335,16 @@ return response()->json([
         @include('landing::web.components.blog')
     </section>
 @endsection
+
+@push('css')
+<style>
+    .product-home-card { transition: transform 200ms cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 200ms ease; }
+    @media (prefers-reduced-motion: reduce) {
+        .product-home-card { transition: none !important; }
+        .product-home-card:hover { transform: none !important; }
+    }
+</style>
+@endpush
 
 @push('js')
     <script src="{{ asset('assets/web/js/typed.min.js') }}"></script>

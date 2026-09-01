@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\DoctorActivityResource;
 use App\Http\Resources\DoctorAttentionAlertResource;
 use App\Http\Resources\DoctorAttentionScoreResource;
+use App\Models\DoctorAttentionAlert;
 use App\Models\DoctorAttentionSettings;
 use App\Services\DoctorAttentionService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class DoctorAttentionController extends Controller
@@ -67,7 +68,7 @@ class DoctorAttentionController extends Controller
      */
     public function alerts(Request $request): AnonymousResourceCollection
     {
-        $alerts = \App\Models\DoctorAttentionAlert::forBusiness($request->user()->business_id)
+        $alerts = DoctorAttentionAlert::forBusiness($request->user()->business_id)
             ->with(['doctor', 'medicalRep'])
             ->latest()
             ->paginate($request->per_page ?? 15);
@@ -80,7 +81,7 @@ class DoctorAttentionController extends Controller
      */
     public function markAsRead(Request $request, $alertId): JsonResponse
     {
-        $alert = \App\Models\DoctorAttentionAlert::findOrFail($alertId);
+        $alert = DoctorAttentionAlert::findOrFail($alertId);
         $alert->markAsRead();
 
         return response()->json([

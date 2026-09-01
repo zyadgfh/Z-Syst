@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class GRNRequest extends FormRequest
@@ -21,21 +21,24 @@ class GRNRequest extends FormRequest
      */
     public function rules(): array
     {
+        $isUpdate = $this->routeIs('grn.update');
+
         return [
-            'purchase_order_id' => 'nullable|exists:purchase_orders,id',
-            'supplier_id' => 'nullable|exists:parties,id',
+            'purchase_order_id' => ($isUpdate ? 'nullable' : 'required') . '|exists:purchase_orders,id',
+            'supplier_id' => ($isUpdate ? 'nullable' : 'required') . '|exists:parties,id',
+            'warehouse_id' => ($isUpdate ? 'nullable' : 'required') . '|exists:warehouses,id',
             'location' => 'nullable|string|max:255',
-            'received_date' => 'nullable|date',
+            'received_date' => ($isUpdate ? 'nullable' : 'required') . '|date',
             'notes' => 'nullable|string|max:1000',
-            'items' => 'nullable|array',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.ordered_quantity' => 'required|integer|min:0',
-            'items.*.received_quantity' => 'required|integer|min:0',
-            'items.*.accepted_quantity' => 'nullable|integer|min:0',
-            'items.*.rejected_quantity' => 'nullable|integer|min:0',
+            'items' => ($isUpdate ? 'nullable' : 'required') . '|array',
+            'items.*.purchase_order_item_id' => 'nullable|exists:purchase_order_items,id',
+            'items.*.product_id' => 'required_with:items|exists:products,id',
+            'items.*.quantity_received' => 'required_with:items|integer|min:0',
+            'items.*.quantity_accepted' => 'nullable|integer|min:0',
+            'items.*.quantity_rejected' => 'nullable|integer|min:0',
+            'items.*.unit_cost' => 'required_with:items|numeric|min:0',
             'items.*.batch_number' => 'nullable|string|max:100',
             'items.*.expiry_date' => 'nullable|date',
-            'items.*.purchase_price' => 'required|numeric|min:0',
             'items.*.notes' => 'nullable|string|max:500',
         ];
     }
@@ -46,19 +49,23 @@ class GRNRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'purchase_order_id.required' => 'Purchase order is required.',
             'purchase_order_id.exists' => 'The selected purchase order is invalid.',
+            'supplier_id.required' => 'Supplier is required.',
             'supplier_id.exists' => 'The selected supplier is invalid.',
+            'warehouse_id.required' => 'Warehouse is required.',
+            'warehouse_id.exists' => 'The selected warehouse is invalid.',
+            'received_date.required' => 'Received date is required.',
+            'items.required' => 'Items are required.',
+            'items.min' => 'At least one item is required.',
             'items.*.product_id.required' => 'Product is required for each item.',
             'items.*.product_id.exists' => 'The selected product is invalid.',
-            'items.*.ordered_quantity.required' => 'Ordered quantity is required for each item.',
-            'items.*.ordered_quantity.integer' => 'Ordered quantity must be an integer.',
-            'items.*.ordered_quantity.min' => 'Ordered quantity must be at least 0.',
-            'items.*.received_quantity.required' => 'Received quantity is required for each item.',
-            'items.*.received_quantity.integer' => 'Received quantity must be an integer.',
-            'items.*.received_quantity.min' => 'Received quantity must be at least 0.',
-            'items.*.purchase_price.required' => 'Purchase price is required for each item.',
-            'items.*.purchase_price.numeric' => 'Purchase price must be a number.',
-            'items.*.purchase_price.min' => 'Purchase price must be at least 0.',
+            'items.*.quantity_received.required' => 'Quantity received is required for each item.',
+            'items.*.quantity_received.integer' => 'Quantity received must be an integer.',
+            'items.*.quantity_received.min' => 'Quantity received must be at least 0.',
+            'items.*.unit_cost.required' => 'Unit cost is required for each item.',
+            'items.*.unit_cost.numeric' => 'Unit cost must be a number.',
+            'items.*.unit_cost.min' => 'Unit cost must be at least 0.',
         ];
     }
 

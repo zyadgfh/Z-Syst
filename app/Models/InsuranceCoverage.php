@@ -77,6 +77,11 @@ class InsuranceCoverage extends Model
         return $query->where('business_id', $businessId);
     }
 
+    public function scopeByBusiness($query, $businessId)
+    {
+        return $query->where('business_id', $businessId);
+    }
+
     public function scopeForCompany($query, $companyId)
     {
         return $query->where('insurance_company_id', $companyId);
@@ -103,8 +108,9 @@ class InsuranceCoverage extends Model
     public function isEffective(): bool
     {
         $now = now();
-        $fromValid = !$this->effective_from || $this->effective_from <= $now;
-        $toValid = !$this->effective_to || $this->effective_to >= $now;
+        $fromValid = ! $this->effective_from || $this->effective_from <= $now;
+        $toValid = ! $this->effective_to || $this->effective_to >= $now;
+
         return $this->is_active && $fromValid && $toValid;
     }
 

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\InsuranceCompany;
 use App\Services\InsuranceService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class InsuranceCompanyController extends Controller
 {
@@ -25,8 +24,8 @@ class InsuranceCompanyController extends Controller
     {
         $companies = InsuranceCompany::with(['business:id,companyName'])
             ->when($request->search, function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                    ->orWhere('code', 'like', '%' . $request->search . '%');
+                $q->where('name', 'like', '%'.$request->search.'%')
+                    ->orWhere('code', 'like', '%'.$request->search.'%');
             })
             ->latest()
             ->paginate(10);
@@ -70,7 +69,7 @@ class InsuranceCompanyController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error creating insurance company: ') . $e->getMessage(),
+                'message' => __('Error creating insurance company: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -78,6 +77,7 @@ class InsuranceCompanyController extends Controller
     public function show(InsuranceCompany $company)
     {
         $company->load(['policies', 'claims']);
+
         return view('admin.insurance.companies.show', compact('company'));
     }
 
@@ -116,7 +116,7 @@ class InsuranceCompanyController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error updating insurance company: ') . $e->getMessage(),
+                'message' => __('Error updating insurance company: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -132,7 +132,7 @@ class InsuranceCompanyController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error deleting insurance company: ') . $e->getMessage(),
+                'message' => __('Error deleting insurance company: ').$e->getMessage(),
             ], 500);
         }
     }

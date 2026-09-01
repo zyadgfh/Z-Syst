@@ -9,8 +9,6 @@ class TenantService
 {
     /**
      * Get current tenant
-     *
-     * @return Business|null
      */
     public function getCurrentTenant(): ?Business
     {
@@ -19,25 +17,21 @@ class TenantService
 
     /**
      * Get current tenant ID
-     *
-     * @return int|null
      */
     public function getCurrentTenantId(): ?int
     {
         $tenant = $this->getCurrentTenant();
+
         return $tenant ? $tenant->id : null;
     }
 
     /**
      * Check if user belongs to tenant
-     *
-     * @param int $businessId
-     * @return bool
      */
     public function isTenantAccessible(int $businessId): bool
     {
         $user = Auth::user();
-        
+
         // Super admin can access all tenants
         if ($user->role === 'superadmin') {
             return true;
@@ -49,9 +43,6 @@ class TenantService
 
     /**
      * Set tenant context manually (for jobs/commands)
-     *
-     * @param int $businessId
-     * @return void
      */
     public function setTenantContext(int $businessId): void
     {
@@ -63,8 +54,6 @@ class TenantService
 
     /**
      * Clear tenant context
-     *
-     * @return void
      */
     public function clearTenantContext(): void
     {

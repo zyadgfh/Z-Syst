@@ -9,32 +9,57 @@ use App\Models\Party;
 use App\Models\Purchase;
 use App\Models\Sale;
 use App\Models\Stock;
+use App\Services\CacheService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class StatisticsController extends Controller
 {
+    protected CacheService $cacheService;
+
+    public function __construct(CacheService $cacheService)
+    {
+        $this->cacheService = $cacheService;
+    }
+
     public function summary(Request $request)
     {
-        $business_id = auth()->user()->business_id;
+        $businessId = auth()->user()->business_id;
         $date = $request->input('date', today());
 
-        $total_income = Income::where('business_id', $business_id)->whereDate('incomeDate', $date)->sum('amount');
-        $total_expense = Expense::where('business_id', $business_id)->whereDate('expenseDate', $date)->sum('amount');
+        $cacheKey = "statistics:summary:{$businessId}:{$date}";
 
-        $sales = Sale::where('business_id', $business_id)->whereDate('created_at', $date)->sum('totalAmount');
-        $purchase = Purchase::where('business_id', $business_id)->whereDate('created_at', $date)->sum('totalAmount');
-        $profit = Sale::where('business_id', $business_id)->whereDate('created_at', $date)->sum('lossProfit') + $total_income - $total_expense;
+        $data = $this->cacheService->remember($cacheKey, 300, function () use ($businessId, $date) {
+            // Use single query for all statistics
+            $stats = Sale::where('business_id', $businessId)
+                ->whereDate('created_at', $date)
+                ->selectRaw('
+                    COALESCE(SUM(totalAmount), 0) as sales,
+                    COALESCE(SUM(lossProfit), 0) as profit_loss
+                ')
+                ->first();
 
-        $data = [
-            'sales' => $sales,
-            'purchase' => $purchase,
-            'income' => (float) $total_income,
-            'expense' => (float) $total_expense,
-            'profit' => (float) $profit,
-        ];
+            $purchase = Purchase::where('business_id', $businessId)
+                ->whereDate('created_at', $date)
+                ->sum('totalAmount');
+
+            $income = Income::where('business_id', $businessId)
+                ->whereDate('incomeDate', $date)
+                ->sum('amount');
+
+            $expense = Expense::where('business_id', $businessId)
+                ->whereDate('expenseDate', $date)
+                ->sum('amount');
+
+            return [
+                'sales' => $stats->sales,
+                'purchase' => $purchase,
+                'income' => (float) $income,
+                'expense' => (float) $expense,
+                'profit' => (float) ($stats->profit_loss + $income - $expense),
+            ];
+        });
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -46,6 +71,7 @@ class StatisticsController extends Controller
     {
         $duration = $request->input('duration', 'weekly');
         $currentDate = Carbon::now();
+
         switch ($duration) {
             case 'weekly':
                 $start = $currentDate->copy()->startOfWeek(Carbon::SATURDAY);
@@ -72,73 +98,105 @@ class StatisticsController extends Controller
                 return response()->json(['error' => 'Invalid duration'], 400);
         }
 
-        $business_id = auth()->user()->business_id;
+        $businessId = auth()->user()->business_id;
+        $cacheKey = "dashboard:{$businessId}:{$duration}";
 
-        $cacheKey = "dashboard_data_{$business_id}_{$duration}";
-        $data_cache = Cache::remember($cacheKey, 300, function () use ($business_id, $start, $end) {
+        $data = $this->cacheService->remember($cacheKey, 300, function () use ($businessId, $start, $end, $format, $period, $duration) {
+            // Cache party stats
+            $partyStats = $this->cacheService->rememberForBusiness($businessId, "party_stats:{$start}:{$end}", 300, function () use ($businessId, $start, $end) {
+                return [
+                    'total_customers' => Party::whereIn('type', ['Retailer', 'Wholesaler'])
+                        ->where('business_id', $businessId)
+                        ->whereBetween('created_at', [$start, $end])
+                        ->count(),
+                    'total_suppliers' => Party::whereIn('type', ['Supplier'])
+                        ->where('business_id', $businessId)
+                        ->whereBetween('created_at', [$start, $end])
+                        ->count(),
+                ];
+            });
+
+            // Cache stock stats
+            $stockStats = $this->cacheService->rememberForBusiness($businessId, "stock_stats:{$start}:{$end}", 300, function () use ($businessId, $start, $end) {
+                return [
+                    'total_medicine' => (int) Stock::where('business_id', $businessId)
+                        ->whereBetween('created_at', [$start, $end])
+                        ->sum('productStock'),
+                    'expired_medicine' => (int) Stock::where('business_id', $businessId)
+                        ->where('expire_date', '<', today())
+                        ->whereBetween('created_at', [$start, $end])
+                        ->sum('productStock'),
+                ];
+            });
+
+            // Get sales data with cache
+            $salesData = $this->cacheService->rememberForBusiness($businessId, "sales_data:{$start}:{$end}", 300, function () use ($businessId, $start, $end) {
+                return DB::table('sales')
+                    ->select(DB::raw("DATE_FORMAT(saleDate, '%Y-%m-%d') as date"), DB::raw('SUM(totalAmount) as amount'))
+                    ->where('business_id', $businessId)
+                    ->whereBetween('saleDate', [$start, $end])
+                    ->groupBy('date')
+                    ->orderBy('date')
+                    ->get()
+                    ->keyBy('date');
+            });
+
+            // Get purchase data with cache
+            $purchaseData = $this->cacheService->rememberForBusiness($businessId, "purchase_data:{$start}:{$end}", 300, function () use ($businessId, $start, $end) {
+                return DB::table('purchases')
+                    ->select(DB::raw("DATE_FORMAT(purchaseDate, '%Y-%m-%d') as date"), DB::raw('SUM(totalAmount) as amount'))
+                    ->where('business_id', $businessId)
+                    ->whereBetween('purchaseDate', [$start, $end])
+                    ->groupBy('date')
+                    ->orderBy('date')
+                    ->get()
+                    ->keyBy('date');
+            });
+
+            // Get loss data with cache
+            $lossData = $this->cacheService->rememberForBusiness($businessId, "loss_data:{$start}:{$end}", 300, function () use ($businessId, $start, $end) {
+                return DB::table('sales')
+                    ->select(DB::raw("DATE_FORMAT(saleDate, '%Y-%m-%d') as date"), DB::raw('SUM(lossProfit) as amount'))
+                    ->where('business_id', $businessId)
+                    ->where('lossProfit', '<=', 0)
+                    ->whereBetween('saleDate', [$start, $end])
+                    ->groupBy('date')
+                    ->orderBy('date')
+                    ->get()
+                    ->keyBy('date');
+            });
+
+            // Get profit data with cache
+            $profitData = $this->cacheService->rememberForBusiness($businessId, "profit_data:{$start}:{$end}", 300, function () use ($businessId, $start, $end) {
+                return DB::table('sales')
+                    ->select(DB::raw("DATE_FORMAT(saleDate, '%Y-%m-%d') as date"), DB::raw('SUM(lossProfit) as amount'))
+                    ->where('business_id', $businessId)
+                    ->where('lossProfit', '>', 0)
+                    ->whereBetween('saleDate', [$start, $end])
+                    ->groupBy('date')
+                    ->orderBy('date')
+                    ->get()
+                    ->keyBy('date');
+            });
+
             return [
-                'total_customers' => Party::whereIn('type', ['Retailer', 'Wholesaler'])->where('business_id', $business_id)->whereBetween('created_at', [$start, $end])->count(),
-                'total_suppliers' => Party::whereIn('type', ['Supplier'])->where('business_id', $business_id)->whereBetween('created_at', [$start, $end])->count(),
-                'total_medicine' => (int) Stock::where('business_id', $business_id)->whereBetween('created_at', [$start, $end])->sum('productStock'),
-                'expired_medicine' => (int) Stock::where('business_id', $business_id)->where('expire_date', '<', today())->whereBetween('created_at', [$start, $end])->sum('productStock'),
+                'total_customers' => $partyStats['total_customers'],
+                'total_suppliers' => $partyStats['total_suppliers'],
+                'total_medicine' => $stockStats['total_medicine'],
+                'expired_medicine' => $stockStats['expired_medicine'],
+
+                'total_loss' => (float) array_sum($lossData->pluck('amount')->toArray()),
+                'total_profit' => (float) array_sum($profitData->pluck('amount')->toArray()),
+                'total_sales' => (float) array_sum($salesData->pluck('amount')->toArray()),
+                'total_purchase' => (float) array_sum($purchaseData->pluck('amount')->toArray()),
+
+                'sales' => $this->formatData($period, $salesData, $format, $duration),
+                'purchases' => $this->formatData($period, $purchaseData, $format, $duration),
+
+                'loss' => $this->formatData($period, $lossData, $format, $duration),
+                'profit' => $this->formatData($period, $profitData, $format, $duration),
             ];
         });
-
-        $sales_data = DB::table('sales')
-            ->select(DB::raw("DATE_FORMAT(saleDate, '%Y-%m-%d') as date"), DB::raw('SUM(totalAmount) as amount'))
-            ->where('business_id', $business_id)
-            ->whereBetween('saleDate', [$start, $end])
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get()
-            ->keyBy('date');
-
-        $purchase_data = DB::table('purchases')
-            ->select(DB::raw("DATE_FORMAT(purchaseDate, '%Y-%m-%d') as date"), DB::raw('SUM(totalAmount) as amount'))
-            ->where('business_id', $business_id)
-            ->whereBetween('purchaseDate', [$start, $end])
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get()
-            ->keyBy('date');
-
-        $loss_data = DB::table('sales')
-            ->select(DB::raw("DATE_FORMAT(saleDate, '%Y-%m-%d') as date"), DB::raw('SUM(lossProfit) as amount'))
-            ->where('business_id', $business_id)
-            ->where('lossProfit', '<=', 0)
-            ->whereBetween('saleDate', [$start, $end])
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get()
-            ->keyBy('date');
-
-        $profit_data = DB::table('sales')
-            ->select(DB::raw("DATE_FORMAT(saleDate, '%Y-%m-%d') as date"), DB::raw('SUM(lossProfit) as amount'))
-            ->where('business_id', $business_id)
-            ->where('lossProfit', '>', 0)
-            ->whereBetween('saleDate', [$start, $end])
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get()
-            ->keyBy('date');
-
-        $data = [
-            'total_customers' => $data_cache['total_customers'],
-            'total_suppliers' => $data_cache['total_suppliers'],
-            'total_medicine' => $data_cache['total_medicine'],
-            'expired_medicine' => $data_cache['expired_medicine'],
-
-            'total_loss' => (float) array_sum($loss_data->pluck('amount')->toArray()),
-            'total_profit' => (float) array_sum($profit_data->pluck('amount')->toArray()),
-            'total_sales' => (float) array_sum($sales_data->pluck('amount')->toArray()),
-            'total_purchase' => (float) array_sum($purchase_data->pluck('amount')->toArray()),
-
-            'sales' => $this->formatData($period, $sales_data, $format, $duration),
-            'purchases' => $this->formatData($period, $purchase_data, $format, $duration),
-
-            'loss' => $this->formatData($period, $loss_data, $format, $duration),
-            'profit' => $this->formatData($period, $profit_data, $format, $duration),
-        ];
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -152,7 +210,7 @@ class StatisticsController extends Controller
         foreach ($period as $date) {
             if ($duration == 'yearly') {
                 $key = $date->format($format);
-                $dateKey = $date->format('Y-m'); // For lookup purposes
+                $dateKey = $date->format('Y-m');
                 $amount = $datas->filter(function ($value, $key) use ($dateKey) {
                     return strpos($value->date, $dateKey) === 0;
                 })->sum('amount');

@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class PlanSeeder extends Seeder
 {
@@ -21,7 +20,7 @@ class PlanSeeder extends Seeder
                     'basic reporting',
                     'email support',
                 ]),
-                'isActive' => true,
+                'status' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -36,7 +35,7 @@ class PlanSeeder extends Seeder
                     'priority support',
                     'multi-warehouse',
                 ]),
-                'isActive' => true,
+                'status' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -53,7 +52,7 @@ class PlanSeeder extends Seeder
                     'API access',
                     'custom integrations',
                 ]),
-                'isActive' => true,
+                'status' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

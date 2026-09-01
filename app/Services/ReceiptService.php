@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\Purchase;
 use App\Models\Receipt;
 use App\Models\ReceiptSetting;
 use App\Models\Sale;
-use App\Models\Purchase;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReceiptService
 {
@@ -22,7 +22,7 @@ class ReceiptService
             $setting = ReceiptSetting::forBusiness($sale->business_id)->active()->first();
 
             $receiptNumber = $this->generateReceiptNumber('SALE');
-            
+
             $receiptData = [
                 'type' => 'sale',
                 'sale' => $sale,
@@ -74,7 +74,7 @@ class ReceiptService
             $setting = ReceiptSetting::forBusiness($purchase->business_id)->active()->first();
 
             $receiptNumber = $this->generateReceiptNumber('PURCHASE');
-            
+
             $receiptData = [
                 'type' => 'purchase',
                 'purchase' => $purchase,
@@ -125,7 +125,7 @@ class ReceiptService
         $view = $data['type'] === 'sale' ? 'receipts.sale-receipt' : 'receipts.purchase-receipt';
 
         $pdf = Pdf::loadView($view, ['data' => $data, 'receipt' => $receipt]);
-        
+
         return $pdf->download("receipt-{$receipt->receipt_number}.pdf");
     }
 
@@ -146,6 +146,7 @@ class ReceiptService
     public function markAsPrinted(Receipt $receipt): Receipt
     {
         $receipt->update(['status' => 'printed']);
+
         return $receipt->fresh();
     }
 
@@ -155,6 +156,7 @@ class ReceiptService
     public function markAsEmailed(Receipt $receipt): Receipt
     {
         $receipt->update(['status' => 'emailed']);
+
         return $receipt->fresh();
     }
 
@@ -167,6 +169,7 @@ class ReceiptService
 
         if ($setting) {
             $setting->update($data);
+
             return $setting->fresh();
         }
 
@@ -217,12 +220,41 @@ class ReceiptService
     }
 
     /**
+     * Get or create receipt settings for a business.
+     */
+    public function getOrCreateSettings(int $businessId): ReceiptSetting
+    {
+        $setting = ReceiptSetting::forBusiness($businessId)->first();
+
+        if ($setting) {
+            return $setting;
+        }
+
+        return ReceiptSetting::create([
+            'business_id' => $businessId,
+            'receipt_header' => 'Receipt',
+            'receipt_footer' => 'Thank you for your purchase!',
+            'show_barcode' => true,
+            'show_qr_code' => false,
+            'is_active' => true,
+        ]);
+    }
+
+    /**
+     * Generate receipt for a sale model instance.
+     */
+    public function generateForSale(Sale $sale, string $format = 'pdf'): Receipt
+    {
+        return $this->generateSaleReceipt($sale->id, $format);
+    }
+
+    /**
      * Generate unique receipt number
      */
     protected function generateReceiptNumber(string $prefix): string
     {
         do {
-            $number = $prefix . '-' . date('Ymd') . '-' . strtoupper(Str::random(6));
+            $number = $prefix.'-'.date('Ymd').'-'.strtoupper(Str::random(6));
         } while (Receipt::where('receipt_number', $number)->exists());
 
         return $number;

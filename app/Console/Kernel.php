@@ -2,10 +2,13 @@
 
 namespace App\Console;
 
-use App\Console\Commands\RotateSettingsKey;
-use App\Console\Commands\BackupDatabase;
+use App\Console\Commands\BackupDatabaseCommand;
 use App\Console\Commands\CalculateDoctorAttentionScores;
+use App\Console\Commands\ExpireLoyaltyPoints;
+use App\Console\Commands\InitializeBookkeeping;
 use App\Console\Commands\ManageSubscriptions;
+use App\Console\Commands\RotateSettingsKey;
+use App\Console\Commands\ScanInventoryAlerts;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -18,9 +21,12 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         RotateSettingsKey::class,
-        BackupDatabase::class,
+        BackupDatabaseCommand::class,
         CalculateDoctorAttentionScores::class,
         ManageSubscriptions::class,
+        ScanInventoryAlerts::class,
+        ExpireLoyaltyPoints::class,
+        InitializeBookkeeping::class,
     ];
 
     /**
@@ -32,6 +38,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('backup:database')->dailyAt('02:00');
         $schedule->command('doctor-attention:calculate')->dailyAt('00:00');
         $schedule->command('subscriptions:manage')->dailyAt('01:00');
+        $schedule->command('db:update-stats')->dailyAt('03:00');
+        $schedule->command('vulnerability-exceptions:expire')->dailyAt('06:00');
+        $schedule->command('inventory:scan')->dailyAt('07:00');
+        $schedule->command('loyalty:expire-points')->dailyAt('04:00');
     }
 
     /**

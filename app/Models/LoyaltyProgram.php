@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LoyaltyProgram extends Model
 {
@@ -15,13 +15,13 @@ class LoyaltyProgram extends Model
         'business_id',
         'name',
         'points_per_currency',
-        'min_points_for_reward',
+        'min_points_to_redeem',
         'is_active',
     ];
 
     protected $casts = [
         'points_per_currency' => 'integer',
-        'min_points_for_reward' => 'integer',
+        'min_points_to_redeem' => 'integer',
         'is_active' => 'boolean',
     ];
 
@@ -67,6 +67,7 @@ class LoyaltyProgram extends Model
         if ($this->points_per_currency === 0) {
             return 0;
         }
+
         return $points / $this->points_per_currency;
     }
 
@@ -75,6 +76,6 @@ class LoyaltyProgram extends Model
      */
     public function canRedeemReward(int $customerPoints): bool
     {
-        return $customerPoints >= $this->min_points_for_reward;
+        return $customerPoints >= $this->min_points_to_redeem;
     }
 }

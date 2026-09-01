@@ -91,7 +91,7 @@ class Receipt extends Model
      */
     public function getTypeLabelAttribute(): string
     {
-        return match($this->type) {
+        return match ($this->type) {
             'sale' => __('Sale'),
             'purchase' => __('Purchase'),
             'return' => __('Return'),
@@ -105,7 +105,7 @@ class Receipt extends Model
      */
     public function getFormatLabelAttribute(): string
     {
-        return match($this->format) {
+        return match ($this->format) {
             'pdf' => 'PDF',
             'html' => 'HTML',
             'thermal' => __('Thermal'),
@@ -118,7 +118,7 @@ class Receipt extends Model
      */
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'generated' => __('Generated'),
             'printed' => __('Printed'),
             'emailed' => __('Emailed'),

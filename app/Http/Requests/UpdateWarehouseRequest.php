@@ -2,35 +2,33 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
-
-class UpdateWarehouseRequest extends FormRequest
+class UpdateWarehouseRequest extends BaseFormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        $warehouse = $this->route('warehouse');
+        if (!$warehouse) {
+            return false;
+        }
+        return $this->user()->can('update', $warehouse);
     }
 
     public function rules(): array
     {
         return [
-            'name' => 'sometimes|string|max:255',
-            'code' => 'sometimes|string|max:50|unique:warehouses,code,'.($this->route('warehouse')->id ?? null),
-            'location' => 'nullable|string|max:500',
-            'is_default' => 'sometimes|boolean',
-            'is_active' => 'sometimes|boolean',
+            'name' => 'required|string|max:255',
+            'location' => 'nullable|string|max:255',
+            'is_default' => 'boolean',
+            'is_active' => 'boolean',
+            'capacity' => 'nullable|integer|min:0',
+            'manager_id' => 'nullable|exists:users,id',
         ];
     }
 
-    protected function failedValidation(Validator $validator)
+    public function messages(): array
     {
-        throw new HttpResponseException(
-            response()->json([
-                'message' => 'Validation failed.',
-                'errors' => $validator->errors(),
-            ], 422)
-        );
+        return [
+            'name.required' => __('Warehouse name is required'),
+        ];
     }
 }

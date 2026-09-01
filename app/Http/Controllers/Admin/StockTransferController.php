@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreStockTransferRequest;
 use App\Models\StockTransfer;
+use App\Models\Warehouse;
 use App\Services\WarehouseService;
 use Illuminate\Http\Request;
 
@@ -27,11 +29,11 @@ class StockTransferController extends Controller
             'toWarehouse:id,name,code',
             'product:id,name',
             'business:id,companyName',
-            'user:id,name'
+            'user:id,name',
         ])
             ->when($request->search, function ($q) use ($request) {
                 $q->whereHas('product', function ($query) use ($request) {
-                    $query->where('name', 'like', '%' . $request->search . '%');
+                    $query->where('name', 'like', '%'.$request->search.'%');
                 });
             })
             ->when($request->status, function ($q) use ($request) {
@@ -52,24 +54,18 @@ class StockTransferController extends Controller
     public function create()
     {
         $businessId = auth()->user()->business_id;
-        $warehouses = \App\Models\Warehouse::forBusiness($businessId)->active()->get();
-        
+        $warehouses = Warehouse::forBusiness($businessId)->active()->get();
+
         return view('admin.stock-transfers.create', compact('warehouses'));
     }
 
-    public function store(Request $request)
+    public function store(StoreStockTransferRequest $request)
     {
-        $request->validate([
-            'business_id' => 'required|exists:businesses,id',
-            'from_warehouse_id' => 'required|exists:warehouses,id',
-            'to_warehouse_id' => 'required|exists:warehouses,id|different:from_warehouse_id',
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1',
-            'notes' => 'nullable|string',
-        ]);
-
         try {
-            $transfer = $this->warehouseService->createTransfer($request->all());
+            $validated = $request->validated();
+            $validated['business_id'] = auth()->user()->business_id;
+
+            $transfer = $this->warehouseService->createTransfer($validated);
 
             return response()->json([
                 'message' => __('Stock transfer created successfully'),
@@ -77,7 +73,7 @@ class StockTransferController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error creating stock transfer: ') . $e->getMessage(),
+                'message' => __('Error creating stock transfer: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -89,7 +85,7 @@ class StockTransferController extends Controller
             'toWarehouse',
             'product',
             'business',
-            'user'
+            'user',
         ]);
 
         return view('admin.stock-transfers.show', compact('transfer'));
@@ -112,7 +108,7 @@ class StockTransferController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error deleting stock transfer: ') . $e->getMessage(),
+                'message' => __('Error deleting stock transfer: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -131,7 +127,7 @@ class StockTransferController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error completing stock transfer: ') . $e->getMessage(),
+                'message' => __('Error completing stock transfer: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -150,7 +146,7 @@ class StockTransferController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error cancelling stock transfer: ') . $e->getMessage(),
+                'message' => __('Error cancelling stock transfer: ').$e->getMessage(),
             ], 500);
         }
     }

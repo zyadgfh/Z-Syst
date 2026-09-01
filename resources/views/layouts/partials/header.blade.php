@@ -3,6 +3,10 @@
         <div class="header-wrapper">
             <div class="header-left">
                 <div class="sidebar-opener"><i class="fal fa-bars" aria-hidden="true"></i></div>
+                <!-- Z-Syst Logo -->
+                <a href="{{ route('admin.dashboard.index') }}" class="logo-container">
+                    <img src="{{ asset('logo.png') }}" alt="Z-Syst Pharmacy Management" class="logo logo-small">
+                </a>
                 <a target="_blank" class="view-website" href="{{ route('home') }}">
                     {{ __('View Website') }}
                     <i class="fas fa-chevron-double-right"></i>
@@ -36,6 +40,37 @@
                     </div>
                 </div>
                 <div class="d-flex align-items-center justify-content-center h-100">
+                    {{-- Inventory Alerts Bell --}}
+                    <div class="inventory-alerts-bell dropdown me-3" style="position: relative;">
+                        <a href="#" class="drop-inventory-alerts-controller mt-1" data-bs-toggle="dropdown" style="text-decoration: none; position: relative; display: inline-block;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e65100" stroke-width="2">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                                <line x1="12" y1="9" x2="12" y2="13"/>
+                                <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                            <span id="inventoryAlertCount" class="badge-soft-danger position-absolute d-flex align-items-center justify-content-center" style="display: none;"></span>
+                        </a>
+                        <div class="dropdown-menu" style="min-width: 340px; max-height: 420px; overflow-y: auto;">
+                            <div class="notification-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f0f0f2;">
+                                <p style="margin: 0; font-size: 14px;">
+                                    {{ __('Inventory Alerts') }}
+                                    <strong id="inventoryAlertTotalBadge"></strong>
+                                </p>
+                                <a href="{{ route('admin.inventory-alerts.index') }}" style="font-size: 12px; color: #007aff; text-decoration: none; font-weight: 600;">
+                                    {{ __('View all') }}
+                                </a>
+                            </div>
+                            <ul id="inventoryAlertList" style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 16px; text-align: center; color: #86868b; font-size: 13px;">{{ __('Loading...') }}</li>
+                            </ul>
+                            <div style="padding: 10px 16px; border-top: 1px solid #f0f0f2; text-align: center;">
+                                <a href="{{ route('admin.inventory-alerts.index') }}" style="color: #007aff; text-decoration: none; font-weight: 600; font-size: 13px;">
+                                    {{ __('View all alerts') }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                     @if (auth()->user()->role == 'superadmin')
                         <div class="notifications dropdown">
                             <a href="#" class="drop-notification-controller mt-1 me-3" data-bs-toggle="dropdown">
@@ -79,6 +114,9 @@
                         </div>
                     @endif
                 </div>
+                @if(env('VITE_CLERK_PUBLISHABLE_KEY'))
+                <div id="clerk-user-button" class="me-3"></div>
+                @endif
                 <div class="profile-info dropdown">
                     <a href="#" data-bs-toggle="dropdown" class="d-flex align-items-center gap-2">
                         <img src="{{ asset(Auth::user()->image ?? 'assets/images/icons/default-user.png') }}" alt="Profile">
@@ -107,8 +145,168 @@
                             </a>
                         </li>
                     </ul>
-                </div>
-            </div>
-        </div>
-    </header>
+                </div></div>
 </div>
+</header>
+</div>
+
+{{-- Inventory Alerts Bell Script --}}
+<script>
+(function() {
+    var bell     = document.querySelector('.inventory-alerts-bell');
+    var countEl  = document.getElementById('inventoryAlertCount');
+    var totalEl  = document.getElementById('inventoryAlertTotalBadge');
+    var listEl   = document.getElementById('inventoryAlertList');
+    var bellUrl  = '{{ route('admin.inventory-alerts.bell-data') }}';
+    var ackUrl   = '{{ url("admin/inventory-alerts") }}/';
+
+    var severityColors = { critical: '#ff3b30', warning: '#ff9500', info: '#007aff' };
+    var typeLabels = { low_stock: 'منخفض', out_of_stock: 'نفذ', expiring_soon: 'قريب الانتهاء', expired: 'منتهي' };
+
+    function fetchBell() {
+        fetch(bellUrl, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.count > 0) {
+                countEl.textContent = data.count > 99 ? '99+' : data.count;
+                countEl.style.display = 'flex';
+            } else {
+                countEl.style.display = 'none';
+            }
+            totalEl.textContent = '(' + data.count + ')';
+
+            if (data.alerts.length === 0) {
+                listEl.innerHTML = '<li style="padding:16px;text-align:center;color:#86868b;font-size:13px;">لا توجد تنبيهات نشطة</li>';
+                return;
+            }
+
+            var html = '';
+            data.alerts.forEach(function(a) {
+                html += '<li style="padding:10px 16px;border-bottom:1px solid #f0f0f2;display:flex;gap:10px;align-items:flex-start;" data-alert-id="' + a.id + '">' +
+                    '<span style="width:8px;height:8px;border-radius:50%;background:' + (severityColors[a.severity] || '#86868b') + ';margin-top:6px;flex-shrink:0;"></span>' +
+                    '<div style="flex:1;min-width:0;">' +
+                    '<div style="font-size:13px;font-weight:600;color:#1d1d1f;line-height:1.4;">' + (a.message || '') + '</div>' +
+                    '<div style="font-size:11px;color:#86868b;margin-top:2px;">' + (typeLabels[a.type] || a.type) + ' &middot; ' + timeAgo(a.created_at) + '</div>' +
+                    '</div>' +
+                    '<button onclick="ackInventoryAlert(' + a.id + ', this)" style="background:none;border:none;color:#007aff;font-size:12px;cursor:pointer;white-space:nowrap;padding:2px 6px;border-radius:6px;flex-shrink:0;" onmouseenter="this.style.background=#f0f0f2" onmouseleave="this.style.background=none" title="تأكيد">✓</button>' +
+                    '</li>';
+            });
+            listEl.innerHTML = html;
+        })
+        .catch(function() {});
+    }
+
+    function timeAgo(dateStr) {
+        var diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
+        if (diff < 60) return 'الآن';
+        if (diff < 3600) return Math.floor(diff / 60) + ' دقيقة';
+        if (diff < 86400) return Math.floor(diff / 3600) + ' ساعة';
+        return Math.floor(diff / 86400) + ' يوم';
+    }
+
+    window.ackInventoryAlert = function(alertId, btn) {
+        fetch(ackUrl + alertId + '/acknowledge-alert', {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var li = btn.closest('li');
+            if (li) li.remove();
+            if (data.count > 0) {
+                countEl.textContent = data.count > 99 ? '99+' : data.count;
+                countEl.style.display = 'flex';
+            } else {
+                countEl.style.display = 'none';
+            }
+            totalEl.textContent = '(' + data.count + ')';
+        });
+    };
+
+    fetchBell();
+    setInterval(fetchBell, 60000);
+})();
+</script>
+
+{{-- Firebase Cloud Messaging Push Notification Registration --}}
+@if(env('VITE_FIREBASE_API_KEY'))
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+<script>
+(function() {
+    // Skip if Firebase is not configured
+    var apiKey = '{{ env("VITE_FIREBASE_API_KEY") }}';
+    if (!apiKey) return;
+
+    var firebaseConfig = {
+        apiKey: apiKey,
+        authDomain: '{{ env("VITE_FIREBASE_AUTH_DOMAIN") }}',
+        projectId: '{{ env("VITE_FIREBASE_PROJECT_ID", "z-syst") }}',
+        storageBucket: '{{ env("VITE_FIREBASE_STORAGE_BUCKET") }}',
+        messagingSenderId: '{{ env("VITE_FIREBASE_MESSAGING_SENDER_ID") }}',
+        appId: '{{ env("VITE_FIREBASE_APP_ID") }}',
+    };
+
+    try {
+        firebase.initializeApp(firebaseConfig);
+        var messaging = firebase.messaging();
+
+        // Request notification permission and register FCM token
+        if ('Notification' in window && Notification.permission === 'default') {
+            // Show a subtle prompt instead of auto-requesting
+            var promptEl = document.createElement('div');
+            promptEl.id = 'fcm-prompt';
+            promptEl.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#1d1d1f;color:#fff;padding:16px 20px;border-radius:12px;z-index:9999;font-size:14px;box-shadow:0 4px 20px rgba(0,0,0,0.2);max-width:340px;';
+            promptEl.innerHTML = '<div style="margin-bottom:10px;">🔔 هل تريد تلقي إشعارات تنبيهات المخزون على جهازك؟</div>' +
+                '<button onclick="requestFCMPermission()" style="background:#007aff;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer;margin-right:8px;">تفعيل</button>' +
+                '<button onclick="this.closest(\'#fcm-prompt\').remove()" style="background:transparent;color:#86868b;border:1px solid #555;border-radius:8px;padding:8px 16px;cursor:pointer;">لاحقاً</button>';
+            document.body.appendChild(promptEl);
+        }
+
+        window.requestFCMPermission = function() {
+            Notification.requestPermission().then(function(permission) {
+                if (permission === 'granted') {
+                    registerFCMToken(messaging);
+                }
+                var prompt = document.getElementById('fcm-prompt');
+                if (prompt) prompt.remove();
+            });
+        };
+
+        function registerFCMToken(messaging) {
+            messaging.getToken({ vapidKey: null }).then(function(token) {
+                if (token) {
+                    fetch('{{ route("api.v1.push-tokens.store") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || ''),
+                        },
+                        body: JSON.stringify({ token: token, platform: 'web' }),
+                    });
+                }
+            }).catch(function(err) {
+                console.log('FCM token error:', err);
+            });
+
+            // Listen for token refresh
+            messaging.onTokenRefresh(function() {
+                messaging.getToken().then(function(newToken) {
+                    if (newToken) {
+                        registerFCMToken(messaging);
+                    }
+                });
+            });
+        }
+
+        // Auto-register if already granted
+        if (Notification.permission === 'granted') {
+            registerFCMToken(messaging);
+        }
+    } catch(e) {
+        console.log('Firebase init skipped:', e.message);
+    }
+})();
+</script>
+@endif

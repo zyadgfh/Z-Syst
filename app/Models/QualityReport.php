@@ -20,10 +20,28 @@ class QualityReport extends Model
         'pass_rate' => 'decimal:2',
     ];
 
-    public function business(): BelongsTo { return $this->belongsTo(Business::class); }
-    public function branch(): BelongsTo { return $this->belongsTo(Branch::class); }
-    public function supplier(): BelongsTo { return $this->belongsTo(Supplier::class); }
-    public function generatedBy(): BelongsTo { return $this->belongsTo(User::class, 'generated_by'); }
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class);
+    }
 
-    public function scopeForBusiness($query, $businessId) { return $query->where('business_id', $businessId); }
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
+    }
+
+    public function generatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'generated_by');
+    }
+
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $query->where('business_id', $businessId);
+    }
 }

@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SubscriptionRequest;
 use App\Http\Resources\SubscriptionResource;
+use App\Models\Business;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Services\SubscriptionService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class SubscriptionController extends Controller
 {
@@ -42,7 +43,8 @@ class SubscriptionController extends Controller
     public function create(Request $request)
     {
         $plans = SubscriptionPlan::active()->get();
-        $businesses = \App\Models\Business::all();
+        $businesses = Business::all();
+
         return view('admin.subscriptions.create', compact('plans', 'businesses'));
     }
 

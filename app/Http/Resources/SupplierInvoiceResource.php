@@ -45,14 +45,14 @@ class SupplierInvoiceResource extends JsonResource
             'is_active' => $this->is_active,
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),
-            
+
             // Computed fields
             'payment_percentage' => $this->getPaymentPercentage(),
             'days_until_due' => $this->getDaysUntilDue(),
             'is_due_soon' => $this->isDueSoon(),
             'is_critically_overdue' => $this->isCriticallyOverdue(),
-            'file_url' => $this->file_path ? asset('storage/' . $this->file_path) : null,
-            
+            'file_url' => $this->file_path ? asset('storage/'.$this->file_path) : null,
+
             // Relationships
             'supplier' => new PartyResource($this->whenLoaded('supplier')),
             'purchase' => new PurchaseResource($this->whenLoaded('purchase')),

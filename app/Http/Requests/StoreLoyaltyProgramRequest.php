@@ -2,36 +2,29 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
-
-class StoreLoyaltyProgramRequest extends FormRequest
+class StoreLoyaltyProgramRequest extends BaseFormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('create', \App\Models\LoyaltyProgram::class);
     }
 
     public function rules(): array
     {
         return [
             'name' => 'required|string|max:255',
-            'code' => 'nullable|string|max:50|unique:loyalty_programs,code',
-            'description' => 'nullable|string|max:500',
-            'points_per_currency' => 'required|integer|min:0|max:100',
-            'min_points_for_reward' => 'required|integer|min:1',
-            'is_active' => 'sometimes|boolean',
+            'points_per_currency' => 'required|integer|min:1|max:1000',
+            'min_points_for_reward' => 'required|integer|min:1|max:100000',
+            'is_active' => 'boolean',
         ];
     }
 
-    protected function failedValidation(Validator $validator)
+    public function messages(): array
     {
-        throw new HttpResponseException(
-            response()->json([
-                'message' => 'Validation failed.',
-                'errors' => $validator->errors(),
-            ], 422)
-        );
+        return [
+            'name.required' => __('Program name is required'),
+            'points_per_currency.required' => __('Points per currency is required'),
+            'min_points_for_reward.required' => __('Minimum points for reward is required'),
+        ];
     }
 }

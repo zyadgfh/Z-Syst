@@ -15,6 +15,18 @@
                     </div>
                     <div class="row justify-content-center mt-2 roles-permissions p-16">
                         <div class="col-md-12">
+                            @if(auth()->user()->can('settings-view'))
+                            <div class="alert alert-info d-flex align-items-center justify-content-between mb-3">
+                                <span>
+                                    <i class="fas fa-cog me-2"></i>
+                                    {{ __('Configure default settings for all users with this role.') }}
+                                </span>
+                                <a href="{{ route('admin.app-settings.index') }}?scope_type=role&scope_id={{ $role->id }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-sliders-h me-1"></i>{{ __('Role Settings') }}
+                                </a>
+                            </div>
+                            @endif
+
                             <form action="{{ route('admin.roles.update', $role->id) }}" method="post"
                                 class="row ajaxform_instant_reload">
                                 @csrf

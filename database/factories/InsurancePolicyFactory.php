@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\InsurancePolicy;
-use App\Models\InsuranceCompany;
 use App\Models\Business;
+use App\Models\InsuranceCompany;
+use App\Models\InsurancePolicy;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class InsurancePolicyFactory extends Factory
 {
@@ -20,11 +20,11 @@ class InsurancePolicyFactory extends Factory
             'business_id' => Business::factory(),
             'insurance_company_id' => InsuranceCompany::factory(),
             'customer_id' => null,
-            'policy_number' => 'POL-' . date('Ymd') . '-' . strtoupper(fake()->unique()->regexify('[A-Z0-9]{6}')),
+            'policy_number' => 'POL-'.date('Ymd').'-'.strtoupper(fake()->unique()->regexify('[A-Z0-9]{6}')),
             'member_id' => fake()->optional()->numerify('MEM########'),
             'card_number' => fake()->optional()->creditCardNumber(),
             'holder_name' => fake()->name(),
-            'holder_dob' => fake()->dateBetween('-80 years', '-18 years'),
+            'holder_dob' => fake()->dateTimeBetween('-80 years', '-18 years'),
             'holder_gender' => fake()->randomElement(['male', 'female', 'other']),
             'holder_phone' => fake()->phoneNumber(),
             'holder_email' => fake()->email(),

@@ -17,7 +17,6 @@ use App\Models\InsuranceCoverage;
 use App\Models\InsurancePolicy;
 use App\Services\InsuranceService;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -92,7 +91,7 @@ class InsuranceController extends Controller
 
     public function companiesShow(InsuranceCompany $company): JsonResponse
     {
-        $this->authorizeAccess($company);
+        $this->authorize('view', $company);
 
         $company->load(['policies', 'claims']);
 
@@ -104,7 +103,7 @@ class InsuranceController extends Controller
 
     public function companiesUpdate(StoreInsuranceCompanyRequest $request, InsuranceCompany $company): JsonResponse
     {
-        $this->authorizeAccess($company);
+        $this->authorize('update', $company);
 
         $company->update($request->validated());
 
@@ -116,7 +115,7 @@ class InsuranceController extends Controller
 
     public function companiesDestroy(InsuranceCompany $company): JsonResponse
     {
-        $this->authorizeAccess($company);
+        $this->authorize('delete', $company);
         $company->delete();
 
         return response()->json(['message' => __('Insurance company deleted successfully.')]);
@@ -176,7 +175,7 @@ class InsuranceController extends Controller
 
     public function policiesShow(InsurancePolicy $policy): JsonResponse
     {
-        $this->authorizeAccess($policy);
+        $this->authorize('view', $policy);
 
         $policy->load(['insuranceCompany', 'customer', 'claims']);
 
@@ -188,7 +187,7 @@ class InsuranceController extends Controller
 
     public function policiesUpdate(StoreInsurancePolicyRequest $request, InsurancePolicy $policy): JsonResponse
     {
-        $this->authorizeAccess($policy);
+        $this->authorize('update', $policy);
         $policy->update($request->validated());
 
         return response()->json([
@@ -199,7 +198,7 @@ class InsuranceController extends Controller
 
     public function policiesDestroy(InsurancePolicy $policy): JsonResponse
     {
-        $this->authorizeAccess($policy);
+        $this->authorize('delete', $policy);
         $policy->delete();
 
         return response()->json(['message' => __('Insurance policy deleted successfully.')]);
@@ -265,7 +264,7 @@ class InsuranceController extends Controller
 
     public function claimsShow(InsuranceClaim $claim): JsonResponse
     {
-        $this->authorizeAccess($claim);
+        $this->authorize('view', $claim);
 
         $claim->load(['insuranceCompany', 'insurancePolicy', 'customer', 'sale', 'prescription']);
 
@@ -277,7 +276,7 @@ class InsuranceController extends Controller
 
     public function claimsSubmit(InsuranceClaim $claim): JsonResponse
     {
-        $this->authorizeAccess($claim);
+        $this->authorize('update', $claim);
         $claim = $this->insurance->submitClaim($claim);
 
         return response()->json([
@@ -288,7 +287,7 @@ class InsuranceController extends Controller
 
     public function claimsApprove(Request $request, InsuranceClaim $claim): JsonResponse
     {
-        $this->authorizeAccess($claim);
+        $this->authorize('update', $claim);
 
         $data = $request->validate([
             'approved_amount' => 'required|numeric|min:0',
@@ -309,7 +308,7 @@ class InsuranceController extends Controller
 
     public function claimsReject(Request $request, InsuranceClaim $claim): JsonResponse
     {
-        $this->authorizeAccess($claim);
+        $this->authorize('update', $claim);
 
         $data = $request->validate([
             'rejection_reason' => 'required|string|max:500',
@@ -325,7 +324,7 @@ class InsuranceController extends Controller
 
     public function claimsPay(Request $request, InsuranceClaim $claim): JsonResponse
     {
-        $this->authorizeAccess($claim);
+        $this->authorize('update', $claim);
 
         $data = $request->validate([
             'paid_amount' => 'required|numeric|min:0',
@@ -386,7 +385,7 @@ class InsuranceController extends Controller
 
     public function coveragesUpdate(StoreInsuranceCoverageRequest $request, InsuranceCoverage $coverage): JsonResponse
     {
-        $this->authorizeAccess($coverage);
+        $this->authorize('update', $coverage);
         $coverage->update($request->validated());
 
         return response()->json([
@@ -397,19 +396,11 @@ class InsuranceController extends Controller
 
     public function coveragesDestroy(InsuranceCoverage $coverage): JsonResponse
     {
-        $this->authorizeAccess($coverage);
+        $this->authorize('delete', $coverage);
         $coverage->delete();
 
         return response()->json(['message' => __('Coverage rule deleted successfully.')]);
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
-
-    private function authorizeAccess(Model $model): void
-    {
-        $businessId = Auth::user()->business_id;
-        if ((int) $model->business_id !== (int) $businessId) {
-            abort(403, __('You are not authorized to access this resource.'));
-        }
-    }
 }

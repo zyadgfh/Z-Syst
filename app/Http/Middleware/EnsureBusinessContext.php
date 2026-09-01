@@ -9,11 +9,13 @@ class EnsureBusinessContext
 {
     public function handle(Request $request, Closure $next)
     {
-        if (! auth()->check()) {
+        $user = $request->user();
+
+        if (! $user) {
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
-        if (empty(auth()->user()->business_id)) {
+        if (empty($user->business_id)) {
             return response()->json(['message' => 'Business context is required.'], 403);
         }
 

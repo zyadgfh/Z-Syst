@@ -107,4 +107,15 @@ return [
 
     'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache_'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Cache Lifetime (minutes)
+    |--------------------------------------------------------------------------
+    |
+    | Default TTL used by the helper cachedCallback() when no explicit TTL
+    | is supplied.
+    |
+    */
+    'lifetime' => (int) env('CACHE_LIFETIME', 60),
+
 ];

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Business;
+use App\Models\Plan;
 use App\Models\PlanSubscribe;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -13,17 +14,19 @@ class BusinessSeeder extends Seeder
     {
         // Get the test admin user
         $admin = User::where('email', 'admin@test.com')->first();
-        
-        if (!$admin) {
+
+        if (! $admin) {
             $this->command->error('Admin user not found. Run UserSeeder first.');
+
             return;
         }
 
         // Get a plan
-        $plan = \App\Models\Plan::first();
-        
-        if (!$plan) {
+        $plan = Plan::first();
+
+        if (! $plan) {
             $this->command->error('Plan not found. Run PlanSeeder first.');
+
             return;
         }
 

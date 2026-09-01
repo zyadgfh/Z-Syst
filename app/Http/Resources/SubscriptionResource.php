@@ -47,9 +47,9 @@ class SubscriptionResource extends JsonResource
             'has_grace_period' => $this->hasGracePeriod(),
             'days_until_renewal' => $this->daysUntilRenewal(),
             'days_in_trial' => $this->daysInTrial(),
-            'invoices_count' => $this->whenLoaded('invoices', fn() => $this->invoices->count()),
-            'usage_records_count' => $this->whenLoaded('usageRecords', fn() => $this->usageRecords->count()),
-            'logs_count' => $this->whenLoaded('logs', fn() => $this->logs->count()),
+            'invoices_count' => $this->whenLoaded('invoices', fn () => $this->invoices->count()),
+            'usage_records_count' => $this->whenLoaded('usageRecords', fn () => $this->usageRecords->count()),
+            'logs_count' => $this->whenLoaded('logs', fn () => $this->logs->count()),
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
         ];

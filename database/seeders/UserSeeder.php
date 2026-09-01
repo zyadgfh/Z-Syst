@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
 {
@@ -42,5 +41,13 @@ class UserSeeder extends Seeder
         ]);
 
         $this->command->info('Users seeded successfully');
+
+        // Assign Spatie roles to seeded users
+        if (method_exists($superAdmin, 'assignRole')) {
+            $superAdmin->assignRole('Super Admin');
+            $admin->assignRole('Admin');
+            $staff->assignRole('Staff');
+            $this->command->info('Spatie roles assigned successfully');
+        }
     }
 }

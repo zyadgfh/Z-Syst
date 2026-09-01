@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\GRNRequest;
 use App\Http\Resources\GRNResource;
-use App\Http\Resources\GRNItemResource;
 use App\Models\GoodsReceivedNote;
+use App\Models\Party;
+use App\Models\Product;
+use App\Models\PurchaseOrder;
 use App\Services\GRNService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class GRNController extends Controller
@@ -56,15 +58,15 @@ class GRNController extends Controller
      */
     public function create(Request $request)
     {
-        $suppliers = \App\Models\Party::where('type', 'supplier')
+        $suppliers = Party::where('type', 'supplier')
             ->forBusiness($request->user()->business_id)
             ->get();
 
-        $purchaseOrders = \App\Models\PurchaseOrder::forBusiness($request->user()->business_id)
+        $purchaseOrders = PurchaseOrder::forBusiness($request->user()->business_id)
             ->whereIn('status', ['accepted', 'partially_received'])
             ->get();
 
-        $products = \App\Models\Product::forBusiness($request->user()->business_id)
+        $products = Product::forBusiness($request->user()->business_id)
             ->active()
             ->get();
 
@@ -112,15 +114,15 @@ class GRNController extends Controller
      */
     public function edit(Request $request, GoodsReceivedNote $grn)
     {
-        $suppliers = \App\Models\Party::where('type', 'supplier')
+        $suppliers = Party::where('type', 'supplier')
             ->forBusiness($request->user()->business_id)
             ->get();
 
-        $purchaseOrders = \App\Models\PurchaseOrder::forBusiness($request->user()->business_id)
+        $purchaseOrders = PurchaseOrder::forBusiness($request->user()->business_id)
             ->whereIn('status', ['accepted', 'partially_received'])
             ->get();
 
-        $products = \App\Models\Product::forBusiness($request->user()->business_id)
+        $products = Product::forBusiness($request->user()->business_id)
             ->active()
             ->get();
 

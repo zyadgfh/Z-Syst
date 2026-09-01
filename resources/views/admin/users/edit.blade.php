@@ -27,6 +27,20 @@
 
                                     <div class="add-suplier-modal-wrapper">
                                         <div class="row">
+                                            @if(auth()->user()->can('settings-view'))
+                                            <div class="col-12 mb-3">
+                                                <div class="alert alert-info d-flex align-items-center justify-content-between mb-0">
+                                                    <span>
+                                                        <i class="fas fa-cog me-2"></i>
+                                                        {{ __('Manage this user\'s individual settings and preferences.') }}
+                                                    </span>
+                                                    <a href="{{ route('admin.app-settings.index') }}?scope_type=user&scope_id={{ $user->id }}" class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-sliders-h me-1"></i>{{ __('User Settings') }}
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            @endif
+
                                             <div class="col-lg-6 mt-2">
                                                 <label>{{ __('Full Name') }}</label>
                                                 <input type="text" name="name" value="{{ $user->name }}" required class="form-control" placeholder="{{ __('Enter Name') }}" >

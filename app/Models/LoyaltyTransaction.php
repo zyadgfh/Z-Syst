@@ -77,7 +77,7 @@ class LoyaltyTransaction extends Model
      */
     public function getTypeLabelAttribute(): string
     {
-        return match($this->type) {
+        return match ($this->type) {
             'earned' => __('Earned'),
             'redeemed' => __('Redeemed'),
             'adjusted' => __('Adjusted'),

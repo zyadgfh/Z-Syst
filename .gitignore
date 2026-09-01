@@ -4,6 +4,9 @@
 /vendor
 .env
 .env.backup
+.env.production
+.env.local
+.env.testing
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
@@ -16,3 +19,16 @@ yarn-error.log
 /storage/app/temp
 /storage/app/uploads
 /storage/debugbar
+/storage/logs
+/storage/framework/cache
+/storage/framework/sessions
+/storage/framework/views
+/storage/framework/testing
+*.log
+*.sqlite
+*.sqlite3
+.phpunit.cache/
+*.bak
+coverage/
+coverage-*.xml
+composer.lock

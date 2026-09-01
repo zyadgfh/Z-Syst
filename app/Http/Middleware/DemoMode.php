@@ -17,7 +17,7 @@ class DemoMode
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (env('DEMO_MODE', false)) {
+        if (config('zsyst.demo_mode')) {
             $disabledRoutes = [
                 'admin.users.delete-all',
                 'admin.system-settings.store',

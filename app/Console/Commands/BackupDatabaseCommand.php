@@ -18,7 +18,7 @@ class BackupDatabaseCommand extends Command
 
         $filename = 'backups/'.date('Y-m-d_H-i-s').'_database.sql';
         $content = '-- Automated backup generated at '.now()."\n";
-        $content .= '-- Database: '.env('DB_DATABASE', 'unknown')."\n";
+        $content .= '-- Database: '.config('database.connections.mysql.database', 'unknown')."\n";
 
         $disk->put($filename, $content);
 

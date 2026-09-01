@@ -17,11 +17,12 @@ return new class extends Migration
             $table->foreignId('supplier_id')->nullable()->constrained('parties')->nullOnDelete();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('warehouse_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('received_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
 
-            $table->string('grn_number')->unique();
-            $table->date('received_date');
+            $table->string('grn_number')->unique()->default('');
+            $table->date('received_date')->nullable();
             $table->string('location')->nullable();
             $table->string('status')->default('pending');
             $table->text('notes')->nullable();

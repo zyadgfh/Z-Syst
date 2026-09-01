@@ -8,7 +8,7 @@
     <div class="erp-table-section">
         <div class="container-fluid">
             <div class="card shadow-sm">
-                <div class="card-bodys ">
+                <div class="card-body ">
                     <div class="table-header p-16">
                         <h4>{{ __('Messages List') }}</h4>
                     </div>
@@ -58,17 +58,20 @@
                     </div>
                 </div>
 
+                @can('messages-delete')
                 <div class="delete-item delete-show d-none multi-delete-container">
                     <div class="delete-item-show d-flex align-items-center justify-content-between w-100">
                         <p class="fw-bold"><span class="selected-count"></span> {{ __('items selected') }}</p>
                         <button data-bs-toggle="modal" class="trigger-modal" data-bs-target="#multi-delete-modal" data-url="{{ route('admin.messages.delete-all') }}">{{ __('Delete') }}</button>
                     </div>
                 </div>
+                @endcan
 
                 <div class="responsive-table table-container">
                     <table class="table">
                         <thead>
                             <tr>
+                                @can('messages-delete')
                                 <th class="table-header-content d-print-none">
                                     <div class="d-flex align-items-center gap-1">
                                         <label class="table-custom-checkbox">
@@ -78,6 +81,7 @@
                                         </label>
                                     </div>
                                 </th>
+                                @endcan
 
                                 <th class="table-header-content">{{ __('SL') }}.</th>
                                 <th class="table-header-content">{{ __('Name') }}</th>
@@ -94,7 +98,7 @@
                     </table>
                 </div>
                 <div>
-                    {{ $messages->links('pagination::bootstrap-5') }}
+                    {{ $messages->links('vendor.pagination.bootstrap-5') }}
                 </div>
             </div>
         </div>

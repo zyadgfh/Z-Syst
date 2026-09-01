@@ -16,7 +16,11 @@
         "vite": "^3.0.0"
     },
     "dependencies": {
+        "@clerk/clerk-js": "^6.29.2",
         "@dataconnect/generated": "file:src/dataconnect-generated",
+        "@supabase/server": "^1.4.1",
+        "@supabase/ssr": "^0.12.4",
+        "@supabase/supabase-js": "^2.112.2",
         "@vercel/analytics": "^2.0.1",
         "firebase": "^12.16.0"
     }

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\InsurancePolicy;
 use App\Models\InsuranceCompany;
+use App\Models\InsurancePolicy;
 use App\Services\InsuranceService;
 use Illuminate\Http\Request;
 
@@ -25,9 +25,9 @@ class InsurancePolicyController extends Controller
     {
         $policies = InsurancePolicy::with(['company:id,name', 'business:id,companyName', 'customer'])
             ->when($request->search, function ($q) use ($request) {
-                $q->where('policy_number', 'like', '%' . $request->search . '%')
-                    ->orWhere('holder_name', 'like', '%' . $request->search . '%')
-                    ->orWhere('member_id', 'like', '%' . $request->search . '%');
+                $q->where('policy_number', 'like', '%'.$request->search.'%')
+                    ->orWhere('holder_name', 'like', '%'.$request->search.'%')
+                    ->orWhere('member_id', 'like', '%'.$request->search.'%');
             })
             ->when($request->status, function ($q) use ($request) {
                 $q->where('status', $request->status);
@@ -41,6 +41,7 @@ class InsurancePolicyController extends Controller
     public function create()
     {
         $companies = InsuranceCompany::active()->get();
+
         return view('admin.insurance.policies.create', compact('companies'));
     }
 
@@ -77,7 +78,7 @@ class InsurancePolicyController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error creating insurance policy: ') . $e->getMessage(),
+                'message' => __('Error creating insurance policy: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -85,12 +86,14 @@ class InsurancePolicyController extends Controller
     public function show(InsurancePolicy $policy)
     {
         $policy->load(['company', 'business', 'customer', 'claims', 'coverages']);
+
         return view('admin.insurance.policies.show', compact('policy'));
     }
 
     public function edit(InsurancePolicy $policy)
     {
         $companies = InsuranceCompany::active()->get();
+
         return view('admin.insurance.policies.edit', compact('policy', 'companies'));
     }
 
@@ -126,7 +129,7 @@ class InsurancePolicyController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error updating insurance policy: ') . $e->getMessage(),
+                'message' => __('Error updating insurance policy: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -142,7 +145,7 @@ class InsurancePolicyController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error deleting insurance policy: ') . $e->getMessage(),
+                'message' => __('Error deleting insurance policy: ').$e->getMessage(),
             ], 500);
         }
     }

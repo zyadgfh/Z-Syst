@@ -7,8 +7,8 @@ use App\Http\Requests\PurchaseOrderRequest;
 use App\Http\Resources\PurchaseOrderResource;
 use App\Models\PurchaseOrder;
 use App\Services\PurchaseOrderService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class PurchaseOrderController extends Controller
@@ -83,7 +83,7 @@ class PurchaseOrderController extends Controller
     public function update(PurchaseOrderRequest $request, PurchaseOrder $purchaseOrder): JsonResponse
     {
         $validated = $request->validated();
-        
+
         $po = $this->poService->update($purchaseOrder, $validated);
 
         return response()->json([

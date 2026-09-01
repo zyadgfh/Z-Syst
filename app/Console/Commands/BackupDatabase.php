@@ -28,15 +28,15 @@ class BackupDatabase extends Command
     {
         try {
             $this->info('Starting database backup...');
-            
+
             $path = $backupService->createDatabaseBackup();
-            
+
             $this->info("Database backup created successfully: {$path}");
-            
+
             return Command::SUCCESS;
         } catch (\Exception $e) {
             $this->error("Backup failed: {$e->getMessage()}");
-            
+
             return Command::FAILURE;
         }
     }

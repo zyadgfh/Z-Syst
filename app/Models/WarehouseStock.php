@@ -52,6 +52,7 @@ class WarehouseStock extends Model
         if ($this->quantity < $amount) {
             return false;
         }
+
         return $this->decrement('quantity', $amount);
     }
 

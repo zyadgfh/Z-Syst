@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\RecallEvent;
 use App\Models\Business;
 use App\Models\Product;
+use App\Models\RecallEvent;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class RecallEventFactory extends Factory
 {

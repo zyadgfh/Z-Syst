@@ -5,10 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SupplierPaymentRequest;
 use App\Http\Resources\SupplierPaymentResource;
+use App\Models\Supplier;
 use App\Models\SupplierPayment;
 use App\Services\SupplierPaymentService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class SupplierPaymentController extends Controller
 {
@@ -40,7 +41,8 @@ class SupplierPaymentController extends Controller
 
     public function create(Request $request)
     {
-        $suppliers = \App\Models\Supplier::forBusiness($request->user()->business_id)->active()->get();
+        $suppliers = Supplier::forBusiness($request->user()->business_id)->active()->get();
+
         return view('admin.supplier-payments.create', compact('suppliers'));
     }
 
@@ -76,7 +78,8 @@ class SupplierPaymentController extends Controller
 
     public function edit(Request $request, SupplierPayment $payment)
     {
-        $suppliers = \App\Models\Supplier::forBusiness($request->user()->business_id)->active()->get();
+        $suppliers = Supplier::forBusiness($request->user()->business_id)->active()->get();
+
         return view('admin.supplier-payments.edit', compact('payment', 'suppliers'));
     }
 

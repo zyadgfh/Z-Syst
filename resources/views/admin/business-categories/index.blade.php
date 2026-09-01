@@ -8,11 +8,10 @@
 <div class="erp-table-section">
     <div class="container-fluid">
         <div class="card">
-            <div class="card-bodys">
+            <div class="card-body">
                 <div class="table-header p-16">
-                    <h4>{{ __('Business Categories List') }}</h4>
-                    @can('banners-create')
-                        <a type="button" href="{{route('admin.business-categories.create')}}" class="add-order-btn rounded-2 {{ Route::is('admin.plans.create') ? 'active' : '' }}" class="btn btn-primary" ><i class="fas fa-plus-circle me-1"></i>{{ __('Add new Category') }}</a>
+                    <h4>{{ __('Business Categories List') }}</h4>                        @can('business-categories-create')
+                        <a type="button" href="{{route('admin.business-categories.create')}}" class="add-order-btn rounded-2"><i class="fas fa-plus-circle me-1"></i>{{ __('Add new Category') }}</a>
                     @endcan
                 </div>
 
@@ -69,7 +68,7 @@
                 <table class="table" id="datatable">
                     <thead>
                     <tr>
-                        @can('banners-delete')
+                        @can('business-categories-delete')
                             <th class="table-header-content d-print-none">
                                 <div class="d-flex align-items-center gap-1">
                                     <label class="table-custom-checkbox">

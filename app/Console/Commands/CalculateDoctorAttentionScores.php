@@ -31,7 +31,7 @@ class CalculateDoctorAttentionScores extends Command
         $branchId = $this->option('branch-id');
 
         try {
-            $service = new DoctorAttentionService();
+            $service = new DoctorAttentionService;
 
             if ($businessId) {
                 // Calculate for specific business
@@ -40,8 +40,8 @@ class CalculateDoctorAttentionScores extends Command
             } else {
                 // Calculate for all businesses
                 // This would typically be handled by a queue worker in production
-                $this->info("Skipping - business-id is required");
-                $this->info("Use: php artisan doctor-attention:calculate --business-id=1");
+                $this->info('Skipping - business-id is required');
+                $this->info('Use: php artisan doctor-attention:calculate --business-id=1');
             }
 
             return Command::SUCCESS;
@@ -53,6 +53,7 @@ class CalculateDoctorAttentionScores extends Command
             ]);
 
             $this->error("Failed to calculate attention scores: {$e->getMessage()}");
+
             return Command::FAILURE;
         }
     }

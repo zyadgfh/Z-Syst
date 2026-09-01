@@ -24,13 +24,43 @@ class SupplierPayment extends Model
         'approved_at' => 'datetime',
     ];
 
-    public function supplier(): BelongsTo { return $this->belongsTo(Supplier::class); }
-    public function business(): BelongsTo { return $this->belongsTo(Business::class); }
-    public function branch(): BelongsTo { return $this->belongsTo(Branch::class); }
-    public function createdBy(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
-    public function approvedBy(): BelongsTo { return $this->belongsTo(User::class, 'approved_by'); }
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
+    }
 
-    public function scopeForBusiness($query, $businessId) { return $query->where('business_id', $businessId); }
-    public function scopeApproved($query) { return $query->where('status', 'approved'); }
-    public function scopePending($query) { return $query->where('status', 'pending'); }
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class);
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $query->where('business_id', $businessId);
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', 'approved');
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
 }

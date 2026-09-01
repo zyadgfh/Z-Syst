@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreIncomeRequest;
+use App\Http\Requests\UpdateIncomeRequest;
 use App\Models\Business;
 use App\Models\Income;
 use Illuminate\Http\Request;
@@ -22,12 +24,8 @@ class ZSystIncomeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreIncomeRequest $request)
     {
-        $request->validate([
-            'amount' => 'required|numeric',
-            'income_category_id' => 'required|integer|exists:income_categories,id',
-        ]);
 
         Business::findOrFail(auth()->user()->business_id)->decrement('remainingShopBalance', $request->amount);
 
@@ -42,12 +40,8 @@ class ZSystIncomeController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateIncomeRequest $request, $id)
     {
-        $request->validate([
-            'amount' => 'required|numeric',
-            'income_category_id' => 'required|integer|exists:income_categories,id',
-        ]);
 
         $income = Income::findOrFail($id);
         $business = Business::findOrFail(auth()->user()->business_id);

@@ -22,6 +22,11 @@ class SettingController extends Controller
     {
         $general = Option::where('key', 'general')->first();
 
+        // Check if design system view exists, otherwise use original
+        if (view()->exists('admin.settings.index')) {
+            return view('admin.settings.index', compact('general'));
+        }
+        
         return view('admin.settings.general', compact('general'));
     }
 
@@ -50,6 +55,19 @@ class SettingController extends Controller
         return response()->json([
             'message' => __('General Setting updated successfully'),
             'redirect' => route('admin.settings.index'),
+        ]);
+    }
+
+    public function toggleDarkMode(Request $request)
+    {
+        $darkMode = $request->input('dark_mode', false);
+        session(['dark_mode' => $darkMode]);
+
+        // Set cookie for persistence
+        cookie()->queue('dark_mode', $darkMode ? 'true' : 'false', 525600); // 1 year
+
+        return response()->json([
+            'dark_mode' => $darkMode,
         ]);
     }
 }

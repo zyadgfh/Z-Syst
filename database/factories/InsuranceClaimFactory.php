@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Business;
 use App\Models\InsuranceClaim;
 use App\Models\InsuranceCompany;
 use App\Models\InsurancePolicy;
-use App\Models\Business;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class InsuranceClaimFactory extends Factory
 {
@@ -28,15 +28,15 @@ class InsuranceClaimFactory extends Factory
             'prescription_id' => null,
             'customer_id' => null,
             'user_id' => null,
-            'claim_number' => 'CLM-' . date('Ymd') . '-' . strtoupper(fake()->unique()->regexify('[A-Z0-9]{8}')),
+            'claim_number' => 'CLM-'.date('Ymd').'-'.strtoupper(fake()->unique()->regexify('[A-Z0-9]{8}')),
             'service_date' => $serviceDate,
             'submission_date' => fake()->optional()->dateTimeBetween($serviceDate, 'now'),
             'total_amount' => $totalAmount,
             'covered_amount' => $coveredAmount,
             'patient_responsibility' => $patientResponsibility,
-            'approved_amount' => fake()->optional(0.7)->randomFloat(2, 0, $coveredAmount),
-            'paid_amount' => fake()->optional(0.5)->randomFloat(2, 0, $coveredAmount),
-            'rejected_amount' => fake()->optional(0.1)->randomFloat(2, 0, $coveredAmount),
+            'approved_amount' => fake()->randomFloat(2, 0, $coveredAmount),
+            'paid_amount' => fake()->randomFloat(2, 0, $coveredAmount),
+            'rejected_amount' => fake()->randomFloat(2, 0, $coveredAmount / 5),
             'status' => fake()->randomElement(['draft', 'submitted', 'under_review', 'approved', 'partially_approved', 'rejected', 'paid', 'cancelled']),
             'rejection_reason' => fake()->optional()->sentence(),
             'external_reference' => fake()->optional()->numerify('EXT########'),
@@ -45,6 +45,7 @@ class InsuranceClaimFactory extends Factory
             'line_items' => fake()->optional()->randomElements([
                 ['product_id' => 1, 'amount' => 50, 'coverage' => 80],
                 ['product_id' => 2, 'amount' => 30, 'coverage' => 90],
+                ['product_id' => 3, 'amount' => 20, 'coverage' => 85],
             ], rand(1, 3)),
         ];
     }

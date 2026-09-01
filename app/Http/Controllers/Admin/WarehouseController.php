@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreWarehouseRequest;
+use App\Http\Requests\UpdateWarehouseRequest;
 use App\Models\Warehouse;
-use App\Models\StockTransfer;
 use App\Services\WarehouseService;
 use Illuminate\Http\Request;
 
@@ -25,8 +26,8 @@ class WarehouseController extends Controller
     {
         $warehouses = Warehouse::with(['business:id,companyName'])
             ->when($request->search, function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                    ->orWhere('code', 'like', '%' . $request->search . '%');
+                $q->where('name', 'like', '%'.$request->search.'%')
+                    ->orWhere('code', 'like', '%'.$request->search.'%');
             })
             ->latest()
             ->paginate(10);
@@ -39,18 +40,10 @@ class WarehouseController extends Controller
         return view('admin.warehouses.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreWarehouseRequest $request)
     {
-        $request->validate([
-            'business_id' => 'required|exists:businesses,id',
-            'name' => 'required|string|max:255',
-            'location' => 'nullable|string|max:255',
-            'is_default' => 'boolean',
-            'is_active' => 'boolean',
-        ]);
-
         try {
-            $warehouse = $this->warehouseService->createWarehouse($request->all());
+            $warehouse = $this->warehouseService->createWarehouse($request->validated());
 
             return response()->json([
                 'message' => __('Warehouse created successfully'),
@@ -58,7 +51,7 @@ class WarehouseController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error creating warehouse: ') . $e->getMessage(),
+                'message' => __('Error creating warehouse: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -76,17 +69,10 @@ class WarehouseController extends Controller
         return view('admin.warehouses.edit', compact('warehouse'));
     }
 
-    public function update(Request $request, Warehouse $warehouse)
+    public function update(UpdateWarehouseRequest $request, Warehouse $warehouse)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'location' => 'nullable|string|max:255',
-            'is_default' => 'boolean',
-            'is_active' => 'boolean',
-        ]);
-
         try {
-            $warehouse = $this->warehouseService->updateWarehouse($warehouse, $request->all());
+            $warehouse = $this->warehouseService->updateWarehouse($warehouse, $request->validated());
 
             return response()->json([
                 'message' => __('Warehouse updated successfully'),
@@ -94,7 +80,7 @@ class WarehouseController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error updating warehouse: ') . $e->getMessage(),
+                'message' => __('Error updating warehouse: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -110,7 +96,7 @@ class WarehouseController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error deleting warehouse: ') . $e->getMessage(),
+                'message' => __('Error deleting warehouse: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -129,7 +115,7 @@ class WarehouseController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error setting default warehouse: ') . $e->getMessage(),
+                'message' => __('Error setting default warehouse: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -158,7 +144,7 @@ class WarehouseController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error adding stock: ') . $e->getMessage(),
+                'message' => __('Error adding stock: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -185,7 +171,7 @@ class WarehouseController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error removing stock: ') . $e->getMessage(),
+                'message' => __('Error removing stock: ').$e->getMessage(),
             ], 500);
         }
     }

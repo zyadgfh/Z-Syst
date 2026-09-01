@@ -7,6 +7,7 @@ use App\Models\BusinessCategory;
 use App\Models\Gateway;
 use App\Models\Option;
 use App\Models\Plan;
+use App\Models\Product;
 use Modules\Landing\App\Models\Blog;
 use Modules\Landing\App\Models\Feature;
 use Modules\Landing\App\Models\PosAppInterface;
@@ -24,12 +25,24 @@ class WebController extends Controller
             $testimonials = Testimonial::latest()->get();
             $recent_blogs = Blog::with('user:id,name')->whereStatus(1)->latest()->take(3)->get();
             $blogs = Blog::with('user:id,name')->whereStatus(1)->take(2)->latest()->get();
+            $featured_products = Product::active()
+                ->with(['category', 'manufacturer'])
+                ->select([
+                    'id', 'productName', 'scientific_name', 'commercial_name',
+                    'description', 'category_id', 'manufacturer_id',
+                    'sales_price', 'images', 'stock_status',
+                    'prescription_required', 'dosage_form', 'strength',
+                ])
+                ->orderByDesc('created_at')
+                ->take(6)
+                ->get();
         } catch (\Throwable $e) {
             $features = collect();
             $interfaces = collect();
             $testimonials = collect();
             $recent_blogs = collect();
             $blogs = collect();
+            $featured_products = collect();
         }
 
         try {
@@ -44,6 +57,6 @@ class WebController extends Controller
             $business_categories = collect();
         }
 
-        return view('landing::web.home.index', compact('page_data', 'features', 'interfaces', 'testimonials', 'blogs', 'recent_blogs', 'plans', 'gateways', 'general', 'business_categories'));
+        return view('landing::web.home.index', compact('page_data', 'features', 'interfaces', 'testimonials', 'blogs', 'recent_blogs', 'plans', 'gateways', 'general', 'business_categories', 'featured_products'));
     }
 }

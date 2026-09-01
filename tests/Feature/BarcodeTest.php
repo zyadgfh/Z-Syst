@@ -20,7 +20,7 @@ class BarcodeTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->barcodeService = new BarcodeService();
+        $this->barcodeService = new BarcodeService;
     }
 
     /**
@@ -107,7 +107,7 @@ class BarcodeTest extends TestCase
     {
         $code = '600123456789';
         $checksum = Barcode::calculateEAN13Checksum($code);
-        
+
         $this->assertIsInt($checksum);
         $this->assertGreaterThanOrEqual(0, $checksum);
         $this->assertLessThanOrEqual(9, $checksum);
@@ -120,7 +120,7 @@ class BarcodeTest extends TestCase
     {
         $code = '12345678901';
         $checksum = Barcode::calculateUPCChecksum($code);
-        
+
         $this->assertIsInt($checksum);
         $this->assertGreaterThanOrEqual(0, $checksum);
         $this->assertLessThanOrEqual(9, $checksum);
@@ -131,8 +131,8 @@ class BarcodeTest extends TestCase
      */
     public function test_ean13_validation()
     {
-        $validEAN13 = '6001234567892';
-        $invalidEAN13 = '6001234567899';
+        $validEAN13 = '6001234567899';
+        $invalidEAN13 = '6001234567892';
 
         $this->assertTrue($this->barcodeService->validateBarcodeNumber($validEAN13, Barcode::TYPE_EAN13));
         $this->assertFalse($this->barcodeService->validateBarcodeNumber($invalidEAN13, Barcode::TYPE_EAN13));
@@ -352,7 +352,7 @@ class BarcodeTest extends TestCase
     {
         $product = Product::factory()->create();
         $businessId = 1;
-        
+
         Barcode::factory()->create([
             'product_id' => $product->id,
             'business_id' => $businessId,
@@ -375,7 +375,7 @@ class BarcodeTest extends TestCase
     {
         $stock = Stock::factory()->create();
         $businessId = 1;
-        
+
         Barcode::factory()->create([
             'batch_id' => $stock->id,
             'business_id' => $businessId,
@@ -397,7 +397,7 @@ class BarcodeTest extends TestCase
     public function test_can_get_not_printed_barcodes()
     {
         $businessId = 1;
-        
+
         Barcode::factory()->create([
             'print_status' => Barcode::STATUS_NOT_PRINTED,
             'business_id' => $businessId,
@@ -422,7 +422,7 @@ class BarcodeTest extends TestCase
         $product = Product::factory()->create();
 
         $response = $this->actingAs($user, 'sanctum')
-            ->postJson('/api/admin/barcodes', [
+            ->postJson('/api/v1/barcodes', [
                 'product_id' => $product->id,
                 'barcode_type' => Barcode::TYPE_CODE128,
             ]);
@@ -448,7 +448,7 @@ class BarcodeTest extends TestCase
         Barcode::factory()->count(3)->create(['business_id' => $user->business_id]);
 
         $response = $this->actingAs($user, 'sanctum')
-            ->getJson('/api/admin/barcodes');
+            ->getJson('/api/v1/barcodes');
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -474,7 +474,7 @@ class BarcodeTest extends TestCase
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
-            ->getJson('/api/admin/barcodes/search?barcode_number=BC123456789');
+            ->getJson('/api/v1/barcodes/search?barcode_number=BC123456789');
 
         $response->assertStatus(200)
             ->assertJson([

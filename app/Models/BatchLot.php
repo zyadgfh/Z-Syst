@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Database\Factories\BatchLotFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BatchLot extends Model
@@ -13,7 +15,7 @@ class BatchLot extends Model
 
     protected static function newFactory()
     {
-        return \Database\Factories\BatchLotFactory::new();
+        return BatchLotFactory::new();
     }
 
     protected $fillable = [
@@ -21,9 +23,11 @@ class BatchLot extends Model
         'product_id',
         'batch_number',
         'lot_number',
+        'quantity',
         'manufacture_date',
         'expiry_date',
         'recall_date',
+        'status',
         'supplier_name',
         'notes',
     ];
@@ -32,6 +36,7 @@ class BatchLot extends Model
         'manufacture_date' => 'date',
         'expiry_date' => 'date',
         'recall_date' => 'date',
+        'quantity' => 'integer',
     ];
 
     public function business(): BelongsTo
@@ -47,6 +52,13 @@ class BatchLot extends Model
     public function recallEvents(): HasMany
     {
         return $this->hasMany(RecallEvent::class);
+    }
+
+    public function affectedRecalls(): BelongsToMany
+    {
+        return $this->belongsToMany(RecallEvent::class, 'recall_affected_batches')
+            ->withPivot(['quarantine_status', 'quarantined_at', 'resolved_at', 'quantity_affected', 'notes'])
+            ->withTimestamps();
     }
 
     public function traceabilityLogs(): HasMany
@@ -79,6 +91,22 @@ class BatchLot extends Model
     }
 
     /**
+     * Scope for quarantined batches
+     */
+    public function scopeQuarantined($query)
+    {
+        return $query->where('status', 'quarantined');
+    }
+
+    /**
+     * Scope for active batches
+     */
+    public function scopeActiveBatches($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    /**
      * Scope for expiring soon (within 30 days)
      */
     public function scopeExpiringSoon($query)
@@ -104,12 +132,39 @@ class BatchLot extends Model
     }
 
     /**
+     * Check if batch is quarantined
+     */
+    public function isQuarantined(): bool
+    {
+        return $this->status === 'quarantined';
+    }
+
+    /**
+     * Quarantine this batch
+     */
+    public function quarantine(): bool
+    {
+        return $this->update([
+            'status' => 'quarantined',
+            'recall_date' => $this->recall_date ?? now(),
+        ]);
+    }
+
+    /**
+     * Release this batch from quarantine
+     */
+    public function release(): bool
+    {
+        return $this->update(['status' => 'active']);
+    }
+
+    /**
      * Check if batch is expiring soon
      */
     public function isExpiringSoon(): bool
     {
-        return $this->expiry_date && 
-               $this->expiry_date <= now()->addDays(30) && 
+        return $this->expiry_date &&
+               $this->expiry_date <= now()->addDays(30) &&
                $this->expiry_date > now();
     }
 
@@ -118,7 +173,7 @@ class BatchLot extends Model
      */
     public function getDaysUntilExpiryAttribute(): ?int
     {
-        if (!$this->expiry_date) {
+        if (! $this->expiry_date) {
             return null;
         }
 

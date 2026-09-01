@@ -37,3 +37,25 @@
     toastr.warning('Error some occurs!');
 </script>
 @endif
+
+{{-- Clerk UserButton mounting --}}
+@if(env('VITE_CLERK_PUBLISHABLE_KEY'))
+<script>
+    window.addEventListener('load', function () {
+        function mountUserButton() {
+            if (typeof Clerk === 'undefined' || !Clerk.loaded) return;
+            var userButtonEl = document.getElementById('clerk-user-button');
+            if (userButtonEl && !userButtonEl.hasChildNodes()) {
+                Clerk.mountUserButton(userButtonEl);
+            }
+        }
+        var interval = setInterval(function () {
+            if (typeof Clerk !== 'undefined' && Clerk.loaded) {
+                clearInterval(interval);
+                mountUserButton();
+            }
+        }, 100);
+        setTimeout(function () { clearInterval(interval); }, 5000);
+    });
+</script>
+@endif

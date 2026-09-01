@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Payment Gateway Settings') }}
+    {{ __('Manual Payment Settings') }}
 @endsection
 
 @push('css')
@@ -19,8 +19,8 @@
                             <div class="table-header">
                                 <div class="card-bodys">
                                     <div class="table-header border-0 p-16">
-                                        <h4>{{ __('Payment Gateway Settings') }}</h4>
-                                        <p class="text-muted">{{ __('Configure Egyptian payment gateways and manual payment methods.') }}</p>
+                                        <h4>{{ __('Manual Payment Settings') }}</h4>
+                                        <p class="text-muted">{{ __('Payment gateways have been removed. Only manual payment processing is available for supplier payments.') }}</p>
                                     </div>
                                 </div>
                             </div> <br>
@@ -34,7 +34,7 @@
 
                                                 <ul class="nav nav-pills flex-column flex-column shadow w-280 p-2">
                                                     @foreach ($gateways as $gateway)
-                                                        @if ($gateway->is_manual || $gateway->namespace)
+                                                        @if ($gateway->is_manual)
                                                         <li class="nav-item">
                                                             <a href="#{{ str_replace(' ', '-', $gateway->name) }}"
                                                                 id="{{ str_replace(' ', '-', $gateway->name) }}-tab4"
@@ -54,7 +54,7 @@
                                                     <div class="card-body">
                                                         <div class="tab-content no-padding">
                                                             @foreach ($gateways as $gateway)
-                                                                @if ($gateway->is_manual || $gateway->namespace)
+                                                                @if ($gateway->is_manual)
                                                                 <div @class([
                                                                     'tab-pane fade',
                                                                     'show active' => $loop->first ? true : false,
@@ -124,7 +124,6 @@
                                                                                 </div>
                                                                             </div>
 
-                                                                            @if ($gateway->is_manual)
                                                                             <div class="col-12 mb-2">
                                                                                 <label>{{ __('Accept Image') }}</label>
                                                                                 <div class="gpt-up-down-arrow position-relative">
@@ -190,7 +189,6 @@
                                                                                 <button type="button"
                                                                                     class="btn btn-primary add_item mb-2">{{ __('Add New Field') }}</button>
                                                                             </div>
-                                                                            @endif
 
                                                                             <div class="col-12 mt-3">
                                                                                 <button type="submit"

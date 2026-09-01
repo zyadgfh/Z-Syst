@@ -81,8 +81,8 @@ class ProductModelTest extends TestCase
         $manufacturer = Manufacturer::factory()->create();
         $product = Product::factory()->create(['manufacturer_id' => $manufacturer->id]);
 
-        $this->assertInstanceOf(Manufacturer::class, $product->manufacterer);
-        $this->assertEquals($manufacturer->id, $product->manufacterer->id);
+        $this->assertInstanceOf(Manufacturer::class, $product->manufacturer);
+        $this->assertEquals($manufacturer->id, $product->manufacturer->id);
     }
 
     public function test_product_has_many_stocks()

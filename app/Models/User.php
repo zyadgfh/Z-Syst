@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Traits\EncryptableAttribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -11,7 +13,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasRoles, Notifiable;
+    use HasApiTokens, EncryptableAttribute, HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -21,7 +23,7 @@ class User extends Authenticatable
     protected $fillable = [
         'business_id',
         'name',
-        'role',
+        // 'role' intentionally excluded — must be set via explicit assignment, never mass-filled
         'email',
         'phone',
         'image',
@@ -31,6 +33,11 @@ class User extends Authenticatable
         'visibility',
         'remember_token',
         'email_verified_at',
+        'clerk_id',
+        'supabase_id',
+        'supabase_access_token',
+        'supabase_refresh_token',
+        'supabase_token_expires_at',
     ];
 
     /**
@@ -40,9 +47,9 @@ class User extends Authenticatable
     {
         // Only apply tenant scope in non-admin contexts
         static::addGlobalScope('tenant', function ($query) {
-            if (auth()->check() && 
-                auth()->user()->role !== 'superadmin' && 
-                !request()->is('admin/*')) {
+            if (auth()->check() &&
+                auth()->user()->role !== 'superadmin' &&
+                ! request()->is('admin/*')) {
                 $query->where('business_id', auth()->user()->business_id);
             }
         });
@@ -56,6 +63,9 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'clerk_id',
+        'supabase_access_token',
+        'supabase_refresh_token',
     ];
 
     /**
@@ -63,14 +73,22 @@ class User extends Authenticatable
      *
      * @var array<string, string>
      */
+    protected $encryptable = ['phone'];
+
     protected $casts = [
         'password' => 'hashed',
         'visibility' => 'json',
         'email_verified_at' => 'datetime',
+        'supabase_token_expires_at' => 'datetime',
     ];
 
     public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
+    }
+
+    public function twoFactorAuth(): HasOne
+    {
+        return $this->hasOne(TwoFactorAuth::class);
     }
 }

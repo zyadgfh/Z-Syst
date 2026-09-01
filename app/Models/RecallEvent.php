@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Database\Factories\RecallEventFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class RecallEvent extends Model
 {
@@ -12,7 +14,7 @@ class RecallEvent extends Model
 
     protected static function newFactory()
     {
-        return \Database\Factories\RecallEventFactory::new();
+        return RecallEventFactory::new();
     }
 
     protected $fillable = [
@@ -45,6 +47,13 @@ class RecallEvent extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function affectedBatches(): BelongsToMany
+    {
+        return $this->belongsToMany(BatchLot::class, 'recall_affected_batches')
+            ->withPivot(['quarantine_status', 'quarantined_at', 'resolved_at', 'quantity_affected', 'notes'])
+            ->withTimestamps();
     }
 
     /**
@@ -80,6 +89,14 @@ class RecallEvent extends Model
     }
 
     /**
+     * Scope for by status string
+     */
+    public function scopeStatus($query, string $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    /**
      * Check if recall is active
      */
     public function isActive(): bool
@@ -111,10 +128,26 @@ class RecallEvent extends Model
      */
     public function getDurationDaysAttribute(): ?int
     {
-        if (!$this->resolved_at) {
+        if (! $this->resolved_at) {
             return now()->diffInDays($this->initiated_at);
         }
 
         return $this->resolved_at->diffInDays($this->initiated_at);
+    }
+
+    /**
+     * Get count of affected batches.
+     */
+    public function getAffectedBatchesCountAttribute(): int
+    {
+        return $this->affectedBatches()->count();
+    }
+
+    /**
+     * Get total quantity affected across all batches.
+     */
+    public function getTotalQuantityAffectedAttribute(): int
+    {
+        return $this->affectedBatches()->sum('recall_affected_batches.quantity_affected');
     }
 }

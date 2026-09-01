@@ -6,6 +6,7 @@ use App\Exceptions\BusinessRuleException;
 use App\Exceptions\Errors\ErrorCode;
 use App\Helpers\TransactionHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateSaleReturnRequest;
 use App\Models\Party;
 use App\Models\Sale;
 use App\Models\SaleDetails;
@@ -36,15 +37,8 @@ class SaleReturnController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(UpdateSaleReturnRequest $request)
     {
-        $request->validate([
-            'sale_id' => 'required|exists:sales,id',
-            'return_date' => 'required',
-            'sale_detail_id' => 'required|array',
-            'return_amount' => 'required|array',
-            'return_qty' => 'required|array',
-        ]);
 
         $sale_return = TransactionHelper::run(function () use ($request) {
             $business_id = auth()->user()->business_id;

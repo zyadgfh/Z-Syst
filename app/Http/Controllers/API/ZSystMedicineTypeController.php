@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreMedicineTypeRequest;
+use App\Http\Requests\UpdateMedicineTypeRequest;
 use App\Models\MedicineType;
 use Illuminate\Http\Request;
 
@@ -18,11 +20,8 @@ class ZSystMedicineTypeController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreMedicineTypeRequest $request)
     {
-        $request->validate([
-            'name' => 'required|unique:medicine_types,name,NULL,id,business_id,'.auth()->user()->business_id,
-        ]);
 
         $data = MedicineType::create($request->all() + [
             'business_id' => auth()->user()->business_id,
@@ -34,14 +33,8 @@ class ZSystMedicineTypeController extends Controller
         ]);
     }
 
-    public function update(Request $request, MedicineType $medicineType)
+    public function update(UpdateMedicineTypeRequest $request, MedicineType $medicineType)
     {
-        $request->validate([
-            'name' => [
-                'required',
-                'unique:medicine_types,name,'.$medicineType->id.',id,business_id,'.auth()->user()->business_id,
-            ],
-        ]);
 
         $medicineType = $medicineType->update($request->all());
 

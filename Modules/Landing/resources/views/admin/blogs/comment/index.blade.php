@@ -54,11 +54,9 @@
                             </tbody>
                         </table>
                     </div>
-                    <nav>
-                        <ul class="pagination">
-                            <li class="page-item">{{ $comments->links('pagination::bootstrap-5') }}</li>
-                        </ul>
-                    </nav>
+                    <div>
+                        {{ $comments->links('vendor.pagination.bootstrap-5') }}
+                    </div>
                 </div>
             </div>
         </div>

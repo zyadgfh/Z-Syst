@@ -1,6 +1,6 @@
-@extends('layouts.admin')
+@extends('layouts.master')
 
-@section('content')
+@section('main_content')
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-12">
@@ -10,7 +10,7 @@
                     <a href="{{ route('admin.purchase-orders.index') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Back
                     </a>
-                    @if($purchaseOrder->status === 'draft')
+                    @if($purchaseOrder->status === 'draft' && auth()->user()->can('purchases-edit'))
                         <a href="{{ route('admin.purchase-orders.edit', $purchaseOrder) }}" class="btn btn-warning">
                             <i class="fas fa-edit"></i> Edit
                         </a>
@@ -311,3 +311,4 @@
     @endphp
 </script>
 @endpush
+@endsection

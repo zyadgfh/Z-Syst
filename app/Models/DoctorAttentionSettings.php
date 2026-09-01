@@ -83,7 +83,7 @@ class DoctorAttentionSettings extends Model
     /**
      * Get default settings for business.
      */
-    public static function getDefaults(int $businessId, int $branchId = null): self
+    public static function getDefaults(int $businessId, ?int $branchId = null): self
     {
         $settings = self::forBusiness($businessId)
             ->when($branchId, function ($query) use ($branchId) {
@@ -91,7 +91,7 @@ class DoctorAttentionSettings extends Model
             })
             ->first();
 
-        if (!$settings) {
+        if (! $settings) {
             $settings = self::create([
                 'business_id' => $businessId,
                 'branch_id' => $branchId,

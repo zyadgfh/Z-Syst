@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\TraceabilityLog;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockTransfer extends Model
@@ -100,6 +101,7 @@ class StockTransfer extends Model
         }
 
         $fromWarehouse = $this->fromWarehouse;
+
         return $fromWarehouse && $fromWarehouse->hasSufficientStock($this->product_id, $this->quantity);
     }
 
@@ -108,7 +110,7 @@ class StockTransfer extends Model
      */
     public function complete(): bool
     {
-        if (!$this->canBeCompleted()) {
+        if (! $this->canBeCompleted()) {
             return false;
         }
 
@@ -119,7 +121,7 @@ class StockTransfer extends Model
                 'product_id' => $this->product_id,
             ])->first();
 
-            if (!$fromStock || !$fromStock->decrease($this->quantity)) {
+            if (! $fromStock || ! $fromStock->decrease($this->quantity)) {
                 return false;
             }
 
@@ -134,6 +136,18 @@ class StockTransfer extends Model
 
             // Update transfer status
             $this->update(['status' => 'completed']);
+
+            // Log traceability for batch-level tracking
+            TraceabilityLog::create([
+                'business_id' => $this->business_id,
+                'product_id' => $this->product_id,
+                'from_warehouse_id' => $this->from_warehouse_id,
+                'to_warehouse_id' => $this->to_warehouse_id,
+                'type' => 'transfer',
+                'quantity' => $this->quantity,
+                'user_id' => $this->user_id ?? auth()->id(),
+                'notes' => "Stock transfer #{$this->id} completed",
+            ]);
 
             return true;
         });
@@ -156,7 +170,7 @@ class StockTransfer extends Model
      */
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'pending' => __('Pending'),
             'completed' => __('Completed'),
             'cancelled' => __('Cancelled'),

@@ -7,7 +7,7 @@
 
 @section('container')
 
-    <form method="post" action="{{ route('LaravelInstaller::codeVerifyProcess') }}" class="tabs-wrap">
+    <form method="post" action="{{ route('LaravelInstaller::envatoCodeVerifyProcess') }}" class="tabs-wrap">
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
         <input type="hidden" name="_tokens" value="purchase_code">
         <div class="form-group {{ $errors->has('purchase_code') ? ' has-error ' : '' }}">

@@ -4,6 +4,7 @@ namespace Modules\Landing\App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Landing\Database\Factories\FeatureFactory;
 
 class Feature extends Model
 {
@@ -22,6 +23,6 @@ class Feature extends Model
 
     protected static function newFactory()
     {
-        return \Modules\Landing\Database\Factories\FeatureFactory::new();
+        return FeatureFactory::new();
     }
 }

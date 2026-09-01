@@ -2,10 +2,10 @@
 
 namespace Modules\Landing\App\Services;
 
-use App\Models\Option;
-use App\Models\Plan;
 use App\Models\BusinessCategory;
 use App\Models\Gateway;
+use App\Models\Option;
+use App\Models\Plan;
 use Modules\Landing\App\Models\Blog;
 use Modules\Landing\App\Models\Feature;
 use Modules\Landing\App\Models\PosAppInterface;
@@ -19,7 +19,7 @@ class LandingService
     public function getLandingData(): array
     {
         $pageData = $this->getPageData();
-        
+
         return [
             'page_data' => $pageData,
             'sections' => $pageData['sections'] ?? [],
@@ -66,7 +66,7 @@ class LandingService
     public function getContactData(): array
     {
         $pageData = $this->getPageData();
-        
+
         return [
             'contact' => $pageData['contact'] ?? [],
             'general' => $this->getGeneralSettings(),
@@ -150,7 +150,7 @@ class LandingService
                 'id' => $plan->id,
                 'name' => $plan->subscriptionName,
                 'duration' => $plan->duration,
-                'duration_text' => $plan->duration . ' days',
+                'duration_text' => $plan->duration.' days',
                 'price' => $plan->subscriptionPrice,
                 'offer_price' => $plan->offerPrice,
                 'discount_percentage' => $discountPercentage,

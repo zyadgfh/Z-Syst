@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\ApprovalWorkflow;
 use App\Models\ApprovalStep;
 use App\Models\ApprovalTemplate;
+use App\Models\ApprovalWorkflow;
 use Illuminate\Support\Facades\DB;
 
 class ApprovalWorkflowService
@@ -42,7 +42,7 @@ class ApprovalWorkflowService
         });
     }
 
-    public function approveStep(ApprovalWorkflow $workflow, int $stepNumber, int $approverId, string $notes = null): ApprovalWorkflow
+    public function approveStep(ApprovalWorkflow $workflow, int $stepNumber, int $approverId, ?string $notes = null): ApprovalWorkflow
     {
         return DB::transaction(function () use ($workflow, $stepNumber, $approverId, $notes) {
             $step = $workflow->steps()->where('step_number', $stepNumber)->first();

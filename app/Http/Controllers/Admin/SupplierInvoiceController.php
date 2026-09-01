@@ -7,11 +7,12 @@ use App\Http\Requests\SupplierInvoicePaymentRequest;
 use App\Http\Requests\SupplierInvoiceRequest;
 use App\Http\Resources\SupplierInvoicePaymentResource;
 use App\Http\Resources\SupplierInvoiceResource;
+use App\Models\Purchase;
 use App\Models\SupplierInvoice;
 use App\Models\SupplierInvoicePayment;
 use App\Services\SupplierInvoiceService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class SupplierInvoiceController extends Controller
@@ -82,7 +83,7 @@ class SupplierInvoiceController extends Controller
     public function update(SupplierInvoiceRequest $request, SupplierInvoice $supplierInvoice): JsonResponse
     {
         $validated = $request->validated();
-        
+
         $invoice = $this->invoiceService->update($supplierInvoice, $validated);
 
         return response()->json([
@@ -174,7 +175,7 @@ class SupplierInvoiceController extends Controller
      */
     public function approvePayment(Request $request, $paymentId): JsonResponse
     {
-        $payment = \App\Models\SupplierInvoicePayment::findOrFail($paymentId);
+        $payment = SupplierInvoicePayment::findOrFail($paymentId);
         $payment = $this->invoiceService->approvePayment($payment, $request->user()->id);
 
         return response()->json([
@@ -249,7 +250,7 @@ class SupplierInvoiceController extends Controller
             'purchase_id' => 'required|exists:purchases,id',
         ]);
 
-        $purchase = \App\Models\Purchase::findOrFail($request->purchase_id);
+        $purchase = Purchase::findOrFail($request->purchase_id);
         $invoice = $this->invoiceService->createFromPurchase($purchase);
 
         return response()->json([

@@ -2,8 +2,9 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Business;
 use App\Models\Warehouse;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class WarehouseFactory extends Factory
 {
@@ -12,9 +13,9 @@ class WarehouseFactory extends Factory
     public function definition()
     {
         return [
-            'business_id' => \App\Models\Business::factory(),
+            'business_id' => Business::factory(),
             'name' => fake()->words(3, true),
-            'code' => 'WH-' . strtoupper(fake()->unique()->regexify('[A-Z0-9]{8}')),
+            'code' => 'WH-'.strtoupper(fake()->unique()->regexify('[A-Z0-9]{8}')),
             'location' => fake()->address(),
             'is_default' => false,
             'is_active' => true,

@@ -60,6 +60,7 @@
                     </li>
 
                     @if($subscriber->payment_status == 'unpaid')
+                    @can('subscription-reports-read')
                     <li>
                         <a href="#approve-modal" class="modal-approve" data-bs-toggle="modal" data-bs-target="#approve-modal" data-url="{{ route('admin.subscription-reports.paid', $subscriber->id) }}">
                             <img src="{{ asset('assets/images/icons/accept.svg') }}" alt="">
@@ -72,6 +73,7 @@
                             {{ __('Reject') }}
                         </a>
                     </li>
+                    @endcan
                     @endif
                 </ul>
             </div>

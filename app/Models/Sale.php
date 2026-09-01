@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Services\InvoiceNumberService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Sale extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -32,6 +34,7 @@ class Sale extends Model
         'saleDate',
         'sale_data',
         'meta',
+        'status',
     ];
 
     public function details()
@@ -47,6 +50,11 @@ class Sale extends Model
     public function party(): BelongsTo
     {
         return $this->belongsTo(Party::class);
+    }
+
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class);
     }
 
     public function user(): BelongsTo
@@ -65,8 +73,8 @@ class Sale extends Model
 
         static::creating(function ($model) {
             if (! $model->invoiceNumber && auth()->check()) {
-                $id = Sale::where('business_id', auth()->user()->business_id)->count() + 1;
-                $model->invoiceNumber = 'S-'.str_pad($id, 5, '0', STR_PAD_LEFT);
+                $invoiceNumberService = app(InvoiceNumberService::class);
+                $model->invoiceNumber = $invoiceNumberService->generateSaleInvoiceNumber(auth()->user()->business_id);
             }
         });
     }

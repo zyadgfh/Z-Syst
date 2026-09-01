@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\PurchaseOrder;
+use App\Models\AgingReport;
 use App\Models\GoodsReceivedNote;
+use App\Models\Product;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
 use App\Models\Supplier;
-use Illuminate\Support\Facades\DB;
 
 class PurchaseReportService
 {
@@ -40,10 +42,12 @@ class PurchaseReportService
 
     public function getPriceComparison(int $businessId, int $productId): array
     {
-        $product = \App\Models\Product::find($productId);
-        if (!$product) return [];
+        $product = Product::find($productId);
+        if (! $product) {
+            return [];
+        }
 
-        $poItems = \App\Models\PurchaseOrderItem::whereHas('purchaseOrder', function ($query) use ($businessId) {
+        $poItems = PurchaseOrderItem::whereHas('purchaseOrder', function ($query) use ($businessId) {
             $query->forBusiness($businessId);
         })->where('product_id', $productId)->get();
 
@@ -79,7 +83,7 @@ class PurchaseReportService
 
     public function getCostVariance(int $businessId): array
     {
-        $poItems = \App\Models\PurchaseOrderItem::whereHas('purchaseOrder', function ($query) use ($businessId) {
+        $poItems = PurchaseOrderItem::whereHas('purchaseOrder', function ($query) use ($businessId) {
             $query->forBusiness($businessId);
         })->get();
 
@@ -105,7 +109,7 @@ class PurchaseReportService
 
     public function getAgingReport(int $businessId): array
     {
-        return \App\Models\AgingReport::forBusiness($businessId)
+        return AgingReport::forBusiness($businessId)
             ->with('supplier')
             ->latest()
             ->get()

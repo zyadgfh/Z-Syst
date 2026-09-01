@@ -3,12 +3,10 @@
 namespace App\Services;
 
 use App\Models\User;
-use App\Models\Business;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class UserManagementService
 {
@@ -19,7 +17,7 @@ class UserManagementService
     {
         return DB::transaction(function () use ($userData, $roleName) {
             $role = Role::where('name', $roleName)->firstOrFail();
-            
+
             $user = User::create([
                 'name' => $userData['name'],
                 'email' => $userData['email'],
@@ -44,7 +42,7 @@ class UserManagementService
     {
         return DB::transaction(function () use ($user, $userData, $roleName) {
             $role = Role::where('name', $roleName)->firstOrFail();
-            
+
             $user->update([
                 'name' => $userData['name'],
                 'email' => $userData['email'],
@@ -83,6 +81,7 @@ class UserManagementService
     public function updateRolePermissions(Role $role, array $permissionIds): Role
     {
         $role->permissions()->sync($permissionIds);
+
         return $role->fresh();
     }
 
@@ -103,6 +102,7 @@ class UserManagementService
     public function assignPermissionsToRole(Role $role, array $permissionIds): Role
     {
         $role->permissions()->sync($permissionIds);
+
         return $role->fresh();
     }
 
@@ -184,9 +184,10 @@ class UserManagementService
     {
         // Remove action suffixes like -create, -read, -update, -delete
         $cleanName = preg_replace('/(-create|-read|-update|-delete)$/', '', $permissionName);
-        
+
         // Extract the module part (first word before -)
         $parts = explode('-', $cleanName);
+
         return ucfirst($parts[0] ?? 'General');
     }
 

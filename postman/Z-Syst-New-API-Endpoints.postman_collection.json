@@ -1,0 +1,850 @@
+{
+  "info": {
+    "name": "Z-Syst New API Endpoints",
+    "description": "Pre-configured requests for all new API endpoints: Accounting, Traceability/Recall, Loyalty, Insurance, Warehouses, FEFO, Predictions, Auto-Order, Stock Audit, Financial Audit, Receipts, and more.\n\nBase URL: {{baseUrl}}\nAuthentication: Bearer token via Sanctum\n\nImport this collection into Postman and set the `baseUrl` and `token` collection variables before use.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api/v1"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "businessId",
+      "value": "1"
+    },
+    {
+      "key": "accountId",
+      "value": ""
+    },
+    {
+      "key": "journalEntryId",
+      "value": ""
+    },
+    {
+      "key": "recallId",
+      "value": ""
+    },
+    {
+      "key": "productId",
+      "value": ""
+    },
+    {
+      "key": "batchLotId",
+      "value": ""
+    },
+    {
+      "key": "companyId",
+      "value": ""
+    },
+    {
+      "key": "policyId",
+      "value": ""
+    },
+    {
+      "key": "claimId",
+      "value": ""
+    },
+    {
+      "key": "warehouseId",
+      "value": ""
+    },
+    {
+      "key": "stockTransferId",
+      "value": ""
+    },
+    {
+      "key": "auditId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Public health check endpoint. Returns status of app, database, cache, and queue."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Double-Entry Accounting",
+      "item": [
+        {
+          "name": "List Accounts",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/accounting/accounts",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounting", "accounts"]
+            },
+            "description": "List all chart of accounts for the authenticated business."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('Status is 200', function() { pm.response.to.have.status(200); });"]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Account",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/accounting/accounts",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounting", "accounts"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"account_type_id\": 1,\n  \"code\": \"1999\",\n  \"name\": \"Test Asset Account\",\n  \"description\": \"A test asset account\",\n  \"opening_balance\": 500.00\n}"
+            },
+            "description": "Create a new account in the chart of accounts."
+          }
+        },
+        {
+          "name": "Show Account",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/accounting/accounts/{{accountId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounting", "accounts", "{{accountId}}"]
+            },
+            "description": "Show details of a specific account including balance history."
+          }
+        },
+        {
+          "name": "List Journal Entries",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/accounting/journal-entries",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounting", "journal-entries"]
+            },
+            "description": "List all journal entries for the authenticated business."
+          }
+        },
+        {
+          "name": "Create Journal Entry",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/accounting/journal-entries",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounting", "journal-entries"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Cash sale revenue\",\n  \"entry_date\": \"2026-01-15\",\n  \"lines\": [\n    {\"account_id\": 1, \"debit\": 1000, \"credit\": 0},\n    {\"account_id\": 4, \"debit\": 0, \"credit\": 1000}\n  ]\n}"
+            },
+            "description": "Create a balanced journal entry (debits must equal credits)."
+          }
+        },
+        {
+          "name": "Show Journal Entry",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/accounting/journal-entries/{{journalEntryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounting", "journal-entries", "{{journalEntryId}}"]
+            },
+            "description": "Show details of a specific journal entry with lines."
+          }
+        },
+        {
+          "name": "Post Journal Entry",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/accounting/journal-entries/{{journalEntryId}}/post",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounting", "journal-entries", "{{journalEntryId}}", "post"]
+            },
+            "description": "Post a draft journal entry to the general ledger. Changes status from 'draft' to 'posted'."
+          }
+        },
+        {
+          "name": "Void Journal Entry",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/accounting/journal-entries/{{journalEntryId}}/void",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounting", "journal-entries", "{{journalEntryId}}", "void"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Entry was created in error\"\n}"
+            },
+            "description": "Void a posted journal entry. Creates a reversal entry automatically."
+          }
+        },
+        {
+          "name": "Trial Balance",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/accounting/trial-balance?as_of_date=2026-12-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounting", "trial-balance"],
+              "query": [
+                { "key": "as_of_date", "value": "2026-12-31", "description": "Optional: filter as of specific date" }
+              ]
+            },
+            "description": "Get the trial balance showing all account balances. Verifies debits equal credits."
+          }
+        },
+        {
+          "name": "Income Statement",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/accounting/income-statement?from=2026-01-01&to=2026-12-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounting", "income-statement"],
+              "query": [
+                { "key": "from", "value": "2026-01-01", "description": "Start date (required)" },
+                { "key": "to", "value": "2026-12-31", "description": "End date (required)" }
+              ]
+            },
+            "description": "Get income statement for a date range. Shows revenue, expenses, and net income."
+          }
+        },
+        {
+          "name": "Balance Sheet",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/accounting/balance-sheet",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounting", "balance-sheet"]
+            },
+            "description": "Get the balance sheet showing assets, liabilities, and equity."
+          }
+        },
+        {
+          "name": "General Ledger",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/accounting/general-ledger/{{accountId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounting", "general-ledger", "{{accountId}}"]
+            },
+            "description": "Get general ledger entries for a specific account."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Traceability & Recall",
+      "item": [
+        {
+          "name": "List Batch Lots",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/traceability/batch-lots",
+              "host": ["{{baseUrl}}"],
+              "path": ["traceability", "batch-lots"]
+            },
+            "description": "List all batch lots for the authenticated business."
+          }
+        },
+        {
+          "name": "Expiring Batches",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/traceability/expiring-batches?days=30",
+              "host": ["{{baseUrl}}"],
+              "path": ["traceability", "expiring-batches"],
+              "query": [
+                { "key": "days", "value": "30", "description": "Number of days ahead to check" }
+              ]
+            },
+            "description": "Get batches expiring within the specified number of days."
+          }
+        },
+        {
+          "name": "Expired Batches",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/traceability/expired-batches",
+              "host": ["{{baseUrl}}"],
+              "path": ["traceability", "expired-batches"]
+            },
+            "description": "Get all batches that have already expired."
+          }
+        },
+        {
+          "name": "List Recalls",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/traceability/recalls?status=active",
+              "host": ["{{baseUrl}}"],
+              "path": ["traceability", "recalls"],
+              "query": [
+                { "key": "status", "value": "active", "description": "Filter by status: active, resolved" }
+              ]
+            },
+            "description": "List all recall events, optionally filtered by status."
+          }
+        },
+        {
+          "name": "Initiate Recall",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/traceability/recalls",
+              "host": ["{{baseUrl}}"],
+              "path": ["traceability", "recalls"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"business_id\": {{businessId}},\n  \"product_id\": {{productId}},\n  \"batch_lot_number\": \"BATCH-001\",\n  \"reason\": \"Contamination risk detected\",\n  \"description\": \"Microbial contamination found in batch\"\n}"
+            },
+            "description": "Initiate a new recall event. Links affected batches automatically."
+          }
+        },
+        {
+          "name": "Recall Summary",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/traceability/recalls/{{recallId}}/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["traceability", "recalls", "{{recallId}}", "summary"]
+            },
+            "description": "Get summary of a recall event including affected batches and statistics."
+          }
+        },
+        {
+          "name": "Quarantine Batch",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/traceability/recalls/{{recallId}}/quarantine",
+              "host": ["{{baseUrl}}"],
+              "path": ["traceability", "recalls", "{{recallId}}", "quarantine"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"batch_lot_id\": {{batchLotId}},\n  \"notes\": \"Quarantined due to contamination\"\n}"
+            },
+            "description": "Quarantine an affected batch. Updates batch status and creates traceability log."
+          }
+        },
+        {
+          "name": "Release Batch",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/traceability/recalls/{{recallId}}/release",
+              "host": ["{{baseUrl}}"],
+              "path": ["traceability", "recalls", "{{recallId}}", "release"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"batch_lot_id\": {{batchLotId}}\n}"
+            },
+            "description": "Release a quarantined batch back to active status."
+          }
+        },
+        {
+          "name": "Dispose Batch",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/traceability/recalls/{{recallId}}/dispose",
+              "host": ["{{baseUrl}}"],
+              "path": ["traceability", "recalls", "{{recallId}}", "dispose"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"batch_lot_id\": {{batchLotId}},\n  \"notes\": \"Disposed per regulatory requirement\"\n}"
+            },
+            "description": "Dispose of a quarantined batch. Sets quantity to zero."
+          }
+        },
+        {
+          "name": "Resolve Recall",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/traceability/recalls/{{recallId}}/resolve",
+              "host": ["{{baseUrl}}"],
+              "path": ["traceability", "recalls", "{{recallId}}", "resolve"]
+            },
+            "description": "Mark a recall event as resolved."
+          }
+        },
+        {
+          "name": "Detect Affected Batches",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/traceability/detect-affected?product_id={{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["traceability", "detect-affected"],
+              "query": [
+                { "key": "product_id", "value": "{{productId}}", "description": "Filter by product ID" },
+                { "key": "batch_lot_number", "value": "", "description": "Optional: filter by batch number" }
+              ]
+            },
+            "description": "Detect potentially affected batches for a product or batch number."
+          }
+        },
+        {
+          "name": "Traceability",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/traceability/traceability?product_id={{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["traceability", "traceability"],
+              "query": [
+                { "key": "product_id", "value": "{{productId}}", "description": "Filter by product ID" }
+              ]
+            },
+            "description": "Get traceability logs for products."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Loyalty & CRM",
+      "item": [
+        {
+          "name": "List Loyalty Programs",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/loyalty", "host": ["{{baseUrl}}"], "path": ["loyalty"] },
+            "description": "List all loyalty programs."
+          }
+        },
+        {
+          "name": "Create Loyalty Program",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/loyalty", "host": ["{{baseUrl}}"], "path": ["loyalty"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Gold Points\",\n  \"type\": \"points\",\n  \"points_per_currency\": 0.01,\n  \"currency_per_point\": 100,\n  \"min_redemption_points\": 100\n}"
+            },
+            "description": "Create a new loyalty program."
+          }
+        },
+        {
+          "name": "Party Balance",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/loyalty/balance/{{partyId}}", "host": ["{{baseUrl}}"], "path": ["loyalty", "balance", "{{partyId}}"] },
+            "description": "Get loyalty point balance for a customer/party."
+          }
+        },
+        {
+          "name": "Party History",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/loyalty/history/{{partyId}}", "host": ["{{baseUrl}}"], "path": ["loyalty", "history", "{{partyId}}"] },
+            "description": "Get loyalty transaction history for a customer/party."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Insurance",
+      "item": [
+        {
+          "name": "Insurance Summary",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/insurance/summary", "host": ["{{baseUrl}}"], "path": ["insurance", "summary"] },
+            "description": "Get insurance module summary stats."
+          }
+        },
+        {
+          "name": "List Companies",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/insurance/companies", "host": ["{{baseUrl}}"], "path": ["insurance", "companies"] },
+            "description": "List all insurance companies."
+          }
+        },
+        {
+          "name": "Create Company",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/insurance/companies", "host": ["{{baseUrl}}"], "path": ["insurance", "companies"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Insurance Co\",\n  \"code\": \"TIC001\",\n  \"default_coverage_percent\": 80,\n  \"default_copay_percent\": 20\n}"
+            },
+            "description": "Create a new insurance company."
+          }
+        },
+        {
+          "name": "List Policies",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/insurance/policies", "host": ["{{baseUrl}}"], "path": ["insurance", "policies"] },
+            "description": "List all insurance policies."
+          }
+        },
+        {
+          "name": "List Claims",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/insurance/claims", "host": ["{{baseUrl}}"], "path": ["insurance", "claims"] },
+            "description": "List all insurance claims."
+          }
+        },
+        {
+          "name": "Submit Claim",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/insurance/claims/{{claimId}}/submit", "host": ["{{baseUrl}}"], "path": ["insurance", "claims", "{{claimId}}", "submit"] },
+            "description": "Submit an insurance claim for processing."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Warehouses & Stock Transfers",
+      "item": [
+        {
+          "name": "List Warehouses",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/warehouses", "host": ["{{baseUrl}}"], "path": ["warehouses"] },
+            "description": "List all warehouses."
+          }
+        },
+        {
+          "name": "Create Warehouse",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/warehouses", "host": ["{{baseUrl}}"], "path": ["warehouses"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Main Warehouse\",\n  \"code\": \"WH-001\",\n  \"address\": \"123 Industrial Area\"\n}"
+            },
+            "description": "Create a new warehouse."
+          }
+        },
+        {
+          "name": "Warehouse Stock",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/warehouses/{{warehouseId}}/stock", "host": ["{{baseUrl}}"], "path": ["warehouses", "{{warehouseId}}", "stock"] },
+            "description": "Get stock levels for a specific warehouse."
+          }
+        },
+        {
+          "name": "List Stock Transfers",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/stock-transfers", "host": ["{{baseUrl}}"], "path": ["stock-transfers"] },
+            "description": "List all stock transfers."
+          }
+        },
+        {
+          "name": "Create Stock Transfer",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/stock-transfers", "host": ["{{baseUrl}}"], "path": ["stock-transfers"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from_warehouse_id\": 1,\n  \"to_warehouse_id\": 2,\n  \"product_id\": 1,\n  \"quantity\": 50\n}"
+            },
+            "description": "Create a new stock transfer between warehouses."
+          }
+        },
+        {
+          "name": "Complete Transfer",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/stock-transfers/{{stockTransferId}}/complete", "host": ["{{baseUrl}}"], "path": ["stock-transfers", "{{stockTransferId}}", "complete"] },
+            "description": "Complete a pending stock transfer."
+          }
+        },
+        {
+          "name": "Transfer Statistics",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/stock-transfers/statistics", "host": ["{{baseUrl}}"], "path": ["stock-transfers", "statistics"] },
+            "description": "Get stock transfer statistics."
+          }
+        }
+      ]
+    },
+    {
+      "name": "FEFO (First-Expiry, First-Out)",
+      "item": [
+        {
+          "name": "Get FEFO Settings",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/fefo/settings", "host": ["{{baseUrl}}"], "path": ["fefo", "settings"] },
+            "description": "Get FEFO configuration for the business."
+          }
+        },
+        {
+          "name": "Update FEFO Settings",
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/fefo/settings", "host": ["{{baseUrl}}"], "path": ["fefo", "settings"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": true,\n  \"auto_deduct_expired_stock\": true,\n  \"min_stock_for_fefo\": 10\n}"
+            },
+            "description": "Update FEFO configuration."
+          }
+        },
+        {
+          "name": "Sale Suggestions",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/fefo/sale-suggestions", "host": ["{{baseUrl}}"], "path": ["fefo", "sale-suggestions"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": 1,\n  \"quantity_requested\": 10\n}"
+            },
+            "description": "Get FEFO-based sale suggestions for optimal batch selection."
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Predictions",
+      "item": [
+        {
+          "name": "Prediction Settings",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/predictions/settings", "host": ["{{baseUrl}}"], "path": ["predictions", "settings"] },
+            "description": "Get AI prediction settings."
+          }
+        },
+        {
+          "name": "Forecast Product",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/predictions/forecast/{{productId}}", "host": ["{{baseUrl}}"], "path": ["predictions", "forecast", "{{productId}}"] },
+            "description": "Get AI-powered sales forecast for a specific product."
+          }
+        },
+        {
+          "name": "Reorder Point",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/predictions/reorder-point/{{productId}}", "host": ["{{baseUrl}}"], "path": ["predictions", "reorder-point", "{{productId}}"] },
+            "description": "Calculate optimal reorder point for a product."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auto-Order",
+      "item": [
+        {
+          "name": "List Auto-Order Rules",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/auto-order/settings", "host": ["{{baseUrl}}"], "path": ["auto-order", "settings"] },
+            "description": "List all auto-order rules."
+          }
+        },
+        {
+          "name": "Generate Suggestions",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/auto-order/generate", "host": ["{{baseUrl}}"], "path": ["auto-order", "generate"] },
+            "description": "Generate auto-order suggestions based on current stock and rules."
+          }
+        },
+        {
+          "name": "Approve Suggestion",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/auto-order/suggestions/{{id}}/approve", "host": ["{{baseUrl}}"], "path": ["auto-order", "suggestions", "{{id}}", "approve"] },
+            "description": "Approve an auto-order suggestion."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Stock Audit",
+      "item": [
+        {
+          "name": "List Stock Audits",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/stock-audits", "host": ["{{baseUrl}}"], "path": ["stock-audits"] },
+            "description": "List all stock audits."
+          }
+        },
+        {
+          "name": "Create Stock Audit",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/stock-audits", "host": ["{{baseUrl}}"], "path": ["stock-audits"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Q1 2026 Audit\",\n  \"warehouse_id\": 1\n}"
+            },
+            "description": "Create a new stock audit."
+          }
+        },
+        {
+          "name": "Variance Report",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/stock-audits/{{auditId}}/variance-report", "host": ["{{baseUrl}}"], "path": ["stock-audits", "{{auditId}}", "variance-report"] },
+            "description": "Get variance report for a stock audit."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Financial Audit",
+      "item": [
+        {
+          "name": "List Financial Audits",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/financial-audits", "host": ["{{baseUrl}}"], "path": ["financial-audits"] },
+            "description": "List all financial audits."
+          }
+        },
+        {
+          "name": "Financial Audit Statistics",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/financial-audits/statistics", "host": ["{{baseUrl}}"], "path": ["financial-audits", "statistics"] },
+            "description": "Get financial audit statistics."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Receipts",
+      "item": [
+        {
+          "name": "Receipt Settings",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/receipts/settings", "host": ["{{baseUrl}}"], "path": ["receipts", "settings"] },
+            "description": "Get receipt generation settings."
+          }
+        },
+        {
+          "name": "Generate Sale Receipt",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/receipts/sales/{{saleId}}", "host": ["{{baseUrl}}"], "path": ["receipts", "sales", "{{saleId}}"] },
+            "description": "Generate a receipt for a completed sale."
+          }
+        },
+        {
+          "name": "Download Receipt",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/receipts/{{receiptId}}/download", "host": ["{{baseUrl}}"], "path": ["receipts", "{{receiptId}}", "download"] },
+            "description": "Download a receipt as PDF."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inventory Turnover",
+      "item": [
+        {
+          "name": "Turnover Summary",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/inventory-turnover/summary", "host": ["{{baseUrl}}"], "path": ["inventory-turnover", "summary"] },
+            "description": "Get inventory turnover summary statistics."
+          }
+        },
+        {
+          "name": "ABC Analysis",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/inventory-turnover/abc-analysis", "host": ["{{baseUrl}}"], "path": ["inventory-turnover", "abc-analysis"] },
+            "description": "Get ABC analysis of inventory (high/medium/low value)."
+          }
+        },
+        {
+          "name": "Slow Moving Items",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/inventory-turnover/slow-moving", "host": ["{{baseUrl}}"], "path": ["inventory-turnover", "slow-moving"] },
+            "description": "Get list of slow-moving inventory items."
+          }
+        }
+      ]
+    }
+  ]
+}

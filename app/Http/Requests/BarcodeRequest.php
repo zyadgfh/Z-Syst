@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class BarcodeRequest extends FormRequest
 {
@@ -23,7 +22,7 @@ class BarcodeRequest extends FormRequest
         return [
             'product_id' => 'nullable|exists:products,id',
             'batch_id' => 'nullable|exists:stock_batches,id',
-            'barcode_number' => 'nullable|string|max:50|unique:barcodes,barcode_number,' . $this->route('barcode'),
+            'barcode_number' => 'nullable|string|max:50|unique:barcodes,barcode_number,'.$this->route('barcode'),
             'barcode_type' => 'required|in:CODE128,EAN13,UPC,QR',
             'size' => 'nullable|in:small,standard,large',
             'print_settings' => 'nullable|array',

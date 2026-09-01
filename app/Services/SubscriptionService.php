@@ -3,13 +3,13 @@
 namespace App\Services;
 
 use App\Models\Subscription;
-use App\Models\SubscriptionPlan;
 use App\Models\SubscriptionInvoice;
-use App\Models\SubscriptionPayment;
-use App\Models\UsageRecord;
 use App\Models\SubscriptionLog;
+use App\Models\SubscriptionPayment;
+use App\Models\SubscriptionPlan;
+use App\Models\UsageRecord;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class SubscriptionService
 {
@@ -73,7 +73,7 @@ class SubscriptionService
         });
     }
 
-    public function cancelSubscription(Subscription $subscription, int $performedBy, string $reason = null): Subscription
+    public function cancelSubscription(Subscription $subscription, int $performedBy, ?string $reason = null): Subscription
     {
         return DB::transaction(function () use ($subscription, $performedBy, $reason) {
             $oldData = $subscription->toArray();
@@ -175,9 +175,11 @@ class SubscriptionService
     public function getUsage(int $businessId, string $metricName, string $period = 'month'): array
     {
         $subscription = Subscription::where('business_id', $businessId)->active()->first();
-        if (!$subscription) return [];
+        if (! $subscription) {
+            return [];
+        }
 
-        $startDate = match($period) {
+        $startDate = match ($period) {
             'day' => now()->startOfDay(),
             'week' => now()->startOfWeek(),
             'month' => now()->startOfMonth(),
@@ -202,23 +204,28 @@ class SubscriptionService
     public function checkLimits(int $businessId, string $metricName): bool
     {
         $subscription = Subscription::where('business_id', $businessId)->active()->first();
-        if (!$subscription) return false;
+        if (! $subscription) {
+            return false;
+        }
 
         $limits = $subscription->plan->limits ?? [];
         $limit = $limits[$metricName] ?? null;
 
-        if (!$limit) return true; // No limit set
+        if (! $limit) {
+            return true;
+        } // No limit set
 
         $usage = $this->getUsage($businessId, $metricName, 'month');
+
         return $usage['total'] < $limit;
     }
 
-    public function getActiveSubscriptions(): \Illuminate\Database\Eloquent\Collection
+    public function getActiveSubscriptions(): Collection
     {
         return Subscription::active()->with(['plan', 'business'])->get();
     }
 
-    public function getExpiringSubscriptions(int $days = 7): \Illuminate\Database\Eloquent\Collection
+    public function getExpiringSubscriptions(int $days = 7): Collection
     {
         return Subscription::active()
             ->where('ends_at', '<=', now()->addDays($days))
@@ -227,7 +234,7 @@ class SubscriptionService
             ->get();
     }
 
-    public function getTrialEndingSubscriptions(int $days = 3): \Illuminate\Database\Eloquent\Collection
+    public function getTrialEndingSubscriptions(int $days = 3): Collection
     {
         return Subscription::trialing()
             ->where('trial_ends_at', '<=', now()->addDays($days))

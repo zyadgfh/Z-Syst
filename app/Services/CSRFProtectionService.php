@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Str;
 
 class CSRFProtectionService
 {
@@ -37,6 +36,7 @@ class CSRFProtectionService
     public function regenerateToken(): string
     {
         Session::regenerateToken();
+
         return $this->getToken();
     }
 
@@ -72,7 +72,8 @@ class CSRFProtectionService
     public function generateFormField(): string
     {
         $token = $this->getToken();
-        return '<input type="hidden" name="_token" value="' . $token . '">';
+
+        return '<input type="hidden" name="_token" value="'.$token.'">';
     }
 
     /**
@@ -81,7 +82,8 @@ class CSRFProtectionService
     public function generateMetaTag(): string
     {
         $token = $this->getToken();
-        return '<meta name="csrf-token" content="' . $token . '">';
+
+        return '<meta name="csrf-token" content="'.$token.'">';
     }
 
     /**
@@ -98,6 +100,7 @@ class CSRFProtectionService
     public function getJavaScriptToken(): string
     {
         $token = $this->getToken();
+
         return "window.csrfToken = '{$token}';";
     }
 }

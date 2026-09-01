@@ -39,13 +39,13 @@ class PurchaseOrderResource extends JsonResource
             'is_active' => $this->is_active,
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),
-            
+
             // Computed fields
             'total_quantity' => $this->getTotalQuantity(),
             'received_quantity' => $this->getReceivedQuantity(),
             'pending_quantity' => $this->getPendingQuantity(),
             'completion_percentage' => $this->getCompletionPercentage(),
-            
+
             // Relationships
             'supplier' => new PartyResource($this->whenLoaded('supplier')),
             'items' => PurchaseOrderItemResource::collection($this->whenLoaded('items')),

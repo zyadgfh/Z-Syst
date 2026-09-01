@@ -2,10 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\QualityStandard;
-use App\Models\QualityReport;
 use App\Models\QualityCheck;
-use Illuminate\Support\Facades\DB;
+use App\Models\QualityReport;
+use App\Models\QualityStandard;
 
 class QualityService
 {
@@ -14,7 +13,7 @@ class QualityService
         return QualityStandard::create($data);
     }
 
-    public function generateReport(int $businessId, int $branchId = null): QualityReport
+    public function generateReport(int $businessId, ?int $branchId = null): QualityReport
     {
         $checks = QualityCheck::whereHas('grnItem.grn', function ($query) use ($businessId, $branchId) {
             $query->where('business_id', $businessId);

@@ -14,7 +14,7 @@ class BladeServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(XSSProtectionService::class, function ($app) {
-            return new XSSProtectionService();
+            return new XSSProtectionService;
         });
     }
 

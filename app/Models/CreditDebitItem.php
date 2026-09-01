@@ -20,6 +20,13 @@ class CreditDebitItem extends Model
         'amount' => 'decimal:2',
     ];
 
-    public function product(): BelongsTo { return $this->belongsTo(Product::class); }
-    public function parent(): BelongsTo { return $this->morphTo(); }
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->morphTo();
+    }
 }

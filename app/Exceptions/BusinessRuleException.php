@@ -3,16 +3,38 @@
 namespace App\Exceptions;
 
 use App\Exceptions\Errors\ErrorCode;
+use Exception;
+use Illuminate\Http\JsonResponse;
 
-class BusinessRuleException extends RenderableException
+class BusinessRuleException extends Exception
 {
-    public function __construct(
-        ErrorCode $errorCode = ErrorCode::BUSINESS_INSUFFICIENT_STOCK,
-        string $userMessage = '',
-        array $context = [],
-        array $debugData = [],
-        ?\Throwable $previous = null
-    ) {
-        parent::__construct($errorCode, $userMessage, $context, $debugData, $previous);
+    protected string $errorCode;
+    protected array $context;
+
+    public function __construct(string|ErrorCode $errorCode, string $message, array $context = [])
+    {
+        $this->errorCode = $errorCode instanceof ErrorCode ? $errorCode->value : $errorCode;
+        $this->context = $context;
+        parent::__construct($message);
+    }
+
+    public function getErrorCode(): string
+    {
+        return $this->errorCode;
+    }
+
+    public function getContext(): array
+    {
+        return $this->context;
+    }
+
+    public function render($request): JsonResponse
+    {
+        return response()->json([
+            'success' => false,
+            'message' => $this->getMessage(),
+            'error_code' => $this->errorCode,
+            'context' => config('app.debug') ? $this->context : [],
+        ], 422);
     }
 }

@@ -23,8 +23,18 @@ class QualityStandard extends Model
         'is_active' => 'boolean',
     ];
 
-    public function business(): BelongsTo { return $this->belongsTo(Business::class); }
-    public function category(): BelongsTo { return $this->belongsTo(Category::class); }
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class);
+    }
 
-    public function scopeActive($query) { return $query->where('is_active', true); }
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 }

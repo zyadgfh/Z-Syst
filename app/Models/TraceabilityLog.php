@@ -106,7 +106,7 @@ class TraceabilityLog extends Model
     {
         $from = $this->fromWarehouse ? $this->fromWarehouse->name : 'External';
         $to = $this->toWarehouse ? $this->toWarehouse->name : 'External';
-        
+
         return "{$from} → {$to}";
     }
 
@@ -115,7 +115,7 @@ class TraceabilityLog extends Model
      */
     public function getTypeLabelAttribute(): string
     {
-        return match($this->type) {
+        return match ($this->type) {
             'transfer' => __('Transfer'),
             'sale' => __('Sale'),
             'purchase' => __('Purchase'),

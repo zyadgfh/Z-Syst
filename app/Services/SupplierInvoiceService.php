@@ -2,14 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Product;
+use App\Models\Purchase;
 use App\Models\SupplierInvoice;
 use App\Models\SupplierInvoiceItem;
 use App\Models\SupplierInvoicePayment;
-use App\Models\Purchase;
-use App\Models\PurchaseDetails;
-use App\Models\Product;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class SupplierInvoiceService
 {
@@ -19,16 +17,19 @@ class SupplierInvoiceService
     public function create(array $data): SupplierInvoice
     {
         return DB::transaction(function () use ($data) {
+            $businessId = $data['business_id'];
             $invoice = SupplierInvoice::create([
                 'supplier_id' => $data['supplier_id'] ?? null,
-                'business_id' => $data['business_id'],
+                'business_id' => $businessId,
                 'branch_id' => $data['branch_id'] ?? null,
                 'purchase_id' => $data['purchase_id'] ?? null,
                 'purchase_order_id' => $data['purchase_order_id'] ?? null,
+                'invoice_number' => $data['invoice_number'] ?? $this->generateInvoiceNumber($businessId),
                 'invoice_date' => $data['invoice_date'] ?? now(),
                 'due_date' => $data['due_date'] ?? now()->addDays(30),
                 'tax_amount' => $data['tax_amount'] ?? 0,
                 'discount_amount' => $data['discount_amount'] ?? 0,
+                'status' => SupplierInvoice::STATUS_PENDING,
                 'currency' => $data['currency'] ?? 'SAR',
                 'payment_terms' => $data['payment_terms'] ?? 'net_30',
                 'notes' => $data['notes'] ?? null,
@@ -59,15 +60,18 @@ class SupplierInvoiceService
     public function createFromPurchase(Purchase $purchase): SupplierInvoice
     {
         return DB::transaction(function () use ($purchase) {
+            $businessId = $purchase->business_id;
             $invoice = SupplierInvoice::create([
                 'supplier_id' => $purchase->party_id,
-                'business_id' => $purchase->business_id,
+                'business_id' => $businessId,
                 'branch_id' => $purchase->branch_id ?? null,
                 'purchase_id' => $purchase->id,
+                'invoice_number' => $this->generateInvoiceNumber($businessId),
                 'invoice_date' => now(),
                 'due_date' => now()->addDays(30),
                 'tax_amount' => $purchase->tax_amount ?? 0,
                 'discount_amount' => $purchase->discountAmount ?? 0,
+                'status' => SupplierInvoice::STATUS_PENDING,
                 'currency' => 'SAR',
                 'payment_terms' => 'net_30',
                 'notes' => "Created from Purchase: {$purchase->invoiceNumber}",
@@ -102,15 +106,22 @@ class SupplierInvoiceService
     {
         $product = Product::find($itemData['product_id'] ?? null);
 
+        $unitPrice = $itemData['unit_price'];
+        $quantity = $itemData['quantity'];
+        $discount = $itemData['discount'] ?? 0;
+        $tax = $itemData['tax'] ?? 0;
+        $total = ($unitPrice * $quantity) - $discount + $tax;
+
         $invoiceItem = SupplierInvoiceItem::create([
             'supplier_invoice_id' => $invoice->id,
             'product_id' => $itemData['product_id'] ?? null,
             'purchase_detail_id' => $itemData['purchase_detail_id'] ?? null,
             'description' => $itemData['description'] ?? ($product->name ?? 'Item'),
-            'quantity' => $itemData['quantity'],
-            'unit_price' => $itemData['unit_price'],
-            'discount' => $itemData['discount'] ?? 0,
-            'tax' => $itemData['tax'] ?? 0,
+            'quantity' => $quantity,
+            'unit_price' => $unitPrice,
+            'discount' => $discount,
+            'tax' => $tax,
+            'total' => $total,
             'batch_number' => $itemData['batch_number'] ?? null,
             'expiry_date' => $itemData['expiry_date'] ?? null,
             'notes' => $itemData['notes'] ?? null,
@@ -118,7 +129,7 @@ class SupplierInvoiceService
 
         $invoice->calculateTotal();
 
-        return $invoiceItem;
+        return $invoiceItem->refresh();
     }
 
     /**
@@ -163,7 +174,7 @@ class SupplierInvoiceService
      */
     public function approve(SupplierInvoice $invoice, int $userId): SupplierInvoice
     {
-        if (!$invoice->isPending()) {
+        if (! $invoice->isPending()) {
             throw new \Exception('Only pending invoices can be approved');
         }
 
@@ -180,7 +191,7 @@ class SupplierInvoiceService
      */
     public function reject(SupplierInvoice $invoice, int $userId, string $reason): SupplierInvoice
     {
-        if (!$invoice->isPending()) {
+        if (! $invoice->isPending()) {
             throw new \Exception('Only pending invoices can be rejected');
         }
 
@@ -218,6 +229,7 @@ class SupplierInvoiceService
                 'supplier_invoice_id' => $invoice->id,
                 'business_id' => $invoice->business_id,
                 'branch_id' => $invoice->branch_id,
+                'payment_number' => $paymentData['payment_number'] ?? $this->generatePaymentNumber($invoice->business_id),
                 'payment_date' => $paymentData['payment_date'] ?? now(),
                 'payment_method' => $paymentData['payment_method'],
                 'payment_reference' => $paymentData['payment_reference'] ?? null,
@@ -232,6 +244,18 @@ class SupplierInvoiceService
                 $this->uploadPaymentFile($payment, $paymentData['file']);
             }
 
+            // Update invoice paid_amount and balance
+            $invoice->increment('paid_amount', $payment->amount);
+            $invoice->refresh();
+            $invoice->balance = $invoice->total_amount - $invoice->paid_amount;
+            if ($invoice->balance <= 0) {
+                $invoice->status = SupplierInvoice::STATUS_PAID;
+                $invoice->balance = 0;
+            } elseif ($invoice->paid_amount > 0) {
+                $invoice->status = SupplierInvoice::STATUS_PARTIALLY_PAID;
+            }
+            $invoice->save();
+
             return $payment;
         });
     }
@@ -241,7 +265,7 @@ class SupplierInvoiceService
      */
     public function approvePayment(SupplierInvoicePayment $payment, int $userId): SupplierInvoicePayment
     {
-        if (!$payment->isPending()) {
+        if (! $payment->isPending()) {
             throw new \Exception('Only pending payments can be approved');
         }
 
@@ -344,7 +368,7 @@ class SupplierInvoiceService
         $pending = SupplierInvoice::forBusiness($businessId)->pending()->count();
         $overdue = SupplierInvoice::forBusiness($businessId)->overdue()->count();
         $unpaid = SupplierInvoice::forBusiness($businessId)->unpaid()->count();
-        
+
         $totalAmount = SupplierInvoice::forBusiness($businessId)->sum('total_amount');
         $paidAmount = SupplierInvoice::forBusiness($businessId)->sum('paid_amount');
         $balance = SupplierInvoice::forBusiness($businessId)->sum('balance');
@@ -376,7 +400,7 @@ class SupplierInvoiceService
 
         foreach ($invoices as $invoice) {
             $daysOverdue = $invoice->getDaysUntilDue();
-            
+
             if ($daysOverdue <= 0) {
                 $period30 += $invoice->balance;
             } elseif ($daysOverdue <= -30) {
@@ -402,10 +426,30 @@ class SupplierInvoiceService
      */
     public function delete(SupplierInvoice $invoice): bool
     {
-        if (!$invoice->isPending()) {
+        if (! $invoice->isPending()) {
             throw new \Exception('Only pending invoices can be deleted');
         }
 
         return $invoice->delete();
+    }
+
+    /**
+     * Generate a unique invoice number.
+     */
+    private function generateInvoiceNumber(int $businessId): string
+    {
+        $count = SupplierInvoice::where('business_id', $businessId)->count() + 1;
+
+        return 'INV-' . date('Y') . '-' . str_pad($count, 5, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Generate a unique payment number.
+     */
+    private function generatePaymentNumber(int $businessId): string
+    {
+        $count = SupplierInvoicePayment::where('business_id', $businessId)->count() + 1;
+
+        return 'PAY-' . date('Y') . '-' . str_pad($count, 5, '0', STR_PAD_LEFT);
     }
 }

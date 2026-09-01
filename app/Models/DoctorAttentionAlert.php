@@ -53,15 +53,20 @@ class DoctorAttentionAlert extends Model
      * Alert type constants
      */
     const TYPE_REFERRAL_DROP = 'referral_drop';
+
     const TYPE_INACTIVITY = 'inactivity';
+
     const TYPE_CRITICAL = 'critical';
 
     /**
      * Severity constants
      */
     const SEVERITY_LOW = 'low';
+
     const SEVERITY_MEDIUM = 'medium';
+
     const SEVERITY_HIGH = 'high';
+
     const SEVERITY_CRITICAL = 'critical';
 
     /**
@@ -201,7 +206,7 @@ class DoctorAttentionAlert extends Model
     /**
      * Mark alert as action taken.
      */
-    public function markAsActionTaken(string $details = null): void
+    public function markAsActionTaken(?string $details = null): void
     {
         $this->update([
             'action_taken' => true,

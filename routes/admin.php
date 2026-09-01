@@ -3,11 +3,17 @@
 use App\Http\Controllers\Admin as ADMIN;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'admin']], function () {
+Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'admin', 'clerk.auth']], function () {
     Route::get('/', [ADMIN\DashboardController::class, 'index'])->name('dashboard.index');
     Route::get('/get-dashboard', [ADMIN\DashboardController::class, 'getDashboardData'])->name('dashboard.data');
     Route::get('/yearly-subscriptions', [ADMIN\DashboardController::class, 'yearlySubscriptions'])->name('dashboard.subscriptions');
     Route::get('/plans-overview', [ADMIN\DashboardController::class, 'subscriptionPlan'])->name('dashboard.plans-overview');
+    
+    // Design System Dashboard
+    Route::get('/dashboard/design-system', [ADMIN\DashboardController::class, 'designSystem'])->name('dashboard.design-system');
+    
+    // Analytics - design system view
+    Route::get('/analytics', [ADMIN\AnalyticsController::class, 'index'])->name('analytics.index');
 
     Route::resource('users', ADMIN\UserController::class)->except('show');
     Route::post('users/filter', [ADMIN\UserController::class, 'zsystFilter'])->name('users.filter');
@@ -37,7 +43,7 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('plans-excel', [ADMIN\ZSystPlanController::class, 'exportExcel'])->name('plans.excel');
     Route::get('plans-csv', [ADMIN\ZSystPlanController::class, 'exportCsv'])->name('plans.csv');
     Route::get('plans/statistics', [ADMIN\ZSystPlanController::class, 'statistics'])->name('plans.statistics');
-    Route::get('plans/popular', [ADMIN\ZystPlanController::class, 'popularPlans'])->name('plans.popular');
+    Route::get('plans/popular', [ADMIN\ZSystPlanController::class, 'popularPlans'])->name('plans.popular');
     Route::get('plans/{plan}/usage', [ADMIN\ZSystPlanController::class, 'planUsage'])->name('plans.usage');
     Route::post('plans/calculate-proration', [ADMIN\ZSystPlanController::class, 'calculateProration'])->name('plans.calculate-proration');
 
@@ -92,17 +98,126 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::resource('roles', ADMIN\RoleController::class)->except('show');
     Route::resource('permissions', ADMIN\PermissionController::class)->only('index', 'store');
 
-    // Settings
+    // Settings (legacy)
     Route::resource('settings', ADMIN\SettingController::class)->only('index', 'update');
     Route::resource('system-settings', ADMIN\SystemSettingController::class)->only('index', 'store');
 
+    // Application Settings & User Preferences
+    Route::get('app-settings', [ADMIN\SettingsController::class, 'index'])->name('app-settings.index');
+    Route::get('app-settings/module/{module}', [ADMIN\SettingsController::class, 'getModuleSettings'])->name('app-settings.module');
+    Route::post('app-settings/update-system', [ADMIN\SettingsController::class, 'updateSystem'])->name('app-settings.update-system');
+    Route::post('app-settings/update-organization', [ADMIN\SettingsController::class, 'updateOrganization'])->name('app-settings.update-organization');
+    Route::post('app-settings/update-branch', [ADMIN\SettingsController::class, 'updateBranch'])->name('app-settings.update-branch');
+    Route::post('app-settings/update-role', [ADMIN\SettingsController::class, 'updateRole'])->name('app-settings.update-role');
+    Route::post('app-settings/update-user', [ADMIN\SettingsController::class, 'updateUser'])->name('app-settings.update-user');
+    Route::post('app-settings/update-bulk', [ADMIN\SettingsController::class, 'updateBulk'])->name('app-settings.update-bulk');
+    Route::post('app-settings/reset', [ADMIN\SettingsController::class, 'resetToInherited'])->name('app-settings.reset');
+    Route::post('app-settings/search', [ADMIN\SettingsController::class, 'search'])->name('app-settings.search');
+    Route::get('app-settings/audit-log', [ADMIN\SettingsController::class, 'getAuditLog'])->name('app-settings.audit-log');
+    Route::get('app-settings/definitions', [ADMIN\SettingsController::class, 'getDefinitions'])->name('app-settings.definitions');
+    Route::get('app-settings/effective', [ADMIN\SettingsController::class, 'getEffective'])->name('app-settings.effective');
+    Route::get('app-settings/module-meta', [ADMIN\SettingsController::class, 'getModuleMeta'])->name('app-settings.module-meta');
+    Route::post('app-settings/seed-defaults', [ADMIN\SettingsController::class, 'seedDefaults'])->name('app-settings.seed-defaults');
+
+    // Branch Settings (shortcut)
+    Route::get('branches/{branch}/settings', function ($branch) {
+        return redirect()->route('admin.app-settings.index', ['scope_type' => 'branch', 'scope_id' => $branch]);
+    })->name('branches.settings');
+
+    // Items / Products Management Module
+    // Specific routes MUST come before wildcard {id} to avoid capture
+    Route::get('items', [ADMIN\ProductController::class, 'index'])->name('items.index');
+    Route::get('items/create', [ADMIN\ProductController::class, 'create'])->name('items.create');
+    Route::post('items/store', [ADMIN\ProductController::class, 'store'])->name('items.store');
+    Route::get('items/search', [ADMIN\ProductController::class, 'search'])->name('items.search');
+    Route::get('items/export', [ADMIN\ProductController::class, 'export'])->name('items.export');
+    Route::get('items/generate-code', [ADMIN\ProductController::class, 'generateInternalCode'])->name('items.generate-code');
+    Route::get('items/statistics', [ADMIN\ProductController::class, 'statistics'])->name('items.statistics');
+    Route::get('items/{id}', [ADMIN\ProductController::class, 'show'])->name('items.show');
+    Route::get('items/{id}/edit', [ADMIN\ProductController::class, 'edit'])->name('items.edit');
+    Route::put('items/{product}/update', [ADMIN\ProductController::class, 'update'])->name('items.update');
+    Route::delete('items/{product}', [ADMIN\ProductController::class, 'destroy'])->name('items.destroy');
+    Route::middleware('throttle:20,1')->group(function () {
+        Route::post('items/{id}/stock-adjust', [ADMIN\ProductController::class, 'stockAdjust'])->name('items.stock-adjust');
+    });
+
+    // Sensitive items actions — rate-limited to prevent abuse
+    Route::middleware('throttle:30,1')->group(function () {
+        Route::post('items/check-duplicates', [ADMIN\ProductController::class, 'checkDuplicates'])->name('items.check-duplicates');
+        Route::post('items/search-barcode', [ADMIN\ProductController::class, 'searchByBarcode'])->name('items.search-barcode');
+        Route::post('items/{id}/print-barcode', [ADMIN\ProductController::class, 'printBarcode'])->name('items.print-barcode');
+    });
+    Route::middleware('throttle:5,1')->group(function () {
+        Route::post('items/bulk-update', [ADMIN\ProductController::class, 'bulkUpdate'])->name('items.bulk-update');
+        Route::post('items/import', [ADMIN\ProductController::class, 'import'])->name('items.import');
+    });
+
+    // Legacy Products routes (redirect to items)
+    Route::get('products', function () {
+        return redirect()->route('admin.items.index');
+    })->name('products.index');
+
+    // Purchase Invoices (Admin Web)
+    Route::get('purchases', [ADMIN\PurchaseInvoiceController::class, 'index'])->name('purchases.index');
+    Route::get('purchases/create', [ADMIN\PurchaseInvoiceController::class, 'create'])->name('purchases.create');
+    Route::post('purchases/store-ajax', [ADMIN\PurchaseInvoiceController::class, 'storeAjax'])->name('purchases.store-ajax');
+    Route::get('purchases/{purchase}', [ADMIN\PurchaseInvoiceController::class, 'show'])->name('purchases.show');
+    Route::get('purchases/{purchase}/edit', [ADMIN\PurchaseInvoiceController::class, 'edit'])->name('purchases.edit');
+    Route::put('purchases/{purchase}/update-ajax', [ADMIN\PurchaseInvoiceController::class, 'updateAjax'])->name('purchases.update-ajax');
+    Route::post('purchases/{purchase}/cancel', [ADMIN\PurchaseInvoiceController::class, 'cancel'])->name('purchases.cancel');
+    Route::post('purchases/search-barcode', [ADMIN\PurchaseInvoiceController::class, 'searchBarcode'])->name('purchases.search-barcode');
+    Route::post('purchases/search-products', [ADMIN\PurchaseInvoiceController::class, 'searchProducts'])->name('purchases.search-products');
+    Route::get('purchases/statistics', [ADMIN\PurchaseInvoiceController::class, 'statistics'])->name('purchases.statistics');
+
+    // Purchase Returns (Admin Web)
+    Route::get('purchases/returns', [ADMIN\PurchaseReturnController::class, 'index'])->name('purchases.returns.index');
+    Route::get('purchases/returns/create', [ADMIN\PurchaseReturnController::class, 'create'])->name('purchases.returns.create');
+    Route::post('purchases/returns/store', [ADMIN\PurchaseReturnController::class, 'store'])->name('purchases.returns.store');
+    Route::get('purchases/returns/{purchaseReturn}', [ADMIN\PurchaseReturnController::class, 'show'])->name('purchases.returns.show');
+
+    // Supplier Dashboard
+    Route::get('suppliers/{supplier}/dashboard', [ADMIN\SupplierDashboardController::class, 'index'])->name('suppliers.dashboard');
+    Route::get('suppliers/{supplier}/ledger', [ADMIN\SupplierDashboardController::class, 'ledger'])->name('suppliers.ledger');
+    Route::post('suppliers/{supplier}/payment', [ADMIN\SupplierDashboardController::class, 'recordPayment'])->name('suppliers.payment');
+
+    // Purchase Reports
+    Route::get('purchases/reports', [ADMIN\PurchaseReportController::class, 'index'])->name('purchases.reports');
+    Route::get('purchases/reports/supplier-balance', [ADMIN\PurchaseReportController::class, 'supplierBalance'])->name('purchases.supplier-balance');
+    Route::get('purchases/reports/stock-movements', [ADMIN\PurchaseReportController::class, 'stockMovements'])->name('purchases.stock-movements');
+
+    // Security Dashboard
+    Route::get('security-dashboard', [ADMIN\SecurityDashboardController::class, 'index'])->name('security-dashboard.index');
+
+    // Vulnerability Exception Tracking
+    Route::resource('vulnerability-exceptions', ADMIN\VulnerabilityExceptionController::class)->except('edit', 'update', 'destroy');
+    Route::post('vulnerability-exceptions/{vulnerabilityException}/approve', [ADMIN\VulnerabilityExceptionController::class, 'approve'])->name('vulnerability-exceptions.approve');
+    Route::post('vulnerability-exceptions/{vulnerabilityException}/reject', [ADMIN\VulnerabilityExceptionController::class, 'reject'])->name('vulnerability-exceptions.reject');
+    Route::post('vulnerability-exceptions/{vulnerabilityException}/revoke', [ADMIN\VulnerabilityExceptionController::class, 'revoke'])->name('vulnerability-exceptions.revoke');
+    Route::post('vulnerability-exceptions/process-expirations', [ADMIN\VulnerabilityExceptionController::class, 'processExpirations'])->name('vulnerability-exceptions.process-expirations');
+    Route::get('vulnerability-exceptions/statistics', [ADMIN\VulnerabilityExceptionController::class, 'statistics'])->name('vulnerability-exceptions.statistics');
+
+    // Maintenance Mode
+    Route::get('maintenance', [ADMIN\MaintenanceController::class, 'index'])->name('maintenance.index');
+    Route::get('maintenance/status', [ADMIN\MaintenanceController::class, 'getStatus'])->name('maintenance.status');
+    Route::get('maintenance/history', [ADMIN\MaintenanceController::class, 'history'])->name('maintenance.history');
+    
+    // Maintenance Mode Actions (Super Admin Only)
+    Route::middleware(['role:superadmin'])->group(function () {
+        Route::post('maintenance/activate', [ADMIN\MaintenanceController::class, 'activate'])->name('maintenance.activate');
+        Route::post('maintenance/deactivate', [ADMIN\MaintenanceController::class, 'deactivate'])->name('maintenance.deactivate');
+        Route::post('maintenance/schedule', [ADMIN\MaintenanceController::class, 'schedule'])->name('maintenance.schedule');
+        Route::put('maintenance/{id}', [ADMIN\MaintenanceController::class, 'update'])->name('maintenance.update');
+    });
+
     // Gateway
     Route::resource('gateways', ADMIN\GatewayController::class)->only('index', 'update');
-    
-    // Tenant Payment Settings
-    Route::resource('tenant-payment-settings', ADMIN\TenantPaymentSettingController::class);
-    Route::post('tenant-payment-settings/{id}/toggle', [ADMIN\TenantPaymentSettingController::class, 'toggleStatus'])->name('tenant-payment-settings.toggle');
-    Route::get('tenant-payment-settings/tenant/{tenantId}', [ADMIN\TenantPaymentSettingController::class, 'getTenantSettings'])->name('tenant-payment-settings.tenant');
+
+    // Payment Gateways (Multi-tenant Egyptian payment gateways)
+    Route::resource('payment-gateways', ADMIN\PaymentGatewayController::class)->except('show');
+    Route::post('payment-gateways/toggle-status/{id}', [ADMIN\PaymentGatewayController::class, 'toggleStatus'])->name('payment-gateways.toggle-status');
+    Route::get('payment-gateways/{id}/transactions', [ADMIN\PaymentGatewayController::class, 'transactions'])->name('payment-gateways.transactions');
+    Route::get('payment-gateways/get-required-fields', [ADMIN\PaymentGatewayController::class, 'getRequiredFields'])->name('payment-gateways.get-required-fields');
+    Route::post('payment-gateways/test-configuration', [ADMIN\PaymentGatewayController::class, 'testConfiguration'])->name('payment-gateways.test-configuration');
 
     Route::resource('currencies', ADMIN\ZSystCurrencyController::class)->except('show');
     Route::post('currencies/filter', [ADMIN\ZSystCurrencyController::class, 'zsystFilter'])->name('currencies.filter');
@@ -174,6 +289,11 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('traceability/recall-statistics', [ADMIN\TraceabilityController::class, 'recallStatistics'])->name('traceability.recall-statistics');
     Route::get('traceability/expiring-batches', [ADMIN\TraceabilityController::class, 'expiringBatches'])->name('traceability.expiring-batches');
     Route::get('traceability/expired-batches', [ADMIN\TraceabilityController::class, 'expiredBatches'])->name('traceability.expired-batches');
+    Route::get('traceability/recalls/{recall}/summary', [ADMIN\TraceabilityController::class, 'recallSummary'])->name('traceability.recall-summary');
+    Route::post('traceability/recalls/{recall}/quarantine', [ADMIN\TraceabilityController::class, 'quarantineBatch'])->name('traceability.quarantine-batch');
+    Route::post('traceability/recalls/{recall}/release', [ADMIN\TraceabilityController::class, 'releaseBatch'])->name('traceability.release-batch');
+    Route::post('traceability/recalls/{recall}/dispose', [ADMIN\TraceabilityController::class, 'disposeBatch'])->name('traceability.dispose-batch');
+    Route::get('traceability/detect-affected', [ADMIN\TraceabilityController::class, 'detectAffectedBatches'])->name('traceability.detect-affected');
 
     // Loyalty & CRM
     Route::get('loyalty', [ADMIN\LoyaltyController::class, 'index'])->name('loyalty.index');
@@ -191,6 +311,9 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('loyalty/customer-loyalty', [ADMIN\LoyaltyController::class, 'customerLoyalty'])->name('loyalty.customer-loyalty');
     Route::get('loyalty/customer-interactions', [ADMIN\LoyaltyController::class, 'customerInteractions'])->name('loyalty.customer-interactions');
     Route::get('loyalty/top-loyal-customers', [ADMIN\LoyaltyController::class, 'topLoyalCustomers'])->name('loyalty.top-loyal-customers');
+    Route::get('loyalty/analytics', [ADMIN\LoyaltyController::class, 'analytics'])->name('loyalty.analytics');
+    Route::get('loyalty/expiring-soonest', [ADMIN\LoyaltyController::class, 'expiringSoonest'])->name('loyalty.expiring-soonest');
+    Route::post('loyalty/send-expiry-reminder', [ADMIN\LoyaltyController::class, 'sendExpiryReminder'])->name('loyalty.send-expiry-reminder');
 
     // Receipts
     Route::get('receipts', [ADMIN\ReceiptController::class, 'index'])->name('receipts.index');
@@ -236,7 +359,10 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
 
     // Purchase Orders
     Route::resource('purchase-orders', ADMIN\PurchaseOrderController::class)->except('show');
-    Route::get('purchase-orders/{purchaseOrder}', [ADMIN\PurchaseOrderController::class, 'show'])->name('purchase-orders.show');
+    // Specific routes BEFORE wildcard to avoid {purchaseOrder} capturing them
+    Route::get('purchase-orders/pending', [ADMIN\PurchaseOrderController::class, 'pending'])->name('purchase-orders.pending');
+    Route::get('purchase-orders/overdue', [ADMIN\PurchaseOrderController::class, 'overdue'])->name('purchase-orders.overdue');
+    Route::get('purchase-orders/statistics', [ADMIN\PurchaseOrderController::class, 'statistics'])->name('purchase-orders.statistics');
     Route::post('purchase-orders/{purchaseOrder}/send', [ADMIN\PurchaseOrderController::class, 'send'])->name('purchase-orders.send');
     Route::post('purchase-orders/{purchaseOrder}/approve', [ADMIN\PurchaseOrderController::class, 'approve'])->name('purchase-orders.approve');
     Route::post('purchase-orders/{purchaseOrder}/reject', [ADMIN\PurchaseOrderController::class, 'reject'])->name('purchase-orders.reject');
@@ -244,9 +370,7 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::post('purchase-orders/{purchaseOrder}/restore', [ADMIN\PurchaseOrderController::class, 'restore'])->name('purchase-orders.restore');
     Route::post('purchase-orders/{purchaseOrder}/convert', [ADMIN\PurchaseOrderController::class, 'convertToPurchase'])->name('purchase-orders.convert');
     Route::get('purchase-orders/{purchaseOrder}/pdf', [ADMIN\PurchaseOrderController::class, 'pdf'])->name('purchase-orders.pdf');
-    Route::get('purchase-orders/pending', [ADMIN\PurchaseOrderController::class, 'pending'])->name('purchase-orders.pending');
-    Route::get('purchase-orders/overdue', [ADMIN\PurchaseOrderController::class, 'overdue'])->name('purchase-orders.overdue');
-    Route::get('purchase-orders/statistics', [ADMIN\PurchaseOrderController::class, 'statistics'])->name('purchase-orders.statistics');
+    Route::get('purchase-orders/{purchaseOrder}', [ADMIN\PurchaseOrderController::class, 'show'])->name('purchase-orders.show');
 
     // GRN (Goods Received Notes)
     Route::resource('grn', ADMIN\GRNController::class)->except('show');
@@ -322,4 +446,62 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
         Route::post('claims/{claim}/payment', [ADMIN\InsuranceClaimController::class, 'processPayment'])->name('claims.payment');
         Route::get('claims/statistics', [ADMIN\InsuranceClaimController::class, 'statistics'])->name('claims.statistics');
     });
+
+    // Online Store - Customer Orders
+    Route::get('customer-orders', [ADMIN\CustomerOrderController::class, 'index'])->name('customer-orders.index');
+    Route::get('customer-orders/{customerOrder}', [ADMIN\CustomerOrderController::class, 'show'])->name('customer-orders.show');
+    Route::put('customer-orders/{customerOrder}/status', [ADMIN\CustomerOrderController::class, 'updateStatus'])->name('customer-orders.update-status');
+    Route::put('customer-orders/{customerOrder}/payment', [ADMIN\CustomerOrderController::class, 'updatePayment'])->name('customer-orders.update-payment');
+    Route::get('customer-orders/export/csv', [ADMIN\CustomerOrderController::class, 'exportCsv'])->name('customer-orders.export-csv');
+
+    // Online Store Analytics Dashboard
+    Route::get('online-store', [ADMIN\OnlineStoreController::class, 'index'])->name('online-store.index');
+
+    // Product Reviews Management
+    Route::get('reviews', [ADMIN\ReviewController::class, 'index'])->name('reviews.index');
+    Route::post('reviews/{review}/approve', [ADMIN\ReviewController::class, 'approve'])->name('reviews.approve');
+    Route::post('reviews/{review}/reject', [ADMIN\ReviewController::class, 'reject'])->name('reviews.reject');
+    Route::delete('reviews/{review}', [ADMIN\ReviewController::class, 'destroy'])->name('reviews.destroy');
+
+    // Coupons Management
+    Route::resource('coupons', ADMIN\CouponController::class);
+    Route::post('coupons/{coupon}/toggle-status', [ADMIN\CouponController::class, 'toggleStatus'])->name('coupons.toggle-status');
+    Route::post('coupons/bulk-delete', [ADMIN\CouponController::class, 'bulkDelete'])->name('coupons.bulk-delete');
+    Route::post('coupons/bulk-toggle-status', [ADMIN\CouponController::class, 'bulkToggleStatus'])->name('coupons.bulk-toggle-status');
+    Route::get('coupons/analytics', [ADMIN\CouponAnalyticsController::class, 'index'])->name('coupons.analytics');
+    Route::get('coupons/import', [ADMIN\CouponImportController::class, 'index'])->name('coupons.import');
+    Route::post('coupons/import/preview', [ADMIN\CouponImportController::class, 'preview'])->name('coupons.import.preview');
+    Route::post('coupons/import/confirm', [ADMIN\CouponImportController::class, 'confirm'])->name('coupons.import.confirm');
+    Route::get('coupons/import/sample', [ADMIN\CouponImportController::class, 'downloadSample'])->name('coupons.import.sample');
+    Route::get('coupons/bulk-generate', [ADMIN\CouponController::class, 'bulkGenerateForm'])->name('coupons.bulk-generate');
+    Route::post('coupons/bulk-generate', [ADMIN\CouponController::class, 'bulkGenerate'])->name('coupons.bulk-generate.store');
+    Route::post('coupons/export-codes', [ADMIN\CouponController::class, 'exportCodes'])->name('coupons.export-codes');
+    Route::post('coupons/export-csv', [ADMIN\CouponController::class, 'exportCsv'])->name('coupons.export-csv');
+    Route::get('coupons/qr-codes', [ADMIN\CouponController::class, 'qrCodes'])->name('coupons.qr-codes');
+
+    // Inventory Alerts
+    Route::get('inventory-alerts', [ADMIN\InventoryAlertController::class, 'index'])->name('inventory-alerts.index');
+    Route::post('inventory-alerts/{alert}/acknowledge', [ADMIN\InventoryAlertController::class, 'acknowledge'])->name('inventory-alerts.acknowledge');
+    Route::post('inventory-alerts/acknowledge-all', [ADMIN\InventoryAlertController::class, 'acknowledgeAll'])->name('inventory-alerts.acknowledge-all');
+    Route::post('inventory-alerts/scan', [ADMIN\InventoryAlertController::class, 'runScan'])->name('inventory-alerts.scan');
+    Route::get('inventory-alerts/chart-data', [ADMIN\InventoryAlertController::class, 'chartData'])->name('inventory-alerts.chart-data');
+    Route::get('inventory-alerts/bell-data', [ADMIN\InventoryAlertController::class, 'bellData'])->name('inventory-alerts.bell-data');
+    Route::post('inventory-alerts/{alert}/acknowledge-alert', [ADMIN\InventoryAlertController::class, 'acknowledgeAlert'])->name('inventory-alerts.acknowledge-alert');
+
+    // Push Notification Preferences & Device Management
+    Route::get('push-notifications', [ADMIN\PushNotificationPreferencesController::class, 'index'])->name('push-notifications.index');
+    Route::post('push-notifications/update-preferences', [ADMIN\PushNotificationPreferencesController::class, 'updatePreferences'])->name('push-notifications.update-preferences');
+    Route::post('push-notifications/toggle-type', [ADMIN\PushNotificationPreferencesController::class, 'toggleType'])->name('push-notifications.toggle-type');
+    Route::post('push-notifications/devices/{device}/deactivate', [ADMIN\PushNotificationPreferencesController::class, 'deactivateDevice'])->name('push-notifications.deactivate-device');
+    Route::delete('push-notifications/devices/{device}/remove', [ADMIN\PushNotificationPreferencesController::class, 'removeDevice'])->name('push-notifications.remove-device');
+    Route::post('push-notifications/deactivate-all', [ADMIN\PushNotificationPreferencesController::class, 'deactivateAllDevices'])->name('push-notifications.deactivate-all');
+
+    // Comparison Analytics
+    Route::get('comparison-analytics', [ADMIN\ComparisonAnalyticsController::class, 'index'])->name('comparison-analytics.index');
+
+    // Sales Report
+    Route::get('sales-report', [ADMIN\SalesReportController::class, 'index'])->name('sales-report.index');
+    Route::get('sales-report/chart-data', [ADMIN\SalesReportController::class, 'chartData'])->name('sales-report.chart-data');
 });
+
+

@@ -148,7 +148,10 @@ class LoyaltyApiTest extends TestCase
         $response->assertOk()
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'points', 'type'],
+                    'current_balance',
+                    'total_earned',
+                    'total_redeemed',
+                    'transactions',
                 ],
             ]);
     }
