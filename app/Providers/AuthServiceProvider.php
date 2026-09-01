@@ -35,9 +35,22 @@ use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\FinancialAuditLog;
 use App\Models\StockMovement;
+use App\Models\Banner;
 use App\Models\BatchLot;
+use App\Models\Business;
+use App\Models\BusinessCategory;
+use App\Models\Coupon;
+use App\Models\Currency;
 use App\Models\Notification;
+use App\Models\Plan;
+use App\Policies\BannerPolicy;
+use App\Policies\BusinessCategoryPolicy;
+use App\Policies\BusinessPolicy;
 use App\Policies\CategoryPolicy;
+use App\Policies\CouponPolicy;
+use App\Policies\CurrencyPolicy;
+use App\Policies\PlanPolicy;
+use App\Policies\RolePolicy;
 use App\Policies\ExpensePolicy;
 use App\Policies\GRNPolicy;
 use App\Policies\IncomePolicy;
@@ -115,6 +128,14 @@ class AuthServiceProvider extends ServiceProvider
         StockMovement::class => StockMovementPolicy::class,
         BatchLot::class => BatchLotPolicy::class,
         Notification::class => NotificationPolicy::class,
+        Banner::class => BannerPolicy::class,
+        Business::class => BusinessPolicy::class,
+        BusinessCategory::class => BusinessCategoryPolicy::class,
+        Currency::class => CurrencyPolicy::class,
+        Plan::class => PlanPolicy::class,
+        Coupon::class => CouponPolicy::class,
+        User::class => UserPolicy::class,
+        \Spatie\Permission\Models\Role::class => RolePolicy::class,
     ];
 
     /**

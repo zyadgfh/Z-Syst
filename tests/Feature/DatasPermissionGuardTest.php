@@ -363,6 +363,55 @@ class DatasPermissionGuardTest extends TestCase
     }
 
     // =========================================================================
+    // Policies registered in AuthServiceProvider
+    // =========================================================================
+
+    public function test_all_admin_policies_are_registered(): void
+    {
+        $authService = file_get_contents(base_path('app/Providers/AuthServiceProvider.php'));
+
+        $expectedPolicies = [
+            'Banner' => 'BannerPolicy',
+            'Business' => 'BusinessPolicy',
+            'BusinessCategory' => 'BusinessCategoryPolicy',
+            'Currency' => 'CurrencyPolicy',
+            'Plan' => 'PlanPolicy',
+            'Coupon' => 'CouponPolicy',
+            'User' => 'UserPolicy',
+            'Role' => 'RolePolicy',
+        ];
+
+        foreach ($expectedPolicies as $model => $policy) {
+            $this->assertStringContainsString(
+                "{$model}::class => {$policy}::class",
+                $authService,
+                "Policy mapping {$model} → {$policy} not registered in AuthServiceProvider"
+            );
+        }
+    }
+
+    public function test_all_policy_files_exist(): void
+    {
+        $policies = [
+            'BannerPolicy',
+            'BusinessPolicy',
+            'BusinessCategoryPolicy',
+            'CurrencyPolicy',
+            'PlanPolicy',
+            'CouponPolicy',
+            'UserPolicy',
+            'RolePolicy',
+        ];
+
+        foreach ($policies as $policy) {
+            $this->assertFileExists(
+                base_path("app/Policies/{$policy}.php"),
+                "Policy file missing: {$policy}.php"
+            );
+        }
+    }
+
+    // =========================================================================
     // Security: No unescaped user input in Blade views
     // =========================================================================
 
