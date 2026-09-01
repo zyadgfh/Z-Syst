@@ -31,7 +31,7 @@
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="#" onclick="bulkUpdateAction()"><i class="fas fa-edit me-2"></i>{{ __('Bulk Update') }}</a></li>
                                 </ul>
-                                <input type="file" id="import-file" accept=".csv,.txt" style="display:none" onchange="importItems(this)">
+                                <input type="file" id="import-file" accept=".csv,.txt" class="d-none" onchange="importItems(this)">
                             </div>
                             <button class="btn btn-outline-secondary" onclick="toggleFilters()">
                                 <i class="fas fa-filter me-1"></i>{{ __('Filters') }}
@@ -137,7 +137,7 @@
                     </div>
 
                     {{-- Bulk Actions Bar --}}
-                    <div id="bulkActionsBar" class="px-3 pb-2" style="display:none">
+                    <div id="bulkActionsBar" class="px-3 pb-2" class="d-none">
                         <div class="d-flex align-items-center gap-3">
                             <span id="selectedCount" class="badge badge-primary">0 {{ __('selected') }}</span>
                             <button class="btn btn-sm btn-outline-primary" onclick="bulkUpdateAction()"><i class="fas fa-edit me-1"></i>{{ __('Update') }}</button>
@@ -157,15 +157,15 @@
                                         </th>
                                         <th class="table-header-content">{{ __('SL') }}.</th>
                                         <th class="table-header-content col-item" data-col="name">{{ __('Item Name') }}</th>
-                                        <th class="table-header-content col-item" data-col="sku" style="display:none">{{ __('SKU') }}</th>
-                                        <th class="table-header-content col-item" data-col="barcode" style="display:none">{{ __('Barcode') }}</th>
+                                        <th class="table-header-content col-item" data-col="sku" class="d-none">{{ __('SKU') }}</th>
+                                        <th class="table-header-content col-item" data-col="barcode" class="d-none">{{ __('Barcode') }}</th>
                                         <th class="table-header-content col-item" data-col="category">{{ __('Category') }}</th>
-                                        <th class="table-header-content col-item" data-col="manufacturer" style="display:none">{{ __('Manufacturer') }}</th>
+                                        <th class="table-header-content col-item" data-col="manufacturer" class="d-none">{{ __('Manufacturer') }}</th>
                                         <th class="table-header-content col-item" data-col="unit">{{ __('Unit') }}</th>
-                                        <th class="table-header-content col-item" data-col="purchase_price" style="display:none">{{ __('Purchase Price') }}</th>
+                                        <th class="table-header-content col-item" data-col="purchase_price" class="d-none">{{ __('Purchase Price') }}</th>
                                         <th class="table-header-content col-item" data-col="selling_price">{{ __('Selling Price') }}</th>
                                         <th class="table-header-content col-item" data-col="stock">{{ __('Stock') }}</th>
-                                        <th class="table-header-content col-item" data-col="reorder" style="display:none">{{ __('Reorder Point') }}</th>
+                                        <th class="table-header-content col-item" data-col="reorder" class="d-none">{{ __('Reorder Point') }}</th>
                                         <th class="table-header-content col-item" data-col="status">{{ __('Status') }}</th>
                                         <th class="table-header-content">{{ __('Actions') }}</th>
                                     </tr>
@@ -190,22 +190,22 @@
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="table-single-content col-item" data-col="sku" style="display:none">
+                                            <td class="table-single-content col-item" data-col="sku" class="d-none">
                                                 <code>{{ $product->sku ?? $product->productCode ?? '-' }}</code>
                                             </td>
-                                            <td class="table-single-content col-item" data-col="barcode" style="display:none">
+                                            <td class="table-single-content col-item" data-col="barcode" class="d-none">
                                                 {{ $product->barcode ?? '-' }}
                                             </td>
                                             <td class="table-single-content col-item" data-col="category">
                                                 <span class="badge badge-soft-info">{{ $product->category->categoryName ?? '-' }}</span>
                                             </td>
-                                            <td class="table-single-content col-item" data-col="manufacturer" style="display:none">
+                                            <td class="table-single-content col-item" data-col="manufacturer" class="d-none">
                                                 {{ $product->manufacturer->name ?? '-' }}
                                             </td>
                                             <td class="table-single-content col-item" data-col="unit">
                                                 {{ $product->unit->unitName ?? '-' }}
                                             </td>
-                                            <td class="table-single-content col-item" data-col="purchase_price" style="display:none">
+                                            <td class="table-single-content col-item" data-col="purchase_price" class="d-none">
                                                 {{ number_format($product->purchase_with_tax ?? $product->purchase_without_tax ?? 0, 2) }}
                                             </td>
                                             <td class="table-single-content col-item" data-col="selling_price">
@@ -227,7 +227,7 @@
                                                     <span class="text-muted">—</span>
                                                 @endif
                                             </td>
-                                            <td class="table-single-content col-item" data-col="reorder" style="display:none">
+                                            <td class="table-single-content col-item" data-col="reorder" class="d-none">
                                                 {{ $product->reorder_point ?? '-' }}
                                             </td>
                                             <td class="table-single-content col-item" data-col="status">

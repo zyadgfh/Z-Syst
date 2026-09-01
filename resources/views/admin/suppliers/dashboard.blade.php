@@ -71,7 +71,7 @@
                                 <div class="card-header"><strong>{{ __('Supplier Information') }}</strong></div>
                                 <div class="card-body">
                                     <table class="table table-borderless mb-0">
-                                        <tr><td class="text-muted" style="width:120px">{{ __('Name') }}</td><td>{{ $supplier->name }}</td></tr>
+                                        <tr><td class="text-muted" class="w-120">{{ __('Name') }}</td><td>{{ $supplier->name }}</td></tr>
                                         <tr><td class="text-muted">{{ __('Phone') }}</td><td>{{ $supplier->phone ?? '—' }}</td></tr>
                                         <tr><td class="text-muted">{{ __('Email') }}</td><td>{{ $supplier->email ?? '—' }}</td></tr>
                                         <tr><td class="text-muted">{{ __('Address') }}</td><td>{{ $supplier->address ?? '—' }}</td></tr>

@@ -25,13 +25,13 @@
         @csrf
         <div style="display: flex; gap: 12px; align-items: flex-end;">
             <div style="flex: 1;">
-                <label style="display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px;">
-                    {{ __('New Category Name') }} <span style="color: #ef4444;">*</span>
+                <label class="form-label-md">
+                    {{ __('New Category Name') }} <span class="text-red">*</span>
                 </label>
                 <input type="text" name="categoryName" value="{{ old('categoryName') }}"
                     style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none;"
                     placeholder="{{ __('e.g. Antibiotics, Vitamins, Supplements') }}" required>
-                @error('categoryName') <p style="color: #ef4444; font-size: 12px; margin-top: 4px;">{{ $message }}</p> @enderror
+                @error('categoryName') <p class="text-red-sm">{{ $message }}</p> @enderror
             </div>
             <button type="submit" name="action" value="add" style="padding: 10px 20px; font-size: 14px; font-weight: 500; background: #22c55e; color: #fff; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap;">
                 <i class="fas fa-plus"></i> {{ __('Add') }}

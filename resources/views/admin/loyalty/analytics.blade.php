@@ -3,14 +3,14 @@
 @section('title', 'تحليلات نقاط الولاء')
 
 @section('main_content')
-    <div class="container-fluid" style="padding: 24px;">
+    <div class="container-fluid" class="card-body-lg">
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div class="d-flex align-items-center gap-3">
-                <a href="{{ route('admin.loyalty.index') }}" style="color: #007aff; text-decoration: none;">
+                <a href="{{ route('admin.loyalty.index') }}" class="link-blue">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                 </a>
-                <h4 style="font-weight: 700; margin: 0;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
+                <h4 class="heading-bold">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" class="icon-align-lg">
                         <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
                     </svg>
                     تحليلات نقاط الولاء
@@ -49,16 +49,16 @@
         <div class="row g-4">
             {{-- Monthly Trend Chart --}}
             <div class="col-lg-8">
-                <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; overflow: hidden;">
-                    <div style="padding: 16px 20px; border-bottom: 1px solid #f0f0f2; background: #fafafa;">
-                        <h5 style="margin: 0; font-size: 16px; font-weight: 700;">📈 الاتجاه الشهري (12 شهر)</h5>
+                <div class="card" class="card-clean">
+                    <div class="table-section-header">
+                        <h5 class="section-title">📈 الاتجاه الشهري (12 شهر)</h5>
                         <div style="display: flex; gap: 16px; margin-top: 8px; font-size: 12px;">
                             <span><span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #34c759; margin-right: 4px;"></span>صدرت</span>
                             <span><span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #007aff; margin-right: 4px;"></span>مستبدلة</span>
                             <span><span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #ff9500; margin-right: 4px;"></span>منتهية</span>
                         </div>
                     </div>
-                    <div style="padding: 20px;">
+                    <div class="card-body">
                         @if ($monthlyTrend->isEmpty())
                             <div style="text-align: center; color: #86868b; padding: 40px;">لا توجد بيانات كافية — سيظهر الرسم بعد استخدام نقاط الولاء</div>
                         @else
@@ -89,11 +89,11 @@
 
             {{-- Points by Type (Pie-like) --}}
             <div class="col-lg-4">
-                <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; overflow: hidden;">
-                    <div style="padding: 16px 20px; border-bottom: 1px solid #f0f0f2; background: #fafafa;">
-                        <h5 style="margin: 0; font-size: 16px; font-weight: 700;">🔵 توزيع النقاط حسب النوع</h5>
+                <div class="card" class="card-clean">
+                    <div class="table-section-header">
+                        <h5 class="section-title">🔵 توزيع النقاط حسب النوع</h5>
                     </div>
-                    <div style="padding: 20px;">
+                    <div class="card-body">
                         @php
                             $total = $byType->sum();
                             $typeColors = ['earned' => '#34c759', 'redeemed' => '#007aff', 'expired' => '#ff9500'];
@@ -117,29 +117,29 @@
         </div>
 
         {{-- Top Earners --}}
-        <div class="card mt-4" style="border-radius: 14px; border: 1px solid #e5e5ea; overflow: hidden;">
-            <div style="padding: 16px 20px; border-bottom: 1px solid #f0f0f2; background: #fafafa;">
-                <h5 style="margin: 0; font-size: 16px; font-weight: 700;">🏆 أكثر الأعضاء كسباً للنقاط</h5>
+        <div class="card mt-4" class="card-clean">
+            <div class="table-section-header">
+                <h5 class="section-title">🏆 أكثر الأعضاء كسباً للنقاط</h5>
             </div>
             @if ($topEarners->isEmpty())
-                <div style="padding: 32px; text-align: center; color: #86868b;">لا توجد بيانات بعد</div>
+                <div class="empty-state-placeholder">لا توجد بيانات بعد</div>
             @else
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0" style="font-size: 14px;">
+                    <table class="table table-hover mb-0" class="fs-14">
                         <thead style="background: #f8f9fa;">
                             <tr>
-                                <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px;">#</th>
-                                <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px;">العضو</th>
-                                <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px;">النقاط المكتسبة</th>
-                                <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px;">عدد المعاملات</th>
+                                <th class="tab-btn">#</th>
+                                <th class="tab-btn">العضو</th>
+                                <th class="tab-btn">النقاط المكتسبة</th>
+                                <th class="tab-btn">عدد المعاملات</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($topEarners as $item)
                                 @php $user = $item['user']; @endphp
-                                <tr style="border-bottom: 1px solid #f0f0f2;">
+                                <tr class="border-bottom-light">
                                     <td style="padding: 12px 16px; font-weight: 700; color: {{ $loop->index < 3 ? '#ff9500' : '#6e6e73' }};">{{ $loop->index + 1 }}</td>
-                                    <td style="padding: 12px 16px;">
+                                    <td class="card-body-sm">
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                             @if ($user?->image)
                                                 <img src="{{ asset($user->image) }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
@@ -152,7 +152,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td style="padding: 12px 16px;">
+                                    <td class="card-body-sm">
                                         <span style="background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 6px; font-weight: 700;">{{ number_format($item['total_earned']) }} نقطة</span>
                                     </td>
                                     <td style="padding: 12px 16px; font-weight: 600;">{{ $item['transactions'] }}</td>

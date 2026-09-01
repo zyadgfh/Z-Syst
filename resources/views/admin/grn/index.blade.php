@@ -7,7 +7,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h2>{{ __('Goods Received Notes (GRN)') }}</h2>
                 <a href="{{ route('admin.grn.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Create GRN
+                    <i class="fas fa-plus"></i> {{ __("Create GRN") }}
                 </a>
             </div>
         </div>
@@ -20,30 +20,30 @@
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Supplier</label>
+                                <label>{{ __("Supplier") }}</label>
                                 <select class="form-control" id="filter-supplier">
-                                    <option value="">All Suppliers</option>
+                                    <option value="">{{ __("All Suppliers") }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Status</label>
+                                <label>{{ __("Status") }}</label>
                                 <select class="form-control" id="filter-status">
-                                    <option value="">All Status</option>
-                                    <option value="pending">Pending</option>
-                                    <option value="verified">Verified</option>
-                                    <option value="accepted">Accepted</option>
-                                    <option value="partially_accepted">Partially Accepted</option>
-                                    <option value="rejected">Rejected</option>
+                                    <option value="">{{ __("All Status") }}</option>
+                                    <option value="pending">{{ __("Pending") }}</option>
+                                    <option value="verified">{{ __("Verified") }}</option>
+                                    <option value="accepted">{{ __("Accepted") }}</option>
+                                    <option value="partially_accepted">{{ __("Partially Accepted") }}</option>
+                                    <option value="rejected">{{ __("Rejected") }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Purchase Order</label>
+                                <label>{{ __("Purchase Order") }}</label>
                                 <select class="form-control" id="filter-po">
-                                    <option value="">All POs</option>
+                                    <option value="">{{ __("All POs") }}</option>
                                 </select>
                             </div>
                         </div>
@@ -67,15 +67,15 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>GRN Number</th>
-                                    <th>Supplier</th>
-                                    <th>Purchase Order</th>
-                                    <th>Status</th>
-                                    <th>Received Date</th>
-                                    <th>Total Received</th>
-                                    <th>Total Accepted</th>
-                                    <th>Total Value</th>
-                                    <th>Actions</th>
+                                    <th>{{ __("GRN Number") }}</th>
+                                    <th>{{ __("Supplier") }}</th>
+                                    <th>{{ __("Purchase Order") }}</th>
+                                    <th>{{ __("Status") }}</th>
+                                    <th>{{ __("Received Date") }}</th>
+                                    <th>{{ __("Total Received") }}</th>
+                                    <th>{{ __("Total Accepted") }}</th>
+                                    <th>{{ __("Total Value") }}</th>
+                                    <th>{{ __("Actions") }}</th>
                                 </tr>
                             </thead>
                             <tbody id="grn-table">

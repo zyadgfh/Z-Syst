@@ -37,7 +37,7 @@
                         </div>
 
                         <!-- Main Content -->
-                        <div id="main-content" class="main-content" style="display: none;">
+                        <div id="main-content" class="main-content" class="d-none">
                             <!-- Maintenance Status Card -->
                             <div class="maintenance-status-wrapper">
                                 <div class="maintenance-status-card" id="maintenance-status-card">
@@ -64,7 +64,7 @@
                             </div>
 
                             <!-- Maintenance Details -->
-                            <div id="maintenance-details" class="maintenance-details" style="display: none;">
+                            <div id="maintenance-details" class="maintenance-details" class="d-none">
                                 <div class="details-header">
                                     <h6>{{ __('Maintenance Details') }}</h6>
                                     <span class="details-badge" id="maintenance-status-badge"></span>
@@ -135,7 +135,7 @@
                             </div>
 
                             <!-- Maintenance Form -->
-                            <div id="maintenance-form" class="maintenance-form animated-form" style="display: none;">
+                            <div id="maintenance-form" class="maintenance-form animated-form" class="d-none">
                                 <div class="form-header">
                                     <h5>{{ __('Activate Maintenance Mode') }}</h5>
                                     <button type="button" class="btn-close" id="close-activate-form">
@@ -194,7 +194,7 @@
                             </div>
 
                             <!-- Schedule Maintenance Form -->
-                            <div id="schedule-maintenance-form" class="maintenance-form animated-form" style="display: none;">
+                            <div id="schedule-maintenance-form" class="maintenance-form animated-form" class="d-none">
                                 <div class="form-header">
                                     <h5>{{ __('Schedule Maintenance') }}</h5>
                                     <button type="button" class="btn-close" id="close-schedule-form">
@@ -238,7 +238,7 @@
                             </div>
 
                             <!-- Maintenance History -->
-                            <div id="maintenance-history" class="maintenance-history animated-form" style="display: none;">
+                            <div id="maintenance-history" class="maintenance-history animated-form" class="d-none">
                                 <div class="history-header">
                                     <h5>{{ __('Maintenance History') }}</h5>
                                     <button type="button" class="btn-close" id="close-history">
@@ -266,7 +266,7 @@
                         </div>
 
                         <!-- Error State -->
-                        <div id="error-state" class="error-state" style="display: none;">
+                        <div id="error-state" class="error-state" class="d-none">
                             <div class="error-icon">
                                 <i class="fas fa-exclamation-triangle"></i>
                             </div>

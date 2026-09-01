@@ -28,7 +28,7 @@
         </div>
         <div class="col-md-3">
             <div class="card kpi-card p-3 text-center" style="border-left: 3px solid #10b981;">
-                <div class="kpi-value" style="color: #10b981;">{{ $stats['approved'] }}</div>
+                <div class="kpi-value" class="text-green">{{ $stats['approved'] }}</div>
                 <div class="kpi-label">{{ __('Approved') }}</div>
             </div>
         </div>
@@ -114,7 +114,7 @@
                                         @if ($review->title)
                                             <strong style="color: #111827;">{{ $review->title }}</strong>
                                         @endif
-                                        <span class="text-muted ms-2" style="font-size: 13px;">
+                                        <span class="text-muted ms-2" class="fs-13">
                                             {{ __('for') }} <span style="color: #15803d;">{{ $review->product->productName ?? 'N/A' }}</span>
                                         </span>
                                     </div>

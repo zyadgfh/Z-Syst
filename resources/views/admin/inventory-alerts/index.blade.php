@@ -3,10 +3,10 @@
 @section('title', 'تنبيهات المخزون')
 
 @section('main_content')
-    <div class="container-fluid" style="padding: 24px;">
+    <div class="container-fluid" class="card-body-lg">
         <div class="d-flex align-items-center justify-content-between mb-4">
             <h4 style="font-weight: 700;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align-lg">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                     <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                     <line x1="12" y1="2" x2="12" y2="4"/>
@@ -16,7 +16,7 @@
             </h4>
             <div class="d-flex gap-2">
                 <button onclick="runInventoryScan()" class="btn" id="scan-btn" style="background: #1d1d1f; color: #fff; border-radius: 10px; padding: 10px 20px; font-weight: 600; transition: transform 150ms ease;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M21 12a9 9 0 11-6.22-8.56"/><polyline points="21 3 21 9 15 9"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align"><path d="M21 12a9 9 0 11-6.22-8.56"/><polyline points="21 3 21 9 15 9"/></svg>
                     فحص المخزون
                 </button>
                 <button onclick="acknowledgeAll()" class="btn" style="background: #f5f5f7; color: #1d1d1f; border-radius: 10px; padding: 10px 20px; font-weight: 600;">
@@ -29,10 +29,10 @@
         <div class="row g-3 mb-4">
             <div class="col-md-3">
                 <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; background: linear-gradient(135deg, #fff0f0, #fff);">
-                    <div class="card-body" style="padding: 20px;">
+                    <div class="card-body" class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
-                                <p style="font-size: 12px; color: #86868b; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">حرج</p>
+                                <p class="section-subtitle-xs">حرج</p>
                                 <h3 style="font-weight: 700; color: #ff3b30; margin: 4px 0 0;">{{ $stats['critical'] }}</h3>
                             </div>
                             <div style="width: 44px; height: 44px; border-radius: 12px; background: #ff3b30; display: flex; align-items: center; justify-content: center;">
@@ -44,10 +44,10 @@
             </div>
             <div class="col-md-3">
                 <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; background: linear-gradient(135deg, #fff8e1, #fff);">
-                    <div class="card-body" style="padding: 20px;">
+                    <div class="card-body" class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
-                                <p style="font-size: 12px; color: #86868b; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">تحذير</p>
+                                <p class="section-subtitle-xs">تحذير</p>
                                 <h3 style="font-weight: 700; color: #ff9500; margin: 4px 0 0;">{{ $stats['warning'] }}</h3>
                             </div>
                             <div style="width: 44px; height: 44px; border-radius: 12px; background: #ff9500; display: flex; align-items: center; justify-content: center;">
@@ -59,10 +59,10 @@
             </div>
             <div class="col-md-3">
                 <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; background: linear-gradient(135deg, #f5f5f7, #fff);">
-                    <div class="card-body" style="padding: 20px;">
+                    <div class="card-body" class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
-                                <p style="font-size: 12px; color: #86868b; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">نفذ من المخزون</p>
+                                <p class="section-subtitle-xs">نفذ من المخزون</p>
                                 <h3 style="font-weight: 700; color: #1d1d1f; margin: 4px 0 0;">{{ $stats['out_of_stock'] }}</h3>
                             </div>
                             <div style="width: 44px; height: 44px; border-radius: 12px; background: #6e6e73; display: flex; align-items: center; justify-content: center;">
@@ -74,10 +74,10 @@
             </div>
             <div class="col-md-3">
                 <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; background: linear-gradient(135deg, #fff5f5, #fff);">
-                    <div class="card-body" style="padding: 20px;">
+                    <div class="card-body" class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
-                                <p style="font-size: 12px; color: #86868b; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">قرب انتهاء الصلاحية</p>
+                                <p class="section-subtitle-xs">قرب انتهاء الصلاحية</p>
                                 <h3 style="font-weight: 700; color: #ff3b30; margin: 4px 0 0;">{{ $stats['expiring'] }}</h3>
                             </div>
                             <div style="width: 44px; height: 44px; border-radius: 12px; background: #c0392b; display: flex; align-items: center; justify-content: center;">
@@ -92,17 +92,17 @@
         {{-- Charts Row --}}
         <div class="row g-3 mb-4">
             <div class="col-md-8">
-                <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea;">
-                    <div class="card-body" style="padding: 20px;">
-                        <h6 style="font-weight: 600; margin-bottom: 16px;">التنبيهات خلال آخر 30 يوم</h6>
+                <div class="card" class="card-clean-bordered">
+                    <div class="card-body" class="card-body">
+                        <h6 class="heading-md">التنبيهات خلال آخر 30 يوم</h6>
                         <canvas id="alertsTrendChart" height="200"></canvas>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea;">
-                    <div class="card-body" style="padding: 20px;">
-                        <h6 style="font-weight: 600; margin-bottom: 16px;">حسب النوع</h6>
+                <div class="card" class="card-clean-bordered">
+                    <div class="card-body" class="card-body">
+                        <h6 class="heading-md">حسب النوع</h6>
                         <canvas id="alertsTypeChart" height="200"></canvas>
                     </div>
                 </div>
@@ -110,16 +110,16 @@
         </div>
 
         {{-- Filters --}}
-        <div class="card mb-4" style="border-radius: 14px; border: 1px solid #e5e5ea;">
+        <div class="card mb-4" class="card-clean-bordered">
             <div class="card-body" style="padding: 16px;">
                 <form method="GET" class="row g-2 align-items-end">
                     <div class="col-md-3">
-                        <label style="font-size: 12px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: block;">بحث</label>
-                        <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="اسم المنتج أو الباركود..." style="border-radius: 10px; border: 1px solid #d2d2d7; padding: 10px 14px;">
+                        <label class="form-label-xs">بحث</label>
+                        <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="اسم المنتج أو الباركود..." class="input-clean-sm">
                     </div>
                     <div class="col-md-2">
-                        <label style="font-size: 12px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: block;">النوع</label>
-                        <select name="type" class="form-select" style="border-radius: 10px; border: 1px solid #d2d2d7; padding: 10px 14px;">
+                        <label class="form-label-xs">النوع</label>
+                        <select name="type" class="form-select" class="input-clean-sm">
                             <option value="">الكل</option>
                             <option value="low_stock" {{ request('type') === 'low_stock' ? 'selected' : '' }}>مخزون منخفض</option>
                             <option value="out_of_stock" {{ request('type') === 'out_of_stock' ? 'selected' : '' }}>نفذ</option>
@@ -128,8 +128,8 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label style="font-size: 12px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: block;">الخطورة</label>
-                        <select name="severity" class="form-select" style="border-radius: 10px; border: 1px solid #d2d2d7; padding: 10px 14px;">
+                        <label class="form-label-xs">الخطورة</label>
+                        <select name="severity" class="form-select" class="input-clean-sm">
                             <option value="">الكل</option>
                             <option value="critical" {{ request('severity') === 'critical' ? 'selected' : '' }}>حرج</option>
                             <option value="warning" {{ request('severity') === 'warning' ? 'selected' : '' }}>تحذير</option>
@@ -150,7 +150,7 @@
         </div>
 
         {{-- Alerts List --}}
-        <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; overflow: hidden;">
+        <div class="card" class="card-clean">
             @forelse ($alerts as $alert)
                 <div id="alert-{{ $alert->id }}" class="alert-item d-flex align-items-start gap-3" style="padding: 16px 20px; border-bottom: 1px solid #f0f0f2; transition: background 150ms ease; {{ $alert->acknowledged ? 'opacity: 0.5;' : '' }}"
                      onmouseenter="this.style.background='#f9f9fb'" onmouseleave="this.style.background='transparent'">

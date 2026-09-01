@@ -8,12 +8,12 @@
         <a href="{{ route('admin.coupons.index') }}" style="color: #007aff; text-decoration: none; margin-left: 16px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </a>
-        <h4 style="font-weight: 700; margin: 0;">استيراد كوبونات من ملف CSV</h4>
+        <h4 class="heading-bold">استيراد كوبونات من ملف CSV</h4>
     </div>
 
     @if ($errors->any())
         <div style="background: #fff0f0; color: #ff3b30; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; font-size: 14px;">
-            <ul class="mb-0" style="list-style: none; padding: 0;">
+            <ul class="mb-0" class="list-unstyled">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -22,8 +22,8 @@
     @endif
 
     {{-- Instructions --}}
-    <div class="card mb-4" style="border-radius: 14px; border: 1px solid #e5e5ea;">
-        <div class="card-body" style="padding: 20px;">
+    <div class="card mb-4" class="card-clean-bordered">
+        <div class="card-body" class="card-body">
             <h6 style="font-weight: 600; margin-bottom: 12px;">الخطوات:</h6>
             <ol style="font-size: 14px; color: #424245; line-height: 2; padding-inline-start: 20px;">
                 <li>حمّل ملف العينة للإطلاع على التنسيق المطلوب</li>
@@ -40,8 +40,8 @@
     </div>
 
     {{-- Upload Form --}}
-    <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea;">
-        <div class="card-body" style="padding: 24px;">
+    <div class="card" class="card-clean-bordered">
+        <div class="card-body" class="card-body-lg">
             <form action="{{ route('admin.coupons.import.preview') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div style="border: 2px dashed #d2d2d7; border-radius: 14px; padding: 48px 24px; text-align: center; transition: border-color 200ms ease, background 200ms ease;"
@@ -61,7 +61,7 @@
 
                 <div class="mt-4">
                     <button type="submit" class="btn" style="background: #007aff; color: #fff; border-radius: 10px; padding: 12px 32px; font-weight: 600; transition: transform 150ms ease;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                         معاينة الاستيراد
                     </button>
                 </div>

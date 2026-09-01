@@ -108,11 +108,11 @@
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between mb-2"><span>{{ __('Subtotal') }}</span><span id="subtotal">0.00</span></div>
-                                        <div class="d-flex justify-content-between mb-2"><span>{{ __('Discount') }}</span><input type="number" name="discountAmount" id="discountAmount" class="form-control form-control-sm text-end" style="width:120px" value="{{ $purchase->discountAmount }}" min="0" step="0.01" onchange="recalculateTotals()"></div>
-                                        <div class="d-flex justify-content-between mb-2"><span>{{ __('Tax') }}</span><input type="number" name="tax_amount" id="taxAmount" class="form-control form-control-sm text-end" style="width:120px" value="{{ $purchase->tax_amount }}" min="0" step="0.01" onchange="recalculateTotals()"></div>
+                                        <div class="d-flex justify-content-between mb-2"><span>{{ __('Discount') }}</span><input type="number" name="discountAmount" id="discountAmount" class="form-control form-control-sm text-end" class="w-120" value="{{ $purchase->discountAmount }}" min="0" step="0.01" onchange="recalculateTotals()"></div>
+                                        <div class="d-flex justify-content-between mb-2"><span>{{ __('Tax') }}</span><input type="number" name="tax_amount" id="taxAmount" class="form-control form-control-sm text-end" class="w-120" value="{{ $purchase->tax_amount }}" min="0" step="0.01" onchange="recalculateTotals()"></div>
                                         <hr>
                                         <div class="d-flex justify-content-between mb-2 fw-bold fs-5"><span>{{ __('Grand Total') }}</span><span id="grandTotal" class="text-primary">0.00</span></div>
-                                        <div class="d-flex justify-content-between mb-2"><span>{{ __('Paid Amount') }}</span><input type="number" name="paidAmount" id="paidAmount" class="form-control form-control-sm text-end" style="width:120px" value="{{ $purchase->paidAmount }}" min="0" step="0.01" onchange="recalculateTotals()"></div>
+                                        <div class="d-flex justify-content-between mb-2"><span>{{ __('Paid Amount') }}</span><input type="number" name="paidAmount" id="paidAmount" class="form-control form-control-sm text-end" class="w-120" value="{{ $purchase->paidAmount }}" min="0" step="0.01" onchange="recalculateTotals()"></div>
                                         <div class="d-flex justify-content-between fw-bold"><span>{{ __('Remaining') }}</span><span id="dueAmount" class="text-danger">0.00</span></div>
                                     </div>
                                 </div>

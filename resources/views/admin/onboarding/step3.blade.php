@@ -22,17 +22,17 @@
         <div style="display: grid; gap: 20px;">
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
                 <div>
-                    <label style="display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px;">
-                        {{ __('Product Name') }} <span style="color: #ef4444;">*</span>
+                    <label class="form-label-md">
+                        {{ __('Product Name') }} <span class="text-red">*</span>
                     </label>
                     <input type="text" name="productName" value="{{ old('productName') }}"
                         style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none;"
                         placeholder="{{ __('e.g. Paracetamol 500mg') }}" required>
-                    @error('productName') <p style="color: #ef4444; font-size: 12px; margin-top: 4px;">{{ $message }}</p> @enderror
+                    @error('productName') <p class="text-red-sm">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label style="display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px;">
-                        {{ __('Category') }} <span style="color: #ef4444;">*</span>
+                    <label class="form-label-md">
+                        {{ __('Category') }} <span class="text-red">*</span>
                     </label>
                     <select name="category_id" style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none; background: #fff;" required>
                         <option value="">{{ __('Select...') }}</option>
@@ -42,22 +42,22 @@
                         </option>
                         @endforeach
                     </select>
-                    @error('category_id') <p style="color: #ef4444; font-size: 12px; margin-top: 4px;">{{ $message }}</p> @enderror
+                    @error('category_id') <p class="text-red-sm">{{ $message }}</p> @enderror
                 </div>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                 <div>
-                    <label style="display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px;">
-                        {{ __('Selling Price') }} <span style="color: #ef4444;">*</span>
+                    <label class="form-label-md">
+                        {{ __('Selling Price') }} <span class="text-red">*</span>
                     </label>
                     <input type="number" name="sales_price" value="{{ old('sales_price') }}" step="0.01" min="0"
                         style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none;"
                         placeholder="0.00" required>
-                    @error('sales_price') <p style="color: #ef4444; font-size: 12px; margin-top: 4px;">{{ $message }}</p> @enderror
+                    @error('sales_price') <p class="text-red-sm">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label style="display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px;">
+                    <label class="form-label-md">
                         {{ __('Purchase Price') }}
                     </label>
                     <input type="number" name="purchase_without_tax" value="{{ old('purchase_without_tax') }}" step="0.01" min="0"

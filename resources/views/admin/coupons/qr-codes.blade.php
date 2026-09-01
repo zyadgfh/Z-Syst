@@ -3,13 +3,13 @@
 @section('title', 'أكواد الكوبونات — QR Codes')
 
 @section('main_content')
-    <div class="container-fluid" style="padding: 24px;">
+    <div class="container-fluid" class="card-body-lg">
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div class="d-flex align-items-center gap-3">
-                <a href="{{ route('admin.coupons.index') }}" style="color: #007aff; text-decoration: none;">
+                <a href="{{ route('admin.coupons.index') }}" class="link-blue">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                 </a>
-                <h4 style="font-weight: 700; margin: 0;">
+                <h4 class="heading-bold">
                     📱 أكواد الكوبونات — QR Codes
                     <span style="font-size: 14px; font-weight: 400; color: #86868b; margin-left: 8px;">({{ $codes->count() }} كود)</span>
                 </h4>

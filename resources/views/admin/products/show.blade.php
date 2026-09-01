@@ -984,7 +984,7 @@
                     </div>
 
                     {{-- Live preview --}}
-                    <div class="card bg-light" id="adjustPreview" style="display:none">
+                    <div class="card bg-light" id="adjustPreview" class="d-none">
                         <div class="card-body py-2">
                             <div class="d-flex justify-content-between">
                                 <span>{{ __('Current Stock:') }}</span>

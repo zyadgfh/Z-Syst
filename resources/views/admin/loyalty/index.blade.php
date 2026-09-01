@@ -103,7 +103,7 @@
         <!-- Expiring Points Widget -->
         <div class="row g-3 mb-4">
             <div class="col-12">
-                <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; overflow: hidden;">
+                <div class="card" class="card-clean">
                     <div class="card-body" style="padding: 0;">
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #f0f0f2; background: linear-gradient(135deg, #fff3e0 0%, #fff8e1 100%);">
                             <div style="display: flex; align-items: center; gap: 10px;">
@@ -114,7 +114,7 @@
                                 </div>
                             </div>
                             <button onclick="loadExpiringPoints()" style="background: #ff9500; color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer; transition: transform 150ms ease;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
                                 تحديث
                             </button>
                         </div>
@@ -252,10 +252,10 @@
                     html += '<table class="table table-hover" style="font-size:13px;margin:0;">';
                     html += '<thead style="background:#fafafa;">';
                     html += '<tr>';
-                    html += '<th style="padding:10px 16px;border:none;font-weight:600;color:#6e6e73;font-size:11px;text-transform:uppercase;">العميل</th>';
-                    html += '<th style="padding:10px 16px;border:none;font-weight:600;color:#6e6e73;font-size:11px;text-transform:uppercase;">النقاط المهددة</th>';
-                    html += '<th style="padding:10px 16px;border:none;font-weight:600;color:#6e6e73;font-size:11px;text-transform:uppercase;">تنتهي خلال</th>';
-                    html += '<th style="padding:10px 16px;border:none;font-weight:600;color:#6e6e73;font-size:11px;text-transform:uppercase;">إجراء</th>';
+                    html += '<th class="tab-btn-xs">العميل</th>';
+                    html += '<th class="tab-btn-xs">النقاط المهددة</th>';
+                    html += '<th class="tab-btn-xs">تنتهي خلال</th>';
+                    html += '<th class="tab-btn-xs">إجراء</th>';
                     html += '</tr></thead><tbody>';
 
                     data.data.forEach(function(item) {

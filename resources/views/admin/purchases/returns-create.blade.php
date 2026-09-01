@@ -101,7 +101,7 @@
                             <button type="button" class="btn btn-warning" id="processReturnBtn" onclick="confirmReturn()" disabled>
                                 <i class="fas fa-undo me-1"></i>{{ __('Process Return') }}
                             </button>
-                            <div id="returnWarning" class="w-100 text-end text-muted mt-2" style="display:none">
+                            <div id="returnWarning" class="w-100 text-end text-muted mt-2" class="d-none">
                                 <small><i class="fas fa-info-circle me-1"></i>{{ __('Enter a return quantity above to enable this button.') }}</small>
                             </div>
                         </div>

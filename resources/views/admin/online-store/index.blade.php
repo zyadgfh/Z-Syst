@@ -41,7 +41,7 @@
             <div class="card kpi-card p-4">
                 <div class="d-flex align-items-center gap-3">
                     <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1);">
-                        <i class="fas fa-dollar-sign" style="color: #10b981;"></i>
+                        <i class="fas fa-dollar-sign" class="text-green"></i>
                     </div>
                     <div>
                         <div class="kpi-value">${{ number_format($kpis['total_revenue'], 0) }}</div>
@@ -194,7 +194,7 @@
                                 <a href="{{ route('admin.customer-orders.show', $order) }}"
                                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0">
                                     <div>
-                                        <div class="fw-medium" style="font-size: 14px;">{{ $order->order_number }}</div>
+                                        <div class="fw-medium" class="fs-14">{{ $order->order_number }}</div>
                                         <small class="text-muted">{{ $order->customer_name }} · {{ $order->created_at->diffForHumans() }}</small>
                                     </div>
                                     <div class="text-end">

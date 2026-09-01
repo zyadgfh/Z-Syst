@@ -5,9 +5,9 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
-                <h2>Purchase Orders</h2>
+                <h2>{{ __("Purchase Orders") }}</h2>
                 <a href="{{ route('admin.purchase-orders.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Create Purchase Order
+                    <i class="fas fa-plus"></i> {{ __("Create Purchase Order") }}
                 </a>
             </div>
         </div>
@@ -20,42 +20,42 @@
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Supplier</label>
+                                <label>{{ __("Supplier") }}</label>
                                 <select class="form-control" id="filter-supplier">
-                                    <option value="">All Suppliers</option>
+                                    <option value="">{{ __("All Suppliers") }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Status</label>
+                                <label>{{ __("Status") }}</label>
                                 <select class="form-control" id="filter-status">
-                                    <option value="">All Status</option>
-                                    <option value="draft">Draft</option>
-                                    <option value="sent">Sent</option>
-                                    <option value="accepted">Accepted</option>
-                                    <option value="partially_received">Partially Received</option>
-                                    <option value="received">Received</option>
-                                    <option value="cancelled">Cancelled</option>
-                                    <option value="rejected">Rejected</option>
+                                    <option value="">{{ __("All Status") }}</option>
+                                    <option value="draft">{{ __("Draft") }}</option>
+                                    <option value="sent">{{ __("Sent") }}</option>
+                                    <option value="accepted">{{ __("Accepted") }}</option>
+                                    <option value="partially_received">{{ __("Partially Received") }}</option>
+                                    <option value="received">{{ __("Received") }}</option>
+                                    <option value="cancelled">{{ __("Cancelled") }}</option>
+                                    <option value="rejected">{{ __("Rejected") }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Priority</label>
+                                <label>{{ __("Priority") }}</label>
                                 <select class="form-control" id="filter-priority">
-                                    <option value="">All Priorities</option>
-                                    <option value="low">Low</option>
-                                    <option value="normal">Normal</option>
-                                    <option value="high">High</option>
-                                    <option value="urgent">Urgent</option>
+                                    <option value="">{{ __("All Priorities") }}</option>
+                                    <option value="low">{{ __("Low") }}</option>
+                                    <option value="normal">{{ __("Normal") }}</option>
+                                    <option value="high">{{ __("High") }}</option>
+                                    <option value="urgent">{{ __("Urgent") }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Search</label>
+                                <label>{{ __("Search") }}</label>
                                 <input type="text" class="form-control" id="search" placeholder="Search PO number...">
                             </div>
                         </div>
@@ -73,15 +73,15 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>PO Number</th>
-                                    <th>Supplier</th>
-                                    <th>Status</th>
-                                    <th>Priority</th>
-                                    <th>Total Amount</th>
-                                    <th>Expected Delivery</th>
-                                    <th>Items</th>
-                                    <th>Progress</th>
-                                    <th>Actions</th>
+                                    <th>{{ __("PO Number") }}</th>
+                                    <th>{{ __("Supplier") }}</th>
+                                    <th>{{ __("Status") }}</th>
+                                    <th>{{ __("Priority") }}</th>
+                                    <th>{{ __("Total Amount") }}</th>
+                                    <th>{{ __("Expected Delivery") }}</th>
+                                    <th>{{ __("Items") }}</th>
+                                    <th>{{ __("Progress") }}</th>
+                                    <th>{{ __("Actions") }}</th>
                                 </tr>
                             </thead>
                             <tbody id="purchase-orders-table">

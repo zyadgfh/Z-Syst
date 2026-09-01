@@ -3,10 +3,10 @@
 @section('title', 'إدارة الكوبونات')
 
 @section('main_content')
-    <div class="container-fluid" style="padding: 24px;">
+    <div class="container-fluid" class="card-body-lg">
         <div class="d-flex align-items-center justify-content-between mb-4">
             <h4 style="font-weight: 700;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align-lg">
                     <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6"/>
                     <path d="M2 8h20v4H2z"/>
                     <circle cx="12" cy="8" r="2"/>
@@ -14,20 +14,20 @@
                 الكوبونات والخصومات
             <div class="d-flex gap-2">
                 <a href="{{ route('admin.coupons.import') }}" class="btn" style="background: #f5f5f7; color: #1d1d1f; border-radius: 10px; padding: 10px 16px; font-weight: 600; text-decoration: none; transition: transform 150ms ease; font-size: 14px;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     استيراد CSV
                 </a>
                 <a href="{{ route('admin.coupons.analytics') }}" class="btn" style="background: #f5f5f7; color: #1d1d1f; border-radius: 10px; padding: 10px 16px; font-weight: 600; text-decoration: none; transition: transform 150ms ease; font-size: 14px;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                     التحليلات
                 </a>
                 <a href="{{ route('admin.coupons.bulk-generate') }}" class="btn" style="background: #5856d6; color: #fff; border-radius: 10px; padding: 10px 16px; font-weight: 600; text-decoration: none; transition: transform 150ms ease; font-size: 14px;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
                     إنشاء بالجملة
                 </a>
                 <a href="{{ route('admin.coupons.create') }}" class="btn" style="background: #007aff; color: #fff; border-radius: 10px; padding: 10px 20px; font-weight: 600; text-decoration: none; transition: transform 150ms ease;"
                    onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle; margin-right: 4px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon-align"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     كوبون جديد
                 </a>
             </div>
@@ -40,24 +40,24 @@
         @endif
 
         {{-- Filters --}}
-        <div class="card mb-4" style="border-radius: 14px; border: 1px solid #e5e5ea;">
+        <div class="card mb-4" class="card-clean-bordered">
             <div class="card-body" style="padding: 16px;">
                 <form method="GET" class="row g-2 align-items-end">
                     <div class="col-md-4">
-                        <label style="font-size: 12px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: block;">بحث</label>
-                        <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="كود الكوبون أو الوصف..." style="border-radius: 10px; border: 1px solid #d2d2d7; padding: 10px 14px;">
+                        <label class="form-label-xs">بحث</label>
+                        <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="كود الكوبون أو الوصف..." class="input-clean-sm">
                     </div>
                     <div class="col-md-3">
-                        <label style="font-size: 12px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: block;">النوع</label>
-                        <select name="type" class="form-select" style="border-radius: 10px; border: 1px solid #d2d2d7; padding: 10px 14px;">
+                        <label class="form-label-xs">النوع</label>
+                        <select name="type" class="form-select" class="input-clean-sm">
                             <option value="">الكل</option>
                             <option value="percentage" {{ request('type') === 'percentage' ? 'selected' : '' }}>نسبة مئوية</option>
                             <option value="fixed" {{ request('type') === 'fixed' ? 'selected' : '' }}>مبلغ ثابت</option>
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label style="font-size: 12px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: block;">الحالة</label>
-                        <select name="status" class="form-select" style="border-radius: 10px; border: 1px solid #d2d2d7; padding: 10px 14px;">
+                        <label class="form-label-xs">الحالة</label>
+                        <select name="status" class="form-select" class="input-clean-sm">
                             <option value="">الكل</option>
                             <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>نشط</option>
                             <option value="expired" {{ request('status') === 'expired' ? 'selected' : '' }}>منتهي</option>
@@ -92,33 +92,33 @@
         </div>
 
         {{-- Coupons Table --}}
-        <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; overflow: hidden;">
+        <div class="card" class="card-clean">
             <div class="table-responsive">
-                <table class="table table-hover mb-0" style="font-size: 14px;">
+                <table class="table table-hover mb-0" class="fs-14">
                     <thead style="background: #f5f5f7;">
                         <tr>
                             <th style="border: none; padding: 12px 16px; width: 40px;">
                                 <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" style="width: 18px; height: 18px; border-radius: 4px; cursor: pointer;">
                             </th>
-                            <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">الكود</th>
-                            <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">النوع والقيمة</th>
-                            <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">الحد الأدنى</th>
-                            <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">الاستخدامات</th>
-                            <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">الصلاحية</th>
-                            <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">الحالة</th>
-                            <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">إجراءات</th>
+                            <th class="tab-btn-upper">الكود</th>
+                            <th class="tab-btn-upper">النوع والقيمة</th>
+                            <th class="tab-btn-upper">الحد الأدنى</th>
+                            <th class="tab-btn-upper">الاستخدامات</th>
+                            <th class="tab-btn-upper">الصلاحية</th>
+                            <th class="tab-btn-upper">الحالة</th>
+                            <th class="tab-btn-upper">إجراءات</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($coupons as $coupon)
-                            <tr style="border-bottom: 1px solid #f0f0f2;" data-coupon-id="{{ $coupon->id }}">
-                                <td style="padding: 14px 16px; vertical-align: middle;">
+                            <tr class="border-bottom-light" data-coupon-id="{{ $coupon->id }}">
+                                <td class="td-align">
                                     <input type="checkbox" class="coupon-checkbox" value="{{ $coupon->id }}" onchange="updateBulkActions()" style="width: 18px; height: 18px; border-radius: 4px; cursor: pointer;">
                                 </td>
-                                <td style="padding: 14px 16px; vertical-align: middle;">
+                                <td class="td-align">
                                     <code style="background: #f5f5f7; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 14px; letter-spacing: 0.04em;">{{ $coupon->code }}</code>
                                 </td>
-                                <td style="padding: 14px 16px; vertical-align: middle;">
+                                <td class="td-align">
                                     @if ($coupon->type === 'percentage')
                                         <span style="background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600;">{{ $coupon->value }}%</span>
                                     @else
@@ -128,7 +128,7 @@
                                 <td style="padding: 14px 16px; vertical-align: middle; color: #6e6e73;">
                                     {{ $coupon->minimum_order_amount > 0 ? number_format($coupon->minimum_order_amount, 2) : '—' }}
                                 </td>
-                                <td style="padding: 14px 16px; vertical-align: middle;">
+                                <td class="td-align">
                                     <span style="font-weight: 600;">{{ $coupon->times_used }}</span>
                                     @if ($coupon->usage_limit)
                                         <span style="color: #86868b;">/ {{ $coupon->usage_limit }}</span>
@@ -143,13 +143,13 @@
                                         <span>بلا انتهاء</span>
                                     @endif
                                 </td>
-                                <td style="padding: 14px 16px; vertical-align: middle;">
+                                <td class="td-align">
                                     <button onclick="toggleCouponStatus({{ $coupon->id }}, this)"
                                         class="badge" style="border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 150ms ease; {{ $coupon->active ? 'background: #d4edda; color: #155724;' : 'background: #f8d7da; color: #721c24;' }}">
                                         {{ $coupon->active ? 'نشط' : 'معطّل' }}
                                     </button>
                                 </td>
-                                <td style="padding: 14px 16px; vertical-align: middle;">
+                                <td class="td-align">
                                     <div class="d-flex gap-2">
                                         @can('coupons-update')
                                         <a href="{{ route('admin.coupons.edit', $coupon) }}" class="btn btn-sm" style="background: #f5f5f7; border: none; border-radius: 8px; padding: 6px 12px; font-size: 13px; text-decoration: none; color: #1d1d1f;">

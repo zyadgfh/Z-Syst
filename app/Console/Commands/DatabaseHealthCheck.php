@@ -12,6 +12,50 @@ class DatabaseHealthCheck extends Command
 
     protected $description = 'Validate database indexes, FK constraints, soft deletes, and overall health';
 
+    /**
+     * Columns that legitimately cannot have FK constraints.
+     * These are grouped by category for clarity.
+     */
+    protected array $skipFkColumns = [
+        // ── Polymorphic columns (reference multiple tables via *_type) ──
+        'entity_id',
+        'reference_id',
+        'parent_id',
+        'scope_id',
+        'tokenable_id',
+        'notifiable_id',
+        'model_id',
+
+        // ── External system IDs (Stripe, Clerk, Supabase) ──
+        'stripe_invoice_id',
+        'stripe_payment_intent_id',
+        'stripe_customer_id',
+        'stripe_subscription_id',
+        'gateway_transaction_id',
+        'clerk_id',
+        'supabase_id',
+
+        // ── Session IDs (ephemeral, no sessions table) ──
+        'session_id',
+
+        // ── Legal/medical identifiers (stored values, not relational) ──
+        'tax_id',
+        'national_id',
+        'member_id',
+        'external_prescription_id',
+        'fhir_resource_id',
+        'cve_id',
+        'finding_id',
+        'einvoice_submission_id',
+    ];
+
+    /**
+     * Column names that always indicate polymorphic usage regardless of table.
+     */
+    protected array $polymorphicSuffixes = [
+        '_type', // e.g., entity_type, reference_type, notifiable_type
+    ];
+
     public function handle(): int
     {
         $this->info('🏥 Database Health Check');
@@ -192,10 +236,11 @@ class DatabaseHealthCheck extends Command
 
     protected function checkOrphanedForeignKeys(): int
     {
-        $this->info('🔗 Orphaned FK Check');
+        $this->info('🔗 FK Constraint Check');
         $this->line(str_repeat('-', 60));
 
         $issues = 0;
+        $skipped = 0;
         $tables = $this->getTables();
 
         foreach ($tables as $name) {
@@ -203,7 +248,6 @@ class DatabaseHealthCheck extends Command
                 continue;
             }
 
-            $indexes = $this->getTableIndexes($name);
             $columns = Schema::getColumnListing($name);
 
             foreach ($columns as $col) {
@@ -212,8 +256,16 @@ class DatabaseHealthCheck extends Command
                     continue;
                 }
 
-                // Check if FK constraint exists (not just an index)
+                // Skip columns that legitimately cannot have FK constraints
+                if ($this->shouldSkipFkCheck($name, $col)) {
+                    $skipped++;
+                    continue;
+                }
+
+                // Check if FK constraint exists
+                $indexes = $this->getTableIndexes($name);
                 $hasFk = false;
+
                 foreach ($indexes as $idx) {
                     if (str_contains($idx->name ?? '', "fk_{$name}_{$col}") ||
                         str_contains($idx->name ?? '', "{$name}_{$col}_foreign")) {
@@ -222,18 +274,23 @@ class DatabaseHealthCheck extends Command
                     }
                 }
 
-                // Note: SQLite doesn't always report FKs via PRAGMA index_list
-                // So we check the table creation SQL
-                $createSql = $this->getTableCreateSql($name);
-                if (str_contains($createSql, "foreign key(\"{$col}\"")) {
-                    $hasFk = true;
+                // Check the table creation SQL for FK definitions
+                if (! $hasFk) {
+                    $createSql = $this->getTableCreateSql($name);
+                    if (str_contains($createSql, "foreign key(\"{$col}\"")) {
+                        $hasFk = true;
+                    }
                 }
 
                 if (! $hasFk) {
-                    $this->line("  ⚠️  {$name}.{$col} — no FK constraint (index only)");
+                    $this->line("  ⚠️  {$name}.{$col} — no FK constraint");
                     $issues++;
                 }
             }
+        }
+
+        if ($skipped > 0) {
+            $this->line("  ℹ️  Skipped {$skipped} columns (polymorphic / external / session IDs)");
         }
 
         if ($issues === 0) {
@@ -242,6 +299,35 @@ class DatabaseHealthCheck extends Command
 
         $this->newLine();
         return $issues;
+    }
+
+    /**
+     * Determine if a column should be skipped during FK checks.
+     */
+    protected function shouldSkipFkCheck(string $table, string $column): bool
+    {
+        // Skip named columns that can never have FK constraints
+        if (in_array($column, $this->skipFkColumns, true)) {
+            return true;
+        }
+
+        // Skip if a corresponding *_type column exists (polymorphic)
+        $baseName = str_replace('_id', '', $column);
+        $typeColumn = $baseName . '_type';
+        if (Schema::hasTable($table) && Schema::hasColumn($table, $typeColumn)) {
+            return true;
+        }
+
+        // Skip Spatie/Laravel internal tables
+        $internalTables = [
+            'model_has_permissions', 'model_has_roles', 'role_has_permissions',
+            'personal_access_tokens', 'notifications', 'password_reset_tokens',
+        ];
+        if (in_array($table, $internalTables)) {
+            return true;
+        }
+
+        return false;
     }
 
     protected function checkUniqueConstraints(): int

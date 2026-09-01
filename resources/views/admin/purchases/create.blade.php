@@ -78,7 +78,7 @@
                                     <tr>
                                         <th style="width:40px">#</th>
                                         <th>{{ __('Product') }}</th>
-                                        <th style="width:120px">{{ __('Barcode') }}</th>
+                                        <th class="w-120">{{ __('Barcode') }}</th>
                                         <th style="width:80px">{{ __('Batch') }}</th>
                                         <th style="width:100px">{{ __('Qty') }}</th>
                                         <th style="width:130px">{{ __('Purchase Price') }}</th>
@@ -109,11 +109,11 @@
                                         </div>
                                         <div class="d-flex justify-content-between mb-2">
                                             <span>{{ __('Discount') }}</span>
-                                            <input type="number" name="discountAmount" id="discountAmount" class="form-control form-control-sm text-end" style="width:120px" value="0" min="0" step="0.01" onchange="recalculateTotals()">
+                                            <input type="number" name="discountAmount" id="discountAmount" class="form-control form-control-sm text-end" class="w-120" value="0" min="0" step="0.01" onchange="recalculateTotals()">
                                         </div>
                                         <div class="d-flex justify-content-between mb-2">
                                             <span>{{ __('Tax') }}</span>
-                                            <input type="number" name="tax_amount" id="taxAmount" class="form-control form-control-sm text-end" style="width:120px" value="0" min="0" step="0.01" onchange="recalculateTotals()">
+                                            <input type="number" name="tax_amount" id="taxAmount" class="form-control form-control-sm text-end" class="w-120" value="0" min="0" step="0.01" onchange="recalculateTotals()">
                                         </div>
                                         <hr>
                                         <div class="d-flex justify-content-between mb-2 fw-bold fs-5">
@@ -122,7 +122,7 @@
                                         </div>
                                         <div class="d-flex justify-content-between mb-2">
                                             <span>{{ __('Paid Amount') }}</span>
-                                            <input type="number" name="paidAmount" id="paidAmount" class="form-control form-control-sm text-end" style="width:120px" value="0" min="0" step="0.01" onchange="recalculateTotals()">
+                                            <input type="number" name="paidAmount" id="paidAmount" class="form-control form-control-sm text-end" class="w-120" value="0" min="0" step="0.01" onchange="recalculateTotals()">
                                         </div>
                                         <div class="d-flex justify-content-between fw-bold {{ $errors->has('dueAmount') ? 'text-danger' : '' }}">
                                             <span>{{ __('Remaining / Debt') }}</span>

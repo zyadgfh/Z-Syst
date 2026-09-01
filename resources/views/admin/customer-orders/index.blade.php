@@ -48,13 +48,13 @@
         </div>
         <div class="col-md-2">
             <div class="card kpi-card p-3 text-center" style="border-left: 3px solid #10b981;">
-                <div class="kpi-value" style="color: #10b981;">{{ $stats['delivered'] }}</div>
+                <div class="kpi-value" class="text-green">{{ $stats['delivered'] }}</div>
                 <div class="kpi-label">{{ __('Delivered') }}</div>
             </div>
         </div>
         <div class="col-md-2">
             <div class="card kpi-card p-3 text-center" style="border-left: 3px solid #10b981;">
-                <div class="kpi-value" style="color: #10b981;">${{ number_format($stats['revenue'], 2) }}</div>
+                <div class="kpi-value" class="text-green">${{ number_format($stats['revenue'], 2) }}</div>
                 <div class="kpi-label">{{ __('Revenue') }}</div>
             </div>
         </div>

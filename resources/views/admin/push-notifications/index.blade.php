@@ -5,11 +5,11 @@
 @section('main_content')
     <div class="container-fluid" style="padding: 24px; max-width: 960px;">
         <div class="d-flex align-items-center gap-3 mb-4">
-            <a href="{{ route('admin.dashboard.index') }}" style="color: #007aff; text-decoration: none;">
+            <a href="{{ route('admin.dashboard.index') }}" class="link-blue">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             </a>
-            <h4 style="font-weight: 700; margin: 0;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
+            <h4 class="heading-bold">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" class="icon-align-lg">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                 </svg>
                 تفضيلات الإشعارات وأجهزة الدفع
@@ -17,10 +17,10 @@
         </div>
 
         {{-- Notification Type Preferences --}}
-        <div class="card mb-4" style="border-radius: 14px; border: 1px solid #e5e5ea; overflow: hidden;">
+        <div class="card mb-4" class="card-clean">
             <div style="padding: 16px 20px; border-bottom: 1px solid #f0f0f2; background: linear-gradient(135deg, #e8f0fe 0%, #f0f4ff 100%);">
-                <h5 style="margin: 0; font-size: 16px; font-weight: 700;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" style="vertical-align: middle; margin-right: 6px;"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
+                <h5 class="section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" class="icon-align-lg"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
                     أنواع الإشعارات
                 </h5>
                 <p style="margin: 4px 0 0; font-size: 13px; color: #6e6e73;">اختر أنواع الإشعارات التي تريد تلقيها</p>
@@ -49,11 +49,11 @@
         </div>
 
         {{-- Registered Devices --}}
-        <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; overflow: hidden;">
+        <div class="card" class="card-clean">
             <div style="padding: 16px 20px; border-bottom: 1px solid #f0f0f2; background: linear-gradient(135deg, #fff3e0 0%, #fff8e1 100%);">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <h5 style="margin: 0; font-size: 16px; font-weight: 700;">
+                        <h5 class="section-title">
                             📱 الأجهزة المسجلة
                             <span style="background: #ff9500; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-right: 6px;">{{ $devices->count() }}</span>
                         </h5>

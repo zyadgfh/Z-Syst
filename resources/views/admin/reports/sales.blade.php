@@ -3,10 +3,10 @@
 @section('title', 'تقرير المبيعات')
 
 @section('main_content')
-<div class="container-fluid" style="padding: 24px;">
+<div class="container-fluid" class="card-body-lg">
     <div class="d-flex align-items-center justify-content-between mb-4">
-        <h4 style="font-weight: 700; margin: 0;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
+        <h4 class="heading-bold">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" class="icon-align-lg">
                 <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
             </svg>
             تقرير المبيعات
@@ -14,16 +14,16 @@
     </div>
 
     {{-- Date Range Filter --}}
-    <div class="card mb-4" style="border-radius: 14px; border: 1px solid #e5e5ea;">
+    <div class="card mb-4" class="card-clean-bordered">
         <div class="card-body" style="padding: 16px;">
             <form method="GET" class="row g-2 align-items-end">
                 <div class="col-md-3">
-                    <label style="font-size: 12px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: block;">من تاريخ</label>
-                    <input type="date" name="date_from" value="{{ $dateFrom }}" class="form-control" style="border-radius: 10px; border: 1px solid #d2d2d7; padding: 10px 14px;">
+                    <label class="form-label-xs">من تاريخ</label>
+                    <input type="date" name="date_from" value="{{ $dateFrom }}" class="form-control" class="input-clean-sm">
                 </div>
                 <div class="col-md-3">
-                    <label style="font-size: 12px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: block;">إلى تاريخ</label>
-                    <input type="date" name="date_to" value="{{ $dateTo }}" class="form-control" style="border-radius: 10px; border: 1px solid #d2d2d7; padding: 10px 14px;">
+                    <label class="form-label-xs">إلى تاريخ</label>
+                    <input type="date" name="date_to" value="{{ $dateTo }}" class="form-control" class="input-clean-sm">
                 </div>
                 <div class="col-md-2">
                     <button type="submit" class="btn w-100" style="background: #007aff; color: #fff; border-radius: 10px; padding: 10px; font-weight: 600;">بحث</button>
@@ -62,11 +62,11 @@
     <div class="row g-4">
         {{-- Revenue by Day Chart --}}
         <div class="col-lg-8">
-            <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; overflow: hidden;">
-                <div style="padding: 16px 20px; border-bottom: 1px solid #f0f0f2; background: #fafafa;">
-                    <h5 style="margin: 0; font-size: 16px; font-weight: 700;">📈 الإيرادات اليومية</h5>
+            <div class="card" class="card-clean">
+                <div class="table-section-header">
+                    <h5 class="section-title">📈 الإيرادات اليومية</h5>
                 </div>
-                <div style="padding: 20px;">
+                <div class="card-body">
                     @if ($dailyRevenue->isEmpty())
                         <div style="text-align: center; color: #86868b; padding: 40px;">لا توجد مبيعات في الفترة المحددة</div>
                     @else
@@ -92,11 +92,11 @@
 
         {{-- Payment Type Breakdown --}}
         <div class="col-lg-4">
-            <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; overflow: hidden;">
-                <div style="padding: 16px 20px; border-bottom: 1px solid #f0f0f2; background: #fafafa;">
-                    <h5 style="margin: 0; font-size: 16px; font-weight: 700;">💳 حسب نوع الدفع</h5>
+            <div class="card" class="card-clean">
+                <div class="table-section-header">
+                    <h5 class="section-title">💳 حسب نوع الدفع</h5>
                 </div>
-                <div style="padding: 20px;">
+                <div class="card-body">
                     @php
                         $totalByType = $byPaymentType->sum('total');
                         $typeColors = ['cash' => '#34c759', 'card' => '#007aff', 'online' => '#5856d6', 'other' => '#86868b'];
@@ -123,28 +123,28 @@
     </div>
 
     {{-- Top Products --}}
-    <div class="card mt-4" style="border-radius: 14px; border: 1px solid #e5e5ea; overflow: hidden;">
-        <div style="padding: 16px 20px; border-bottom: 1px solid #f0f0f2; background: #fafafa;">
-            <h5 style="margin: 0; font-size: 16px; font-weight: 700;">🏆 أكثر المنتجات مبيعاً</h5>
+    <div class="card mt-4" class="card-clean">
+        <div class="table-section-header">
+            <h5 class="section-title">🏆 أكثر المنتجات مبيعاً</h5>
         </div>
         @if ($topProducts->isEmpty())
-            <div style="padding: 32px; text-align: center; color: #86868b;">لا توجد بيانات مبيعات</div>
+            <div class="empty-state-placeholder">لا توجد بيانات مبيعات</div>
         @else
             <div class="table-responsive">
-                <table class="table table-hover mb-0" style="font-size: 14px;">
+                <table class="table table-hover mb-0" class="fs-14">
                     <thead style="background: #f8f9fa;">
                         <tr>
-                            <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px;">#</th>
-                            <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px;">المنتج</th>
-                            <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px;">الكمية المباعة</th>
-                            <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px;">الإيراد</th>
+                            <th class="tab-btn">#</th>
+                            <th class="tab-btn">المنتج</th>
+                            <th class="tab-btn">الكمية المباعة</th>
+                            <th class="tab-btn">الإيراد</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($topProducts as $product)
-                            <tr style="border-bottom: 1px solid #f0f0f2;">
+                            <tr class="border-bottom-light">
                                 <td style="padding: 12px 16px; font-weight: 700; color: {{ $loop->index < 3 ? '#ff9500' : '#6e6e73' }};">{{ $loop->index + 1 }}</td>
-                                <td style="padding: 12px 16px;">
+                                <td class="card-body-sm">
                                     <div style="display: flex; align-items: center; gap: 10px;">
                                         <div style="width: 36px; height: 36px; border-radius: 8px; background: #f5f5f7; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
                                             @if ($product->images && is_array($product->images) && count($product->images) > 0)
@@ -157,7 +157,7 @@
                                     </div>
                                 </td>
                                 <td style="padding: 12px 16px; font-weight: 600;">{{ number_format($product->total_qty) }}</td>
-                                <td style="padding: 12px 16px;">
+                                <td class="card-body-sm">
                                     <span style="background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 6px; font-weight: 700;">{{ number_format($product->total_revenue, 2) }}</span>
                                 </td>
                             </tr>
@@ -169,34 +169,34 @@
     </div>
 
     {{-- Recent Sales Table --}}
-    <div class="card mt-4" style="border-radius: 14px; border: 1px solid #e5e5ea; overflow: hidden;">
-        <div style="padding: 16px 20px; border-bottom: 1px solid #f0f0f2; background: #fafafa;">
-            <h5 style="margin: 0; font-size: 16px; font-weight: 700;">🧾 آخر المبيعات</h5>
+    <div class="card mt-4" class="card-clean">
+        <div class="table-section-header">
+            <h5 class="section-title">🧾 آخر المبيعات</h5>
         </div>
         @if ($recentSales->isEmpty())
-            <div style="padding: 32px; text-align: center; color: #86868b;">لا توجد مبيعات</div>
+            <div class="empty-state-placeholder">لا توجد مبيعات</div>
         @else
             <div class="table-responsive">
-                <table class="table table-hover mb-0" style="font-size: 14px;">
+                <table class="table table-hover mb-0" class="fs-14">
                     <thead style="background: #f8f9fa;">
                         <tr>
-                            <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px;">رقم الفاتورة</th>
-                            <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px;">التاريخ</th>
-                            <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px;">العميل</th>
-                            <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px;">المندوب</th>
-                            <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px;">الإجمالي</th>
-                            <th style="border: none; padding: 12px 16px; font-weight: 600; color: #6e6e73; font-size: 12px;">الحالة</th>
+                            <th class="tab-btn">رقم الفاتورة</th>
+                            <th class="tab-btn">التاريخ</th>
+                            <th class="tab-btn">العميل</th>
+                            <th class="tab-btn">المندوب</th>
+                            <th class="tab-btn">الإجمالي</th>
+                            <th class="tab-btn">الحالة</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($recentSales as $sale)
-                            <tr style="border-bottom: 1px solid #f0f0f2;">
-                                <td style="padding: 12px 16px;"><code style="background: #f5f5f7; padding: 3px 8px; border-radius: 6px; font-size: 13px;">{{ $sale->invoiceNumber }}</code></td>
+                            <tr class="border-bottom-light">
+                                <td class="card-body-sm"><code style="background: #f5f5f7; padding: 3px 8px; border-radius: 6px; font-size: 13px;">{{ $sale->invoiceNumber }}</code></td>
                                 <td style="padding: 12px 16px; font-size: 13px; color: #6e6e73;">{{ $sale->saleDate ? \Carbon\Carbon::parse($sale->saleDate)->format('Y-m-d H:i') : '—' }}</td>
-                                <td style="padding: 12px 16px;">{{ $sale->party->name ?? '—' }}</td>
-                                <td style="padding: 12px 16px;">{{ $sale->user->name ?? '—' }}</td>
+                                <td class="card-body-sm">{{ $sale->party->name ?? '—' }}</td>
+                                <td class="card-body-sm">{{ $sale->user->name ?? '—' }}</td>
                                 <td style="padding: 12px 16px; font-weight: 700;">{{ number_format($sale->totalAmount, 2) }}</td>
-                                <td style="padding: 12px 16px;">
+                                <td class="card-body-sm">
                                     @if ($sale->isPaid)
                                         <span style="background: #d4edda; color: #155724; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">مدفوع</span>
                                     @elseif ($sale->dueAmount > 0 && $sale->paidAmount > 0)

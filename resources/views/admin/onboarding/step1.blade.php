@@ -13,18 +13,18 @@
         @csrf
         <div style="display: grid; gap: 20px;">
             <div>
-                <label style="display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px;">
-                    {{ __('Store Name') }} <span style="color: #ef4444;">*</span>
+                <label class="form-label-md">
+                    {{ __('Store Name') }} <span class="text-red">*</span>
                 </label>
                 <input type="text" name="companyName" value="{{ old('companyName', $business->companyName ?? '') }}"
                     style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none; transition: border 0.2s;"
                     placeholder="{{ __('e.g. Al-Shifa Pharmacy') }}" required>
-                @error('companyName') <p style="color: #ef4444; font-size: 12px; margin-top: 4px;">{{ $message }}</p> @enderror
+                @error('companyName') <p class="text-red-sm">{{ $message }}</p> @enderror
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                 <div>
-                    <label style="display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px;">
+                    <label class="form-label-md">
                         {{ __('Phone Number') }}
                     </label>
                     <input type="text" name="phoneNumber" value="{{ old('phoneNumber', $business->phoneNumber ?? '') }}"
@@ -32,7 +32,7 @@
                         placeholder="{{ __('+20 123 456 7890') }}">
                 </div>
                 <div>
-                    <label style="display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px;">
+                    <label class="form-label-md">
                         {{ __('Address') }}
                     </label>
                     <input type="text" name="address" value="{{ old('address', $business->address ?? '') }}"

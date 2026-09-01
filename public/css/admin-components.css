@@ -22,6 +22,14 @@
     display: block;
 }
 
+.form-label-md {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
 /* Form inputs */
 .form-input-clean {
     width: 100%;
@@ -29,6 +37,21 @@
     border: 1px solid #d2d2d7;
     padding: 10px 14px;
     font-size: 15px;
+}
+
+.input-clean-sm {
+    border-radius: 10px;
+    border: 1px solid #d2d2d7;
+    padding: 10px 14px;
+}
+
+.input-clean-alt {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
 }
 
 /* Cards */
@@ -55,11 +78,20 @@
     padding: 12px 16px;
 }
 
+.card-body-padding {
+    padding: 14px 16px;
+}
+
 /* Table headers */
 .table-section-header {
     padding: 16px 20px;
     border-bottom: 1px solid #f0f0f2;
     background: #fafafa;
+}
+
+.td-align {
+    padding: 14px 16px;
+    vertical-align: middle;
 }
 
 /* Section titles */
@@ -96,6 +128,17 @@
     font-weight: 600;
 }
 
+/* Headings */
+.heading-bold {
+    font-weight: 700;
+    margin: 0;
+}
+
+.heading-md {
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
 /* Icon alignment */
 .icon-align {
     vertical-align: middle;
@@ -110,11 +153,6 @@
 /* Width helpers */
 .w-120 {
     width: 120px;
-}
-
-/* Hidden by default */
-.d-none-custom {
-    display: none;
 }
 
 /* Tab buttons */
@@ -136,6 +174,15 @@
     letter-spacing: 0.05em;
 }
 
+.tab-btn-xs {
+    border: none;
+    padding: 10px 12px;
+    font-weight: 600;
+    color: #6e6e73;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
 /* Font sizes */
 .fs-11 { font-size: 11px; }
 .fs-12 { font-size: 12px; }
@@ -146,3 +193,37 @@
 /* Text colors */
 .text-muted-custom { color: #86868b; }
 .text-subtle { color: #6e6e73; }
+.text-red { color: #ef4444; }
+.text-red-sm { color: #ef4444; font-size: 12px; margin-top: 4px; }
+.text-green { color: #10b981; }
+.text-danger-custom { color: #ff3b30; }
+
+/* Links */
+.link-blue {
+    color: #007aff;
+    text-decoration: none;
+}
+
+/* Borders */
+.border-bottom-light {
+    border-bottom: 1px solid #f0f0f2;
+}
+
+/* Spacing */
+.p-10 { padding: 10px; }
+
+/* Lists */
+.list-unstyled {
+    list-style: none;
+    padding: 0;
+}
+
+/* Empty state */
+.empty-state-placeholder {
+    padding: 32px;
+    text-align: center;
+    color: #86868b;
+}
+
+/* Utilities */
+.d-none { display: none; }

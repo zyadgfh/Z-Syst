@@ -81,9 +81,9 @@
             <div style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
                 {{ $step['done'] ? 'background: #dcfce7; color: #16a34a;' : 'background: #f3f4f6; color: #9ca3af;' }}">
                 @if($step['done'])
-                    <i class="fas fa-check" style="font-size: 14px;"></i>
+                    <i class="fas fa-check" class="fs-14"></i>
                 @else
-                    <i class="fas {{ $step['icon'] }}" style="font-size: 14px;"></i>
+                    <i class="fas {{ $step['icon'] }}" class="fs-14"></i>
                 @endif
             </div>
             <div style="flex: 1; {{ $step['done'] ? 'opacity: 0.6;' : '' }}">

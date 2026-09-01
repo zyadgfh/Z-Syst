@@ -3,13 +3,13 @@
 @section('title', 'تحليلات المقارنات')
 
 @section('main_content')
-    <div class="container-fluid" style="padding: 24px;">
+    <div class="container-fluid" class="card-body-lg">
         <div class="d-flex align-items-center gap-3 mb-4">
-            <a href="{{ route('admin.dashboard.index') }}" style="color: #007aff; text-decoration: none;">
+            <a href="{{ route('admin.dashboard.index') }}" class="link-blue">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             </a>
-            <h4 style="font-weight: 700; margin: 0;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
+            <h4 class="heading-bold">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" class="icon-align-lg">
                     <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
                 </svg>
                 تحليلات المقارنات
@@ -39,12 +39,12 @@
         <div class="row g-4">
             {{-- Most Compared Products --}}
             <div class="col-lg-7">
-                <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; overflow: hidden;">
-                    <div style="padding: 16px 20px; border-bottom: 1px solid #f0f0f2; background: #fafafa;">
-                        <h5 style="margin: 0; font-size: 16px; font-weight: 700;">🏆 أكثر المنتجات المقارنة</h5>
+                <div class="card" class="card-clean">
+                    <div class="table-section-header">
+                        <h5 class="section-title">🏆 أكثر المنتجات المقارنة</h5>
                     </div>
                     @if ($mostCompared->isEmpty())
-                        <div style="padding: 32px; text-align: center; color: #86868b;">لا توجد بيانات مقارنات بعد</div>
+                        <div class="empty-state-placeholder">لا توجد بيانات مقارنات بعد</div>
                     @else
                         <div style="padding: 8px 0;">
                             @foreach ($mostCompared as $index => $item)
@@ -78,11 +78,11 @@
 
             {{-- Daily Trend Chart --}}
             <div class="col-lg-5">
-                <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; overflow: hidden;">
-                    <div style="padding: 16px 20px; border-bottom: 1px solid #f0f0f2; background: #fafafa;">
-                        <h5 style="margin: 0; font-size: 16px; font-weight: 700;">📊 الاتجاه اليومي (30 يوم)</h5>
+                <div class="card" class="card-clean">
+                    <div class="table-section-header">
+                        <h5 class="section-title">📊 الاتجاه اليومي (30 يوم)</h5>
                     </div>
-                    <div style="padding: 20px;">
+                    <div class="card-body">
                         @if ($dailyTrend->isEmpty())
                             <div style="text-align: center; color: #86868b; padding: 20px;">لا توجد بيانات كافية</div>
                         @else
@@ -106,9 +106,9 @@
                 </div>
 
                 {{-- Top Shared Links --}}
-                <div class="card mt-4" style="border-radius: 14px; border: 1px solid #e5e5ea; overflow: hidden;">
-                    <div style="padding: 16px 20px; border-bottom: 1px solid #f0f0f2; background: #fafafa;">
-                        <h5 style="margin: 0; font-size: 16px; font-weight: 700;">🔗 أكثر روابط المشاركة مشاهدة</h5>
+                <div class="card mt-4" class="card-clean">
+                    <div class="table-section-header">
+                        <h5 class="section-title">🔗 أكثر روابط المشاركة مشاهدة</h5>
                     </div>
                     @if ($topShared->isEmpty())
                         <div style="padding: 24px; text-align: center; color: #86868b; font-size: 13px;">لم تُ-share مقارنات بعد</div>

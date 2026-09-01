@@ -69,7 +69,7 @@
                         <span class="badge p-2" style="font-size: 14px; background: {{ $order->payment_status === 'paid' ? '#f0fdf4; color: #166534' : '#fef2f2; color: #991b1b' }}">
                             {{ ucfirst(str_replace('_', ' ', $order->payment_status)) }}
                         </span>
-                        <span class="ms-auto text-muted" style="font-size: 13px;">{{ $order->created_at->format('M d, Y g:i A') }}</span>
+                        <span class="ms-auto text-muted" class="fs-13">{{ $order->created_at->format('M d, Y g:i A') }}</span>
                     </div>
 
                     {{-- Visual Progress Bar --}}
@@ -210,7 +210,7 @@
                     @if ($order->discount_amount > 0)
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">{{ __('Discount') }}</span>
-                            <span style="color: #10b981;">-${{ number_format($order->discount_amount, 2) }}</span>
+                            <span class="text-green">-${{ number_format($order->discount_amount, 2) }}</span>
                         </div>
                     @endif
                     <div class="d-flex justify-content-between mb-2">
@@ -231,10 +231,10 @@
                 </div>
                 <div class="card-body">
                     <div class="mb-2"><strong>{{ $order->customer_name }}</strong></div>
-                    <div class="text-muted mb-1" style="font-size: 13px;">
+                    <div class="text-muted mb-1" class="fs-13">
                         <i class="fas fa-envelope me-1"></i>{{ $order->customer_email }}
                     </div>
-                    <div class="text-muted mb-1" style="font-size: 13px;">
+                    <div class="text-muted mb-1" class="fs-13">
                         <i class="fas fa-phone me-1"></i>{{ $order->customer_phone }}
                     </div>
                 </div>
@@ -246,13 +246,13 @@
                     <h5 class="mb-0">{{ __('Shipping') }}</h5>
                 </div>
                 <div class="card-body">
-                    <div class="text-muted" style="font-size: 13px;">
+                    <div class="text-muted" class="fs-13">
                         {{ $order->shipping_address }}
                         @if ($order->city)
                             <br>{{ $order->city }}
                         @endif
                     </div>
-                    <div class="mt-2 text-muted" style="font-size: 13px;">
+                    <div class="mt-2 text-muted" class="fs-13">
                         <i class="fas fa-credit-card me-1"></i>
                         {{ str_replace('_', ' ', ucfirst($order->payment_method ?? 'N/A')) }}
                     </div>
@@ -265,7 +265,7 @@
                         <h5 class="mb-0">{{ __('Notes') }}</h5>
                     </div>
                     <div class="card-body">
-                        <p class="text-muted mb-0" style="font-size: 13px;">{{ $order->notes }}</p>
+                        <p class="text-muted mb-0" class="fs-13">{{ $order->notes }}</p>
                     </div>
                 </div>
             @endif
