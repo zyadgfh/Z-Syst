@@ -117,6 +117,60 @@
                 @if(env('VITE_CLERK_PUBLISHABLE_KEY'))
                 <div id="clerk-user-button" class="me-3"></div>
                 @endif
+                {{-- Dark Mode Toggle --}}
+                <div class="me-3" style="display:flex;align-items:center;">
+                    <button id="darkModeToggle" onclick="toggleDarkMode()" title="{{ __('Toggle Dark Mode') }}"
+                        style="width:36px;height:36px;border-radius:50%;border:1px solid #e5e7eb;background:var(--color-background,#fff);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;">
+                        <span id="darkModeIcon">🌙</span>
+                    </button>
+                </div>
+
+                {{-- Activity Feed --}}
+                <div class="dropdown me-3" style="position:relative;">
+                    <a href="#" data-bs-toggle="dropdown" style="text-decoration:none;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:1px solid #e5e7eb;background:var(--color-background,#fff);font-size:16px;" title="{{ __('Recent Activity') }}">
+                        📊
+                    </a>
+                    <div class="dropdown-menu" style="min-width:300px;max-height:400px;overflow-y:auto;">
+                        <div style="padding:12px 16px;border-bottom:1px solid #f0f0f2;">
+                            <strong style="font-size:14px;">{{ __('Recent Activity') }}</strong>
+                        </div>
+                        <ul style="list-style:none;padding:0;margin:0;">
+                            @php
+                                $businessId = auth()->user()->business_id;
+                                $recentSales = \App\Models\Sale::where('business_id', $businessId)
+                                    ->latest()->limit(5)->get();
+                                $lowStock = \App\Models\Stock::where('productStock', '<=', 10)
+                                    ->where('business_id', $businessId)->count();
+                            @endphp
+                            @forelse($recentSales as $sale)
+                            <li style="padding:10px 16px;border-bottom:1px solid #f3f4f6;display:flex;gap:10px;align-items:center;">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;"></span>
+                                <div style="flex:1;min-width:0;">
+                                    <div style="font-size:13px;font-weight:500;color:#1f2937;">
+                                        {{ __('Sale') }} #{{ $sale->invoiceNumber }}
+                                    </div>
+                                    <div style="font-size:11px;color:#6b7280;">
+                                        {{ number_format($sale->totalAmount, 2) }} &middot; {{ $sale->created_at->diffForHumans() }}
+                                    </div>
+                                </div>
+                            </li>
+                            @empty
+                            <li style="padding:16px;text-align:center;color:#9ca3af;font-size:13px;">
+                                {{ __('No recent activity') }}
+                            </li>
+                            @endforelse
+                            @if($lowStock > 0)
+                            <li style="padding:10px 16px;background:#fef3c7;display:flex;gap:10px;align-items:center;">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;flex-shrink:0;"></span>
+                                <div style="font-size:13px;color:#92400e;">
+                                    {{ __(':count low stock item(s)', ['count' => $lowStock]) }}
+                                </div>
+                            </li>
+                            @endif
+                        </ul>
+                    </div>
+                </div>
+
                 <div class="profile-info dropdown">
                     <a href="#" data-bs-toggle="dropdown" class="d-flex align-items-center gap-2">
                         <img src="{{ asset(Auth::user()->image ?? 'assets/images/icons/default-user.png') }}" alt="Profile">
@@ -310,3 +364,29 @@
 })();
 </script>
 @endif
+
+{{-- Dark Mode Toggle Script --}}
+<script>
+function toggleDarkMode() {
+    const html = document.documentElement;
+    const isDark = html.classList.toggle('dark');
+    localStorage.setItem('darkMode', isDark);
+    document.getElementById('darkModeIcon').textContent = isDark ? '☀️' : '🌙';
+
+    // Save preference to server
+    fetch('{{ route("toggle-dark-mode") }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Content-Type': 'application/json',
+        },
+    });
+}
+
+// Set initial icon
+document.addEventListener('DOMContentLoaded', function() {
+    const isDark = document.documentElement.classList.contains('dark');
+    const icon = document.getElementById('darkModeIcon');
+    if (icon) icon.textContent = isDark ? '☀️' : '🌙';
+});
+</script>

@@ -27,6 +27,9 @@
     <!-- Getting Started Checklist (for new users) -->
     @include('admin.dashboard.partials.getting-started')
 
+    <!-- Role-Based Dashboard Content -->
+    @include('admin.dashboard.partials.role-based-content')
+
     <!-- Stats Grid -->
     <div class="stats-grid-container">
         <div class="kpi-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-lg">
