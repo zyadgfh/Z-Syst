@@ -268,6 +268,159 @@ class DatasPermissionGuardTest extends TestCase
     }
 
     // =========================================================================
+    // Non-datas view @can guard tests
+    // =========================================================================
+
+    /**
+     * Non-datas views that have edit/delete links and their expected permissions.
+     *
+     * @return array<string, array{0: string, 1: string|null, 2: string|null, 3: string|null, 4: string|null}>
+     *         [path, editRoute, editPermission, deleteRoute, deletePermission]
+     */
+    public static function nonDatasEditRouteProvider(): array
+    {
+        return [
+            'coupons'              => ['resources/views/admin/coupons/index.blade.php',              'admin.coupons.edit',              'coupons-update',              null,                          null],
+            'payment-gateways'     => ['resources/views/admin/payment-gateways/index.blade.php',     'admin.payment-gateways.edit',     'gateways-edit',               null,                          null],
+            'purchase-orders-show' => ['resources/views/admin/purchase-orders/show.blade.php',       'admin.purchase-orders.edit',      'purchases-edit',              null,                          null],
+            'suppliers-show'       => ['resources/views/admin/suppliers/show.blade.php',            'admin.suppliers.edit',            'suppliers-edit',              null,                          null],
+            'insurance-policies'   => ['resources/views/admin/insurance/policies/index.blade.php',   'admin.insurance.policies.edit',   'insurance-policies-update',   null,                          null],
+            'insurance-companies'  => ['resources/views/admin/insurance/companies/index.blade.php',  'admin.insurance.companies.edit',  'insurance-companies-update',  null,                          null],
+            'loyalty-programs'     => ['resources/views/admin/loyalty/programs.blade.php',           'admin.loyalty.edit',              'loyalty-update',              'admin.loyalty.destroy',        'loyalty-delete'],
+            'warehouses'           => ['resources/views/admin/warehouses/index.blade.php',           'admin.warehouses.edit',           'warehouses-update',           'admin.warehouses.destroy',     'warehouses-delete'],
+            'roles'                => ['resources/views/admin/roles/index.blade.php',                'admin.roles.edit',                'roles-update',                null,                          null],
+            'products'             => ['resources/views/admin/products/index.blade.php',             'admin.items.edit',                'update',                      'admin.items.destroy',          'delete'],
+        ];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('nonDatasEditRouteProvider')]
+    public function test_non_datas_edit_action_has_can_guard(string $path, ?string $editRoute, ?string $editPermission, ?string $deleteRoute, ?string $deletePermission): void
+    {
+        if (!file_exists(base_path($path))) {
+            $this->markTestSkipped("File not found: {$path}");
+        }
+
+        $content = $this->readFile($path);
+
+        if ($editRoute && $editPermission) {
+            if (str_contains($content, $editRoute)) {
+                // Accept: @can('perm'), @can('perm', $obj), auth()->user()->can('perm'), Gate::allows('perm')
+                $hasGuard =
+                    str_contains($content, "@can('{$editPermission}'") ||
+                    str_contains($content, "auth()->user()->can('{$editPermission}')") ||
+                    str_contains($content, "Gate::allows('{$editPermission}'") ||
+                    str_contains($content, "\$user->can('{$editPermission}'");
+
+                $this->assertTrue(
+                    $hasGuard,
+                    "[{$path}] Edit route '{$editRoute}' NOT guarded by @can('{$editPermission}') or auth()->user()->can()"
+                );
+            }
+        }
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('nonDatasEditRouteProvider')]
+    public function test_non_datas_delete_action_has_can_guard(string $path, ?string $editRoute, ?string $editPermission, ?string $deleteRoute, ?string $deletePermission): void
+    {
+        if (!file_exists(base_path($path))) {
+            $this->markTestSkipped("File not found: {$path}");
+        }
+
+        $content = $this->readFile($path);
+
+        if ($deleteRoute && $deletePermission) {
+            if (str_contains($content, $deleteRoute)) {
+                $hasGuard =
+                    str_contains($content, "@can('{$deletePermission}'") ||
+                    str_contains($content, "auth()->user()->can('{$deletePermission}')") ||
+                    str_contains($content, "Gate::allows('{$deletePermission}'");
+
+                $this->assertTrue(
+                    $hasGuard,
+                    "[{$path}] Delete route '{$deleteRoute}' NOT guarded by @can('{$deletePermission}') or auth()->user()->can()"
+                );
+            }
+        }
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('nonDatasEditRouteProvider')]
+    public function test_non_datas_can_endcan_balanced(string $path, ?string $editRoute, ?string $editPermission, ?string $deleteRoute, ?string $deletePermission): void
+    {
+        if (!file_exists(base_path($path))) {
+            $this->markTestSkipped("File not found: {$path}");
+        }
+
+        $content = $this->readFile($path);
+
+        preg_match_all('/@can\b/', $content, $opens);
+        preg_match_all('/@endcan\b/', $content, $closes);
+
+        $this->assertEquals(
+            count($opens[0]),
+            count($closes[0]),
+            "[{$path}] @can (" . count($opens[0]) . ") vs @endcan (" . count($closes[0]) . ") mismatch"
+        );
+    }
+
+    // =========================================================================
+    // Security: No unescaped user input in Blade views
+    // =========================================================================
+
+    public function test_no_raw_user_input_in_admin_views(): void
+    {
+        $adminViews = glob(resource_path('views/admin/**/*.blade.php'));
+        $landingViews = glob(resource_path('../Modules/Landing/resources/views/admin/**/*.blade.php'));
+        $allViews = array_merge($adminViews, $landingViews);
+
+        $risky = [];
+        foreach ($allViews as $view) {
+            $content = file_get_contents($view);
+            // Find {!! !!} that contain user-input variables (request, input, old())
+            if (preg_match_all('/\{\{!!\s*(request\(|\$request->|old\(|\$_)/', $content, $matches)) {
+                $relativePath = str_replace(base_path() . '/', '', $view);
+                $risky[] = "{$relativePath}: " . implode(', ', $matches[0]);
+            }
+        }
+
+        $this->assertEmpty(
+            $risky,
+            "Admin views contain {!! !!} with raw user input (XSS risk):\n" . implode("\n", $risky)
+        );
+    }
+
+    // =========================================================================
+    // Security: All POST/PUT/DELETE forms have CSRF protection
+    // =========================================================================
+
+    public function test_all_admin_forms_have_csrf_protection(): void
+    {
+        $adminViews = glob(resource_path('views/admin/**/*.blade.php'));
+        $landingViews = glob(resource_path('../Modules/Landing/resources/views/admin/**/*.blade.php'));
+        $allViews = array_merge($adminViews, $landingViews);
+
+        $missing = [];
+        foreach ($allViews as $view) {
+            $content = file_get_contents($view);
+            $relativePath = str_replace(base_path() . '/', '', $view);
+
+            // Check for <form with method POST/PUT/DELETE that has NO @csrf and NO confirm-action (AJAX)
+            if (preg_match_all('/<form[^>]*method\s*=\s*["\'](?:POST|PUT|DELETE|PATCH)["\']/i', $content, $forms)) {
+                $hasCsrf = str_contains($content, '@csrf') || str_contains($content, 'csrf_token') || str_contains($content, 'csrf-field');
+                $hasAjaxHandler = str_contains($content, 'confirm-action') || str_contains($content, 'ajaxform') || str_contains($content, 'X-CSRF-TOKEN');
+
+                if (!$hasCsrf && !$hasAjaxHandler) {
+                    $missing[] = $relativePath;
+                }
+            }
+        }
+
+        $this->assertEmpty(
+            $missing,
+            "Admin forms without CSRF protection (no @csrf and no AJAX handler):\n" . implode("\n", $missing)
+        );
+    }
+
+    // =========================================================================
     // Helper
     // =========================================================================
 
