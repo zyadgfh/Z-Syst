@@ -124,6 +124,7 @@ class Kernel extends HttpKernel
         'permission' => PermissionMiddleware::class,
         'role_or_permission' => RoleOrPermissionMiddleware::class,
         'admin' => AdminMiddleware::class,
+        'cache' => \App\Http\Middleware\CacheResponse::class,
         'business.context' => EnsureBusinessContext::class,
         'tenant.check' => TenantAccessCheck::class,
         'subscription.limit' => CheckSubscriptionLimits::class,

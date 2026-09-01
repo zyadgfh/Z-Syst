@@ -107,7 +107,8 @@
                                     {{-- Product Image --}}
                                     <div style="height: 200px; background: #f5f5f7; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;">
                                         @if ($product->images && is_array($product->images) && count($product->images) > 0)
-                                            <img src="{{ asset($product->images[0]) }}" alt="{{ e($product->productName) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                            
+<img loading="lazy" src="{{ asset($product->images[0]) }}" alt="{{ e($product->productName) }}" style="width: 100%; height: 100%; object-fit: cover;">
                                         @else
                                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#86868b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                                                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -229,7 +230,8 @@
                                 data.data.forEach(function(p) {
                                     html += '<a href="' + p.url + '" style="display:flex;align-items:center;gap:12px;padding:10px 14px;text-decoration:none;color:inherit;border-bottom:1px solid #f0f0f2;transition:background 100ms;" onmouseenter="this.style.background='#f8f9fa'" onmouseleave="this.style.background='transparent'">';
                                     if (p.image) {
-                                        html += '<img src="' + p.image + '" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;">';
+                                        html += '
+<img loading="lazy" src="' + p.image + '" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;">';
                                     } else {
                                         html += '<div style="width:40px;height:40px;border-radius:8px;background:#f5f5f7;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">💊</div>';
                                     }

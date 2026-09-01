@@ -29,7 +29,8 @@
         <div class="row">
             <div class="col-lg-6 mb-3 align-self-center">
                 <div class="contact-image">
-                    <img src="{{ asset($page_data['contact_us_icon'] ?? 'assets/images/icons/img-upload.png') }}" alt="image" class="w-100 object-fit-cover rounded-2" />
+                    
+<img loading="lazy" src="{{ asset($page_data['contact_us_icon'] ?? 'assets/images/icons/img-upload.png') }}" alt="image" class="w-100 object-fit-cover rounded-2" />
                 </div>
             </div>
             <div class="col-lg-6 mb-3 align-self-center">

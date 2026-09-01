@@ -4,7 +4,9 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Modules\Landing\App\Http\Controllers\Web;
 
-Route::get('/', [Web\WebController::class, 'index'])->name('home');
+Route::middleware('cache:30')->group(function () {
+    Route::get('/', [Web\WebController::class, 'index'])->name('home');
+});
 
 // Language Switcher
 Route::post('/locale/switch', function () {
@@ -16,18 +18,24 @@ Route::post('/locale/switch', function () {
     app()->setLocale($locale);
     return redirect()->back();
 })->name('locale.switch');
-Route::get('/about-us', [Web\AboutController::class, 'index'])->name('about.index');
-Route::get('/terms-conditions', [Web\TermServiceController::class, 'index'])->name('term.index');
-Route::get('/privacy-policy', [Web\PolicyController::class, 'index'])->name('policy.index');
+Route::middleware('cache:60')->group(function () {
+    Route::get('/about-us', [Web\AboutController::class, 'index'])->name('about.index');
+    Route::get('/terms-conditions', [Web\TermServiceController::class, 'index'])->name('term.index');
+    Route::get('/privacy-policy', [Web\PolicyController::class, 'index'])->name('policy.index');
+});
 Route::get('/contact-us', [Web\ContactController::class, 'index'])->name('contact.index');
 Route::post('/contact/store', [Web\ContactController::class, 'store'])->name('contact.store');
 Route::resource('blogs', Web\BlogController::class)->only('index', 'show', 'store');
 
 // Public Product Catalog
-Route::get('/catalog', [Web\CatalogController::class, 'index'])->name('catalog.index');
-Route::get('/catalog/{id}', [Web\CatalogController::class, 'show'])->name('catalog.show');
+Route::middleware('cache:15')->group(function () {
+    Route::get('/catalog', [Web\CatalogController::class, 'index'])->name('catalog.index');
+    Route::get('/catalog/{id}', [Web\CatalogController::class, 'show'])->name('catalog.show');
+});
 Route::get('/catalog/autocomplete', [Web\CatalogController::class, 'autocomplete'])->name('catalog.autocomplete');
-Route::get('/plans', [Web\PlanController::class, 'index'])->name('plan.index');
+Route::middleware('cache:60')->group(function () {
+    Route::get('/plans', [Web\PlanController::class, 'index'])->name('plan.index');
+});
 Route::get('/filter-blogs-by-tag', [Web\BlogController::class, 'filterBlogsByTag'])->name('frontend.tag.filter');
 
 Route::get('/cache-clear', function () {

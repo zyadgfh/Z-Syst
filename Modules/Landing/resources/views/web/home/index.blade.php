@@ -52,7 +52,8 @@
                         <div class="hero-visual-header">
                             <span></span><span></span><span></span>
                         </div>
-                        <img src="{{ asset($heroImage) }}" alt="Product preview" />
+                        
+<img loading="lazy" src="{{ asset($heroImage) }}" alt="Product preview" />
                         <div class="hero-visual-footer">
                             <div>
                                 <p>{{ __('Live operational view') }}</p>
@@ -172,7 +173,8 @@
                     <div class="showcase-grid">
                         @foreach ($interfaces as $interface)
                             <div class="showcase-card">
-                                <img src="{{ asset($interface->image) }}" alt="Interface preview" />
+                                
+<img loading="lazy" src="{{ asset($interface->image) }}" alt="Interface preview" />
                             </div>
                         @endforeach
                     </div>
@@ -199,7 +201,8 @@
                                 {{-- Image --}}
                                 <div style="height: 180px; background: #f5f5f7; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;">
                                     @if ($product->images && is_array($product->images) && count($product->images) > 0)
-                                        <img src="{{ asset($product->images[0]) }}" alt="{{ e($product->productName) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                        
+<img loading="lazy" src="{{ asset($product->images[0]) }}" alt="{{ e($product->productName) }}" style="width: 100%; height: 100%; object-fit: cover;">
                                     @else
                                         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#86868b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -302,7 +305,8 @@ return response()->json([
                 @foreach ($testimonials as $testimonial)
                     <div class="col-md-6 col-lg-4">
                         <div class="customer-card">
-                            <img src="{{ asset($testimonial->client_image) }}" alt="" />
+                            
+<img loading="lazy" src="{{ asset($testimonial->client_image) }}" alt="" />
                             <p>“{{ Str::words($testimonial->text ?? '', 24, '...') }}”</p>
                             <div class="customer-meta">
                                 <h5>{{ Str::limit($testimonial->client_name ?? '', 20, '') }}</h5>

@@ -4,7 +4,7 @@
             {{ Str::words($page_data['headings']['term_of_service_title'] ?? '', 5, '...') }}
         </h2>
         <div>
-            {!! $term_condition->value['description'] ?? '' !!}
+            @sanitized($term_condition->value['description'] ?? '')
         </div>
     </div>
 </section>

@@ -35,7 +35,8 @@
                         <div id="gallery-main" style="background: #f5f5f7; border-radius: 20px; overflow: hidden; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; position: relative;">
                             @if ($hasImages)
                                 @foreach ($product->images as $idx => $img)
-                                    <img src="{{ asset($img) }}" alt="{{ e($product->productName) }} ({{ $idx + 1 }})" class="gallery-image" data-index="{{ $idx }}" style="width: 100%; height: 100%; object-fit: contain; position: absolute; top: 0; left: 0; {{ $idx === 0 ? '' : 'opacity: 0; pointer-events: none;' }} transition: opacity 250ms ease;">
+                                    
+<img loading="lazy" src="{{ asset($img) }}" alt="{{ e($product->productName) }} ({{ $idx + 1 }})" class="gallery-image" data-index="{{ $idx }}" style="width: 100%; height: 100%; object-fit: contain; position: absolute; top: 0; left: 0; {{ $idx === 0 ? '' : 'opacity: 0; pointer-events: none;' }} transition: opacity 250ms ease;">
                                 @endforeach
                             @else
                                 <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
@@ -61,7 +62,8 @@
                             <div style="display: flex; gap: 8px; margin-top: 12px; overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x mandatory;">
                                 @foreach ($product->images as $idx => $img)
                                     <button type="button" onclick="galleryGoTo({{ $idx }})" class="gallery-thumb" data-index="{{ $idx }}" style="flex-shrink: 0; width: 64px; height: 64px; border-radius: 10px; overflow: hidden; border: 2px solid {{ $idx === 0 ? '#007aff' : 'transparent' }}; background: #f5f5f7; cursor: pointer; padding: 0; transition: border-color 150ms ease, opacity 150ms ease; scroll-snap-align: start; {{ $idx === 0 ? '' : 'opacity: 0.6;' }}" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='{{ $idx === 0 ? '1' : '0.6' }}'" aria-label="{{ __('View image') }} {{ $idx + 1 }}">
-                                        <img src="{{ asset($img) }}" alt="" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                                        
+<img loading="lazy" src="{{ asset($img) }}" alt="" style="width: 100%; height: 100%; object-fit: cover; display: block;">
                                     </button>
                                 @endforeach
                             </div>
@@ -218,7 +220,8 @@
                              onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                             <div style="height: 150px; background: #f5f5f7; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                                 @if ($rec->images && is_array($rec->images) && count($rec->images) > 0)
-                                    <img src="{{ asset($rec->images[0]) }}" alt="{{ e($rec->productName) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    
+<img loading="lazy" src="{{ asset($rec->images[0]) }}" alt="{{ e($rec->productName) }}" style="width: 100%; height: 100%; object-fit: cover;">
                                 @else
                                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                                 @endif

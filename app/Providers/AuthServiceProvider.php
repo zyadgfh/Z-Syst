@@ -27,15 +27,19 @@ use App\Models\Sale;
 use App\Models\SaleReturn;
 use App\Models\Stock;
 use App\Models\StockAudit;
+use App\Models\StockTransfer;
 use App\Models\Subscription;
 use App\Models\Supplier;
+use App\Models\SupplierInvoice;
 use App\Models\Tax;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\FinancialAuditLog;
 use App\Models\StockMovement;
+use App\Models\AuditLog;
 use App\Models\Banner;
+use App\Models\Barcode;
 use App\Models\BatchLot;
 use App\Models\Business;
 use App\Models\BusinessCategory;
@@ -43,7 +47,9 @@ use App\Models\Coupon;
 use App\Models\Currency;
 use App\Models\Notification;
 use App\Models\Plan;
+use App\Policies\AuditLogPolicy;
 use App\Policies\BannerPolicy;
+use App\Policies\BarcodePolicy;
 use App\Policies\BusinessCategoryPolicy;
 use App\Policies\BusinessPolicy;
 use App\Policies\CategoryPolicy;
@@ -83,6 +89,8 @@ use App\Policies\FinancialAuditLogPolicy;
 use App\Policies\StockMovementPolicy;
 use App\Policies\BatchLotPolicy;
 use App\Policies\NotificationPolicy;
+use App\Policies\StockTransferPolicy;
+use App\Policies\SupplierInvoicePolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -128,6 +136,10 @@ class AuthServiceProvider extends ServiceProvider
         StockMovement::class => StockMovementPolicy::class,
         BatchLot::class => BatchLotPolicy::class,
         Notification::class => NotificationPolicy::class,
+        SupplierInvoice::class => SupplierInvoicePolicy::class,
+        StockTransfer::class => StockTransferPolicy::class,
+        Barcode::class => BarcodePolicy::class,
+        AuditLog::class => AuditLogPolicy::class,
         Banner::class => BannerPolicy::class,
         Business::class => BusinessPolicy::class,
         BusinessCategory::class => BusinessCategoryPolicy::class,
