@@ -32,6 +32,7 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', User::class);
         $users = User::whereNotIn('role', ['superadmin', 'staff', 'shop-owner'])->latest()->paginate(10);
 
         return view('admin.users.index', compact('users'));
@@ -61,6 +62,7 @@ class UserController extends Controller
 
     public function create()
     {
+        $this->authorize('create', User::class);
         $roles = Role::where('name', '!=', 'superadmin')->latest()->get();
 
         return view('admin.users.create', compact('roles'));
@@ -68,6 +70,7 @@ class UserController extends Controller
 
     public function store(StoreUserRequest $request)
     {
+        $this->authorize('create', User::class);
         $validated = $request->validated();
 
         $user = User::create($validated + [
@@ -98,6 +101,7 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $request, User $user)
     {
+        $this->authorize('update', $user);
         if ($user->role == 'superadmin') {
             return response()->json(__('You can not update a superadmin.'), 400);
         }
@@ -118,6 +122,7 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        $this->authorize('delete', $user);
         if ($user->role == 'superadmin') {
             return response()->json(__('You can not delete a superadmin.'), 400);
         }

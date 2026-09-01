@@ -30,6 +30,7 @@ class ZSystBusinessController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Business::class);
         $plans = Plan::latest()->get();
         $gateways = Gateway::latest()->get();
         $businesses = Business::with('enrolled_plan:id,plan_id', 'enrolled_plan.plan:id,subscriptionName', 'category:id,name')->latest()->paginate(10);
@@ -67,6 +68,7 @@ class ZSystBusinessController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Business::class);
         $plans = Plan::where('status', 1)->latest()->get();
         $categories = BusinessCategory::whereStatus(1)->latest()->get();
 
@@ -75,6 +77,7 @@ class ZSystBusinessController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Business::class);
         $request->validate([
             'address' => 'nullable|max:250',
             'companyName' => 'required|max:250',
@@ -152,6 +155,8 @@ class ZSystBusinessController extends Controller
 
     public function edit(string $id)
     {
+        $business = Business::findOrFail($id);
+        $this->authorize('update', $business);
         $plans = Plan::latest()->get();
         $business = Business::findOrFail($id);
         $categories = BusinessCategory::whereStatus(1)->latest()->get();
@@ -162,6 +167,8 @@ class ZSystBusinessController extends Controller
 
     public function update(Request $request, string $id)
     {
+        $business = Business::findOrFail($id);
+        $this->authorize('update', $business);
         $request->validate([
             'address' => 'nullable|max:250',
             'companyName' => 'required|max:250',
@@ -234,6 +241,7 @@ class ZSystBusinessController extends Controller
     public function destroy($id)
     {
         $business = Business::findOrFail($id);
+        $this->authorize('delete', $business);
         $business->delete();
 
         return response()->json([

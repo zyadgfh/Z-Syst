@@ -25,6 +25,7 @@ class ZSystPlanController extends Controller
 
     public function index()
     {
+        $this->authorize('viewAny', Plan::class);
         $plans = Plan::latest()->paginate(10);
 
         return view('admin.plans.index', compact('plans'));
@@ -53,6 +54,7 @@ class ZSystPlanController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Plan::class);
         $roles = Role::where('name', '!=', 'author')->get();
 
         return view('admin.plans.create', compact('roles'));
@@ -60,6 +62,7 @@ class ZSystPlanController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Plan::class);
         $request->validate([
             'subscriptionName' => 'required|string|max:255',
             'duration' => 'required|integer|min:1',
@@ -88,6 +91,7 @@ class ZSystPlanController extends Controller
 
     public function update(Request $request, Plan $plan)
     {
+        $this->authorize('update', $plan);
         $request->validate([
             'subscriptionName' => 'required|string|max:255',
             'duration' => 'required|string',
@@ -116,6 +120,7 @@ class ZSystPlanController extends Controller
 
     public function destroy(Plan $plan)
     {
+        $this->authorize('delete', $plan);
         $plan->delete();
 
         return response()->json([

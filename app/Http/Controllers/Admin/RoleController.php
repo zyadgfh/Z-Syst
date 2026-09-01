@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Permission;
@@ -23,6 +23,7 @@ class RoleController extends Controller
 
     public function index()
     {
+        $this->authorize('viewAny', Role::class);
         $roles = Role::with('users')->whereNotIn('name', ['Super Admin', 'superadmin', 'super admin'])->withCount('users')->get();
 
         return view('admin.roles.index', compact('roles'));
@@ -30,6 +31,7 @@ class RoleController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Role::class);
         $groups = [];
         foreach (Permission::all() as $index => $permission) {
             $groups[ucwords(str($permission->name)->remove(['-create', '-read', '-update', '-delete'])->replace('-', ' '))][] = $permission;
@@ -40,6 +42,7 @@ class RoleController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Role::class);
         $request->validate([
             'name' => ['required', 'string', 'unique:roles,name'],
             'permissions' => ['required', 'array'],
@@ -74,6 +77,7 @@ class RoleController extends Controller
 
     public function update(Request $request, Role $role)
     {
+        $this->authorize('update', $role);
         abort_if(in_array($role->name, ['Super Admin', 'superadmin', 'super admin']), 403, __('You are not allowed to mess with Super Admin'));
         $request->validate([
             'name' => ['required', 'string', Rule::unique('roles')->ignore($role->id)],
@@ -95,6 +99,7 @@ class RoleController extends Controller
 
     public function destroy(Role $role)
     {
+        $this->authorize('delete', $role);
         abort_if(in_array($role->name, ['Super Admin', 'superadmin', 'super admin']), 403, __('You are not allowed to mess with Super Admin'));
         $role->delete();
 

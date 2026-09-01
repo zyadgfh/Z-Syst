@@ -57,6 +57,7 @@ use App\Policies\CouponPolicy;
 use App\Policies\CurrencyPolicy;
 use App\Policies\PlanPolicy;
 use App\Policies\RolePolicy;
+use App\Policies\UserPolicy;
 use App\Policies\ExpensePolicy;
 use App\Policies\GRNPolicy;
 use App\Policies\IncomePolicy;
