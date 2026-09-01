@@ -22,7 +22,7 @@
         @foreach($steps as $num => $step)
         <div style="display: flex; align-items: center; gap: 8px;">
             <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600;
-                {{ $step['done'] ? 'background: #dcfce7; color: #16a34a;' : ($num === request()->segment(3) || ($num === 1 && request()->is('*/onboarding'))) ? 'background: #6366f1; color: #fff;' : 'background: #f3f4f6; color: #9ca3af;' }}">
+                {{ $step['done'] ? 'background: #dcfce7; color: #16a34a;' : (($num == request()->segment(3) || ($num == 1 && request()->is('*/onboarding'))) ? 'background: #6366f1; color: #fff;' : 'background: #f3f4f6; color: #9ca3af;') }}">
                 @if($step['done'])
                     <i class="fas fa-check"></i>
                 @else

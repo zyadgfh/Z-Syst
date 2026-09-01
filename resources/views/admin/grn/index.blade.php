@@ -5,7 +5,7 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
-                <h2>Goods Received Notes (GRN)</h2>
+                <h2>{{ __('Goods Received Notes (GRN)') }}</h2>
                 <a href="{{ route('admin.grn.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Create GRN
                 </a>
@@ -49,7 +49,7 @@
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Search</label>
+                                <label>{{ __('Search') }}</label>
                                 <input type="text" class="form-control" id="search" placeholder="Search GRN number...">
                             </div>
                         </div>

@@ -32,6 +32,20 @@ class OnboardingController extends Controller
     }
 
     /**
+     * Dispatch to the correct step.
+     */
+    public function step(int $step)
+    {
+        return match($step) {
+            1 => $this->step1(),
+            2 => $this->step2(),
+            3 => $this->step3(),
+            4 => $this->step4(),
+            default => abort(404),
+        };
+    }
+
+    /**
      * Step 1: Business setup.
      */
     public function step1()

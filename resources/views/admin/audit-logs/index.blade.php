@@ -35,7 +35,7 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $log->created_at->format('d M Y H:i') }}</td>
-                            <td>{{ $log->user->name ?? 'System' }}</td>
+                            <td>{{ $log->user->name ?? __('System') }}</td>
                             <td>
                                 <span class="badge badge-{{ $log->action === 'delete' ? 'danger' : ($log->action === 'create' ? 'success' : 'info') }}">
                                     {{ ucfirst($log->action) }}
