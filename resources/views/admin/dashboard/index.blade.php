@@ -196,7 +196,7 @@
                         </div>
                         <span>{{ __('Add Category') }}</span>
                     </a>
-                    <a href="{{ route('admin.reports.active-stores.index') }}" class="quick-action-item card p-lg text-center">
+                    <a href="{{ route('admin.active-stores.index') }}" class="quick-action-item card p-lg text-center">
                         <div class="action-icon action-icon-pink mx-auto">
                             <i class="fas fa-chart-bar"></i>
                         </div>

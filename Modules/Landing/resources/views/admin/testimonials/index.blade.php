@@ -8,7 +8,7 @@
     <div class="erp-table-section">
         <div class="container-fluid">
             <div class="card shadow-sm">
-                <div class="card-bodys">
+                <div class="card-body">
                     <div class="table-header p-16">
                         <h4>{{ __('Testimonials List') }}</h4>
                         <a href="{{ route('admin.testimonials.create') }}" class="theme-btn print-btn text-light">
@@ -98,7 +98,7 @@
                     </table>
                 </div>
                 <div>
-                    {{ $testimonials->links('pagination::bootstrap-5') }}
+                    {{ $testimonials->links('vendor.pagination.bootstrap-5') }}
                 </div>
             </div>
         </div>

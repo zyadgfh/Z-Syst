@@ -6,10 +6,8 @@ use App\Http\Controllers\Webhook\ClerkWebhookController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
-// Root route - redirect to login
-Route::get('/', function () {
-    return redirect('/login');
-})->name('home');
+// Root route is handled by Landing module (Modules/Landing/Routes/web.php)
+// Removed redirect to /login to allow public homepage
 
 // Payment Routes (Egyptian payment gateways + legacy manual)
 Route::get('/payments-gateways/{plan_id}/{business_id}', [Web\PaymentController::class, 'index'])

@@ -8,13 +8,12 @@
     <div class="erp-table-section">
         <div class="container-fluid">
             <div class="card ">
-                <div class="card-bodys">
+                <div class="card-body">
                     <div class="table-header p-16">
                         <h4>{{ __('Store List') }}</h4>
-                        @can('business-read')
+                        @can('business-create')
                             <a type="button" href="{{ route('admin.business.create') }}"
-                                class="add-order-btn rounded-2 {{ Route::is('admin.business.create') ? 'active' : '' }}"
-                                class="btn btn-primary"><i class="fas fa-plus-circle me-1"></i>{{ __('Add Store') }}</a>
+                                class="add-order-btn rounded-2"><i class="fas fa-plus-circle me-1"></i>{{ __('Add Store') }}</a>
                         @endcan
                     </div>
 
@@ -62,6 +61,7 @@
                     </div>
                 </div>
 
+                @can('business-delete')
                 <div class="delete-item delete-show d-none multi-delete-container">
                     <div class="delete-item-show d-flex align-items-center justify-content-between w-100">
                         <p class="fw-bold"><span class="selected-count"></span> {{ __('items selected') }}</p>
@@ -69,6 +69,7 @@
                             data-url="{{ route('admin.business.delete-all') }}">{{ __('Delete') }}</button>
                     </div>
                 </div>
+                @endcan
 
                 <div class="responsive-table table-container">
                     <table class="table" id="datatable">

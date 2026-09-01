@@ -1,6 +1,6 @@
-@extends('layouts.admin')
+@extends('layouts.master')
 
-@section('content')
+@section('main_content')
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-12">
@@ -10,9 +10,11 @@
                     <a href="{{ route('admin.suppliers.index') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Back
                     </a>
+                    @can('suppliers-edit')
                     <a href="{{ route('admin.suppliers.edit', $supplier) }}" class="btn btn-warning">
                         <i class="fas fa-edit"></i> Edit
                     </a>
+                    @endcan
                 </div>
             </div>
         </div>
@@ -194,3 +196,4 @@
     }
 </script>
 @endpush
+@endsection

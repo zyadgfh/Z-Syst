@@ -36,24 +36,19 @@ class AuthenticatedSessionController extends Controller
         $user = auth()->user();
 
         if ($user->role == 'shop-owner' || $user->role == 'staff') {
-            Auth::logout();
-
-            return response()->json([
-                'redirect' => route('login'),
-                'message' => __('You can not login as an business account right now.'),
-            ]);
+            $redirect_url = url('/admin');
         } else {
             $role = Role::where('name', $user->role)->first();
-            $first_role = $role->permissions->pluck('name')->all()[0];
-            $page = explode('-', $first_role);
-            $redirect_url = route('admin.'.$page[0].'.index');
+            if ($role && $role->permissions->count() > 0) {
+                $first_role = $role->permissions->pluck('name')->first();
+                $page = explode('-', $first_role);
+                $redirect_url = route('admin.'.$page[0].'.index');
+            } else {
+                $redirect_url = url('/');
+            }
         }
 
-        return response()->json([
-            'message' => __('Logged In Successfully'),
-            'remember' => $remember,
-            'redirect' => $redirect_url,
-        ]);
+        return redirect($redirect_url)->with('message', __('Logged In Successfully'));
     }
 
     /**

@@ -60,6 +60,7 @@
                     </li>
 
                     @if($payment->payment_status == 'unpaid')
+                    @can('manual-payment-reports-read')
                     <li>
                         <a href="#approve-modal" class="manual-payment-modal" data-bs-toggle="modal" data-bs-target="#approve-modal" data-url="{{ route('admin.manual-payments.paid', $payment->id) }}">
                             <img src="{{ asset('assets/images/icons/accept.svg') }}" alt="">
@@ -72,6 +73,7 @@
                             {{ __('Reject') }}
                         </a>
                     </li>
+                    @endcan
                     @endif
                 </ul>
             </div>

@@ -8,12 +8,12 @@
     <div class="erp-table-section">
         <div class="container-fluid">
             <div class="card">
-                <div class="card-bodys">
+                <div class="card-body">
                     <div class="table-header p-16">
                         <h4>{{ __('Advertising List') }}</h4>
                         @can('banners-create')
                             <a type="button" href="#create-banner-modal" data-bs-toggle="modal"
-                                class="add-order-btn rounded-2 active" class="btn btn-primary"><i
+                                class="add-order-btn rounded-2 active"><i
                                     class="fas fa-plus-circle me-1"></i> {{ __('Add Advertising') }}</a>
                         @endcan
                     </div>

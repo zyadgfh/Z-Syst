@@ -26,6 +26,7 @@
                 <i class="far fa-ellipsis-v"></i>
             </button>
             <ul class="dropdown-menu">
+                @can('testimonials-update')
                 <li>
                     <a href="{{ route('admin.testimonials.edit',$testimonial->id) }}">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -36,6 +37,8 @@
                         {{ __('Edit') }}
                     </a>
                 </li>
+                @endcan
+                @can('testimonials-delete')
                 <li>
                     <a href="{{ route('admin.testimonials.destroy', $testimonial->id) }}" class="confirm-action" data-method="DELETE">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -45,6 +48,7 @@
                         {{ __('Delete') }}
                     </a>
                 </li>
+                @endcan
             </ul>
         </div>
     </td>

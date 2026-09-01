@@ -8,7 +8,7 @@
     <div class="erp-table-section">
         <div class="container-fluid">
             <div class="card">
-                <div class="card-bodys ">
+                <div class="card-body ">
                     <div class="table-header p-16">
                         <h4>{{ __('Staff List') }}</h4>
 
@@ -63,12 +63,14 @@
                         </div>
                     </div>
 
+                    @can('users-delete')
                     <div class="delete-item delete-show d-none multi-delete-container">
                         <div class="delete-item-show d-flex align-items-center justify-content-between w-100">
                             <p class="fw-bold"><span class="selected-count"></span> {{ __('items selected') }}</p>
                             <button data-bs-toggle="modal" class="trigger-modal" data-bs-target="#multi-delete-modal" data-url="{{ route('admin.users.delete-all') }}">{{ __('Delete') }}</button>
                         </div>
                     </div>
+                    @endcan
 
                     <div class="responsive-table table-container">
                         <table class="table" id="datatable">

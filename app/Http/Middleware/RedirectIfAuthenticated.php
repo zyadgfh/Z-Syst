@@ -21,7 +21,11 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                return redirect(RouteServiceProvider::HOME);
+                $user = Auth::guard($guard)->user();
+                if (in_array($user->role ?? '', ['shop-owner', 'staff'])) {
+                    return redirect(RouteServiceProvider::HOME);
+                }
+                return redirect('/');
             }
         }
 

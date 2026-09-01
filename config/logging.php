@@ -87,5 +87,13 @@ return [
             'level' => 'info',
             'days' => 90,
         ],
+
+        // Error Logging (used by App\Helpers\Logger)
+        'errors' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/errors.log'),
+            'level' => 'error',
+            'days' => 30,
+        ],
     ],
 ];

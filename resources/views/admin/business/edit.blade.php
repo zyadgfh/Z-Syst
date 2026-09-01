@@ -8,7 +8,7 @@
     <div class="erp-table-section">
         <div class="container-fluid">
             <div class="card border-0">
-                <div class="card-bodys">
+                <div class="card-body">
                     <div class="table-header p-16">
                         <h4>{{ __('Edit Business') }}</h4>
                         @can('plans-read')
@@ -87,9 +87,9 @@
                                     </div>
 
                                     <div class="col-lg-6">
-                                        <label>{{__('Password')}}</label>
+                                        <label>{{__('Password')}} <small class="text-muted">({{ __('leave blank to keep current') }})</small></label>
                                         <div class="pass-field">
-                                            <input type="password" name="password" required class="form-control" placeholder="{{ __('Enter Password') }}">
+                                            <input type="password" name="password" class="form-control" placeholder="{{ __('Enter Password') }}">
                                             <i class="far fa-eye eye-btn"></i>
                                         </div>
                                     </div>
@@ -112,7 +112,7 @@
                                         <div class="button-group text-center mt-5">
                                             <button type="reset"
                                                 class="theme-btn border-btn m-2">{{ __('Cancel') }}</button>
-                                            <button class="theme-btn m-2 submit-btn">{{ __('Save') }}</button>
+                                            <button class="theme-btn m-2 submit-btn">{{ __('Update') }}</button>
                                         </div>
                                     </div>
                                 </div>

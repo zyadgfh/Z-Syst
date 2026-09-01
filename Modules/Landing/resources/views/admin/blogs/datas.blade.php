@@ -1,6 +1,6 @@
 @foreach ($blogs as $blog)
     <tr>
-
+        @can('blogs-delete')
         <td class="w-60 checkbox table-single-content d-print-none">
             <label class="table-custom-checkbox">
                 <input type="checkbox" name="ids[]" class="table-hidden-checkbox checkbox-item delete-checkbox-item multi-delete"
@@ -8,6 +8,7 @@
                 <span class="table-custom-checkmark custom-checkmark"></span>
             </label>
         </td>
+        @endcan
 
         <td>{{ ($blogs->currentPage() - 1) * $blogs->perPage() + $loop->iteration }}  <i class="{{ request('id') == $blog->id ? 'fas fa-bell text-red' : '' }}"></i></td>
 

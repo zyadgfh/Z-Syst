@@ -151,13 +151,17 @@
                                 </td>
                                 <td style="padding: 14px 16px; vertical-align: middle;">
                                     <div class="d-flex gap-2">
+                                        @can('coupons-update')
                                         <a href="{{ route('admin.coupons.edit', $coupon) }}" class="btn btn-sm" style="background: #f5f5f7; border: none; border-radius: 8px; padding: 6px 12px; font-size: 13px; text-decoration: none; color: #1d1d1f;">
                                             تعديل
                                         </a>
+                                        @endcan
+                                        @can('coupons-delete')
                                         <form action="{{ route('admin.coupons.destroy', $coupon) }}" method="POST" style="display: inline;" onsubmit="return confirm('هل أنت متأكد من حذف هذا الكوبون؟')">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="btn btn-sm" style="background: #fff0f0; border: none; border-radius: 8px; padding: 6px 12px; font-size: 13px; color: #ff3b30;">حذف</button>
                                         </form>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>

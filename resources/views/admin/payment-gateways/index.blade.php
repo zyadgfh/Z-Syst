@@ -249,23 +249,29 @@
                             </td>
                             <td>
                                 <div class="btn-group">
+                                    @can('gateways-edit')
                                     <a href="{{ route('admin.payment-gateways.edit', $gateway->id) }}" 
                                        class="btn btn-sm btn-info btn-action" title="{{ __('Edit') }}">
                                         <i class="fas fa-edit"></i>
                                     </a>
+                                    @endcan
+                                    @can('gateways-edit')
                                     <button onclick="toggleStatus({{ $gateway->id }})" 
                                             class="btn btn-sm {{ $gateway->is_active ? 'btn-warning' : 'btn-success' }} btn-action" 
                                             title="{{ $gateway->is_active ? __('Deactivate') : __('Activate') }}">
                                         <i class="fas {{ $gateway->is_active ? 'fa-toggle-off' : 'fa-toggle-on' }}"></i>
                                     </button>
+                                    @endcan
                                     <a href="{{ route('admin.payment-gateways.transactions', $gateway->id) }}" 
                                        class="btn btn-sm btn-secondary btn-action" title="{{ __('Transactions') }}">
                                         <i class="fas fa-list"></i>
                                     </a>
+                                    @can('gateways-delete')
                                     <button onclick="deleteGateway({{ $gateway->id }})" 
                                             class="btn btn-sm btn-danger btn-action" title="{{ __('Delete') }}">
                                         <i class="fas fa-trash"></i>
                                     </button>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>

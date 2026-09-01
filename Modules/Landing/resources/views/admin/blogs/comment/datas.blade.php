@@ -10,12 +10,14 @@
                     <i class="far fa-ellipsis-v"></i>
                 </button>
                 <ul class="dropdown-menu">
-                    <li>
-                        <a href="{{ route('admin.comments.destroy', $comment->id) }}" class="confirm-action" data-method="DELETE">
-                            <i class="fal fa-trash-alt"></i>
-                            {{ __('Delete') }}
-                        </a>
-                    </li>
+                    @can('blogs-delete')
+                        <li>
+                            <a href="{{ route('admin.comments.destroy', $comment->id) }}" class="confirm-action" data-method="DELETE">
+                                <i class="fal fa-trash-alt"></i>
+                                {{ __('Delete') }}
+                            </a>
+                        </li>
+                    @endcan
                 </ul>
             </div>
         </td>

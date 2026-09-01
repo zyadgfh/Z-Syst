@@ -23,13 +23,13 @@ class AdminMiddleware
         $user = Auth::user();
 
         // Only allow shop-owner and staff (admin-level roles) to access admin routes
-        $adminRoles = ['shop-owner', 'staff'];
+        $adminRoles = ['superadmin', 'admin', 'shop-owner', 'staff'];
 
         if (in_array($user->role, $adminRoles)) {
             return $next($request);
         }
 
-        // Redirect non-admin users
-        return redirect('/');
+        // Redirect non-admin users to homepage
+        return redirect('/')->with('error', __('You do not have admin access.'));
     }
 }

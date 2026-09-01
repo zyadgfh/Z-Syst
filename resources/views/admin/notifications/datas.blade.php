@@ -10,9 +10,11 @@
                     <i class="far fa-ellipsis-v"></i>
                 </button>
                 <ul class="dropdown-menu">
-                    <li>
-                        <a href="{{ route('admin.notifications.mtView', $notification->id) }}"><i class="fas fa-eye"></i> @lang('View')</a>
-                    </li>
+                    @can('notifications-read')
+                        <li>
+                            <a href="{{ route('admin.notifications.mtView', $notification->id) }}"><i class="fas fa-eye"></i> @lang('View')</a>
+                        </li>
+                    @endcan
                 </ul>
             </div>
         </td>
