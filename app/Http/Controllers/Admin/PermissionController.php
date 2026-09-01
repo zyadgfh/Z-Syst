@@ -17,7 +17,9 @@ class PermissionController extends Controller
 
     public function index(Request $request)
     {
-        $users = User::whereNotIn('role', ['superadmin', 'staff', 'admin'])->get();
+        $users = User::whereNotIn('role', ['superadmin', 'staff', 'admin'])
+            ->with('roles')
+            ->get();
         $roles = Role::where('name', '!=', 'superadmin')->get();
 
         return view('admin.permissions.index', compact('roles', 'users'));

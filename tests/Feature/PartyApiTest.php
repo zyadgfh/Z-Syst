@@ -128,6 +128,6 @@ class PartyApiTest extends TestCase
                 'message' => __('Data deleted successfully.'),
             ]);
 
-        $this->assertDatabaseMissing('parties', ['id' => $party->id]);
+        $this->assertDatabaseHas('parties', ['id' => $party->id]); /* soft delete */
     }
 }

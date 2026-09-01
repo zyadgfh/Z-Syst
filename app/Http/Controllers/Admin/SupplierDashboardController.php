@@ -36,8 +36,9 @@ class SupplierDashboardController extends Controller
         $summary = $this->ledgerService->getSummary($businessId, $supplier->id);
         $ledger = $this->ledgerService->getLedger($businessId, $supplier->id, 20);
 
-        // Recent purchases
-        $recentPurchases = Purchase::where('business_id', $businessId)
+        // Recent purchases (with eager-loaded relations for the view)
+        $recentPurchases = Purchase::with('party')
+            ->where('business_id', $businessId)
             ->where('party_id', $supplier->id)
             ->select('id', 'invoiceNumber', 'totalAmount', 'paidAmount', 'dueAmount', 'purchaseDate', 'status')
             ->latest()
