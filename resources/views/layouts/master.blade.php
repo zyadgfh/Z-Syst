@@ -11,6 +11,13 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@hasSection('title') @yield('title') | @endif {{ get_option('general')['title'] ?? config('app.name') }}</title>
     
+    {{-- PWA --}}
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="{{ asset('favicon.ico') }}">
+    
     <!-- Design System CSS -->
     <link rel="stylesheet" href="{{ asset('css/design-system.css') }}">
     
@@ -50,5 +57,16 @@
 
 @include('layouts.partials.flash-messages')
 @include('layouts.partials.script')
+
+{{-- PWA Service Worker Registration --}}
+@if(env('APP_ENV') === 'production')
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+}
+</script>
+@endif
 </body>
 </html>

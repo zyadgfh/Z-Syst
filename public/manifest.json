@@ -1,0 +1,54 @@
+{
+    "name": "Z-Syst Pharmacy Management",
+    "short_name": "Z-Syst",
+    "description": "Professional pharmacy management system. Manage inventory, sales, prescriptions, and operations.",
+    "start_url": "/admin",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#6366f1",
+    "orientation": "any",
+    "scope": "/",
+    "lang": "en",
+    "dir": "auto",
+    "categories": ["business", "medical", "productivity"],
+    "icons": [
+        {
+            "src": "/assets/images/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/assets/images/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/assets/images/screenshots/dashboard.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Admin Dashboard"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Dashboard",
+            "url": "/admin",
+            "icons": [{"src": "/assets/images/icons/icon-192.png", "sizes": "192x192"}]
+        },
+        {
+            "name": "Products",
+            "url": "/admin/items",
+            "icons": [{"src": "/assets/images/icons/icon-192.png", "sizes": "192x192"}]
+        },
+        {
+            "name": "Prescriptions",
+            "url": "/admin/prescriptions",
+            "icons": [{"src": "/assets/images/icons/icon-192.png", "sizes": "192x192"}]
+        }
+    ]
+}
