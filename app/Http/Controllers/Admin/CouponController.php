@@ -11,11 +11,21 @@ use Illuminate\Support\Str;
 
 class CouponController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:coupons-read')->only('index', 'exportCodes', 'exportCsv', 'qrCodes');
+        $this->middleware('permission:coupons-create')->only('create', 'store', 'bulkGenerateForm', 'bulkGenerate');
+        $this->middleware('permission:coupons-update')->only('edit', 'update', 'toggleStatus', 'bulkToggleStatus');
+        $this->middleware('permission:coupons-delete')->only('destroy', 'bulkDelete');
+    }
+
     /**
      * Show the bulk code generator form.
      */
     public function bulkGenerateForm()
     {
+        $this->authorize('create', \App\Models\Coupon::class);
+
         return view('admin.coupons.bulk-generate');
     }
 
@@ -24,6 +34,7 @@ class CouponController extends Controller
      */
     public function bulkGenerate(Request $request)
     {
+        $this->authorize('create', \App\Models\Coupon::class);
         $request->validate([
             'count'                  => 'required|integer|min:1|max:5000',
             'prefix'                 => 'nullable|string|max:10',
@@ -89,6 +100,8 @@ class CouponController extends Controller
     }
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Coupon::class);
+
         $query = Coupon::withCount('usages');
 
         if ($request->filled('search')) {
@@ -119,11 +132,15 @@ class CouponController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Coupon::class);
+
         return view('admin.coupons.create');
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', Coupon::class);
+
         $validated = $request->validate([
             'code'                   => 'required|string|max:50|unique:coupons,code',
             'description'            => 'nullable|string|max:255',
@@ -149,11 +166,15 @@ class CouponController extends Controller
 
     public function edit(Coupon $coupon)
     {
+        $this->authorize('update', $coupon);
+
         return view('admin.coupons.edit', compact('coupon'));
     }
 
     public function update(Request $request, Coupon $coupon)
     {
+        $this->authorize('update', $coupon);
+
         $validated = $request->validate([
             'description'            => 'nullable|string|max:255',
             'type'                   => 'required|in:percentage,fixed',
@@ -176,6 +197,7 @@ class CouponController extends Controller
 
     public function destroy(Coupon $coupon)
     {
+        $this->authorize('delete', $coupon);
         $coupon->delete();
         return redirect()->route('admin.coupons.index')
             ->with('success', 'تم حذف الكوبون بنجاح');
@@ -183,6 +205,7 @@ class CouponController extends Controller
 
     public function toggleStatus(Coupon $coupon)
     {
+        $this->authorize('update', $coupon);
         $coupon->update(['active' => !$coupon->active]);
 
         return response()->json([
@@ -197,6 +220,8 @@ class CouponController extends Controller
      */
     public function bulkDelete(Request $request)
     {
+        $this->authorize('delete', Coupon::class);
+
         $request->validate([
             'ids' => 'required|array|min:1',
             'ids.*' => 'exists:coupons,id',
@@ -216,6 +241,8 @@ class CouponController extends Controller
      */
     public function bulkToggleStatus(Request $request)
     {
+        $this->authorize('update', Coupon::class);
+
         $request->validate([
             'ids'    => 'required|array|min:1',
             'ids.*'  => 'exists:coupons,id',
@@ -239,6 +266,8 @@ class CouponController extends Controller
      */
     public function exportCodes(Request $request)
     {
+        $this->authorize('viewAny', Coupon::class);
+
         $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:coupons,id',
@@ -259,6 +288,8 @@ class CouponController extends Controller
      */
     public function exportCsv(Request $request)
     {
+        $this->authorize('viewAny', Coupon::class);
+
         $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:coupons,id',
@@ -309,6 +340,8 @@ class CouponController extends Controller
      */
     public function qrCodes(Request $request)
     {
+        $this->authorize('viewAny', Coupon::class);
+
         $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:coupons,id',

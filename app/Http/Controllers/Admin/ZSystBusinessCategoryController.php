@@ -10,8 +10,17 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ZSystBusinessCategoryController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:business-categories-read')->only('index', 'exportExcel', 'exportCsv');
+        $this->middleware('permission:business-categories-update')->only('create', 'store', 'edit', 'update', 'status', 'zsystFilter');
+        $this->middleware('permission:business-categories-delete')->only('destroy', 'deleteAll');
+    }
+
     public function index()
     {
+        $this->authorize('viewAny', BusinessCategory::class);
+
         $categories = BusinessCategory::latest()->paginate(10);
 
         return view('admin.business-categories.index', compact('categories'));
@@ -39,11 +48,15 @@ class ZSystBusinessCategoryController extends Controller
 
     public function create()
     {
+        $this->authorize('create', BusinessCategory::class);
+
         return view('admin.business-categories.create');
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', BusinessCategory::class);
+
         $request->validate([
             'status' => 'in:on',
             'description' => 'nullable|string|max:255',
@@ -62,13 +75,17 @@ class ZSystBusinessCategoryController extends Controller
 
     public function edit($id)
     {
-        $category = BusinessCategory::find($id);
+        $category = BusinessCategory::findOrFail($id);
+        $this->authorize('update', $category);
 
         return view('admin.business-categories.edit', compact('category'));
     }
 
     public function update(Request $request, $id)
     {
+        $category = BusinessCategory::findOrFail($id);
+        $this->authorize('update', $category);
+
         $request->validate([
             'status' => 'in:on',
             'description' => 'nullable|string|max:255',
@@ -90,6 +107,7 @@ class ZSystBusinessCategoryController extends Controller
     public function destroy($id)
     {
         $category = BusinessCategory::findOrFail($id);
+        $this->authorize('delete', $category);
         $category->delete();
 
         return response()->json([
@@ -100,6 +118,7 @@ class ZSystBusinessCategoryController extends Controller
 
     public function deleteAll(Request $request)
     {
+        $this->authorize('delete', BusinessCategory::class);
         BusinessCategory::whereIn('id', $request->ids)->delete();
 
         return response()->json([
