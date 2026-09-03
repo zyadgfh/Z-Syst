@@ -5,7 +5,10 @@
         "build": "vite build",
         "test:visual": "npx playwright test tests/visual/",
         "test:visual:update": "npx playwright test tests/visual/ --update-snapshots",
-        "test:visual:report": "npx playwright show-report tests/visual/results"
+        "test:visual:report": "npx playwright show-report tests/visual/results",
+        "test:e2e": "npx playwright test tests/e2e/",
+        "test:e2e:ui": "npx playwright test tests/e2e/ --ui",
+        "test:e2e:report": "npx playwright show-report tests/results"
     },
     "devDependencies": {
         "@playwright/test": "^1.62.1",

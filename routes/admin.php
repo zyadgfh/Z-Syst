@@ -455,6 +455,7 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
         Route::post('claims/{claim}/process', [ADMIN\InsuranceClaimController::class, 'process'])->name('claims.process');
         Route::post('claims/{claim}/payment', [ADMIN\InsuranceClaimController::class, 'processPayment'])->name('claims.payment');
         Route::get('claims/statistics', [ADMIN\InsuranceClaimController::class, 'statistics'])->name('claims.statistics');
+        Route::get('claims/statistics/dashboard', fn () => view('admin.insurance.claims.statistics'))->name('claims.statistics.dashboard');
     });
 
     // Online Store - Customer Orders

@@ -56,8 +56,8 @@
                                         <td class="text-center fw-bold text-primary">{{ $item['returnable_qty'] }}</td>
                                         <td class="text-center">
                                             <input type="number" name="items[{{ $index }}][return_qty]"
-                                                   class="form-control form-control-sm text-center return-qty"
-                                                   class="d-inline-block" style="width:80px;"
+                                                   class="form-control form-control-sm text-center return-qty w-80"
+                                                   class="d-inline-block"
                                                    value="0" min="0" max="{{ $item['returnable_qty'] }}"
                                                    data-unit-price="{{ $item['unit_price'] }}"
                                                    data-returnable="{{ $item['returnable_qty'] }}"

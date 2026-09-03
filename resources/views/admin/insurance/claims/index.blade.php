@@ -6,9 +6,14 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0 text-gray-800">{{ __('insurance.Insurance Claims') }}</h1>
-        <a href="{{ route('admin.insurance.claims.create') }}" class="btn btn-primary-blue">
-            <i class="fas fa-plus me-1"></i> {{ __('common.New Claim') }}
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('admin.insurance.claims.statistics.dashboard') }}" class="btn btn-outline-primary">
+                <i class="fas fa-chart-bar me-1"></i> {{ __('insurance.Statistics') }}
+            </a>
+            <a href="{{ route('admin.insurance.claims.create') }}" class="btn btn-primary-blue">
+                <i class="fas fa-plus me-1"></i> {{ __('common.New Claim') }}
+            </a>
+        </div>
     </div>
 
     <div class="card">
@@ -21,8 +26,9 @@
                             <th>{{ __('common.Claim Number') }}</th>
                             <th>{{ __('common.Policy') }}</th>
                             <th>{{ __('common.Amount') }}</th>
-                            <th>{{ __('common.Status') }}</th>
-                            <th>{{ __('common.Date') }}</th>
+                        <th>{{ __('common.Insurance Company') }}</th>
+                        <th>{{ __('common.Status') }}</th>
+                        <th>{{ __('common.Date') }}</th>
                             <th>{{ __('common.Actions') }}</th>
                         </tr>
                     </thead>
@@ -32,7 +38,8 @@
                                 <td>{{ $claim->id }}</td>
                                 <td>{{ $claim->claim_number ?? '—' }}</td>
                                 <td>{{ $claim->policy->policy_number ?? '—' }}</td>
-                                <td>{{ number_format($claim->amount ?? 0, 2) }}</td>
+                                <td>{{ number_format($claim->total_amount ?? 0, 2) }}</td>
+                                <td>{{ $claim->company->name ?? '—' }}</td>
                                 <td>
                                     @if($claim->status === 'approved')
                                         <span class="badge bg-success">{{ __('common.Approved') }}</span>
@@ -52,7 +59,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-4 text-muted">{{ __('common.No data available') }}</td>
+                                <td colspan="8" class="text-center py-4 text-muted">{{ __('common.No data available') }}</td>
                             </tr>
                         @endforelse
                     </tbody>

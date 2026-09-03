@@ -67,7 +67,7 @@
                                         <i class="fas fa-search"></i>
                                     </button>
                                 </div>
-                                <div id="productSearchResults" class="list-group mt-1" style="display:none; max-height:200px; overflow-y:auto;"></div>
+                                <div id="productSearchResults" class="list-group mt-1 dropdown-scroll"></div>
                             </div>
                         </div>
 

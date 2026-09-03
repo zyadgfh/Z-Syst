@@ -62,7 +62,7 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body text-center p-4">
-                        <div class="display-4 mb-2" style="color: var(--color-primary);">
+                        <div class="display-4 mb-2 color-primary">
                             <i class="fas fa-clipboard-list"></i>
                         </div>
                         <h5>{{ __('audit.Batch Lots') }}</h5>
@@ -86,7 +86,7 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body text-center p-4">
-                        <div class="display-4 mb-2" style="color: var(--color-accent);">
+                        <div class="display-4 mb-2 color-accent">
                             <i class="fas fa-sitemap"></i>
                         </div>
                         <h5>{{ __('audit.Traceability Logs') }}</h5>

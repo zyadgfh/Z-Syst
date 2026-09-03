@@ -138,12 +138,12 @@
                     </div>
                     <div class="col-md-2">
                         <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px; padding-top: 8px;">
-                            <input type="checkbox" name="acknowledged" value="1" {{ request('acknowledged') ? 'checked' : '' }} style="width: 16px; height: 16px;">
+                            <input type="checkbox" name="acknowledged" value="1" {{ request('acknowledged') ? 'checked' : '' }} class="icon-md">
                             تمت القراءة
                         </label>
                     </div>
                     <div class="col-md-3">
-                        <button type="submit" class="btn w-100" class="btn-dark" style="padding: 10px;">بحث</button>
+                        <button type="submit" class="btn w-100 pad-sm" class="btn-dark">بحث</button>
                     </div>
                 </form>
             </div>

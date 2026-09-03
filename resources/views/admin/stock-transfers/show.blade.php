@@ -30,7 +30,7 @@
                 <div class="card-body">
                     <table class="table table-borderless">
                         <tr>
-                            <th style="width: 200px">{{ __('common.Status') }}</th>
+                            <th class="w-200">{{ __('common.Status') }}</th>
                             <td>
                                 @if($transfer->status === 'pending')
                                     <span class="badge bg-warning text-dark">{{ __('common.Pending') }}</span>

@@ -28,7 +28,7 @@
             <div class="card kpi-card p-4">
                 <div class="d-flex align-items-center gap-3">
                     <div class="kpi-icon js-kpi-icon-blue">
-                        <i class="fas fa-shopping-bag" style="color: #3b82f6;"></i>
+                        <i class="fas fa-shopping-bag text-blue"></i>
                     </div>
                     <div>
                         <div class="kpi-value">{{ $kpis['total_orders'] }}</div>

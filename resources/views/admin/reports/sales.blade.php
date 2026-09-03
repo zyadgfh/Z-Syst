@@ -109,7 +109,7 @@
                             <div class="progress-row">
                                 <div class="progress-row-header">
                                     <span class="fs-13-color-heading">{{ ucfirst($pt->payment_type) }}</span>
-                                    <span class="text-13" style="color: #86868b;">{{ number_format($pt->total) }} ({{ number_format($pct, 1) }}%)</span>
+                                    <span class="text-13 text-muted-sm">{{ number_format($pt->total) }} ({{ number_format($pct, 1) }}%)</span>
                                 </div>
                                 <div class="progress-bar-container-sm">
                                     <div class="progress-bar-fill-sm" style="width: {{ $pct }}%; background: {{ $typeColors[$pt->payment_type] ?? '#86868b' }};"></div>

@@ -66,7 +66,7 @@
                 <div class="empty-state-padded">
                     <div class="empty-state-emoji">📭</div>
                     <p class="text-14" style="color: #86868b; margin: 0;">لا توجد أجهزة مسجلة للإشعارات بعد</p>
-                    <p class="stat-label-heading" style="color: #86868b;">سيظهر هنا أي جهاز يسجل للإشعارات من لوحة التحكم</p>
+                    <p class="stat-label-heading text-muted-sm">سيظهر هنا أي جهاز يسجل للإشعارات من لوحة التحكم</p>
                 </div>
             @else
                 <div class="p-8-0">

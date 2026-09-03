@@ -13,11 +13,11 @@
                 </svg>
                 الكوبونات والخصومات
             <div class="d-flex gap-2">
-                <a href="{{ route('admin.coupons.import') }}" class="btn" class="btn-secondary" style="padding: 10px 16px; font-size: 14px;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
+                <a href="{{ route('admin.coupons.import') }}" class="btn pad-input" class="btn-secondary" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     استيراد CSV
                 </a>
-                <a href="{{ route('admin.coupons.analytics') }}" class="btn" class="btn-secondary" style="padding: 10px 16px; font-size: 14px;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
+                <a href="{{ route('admin.coupons.analytics') }}" class="btn pad-input" class="btn-secondary" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                     التحليلات
                 </a>
@@ -65,7 +65,7 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <button type="submit" class="btn w-100" class="btn-dark" style="padding: 10px;">بحث</button>
+                        <button type="submit" class="btn w-100 pad-sm" class="btn-dark">بحث</button>
                     </div>
                 </form>
             </div>

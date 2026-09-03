@@ -69,7 +69,7 @@ test.describe('Admin Views - Visual Regression', () => {
   });
 
   test('inventory alerts renders correctly', async ({ page }) => {
-    await page.goto(`${BASE_URL}/admin/inventory-alerts');
+    await page.goto(`${BASE_URL}/admin/inventory-alerts`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(500);
     
@@ -99,7 +99,7 @@ test.describe('Admin Views - Visual Regression', () => {
   });
 
   test('comparison analytics renders correctly', async ({ page }) => {
-    await page.goto(`${BASE_URL}/admin/comparison-analytics');
+    await page.goto(`${BASE_URL}/admin/comparison-analytics`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(500);
     

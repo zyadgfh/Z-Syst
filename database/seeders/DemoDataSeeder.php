@@ -15,6 +15,9 @@ use App\Models\Unit;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WarehouseStock;
+use App\Models\InsuranceCompany;
+use App\Models\InsurancePolicy;
+use App\Models\InsuranceClaim;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -68,6 +71,8 @@ class DemoDataSeeder extends Seeder
         // 14. Create stock transfer history
         $this->seedStockTransfers($business, $products, $warehouses);
 
+        // 15. Create insurance data
+        $this->seedInsurance($business);
         $this->command->info('Demo data seeded successfully!');
     }
 
@@ -468,6 +473,74 @@ class DemoDataSeeder extends Seeder
                 'user_id' => $this->owner->id ?? null,
                 'created_at' => now()->subDays(mt_rand(1, 30)),
                 'updated_at' => now()->subDays(mt_rand(0, 10)),
+            ]);
+        }
+    }
+    private function seedInsurance($business)
+    {
+        $insuranceData = [
+            ['name' => 'National Health Insurance (NHI)', 'code' => 'NHI-001', 'status' => 'active', 'integration_type' => 'api', 'default_coverage_percent' => 80, 'default_copay_percent' => 20, 'settlement_days' => 30],
+            ['name' => 'Private Plus Insurance', 'code' => 'PPI-002', 'status' => 'active', 'integration_type' => 'manual', 'default_coverage_percent' => 70, 'default_copay_percent' => 30, 'settlement_days' => 45],
+            ['name' => 'Global Care Health', 'code' => 'GCH-003', 'status' => 'active', 'integration_type' => 'hybrid', 'default_coverage_percent' => 85, 'default_copay_percent' => 15, 'settlement_days' => 21],
+        ];
+        $insuranceCompanies = [];
+        foreach ($insuranceData as $data) {
+            $data['business_id'] = $business->id;
+            $data['contact_person'] = 'Admin';
+            $data['phone'] = '+201234567890';
+            $data['email'] = strtolower(str_replace(' ', '.', $data['name'])) . '@insurance.com';
+            $data['notes'] = 'Demo insurance company';
+            $insuranceCompanies[] = InsuranceCompany::create($data);
+        }
+
+        $customers = Party::where('business_id', $business->id)->where('type', 'Retailer')->get();
+        $insurancePolicies = [];
+        foreach ($customers as $i => $customer) {
+            $company = $insuranceCompanies[array_rand($insuranceCompanies)];
+            $policy = InsurancePolicy::create([
+                'business_id' => $business->id,
+                'insurance_company_id' => $company->id,
+                'customer_id' => $customer->id,
+                'policy_number' => 'POL-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT),
+                'member_id' => 'MEM-' . rand(1000, 9999),
+                'holder_name' => $customer->name,
+                'holder_phone' => $customer->phone,
+                'plan_type' => ['individual', 'family', 'corporate'][array_rand(['individual', 'family', 'corporate'])],
+                'status' => 'active',
+                'start_date' => now()->subMonths(rand(1, 12)),
+                'end_date' => now()->addMonths(rand(6, 18)),
+                'annual_limit' => [5000, 10000, 20000][array_rand([5000, 10000, 20000])],
+                'used_amount' => rand(0, 3000),
+                'coverage_percent' => $company->default_coverage_percent,
+                'copay_percent' => $company->default_copay_percent,
+            ]);
+            $policy->remaining_limit = $policy->annual_limit - $policy->used_amount;
+            $policy->save();
+            $insurancePolicies[] = $policy;
+        }
+
+        $claimStatuses = ['draft', 'submitted', 'approved', 'pending_review', 'rejected', 'paid'];
+        for ($i = 0; $i < 12; $i++) {
+            $policy = $insurancePolicies[array_rand($insurancePolicies)];
+            $totalAmount = round(rand(100, 2000) / 100) * 100;
+            $coveredAmount = $totalAmount * ($policy->coverage_percent / 100);
+            $status = $claimStatuses[array_rand($claimStatuses)];
+            InsuranceClaim::create([
+                'business_id' => $business->id,
+                'insurance_company_id' => $policy->insurance_company_id,
+                'insurance_policy_id' => $policy->id,
+                'customer_id' => $policy->customer_id,
+                'user_id' => $this->owner->id ?? null,
+                'claim_number' => 'CLM-' . str_pad($i + 1, 5, '0', STR_PAD_LEFT),
+                'service_date' => now()->subDays(rand(1, 60)),
+                'submission_date' => $status !== 'draft' ? now()->subDays(rand(0, 30)) : null,
+                'total_amount' => $totalAmount,
+                'covered_amount' => $coveredAmount,
+                'patient_responsibility' => $totalAmount - $coveredAmount,
+                'approved_amount' => in_array($status, ['approved', 'paid']) ? $coveredAmount : 0,
+                'paid_amount' => $status === 'paid' ? $coveredAmount : 0,
+                'status' => $status,
+                'notes' => 'Demo insurance claim #' . ($i + 1),
             ]);
         }
     }

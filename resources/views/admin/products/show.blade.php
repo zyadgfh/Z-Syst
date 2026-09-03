@@ -963,7 +963,7 @@
                             <table class="table table-sm table-bordered">
                                 <thead>
                                     <tr>
-                                        <th style="width:30px"></th>
+                                        <th class="w-30"></th>
                                         <th>{{ __('purchases.Batch') }}</th>
                                         <th>{{ __('products.Available') }}</th>
                                         <th>{{ __('products.Expiry') }}</th>

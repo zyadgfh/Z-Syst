@@ -104,7 +104,7 @@
                             <div class="progress-row">
                                 <div class="progress-row-header">
                                     <span class="fs-13-color-heading">{{ $typeLabels[$type] ?? $type }}</span>
-                                    <span class="text-13" style="color: #86868b;">{{ number_format($count) }} ({{ number_format($pct, 1) }}%)</span>
+                                    <span class="text-13 text-muted-sm">{{ number_format($count) }} ({{ number_format($pct, 1) }}%)</span>
                                 </div>
                                 <div class="progress-bar-container">
                                     <div class="progress-bar-fill" style="width: {{ $pct }}%; background: {{ $typeColors[$type] ?? '#86868b' }};"></div>

@@ -24,7 +24,7 @@
     <div class="row mb-4">
         <div class="col-md-2">
             <div class="card kpi-card p-3 text-center">
-                <div class="kpi-value" style="color: #111827;">{{ $stats['total'] }}</div>
+                <div class="kpi-value text-dark">{{ $stats['total'] }}</div>
                 <div class="kpi-label">{{ __('common.Total') }}</div>
             </div>
         </div>
@@ -36,7 +36,7 @@
         </div>
         <div class="col-md-2">
             <div class="card kpi-card p-3 text-center js-kpi-border-blue">
-                <div class="kpi-value" style="color: #3b82f6;">{{ $stats['processing'] }}</div>
+                <div class="kpi-value text-blue">{{ $stats['processing'] }}</div>
                 <div class="kpi-label">{{ __('orders.Processing') }}</div>
             </div>
         </div>
@@ -47,13 +47,13 @@
             </div>
         </div>
         <div class="col-md-2">
-            <div class="card kpi-card p-3 text-center" class="border-left-green" style="border-left: 3px solid #10b981;">
+            <div class="card kpi-card p-3 text-center border-left-accent" class="border-left-green">
                 <div class="kpi-value" class="text-green">{{ $stats['delivered'] }}</div>
                 <div class="kpi-label">{{ __('orders.Delivered') }}</div>
             </div>
         </div>
         <div class="col-md-2">
-            <div class="card kpi-card p-3 text-center" class="border-left-green" style="border-left: 3px solid #10b981;">
+            <div class="card kpi-card p-3 text-center border-left-accent" class="border-left-green">
                 <div class="kpi-value" class="text-green">${{ number_format($stats['revenue'], 2) }}</div>
                 <div class="kpi-label">{{ __('orders.Revenue') }}</div>
             </div>

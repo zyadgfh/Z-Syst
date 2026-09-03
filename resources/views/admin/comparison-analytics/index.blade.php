@@ -18,19 +18,19 @@
 
         {{-- Stats Cards --}}
         <div class="js-kpi-grid">
-            <div class="js-card-gradient-info" style="padding: 20px; text-align: center;">
+            <div class="js-card-gradient-info text-center-pad">
                 <div class="js-stat-value-lg" class="stat-xl" style="font-size: 32px; color: #007aff;">{{ $totalComparisons }}</div>
                 <div class="section-subtitle-desc">إجمالي المقارنات</div>
             </div>
-            <div class="js-card-gradient-success" style="padding: 20px; text-align: center;">
+            <div class="js-card-gradient-success text-center-pad">
                 <div class="js-stat-value-lg" class="stat-xl" style="font-size: 32px; color: #2e7d32;">{{ $totalViews }}</div>
                 <div class="section-subtitle-desc">إجمالي المشاهدات</div>
             </div>
-            <div class="js-card-gradient-amber" style="padding: 20px; text-align: center;">
+            <div class="js-card-gradient-amber text-center-pad">
                 <div class="js-stat-value-lg" class="stat-xl" style="font-size: 32px; color: #e65100;">{{ $uniqueProductsCompared }}</div>
                 <div class="section-subtitle-desc">منتجات فريدة مقارنة</div>
             </div>
-            <div class="js-card-gradient-purple" style="padding: 20px; text-align: center;">
+            <div class="js-card-gradient-purple text-center-pad">
                 <div class="js-stat-value-lg" class="stat-xl" style="font-size: 32px; color: #7b1fa2;">{{ number_format($avgProductsPerComparison, 1) }}</div>
                 <div class="section-subtitle-desc">متوسط المنتجات/مقارنة</div>
             </div>
@@ -49,7 +49,7 @@
                         <div class="p-8-0">
                             @foreach ($mostCompared as $index => $item)
                                 @php $product = $item['product']; @endphp
-                                <div class="row-cell-gap12" class="row-cell-gap12" data-row-border style="padding: 10px 20px;">
+                                <div class="row-cell-gap12 pad-md" class="row-cell-gap12 pad-md" data-row-border>
                                     <span class="step-circle" style="background: {{ $index < 3 ? '#ff9500' : '#f0f0f2' }}; color: {{ $index < 3 ? '#fff' : '#6e6e73' }};">
                                         {{ $index + 1 }}
                                     </span>
@@ -115,7 +115,7 @@
                     @else
                         <div class="p-8-0">
                             @foreach ($topShared as $record)
-                                <div class="row-cell" class="row-cell-gap12" data-row-border style="padding: 10px 20px;">
+                                <div class="row-cell pad-md" class="row-cell-gap12" data-row-border>
                                     <span class="text-20">👁️</span>
                                     <div class="flex-1-min">
                                         <div class="fs-13-color-heading">

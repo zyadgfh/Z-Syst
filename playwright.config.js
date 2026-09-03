@@ -1,20 +1,26 @@
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './tests/visual',
-  outputDir: './tests/visual/results',
+  testDir: './tests',
+  outputDir: './tests/results',
   snapshotPathTemplate: '{testDir}/__screenshots__/{arg}{ext}',
   timeout: 30000,
   retries: 1,
   use: {
-    baseURL: 'http://127.0.0.1:8000',
+    baseURL: process.env.BASE_URL || 'http://127.0.0.1:8000',
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
     viewport: { width: 1440, height: 900 },
   },
   projects: [
     {
-      name: 'chromium',
+      name: 'e2e',
+      testDir: './tests/e2e',
+      use: { browserName: 'chromium' },
+    },
+    {
+      name: 'visual',
+      testDir: './tests/visual',
       use: { browserName: 'chromium' },
     },
   ],

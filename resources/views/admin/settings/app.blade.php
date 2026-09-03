@@ -440,7 +440,7 @@
         return `
         <div class="setting-row ${isOverridden ? 'has-override' : ''}" id="setting-${def.key.replace(/\./g, '-')}">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                <div class="flex-1" style="min-width: 200px;">
+                <div class="flex-1 min-w-200">
                     <div class="setting-name">
                         ${def.name}
                         ${overrideBadge}
