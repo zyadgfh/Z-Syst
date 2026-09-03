@@ -25,7 +25,7 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
                     إنشاء بالجملة
                 </a>
-                <a href="{{ route('admin.coupons.create') }}" class="btn" style="background: #007aff; color: #fff; border-radius: 10px; padding: 10px 20px; font-weight: 600; text-decoration: none; transition: transform 150ms ease;"
+                <a href="{{ route('admin.coupons.create') }}" class="btn btn-apple-blue"
                    onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon-align"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     كوبون جديد
@@ -145,7 +145,7 @@
                                 </td>
                                 <td class="td-align">
                                     <button onclick="toggleCouponStatus({{ $coupon->id }}, this)"
-                                        class="badge {{ $coupon->active ? 'btn-toggle-active' : 'btn-toggle-inactive' }}" style="border: none; cursor: pointer;">
+                                        class="badge {{ $coupon->active ? 'btn-toggle-active' : 'btn-toggle-inactive' }}" class="border-none cursor-pointer">
                                         {{ $coupon->active ? 'نشط' : 'معطّل' }}
                                     </button>
                                 </td>

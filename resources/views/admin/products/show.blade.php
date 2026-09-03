@@ -324,7 +324,7 @@
                             @if($priceHistory->count() > 0)
                                 <div class="mt-4">
                                     <h6 class="text-muted mb-3">{{ __('products.Price History') }}</h6>
-                                    <div style="position:relative;height:250px">
+                                    <div class="pos-rel h-250">
                                         <canvas id="priceHistoryChart"></canvas>
                                     </div>
                                 </div>
@@ -551,7 +551,7 @@
                     >
                         @forelse($stockMovements as $movement)
                             <tr>
-                                <td style="white-space:nowrap">
+                                <td class="ws-nowrap">
                                     <div>{{ $movement->created_at->format('d M Y') }}</div>
                                     <small class="text-muted">{{ $movement->created_at->format('H:i:s') }}</small>
                                 </td>
@@ -573,7 +573,7 @@
                                         <i class="fas fa-user-circle me-1 text-muted"></i>{{ $movement->user->name ?? '-' }}
                                     </span>
                                 </td>
-                                <td class="text-muted" style="max-width:200px">{{ Str::limit($movement->notes, 50) }}</td>
+                                <td class="text-muted max-w-200">{{ Str::limit($movement->notes, 50) }}</td>
                             </tr>
                         @empty
                             @slot('empty') @endslot
@@ -755,12 +755,12 @@
                                                     <div class="d-flex align-items-center gap-2 mb-1">
                                                         <strong class="text-sm">{{ $event['title'] }}</strong>
                                                         @if(isset($event['badge']))
-                                                            <span class="badge badge-soft-{{ $event['badge_color'] ?? 'secondary' }}" style="font-size:10px">{{ $event['badge'] }}</span>
+                                                            <span class="badge badge-soft-{{ $event['badge_color'] ?? 'secondary' }} fz10">{{ $event['badge'] }}</span>
                                                         @endif
                                                     </div>
-                                                    <p class="text-muted mb-0 small" style="line-height:1.4">{{ $event['description'] }}</p>
+                                                    <p class="text-muted mb-0 small lh-14">{{ $event['description'] }}</p>
                                                 </div>
-                                                <div class="text-end flex-shrink-0 ms-3" style="min-width:90px">
+                                                <div class="text-end flex-shrink-0 ms-3 min-w-90">
                                                     <small class="text-muted d-block" class="fs-11">{{ $event['date']->format('d M H:i') }}</small>
                                                     <small class="text-muted" class="fs-11">{{ $event['date']->diffForHumans() }}</small>
                                                     <div class="mt-1">
@@ -870,17 +870,17 @@
                     </div>
 
                     {{-- Live preview --}}
-                    <div class="mt-3 p-3 bg-light rounded" id="barcodePreview" style="border:1px dashed #ccc">
+                    <div class="mt-3 p-3 bg-light rounded border-dashed-gray" id="barcodePreview">
                         <div class="text-center">
                             <div class="fw-bold" class="fs-11">{{ $product->productName }}</div>
                             @if($product->scientific_name)
-                                <div style="font-size:8px;color:#666;font-style:italic">{{ $product->scientific_name }}</div>
+                                <div class="fz8-gray-italic">{{ $product->scientific_name }}</div>
                             @endif
-                            <div style="font-family:monospace;font-weight:700;letter-spacing:3px;margin:5px 0">
+                            <div class="mono-bold tracking-wide my-5">
                                 ||| {{ $product->barcode }} |||
                             </div>
-                            <div style="font-size:7px;color:#888">{{ $product->barcode_type ?? 'CODE128' }}</div>
-                            <div style="font-size:10px;color:#666;margin-top:4px">
+                            <div class="fz7-gray">{{ $product->barcode_type ?? 'CODE128' }}</div>
+                            <div class="fz10-gray-mt4">
                                 {{ __('products.×') }} <span id="previewQty">4</span> {{ __('products.labels') }}
                                 · {{ __('products.Size') }}: <span id="previewSize">{{ __('products.Standard') }}</span>
                             </div>

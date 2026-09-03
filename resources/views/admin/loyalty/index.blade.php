@@ -89,7 +89,7 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body text-center p-4">
-                        <div class="display-4 mb-2" style="color: var(--color-secondary);">
+                        <div class="display-4 mb-2 c-secondary">
                             <i class="fas fa-comments"></i>
                         </div>
                         <h5>{{ __('loyalty.Customer Interactions') }}</h5>
@@ -104,22 +104,22 @@
         <div class="row g-3 mb-4">
             <div class="col-12">
                 <div class="card" class="card-clean">
-                    <div class="card-body" style="padding: 0;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #f0f0f2; background: linear-gradient(135deg, #fff3e0 0%, #fff8e1 100%);">
+                    <div class="card-body p-0">
+                        <div class="header-amber-gradient">
                             <div class="row-cell">
-                                <span style="font-size: 24px;">⏰</span>
+                                <span class="fz24">⏰</span>
                                 <div>
-                                    <h5 style="margin: 0; font-size: 16px; font-weight: 700; color: #1d1d1f;">نقاط على وشك الانتهاء</h5>
-                                    <p style="margin: 0; font-size: 12px; color: #86868b;">النقاط التي ستنتهي خلال 30 يوماً</p>
+                                    <h5 class="heading-dark">نقاط على وشك الانتهاء</h5>
+                                    <p class="text-caption">النقاط التي ستنتهي خلال 30 يوماً</p>
                                 </div>
                             </div>
-                            <button onclick="loadExpiringPoints()" style="background: #ff9500; color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer; transition: transform 150ms ease;">
+                            <button onclick="loadExpiringPoints()" class="btn-orange">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
                                 تحديث
                             </button>
                         </div>
                         <div id="expiringPointsList" class="p-8-0">
-                            <div style="padding: 20px; text-align: center; color: #86868b; font-size: 13px;">جاري التحميل...</div>
+                            <div class="empty-state-muted">جاري التحميل...</div>
                         </div>
                     </div>
                 </div>
@@ -129,13 +129,13 @@
         <!-- Analytics Link -->
         <div class="row g-3 mb-4">
             <div class="col-12">
-                <a href="{{ route('admin.loyalty.analytics') }}" style="display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border-radius: 14px; padding: 16px 20px; text-decoration: none; transition: transform 150ms ease;" onmouseenter="this.style.transform='scale(1.01)'" onmouseleave="this.style.transform='scale(1)'">
+                <a href="{{ route('admin.loyalty.analytics') }}" class="card-gradient-purple" onmouseenter="this.style.transform='scale(1.01)'" onmouseleave="this.style.transform='scale(1)'">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                     <div>
-                        <div style="font-weight: 700; font-size: 15px;">تحليلات نقاط الولاء</div>
-                        <div style="font-size: 12px; opacity: 0.8;">عرض الرسوم البيانية والاتجاهات الشهرية</div>
+                        <div class="fw-700-fz15">تحليلات نقاط الولاء</div>
+                        <div class="fz12-opacity">عرض الرسوم البيانية والاتجاهات الشهرية</div>
                     </div>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: auto;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-auto"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </a>
             </div>
         </div>
@@ -269,8 +269,8 @@
                         } else {
                             html += '<div class="js-avatar-sm">' + (user ? user.name.charAt(0) : '?') + '</div>';
                         }
-                        html += '<div><div style="font-weight:600;color:#1d1d1f;">' + (user ? user.name : 'غير معروف') + '</div>';
-                        html += '<div style="font-size:11px;color:#86868b;">' + (user ? user.email : '') + '</div></div>';
+                        html += '<div><div class="fw-600-dark">' + (user ? user.name : 'غير معروف') + '</div>';
+                        html += '<div class="fz11-muted">' + (user ? user.email : '') + '</div></div>';
                         html += '</div></td>';
                         html += '<td class="js-table-cell-center">';
                         html += '<span class="js-badge-orange">' + item.total_points + ' نقطة</span>';

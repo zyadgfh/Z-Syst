@@ -92,8 +92,8 @@
             <h5 class="mb-0">{{ __('insurance.Approval Rate') }}</h5>
         </div>
         <div class="card-body">
-            <div class="progress" style="height: 24px;">
-                <div id="approvalBar" class="progress-bar bg-success" role="progressbar" style="width: 0%">0%</div>
+            <div class="progress h-24">
+                <div id="approvalBar" class="progress-bar bg-success w-0" role="progressbar">0%</div>
             </div>
             <div class="d-flex justify-content-between mt-2">
                 <small class="text-muted">{{ __('insurance.Approved') }}: <span id="approvalCount">0</span></small>

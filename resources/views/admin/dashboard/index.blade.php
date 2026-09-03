@@ -100,7 +100,7 @@
 
             <!-- Revenue -->
             <div class="card kpi-card">
-                <div class="kpi-icon" style="background: linear-gradient(135deg, rgba(21, 128, 61, 0.1) 0%, rgba(3, 105, 161, 0.1) 100%);">
+                <div class="kpi-icon bg-gradient-teal-blue-10">
                     <i class="fas fa-dollar-sign text-primary"></i>
                 </div>
                 <div class="kpi-value" id="total_revenue">$0</div>

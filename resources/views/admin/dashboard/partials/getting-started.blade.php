@@ -53,29 +53,29 @@
     if ($allDone) return;
 @endphp
 
-<div class="card getting-started-card" style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-bottom: 24px;">
-    <div style="padding: 20px 24px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #fff;">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
+<div class="card getting-started-card card-bordered">
+    <div class="card-gradient-indigo">
+        <div class="flex-between">
             <div>
-                <h3 style="margin: 0 0 4px; font-size: 16px; font-weight: 600;">
+                <h3 class="text-title">
                     <i class="fas fa-rocket me-2"></i>{{ __('Getting Started') }}
                 </h3>
-                <p style="margin: 0; font-size: 13px; opacity: 0.85;">
+                <p class="text-subtle">
                     {{ __('Complete these steps to set up your store') }}
                 </p>
             </div>
-            <div style="text-align: right;">
-                <div style="font-size: 24px; font-weight: 700;">{{ $completedCount }}/{{ $totalCount }}</div>
-                <div style="font-size: 11px; opacity: 0.8;">{{ __('steps done') }}</div>
+            <div class="text-right">
+                <div class="fz24-bold">{{ $completedCount }}/{{ $totalCount }}</div>
+                <div class="fz11-opacity">{{ __('steps done') }}</div>
             </div>
         </div>
         <!-- Progress bar -->
-        <div style="margin-top: 16px; background: rgba(255,255,255,0.2); border-radius: 8px; height: 6px;">
+        <div class="progress-track">
             <div style="background: #fff; border-radius: 8px; height: 100%; width: {{ ($completedCount / $totalCount) * 100 }}%; transition: width 0.5s ease;"></div>
         </div>
     </div>
 
-    <div style="padding: 16px 24px;">
+    <div class="pad-lg">
         @foreach($steps as $step)
         <div class="getting-started-step" style="display: flex; align-items: center; gap: 14px; padding: 12px 0; {{ !$loop->last ? 'border-bottom: 1px solid #f3f4f6;' : '' }}">
             <div style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
@@ -90,14 +90,14 @@
                 <div class="fw-600 text-14" style="color: #1f2937; {{ $step['done'] ? 'text-decoration: line-through;' : '' }}">
                     {{ $step['title'] }}
                 </div>
-                <div style="font-size: 12px; color: #6b7280; margin-top: 2px;">{{ $step['description'] }}</div>
+                <div class="fz12-gray-mt2">{{ $step['description'] }}</div>
             </div>
             @if(!$step['done'])
-            <a href="{{ $step['url'] }}" style="font-size: 12px; font-weight: 500; color: #6366f1; text-decoration: none; padding: 6px 14px; border: 1px solid #e0e7ff; border-radius: 6px; white-space: nowrap; transition: all 0.2s;">
-                {{ __('Start') }} <i class="fas fa-arrow-right" style="font-size: 10px; margin-left: 4px;"></i>
+            <a href="{{ $step['url'] }}" class="badge-indigo-link">
+                {{ __('Start') }} <i class="fas fa-arrow-right fz10 ml-4"></i>
             </a>
             @else
-            <span style="font-size: 12px; color: #16a34a; font-weight: 500;">
+            <span class="fz12-green-semibold">
                 <i class="fas fa-check-circle"></i> {{ __('Done') }}
             </span>
             @endif

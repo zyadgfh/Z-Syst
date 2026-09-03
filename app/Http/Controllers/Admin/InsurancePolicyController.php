@@ -85,7 +85,7 @@ class InsurancePolicyController extends Controller
 
     public function show(InsurancePolicy $policy)
     {
-        $policy->load(['company', 'business', 'customer', 'claims', 'coverages']);
+        $policy->load(['company', 'business', 'customer', 'claims']);
 
         return view('admin.insurance.policies.show', compact('policy'));
     }

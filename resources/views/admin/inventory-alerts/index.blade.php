@@ -58,14 +58,14 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; background: linear-gradient(135deg, #f5f5f7, #fff);">
+                <div class="card card-gradient-gray">
                     <div class="card-body" class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <p class="section-subtitle-xs">نفذ من المخزون</p>
-                                <h3 style="font-weight: 700; color: #1d1d1f; margin: 4px 0 0;">{{ $stats['out_of_stock'] }}</h3>
+                                <h3 class="fw-700-dark-mt4">{{ $stats['out_of_stock'] }}</h3>
                             </div>
-                            <div class="icon-container-44" style="background: #6e6e73;">
+                            <div class="icon-container-44 bg-gray">
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
                             </div>
                         </div>
@@ -73,14 +73,14 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; background: linear-gradient(135deg, #fff5f5, #fff);">
+                <div class="card card-gradient-red">
                     <div class="card-body" class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <p class="section-subtitle-xs">قرب انتهاء الصلاحية</p>
                                 <h3 class="stat-lg-red">{{ $stats['expiring'] }}</h3>
                             </div>
-                            <div class="js-icon-container" style="background: #c0392b;">
+                            <div class="js-icon-container bg-red">
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                             </div>
                         </div>
@@ -137,7 +137,7 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px; padding-top: 8px;">
+                        <label class="inline-flex-center-gap6 fz14 pt-8">
                             <input type="checkbox" name="acknowledged" value="1" {{ request('acknowledged') ? 'checked' : '' }} class="icon-md">
                             تمت القراءة
                         </label>
@@ -163,17 +163,17 @@
                                 {{ match($alert->type) { 'low_stock' => 'مخزون منخفض', 'out_of_stock' => 'نفذ من المخزون', 'expiring_soon' => 'قرب انتهاء', 'expired' => 'منتهي الصلاحية', 'overstock' => 'مخزون زائد', default => $alert->type } }}
                             </span>
                             @if ($alert->product)
-                                <a href="{{ route('admin.items.show', $alert->product_id) }}" style="font-size: 14px; font-weight: 600; color: #007aff; text-decoration: none;">{{ $alert->product->productName }}</a>
+                                <a href="{{ route('admin.items.show', $alert->product_id) }}" class="fz14-semibold-blue">{{ $alert->product->productName }}</a>
                             @endif
                         </div>
-                        <p style="font-size: 13px; color: #6e6e73; margin: 0;">{{ $alert->message }}</p>
+                        <p class="fz13-subtle">{{ $alert->message }}</p>
                         <div class="d-flex align-items-center gap-3 mt-2" class="stat-label">
                             <span>{{ $alert->created_at->diffForHumans() }}</span>
                             @if ($alert->current_stock > 0)
                                 <span>المخزون الحالي: <strong>{{ $alert->current_stock }}</strong></span>
                             @endif
                             @if ($alert->suggested_reorder_qty)
-                                <span>الكمية المقترحة للطلب: <strong style="color: #007aff;">{{ $alert->suggested_reorder_qty }}</strong></span>
+                                <span>الكمية المقترحة للطلب: <strong class="c-blue">{{ $alert->suggested_reorder_qty }}</strong></span>
                             @endif
                             @if ($alert->suggested_reorder_date)
                                 <span>التاريخ المقترح: {{ $alert->suggested_reorder_date->format('Y-m-d') }}</span>
@@ -181,15 +181,15 @@
                         </div>
                     </div>
 
-                    <div class="d-flex gap-2" style="flex-shrink: 0;">
+                    <div class="d-flex gap-2 flex-noshrink">
                         @if ($alert->product && $alert->suggested_reorder_qty)
-                            <a href="{{ route('admin.purchases.create') }}" class="btn btn-sm" style="background: #e8f5e9; color: #2e7d32; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; text-decoration: none; transition: transform 150ms ease;"
+                            <a href="{{ route('admin.purchases.create') }}" class="btn btn-sm btn-green-outline-sm"
                                onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">
                                 طلب شراء
                             </a>
                         @endif
                         @if (!$alert->acknowledged)
-                            <button onclick="acknowledgeAlert({{ $alert->id }})" class="btn btn-sm" style="background: #f5f5f7; color: #1d1d1f; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600;">
+                            <button onclick="acknowledgeAlert({{ $alert->id }})" class="btn btn-sm" class="btn-apple-gray-xs">
                                 تم
                             </button>
                         @endif
@@ -201,7 +201,7 @@
                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                         <polyline points="22 4 12 14.01 9 11.01"/>
                     </svg>
-                    <h5 style="color: #1d1d1f; font-weight: 600;">لا توجد تنبيهات</h5>
+                    <h5 class="c-dark fw-600">لا توجد تنبيهات</h5>
                     <p class="text-14 text-muted">جميع المنتجات في حالة مخزون جيدة</p>
                 </div>
             @endforelse

@@ -288,6 +288,58 @@ class ProductController extends Controller
     }
 
     /**
+     * Bulk delete products.
+     */
+    public function bulkDestroy(Request $request): JsonResponse
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:products,id',
+        ]);
+
+        $businessId = $request->user()->business_id;
+        $products = Product::whereIn('id', $request->ids)
+            ->where('business_id', $businessId)
+            ->get();
+
+        $deleted = 0;
+        $archived = 0;
+        $errors = 0;
+
+        foreach ($products as $product) {
+            try {
+                $this->productService->deleteProduct($product);
+                if ($product->archived) {
+                    $archived++;
+                } else {
+                    $deleted++;
+                }
+            } catch (\Exception $e) {
+                $errors++;
+            }
+        }
+
+        $messages = [];
+        if ($deleted > 0) {
+            $messages[] = $deleted . ' ' . __('deleted');
+        }
+        if ($archived > 0) {
+            $messages[] = $archived . ' ' . __('archived');
+        }
+        if ($errors > 0) {
+            $messages[] = $errors . ' ' . __('errors');
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => implode(', ', $messages),
+            'deleted' => $deleted,
+            'archived' => $archived,
+            'errors' => $errors,
+        ]);
+    }
+
+    /**
      * Check for duplicate products.
      */
     public function checkDuplicates(Request $request): JsonResponse

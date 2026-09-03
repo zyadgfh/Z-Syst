@@ -10,7 +10,7 @@
         <td>{{ $prescriptions->perPage() * ($prescriptions->currentPage() - 1) + $loop->iteration }}</td>
         <td>
             <a href="{{ asset($prescription->image) }}" target="_blank">
-                <img class="table-img" height="50px" width="50px" style="object-fit:cover; border-radius:4px;" src="{{ asset($prescription->image) }}" alt="Prescription">
+                <img class="table-img obj-cover rounded" height="50px" width="50px" src="{{ asset($prescription->image) }}" alt="Prescription">
             </a>
         </td>
         <td class="table-single-content">{{ $prescription->party ? $prescription->party->name : __('products.Walk-in Customer') }}</td>

@@ -7,7 +7,7 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <a href="{{ route('admin.customer-orders.index') }}" class="text-decoration-none mb-2 d-inline-block" style="color: #15803d; font-size: 14px;">
+            <a href="{{ route('admin.customer-orders.index') }}" class="text-decoration-none mb-2 d-inline-block c-green-dark fz14">
                 ← {{ __('orders.Back to Orders') }}
             </a>
             <h2 class="dashboard-title">{{ __('orders.Order') }} {{ $order->order_number }}</h2>
@@ -120,20 +120,20 @@
 
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <div style="font-weight: 600; font-size: 14px; color: #111827;">
+                                        <div class="fw-600-fz14-dark">
                                             <span data-dot-style="--dot-color: {{ $color }}"></span>
                                             {{ ucfirst($history->status) }}
                                         </div>
                                         @if ($history->note)
-                                            <div class="card-body-sm" style="background: #f3f4f6; margin-top: 6px; font-size: 13px; color: #4b5563; max-width: 400px;">
+                                            <div class="card-body-sm bg-gray-100 mt-6 fz13 c-gray-600 max-w-400">
                                                 💬 {{ $history->note }}
                                             </div>
                                         @endif
                                     </div>
-                                    <div style="text-align: right; flex-shrink: 0;">
-                                        <div style="font-size: 12px; color: #6b7280;">{{ $history->changed_at->format('M d, Y g:i A') }}</div>
+                                    <div class="text-right-noshrink">
+                                        <div class="fz12-gray">{{ $history->changed_at->format('M d, Y g:i A') }}</div>
                                         @if ($history->changedByUser)
-                                            <div style="font-size: 11px; color: #9ca3af; margin-top: 2px;">by {{ $history->changedByUser->name }}</div>
+                                            <div class="fz11-lightgray-mt2">by {{ $history->changedByUser->name }}</div>
                                         @endif
                                     </div>
                                 </div>
@@ -168,9 +168,9 @@
                                             <div class="d-flex align-items-center gap-2">
                                                 <div class="js-product-thumb">
                                                     @if ($item->product && $item->product->images && is_array($item->product->images) && count($item->product->images) > 0)
-                                                        <img src="{{ asset('storage/' . $item->product->images[0]) }}" style="border-radius: 6px;">
+                                                        <img src="{{ asset('storage/' . $item->product->images[0]) }}" class="rounded-6">
                                                     @else
-                                                        <i class="fas fa-box" style="color: #9ca3af;"></i>
+                                                        <i class="fas fa-box c-gray-400"></i>
                                                     @endif
                                                 </div>
                                                 <div>

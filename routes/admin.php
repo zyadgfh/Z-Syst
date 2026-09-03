@@ -147,6 +147,7 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('items/{id}/edit', [ADMIN\ProductController::class, 'edit'])->name('items.edit');
     Route::put('items/{product}/update', [ADMIN\ProductController::class, 'update'])->name('items.update');
     Route::delete('items/{product}', [ADMIN\ProductController::class, 'destroy'])->name('items.destroy');
+    Route::post('items/bulk-delete', [ADMIN\ProductController::class, 'bulkDestroy'])->name('items.bulk-delete');
     Route::middleware('throttle:20,1')->group(function () {
         Route::post('items/{id}/stock-adjust', [ADMIN\ProductController::class, 'stockAdjust'])->name('items.stock-adjust');
     });
@@ -449,13 +450,14 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
         Route::post('policies/{policy}/check-eligibility', [ADMIN\InsurancePolicyController::class, 'checkEligibility'])->name('policies.check-eligibility');
 
         // Insurance Claims
+        // IMPORTANT: Fixed routes BEFORE resource to avoid {claim} catching 'statistics'
+        Route::get('claims/statistics', [ADMIN\InsuranceClaimController::class, 'statistics'])->name('claims.statistics');
+        Route::get('claims/statistics/dashboard', fn () => view('admin.insurance.claims.statistics'))->name('claims.statistics.dashboard');
         Route::resource('claims', ADMIN\InsuranceClaimController::class)->except('show');
         Route::get('claims/{claim}', [ADMIN\InsuranceClaimController::class, 'show'])->name('claims.show');
         Route::post('claims/{claim}/submit', [ADMIN\InsuranceClaimController::class, 'submit'])->name('claims.submit');
         Route::post('claims/{claim}/process', [ADMIN\InsuranceClaimController::class, 'process'])->name('claims.process');
         Route::post('claims/{claim}/payment', [ADMIN\InsuranceClaimController::class, 'processPayment'])->name('claims.payment');
-        Route::get('claims/statistics', [ADMIN\InsuranceClaimController::class, 'statistics'])->name('claims.statistics');
-        Route::get('claims/statistics/dashboard', fn () => view('admin.insurance.claims.statistics'))->name('claims.statistics.dashboard');
     });
 
     // Online Store - Customer Orders

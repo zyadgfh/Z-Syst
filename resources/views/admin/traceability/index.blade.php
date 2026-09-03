@@ -74,7 +74,7 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body text-center p-4">
-                        <div class="display-4 mb-2" style="color: var(--color-destructive);">
+                        <div class="display-4 mb-2 c-destructive">
                             <i class="fas fa-exclamation-triangle"></i>
                         </div>
                         <h5>{{ __('audit.Recall Events') }}</h5>

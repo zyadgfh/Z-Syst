@@ -3,9 +3,9 @@
 @section('title', 'إنشاء أكواد كوبونات بالجملة')
 
 @section('main_content')
-    <div class="container-fluid" style="padding: 24px; max-width: 820px;">
+    <div class="container-fluid pad-24 max-w-820">
         <div class="d-flex align-items-center mb-4">
-            <a href="{{ route('admin.coupons.index') }}" style="color: #007aff; text-decoration: none; font-size: 14px; margin-left: 16px;">
+            <a href="{{ route('admin.coupons.index') }}" class="c-blue no-underline fz14 ml-16">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="va-middle"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             </a>
             <h4 class="heading-bold">
@@ -20,7 +20,7 @@
         </div>
 
         @if ($errors->any())
-            <div class="alert" style="background: #fff0f0; color: #ff3b30; border-radius: 12px; padding: 12px 16px; border: none; margin-bottom: 16px;">
+            <div class="alert alert-red">
                 <ul class="mb-0" class="list-unstyled">
                     @foreach ($errors->all() as $error)
                         <li class="fs-14">{{ $error }}</li>
@@ -29,10 +29,10 @@
             </div>
         @endif
 
-        <form action="{{ route('admin.coupons.bulk-generate.store') }}" method="POST" style="background: #fff; border-radius: 16px; border: 1px solid #e5e5ea; padding: 24px;">
+        <form action="{{ route('admin.coupons.bulk-generate.store') }}" method="POST" class="card-apple-lg">
             @csrf
 
-            <div style="background: #f0f7ff; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; font-size: 13px; color: #0056b3; line-height: 1.6;">
+            <div class="card-info-light">
                 <strong>ملاحظة:</strong> سيتم إنشاء أكواد عشوائية فريدة بنفس إعدادات الخصم. يمكنك تخصيص البادئة وطول الكود أدناه.
             </div>
 
@@ -63,7 +63,7 @@
                         placeholder="8">
                 </div>
 
-                <div class="col-12"><hr style="border: none; border-top: 1px solid #f0f0f2; margin: 8px 0;"></div>
+                <div class="col-12"><hr class="border-top-light my-8"></div>
 
                 {{-- Discount Settings --}}
                 <div class="col-md-4">

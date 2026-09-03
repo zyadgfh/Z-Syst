@@ -524,7 +524,7 @@ class InsuranceService
     {
         return InsurancePolicy::where('party_id', $customerId)
             ->where('business_id', $businessId)
-            ->with(['company', 'coverages'])
+            ->with(['company'])
             ->get()
             ->map(function ($policy) {
                 return [

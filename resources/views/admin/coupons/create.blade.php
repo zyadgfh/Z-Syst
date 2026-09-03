@@ -27,8 +27,7 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label-sm">كود الكوبون <span class="text-danger-custom">*</span></label>
-                    <input type="text" name="code" value="{{ old('code') }}" required
-                        style="width: 100%; border-radius: 10px; border: 1px solid #d2d2d7; padding: 10px 14px; font-size: 15px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;"
+                    <input type="text" name="code" value="{{ old('code') }}" required class="input-uppercase-bold"
                         placeholder="مثال: SUMMER20">
                 </div>
                 <div class="col-md-6">

@@ -29,7 +29,7 @@
                     <button type="submit" class="btn w-100" class="btn-primary-blue">بحث</button>
                 </div>
                 <div class="col-md-2">
-                    <a href="{{ route('admin.sales-report.index') }}" class="btn w-100" style="background: #f5f5f7; color: #1d1d1f; border-radius: 10px; padding: 10px; font-weight: 600; text-decoration: none;">هذا الشهر</a>
+                    <a href="{{ route('admin.sales-report.index') }}" class="btn w-100 btn-apple-gray-icon">هذا الشهر</a>
                 </div>
             </form>
         </div>
@@ -73,7 +73,7 @@
                         @php
                             $maxRevenue = max($dailyRevenue->pluck('revenue')->max(), 1);
                         @endphp
-                        <div style="display: flex; align-items: flex-end; gap: 4px; height: 200px; padding-bottom: 30px; position: relative;">
+                        <div class="flex-end-gap4 h-200 pb-30 pos-rel">
                             @foreach ($dailyRevenue as $day)
                                 @php $height = ($day->revenue / $maxRevenue) * 170; @endphp
                                 <div class="bar-col" title="{{ $day->date }}: {{ number_format($day->revenue) }} ({{ $day->orders }} طلب)">
@@ -192,7 +192,7 @@
                         @foreach ($recentSales as $sale)
                             <tr class="border-bottom-light">
                                 <td class="card-body-sm"><code class="code-badge-sm">{{ $sale->invoiceNumber }}</code></td>
-                                <td style="padding: 12px 16px; font-size: 13px; color: #6e6e73;">{{ $sale->saleDate ? \Carbon\Carbon::parse($sale->saleDate)->format('Y-m-d H:i') : '—' }}</td>
+                                <td class="pad-md-muted">{{ $sale->saleDate ? \Carbon\Carbon::parse($sale->saleDate)->format('Y-m-d H:i') : '—' }}</td>
                                 <td class="card-body-sm">{{ $sale->party->name ?? '—' }}</td>
                                 <td class="card-body-sm">{{ $sale->user->name ?? '—' }}</td>
                                 <td class="row-amount">{{ number_format($sale->totalAmount, 2) }}</td>

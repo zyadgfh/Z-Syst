@@ -127,7 +127,7 @@
                         <td>${formatDate(po.expected_delivery_date)}</td>
                         <td>${po.total_quantity}</td>
                         <td>
-                            <div class="progress" style="height: 20px;">
+                            <div class="progress h-20">
                                 <div class="progress-bar" style="width: ${po.completion_percentage}%">
                                     ${po.completion_percentage.toFixed(0)}%
                                 </div>

@@ -11,9 +11,9 @@
 
     {{-- Existing categories --}}
     @if($categories->count() > 0)
-    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
+    <div class="flex-wrap-gap8 mb-20">
         @foreach($categories as $cat)
-        <span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; border-radius: 20px; font-size: 13px; font-weight: 500;">
+        <span class="btn-pill-green">
             <i class="fas fa-check-circle"></i> {{ $cat->categoryName }}
         </span>
         @endforeach
@@ -23,8 +23,8 @@
     {{-- Add category form --}}
     <form method="POST" action="{{ route('admin.onboarding.saveStep2') }}">
         @csrf
-        <div style="display: flex; gap: 12px; align-items: flex-end;">
-            <div style="flex: 1;">
+        <div class="flex-gap12-end">
+            <div class="flex-1">
                 <label class="form-label-md">
                     {{ __('business.New Category Name') }} <span class="text-red">*</span>
                 </label>
@@ -33,7 +33,7 @@
                     placeholder="{{ __('business.e.g. Antibiotics, Vitamins, Supplements') }}" required>
                 @error('categoryName') <p class="text-red-sm">{{ $message }}</p> @enderror
             </div>
-            <button type="submit" name="action" value="add" style="padding: 10px 20px; font-size: 14px; font-weight: 500; background: #22c55e; color: #fff; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap;">
+            <button type="submit" name="action" value="add" class="btn-success-solid ws-nowrap">
                 <i class="fas fa-plus"></i> {{ __('common.Add') }}
             </button>
         </div>

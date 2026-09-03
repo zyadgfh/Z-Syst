@@ -21,7 +21,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card kpi-card p-3 text-center" style="border-left: 3px solid #f59e0b;">
+            <div class="card kpi-card p-3 text-center border-l-amber">
                 <div class="kpi-value" class="text-amber">{{ $stats['pending'] }}</div>
                 <div class="kpi-label">{{ __('common.Pending') }}</div>
             </div>
@@ -33,7 +33,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card kpi-card p-3 text-center" style="border-left: 3px solid #8b5cf6;">
+            <div class="card kpi-card p-3 text-center border-l-purple">
                 <div class="kpi-value" class="text-violet">{{ number_format($stats['avg_rating'], 1) }}</div>
                 <div class="kpi-label">{{ __('orders.Avg Rating') }}</div>
             </div>
@@ -98,12 +98,12 @@
                                             @endfor
                                         </div>
                                         @if ($review->is_verified_purchase)
-                                            <span class="badge" style="background: #f0fdf4; color: #166534; font-size: 11px;">
+                                            <span class="badge badge-green-xs">
                                                 <i class="fas fa-check-circle me-1"></i>{{ __('purchases.Verified') }}
                                             </span>
                                         @endif
                                         @if (!$review->is_approved)
-                                            <span class="badge" style="background: #fef3c7; color: #92400e; font-size: 11px;">
+                                            <span class="badge badge-amber-sm">
                                                 {{ __('common.Pending') }}
                                             </span>
                                         @endif
@@ -120,10 +120,10 @@
                                     </div>
 
                                     <!-- Review Text -->
-                                    <p class="mb-2" style="color: #374151; font-size: 14px; line-height: 1.6;">{{ $review->review }}</p>
+                                    <p class="mb-2 c-gray-700 fz14 lh-16">{{ $review->review }}</p>
 
                                     <!-- Meta -->
-                                    <div class="d-flex align-items-center gap-3" style="font-size: 12px; color: #9ca3af;">
+                                    <div class="d-flex align-items-center gap-3 fz12-lightgray">
                                         <span><i class="fas fa-user me-1"></i>{{ $review->user->name ?? 'N/A' }}</span>
                                         <span><i class="fas fa-calendar me-1"></i>{{ $review->created_at->format('M d, Y') }}</span>
                                         <span><i class="fas fa-thumbs-up me-1"></i>{{ $review->helpful_count }} {{ __('orders.helpful') }}</span>
@@ -134,20 +134,20 @@
                                 <div class="d-flex gap-2 flex-shrink-0 ms-3">
                                     @if (!$review->is_approved)
                                         <button onclick="approveReview({{ $review->id }})"
-                                            class="btn btn-sm" style="background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;"
+                                            class="btn btn-sm badge-green-outline"
                                             title="{{ __('orders.Approve') }}">
                                             <i class="fas fa-check"></i>
                                         </button>
                                     @endif
                                     @if ($review->is_approved)
                                         <button onclick="rejectReview({{ $review->id }})"
-                                            class="btn btn-sm" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a;"
+                                            class="btn btn-sm badge-amber-outline"
                                             title="{{ __('orders.Hide') }}">
                                             <i class="fas fa-eye-slash"></i>
                                         </button>
                                     @endif
                                     <button onclick="deleteReview({{ $review->id }})"
-                                        class="btn btn-sm" style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca;"
+                                        class="btn btn-sm badge-red-outline"
                                         title="{{ __('common.Delete') }}">
                                         <i class="fas fa-trash"></i>
                                     </button>

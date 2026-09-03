@@ -65,14 +65,14 @@
                             @php
                                 $maxVal = max($monthlyTrend->pluck('earned')->max(), $monthlyTrend->pluck('redeemed')->max(), 1);
                             @endphp
-                            <div style="display: flex; align-items: flex-end; gap: 8px; height: 200px; padding-bottom: 30px; position: relative;">
+                            <div class="flex-end-gap8 h-200 pb-30 pos-rel">
                                 @foreach ($monthlyTrend as $month)
                                     @php
                                         $hEarned = ($month->earned / $maxVal) * 170;
                                         $hRedeemed = ($month->redeemed / $maxVal) * 170;
                                         $hExpired = ($month->expired / $maxVal) * 170;
                                     @endphp
-                                    <div style="flex: 1; display: flex; gap: 2px; align-items: flex-end; position: relative;" title="{{ $month->month }}: صدرت {{ number_format($month->earned) }} / مستبدلة {{ number_format($month->redeemed) }}">
+                                    <div class="flex-1-end pos-rel" title="{{ $month->month }}: صدرت {{ number_format($month->earned) }} / مستبدلة {{ number_format($month->redeemed) }}">
                                         <div class="flex-1" data-bar-height data-bar-green data-bar-style="--bar-h: {{ $hEarned }}"></div>
                                         <div class="flex-1" data-bar-height data-bar-blue data-bar-style="--bar-h: {{ $hRedeemed }}"></div>
                                         <div class="flex-1" data-bar-height data-bar-amber data-bar-style="--bar-h: {{ $hExpired }}"></div>

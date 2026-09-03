@@ -74,7 +74,7 @@
                             <strong>{{ number_format($policy->annual_limit ?? 0, 2) }}</strong>
                         </div>
                         @if($policy->annual_limit)
-                        <div class="progress" style="height: 8px;">
+                        <div class="progress h-8">
                             <div class="progress-bar bg-{{ ($policy->used_amount / max($policy->annual_limit, 1)) * 100 > 80 ? 'danger' : 'success' }}"
                                  style="width: {{ min(($policy->used_amount / max($policy->annual_limit, 1)) * 100, 100) }}%"></div>
                         </div>

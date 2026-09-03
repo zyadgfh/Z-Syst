@@ -57,7 +57,7 @@
                                     <label class="form-label">{{ __('settings.Favicon') }}</label>
                                     <div class="image-upload">
                                         <div class="upload-preview" id="favicon-preview">
-                                            <img src="{{ asset($general->value['favicon'] ?? 'assets/images/logo/logo.png') }}" alt="Favicon" style="max-width: 64px; max-height: 64px; object-fit: contain;">
+                                            <img src="{{ asset($general->value['favicon'] ?? 'assets/images/logo/logo.png') }}" alt="Favicon" class="thumb-sm">
                                         </div>
                                         <input type="file" name="favicon" class="form-control" accept="image/*" id="favicon-input">
                                     </div>
@@ -113,7 +113,7 @@
                             if (file) {
                                 const reader = new FileReader();
                                 reader.onload = function(e) {
-                                    previewElement.innerHTML = `<img src="${e.target.result}" alt="Preview" style="max-width: 100%; max-height: 200px; object-fit: contain;">`;
+                                    previewElement.innerHTML = `<img src="${e.target.result}" alt="Preview" class="img-contain">`;
                                 };
                                 reader.readAsDataURL(file);
                             }

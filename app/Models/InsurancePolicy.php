@@ -75,10 +75,10 @@ class InsurancePolicy extends Model
         return $this->hasMany(InsuranceClaim::class);
     }
 
-    public function coverages(): HasMany
-    {
-        return $this->hasMany(InsuranceCoverage::class);
-    }
+    /**
+     * Coverages belong to the insurance company, not the policy.
+     * Use $policy->company->coverages instead.
+     */
 
     public function scopeActive($query)
     {

@@ -11,7 +11,7 @@
 
     {{-- Existing products count --}}
     @if($products->count() > 0)
-    <div style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; margin-bottom: 20px; font-size: 14px; color: #16a34a;">
+    <div class="alert-success-flex">
         <i class="fas fa-check-circle"></i>
         {{ __(':count product(s) added', ['count' => $products->count()]) }}
     </div>
@@ -20,7 +20,7 @@
     <form method="POST" action="{{ route('admin.onboarding.saveStep3') }}">
         @csrf
         <div class="grid-gap-20">
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+            <div class="grid-2-1">
                 <div>
                     <label class="form-label-md">
                         {{ __('products.Product Name') }} <span class="text-red">*</span>
@@ -34,7 +34,7 @@
                     <label class="form-label-md">
                         {{ __('common.Category') }} <span class="text-red">*</span>
                     </label>
-                    <select name="category_id" style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none; background: #fff;" required>
+                    <select name="category_id" class="input-clean" required>
                         <option value="">{{ __('security.Select...') }}</option>
                         @foreach($categories as $cat)
                         <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>
@@ -71,7 +71,7 @@
             <a href="{{ route('admin.onboarding.step', 2) }}" class="input-btn-outline">
                 <i class="fas fa-arrow-left"></i> {{ __('common.Back') }}
             </a>
-            <button type="submit" name="action" value="add" style="padding: 10px 20px; font-size: 14px; font-weight: 500; background: #22c55e; color: #fff; border: none; border-radius: 8px; cursor: pointer;">
+            <button type="submit" name="action" value="add" class="btn-success-solid">
                 <i class="fas fa-plus"></i> {{ __('business.Add Product') }}
             </button>
             <button type="submit" name="action" value="continue" class="input-btn-primary">

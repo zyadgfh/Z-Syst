@@ -13,10 +13,10 @@
                     <h4 class="mb-0">{{ __('settings.Application Settings') }}</h4>
                     <div class="d-flex align-items-center gap-2">
                         {{-- Search --}}
-                        <div class="position-relative" style="min-width: 280px;">
+                        <div class="position-relative min-w-280">
                             <input type="text" id="settings-search" class="form-control"
                                    placeholder="{{ __('settings.Search settings...') }}" autocomplete="off">
-                            <i class="fas fa-search position-absolute" style="right: 12px; top: 50%; transform: translateY(-50%); color: #999;"></i>
+                            <i class="fas fa-search position-absolute pos-right-center-muted"></i>
                         </div>
                     </div>
                 </div>
@@ -34,7 +34,7 @@
 
                 <div class="row g-0">
                     {{-- Settings Sidebar --}}
-                    <div class="col-lg-3 col-md-4 border-end" style="min-height: 70vh;">
+                    <div class="col-lg-3 col-md-4 border-end min-h-70vh">
                         <div class="p-3">
                             @can('settings-edit')
                             <div class="mb-3">

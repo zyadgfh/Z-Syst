@@ -11,44 +11,44 @@
                 </a>
                 <h4 class="heading-bold">
                     📱 أكواد الكوبونات — QR Codes
-                    <span style="font-size: 14px; font-weight: 400; color: #86868b; margin-left: 8px;">({{ $codes->count() }} كود)</span>
+                    <span class="fz14-normal-muted-ml8">({{ $codes->count() }} كود)</span>
                 </h4>
             </div>
             <div class="d-flex gap-2">
-                <button onclick="window.print()" style="display: inline-flex; align-items: center; gap: 6px; background: #007aff; color: #fff; border: none; border-radius: 10px; padding: 10px 18px; font-weight: 600; font-size: 14px; cursor: pointer;">
+                <button onclick="window.print()" class="btn-inline-blue">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
                     طباعة
                 </button>
-                <button onclick="downloadAll()" style="display: inline-flex; align-items: center; gap: 6px; background: #f5f5f7; color: #1d1d1f; border: none; border-radius: 10px; padding: 10px 18px; font-weight: 600; font-size: 14px; cursor: pointer;">
+                <button onclick="downloadAll()" class="btn-inline-gray">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     تحميل CSV
                 </button>
             </div>
         </div>
 
-        <div id="qrGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;">
+        <div id="qrGrid" class="grid-auto-fill">
             @foreach ($codes as $item)
-                <div class="qr-card" style="background: #fff; border-radius: 14px; border: 1px solid #e5e5ea; padding: 16px; text-align: center; transition: box-shadow 150ms ease;" onmouseenter="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'" onmouseleave="this.style.boxShadow='none'">
+                <div class="qr-card card-apple" onmouseenter="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'" onmouseleave="this.style.boxShadow='none'">
                     <div class="img-preview">
-                        <img src="{{ $item['qr_url'] }}" alt="QR Code for {{ $item['code'] }}" class="thumb-contain" style="width: 100%; height: 100%;" loading="lazy">
+                        <img src="{{ $item['qr_url'] }}" alt="QR Code for {{ $item['code'] }}" class="thumb-contain w-full h-full" loading="lazy">
                     </div>
 
-                    <code style="display: block; font-size: 16px; font-weight: 700; color: #1d1d1f; letter-spacing: 0.06em; margin-bottom: 6px; background: #f5f5f7; padding: 6px 12px; border-radius: 8px;">{{ $item['code'] }}</code>
+                    <code class="block-code">{{ $item['code'] }}</code>
 
-                    <div style="font-size: 13px; color: #6e6e73; margin-bottom: 4px;">
+                    <div class="fz13-subtle-mb4">
                         @if ($item['type'] === 'percentage')
-                            <span style="background: #e8f5e9; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-weight: 600;">{{ $item['value'] }}%</span>
+                            <span class="badge-green-tag">{{ $item['value'] }}%</span>
                         @else
-                            <span style="background: #e3f2fd; color: #1565c0; padding: 2px 8px; border-radius: 4px; font-weight: 600;">{{ number_format($item['value'], 2) }}</span>
+                            <span class="badge-blue-tag">{{ number_format($item['value'], 2) }}</span>
                         @endif
                     </div>
 
                     @if ($item['description'])
-                        <div style="font-size: 11px; color: #86868b; margin-top: 4px;">{{ $item['description'] }}</div>
+                        <div class="fz11-muted-mt4">{{ $item['description'] }}</div>
                     @endif
 
                     @if ($item['expires_at'])
-                        <div style="font-size: 11px; color: #86868b; margin-top: 2px;">ينتهي: {{ $item['expires_at'] }}</div>
+                        <div class="fz11-muted-mt2">ينتهي: {{ $item['expires_at'] }}</div>
                     @endif
                 </div>
             @endforeach

@@ -11,7 +11,7 @@
     {{-- Today's Sales --}}
     <div class="card card-body">
         <h3 class="section-subtitle">
-            <i class="fas fa-shopping-cart" style="color:#22c55e; margin-right:6px;"></i>{{ __('Today\'s Sales') }}
+            <i class="fas fa-shopping-cart c-green mr-6"></i>{{ __('Today\'s Sales') }}
         </h3>
         @php
             $todaySales = \App\Models\Sale::where('business_id', $businessId)
@@ -19,14 +19,14 @@
                 ->selectRaw('COUNT(*) as count, SUM(totalAmount) as total')
                 ->first();
         @endphp
-        <div class="js-stat-value-lg" style="font-size:28px; color:#1f2937;">{{ $todaySales->count ?? 0 }}</div>
-        <div class="section-subtitle-xs" style="color:#6b7280;">{{ __('transactions') }} &middot; {{ number_format($todaySales->total ?? 0, 2) }}</div>
+        <div class="js-stat-value-lg fz28-dark">{{ $todaySales->count ?? 0 }}</div>
+        <div class="section-subtitle-xs c-gray-500">{{ __('transactions') }} &middot; {{ number_format($todaySales->total ?? 0, 2) }}</div>
     </div>
 
     {{-- Low Stock Alert --}}
     <div class="card card-body">
         <h3 class="section-subtitle">
-            <i class="fas fa-exclamation-triangle" style="color:#f59e0b; margin-right:6px;"></i>{{ __('Low Stock Items') }}
+            <i class="fas fa-exclamation-triangle c-amber mr-6"></i>{{ __('Low Stock Items') }}
         </h3>
         @php
             $lowStock = \App\Models\Stock::where('business_id', $businessId)
@@ -39,10 +39,10 @@
             {{ $lowStock->count() }}
         </div>
         @if($lowStock->count() > 0)
-        <div style="margin-top:8px;">
+        <div class="mt-8">
             @foreach($lowStock as $stock)
-            <div style="font-size:12px; color:#6b7280; padding:2px 0;">
-                {{ $stock->product->productName ?? '—' }}: <strong style="color:#ef4444;">{{ $stock->productStock }}</strong>
+            <div class="fz12-gray-py2">
+                {{ $stock->product->productName ?? '—' }}: <strong class="c-red">{{ $stock->productStock }}</strong>
             </div>
             @endforeach
         </div>
@@ -57,14 +57,14 @@
         ->count();
 @endphp
 @if($pendingRx > 0)
-<div class="card" style="padding:16px 20px; border:1px solid #fef3c7; border-radius:12px; background:#fffbeb; margin-bottom:24px;">
-    <div style="display:flex; align-items:center; gap:12px;">
+<div class="card alert-warning-custom">
+    <div class="flex-center-gap12">
         <i class="fas fa-prescription text-amber" class="text-20"></i>
         <div>
-            <strong style="color:#92400e;">{{ __(':count pending prescription(s)', ['count' => $pendingRx]) }}</strong>
-            <div style="font-size:12px; color:#b45309;">{{ __('Review and dispense pending prescriptions') }}</div>
+            <strong class="c-amber-800">{{ __(':count pending prescription(s)', ['count' => $pendingRx]) }}</strong>
+            <div class="fz12-amber">{{ __('Review and dispense pending prescriptions') }}</div>
         </div>
-        <a href="{{ route('admin.prescriptions.index') }}" style="margin-left:auto; padding:6px 14px; background:#f59e0b; color:#fff; border-radius:6px; text-decoration:none; font-size:12px; font-weight:500;">
+        <a href="{{ route('admin.prescriptions.index') }}" class="badge-warning-link">
             {{ __('View') }}
         </a>
     </div>
@@ -72,17 +72,17 @@
 @endif
 
 {{-- Quick Actions for Staff --}}
-<div class="card card-body" style="margin-bottom:24px;">
-    <h3 class="section-subtitle" style="margin-bottom:16px;">
-        <i class="fas fa-bolt" style="color:#6366f1; margin-right:6px;"></i>{{ __('Quick Actions') }}
+<div class="card card-body mb-24">
+    <h3 class="section-subtitle mb-16">
+        <i class="fas fa-bolt c-indigo mr-6"></i>{{ __('Quick Actions') }}
     </h3>
     <div class="js-grid-4col">
         <a href="{{ route('admin.prescriptions.index') }}" class="feature-card">
-            <i class="fas fa-prescription" style="font-size:20px; color:#6366f1;"></i>
+            <i class="fas fa-prescription fz20-indigo"></i>
             <span class="fs-12-500">{{ __('Prescriptions') }}</span>
         </a>
         <a href="{{ route('admin.products.index') }}" class="feature-card">
-            <i class="fas fa-pills" style="font-size:20px; color:#22c55e;"></i>
+            <i class="fas fa-pills fz20-green"></i>
             <span class="fs-12-500">{{ __('Products') }}</span>
         </a>
         <a href="{{ route('admin.inventory-alerts.index') }}" class="feature-card">
@@ -90,7 +90,7 @@
             <span class="fs-12-500">{{ __('Inventory') }}</span>
         </a>
         <a href="{{ route('admin.receipts.index') }}" class="feature-card">
-            <i class="fas fa-receipt" style="font-size:20px; color:#8b5cf6;"></i>
+            <i class="fas fa-receipt fz20-purple"></i>
             <span class="fs-12-500">{{ __('Receipts') }}</span>
         </a>
     </div>

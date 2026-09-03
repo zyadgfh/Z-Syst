@@ -40,7 +40,7 @@
         <div class="col-md-3">
             <div class="card kpi-card p-4">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1);">
+                    <div class="kpi-icon bg-teal-10">
                         <i class="fas fa-dollar-sign" class="text-green"></i>
                     </div>
                     <div>
@@ -84,7 +84,7 @@
             <div class="card kpi-card p-4">
                 <div class="d-flex align-items-center gap-3">
                     <div class="kpi-icon js-kpi-icon-pink">
-                        <i class="fas fa-users" style="color: #ec4899;"></i>
+                        <i class="fas fa-users c-pink"></i>
                     </div>
                     <div>
                         <div class="kpi-value">{{ $kpis['total_customers'] }}</div>
@@ -97,7 +97,7 @@
             <div class="card kpi-card p-4">
                 <div class="d-flex align-items-center gap-3">
                     <div class="kpi-icon js-kpi-icon-teal">
-                        <i class="fas fa-user-plus" style="color: #14b8a6;"></i>
+                        <i class="fas fa-user-plus c-teal"></i>
                     </div>
                     <div>
                         <div class="kpi-value">{{ $kpis['new_customers'] }}</div>
@@ -163,7 +163,7 @@
                                                 <span class="fw-medium">{{ $tp->product->productName ?? 'N/A' }}</span>
                                             </td>
                                             <td class="text-center">
-                                                <span class="badge" style="background: #eff6ff; color: #1e40af;">{{ $tp->total_sold }}</span>
+                                                <span class="badge bg-blue-50 c-blue-800">{{ $tp->total_sold }}</span>
                                             </td>
                                             <td class="text-end fw-bold">${{ number_format($tp->total_revenue, 2) }}</td>
                                         </tr>
@@ -181,7 +181,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">{{ __('orders.Recent Orders') }}</h5>
-                    <a href="{{ route('admin.customer-orders.index') }}" class="text-decoration-none" style="color: #15803d; font-size: 13px;">
+                    <a href="{{ route('admin.customer-orders.index') }}" class="text-decoration-none c-green-dark fz13">
                         {{ __('common.View All') }} →
                     </a>
                 </div>

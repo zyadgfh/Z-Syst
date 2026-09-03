@@ -19,19 +19,19 @@
         {{-- Stats Cards --}}
         <div class="js-kpi-grid">
             <div class="js-card-gradient-info text-center-pad">
-                <div class="js-stat-value-lg" class="stat-xl" style="font-size: 32px; color: #007aff;">{{ $totalComparisons }}</div>
+                <div class="js-stat-value-lg fz32-blue" class="stat-xl">{{ $totalComparisons }}</div>
                 <div class="section-subtitle-desc">إجمالي المقارنات</div>
             </div>
             <div class="js-card-gradient-success text-center-pad">
-                <div class="js-stat-value-lg" class="stat-xl" style="font-size: 32px; color: #2e7d32;">{{ $totalViews }}</div>
+                <div class="js-stat-value-lg fz32-green" class="stat-xl">{{ $totalViews }}</div>
                 <div class="section-subtitle-desc">إجمالي المشاهدات</div>
             </div>
             <div class="js-card-gradient-amber text-center-pad">
-                <div class="js-stat-value-lg" class="stat-xl" style="font-size: 32px; color: #e65100;">{{ $uniqueProductsCompared }}</div>
+                <div class="js-stat-value-lg fz32-orange" class="stat-xl">{{ $uniqueProductsCompared }}</div>
                 <div class="section-subtitle-desc">منتجات فريدة مقارنة</div>
             </div>
             <div class="js-card-gradient-purple text-center-pad">
-                <div class="js-stat-value-lg" class="stat-xl" style="font-size: 32px; color: #7b1fa2;">{{ number_format($avgProductsPerComparison, 1) }}</div>
+                <div class="js-stat-value-lg fz32-purple" class="stat-xl">{{ number_format($avgProductsPerComparison, 1) }}</div>
                 <div class="section-subtitle-desc">متوسط المنتجات/مقارنة</div>
             </div>
         </div>
@@ -53,20 +53,20 @@
                                     <span class="step-circle" style="background: {{ $index < 3 ? '#ff9500' : '#f0f0f2' }}; color: {{ $index < 3 ? '#fff' : '#6e6e73' }};">
                                         {{ $index + 1 }}
                                     </span>
-                                    <div class="icon-container-40 icon-container-subtle" style="border-radius: 8px; flex-shrink: 0;">
+                                    <div class="icon-container-40 icon-container-subtle rounded-8 flex-noshrink">
                                         @if ($product->images && is_array($product->images) && count($product->images) > 0)
                                             <img src="{{ asset($product->images[0]) }}" class="img-cover">
                                         @else
-                                            <span class="text-14" style="font-size: 18px;">💊</span>
+                                            <span class="text-14 fz18">💊</span>
                                         @endif
                                     </div>
                                     <div class="flex-1-min">
-                                        <div class="fw-600 text-14 text-heading" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $product->productName }}</div>
+                                        <div class="fw-600 text-14 text-heading text-truncate">{{ $product->productName }}</div>
                                         @if ($product->category)
                                             <div class="fs-11-color-muted">{{ $product->category->name }}</div>
                                         @endif
                                     </div>
-                                    <span class="type-badge-blue" style="font-weight: 700; white-space: nowrap;">
+                                    <span class="type-badge-blue fw-700-nowrap">
                                         {{ $item['count'] }} مقارنة
                                     </span>
                                 </div>
@@ -89,14 +89,14 @@
                             @php
                                 $maxComparisons = max($dailyTrend->pluck('comparisons')->max(), 1);
                             @endphp
-                            <div style="display: flex; align-items: flex-end; gap: 4px; height: 160px; padding-bottom: 24px; position: relative;">
+                            <div class="flex-end-gap4 h-160 pb-24 pos-rel">
                                 @foreach ($dailyTrend as $day)
                                     @php $height = ($day->comparisons / $maxComparisons) * 130; @endphp
                                     <div class="bar-col" title="{{ $day->date }}: {{ $day->comparisons }} مقارنة">
                                         <span class="bar-value">{{ $day->comparisons }}</span>
                                         <div class="bar-fill-animated" style="width: 100%; max-width: 20px; height: {{ $height }}px; background: linear-gradient(180deg, #007aff, #5ac8fa);"></div>
                                         @if ($loop->iteration % 5 === 0 || $loop->last)
-                                            <span style="position: absolute; bottom: -20px; font-size: 9px; color: #86868b;">{{ \Carbon\Carbon::parse($day->date)->format('d/m') }}</span>
+                                            <span class="pos-abs-bottom-muted">{{ \Carbon\Carbon::parse($day->date)->format('d/m') }}</span>
                                         @endif
                                     </div>
                                 @endforeach
@@ -111,7 +111,7 @@
                         <h5 class="section-title">🔗 أكثر روابط المشاركة مشاهدة</h5>
                     </div>
                     @if ($topShared->isEmpty())
-                        <div class="empty-state-center-sm" style="padding: 24px;">لم تُ-share مقارنات بعد</div>
+                        <div class="empty-state-center-sm pad-24">لم تُ-share مقارنات بعد</div>
                     @else
                         <div class="p-8-0">
                             @foreach ($topShared as $record)
@@ -125,7 +125,7 @@
                                             {{ $record->last_viewed_at?->diffForHumans() }}
                                         </div>
                                     </div>
-                                    <span class="badge-green" style="padding: 3px 10px; font-size: 12px;">
+                                    <span class="badge-green badge-sm">
                                         {{ $record->view_count }} مشاهدة
                                     </span>
                                 </div>

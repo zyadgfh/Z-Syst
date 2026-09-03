@@ -138,7 +138,7 @@
                     <h4>{{ __('purchases.Progress') }}</h4>
                 </div>
                 <div class="card-body">
-                    <div class="progress mb-3" style="height: 30px;">
+                    <div class="progress mb-3 h-30">
                         <div class="progress-bar" style="width: {{ $purchaseOrder->completion_percentage }}%">
                             {{ $purchaseOrder->completion_percentage }}%
                         </div>

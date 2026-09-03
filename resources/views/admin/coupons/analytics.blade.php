@@ -19,7 +19,7 @@
             <div class="card js-card-gradient-info">
                 <div class="card-body">
                     <p class="section-subtitle-xs">إجمالي الاستخدامات</p>
-                    <h3 class="js-stat-value-lg" style="color: #1565c0;">{{ number_format($totalUsages) }}</h3>
+                    <h3 class="js-stat-value-lg c-blue-dark">{{ number_format($totalUsages) }}</h3>
                 </div>
             </div>
         </div>
@@ -27,7 +27,7 @@
             <div class="card js-card-gradient-success">
                 <div class="card-body">
                     <p class="section-subtitle-xs">إجمالي الخصومات</p>
-                    <h3 class="js-stat-value-lg" style="color: #2e7d32;">${{ number_format($totalDiscountGiven, 2) }}</h3>
+                    <h3 class="js-stat-value-lg c-green">${{ number_format($totalDiscountGiven, 2) }}</h3>
                 </div>
             </div>
         </div>
@@ -35,7 +35,7 @@
             <div class="card js-card-gradient-purple">
                 <div class="card-body">
                     <p class="section-subtitle-xs">الإيرادات بالكوبونات</p>
-                    <h3 class="js-stat-value-lg" style="color: #7b1fa2;">${{ number_format($couponRevenue, 2) }}</h3>
+                    <h3 class="js-stat-value-lg c-purple">${{ number_format($couponRevenue, 2) }}</h3>
                 </div>
             </div>
         </div>
@@ -43,7 +43,7 @@
             <div class="card js-card-gradient-amber">
                 <div class="card-body">
                     <p class="section-subtitle-xs">متوسط قيمة الطلب</p>
-                    <h3 class="js-stat-value-lg" style="color: #f57f17;">${{ number_format($avgOrderValue ?? 0, 2) }}</h3>
+                    <h3 class="js-stat-value-lg c-amber-dark">${{ number_format($avgOrderValue ?? 0, 2) }}</h3>
                 </div>
             </div>
         </div>
@@ -54,7 +54,7 @@
         <div class="col-md-4">
             <div class="card" class="card-clean-bordered">
                 <div class="card-body d-flex align-items-center gap-3" class="p-16-20">
-                    <div class="js-icon-container-sm" style="background: #e3f2fd;">
+                    <div class="js-icon-container-sm bg-blue-50">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1565c0" stroke-width="2"><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6"/><path d="M2 8h20v4H2z"/></svg>
                     </div>
                     <div>
@@ -67,7 +67,7 @@
         <div class="col-md-4">
             <div class="card" class="card-clean-bordered">
                 <div class="card-body d-flex align-items-center gap-3" class="p-16-20">
-                    <div class="js-icon-container-sm" style="background: #e8f5e9;">
+                    <div class="js-icon-container-sm bg-green-50">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                     </div>
                     <div>
@@ -80,7 +80,7 @@
         <div class="col-md-4">
             <div class="card" class="card-clean-bordered">
                 <div class="card-body d-flex align-items-center gap-3" class="p-16-20">
-                    <div class="js-icon-container-sm" style="background: #fff3e0;">
+                    <div class="js-icon-container-sm bg-orange-50">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e65100" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     </div>
                     <div>
@@ -139,12 +139,12 @@
                                     @endif
                                 </td>
                                 <td class="p-12-16-600">{{ $coupon->usages_count }}</td>
-                                <td class="js-table-cell" style="font-weight: 600; color: #2e7d32;">${{ number_format($coupon->usages_sum_discount_amount ?? 0, 2) }}</td>
+                                <td class="js-table-cell fw-600-green">${{ number_format($coupon->usages_sum_discount_amount ?? 0, 2) }}</td>
                                 <td class="card-body-sm">
                                     @if ($coupon->isCurrentlyValid())
                                         <span class="js-badge-success" class="text-12">نشط</span>
                                     @else
-                                        <span class="js-badge-pill" style="background: #f8d7da; color: #721c24; font-size: 12px;">منتهي</span>
+                                        <span class="js-badge-pill badge-red-danger">منتهي</span>
                                     @endif
                                 </td>
                             </tr>

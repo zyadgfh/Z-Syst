@@ -25,7 +25,7 @@
                     </div>
 
                     <div class="p-4">
-                        <div class="receipt-container" style="max-width: 800px; margin: 0 auto;">
+                        <div class="receipt-container center-block">
                             <div class="receipt-header text-center mb-4">
                                 <h3 class="fw-bold">{{ $settings->receipt_header ?? config('app.name') }}</h3>
                                 <p class="text-muted small mb-0">{{ $settings->tagline ?? '' }}</p>

@@ -21,6 +21,11 @@
     <!-- Design System CSS -->
     <link rel="stylesheet" href="{{ asset('css/design-system.css') }}">
     
+    {{-- Vite compiled assets (when built) --}}
+    @if(file_exists(public_path('build/manifest.json')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
+    
     {{-- Admin CSS loaded conditionally via @push('admin_css') in admin layouts --}}
     @stack('admin_css')
     

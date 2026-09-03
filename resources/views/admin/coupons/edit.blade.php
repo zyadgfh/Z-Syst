@@ -8,7 +8,7 @@
             <a href="{{ route('admin.coupons.index') }}" class="js-back-link">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="va-middle"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             </a>
-            <h4 class="heading-bold">تعديل الكوبون: <code style="background: #f5f5f7; padding: 2px 8px; border-radius: 6px;">{{ $coupon->code }}</code></h4>
+            <h4 class="heading-bold">تعديل الكوبون: <code class="badge-gray-tag">{{ $coupon->code }}</code></h4>
         </div>
 
         @if ($errors->any())
@@ -72,15 +72,15 @@
                     </select>
                 </div>
                 <div class="col-md-6">
-                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; margin-top: 28px;">
-                        <input type="checkbox" name="single_use" value="1" {{ old('single_use', $coupon->single_use) ? 'checked' : '' }} style="width: 18px; height: 18px;">
+                    <label class="inline-flex-center-gap8 fz14 mt-28">
+                        <input type="checkbox" name="single_use" value="1" {{ old('single_use', $coupon->single_use) ? 'checked' : '' }} class="icon-lg">
                         استخدام واحد لكل مستخدم
                     </label>
                 </div>
             </div>
 
             <div class="d-flex gap-2 mt-4">
-                <button type="submit" class="btn" style="background: #007aff; color: #fff; border-radius: 10px; padding: 10px 28px; font-weight: 600;">تحديث</button>
+                <button type="submit" class="btn btn-apple-blue-lg">تحديث</button>
                 <a href="{{ route('admin.coupons.index') }}" class="btn" class="btn-secondary">إلغاء</a>
             </div>
         </form>

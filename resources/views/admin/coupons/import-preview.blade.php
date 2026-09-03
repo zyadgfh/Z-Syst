@@ -12,11 +12,11 @@
             <h4 class="heading-bold">معاينة الاستيراد — {{ count($validated) }} كوبون</h4>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('admin.coupons.import') }}" class="btn" style="background: #f5f5f7; color: #1d1d1f; border-radius: 10px; padding: 10px 20px; font-weight: 600; text-decoration: none;">إلغاء</a>
+            <a href="{{ route('admin.coupons.import') }}" class="btn btn-apple-gray-sm">إلغاء</a>
             @if (count($validated) > 0)
                 <form action="{{ route('admin.coupons.import.confirm') }}" method="POST" class="d-inline" onsubmit="return confirm('تأكيد استيراد {{ count($validated) }} كوبون؟')">
                     @csrf
-                    <button type="submit" class="btn" style="background: #34c759; color: #fff; border-radius: 10px; padding: 10px 20px; font-weight: 600; transition: transform 150ms ease;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
+                    <button type="submit" class="btn btn-apple-green" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon-align"><polyline points="20 6 9 17 4 12"/></svg>
                         تأكيد الاستيراد ({{ count($validated) }})
                     </button>
@@ -27,7 +27,7 @@
 
     {{-- Errors --}}
     @if (!empty($errors))
-        <div style="background: #fff3cd; color: #856404; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; font-size: 14px;">
+        <div class="alert-amber">
             <strong>{{ count($errors) }} صف(صفوف) بها أخطاء:</strong>
             <ul class="mb-0 mt-2" class="list-unstyled">
                 @foreach ($errors as $line => $lineErrors)
@@ -57,20 +57,20 @@
                     <tbody>
                         @foreach ($validated as $row)
                             <tr class="border-bottom-light">
-                                <td style="padding: 10px 12px; color: #86868b;">{{ $row['line'] }}</td>
-                                <td class="p-10"><code style="background: #f5f5f7; padding: 3px 8px; border-radius: 4px; font-weight: 600;">{{ $row['code'] }}</code></td>
+                                <td class="pad-sm-muted">{{ $row['line'] }}</td>
+                                <td class="p-10"><code class="badge-gray-tag-sm">{{ $row['code'] }}</code></td>
                                 <td class="p-10">
                                     @if ($row['type'] === 'percentage')
-                                        <span style="background: #e8f5e9; color: #2e7d32; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">{{ $row['value'] }}%</span>
+                                        <span class="badge-green-tag-sm">{{ $row['value'] }}%</span>
                                     @else
-                                        <span style="background: #e3f2fd; color: #1565c0; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">${{ number_format($row['value'], 2) }}</span>
+                                        <span class="badge-blue-tag-sm">${{ number_format($row['value'], 2) }}</span>
                                     @endif
                                 </td>
                                 <td class="p-10">${{ number_format($row['minimum_order_amount'], 2) }}</td>
                                 <td class="p-10">{{ $row['usage_limit'] ?? '∞' }}</td>
                                 <td class="p-10">{{ $row['expires_at'] ?? '—' }}</td>
                                 <td class="p-10">{{ $row['active'] ? '✓' : '✗' }}</td>
-                                <td style="padding: 10px 12px; color: #34c759;">جاهز</td>
+                                <td class="text-success-pad">جاهز</td>
                             </tr>
                         @endforeach
                     </tbody>

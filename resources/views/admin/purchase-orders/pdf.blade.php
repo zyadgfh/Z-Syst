@@ -118,7 +118,7 @@
     </div>
 
     @if($purchaseOrder->shipping_address)
-        <div class="info-box" style="margin-bottom: 30px;">
+        <div class="info-box mb-30">
             <h3>{{ __('purchases.Shipping Address') }}</h3>
             <p>{{ $purchaseOrder->shipping_address }}</p>
         </div>
@@ -177,14 +177,14 @@
     </div>
 
     @if($purchaseOrder->terms)
-        <div class="info-box" style="margin-top: 30px;">
+        <div class="info-box mt-30">
             <h3>Terms & Conditions</h3>
             <p>{{ $purchaseOrder->terms }}</p>
         </div>
     @endif
 
     @if($purchaseOrder->notes)
-        <div class="info-box" style="margin-top: 20px;">
+        <div class="info-box mt-20">
             <h3>{{ __('common.Notes') }}</h3>
             <p>{{ $purchaseOrder->notes }}</p>
         </div>

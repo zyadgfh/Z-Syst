@@ -108,7 +108,7 @@
                                     <td>{{ $log->created_at->format('d M H:i') }}</td>
                                     <td><span class="badge badge-soft-info">{{ $log->action }}</span></td>
                                     <td>{{ $log->user->name ?? '—' }}</td>
-                                    <td class="text-muted" style="max-width:300px">{{ Str::limit($log->description ?? json_encode($log->meta ?? ''), 60) }}</td>
+                                    <td class="text-muted max-w-300">{{ Str::limit($log->description ?? json_encode($log->meta ?? ''), 60) }}</td>
                                 </tr>
                             @empty
                                 <tr><td colspan="4" class="text-center text-muted py-3">{{ __('security.No audit logs in the last 30 days.') }}</td></tr>

@@ -51,7 +51,7 @@
         {{-- Registered Devices --}}
         <div class="card" class="card-clean">
             <div class="card-header-amber-gradient">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="flex-between-center">
                     <div>
                         <h5 class="section-title">
                             📱 الأجهزة المسجلة
@@ -65,7 +65,7 @@
             @if ($devices->isEmpty())
                 <div class="empty-state-padded">
                     <div class="empty-state-emoji">📭</div>
-                    <p class="text-14" style="color: #86868b; margin: 0;">لا توجد أجهزة مسجلة للإشعارات بعد</p>
+                    <p class="text-14 c-muted m-0">لا توجد أجهزة مسجلة للإشعارات بعد</p>
                     <p class="stat-label-heading text-muted-sm">سيظهر هنا أي جهاز يسجل للإشعارات من لوحة التحكم</p>
                 </div>
             @else

@@ -5,20 +5,20 @@
 @endsection
 
 @section('main_content')
-<div class="container-fluid" style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
+<div class="container-fluid center-block pad-40">
 
     {{-- Header --}}
-    <div style="text-align: center; margin-bottom: 32px;">
-        <h1 style="font-size: 28px; font-weight: 700; color: #1f2937; margin-bottom: 8px;">
+    <div class="text-center-mb32">
+        <h1 class="fz28-bold-dark-mb8">
             {{ __('business.Welcome to Z-Syst! 🎉') }}
         </h1>
-        <p style="font-size: 15px; color: #6b7280;">
+        <p class="fz15-gray">
             {{ __('business.Let\'s set up your store in a few quick steps.') }}
         </p>
     </div>
 
     {{-- Step Indicator --}}
-    <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 40px;">
+    <div class="flex-center-gap8 mb-40">
         @foreach($steps as $num => $step)
         <div class="d-flex-center">
             <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600;
@@ -43,9 +43,9 @@
     @yield('onboarding_content')
 
     {{-- Skip link --}}
-    <div style="text-align: center; margin-top: 24px;">
-        <a href="{{ route('admin.onboarding.skip') }}" style="font-size: 13px; color: #9ca3af; text-decoration: none;">
-            {{ __('business.Skip onboarding') }} <i class="fas fa-arrow-right" style="font-size: 10px;"></i>
+    <div class="text-center-mt24">
+        <a href="{{ route('admin.onboarding.skip') }}" class="fz13-gray-no-underline">
+            {{ __('business.Skip onboarding') }} <i class="fas fa-arrow-right fz10"></i>
         </a>
     </div>
 </div>

@@ -432,8 +432,36 @@
         }
 
         function bulkDelete() {
+            const ids = getSelectedIds();
+            if (ids.length === 0) {
+                toastr.warning('{{ __('products.Please select items to delete') }}');
+                return;
+            }
             if (!confirm('{{ __('products.Are you sure you want to delete the selected items?') }}')) return;
-            // TODO: Implement bulk delete
+
+            fetch('{{ route('admin.items.bulk-delete') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ ids })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    toastr.success(data.message);
+                    clearSelection();
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    toastr.error(data.message || '{{ __('common.Error') }}');
+                }
+            })
+            .catch(err => {
+                toastr.error('{{ __('common.Error') }}: ' + err.message);
+            });
         }
 
         // Export
