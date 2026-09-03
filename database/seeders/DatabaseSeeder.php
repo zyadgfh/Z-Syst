@@ -34,24 +34,7 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             ItemsPermissionsSeeder::class,
             UserSeeder::class,
-            // Skip problematic seeders for now
-            // BusinessSeeder::class,
-            // BranchSeeder::class,
-            // PaymentGatewaySeeder::class,
-            // CurrencySeeder::class,
-            // CategorySeeder::class,
-            // ManufacturerSeeder::class,
-            // UnitSeeder::class,
-            // TypeTableSeeder::class,
-            // TaxTableSeeder::class,
-            // ProductSeeder::class,
-            // PartySeeder::class,
-            // OptionTableSeeder::class,
-            // BoxSizeSeeder::class,
-            // BusinessCategorySeeder::class,
-            // LanguageSeeder::class,
-            // AdvertiseSeeder::class,
-            // DrugInteractionSeeder::class,
+            DemoDataSeeder::class,
         ]);
     }
 
