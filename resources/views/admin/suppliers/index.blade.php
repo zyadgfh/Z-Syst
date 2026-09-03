@@ -124,12 +124,12 @@
     }
 
     function viewSupplier(id) {
-        window.location.href = `{{ route('admin.suppliers.show') }}`.replace('{supplier}', id);
+        window.location.href = '/admin/suppliers/' + id;
     }
 
     function calculatePerformance(id) {
         if (confirm('Calculate performance for this supplier?')) {
-            $.post(`{{ route('admin.suppliers.calculate-performance') }}`.replace('{supplier}', id), function(data) {
+            $.post('/admin/suppliers/' + id + '/calculate-performance', function(data) {
                 alert('Performance calculated successfully');
                 loadSuppliers();
             });

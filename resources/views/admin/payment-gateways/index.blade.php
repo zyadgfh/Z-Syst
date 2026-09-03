@@ -299,6 +299,7 @@
 
 @push('js')
 @php
+if (!function_exists('getGatewayIcon')) {
 function getGatewayIcon($gatewayType) {
     return match($gatewayType) {
         'vodafone_cash' => 'fa-mobile-alt',
@@ -310,6 +311,7 @@ function getGatewayIcon($gatewayType) {
         default => 'fa-credit-card',
     };
 }
+} // end function_exists check
 @endphp
 
 <script>
@@ -333,7 +335,7 @@ function toggleStatus(id) {
         return;
     }
     
-    fetch(`{{ route('admin.payment-gateways.toggle-status', ['id' => ':id']) }}`.replace(':id', id), {
+    fetch('/admin/payment-gateways/' + id + '/toggle-status', {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -360,7 +362,7 @@ function deleteGateway(id) {
     
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = '{{ route("admin.payment-gateways.destroy", ['id' => ':id']) }}'.replace(':id', id);
+    form.action = '/admin/payment-gateways/' + id;
     
     const csrfInput = document.createElement('input');
     csrfInput.type = 'hidden';

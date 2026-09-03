@@ -31,4 +31,4 @@ yarn-error.log
 *.bak
 coverage/
 coverage-*.xml
-composer.lock
+composer.lock.env.staging

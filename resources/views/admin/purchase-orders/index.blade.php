@@ -214,7 +214,7 @@
 
     function sendPO(id) {
         if (confirm('Send this purchase order to supplier?')) {
-            $.post(`{{ route('admin.purchase-orders.send') }}`.replace('{purchaseOrder}', id), function(data) {
+            $.post('/admin/purchase-orders/' + id + '/send', function(data) {
                 alert('Purchase order sent successfully');
                 loadPurchaseOrders();
             });
@@ -223,7 +223,7 @@
 
     function approvePO(id) {
         if (confirm('Approve this purchase order?')) {
-            $.post(`{{ route('admin.purchase-orders.approve') }}`.replace('{purchaseOrder}', id), function(data) {
+            $.post('/admin/purchase-orders/' + id + '/approve', function(data) {
                 alert('Purchase order approved successfully');
                 loadPurchaseOrders();
             });
@@ -233,7 +233,7 @@
     function rejectPO(id) {
         const reason = prompt('Please enter rejection reason:');
         if (reason) {
-            $.post(`{{ route('admin.purchase-orders.reject') }}`.replace('{purchaseOrder}', id), { reason: reason }, function(data) {
+            $.post('/admin/purchase-orders/' + id + '/reject', { reason: reason }, function(data) {
                 alert('Purchase order rejected successfully');
                 loadPurchaseOrders();
             });
@@ -242,7 +242,7 @@
 
     function cancelPO(id) {
         if (confirm('Cancel this purchase order?')) {
-            $.post(`{{ route('admin.purchase-orders.cancel') }}`.replace('{purchaseOrder}', id), function(data) {
+            $.post('/admin/purchase-orders/' + id + '/cancel', function(data) {
                 alert('Purchase order cancelled successfully');
                 loadPurchaseOrders();
             });
@@ -251,7 +251,7 @@
 
     function convertToPurchase(id) {
         if (confirm('Convert this PO to Purchase?')) {
-            $.post(`{{ route('admin.purchase-orders.convert') }}`.replace('{purchaseOrder}', id), function(data) {
+            $.post('/admin/purchase-orders/' + id + '/convert', function(data) {
                 alert('Purchase order converted to purchase successfully');
                 loadPurchaseOrders();
             });
@@ -259,7 +259,7 @@
     }
 
     function viewPO(id) {
-        window.location.href = `{{ route('admin.purchase-orders.show') }}`.replace('{purchaseOrder}', id);
+        window.location.href = '/admin/purchase-orders/' + id;
     }
 </script>
 @endpush

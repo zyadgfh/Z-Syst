@@ -65,6 +65,9 @@ class DemoDataSeeder extends Seeder
         // 13. Create customers
         $this->seedCustomers($business);
 
+        // 14. Create stock transfer history
+        $this->seedStockTransfers($business, $products, $warehouses);
+
         $this->command->info('Demo data seeded successfully!');
     }
 
@@ -264,6 +267,30 @@ class DemoDataSeeder extends Seeder
             ['name' => 'Loratadine 10mg', 'cat_idx' => 2, 'mfg_idx' => 1, 'unit_idx' => 0, 'price' => 20.00, 'cost' => 11.00],
             ['name' => 'Glucophage 1000mg', 'cat_idx' => 3, 'mfg_idx' => 2, 'unit_idx' => 0, 'price' => 42.00, 'cost' => 28.00],
             ['name' => 'Norvasc 5mg', 'cat_idx' => 4, 'mfg_idx' => 3, 'unit_idx' => 0, 'price' => 48.00, 'cost' => 30.00],
+            ['name' => 'Augmentin 625mg', 'cat_idx' => 1, 'mfg_idx' => 4, 'unit_idx' => 0, 'price' => 68.00, 'cost' => 48.00],
+            ['name' => 'Nexium 40mg', 'cat_idx' => 5, 'mfg_idx' => 5, 'unit_idx' => 0, 'price' => 95.00, 'cost' => 65.00],
+            ['name' => 'Concerta 36mg', 'cat_idx' => 0, 'mfg_idx' => 0, 'unit_idx' => 0, 'price' => 180.00, 'cost' => 120.00],
+            ['name' => 'Crestor 10mg', 'cat_idx' => 4, 'mfg_idx' => 1, 'unit_idx' => 0, 'price' => 110.00, 'cost' => 75.00],
+            ['name' => 'Allegra 180mg', 'cat_idx' => 2, 'mfg_idx' => 2, 'unit_idx' => 0, 'price' => 55.00, 'cost' => 35.00],
+            ['name' => 'Dettol Antiseptic', 'cat_idx' => 7, 'mfg_idx' => 3, 'unit_idx' => 2, 'price' => 32.00, 'cost' => 20.00],
+            ['name' => 'Dulcolax Suppository', 'cat_idx' => 5, 'mfg_idx' => 4, 'unit_idx' => 0, 'price' => 28.00, 'cost' => 16.00],
+            ['name' => 'Flagyl 400mg', 'cat_idx' => 1, 'mfg_idx' => 5, 'unit_idx' => 0, 'price' => 22.00, 'cost' => 13.00],
+            ['name' => 'Voltaren Gel', 'cat_idx' => 7, 'mfg_idx' => 0, 'unit_idx' => 3, 'price' => 45.00, 'cost' => 28.00],
+            ['name' => 'Fish Oil Omega-3', 'cat_idx' => 8, 'mfg_idx' => 1, 'unit_idx' => 5, 'price' => 95.00, 'cost' => 60.00],
+            ['name' => 'Salbutamol Nebulizer', 'cat_idx' => 6, 'mfg_idx' => 2, 'unit_idx' => 2, 'price' => 38.00, 'cost' => 22.00],
+            ['name' => 'Clotrimazole Cream', 'cat_idx' => 7, 'mfg_idx' => 3, 'unit_idx' => 3, 'price' => 18.00, 'cost' => 10.00],
+            ['name' => 'Calpol 120mg Syrup', 'cat_idx' => 0, 'mfg_idx' => 4, 'unit_idx' => 2, 'price' => 25.00, 'cost' => 15.00],
+            ['name' => 'ORS Sachets', 'cat_idx' => 5, 'mfg_idx' => 5, 'unit_idx' => 5, 'price' => 15.00, 'cost' => 8.00],
+            ['name' => 'Vitamin D3 5000IU', 'cat_idx' => 8, 'mfg_idx' => 0, 'unit_idx' => 0, 'price' => 85.00, 'cost' => 50.00],
+            ['name' => 'Pantoprazole 40mg', 'cat_idx' => 5, 'mfg_idx' => 1, 'unit_idx' => 0, 'price' => 30.00, 'cost' => 18.00],
+            ['name' => 'Pregabalin 75mg', 'cat_idx' => 0, 'mfg_idx' => 2, 'unit_idx' => 0, 'price' => 75.00, 'cost' => 50.00],
+            ['name' => 'Betnovate Cream', 'cat_idx' => 7, 'mfg_idx' => 3, 'unit_idx' => 3, 'price' => 20.00, 'cost' => 11.00],
+            ['name' => 'Micardis 80mg', 'cat_idx' => 4, 'mfg_idx' => 4, 'unit_idx' => 0, 'price' => 120.00, 'cost' => 80.00],
+            ['name' => 'Diazepam 5mg', 'cat_idx' => 0, 'mfg_idx' => 5, 'unit_idx' => 0, 'price' => 12.00, 'cost' => 7.00],
+            ['name' => 'Levofloxacin 500mg', 'cat_idx' => 1, 'mfg_idx' => 0, 'unit_idx' => 0, 'price' => 60.00, 'cost' => 40.00],
+            ['name' => 'Solgar Vitamin C', 'cat_idx' => 8, 'mfg_idx' => 1, 'unit_idx' => 0, 'price' => 150.00, 'cost' => 95.00],
+            ['name' => 'Zovirax Cream', 'cat_idx' => 7, 'mfg_idx' => 2, 'unit_idx' => 3, 'price' => 65.00, 'cost' => 40.00],
+            ['name' => 'Becotide Nasal Spray', 'cat_idx' => 6, 'mfg_idx' => 3, 'unit_idx' => 2, 'price' => 75.00, 'cost' => 48.00],
         ];
 
         $products = [];
@@ -411,6 +438,37 @@ class DemoDataSeeder extends Seeder
                 ['business_id' => $business->id, 'name' => $data['name']],
                 array_merge($data, ['business_id' => $business->id, 'type' => 'Retailer', 'status' => 1])
             );
+        }
+    }
+
+    private function seedStockTransfers($business, $products, $warehouses)
+    {
+        $statuses = ['completed', 'completed', 'completed', 'pending', 'cancelled'];
+        $warehousePairs = [];
+        foreach ($warehouses as $i => $wh1) {
+            foreach ($warehouses as $j => $wh2) {
+                if ($i !== $j) {
+                    $warehousePairs[] = [$wh1, $wh2];
+                }
+            }
+        }
+
+        for ($i = 0; $i < 15; $i++) {
+            $pair = $warehousePairs[array_rand($warehousePairs)];
+            $product = $products[array_rand($products)];
+            $status = $statuses[array_rand($statuses)];
+
+            DB::table('stock_transfers')->insert([
+                'business_id' => $business->id,
+                'from_warehouse_id' => $pair[0]->id,
+                'to_warehouse_id' => $pair[1]->id,
+                'product_id' => $product->id,
+                'quantity' => mt_rand(5, 50),
+                'status' => $status,
+                'user_id' => $this->owner->id ?? null,
+                'created_at' => now()->subDays(mt_rand(1, 30)),
+                'updated_at' => now()->subDays(mt_rand(0, 10)),
+            ]);
         }
     }
 }

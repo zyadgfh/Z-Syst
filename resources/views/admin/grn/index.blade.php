@@ -174,7 +174,7 @@
 
     function verifyGRN(id) {
         if (confirm('Verify this GRN and update stock?')) {
-            $.post(`{{ route('admin.grn.verify') }}`.replace('{grn}', id), function(data) {
+            $.post('/admin/grn/' + id + '/verify', function(data) {
                 alert('GRN verified successfully');
                 loadGRNs();
             });
@@ -183,7 +183,7 @@
 
     function acceptGRN(id) {
         if (confirm('Accept this GRN?')) {
-            $.post(`{{ route('admin.grn.accept') }}`.replace('{grn}', id), function(data) {
+            $.post('/admin/grn/' + id + '/accept', function(data) {
                 alert('GRN accepted successfully');
                 loadGRNs();
             });
@@ -192,7 +192,7 @@
 
     function rejectGRN(id) {
         if (confirm('Reject this GRN and rollback stock?')) {
-            $.post(`{{ route('admin.grn.reject') }}`.replace('{grn}', id), function(data) {
+            $.post('/admin/grn/' + id + '/reject', function(data) {
                 alert('GRN rejected successfully');
                 loadGRNs();
             });
@@ -200,7 +200,7 @@
     }
 
     function viewGRN(id) {
-        window.location.href = `{{ route('admin.grn.show') }}`.replace('{grn}', id);
+        window.location.href = '/admin/grn/' + id;
     }
 </script>
 @endpush
