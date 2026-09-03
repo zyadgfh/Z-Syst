@@ -1,0 +1,1143 @@
+openapi: 3.0.3
+info:
+  title: Z-Syst Pharmacy Management API
+  description: |
+    REST API for Z-Syst Pharmacy Management System.
+    Provides authentication, inventory management, sales, purchases,
+    supplier management, subscriptions, payments, and advanced features
+    like FEFO, predictions, doctor attention, and e-invoicing.
+  version: 1.0.0
+  contact:
+    name: Z-Syst Support
+    email: support@z-syst.com
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local development
+  - url: https://z-syst.web.app/api/v1
+    description: Production
+
+tags:
+  - name: Auth
+    description: Authentication & registration
+  - name: Dashboard
+    description: Dashboard statistics & summaries
+  - name: Products
+    description: Product & inventory management (v1)
+  - name: Items
+    description: Items module (v2 CRUD)
+  - name: Sales
+    description: Sales & reporting
+  - name: Purchases
+    description: Purchase orders & invoices
+  - name: Suppliers
+    description: Supplier management & invoices
+  - name: Parties
+    description: Customers & suppliers (parties)
+  - name: Barcodes
+    description: Barcode generation & printing
+  - name: Reports
+    description: Sales, purchase, stock, financial reports
+  - name: Subscriptions
+    description: Plan subscriptions & billing
+  - name: Payments
+    description: POS payment processing
+  - name: E-Invoicing
+    description: Electronic invoicing (ZATCA/e-invoice)
+  - name: Doctor Attention
+    description: Doctor attention scoring & alerts
+  - name: Advanced
+    description: FEFO, predictions, auto-order, insurance, warehouses, audits
+  - name: Push Notifications
+    description: FCM push token management
+  - name: Backup
+    description: Data backup & export
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ─── Health ─────────────────────────────────────────
+  /health:
+    get:
+      tags: [Dashboard]
+      summary: Health check
+      security: []
+      responses:
+        '200':
+          description: All systems healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheck'
+        '503':
+          description: One or more systems degraded
+
+  # ─── Auth ───────────────────────────────────────────
+  /auth/sign-in:
+    post:
+      tags: [Auth]
+      summary: Sign in with email/password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+
+  /auth/sign-up:
+    post:
+      tags: [Auth]
+      summary: Register a new account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, phone, companyName, business_category_id]
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                phone:
+                  type: string
+                companyName:
+                  type: string
+                business_category_id:
+                  type: integer
+      responses:
+        '201':
+          description: Registration successful, OTP sent
+
+  /auth/submit-otp:
+    post:
+      tags: [Auth]
+      summary: Submit OTP for verification
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [otp, email]
+              properties:
+                otp:
+                  type: string
+                email:
+                  type: string
+      responses:
+        '200':
+          description: OTP verified
+
+  /auth/resend-otp:
+    post:
+      tags: [Auth]
+      summary: Resend OTP
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: OTP resent
+
+  /auth/send-reset-code:
+    post:
+      tags: [Auth]
+      summary: Send password reset code
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: Reset code sent
+
+  /auth/verify-reset-code:
+    post:
+      tags: [Auth]
+      summary: Verify password reset code
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, code]
+              properties:
+                email:
+                  type: string
+                code:
+                  type: string
+      responses:
+        '200':
+          description: Code verified
+
+  /auth/password-reset:
+    post:
+      tags: [Auth]
+      summary: Reset password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, code, password, password_confirmation]
+              properties:
+                email:
+                  type: string
+                code:
+                  type: string
+                password:
+                  type: string
+                password_confirmation:
+                  type: string
+      responses:
+        '200':
+          description: Password reset successful
+
+  /auth/status:
+    get:
+      tags: [Auth]
+      summary: Get 2FA status
+      responses:
+        '200':
+          description: 2FA status
+
+  # ─── Supabase Auth ──────────────────────────────────
+  /auth/supabase/register:
+    post:
+      tags: [Auth]
+      summary: Register via Supabase
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Registration successful
+
+  /auth/supabase/login:
+    post:
+      tags: [Auth]
+      summary: Login via Supabase
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Login successful
+
+  # ─── Dashboard ──────────────────────────────────────
+  /summary:
+    get:
+      tags: [Dashboard]
+      summary: Get dashboard summary statistics
+      responses:
+        '200':
+          description: Dashboard summary
+
+  /dashboard:
+    get:
+      tags: [Dashboard]
+      summary: Get detailed dashboard data
+      responses:
+        '200':
+          description: Dashboard data
+
+  /features:
+    get:
+      tags: [Dashboard]
+      summary: Get feature flags/status
+      responses:
+        '200':
+          description: Feature status list
+
+  /branches/{companyId}:
+    get:
+      tags: [Dashboard]
+      summary: Get branches for a company
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Branches list
+
+  # ─── E-Commerce Core ────────────────────────────────
+  /backup:
+    post:
+      tags: [Backup]
+      summary: Create data backup
+      responses:
+        '200':
+          description: Backup created
+
+  /change-password:
+    post:
+      tags: [Auth]
+      summary: Change current password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [current_password, password, password_confirmation]
+              properties:
+                current_password:
+                  type: string
+                password:
+                  type: string
+                password_confirmation:
+                  type: string
+      responses:
+        '200':
+          description: Password changed
+
+  # ─── Reports ────────────────────────────────────────
+  /purchase-report:
+    get:
+      tags: [Reports]
+      summary: Purchase report
+      parameters:
+        - name: from
+          in: query
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Purchase report data
+
+  /sales-report:
+    get:
+      tags: [Reports]
+      summary: Sales report
+      parameters:
+        - name: from
+          in: query
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Sales report data
+
+  /due-collects-report:
+    get:
+      tags: [Reports]
+      summary: Due collects report
+      responses:
+        '200':
+          description: Due collects data
+
+  /loss-profit-report:
+    get:
+      tags: [Reports]
+      summary: Loss/profit report
+      responses:
+        '200':
+          description: Loss/profit data
+
+  /income-report:
+    get:
+      tags: [Reports]
+      summary: Income report
+      responses:
+        '200':
+          description: Income data
+
+  /expense-report:
+    get:
+      tags: [Reports]
+      summary: Expense report
+      responses:
+        '200':
+          description: Expense data
+
+  /low-stock-report:
+    get:
+      tags: [Reports]
+      summary: Low stock report
+      responses:
+        '200':
+          description: Low stock items
+
+  /taxes-report:
+    get:
+      tags: [Reports]
+      summary: Taxes report
+      responses:
+        '200':
+          description: Tax summary
+
+  # ─── Subscriptions ──────────────────────────────────
+  /subscriptions/{subscription}:
+    get:
+      tags: [Subscriptions]
+      summary: Get subscription details
+      parameters:
+        - name: subscription
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Subscription details
+
+  /subscriptions/{subscription}/upgrade:
+    post:
+      tags: [Subscriptions]
+      summary: Upgrade subscription plan
+      parameters:
+        - name: subscription
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Plan upgraded
+
+  /subscriptions/{subscription}/downgrade:
+    post:
+      tags: [Subscriptions]
+      summary: Downgrade subscription plan
+      parameters:
+        - name: subscription
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Plan downgraded
+
+  /subscriptions/{subscription}/cancel:
+    post:
+      tags: [Subscriptions]
+      summary: Cancel subscription
+      parameters:
+        - name: subscription
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Subscription cancelled
+
+  /subscriptions/{subscription}/renew:
+    post:
+      tags: [Subscriptions]
+      summary: Renew subscription
+      parameters:
+        - name: subscription
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Subscription renewed
+
+  /subscriptions/{subscription}/generate-invoice:
+    post:
+      tags: [Subscriptions]
+      summary: Generate subscription invoice
+      parameters:
+        - name: subscription
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Invoice generated
+
+  /subscriptions/usage:
+    get:
+      tags: [Subscriptions]
+      summary: Get subscription usage stats
+      responses:
+        '200':
+          description: Usage statistics
+
+  /subscriptions/check-limits:
+    get:
+      tags: [Subscriptions]
+      summary: Check plan limits
+      responses:
+        '200':
+          description: Limits status
+
+  # ─── Payments ───────────────────────────────────────
+  /payments/gateways:
+    get:
+      tags: [Payments]
+      summary: Get available payment gateways
+      responses:
+        '200':
+          description: Gateway list
+
+  /payments/process:
+    post:
+      tags: [Payments]
+      summary: Process a POS payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Payment processed
+
+  /payments/verify:
+    post:
+      tags: [Payments]
+      summary: Verify payment status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Payment verified
+
+  /payments/refund:
+    post:
+      tags: [Payments]
+      summary: Process refund
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Refund processed
+
+  /payments/calculate-change:
+    post:
+      tags: [Payments]
+      summary: Calculate change for cash payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Change calculated
+
+  /payments/stats:
+    get:
+      tags: [Payments]
+      summary: Get payment statistics
+      responses:
+        '200':
+          description: Payment stats
+
+  # ─── E-Invoicing ────────────────────────────────────
+  /e-invoices:
+    get:
+      tags: [E-Invoicing]
+      summary: List e-invoices
+      responses:
+        '200':
+          description: Invoice list
+    post:
+      tags: [E-Invoicing]
+      summary: Create e-invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Invoice created
+
+  /e-invoices/{invoice}:
+    get:
+      tags: [E-Invoicing]
+      summary: Get e-invoice details
+      parameters:
+        - name: invoice
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Invoice details
+    put:
+      tags: [E-Invoicing]
+      summary: Update e-invoice
+      parameters:
+        - name: invoice
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Invoice updated
+    delete:
+      tags: [E-Invoicing]
+      summary: Delete e-invoice
+      parameters:
+        - name: invoice
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '204':
+          description: Invoice deleted
+
+  /e-invoices/{invoice}/validate:
+    post:
+      tags: [E-Invoicing]
+      summary: Validate e-invoice
+      parameters:
+        - name: invoice
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Validation result
+
+  /e-invoices/{invoice}/submit:
+    post:
+      tags: [E-Invoicing]
+      summary: Submit e-invoice to authority
+      parameters:
+        - name: invoice
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Submission result
+
+  /e-invoices/{invoice}/sync:
+    post:
+      tags: [E-Invoicing]
+      summary: Sync e-invoice with authority
+      parameters:
+        - name: invoice
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Sync result
+
+  /e-invoices/{invoice}/cancel:
+    post:
+      tags: [E-Invoicing]
+      summary: Cancel e-invoice
+      parameters:
+        - name: invoice
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Cancellation result
+
+  /e-invoices/{invoice}/qr-code:
+    get:
+      tags: [E-Invoicing]
+      summary: Get e-invoice QR code
+      parameters:
+        - name: invoice
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: QR code data
+
+  # ─── Doctor Attention ───────────────────────────────
+  /doctor-attention/dashboard:
+    get:
+      tags: [Doctor Attention]
+      summary: Doctor attention dashboard
+      responses:
+        '200':
+          description: Dashboard data
+
+  /doctor-attention/needing-attention:
+    get:
+      tags: [Doctor Attention]
+      summary: Doctors needing attention
+      responses:
+        '200':
+          description: Doctor list
+
+  /doctor-attention/critical:
+    get:
+      tags: [Doctor Attention]
+      summary: Critical attention doctors
+      responses:
+        '200':
+          description: Critical list
+
+  /doctor-attention/alerts:
+    get:
+      tags: [Doctor Attention]
+      summary: List attention alerts
+      responses:
+        '200':
+          description: Alert list
+
+  /doctor-attention/alerts/{alertId}/read:
+    post:
+      tags: [Doctor Attention]
+      summary: Mark alert as read
+      parameters:
+        - name: alertId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Alert marked
+
+  /doctor-attention/alerts/{alertId}/action:
+    post:
+      tags: [Doctor Attention]
+      summary: Mark alert action taken
+      parameters:
+        - name: alertId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Action recorded
+
+  /doctor-attention/statistics:
+    get:
+      tags: [Doctor Attention]
+      summary: Doctor attention statistics
+      responses:
+        '200':
+          description: Statistics
+
+  /doctor-attention/settings:
+    get:
+      tags: [Doctor Attention]
+      summary: Get attention settings
+      responses:
+        '200':
+          description: Settings
+    put:
+      tags: [Doctor Attention]
+      summary: Update attention settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Settings updated
+
+  /doctor-attention/calculate-scores:
+    post:
+      tags: [Doctor Attention]
+      summary: Recalculate attention scores
+      responses:
+        '200':
+          description: Scores recalculated
+
+  # ─── Barcodes ───────────────────────────────────────
+  /barcodes/search:
+    get:
+      tags: [Barcodes]
+      summary: Search barcodes
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Search results
+
+  /barcodes/settings:
+    get:
+      tags: [Barcodes]
+      summary: Get barcode settings
+      responses:
+        '200':
+          description: Settings
+
+  /barcodes/not-printed:
+    get:
+      tags: [Barcodes]
+      summary: Get unprinted barcodes
+      responses:
+        '200':
+          description: Barcode list
+
+  /barcodes/download/{filename}:
+    get:
+      tags: [Barcodes]
+      summary: Download barcode file
+      parameters:
+        - name: filename
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: File download
+
+  /barcodes/by-product/{productId}:
+    get:
+      tags: [Barcodes]
+      summary: Get barcodes for a product
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Barcode list
+
+  /barcodes/by-batch/{batchId}:
+    get:
+      tags: [Barcodes]
+      summary: Get barcodes for a batch
+      parameters:
+        - name: batchId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Barcode list
+
+  /barcodes/generate-multiple:
+    post:
+      tags: [Barcodes]
+      summary: Generate multiple barcodes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Barcodes generated
+
+  /barcodes/generate-for-batch:
+    post:
+      tags: [Barcodes]
+      summary: Generate barcodes for a batch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Barcodes generated
+
+  /barcodes/print-multiple:
+    post:
+      tags: [Barcodes]
+      summary: Print multiple barcodes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Print initiated
+
+  /barcodes/print-for-product:
+    post:
+      tags: [Barcodes]
+      summary: Print barcodes for a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Print initiated
+
+  # ─── Push Tokens ────────────────────────────────────
+  /push-tokens:
+    post:
+      tags: [Push Notifications]
+      summary: Register FCM push token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, platform]
+              properties:
+                token:
+                  type: string
+                platform:
+                  type: string
+                  enum: [web, ios, android]
+      responses:
+        '201':
+          description: Token registered
+    delete:
+      tags: [Push Notifications]
+      summary: Remove push token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Token removed
+
+  /push-tokens/test:
+    post:
+      tags: [Push Notifications]
+      summary: Send test push notification
+      responses:
+        '200':
+          description: Test notification sent
+
+  # ─── V2 Items ───────────────────────────────────────
+  /../v2/items:
+    get:
+      tags: [Items]
+      summary: List items (v2)
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer }
+        - name: per_page
+          in: query
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Paginated items list
+    post:
+      tags: [Items]
+      summary: Create item (v2)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Item'
+      responses:
+        '201':
+          description: Item created
+
+  /../v2/items/{id}:
+    get:
+      tags: [Items]
+      summary: Get item details (v2)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Item details
+    put:
+      tags: [Items]
+      summary: Update item (v2)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Item'
+      responses:
+        '200':
+          description: Item updated
+    delete:
+      tags: [Items]
+      summary: Delete item (v2)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '204':
+          description: Item deleted
+
+  /../v2/items/search:
+    get:
+      tags: [Items]
+      summary: Search items (v2)
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Search results
+
+  /../v2/items/{id}/stock-movements:
+    get:
+      tags: [Items]
+      summary: Get stock movements for item (v2)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Stock movement history
+
+  /../v2/items/{id}/kpis:
+    get:
+      tags: [Items]
+      summary: Get item KPIs (v2)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Item KPIs
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Sanctum bearer token from /auth/sign-in
+
+  schemas:
+    HealthCheck:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded]
+        checks:
+          type: object
+          properties:
+            app: { type: string }
+            database: { type: string }
+            cache: { type: string }
+            queue: { type: string }
+        timestamp: { type: string, format: date-time }
+        version: { type: string }
+
+    AuthToken:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        token:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email: { type: string }
+        role: { type: string }
+        business_id: { type: integer }
+        lang: { type: string }
+
+    Item:
+      type: object
+      properties:
+        id: { type: integer }
+        productName: { type: string }
+        category_id: { type: integer }
+        sales_price: { type: number }
+        purchase_without_tax: { type: number }
+        barcode: { type: string }
+        sku: { type: string }
+        stock_quantity: { type: integer }
+        expiry_date: { type: string, format: date }
+        batch_number: { type: string }

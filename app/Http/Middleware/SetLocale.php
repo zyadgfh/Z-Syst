@@ -21,11 +21,26 @@ class SetLocale
             }
         }
 
+        // If user requested a language change via query param
         if ($request->has('lang')) {
-            session(['lang' => $request->lang]);
+            $newLang = $request->lang;
+            session(['lang' => $newLang]);
+
+            // Persist to user's DB preference if authenticated
+            if (auth()->check()) {
+                auth()->user()->update(['lang' => $newLang]);
+            }
         }
 
-        $lang = session('lang') ?? 'ar';
+        // Resolution order: query param > session > user DB preference > default
+        $lang = session('lang');
+
+        if (! $lang && auth()->check() && auth()->user()->lang) {
+            $lang = auth()->user()->lang;
+            session(['lang' => $lang]);
+        }
+
+        $lang = $lang ?? config('app.locale', 'ar');
 
         app()->setLocale($lang);
 
