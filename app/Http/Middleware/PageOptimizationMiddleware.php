@@ -23,7 +23,7 @@ class PageOptimizationMiddleware
         // Only optimize HTML responses
         if ($response instanceof Response && $response->headers->get('Content-Type') === 'text/html; charset=UTF-8') {
             $content = $response->getContent();
-            
+
             // Minify HTML in production
             if (app()->environment('production')) {
                 $content = $this->optimizationService->minifyHTML($content);

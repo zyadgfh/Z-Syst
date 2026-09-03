@@ -19,7 +19,7 @@ class CheckSubscriptionLimits
     public function handle(Request $request, Closure $next, string $metricName)
     {
         $user = Auth::user();
-        if (!$user || !$user->business_id) {
+        if (! $user || ! $user->business_id) {
             return response()->json([
                 'success' => false,
                 'message' => 'User not authenticated or no business associated',
@@ -28,7 +28,7 @@ class CheckSubscriptionLimits
 
         $withinLimits = $this->subscriptionService->checkLimits($user->business_id, $metricName);
 
-        if (!$withinLimits) {
+        if (! $withinLimits) {
             return response()->json([
                 'success' => false,
                 'message' => "You have reached your {$metricName} limit. Please upgrade your subscription.",

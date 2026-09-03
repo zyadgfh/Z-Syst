@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\AuditLog;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Request;
 
@@ -113,7 +114,7 @@ class AuditService
     /**
      * Get audit logs for business
      */
-    public function getLogsForBusiness(int $businessId, array $filters = []): \Illuminate\Database\Eloquent\Collection
+    public function getLogsForBusiness(int $businessId, array $filters = []): Collection
     {
         $query = AuditLog::forBusiness($businessId)
             ->with(['user:id,name,email'])
@@ -141,7 +142,7 @@ class AuditService
     /**
      * Get audit logs for model
      */
-    public function getLogsForModel(Model $model): \Illuminate\Database\Eloquent\Collection
+    public function getLogsForModel(Model $model): Collection
     {
         return AuditLog::forModel(get_class($model), $model->id)
             ->with(['user:id,name,email'])
@@ -152,7 +153,7 @@ class AuditService
     /**
      * Get audit logs for user
      */
-    public function getLogsForUser(int $userId, int $limit = 100): \Illuminate\Database\Eloquent\Collection
+    public function getLogsForUser(int $userId, int $limit = 100): Collection
     {
         return AuditLog::forUser($userId)
             ->with(['user:id,name,email'])
@@ -189,7 +190,7 @@ class AuditService
     public function cleanOldLogs(int $daysToKeep = 90): int
     {
         $cutoffDate = now()->subDays($daysToKeep);
-        
+
         return AuditLog::where('created_at', '<', $cutoffDate)->delete();
     }
 
@@ -198,19 +199,19 @@ class AuditService
      */
     protected function generateDescription(string $action, ?Model $model): string
     {
-        if (!$model) {
+        if (! $model) {
             return ucfirst($action);
         }
 
         $modelName = class_basename($model);
         $modelId = $model->id;
 
-        return match($action) {
+        return match ($action) {
             'created' => "Created {$modelName} #{$modelId}",
             'updated' => "Updated {$modelName} #{$modelId}",
             'deleted' => "Deleted {$modelName} #{$modelId}",
             'restored' => "Restored {$modelName} #{$modelId}",
-            default => ucfirst($action) . " {$modelName} #{$modelId}",
+            default => ucfirst($action)." {$modelName} #{$modelId}",
         };
     }
 }

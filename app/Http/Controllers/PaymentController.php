@@ -4,18 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Helpers\HasUploader;
 use App\Models\Business;
+use App\Models\CompanyPaymentGateway;
 use App\Models\Gateway;
+use App\Models\PaymentTransaction;
 use App\Models\Plan;
 use App\Models\PlanSubscribe;
-use App\Models\TenantPaymentSetting;
 use App\Models\User;
+use App\Services\PaymentGatewayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Session;
 
 class PaymentController extends Controller
 {
     use HasUploader;
+
+    protected PaymentGatewayService $paymentGatewayService;
+
+    public function __construct(PaymentGatewayService $paymentGatewayService)
+    {
+        $this->paymentGatewayService = $paymentGatewayService;
+    }
 
     /**
      * Display a listing of the resource.
@@ -24,14 +32,21 @@ class PaymentController extends Controller
     {
         $plan = Plan::findOrFail($id);
         session()->put('business_id', $business_id);
-        $gateways = Gateway::with('currency:id,code,rate,symbol,position')->where('status', 1)->get();
 
-        return view('payments.index', compact('gateways', 'plan'));
+        // Get new Egyptian payment gateways
+        $companyGateways = $this->paymentGatewayService->getAvailableGateways($business_id);
+
+        // Also show legacy manual gateways for backward compatibility
+        $legacyGateways = Gateway::with('currency:id,code,rate,symbol,position')
+            ->where('status', 1)
+            ->where('is_manual', 1)
+            ->get();
+
+        return view('payments.index', compact('companyGateways', 'legacyGateways', 'plan'));
     }
 
     /**
      * Store a newly created resource in storage.
-     * Supports manual payments and Egyptian payment gateways with multi-tenant support
      */
     public function payment(Request $request, $plan_id, $gateway_id)
     {
@@ -40,129 +55,141 @@ class PaymentController extends Controller
         ]);
 
         $plan = Plan::findOrFail($plan_id);
-        $gateway = Gateway::findOrFail($gateway_id);
         $business = Business::findOrFail(session('business_id'));
         $user = User::where('business_id', $business->id)->firstOrFail();
 
-        // Get tenant-specific payment settings
-        $tenantSettings = TenantPaymentSetting::getSettingsForTenant($business->id, $gateway_id);
+        // Check if this is a new Egyptian payment gateway or legacy gateway
+        $companyGateway = CompanyPaymentGateway::find($gateway_id);
 
-        $amount = $plan->offerPrice ?? $plan->subscriptionPrice;
+        if ($companyGateway) {
+            return $this->processEgyptianGatewayPayment($request, $plan, $business, $user, $companyGateway);
+        } else {
+            return $this->processLegacyManualPayment($request, $plan, $business, $user, $gateway_id);
+        }
+    }
 
-        // Handle manual payments
-        if ($gateway->is_manual) {
-            $request->validate([
-                'attachment' => 'required|max:2048|file',
+    /**
+     * Process payment through Egyptian payment gateways.
+     */
+    protected function processEgyptianGatewayPayment(Request $request, $plan, $business, $user, CompanyPaymentGateway $gateway)
+    {
+        try {
+            $amount = $plan->offerPrice ?? $plan->subscriptionPrice;
+
+            $paymentData = [
+                'amount' => $amount,
+                'currency' => 'EGP',
+                'customer_phone' => $request->phone ?? $business->phoneNumber,
+                'customer_email' => $user->email,
+                'transaction_type' => PaymentTransaction::TYPE_SUBSCRIPTION,
+                'metadata' => [
+                    'plan_id' => $plan->id,
+                    'business_id' => $business->id,
+                    'plan_name' => $plan->subscriptionName,
+                ],
+                'processed_by' => auth()->id(),
+            ];
+
+            // Add card data if bank card payment
+            if ($gateway->gateway_type === CompanyPaymentGateway::GATEWAY_BANK_CARD) {
+                $paymentData['card_data'] = [
+                    'card_number' => $request->card_number,
+                    'card_holder' => $request->card_holder,
+                    'expiry_month' => $request->expiry_month,
+                    'expiry_year' => $request->expiry_year,
+                    'cvv' => $request->cvv,
+                ];
+            }
+
+            // Add cash-specific data
+            if ($gateway->gateway_type === CompanyPaymentGateway::GATEWAY_CASH) {
+                $paymentData['received_amount'] = $request->received_amount;
+                $paymentData['payment_notes'] = $request->payment_notes;
+                $paymentData['verified_by'] = $request->verified_by;
+            }
+
+            $transaction = $this->paymentGatewayService->processPayment($gateway->id, $paymentData);
+
+            if ($transaction->status === PaymentTransaction::STATUS_COMPLETED) {
+                return $this->completeSubscription($plan, $business, $gateway->id, $transaction);
+            } elseif ($transaction->status === PaymentTransaction::STATUS_PENDING) {
+                return redirect(route('order.status', ['status' => 'pending']))
+                    ->with('message', __('Payment is being processed. Transaction ID: ').$transaction->internal_reference);
+            } else {
+                return redirect(route('order.status', ['status' => 'failed']))
+                    ->with('error', __('Payment failed: ').$transaction->failure_reason);
+            }
+
+        } catch (\Exception $e) {
+            return redirect(route('order.status', ['status' => 'failed']))
+                ->with('error', __('Payment processing error: ').$e->getMessage());
+        }
+    }
+
+    /**
+     * Process legacy manual payment (backward compatibility).
+     */
+    protected function processLegacyManualPayment(Request $request, $plan, $business, $user, $gateway_id)
+    {
+        $gateway = Gateway::findOrFail($gateway_id);
+
+        if (! $gateway->is_manual) {
+            return redirect(route('order.status', ['status' => 'failed']))
+                ->with('error', __('Payment gateways have been removed. Use the new Egyptian payment gateways or manual payment.'));
+        }
+
+        $request->validate([
+            'attachment' => 'required|max:2048|file',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $has_free_subscriptions = Plan::where('subscriptionPrice', '<=', 0)->orWhere('offerPrice', '<=', 0)->first();
+
+            if ($plan->subscriptionPrice <= 0 && $has_free_subscriptions) {
+                return response()->json([
+                    'status' => 406,
+                    'message' => __('Sorry, you cannot subscribe to a free plan again.'),
+                ], 406);
+            }
+
+            $attachment = $request->attachment ? $this->upload($request, 'attachment') : null;
+
+            $subscribe = PlanSubscribe::create([
+                'plan_id' => $plan->id,
+                'duration' => $plan->duration,
+                'business_id' => $business->id,
+                'price' => $plan->subscriptionPrice,
+                'gateway_id' => $gateway_id,
+                'payment_status' => 'unpaid',
+                'notes' => [
+                    'manual_data' => $request->manual_data,
+                    'attachment' => $attachment,
+                ],
             ]);
 
-            DB::beginTransaction();
-            try {
+            sendNotification($subscribe->id, route('admin.subscription-reports.index', ['id' => $subscribe->id]), __('New subscription purchased requested.'));
 
-                $has_free_subscriptions = Plan::where('subscriptionPrice', '<=', 0)->orWhere('offerPrice', '<=', 0)->first();
+            DB::commit();
 
-                if ($plan->subscriptionPrice <= 0 && $has_free_subscriptions) {
-                    return response()->json([
-                        'status' => 406,
-                        'message' => __('Sorry, you cannot subscribe to a free plan again.'),
-                    ], 406);
-                }
+            return redirect(route('order.status', ['status' => 'success']))
+                ->with('message', __('New subscription purchased requested.'));
 
-                $attachment = $request->attachment ? $this->upload($request, 'attachment') : null;
+        } catch (\Exception $e) {
+            DB::rollback();
 
-                $subscribe = PlanSubscribe::create([
-                    'plan_id' => $plan->id,
-                    'duration' => $plan->duration,
-                    'business_id' => $business->id,
-                    'price' => $plan->subscriptionPrice,
-                    'gateway_id' => $gateway_id,
-                    'payment_status' => 'unpaid',
-                    'notes' => [
-                        'manual_data' => $request->manual_data,
-                        'attachment' => $attachment,
-                    ],
-                ]);
-
-                sendNotification($subscribe->id, route('admin.subscription-reports.index', ['id' => $subscribe->id]), __('New subscription purchased requested.'));
-
-                DB::commit();
-
-                return redirect(route('order.status', ['status' => 'success']))->with('message', __('New subscription purchased requested.'));
-
-            } catch (\Exception $e) {
-                DB::rollback();
-
-                return redirect(route('order.status', ['status' => 'failed']))->with('message', __('Something went wrong!'));
-            }
+            return redirect(route('order.status', ['status' => 'failed']))
+                ->with('message', __('Something went wrong!'));
         }
-
-        // Handle Egyptian payment gateways
-        if ($gateway->namespace) {
-            $payment_data['currency'] = $gateway->currency->code ?? 'EGP';
-            $payment_data['email'] = $user->email;
-            $payment_data['name'] = $business->name;
-            $payment_data['phone'] = $business->phoneNumber;
-            $payment_data['billName'] = __('Make plan purchase payment');
-            $payment_data['amount'] = $amount;
-            $payment_data['mode'] = $gateway->mode;
-            $payment_data['charge'] = $gateway->charge ?? 0;
-            $payment_data['pay_amount'] = round(convert_money($amount, $gateway->currency) + $gateway->charge);
-            $payment_data['gateway_id'] = $gateway->id;
-            $payment_data['payment_type'] = 'plan_payment';
-            $payment_data['request_from'] = 'merchant';
-            $payment_data['business_id'] = $business->id;
-            $payment_data['plan_id'] = $plan->id;
-
-            // Add tenant-specific settings
-            if ($tenantSettings) {
-                $payment_data['merchant_phone'] = $tenantSettings->merchant_phone;
-                $payment_data['merchant_name'] = $tenantSettings->merchant_name;
-                $payment_data['merchant_code'] = $tenantSettings->merchant_code;
-                $payment_data['merchant_key'] = $tenantSettings->merchant_key;
-                $payment_data['merchant_instapay_id'] = $tenantSettings->merchant_instapay_id;
-                $payment_data['bank_name'] = $tenantSettings->bank_name;
-                $payment_data['account_number'] = $tenantSettings->account_number;
-                $payment_data['branch_name'] = $tenantSettings->branch_name;
-            }
-
-            foreach ($gateway->data ?? [] as $key => $info) {
-                $payment_data[$key] = $info;
-            }
-
-            session()->put('gateway_id', $gateway->id);
-            session()->put('plan', $plan);
-
-            $redirect = $gateway->namespace::make_payment($payment_data);
-
-            return $redirect;
-        }
-
-        return redirect(route('order.status', ['status' => 'failed']))->with('error', __('Payment method not available.'));
     }
 
     /**
-     * Display order status (kept for manual payment flow)
+     * Complete subscription after successful payment.
      */
-    public function orderStatus()
-    {
-        return request('status');
-    }
-
-    /**
-     * Handle successful payment from Egyptian gateways
-     */
-    public function success()
+    protected function completeSubscription($plan, $business, $gatewayId, $transaction)
     {
         DB::beginTransaction();
         try {
-
-            $plan = session('plan');
-            $gateway_id = session('gateway_id');
-
-            if (! $plan) {
-                return redirect(route('order.status', ['status' => 'failed']))->with('error', __('Transaction failed, Please try again.'));
-            }
-
-            $business = Business::findOrFail(session('business_id'));
             $has_free_subscriptions = Plan::where('subscriptionPrice', '<=', 0)->orWhere('offerPrice', '<=', 0)->first();
 
             if ($plan->subscriptionPrice <= 0 && $has_free_subscriptions) {
@@ -177,8 +204,12 @@ class PaymentController extends Controller
                 'duration' => $plan->duration,
                 'business_id' => $business->id,
                 'price' => $plan->subscriptionPrice,
-                'gateway_id' => $gateway_id,
-                'payment_status' => 'pending', // Egyptian gateways are manual verification
+                'gateway_id' => $gatewayId,
+                'payment_status' => 'paid',
+                'notes' => [
+                    'transaction_id' => $transaction->id,
+                    'reference_id' => $transaction->reference_id,
+                ],
             ]);
 
             $business->update([
@@ -187,25 +218,74 @@ class PaymentController extends Controller
                 'will_expire' => now()->addDays($plan->duration),
             ]);
 
-            session()->forget('gateway_id');
-            session()->forget('plan');
+            session()->forget('business_id');
 
             DB::commit();
 
-            return redirect(route('order.status', ['status' => 'success']))->with('message', __('Payment submitted for verification.'));
+            return redirect(route('order.status', ['status' => 'success']))
+                ->with('message', __('New subscription order successfully.'));
 
         } catch (\Exception $e) {
             DB::rollback();
 
-            return redirect(route('order.status', ['status' => 'failed']))->with('message', __('Something went wrong!'));
+            return redirect(route('order.status', ['status' => 'failed']))
+                ->with('message', __('Something went wrong!'));
         }
     }
 
     /**
-     * Handle failed payment
+     * Display order status.
      */
-    public function failed()
+    public function orderStatus()
     {
-        return redirect(route('order.status', ['status' => 'failed']))->with('error', __('Transaction failed, Please try again.'));
+        return request('status');
+    }
+
+    /**
+     * Payment callback for gateways that redirect back.
+     */
+    public function paymentCallback(Request $request)
+    {
+        $referenceId = $request->input('reference_id');
+        $gatewayType = $request->input('gateway_type');
+
+        try {
+            $transaction = PaymentTransaction::where('reference_id', $referenceId)
+                ->where('gateway_type', $gatewayType)
+                ->firstOrFail();
+
+            if ($transaction->status === PaymentTransaction::STATUS_PENDING) {
+                // Verify payment status with gateway
+                $verification = $this->paymentGatewayService->verifyPayment($transaction->gateway_id, $referenceId);
+
+                if ($verification['success']) {
+                    $transaction->markAsCompleted($referenceId, $verification['data']);
+
+                    // Complete subscription if it's a subscription payment
+                    if ($transaction->transaction_type === PaymentTransaction::TYPE_SUBSCRIPTION) {
+                        $plan = Plan::find($transaction->metadata['plan_id'] ?? null);
+                        $business = Business::find($transaction->metadata['business_id'] ?? null);
+
+                        if ($plan && $business) {
+                            return $this->completeSubscription($plan, $business, $transaction->gateway_id, $transaction);
+                        }
+                    }
+
+                    return redirect(route('order.status', ['status' => 'success']))
+                        ->with('message', __('Payment completed successfully.'));
+                } else {
+                    $transaction->markAsFailed($verification['error'] ?? 'Payment verification failed');
+
+                    return redirect(route('order.status', ['status' => 'failed']))
+                        ->with('error', __('Payment verification failed.'));
+                }
+            }
+
+            return redirect(route('order.status', ['status' => $transaction->status]));
+
+        } catch (\Exception $e) {
+            return redirect(route('order.status', ['status' => 'failed']))
+                ->with('error', __('Payment callback error: ').$e->getMessage());
+        }
     }
 }

@@ -9,8 +9,8 @@ use App\Models\Barcode;
 use App\Models\Product;
 use App\Models\Stock;
 use App\Services\BarcodeService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Storage;
 
@@ -94,7 +94,7 @@ class BarcodeController extends Controller
     public function update(BarcodeRequest $request, Barcode $barcode): JsonResponse
     {
         $validated = $request->validated();
-        
+
         $barcode->update($validated);
 
         return response()->json([
@@ -129,7 +129,9 @@ class BarcodeController extends Controller
             'size' => 'nullable|in:small,standard,large',
         ]);
 
-        $product = Product::findOrFail($request->product_id);
+        $product = Product::where('id', $request->product_id)
+            ->where('business_id', auth()->user()->business_id)
+            ->firstOrFail();
         $barcodes = $this->barcodeService->generateMultipleForProduct(
             $product,
             $request->quantity,
@@ -155,7 +157,9 @@ class BarcodeController extends Controller
             'size' => 'nullable|in:small,standard,large',
         ]);
 
-        $batch = Stock::findOrFail($request->batch_id);
+        $batch = Stock::where('id', $request->batch_id)
+            ->where('business_id', auth()->user()->business_id)
+            ->firstOrFail();
         $barcodes = $this->barcodeService->generateMultipleForBatch(
             $batch,
             $request->quantity,
@@ -221,7 +225,9 @@ class BarcodeController extends Controller
             'quantity' => 'required|integer|min:1|max:100',
         ]);
 
-        $product = Product::findOrFail($request->product_id);
+        $product = Product::where('id', $request->product_id)
+            ->where('business_id', auth()->user()->business_id)
+            ->firstOrFail();
         $pdfPath = $this->barcodeService->printForProduct(
             $product,
             $request->quantity,
@@ -248,7 +254,9 @@ class BarcodeController extends Controller
             'quantity' => 'required|integer|min:1|max:100',
         ]);
 
-        $batch = Stock::findOrFail($request->batch_id);
+        $batch = Stock::where('id', $request->batch_id)
+            ->where('business_id', auth()->user()->business_id)
+            ->firstOrFail();
         $pdfPath = $this->barcodeService->printForBatch(
             $batch,
             $request->quantity,
@@ -287,9 +295,9 @@ class BarcodeController extends Controller
      */
     public function download(Request $request, string $filename)
     {
-        $path = storage_path('app/public/' . $filename);
-        
-        if (!file_exists($path)) {
+        $path = storage_path('app/public/'.$filename);
+
+        if (! file_exists($path)) {
             return response()->json([
                 'success' => false,
                 'message' => 'File not found',
@@ -313,7 +321,7 @@ class BarcodeController extends Controller
             $request->user()->business_id
         );
 
-        if (!$barcode) {
+        if (! $barcode) {
             return response()->json([
                 'success' => false,
                 'message' => 'Barcode not found',

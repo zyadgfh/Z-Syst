@@ -29,7 +29,7 @@ class DoctorAttentionScoreResource extends JsonResource
             'alert_reason' => $this->alert_reason,
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),
-            
+
             // Computed fields
             'needs_attention' => $this->needsAttention(),
             'is_critical' => $this->isCritical(),
@@ -37,7 +37,7 @@ class DoctorAttentionScoreResource extends JsonResource
             'has_significant_decline' => $this->hasSignificantDecline(),
             'is_inactive_too_long' => $this->isInactiveTooLong(),
             'urgency_level' => $this->getUrgencyLevel(),
-            
+
             // Relationships
             'doctor' => new PartyResource($this->whenLoaded('doctor')),
         ];

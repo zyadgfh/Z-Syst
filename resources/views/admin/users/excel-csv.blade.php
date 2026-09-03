@@ -1,11 +1,11 @@
 <table>
     <thead>
         <tr>
-            <th>{{ __('SL') }}.</th>
-            <th>{{ __('Name') }}</th>
-            <th>{{ __('Phone') }}</th>
-            <th>{{ __('User Email') }}</th>
-            <th>{{ __('User Role') }}</th>
+            <th>{{ __('common.SL') }}.</th>
+            <th>{{ __('common.Name') }}</th>
+            <th>{{ __('common.Phone') }}</th>
+            <th>{{ __('roles.User Email') }}</th>
+            <th>{{ __('roles.User Role') }}</th>
         </tr>
     </thead>
 

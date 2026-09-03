@@ -34,10 +34,10 @@ class SupplierInvoicePaymentResource extends JsonResource
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),
             'deleted_at' => $this->deleted_at?->toIso8601String(),
-            
+
             // Computed fields
-            'file_url' => $this->file_path ? asset('storage/' . $this->file_path) : null,
-            
+            'file_url' => $this->file_path ? asset('storage/'.$this->file_path) : null,
+
             // Relationships
             'invoice' => new SupplierInvoiceResource($this->whenLoaded('invoice')),
             'created_by_user' => new UserResource($this->whenLoaded('createdBy')),

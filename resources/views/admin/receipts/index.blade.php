@@ -1,7 +1,7 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title')
-    {{ __('Receipts') }}
+    {{ __('gateways.Receipts') }}
 @endsection
 
 @section('main_content')
@@ -12,16 +12,16 @@
                     <div class="table-top-form">
                         <div class="table-search">
                             <span><i class="fas fa-search"></i></span>
-                            <input type="text" class="form-control" placeholder="{{ __('Search receipts...') }}" id="receipt-search">
+                            <input type="text" class="form-control" placeholder="{{ __('gateways.Search receipts...') }}" id="receipt-search">
                         </div>
                         <div class="d-flex gap-2">
                             <select class="form-select" id="type-filter">
-                                <option value="all">{{ __('All Types') }}</option>
-                                <option value="sale">{{ __('Sales') }}</option>
-                                <option value="purchase">{{ __('Purchases') }}</option>
+                                <option value="all">{{ __('common.All Types') }}</option>
+                                <option value="sale">{{ __('gateways.Sales') }}</option>
+                                <option value="purchase">{{ __('gateways.Purchases') }}</option>
                             </select>
                             <a href="{{ route('admin.receipts.settings') }}" class="btn btn-secondary">
-                                <i class="fas fa-cog me-2"></i>{{ __('Receipt Settings') }}
+                                <i class="fas fa-cog me-2"></i>{{ __('gateways.Receipt Settings') }}
                             </a>
                         </div>
                     </div>
@@ -31,14 +31,14 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th class="table-header-content">{{ __('SL') }}.</th>
-                                        <th class="table-header-content">{{ __('Receipt #') }}</th>
-                                        <th class="table-header-content">{{ __('Type') }}</th>
-                                        <th class="table-header-content">{{ __('Customer/Supplier') }}</th>
-                                        <th class="table-header-content">{{ __('Total') }}</th>
-                                        <th class="table-header-content">{{ __('Date') }}</th>
-                                        <th class="table-header-content">{{ __('Status') }}</th>
-                                        <th class="table-header-content">{{ __('Action') }}</th>
+                                        <th class="table-header-content">{{ __('common.SL') }}.</th>
+                                        <th class="table-header-content">{{ __('gateways.Receipt #') }}</th>
+                                        <th class="table-header-content">{{ __('common.Type') }}</th>
+                                        <th class="table-header-content">{{ __('gateways.Customer/Supplier') }}</th>
+                                        <th class="table-header-content">{{ __('common.Total') }}</th>
+                                        <th class="table-header-content">{{ __('common.Date') }}</th>
+                                        <th class="table-header-content">{{ __('common.Status') }}</th>
+                                        <th class="table-header-content">{{ __('common.Action') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody id="receipts-data">
@@ -53,27 +53,27 @@
                                             </td>
                                             <td class="table-single-content">
                                                 @if ($receipt->receiptable_type === 'sale')
-                                                    <span class="badge-soft-info">{{ __('Sale') }}</span>
+                                                    <span class="badge-soft-info">{{ __('gateways.Sale') }}</span>
                                                 @else
-                                                    <span class="badge-soft-success">{{ __('Purchase') }}</span>
+                                                    <span class="badge-soft-success">{{ __('gateways.Purchase') }}</span>
                                                 @endif
                                             </td>
-                                            <td class="table-single-content">{{ $receipt->party->name ?? __('Unknown') }}</td>
+                                            <td class="table-single-content">{{ $receipt->party->name ?? __('common.Unknown') }}</td>
                                             <td class="table-single-content">{{ format_currency($receipt->total_amount) }}</td>
                                             <td class="table-single-content">{{ formatted_date($receipt->created_at) }}</td>
                                             <td class="table-single-content">
                                                 @if ($receipt->status === 'paid')
-                                                    <span class="badge-soft-success">{{ __('Paid') }}</span>
+                                                    <span class="badge-soft-success">{{ __('purchases.Paid') }}</span>
                                                 @else
                                                     <span class="badge-soft-warning">{{ ucfirst($receipt->status) }}</span>
                                                 @endif
                                             </td>
                                             <td class="table-single-content">
                                                 <div class="action-buttons">
-                                                    <a href="{{ route('admin.receipts.show', $receipt) }}" class="btn btn-sm btn-info" target="_blank" title="{{ __('View') }}">
+                                                    <a href="{{ route('admin.receipts.show', $receipt) }}" class="btn btn-sm btn-info" target="_blank" title="{{ __('common.View') }}">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <a href="{{ route('admin.receipts.show', $receipt) }}?download=1" class="btn btn-sm btn-success" title="{{ __('Download') }}">
+                                                    <a href="{{ route('admin.receipts.show', $receipt) }}?download=1" class="btn btn-sm btn-success" title="{{ __('common.Download') }}">
                                                         <i class="fas fa-download"></i>
                                                     </a>
                                                 </div>
@@ -81,7 +81,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="8" class="text-center py-4">{{ __('No receipts found') }}</td>
+                                            <td colspan="8" class="text-center py-4">{{ __('gateways.No receipts found') }}</td>
                                         </tr>
                                     @endforelse
                                 </tbody>

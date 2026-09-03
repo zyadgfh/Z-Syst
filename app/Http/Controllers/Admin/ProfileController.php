@@ -27,7 +27,9 @@ class ProfileController extends Controller
             'email' => 'required|email',
             'image' => 'nullable|image',
         ]);
-        $user = User::findOrFail($id);
+        $user = User::where('id', $id)
+            ->where('business_id', auth()->user()->business_id)
+            ->firstOrFail();
 
         if ($request->password || $request->current_password) {
             if (Hash::check($request->current_password, $user->password)) {

@@ -20,6 +20,7 @@ class ZSystCurrencyController extends Controller
 
     public function index()
     {
+        $this->authorize('viewAny', Currency::class);
         $currencies = Currency::orderBy('is_default', 'desc')->orderBy('status', 'desc')->paginate(10);
 
         return view('admin.currencies.index', compact('currencies'));
@@ -49,6 +50,7 @@ class ZSystCurrencyController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Currency::class);
         $countries = base_path('lang/countrylist.json');
         $countries = json_decode(file_get_contents($countries), true);
 
@@ -57,6 +59,7 @@ class ZSystCurrencyController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Currency::class);
         $request->validate([
             'name' => 'required|string|max:30|unique:currencies',
             'country_name' => 'nullable|string|max:255',
@@ -86,6 +89,7 @@ class ZSystCurrencyController extends Controller
 
     public function update(Request $request, Currency $currency)
     {
+        $this->authorize('update', $currency);
         $request->validate([
             'name' => 'required|string|max:30|unique:currencies,name,'.$currency->id,
             'country_name' => 'nullable|string|max:255',
@@ -119,6 +123,7 @@ class ZSystCurrencyController extends Controller
 
     public function destroy(Currency $currency)
     {
+        $this->authorize('delete', $currency);
         if ($currency->is_default) {
             return response()->json([
                 'message' => __('You cannot delete it because it is default currency'),

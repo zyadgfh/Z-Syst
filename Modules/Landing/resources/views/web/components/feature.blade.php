@@ -10,7 +10,8 @@
                 <div class="col-sm-6 col-lg-4">
                     <div class="feature-card" style="background: {{ $feature->bg_color ?? 'linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)' }}">
                         <div class="feature-icon">
-                            <img src="{{ asset($feature->image) }}" alt="{{ $feature->title ?? __('Feature') }}" />
+                            
+<img loading="lazy" src="{{ asset($feature->image) }}" alt="{{ $feature->title ?? __('Feature') }}" />
                         </div>
                         <div class="feature-content">
                             <h6>{{ Str::words($feature->title ?? __('Feature'), 4, '...') }}</h6>

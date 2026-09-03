@@ -1,7 +1,7 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title')
-    {{ __('Loyalty Programs') }}
+    {{ __('loyalty.Loyalty Programs') }}
 @endsection
 
 @section('main_content')
@@ -10,10 +10,10 @@
             <div class="card">
                 <div class="card-bodys">
                     <div class="table-header p-16">
-                        <h4>{{ __('Loyalty Programs') }}</h4>
+                        <h4>{{ __('loyalty.Loyalty Programs') }}</h4>
                         @can('loyalty-create')
                             <a href="{{ route('admin.loyalty.create') }}" class="add-order-btn rounded-2 active">
-                                <i class="fas fa-plus-circle me-1"></i> {{ __('Add Program') }}
+                                <i class="fas fa-plus-circle me-1"></i> {{ __('loyalty.Add Program') }}
                             </a>
                         @endcan
                     </div>
@@ -22,12 +22,12 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th class="table-header-content">{{ __('SL') }}.</th>
-                                    <th class="table-header-content">{{ __('Name') }}</th>
-                                    <th class="table-header-content">{{ __('Points Rate') }}</th>
-                                    <th class="table-header-content">{{ __('Min Redemption') }}</th>
-                                    <th class="table-header-content">{{ __('Status') }}</th>
-                                    <th class="table-header-content d-print-none">{{ __('Action') }}</th>
+                                    <th class="table-header-content">{{ __('common.SL') }}.</th>
+                                    <th class="table-header-content">{{ __('common.Name') }}</th>
+                                    <th class="table-header-content">{{ __('loyalty.Points Rate') }}</th>
+                                    <th class="table-header-content">{{ __('loyalty.Min Redemption') }}</th>
+                                    <th class="table-header-content">{{ __('common.Status') }}</th>
+                                    <th class="table-header-content d-print-none">{{ __('common.Action') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -35,13 +35,13 @@
                                     <tr class="table-content">
                                         <td class="table-single-content">{{ $loop->iteration }}</td>
                                         <td class="table-single-content">{{ $program->name }}</td>
-                                        <td class="table-single-content">{{ $program->points_per_currency }} {{ __('points per') }} {{ $program->currency ?? '1' }} {{ __('unit') }}</td>
+                                        <td class="table-single-content">{{ $program->points_per_currency }} {{ __('loyalty.points per') }} {{ $program->currency ?? '1' }} {{ __('loyalty.unit') }}</td>
                                         <td class="table-single-content">{{ $program->min_points_for_redemption }}</td>
                                         <td class="table-single-content">
                                             @if ($program->is_active)
-                                                <span class="badge bg-success">{{ __('Active') }}</span>
+                                                <span class="badge bg-success">{{ __('common.Active') }}</span>
                                             @else
-                                                <span class="badge bg-danger">{{ __('Inactive') }}</span>
+                                                <span class="badge bg-danger">{{ __('common.Inactive') }}</span>
                                             @endif
                                         </td>
                                         <td class="table-single-content d-print-none">
@@ -61,7 +61,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center py-4">{{ __('No loyalty programs found') }}</td>
+                                        <td colspan="6" class="text-center py-4">{{ __('loyalty.No loyalty programs found') }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -80,7 +80,7 @@
 @push('js')
     <script>
         function deleteProgram(id) {
-            if (confirm('{{ __("Are you sure you want to delete this loyalty program?") }}')) {
+            if (confirm('{{ __('loyalty.Are you sure you want to delete this loyalty program?') }}')) {
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = `/admin/loyalty-programs/${id}`;

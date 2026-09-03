@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\InvoiceNumberService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -34,8 +35,10 @@ class DueCollect extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            $id = DueCollect::where('business_id', auth()->user()->business_id)->count() + 1;
-            $model->invoiceNumber = 'D-'.str_pad($id, 5, '0', STR_PAD_LEFT);
+            if (! $model->invoiceNumber && auth()->check()) {
+                $invoiceNumberService = app(InvoiceNumberService::class);
+                $model->invoiceNumber = $invoiceNumberService->generateDueCollectInvoiceNumber(auth()->user()->business_id);
+            }
         });
     }
 

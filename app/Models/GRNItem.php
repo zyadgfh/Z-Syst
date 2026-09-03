@@ -4,18 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class GRNItem extends Model
+class GrnItem extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'grn_id',
         'product_id',
@@ -29,62 +22,22 @@ class GRNItem extends Model
         'notes',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
-        'expiry_date' => 'datetime',
+        'ordered_quantity' => 'integer',
+        'received_quantity' => 'integer',
+        'accepted_quantity' => 'integer',
+        'rejected_quantity' => 'integer',
+        'expiry_date' => 'date',
         'purchase_price' => 'decimal:2',
     ];
 
-    /**
-     * Get the GRN for the item.
-     */
-    public function grn(): BelongsTo
+    public function grn()
     {
-        return $this->belongsTo(GoodsReceivedNote::class);
+        return $this->belongsTo(GoodsReceivedNote::class, 'grn_id');
     }
 
-    /**
-     * Get the product for the item.
-     */
-    public function product(): BelongsTo
+    public function product()
     {
         return $this->belongsTo(Product::class);
-    }
-
-    /**
-     * Get the quality checks for the item.
-     */
-    public function qualityChecks(): HasMany
-    {
-        return $this->hasMany(QualityCheck::class);
-    }
-
-    /**
-     * Calculate total amount.
-     */
-    public function getTotalAttribute(): float
-    {
-        return $this->accepted_quantity * $this->purchase_price;
-    }
-
-    /**
-     * Calculate pending quantity.
-     */
-    public function getPendingQuantityAttribute(): int
-    {
-        return $this->ordered_quantity - $this->received_quantity;
-    }
-
-    /**
-     * Calculate acceptance rate.
-     */
-    public function getAcceptanceRateAttribute(): float
-    {
-        if ($this->received_quantity === 0) return 0;
-        return ($this->accepted_quantity / $this->received_quantity) * 100;
     }
 }

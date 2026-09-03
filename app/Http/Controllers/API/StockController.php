@@ -13,6 +13,8 @@ class StockController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('viewAny', \App\Models\Stock::class);
+
         $business_id = Auth::user()->business_id;
         $fefoEnabled = FefoSetting::getForBusiness($business_id)->fefo_enabled;
 

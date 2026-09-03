@@ -51,18 +51,26 @@ class SupplierInvoicePayment extends Model
      * Status constants
      */
     const STATUS_PENDING = 'pending';
+
     const STATUS_APPROVED = 'approved';
+
     const STATUS_COMPLETED = 'completed';
+
     const STATUS_CANCELLED = 'cancelled';
 
     /**
      * Payment method constants
      */
     const METHOD_CASH = 'cash';
+
     const METHOD_BANK_TRANSFER = 'bank_transfer';
+
     const METHOD_CHECK = 'check';
+
     const METHOD_CREDIT_CARD = 'credit_card';
+
     const METHOD_DEBIT_CARD = 'debit_card';
+
     const METHOD_ONLINE = 'online';
 
     /**
@@ -250,6 +258,7 @@ class SupplierInvoicePayment extends Model
     private static function generatePaymentNumber(int $businessId): string
     {
         $count = self::where('business_id', $businessId)->count() + 1;
-        return 'PAY-' . date('Y') . '-' . str_pad($count, 5, '0', STR_PAD_LEFT);
+
+        return 'PAY-'.date('Y').'-'.str_pad($count, 5, '0', STR_PAD_LEFT);
     }
 }

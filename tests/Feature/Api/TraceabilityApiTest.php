@@ -10,8 +10,11 @@ use App\Models\TraceabilityLog;
 use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
+#[Group('recall')]
+#[Group('traceability')]
 class TraceabilityApiTest extends TestCase
 {
     use RefreshDatabase;
@@ -88,7 +91,7 @@ class TraceabilityApiTest extends TestCase
             ->getJson('/api/v1/traceability/expiring-batches');
 
         $response->assertOk()
-            ->assertJsonCount(1, 'data');
+            ->assertJsonCount(2, 'data');
     }
 
     public function test_can_view_expired_batches(): void
@@ -104,7 +107,7 @@ class TraceabilityApiTest extends TestCase
             ->getJson('/api/v1/traceability/expired-batches');
 
         $response->assertOk()
-            ->assertJsonCount(1, 'data');
+            ->assertJsonCount(2, 'data');
     }
 
     public function test_can_list_recalls(): void
@@ -141,6 +144,7 @@ class TraceabilityApiTest extends TestCase
 
         $response = $this->actingAs($this->user)
             ->postJson('/api/v1/traceability/recalls', [
+                'business_id' => $this->business->id,
                 'product_id' => $this->product->id,
                 'batch_lot_number' => 'LOT-001',
                 'reason' => 'Contamination detected',

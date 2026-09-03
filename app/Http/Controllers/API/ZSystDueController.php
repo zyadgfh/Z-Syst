@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Exceptions\BusinessRuleException;
 use App\Exceptions\Errors\ErrorCode;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreDuePaymentRequest;
 use App\Models\Business;
 use App\Models\DueCollect;
 use App\Models\Party;
@@ -63,17 +64,9 @@ class ZSystDueController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreDuePaymentRequest $request)
     {
         $party = Party::find($request->party_id);
-
-        $request->validate([
-            'paymentType' => 'required|string',
-            'paymentDate' => 'required|string',
-            'payDueAmount' => 'required|numeric',
-            'party_id' => 'required|exists:parties,id',
-            'invoiceNumber' => 'nullable|exists:'.($party->type == 'Supplier' ? 'purchases' : 'sales').',invoiceNumber',
-        ]);
 
         // Find invoice if invoiceNumber provided
         $invoice = null;
@@ -147,7 +140,7 @@ class ZSystDueController extends Controller
             'opening_balance' => $request->invoiceNumber ? $party->opening_balance : $party->opening_balance - $request->payDueAmount,
         ]);
 
-        if (env('MESSAGE_ENABLED')) {
+        if (config('zsyst.message_enabled')) {
             sendMessage($party->phone, dueCollectMessage($data, $party, $business_name, $request->invoiceNumber));
         }
 

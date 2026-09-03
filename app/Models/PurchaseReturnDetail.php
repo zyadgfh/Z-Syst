@@ -18,16 +18,18 @@ class PurchaseReturnDetail extends Model
         'business_id',
         'purchase_return_id',
         'purchase_detail_id',
+        'product_id',
         'return_amount',
         'return_qty',
+        'unit_price',
+        'discount',
+        'tax',
+        'credit_amount',
+        'reason',
+        'batch_no',
     ];
 
-    /**
-     * Indicates if the model should be timestamped.
-     *
-     * @var bool
-     */
-    public $timestamps = false;
+    // Timestamps enabled (migration now has created_at/updated_at)
 
     public function purchaseReturn()
     {
@@ -37,5 +39,10 @@ class PurchaseReturnDetail extends Model
     public function purchaseDetail()
     {
         return $this->belongsTo(PurchaseDetails::class, 'purchase_detail_id');
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

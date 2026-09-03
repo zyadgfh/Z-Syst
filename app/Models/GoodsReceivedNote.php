@@ -22,6 +22,7 @@ class GoodsReceivedNote extends Model
         'supplier_id',
         'business_id',
         'branch_id',
+        'warehouse_id',
         'received_by',
         'verified_by',
         'grn_number',
@@ -45,10 +46,18 @@ class GoodsReceivedNote extends Model
     /**
      * Status constants
      */
+    const STATUS_DRAFT = 'draft';
+
     const STATUS_PENDING = 'pending';
+
     const STATUS_VERIFIED = 'verified';
+
     const STATUS_PARTIALLY_ACCEPTED = 'partially_accepted';
+
     const STATUS_ACCEPTED = 'accepted';
+
+    const STATUS_RECEIVED = 'received';
+    const STATUS_PARTIALLY_RECEIVED = 'partially_received';
     const STATUS_REJECTED = 'rejected';
 
     /**
@@ -65,6 +74,14 @@ class GoodsReceivedNote extends Model
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Party::class, 'supplier_id');
+    }
+
+    /**
+     * Get the warehouse for the GRN.
+     */
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class);
     }
 
     /**
@@ -104,7 +121,18 @@ class GoodsReceivedNote extends Model
      */
     public function items(): HasMany
     {
-        return $this->hasMany(GRNItem::class);
+        return $this->hasMany(GRNItem::class, 'grn_id');
+    }
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (GoodsReceivedNote $grn) {
+            if (empty($grn->grn_number)) {
+                $grn->grn_number = self::generateGRNNumber();
+            }
+        });
     }
 
     /**
@@ -291,9 +319,12 @@ class GoodsReceivedNote extends Model
     public function getCompletionPercentageAttribute(): float
     {
         $totalOrdered = $this->items->sum('ordered_quantity');
-        if ($totalOrdered === 0) return 0;
+        if ($totalOrdered === 0) {
+            return 0;
+        }
 
         $totalReceived = $this->items->sum('received_quantity');
+
         return ($totalReceived / $totalOrdered) * 100;
     }
 }

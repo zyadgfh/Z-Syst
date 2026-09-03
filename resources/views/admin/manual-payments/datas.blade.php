@@ -48,30 +48,32 @@
                             data-expired="{{  $payment->created_at ? formatted_date($payment->created_at->addDays($payment->duration)) : '' }}"
                         >
                            <img src="{{ asset('assets/images/icons/eye.svg') }}" alt="">
-                            {{ __('View') }}
+                            {{ __('common.View') }}
                         </a>
 
                     </li>
 
                     <li>
                         <a target="_blank" href="{{ route('admin.manual-payments.invoice', $payment->id) }}">
-                            <img src="{{ asset('assets/images/icons/invoice.svg') }}" alt="">                            {{ __('Invoice') }}
+                            <img src="{{ asset('assets/images/icons/invoice.svg') }}" alt="">                            {{ __('common.Invoice') }}
                         </a>
                     </li>
 
                     @if($payment->payment_status == 'unpaid')
+                    @can('manual-payment-reports-read')
                     <li>
                         <a href="#approve-modal" class="manual-payment-modal" data-bs-toggle="modal" data-bs-target="#approve-modal" data-url="{{ route('admin.manual-payments.paid', $payment->id) }}">
                             <img src="{{ asset('assets/images/icons/accept.svg') }}" alt="">
-                            {{ __('Accept') }}
+                            {{ __('gateways.Accept') }}
                         </a>
                     </li>
                     <li>
                         <a href="#reject-modal" class="manual-payment-reject-modal" data-bs-toggle="modal" data-bs-target="#reject-modal" data-url="{{ route('admin.manual-payments.reject', $payment->id) }}">
                             <img src="{{ asset('assets/images/icons/reject.svg') }}" alt="">
-                            {{ __('Reject') }}
+                            {{ __('common.Reject') }}
                         </a>
                     </li>
+                    @endcan
                     @endif
                 </ul>
             </div>

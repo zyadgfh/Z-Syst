@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\HasUploader;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StorePartyRequest;
+use App\Http\Requests\UpdatePartyRequest;
 use App\Models\Business;
 use App\Models\Party;
 use Illuminate\Http\Request;
@@ -17,6 +19,8 @@ class PartyController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Party::class);
+
         $data = Party::where('business_id', auth()->user()->business_id)->latest()->get();
 
         return response()->json([
@@ -28,13 +32,13 @@ class PartyController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StorePartyRequest $request)
     {
-        $request->validate([
-            'phone' => 'required|max:20|unique:parties,phone',
-        ]);
+        $this->authorize('create', Party::class);
 
-        $data = Party::create($request->except('image') + [
+        // Validation is handled by StorePartyRequest
+
+        $data = Party::create($request->validated() + [
             'opening_balance' => $request->due,
             'business_id' => auth()->user()->business_id,
             'image' => $request->image ? $this->upload($request, 'image') : null,
@@ -48,7 +52,9 @@ class PartyController extends Controller
 
     public function show(Party $party)
     {
-        if (env('MESSAGE_ENABLED')) {
+        $this->authorize('view', $party);
+
+        if (config('zsyst.message_enabled')) {
             if ($party->due) {
                 $business = Business::findOrFail($party->business_id);
                 $response = sendMessage($party->phone, dueMessage($party, $business->companyName));
@@ -77,13 +83,13 @@ class PartyController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Party $party)
+    public function update(UpdatePartyRequest $request, Party $party)
     {
-        $request->validate([
-            'phone' => 'required|max:20|unique:parties,phone,'.$party->id,
-        ]);
+        $this->authorize('update', $party);
 
-        $party = $party->update($request->except('image') + [
+        // Validation is handled by UpdatePartyRequest
+
+        $party->update($request->validated() + [
             'opening_balance' => $request->due,
             'image' => $request->image ? $this->upload($request, 'image', $party->image) : $party->image,
         ]);
@@ -99,6 +105,8 @@ class PartyController extends Controller
      */
     public function destroy(Party $party)
     {
+        $this->authorize('delete', $party);
+
         $party->delete();
 
         return response()->json([

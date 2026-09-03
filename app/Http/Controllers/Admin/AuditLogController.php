@@ -24,7 +24,8 @@ class AuditLogController extends Controller
     public function index(Request $request)
     {
         $businessId = $request->business_id ?? auth()->user()->business_id;
-        
+
+        // Super admins without a business can see all logs
         $filters = [
             'action' => $request->action,
             'user_id' => $request->user_id,
@@ -34,7 +35,13 @@ class AuditLogController extends Controller
             'date_to' => $request->date_to,
         ];
 
-        $logs = $this->auditService->getLogsForBusiness($businessId, $filters);
+        if ($businessId) {
+            $logs = $this->auditService->getLogsForBusiness((int) $businessId, $filters);
+        } else {
+            $logs = AuditLog::with(['user:id,name,email', 'business:id,companyName'])
+                ->orderBy('created_at', 'desc')
+                ->paginate(15);
+        }
 
         return view('admin.audit-logs.index', compact('logs'));
     }
@@ -55,7 +62,7 @@ class AuditLogController extends Controller
     public function statistics(Request $request)
     {
         $businessId = $request->business_id ?? auth()->user()->business_id;
-        
+
         $filters = [
             'date_from' => $request->date_from,
             'date_to' => $request->date_to,
@@ -111,7 +118,7 @@ class AuditLogController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error deleting audit log: ') . $e->getMessage(),
+                'message' => __('Error deleting audit log: ').$e->getMessage(),
             ], 500);
         }
     }

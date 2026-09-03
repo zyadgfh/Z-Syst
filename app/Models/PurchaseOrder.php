@@ -21,6 +21,7 @@ class PurchaseOrder extends Model
         'supplier_id',
         'business_id',
         'branch_id',
+        'warehouse_id',
         'created_by',
         'approved_by',
         'po_number',
@@ -44,6 +45,7 @@ class PurchaseOrder extends Model
         'rejected_at',
         'rejection_reason',
         'is_active',
+        'shipping_cost',
     ];
 
     /**
@@ -71,19 +73,28 @@ class PurchaseOrder extends Model
      * Status constants
      */
     const STATUS_DRAFT = 'draft';
+
     const STATUS_SENT = 'sent';
+
     const STATUS_ACCEPTED = 'accepted';
+
     const STATUS_PARTIALLY_RECEIVED = 'partially_received';
+
     const STATUS_RECEIVED = 'received';
+
     const STATUS_CANCELLED = 'cancelled';
+
     const STATUS_REJECTED = 'rejected';
 
     /**
      * Priority constants
      */
     const PRIORITY_LOW = 'low';
+
     const PRIORITY_NORMAL = 'normal';
+
     const PRIORITY_HIGH = 'high';
+
     const PRIORITY_URGENT = 'urgent';
 
     /**
@@ -375,15 +386,26 @@ class PurchaseOrder extends Model
     }
 
     /**
-     * Get completion percentage.
+     * Get completion percentage (accessor).
+     */
+    public function getCompletionPercentageAttribute(): float
+    {
+        $total = $this->getTotalQuantity();
+        if ($total === 0) {
+            return 0;
+        }
+
+        $received = $this->getReceivedQuantity();
+
+        return round(($received / $total) * 100);
+    }
+
+    /**
+     * Get completion percentage (method).
      */
     public function getCompletionPercentage(): float
     {
-        $total = $this->getTotalQuantity();
-        if ($total === 0) return 0;
-        
-        $received = $this->getReceivedQuantity();
-        return ($received / $total) * 100;
+        return $this->completion_percentage;
     }
 
     /**
@@ -419,6 +441,7 @@ class PurchaseOrder extends Model
     private static function generatePONumber(int $businessId): string
     {
         $count = self::where('business_id', $businessId)->count() + 1;
-        return 'PO-' . date('Y') . '-' . str_pad($count, 5, '0', STR_PAD_LEFT);
+
+        return 'PO-'.date('Y').'-'.str_pad($count, 5, '0', STR_PAD_LEFT);
     }
 }

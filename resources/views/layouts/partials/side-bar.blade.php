@@ -1,8 +1,8 @@
 <div class="sidebar-container">
     <nav class="side-bar">
         <div class="side-bar-logo">
-            <a href="{{ route('admin.dashboard.index') }}">
-                <img src="{{ asset(get_option('general')['admin_logo'] ?? 'assets/images/logo/logo.png') }}" alt="Logo">
+            <a href="{{ route('admin.dashboard.index') }}" class="logo-sidebar">
+                <img src="{{ asset('logo.png') }}" alt="Z-Syst Pharmacy Management" class="logo logo-large">
             </a>
             <button class="close-btn"><i class="fal fa-times"></i></button>
         </div>
@@ -104,6 +104,44 @@
                         </a>
                     </li>
                 @endcan
+
+                @canany(['products-view', 'items-view'])
+                    <li class="{{ Request::routeIs('admin.items.*', 'admin.products.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.items.index') }}">
+                            <span class="sidebar-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M21 8V21H3V8" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M23 3H1V8H23V3Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M10 12H14" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                            {{ __('Items Management') }}
+                        </a>
+                    </li>
+                @endcan
+
+                <li class="{{ Request::routeIs('admin.vulnerability-exceptions.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.vulnerability-exceptions.index') }}">
+                        <span class="sidebar-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </span>
+                        {{ __('Security Exceptions') }}
+                    </a>
+                </li>
+
+                <li class="{{ Request::routeIs('admin.security-dashboard.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.security-dashboard.index') }}">
+                        <span class="sidebar-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M9 12l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </span>
+                        {{ __('Security Dashboard') }}
+                    </a>
+                </li>
 
                 @can('prescriptions-read')
                     <li class="{{ Request::routeIs('admin.prescriptions.index', 'admin.prescriptions.create', 'admin.prescriptions.edit') ? 'active' : '' }}">
@@ -371,6 +409,10 @@
                             @endcan
                             @can('settings-read')
                                 <li>
+                                    <a class="{{ Request::routeIs('admin.app-settings.index') ? 'active' : '' }}"
+                                        href="{{ route('admin.app-settings.index') }}">{{ __('Application Settings') }}</a>
+                                </li>
+                                <li>
                                     <a class="{{ Request::routeIs('admin.system-settings.index') ? 'active' : '' }}"
                                         href="{{ route('admin.system-settings.index') }}">{{ __('System Settings') }}</a>
                                 </li>
@@ -382,6 +424,55 @@
                          </ul>
                      </li>
                  @endcanany
+
+                @canany(['purchases-view', 'purchases-create', 'purchases-edit'])
+                    <li class="dropdown {{ Route::is('admin.purchases.*') ? 'active' : '' }}">
+                        <a href="#">
+                            <span class="sidebar-icon">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M2.5 7.5C2.5 5.567 4.067 4 6 4H14C15.933 4 17.5 5.567 17.5 7.5V12.5C17.5 14.433 15.933 16 14 16H6C4.067 16 2.5 14.433 2.5 12.5V7.5Z" stroke="white" stroke-width="1.5"/>
+                                    <path d="M7.5 2.5V5.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                    <path d="M12.5 2.5V5.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                            </span>
+                            {{ __('Purchases') }}
+                        </a>
+                        <ul>
+                            @can('purchases-view')
+                                <li><a class="{{ Request::routeIs('admin.purchases.index') ? 'active' : '' }}" href="{{ route('admin.purchases.index') }}">{{ __('All Purchases') }}</a></li>
+                            @endcan
+                            @can('purchases-create')
+                                <li><a class="{{ Request::routeIs('admin.purchases.create') ? 'active' : '' }}" href="{{ route('admin.purchases.create') }}">{{ __('New Purchase') }}</a></li>
+                                <li><a class="{{ Request::routeIs('admin.purchases.returns.*') ? 'active' : '' }}" href="{{ route('admin.purchases.returns.index') }}">{{ __('Purchase Returns') }}</a></li>
+                            @endcan
+                            @can('reports-view')
+                                <li><a class="{{ Request::routeIs('admin.purchases.reports', 'admin.purchases.supplier-balance', 'admin.purchases.stock-movements') ? 'active' : '' }}" href="{{ route('admin.purchases.reports') }}">{{ __('Purchase Reports') }}</a></li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcanany
+
+                @canany(['suppliers-view', 'suppliers-create'])
+                    <li class="dropdown {{ Route::is('admin.suppliers.*') ? 'active' : '' }}">
+                        <a href="#">
+                            <span class="sidebar-icon">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M16.6667 10L10 16.6667L3.33333 10" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M16.6667 3.33333L10 10L3.33333 3.33333" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                            {{ __('Suppliers') }}
+                        </a>
+                        <ul>
+                            @can('suppliers-view')
+                                <li><a class="{{ Request::routeIs('admin.suppliers.index') ? 'active' : '' }}" href="{{ route('admin.suppliers.index') }}">{{ __('All Suppliers') }}</a></li>
+                            @endcan
+                            @can('suppliers-create')
+                                <li><a class="{{ Request::routeIs('admin.suppliers.create') ? 'active' : '' }}" href="{{ route('admin.suppliers.create') }}">{{ __('Add Supplier') }}</a></li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcanany
 
                 @canany(['warehouses-read', 'warehouses-create', 'warehouses-update', 'warehouses-delete'])
                     <li class="dropdown {{ Route::is('admin.warehouses.*') ? 'active' : '' }}">
@@ -473,6 +564,21 @@
                         </ul>
                     </li>
                 @endcanany
+
+                @can('maintenance-read')
+                    <li class="{{ Request::routeIs('admin.maintenance.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.maintenance.index') }}">
+                            <span class="sidebar-icon">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18Z" stroke="white" stroke-width="1.5"/>
+                                    <path d="M10 6V10L13 13" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M5 5L15 15" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                            {{ __('Maintenance Mode') }}
+                        </a>
+                    </li>
+                @endcan
             </ul>
         </div>
     </nav>

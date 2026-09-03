@@ -22,10 +22,28 @@ class PaymentSchedule extends Model
         'reminders_sent' => 'boolean',
     ];
 
-    public function supplier(): BelongsTo { return $this->belongsTo(Supplier::class); }
-    public function business(): BelongsTo { return $this->belongsTo(Business::class); }
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
+    }
 
-    public function scopeForBusiness($query, $businessId) { return $query->where('business_id', $businessId); }
-    public function scopePending($query) { return $query->where('status', 'pending'); }
-    public function scopePaid($query) { return $query->where('status', 'paid'); }
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class);
+    }
+
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $query->where('business_id', $businessId);
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
+
+    public function scopePaid($query)
+    {
+        return $query->where('status', 'paid');
+    }
 }

@@ -26,12 +26,12 @@ class PurchaseOrderItemResource extends JsonResource
             'notes' => $this->notes,
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),
-            
+
             // Computed fields
             'is_fully_received' => $this->isFullyReceived(),
             'is_partially_received' => $this->isPartiallyReceived(),
             'remaining_quantity' => $this->getRemainingQuantity(),
-            
+
             // Relationships
             'product' => new ProductResource($this->whenLoaded('product')),
         ];

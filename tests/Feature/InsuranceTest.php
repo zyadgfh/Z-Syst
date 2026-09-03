@@ -11,8 +11,11 @@ use App\Models\Product;
 use App\Models\User;
 use App\Services\InsuranceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
+#[Group('recall')]
+#[Group('traceability')]
 class InsuranceTest extends TestCase
 {
     use RefreshDatabase;

@@ -5,11 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\GRNRequest;
 use App\Http\Resources\GRNResource;
-use App\Http\Resources\GRNItemResource;
 use App\Models\GoodsReceivedNote;
 use App\Services\GRNService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class GRNController extends Controller
@@ -42,6 +41,10 @@ class GRNController extends Controller
             $query->byStatus($request->status);
         }
 
+        if ($request->has('warehouse_id')) {
+            $query->where('warehouse_id', $request->warehouse_id);
+        }
+
         $grns = $query->latest()->paginate($request->per_page ?? 15);
 
         return GRNResource::collection($grns);
@@ -69,8 +72,12 @@ class GRNController extends Controller
     /**
      * Display the specified GRN.
      */
-    public function show(GoodsReceivedNote $grn): JsonResponse
+    public function show(Request $request, GoodsReceivedNote $grn): JsonResponse
     {
+        if ($grn->business_id !== $request->user()->business_id) {
+            return response()->json(['success' => false, 'message' => 'Not found'], 404);
+        }
+
         $grn->load(['supplier', 'purchaseOrder', 'items.product', 'items.qualityChecks', 'receivedBy', 'verifiedBy']);
 
         return response()->json([
@@ -84,7 +91,15 @@ class GRNController extends Controller
      */
     public function update(GRNRequest $request, GoodsReceivedNote $grn): JsonResponse
     {
+        if (! $this->grnService->canBeEdited($grn)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only draft or pending GRNs can be updated',
+            ], 403);
+        }
+
         $validated = $request->validated();
+        $validated['warehouse_id'] = $grn->warehouse_id;
 
         $grn = $this->grnService->update($grn, $validated);
 
@@ -100,12 +115,16 @@ class GRNController extends Controller
      */
     public function destroy(GoodsReceivedNote $grn): JsonResponse
     {
-        $this->grnService->delete($grn);
+        try {
+            $this->grnService->delete($grn);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'GRN deleted successfully',
-        ]);
+        return response()->json(null, 204);
     }
 
     /**
@@ -113,7 +132,14 @@ class GRNController extends Controller
      */
     public function verify(Request $request, GoodsReceivedNote $grn): JsonResponse
     {
-        $grn = $this->grnService->verify($grn, $request->user()->id);
+        try {
+            $grn = $this->grnService->verify($grn, $request->user()->id);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        }
 
         return response()->json([
             'success' => true,
@@ -127,7 +153,14 @@ class GRNController extends Controller
      */
     public function accept(Request $request, GoodsReceivedNote $grn): JsonResponse
     {
-        $grn = $this->grnService->accept($grn);
+        try {
+            $grn = $this->grnService->accept($grn);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        }
 
         return response()->json([
             'success' => true,
@@ -141,7 +174,14 @@ class GRNController extends Controller
      */
     public function reject(Request $request, GoodsReceivedNote $grn): JsonResponse
     {
-        $grn = $this->grnService->reject($grn);
+        try {
+            $grn = $this->grnService->reject($grn);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        }
 
         return response()->json([
             'success' => true,

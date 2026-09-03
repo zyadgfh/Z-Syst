@@ -6,56 +6,89 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+env:
+  PHP_VERSION: '8.3'
+  COMPOSER_CACHE_DIR: composer-cache
+
 jobs:
-  test:
-    name: Run Tests
+  # ──────────────────────────────────────────────
+  # PR Jobs: Run only new-features test subset
+  # ──────────────────────────────────────────────
+  test-new-features:
+    name: "Tests: New Features (PR subset)"
     runs-on: ubuntu-latest
-    
+    if: github.event_name == 'pull_request'
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
-          extensions: mbstring, xml, mysql, bcmath, gd, intl, zip
-          coverage: xdebug
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, xml, sqlite3, bcmath, gd, intl, zip
+          coverage: pcov
+          tools: phpunit
 
-      - name: Copy .env
-        run: cp .env.example .env
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
         run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Generate application key
-        run: php artisan key:generate
-
-      - name: Run migrations
-        run: php artisan migrate --force
-
-      - name: Run tests
-        run: php artisan test --coverage-clover=coverage.xml
+      - name: Run new-features tests with coverage
+        run: |
+          vendor/bin/phpunit --testsuite="CI-NewFeatures" \
+            --coverage-clover=coverage-new-features.xml \
+            --coverage-html=coverage/new-features/html \
+            --coverage-text
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
+          CACHE_DRIVER: array
+          SESSION_DRIVER: array
+          QUEUE_CONNECTION: sync
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
-          file: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
+          files: ./coverage-new-features.xml
+          flags: new-features
+          name: new-features-coverage
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  security-scan:
-    name: Security Scan
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-new-features
+          path: coverage/new-features/html/
+          retention-days: 14
+
+  security-scan-pr:
+    name: "Security: Audit (PR)"
     runs-on: ubuntu-latest
-    
+    if: github.event_name == 'pull_request'
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: ${{ env.PHP_VERSION }}
 
       - name: Install dependencies
         run: composer install --no-progress --no-interaction
@@ -63,51 +96,314 @@ jobs:
       - name: Run security audit
         run: composer audit
 
-      - name: Run Laravel security check
-        run: composer require enlightn/security-checker --dev
-        run: vendor/bin/security-checker
-
-  code-quality:
-    name: Code Quality Check
+  code-quality-pr:
+    name: "Quality: Pint + PHPStan (PR)"
     runs-on: ubuntu-latest
-    
+    if: github.event_name == 'pull_request'
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: ${{ env.PHP_VERSION }}
+          tools: laravel-pint
 
       - name: Install dependencies
         run: composer install --no-progress --no-interaction
 
-      - name: Run PHPStan
-        run: composer require phpstan/phpstan --dev
-        run: vendor/bin/phpstan analyse --memory-limit=2G
-
-      - name: Run Pint
-        run: composer require laravel/pint --dev
+      - name: Run Pint (dry-run)
         run: vendor/bin/pint --test
 
-  deploy-staging:
-    name: Deploy to Staging
-    needs: [test, security-scan, code-quality]
+  # ──────────────────────────────────────────────
+  # Main/Develop Jobs: Full test suite
+  # ──────────────────────────────────────────────
+  test-full:
+    name: "Tests: Full Suite"
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/develop'
-    environment:
-      name: staging
-      url: https://staging.z-syst.com
-    
+    if: github.event_name == 'push'
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: testing
+          MYSQL_USER: tester
+          MYSQL_PASSWORD: tester
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, xml, mysql, bcmath, gd, intl, zip
+          coverage: pcov
+          tools: phpunit
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Copy environment file
+        run: cp .env.example .env
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Run full tests with coverage
+        run: |
+          vendor/bin/phpunit \
+            --coverage-clover=coverage-full.xml \
+            --coverage-html=coverage/full/html \
+            --coverage-text
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
+          APP_ENV: testing
+          CACHE_DRIVER: array
+          SESSION_DRIVER: array
+          QUEUE_CONNECTION: sync
+
+      - name: Upload full coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage-full.xml
+          flags: full-suite
+          name: full-suite-coverage
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload full coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-full-suite
+          path: coverage/full/html/
+          retention-days: 30
+
+  # ──────────────────────────────────────────────
+  # Targeted coverage: Accounting + Recall suites
+  # ──────────────────────────────────────────────
+  coverage-accounting:
+    name: "Coverage: Accounting Suite"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, xml, sqlite3, bcmath, gd, intl, zip
+          coverage: pcov
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Run accounting tests with coverage
+        run: |
+          vendor/bin/phpunit \
+            --testsuite="Coverage-Accounting" \
+            --coverage-clover=coverage-accounting.xml \
+            --coverage-html=coverage/accounting/html \
+            --coverage-text
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
+          CACHE_DRIVER: array
+          SESSION_DRIVER: array
+          QUEUE_CONNECTION: sync
+
+      - name: Upload accounting coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage-accounting.xml
+          flags: accounting
+          name: accounting-coverage
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload accounting coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-accounting
+          path: coverage/accounting/html/
+          retention-days: 30
+
+      - name: Upload accounting coverage summary
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "### Accounting Coverage" >> $GITHUB_STEP_SUMMARY
+          echo "Coverage report uploaded as artifact. See coverage/accounting/html/ for details." >> $GITHUB_STEP_SUMMARY
+
+  coverage-recall:
+    name: "Coverage: Recall & Traceability Suite"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, xml, sqlite3, bcmath, gd, intl, zip
+          coverage: pcov
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Run recall/traceability tests with coverage
+        run: |
+          vendor/bin/phpunit \
+            --testsuite="Coverage-Recall" \
+            --coverage-clover=coverage-recall.xml \
+            --coverage-html=coverage/recall/html \
+            --coverage-text
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
+          CACHE_DRIVER: array
+          SESSION_DRIVER: array
+          QUEUE_CONNECTION: sync
+
+      - name: Upload recall coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage-recall.xml
+          flags: recall-traceability
+          name: recall-coverage
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload recall coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-recall
+          path: coverage/recall/html/
+          retention-days: 30
+
+  # ──────────────────────────────────────────────
+  # Quality & Security (main only)
+  # ──────────────────────────────────────────────
+  security-scan:
+    name: "Security: Audit"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+
+      - name: Install dependencies
+        run: composer install --no-progress --no-interaction
+
+      - name: Run security audit
+        run: composer audit
+
+  code-quality:
+    name: "Quality: Pint + PHPStan"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          tools: phpstan, laravel-pint
+
+      - name: Install dependencies
+        run: composer install --no-progress --no-interaction
+
+      - name: Run Pint (dry-run)
+        run: vendor/bin/pint --test
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse --memory-limit=2G
+
+  # ──────────────────────────────────────────────
+  # Deployments
+  # ──────────────────────────────────────────────
+  deploy-staging:
+    name: "Deploy: Staging"
+    needs: [test-full, security-scan, code-quality]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment:
+      name: staging
+      url: https://staging.z-syst.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
 
       - name: Install dependencies
         run: composer install --no-dev --optimize-autoloader
@@ -116,67 +412,35 @@ jobs:
         run: |
           echo "Deploying to staging..."
           # Add your deployment commands here
-          # Example: rsync -avz ./ user@staging-server:/var/www/z-syst/
-
-      - name: Run migrations on staging
-        run: |
-          ssh user@staging-server "cd /var/www/z-syst && php artisan migrate --force"
-
-      - name: Clear cache on staging
-        run: |
-          ssh user@staging-server "cd /var/www/z-syst && php artisan cache:clear && php artisan config:cache && php artisan route:cache"
 
       - name: Health check
         run: curl -f https://staging.z-syst.com/health || exit 1
 
   deploy-production:
-    name: Deploy to Production
-    needs: [test, security-scan, code-quality]
+    name: "Deploy: Production"
+    needs: [test-full, security-scan, code-quality]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment:
       name: production
       url: https://app.z-syst.com
-    
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: ${{ env.PHP_VERSION }}
 
       - name: Install dependencies
         run: composer install --no-dev --optimize-autoloader
-
-      - name: Create backup
-        run: |
-          echo "Creating backup..."
-          # Add backup commands here
 
       - name: Deploy to production
         run: |
           echo "Deploying to production..."
           # Add your deployment commands here
-          # Example: rsync -avz ./ user@production-server:/var/www/z-syst/
-
-      - name: Run migrations on production
-        run: |
-          ssh user@production-server "cd /var/www/z-syst && php artisan migrate --force"
-
-      - name: Clear cache on production
-        run: |
-          ssh user@production-server "cd /var/www/z-syst && php artisan cache:clear && php artisan config:cache && php artisan route:cache"
-
-      - name: Restart queue workers
-        run: |
-          ssh user@production-server "sudo supervisorctl restart laravel-worker:*"
 
       - name: Health check
         run: curl -f https://app.z-syst.com/health || exit 1
-
-      - name: Notify team
-        run: |
-          echo "Deployment to production successful!"
-          # Add notification commands here (Slack, email, etc.)

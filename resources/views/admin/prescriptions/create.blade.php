@@ -3,7 +3,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">{{ __('Add New Prescription') }}</h5>
+                <h5 class="modal-title" id="exampleModalLabel">{{ __('products.Add New Prescription') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -11,9 +11,9 @@
                     @csrf
 
                     <div class="mt-3">
-                        <label>{{ __('Customer') }} ({{ __('Optional') }})</label>
+                        <label>{{ __('common.Customer') }} ({{ __('gateways.Optional') }})</label>
                         <select name="party_id" class="form-control">
-                            <option value="">{{ __('Select Customer') }}</option>
+                            <option value="">{{ __('products.Select Customer') }}</option>
                             @foreach ($parties as $party)
                                 <option value="{{ $party->id }}">{{ $party->name }} ({{ $party->phone }})</option>
                             @endforeach
@@ -21,41 +21,41 @@
                     </div>
 
                     <div class="mt-3">
-                        <label>{{ __('Prescription Number') }}</label>
-                        <input type="text" name="prescription_number" class="form-control" placeholder="{{ __('RX-123456') }}">
+                        <label>{{ __('products.Prescription Number') }}</label>
+                        <input type="text" name="prescription_number" class="form-control" placeholder="{{ __('products.RX-123456') }}">
                     </div>
 
                     <div class="mt-3">
-                        <label>{{ __('Patient Name') }}</label>
-                        <input type="text" name="patient_name" class="form-control" placeholder="{{ __('Patient full name') }}">
+                        <label>{{ __('products.Patient Name') }}</label>
+                        <input type="text" name="patient_name" class="form-control" placeholder="{{ __('products.Patient full name') }}">
                     </div>
 
                     <div class="mt-3">
-                        <label>{{ __('Doctor Name') }}</label>
-                        <input type="text" name="doctor_name" class="form-control" placeholder="{{ __('Doctor name') }}">
+                        <label>{{ __('products.Doctor Name') }}</label>
+                        <input type="text" name="doctor_name" class="form-control" placeholder="{{ __('products.Doctor name') }}">
                     </div>
 
                     <div class="mt-3">
-                        <label>{{ __('Expiry Date') }}</label>
+                        <label>{{ __('common.Expiry Date') }}</label>
                         <input type="date" name="expires_at" class="form-control">
                     </div>
 
                     <div class="mt-3">
-                        <label>{{ __('Review Status') }}</label>
+                        <label>{{ __('products.Review Status') }}</label>
                         <select name="review_status" class="form-control">
-                            <option value="pending">{{ __('Pending') }}</option>
-                            <option value="approved">{{ __('Approved') }}</option>
-                            <option value="rejected">{{ __('Rejected') }}</option>
+                            <option value="pending">{{ __('common.Pending') }}</option>
+                            <option value="approved">{{ __('common.Approved') }}</option>
+                            <option value="rejected">{{ __('purchases.Rejected') }}</option>
                         </select>
                     </div>
 
                     <div class="mt-3">
-                        <label>{{ __('Notes') }}</label>
-                        <textarea name="notes" class="form-control" rows="3" placeholder="{{ __('Enter notes about the prescription') }}"></textarea>
+                        <label>{{ __('common.Notes') }}</label>
+                        <textarea name="notes" class="form-control" rows="3" placeholder="{{ __('products.Enter notes about the prescription') }}"></textarea>
                     </div>
 
                     <div class="mt-3 position-relative">
-                        <label class="upload-img-label">{{ __('Prescription Image') }} <span class="text-danger">*</span></label>
+                        <label class="upload-img-label">{{ __('products.Prescription Image') }} <span class="text-danger">*</span></label>
                         <div class="chosen-img">
                             <label class="d-flex align-items-center gap-2">
                                 <input type="file" name="image" class="form-control bg-light"
@@ -71,8 +71,8 @@
 
                     <div class="col-lg-12">
                         <div class="button-group text-center mt-3">
-                            <button type="reset" class="theme-btn border-btn m-2" data-bs-dismiss="modal" aria-label="Close">{{ __('Cancel') }}</button>
-                            <button class="theme-btn m-2 submit-btn">{{ __('Save') }}</button>
+                            <button type="reset" class="theme-btn border-btn m-2" data-bs-dismiss="modal" aria-label="Close">{{ __('common.Cancel') }}</button>
+                            <button class="theme-btn m-2 submit-btn">{{ __('common.Save') }}</button>
                         </div>
                     </div>
                 </form>

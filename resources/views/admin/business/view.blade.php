@@ -2,7 +2,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5">{{ __('Business View') }} (<span class="business_name"></span>)</h1>
+                <h1 class="modal-title fs-5">{{ __('business.Business View') }} (<span class="business_name"></span>)</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -15,7 +15,7 @@
                     </div>
                     <div class="row align-items-center mt-4">
                         <div class="col-md-4">
-                            <p>{{ __('Business Name') }}</p>
+                            <p>{{ __('common.Business Name') }}</p>
                         </div>
                         <div class="col-1">
                             <p>:</p>
@@ -27,7 +27,7 @@
 
                     <div class="row align-items-center mt-3">
                         <div class="col-md-4">
-                            <p>{{ __('Business Category') }}</p>
+                            <p>{{ __('common.Business Category') }}</p>
                         </div>
                         <div class="col-1">
                             <p>:</p>
@@ -38,7 +38,7 @@
                     </div>
                     <div class="row align-items-center mt-3">
                         <div class="col-md-4">
-                            <p>{{ __('Phone') }}</p>
+                            <p>{{ __('common.Phone') }}</p>
                         </div>
                         <div class="col-1">
                             <p>:</p>
@@ -50,7 +50,7 @@
 
                     <div class="row align-items-center mt-3">
                         <div class="col-md-4">
-                            <p>{{ __('Address') }}</p>
+                            <p>{{ __('common.Address') }}</p>
                         </div>
                         <div class="col-1">
                             <p>:</p>
@@ -61,7 +61,7 @@
                     </div>
                     <div class="row align-items-center mt-3">
                         <div class="col-md-4">
-                            <p>{{ __('Package') }}</p>
+                            <p>{{ __('common.Package') }}</p>
                         </div>
                         <div class="col-1">
                             <p>:</p>
@@ -72,7 +72,7 @@
                     </div>
                     <div class="row align-items-center mt-3">
                         <div class="col-md-4">
-                            <p>{{ __('Upgrade Date') }}</p>
+                            <p>{{ __('business.Upgrade Date') }}</p>
                         </div>
                         <div class="col-1">
                             <p>:</p>
@@ -83,7 +83,7 @@
                     </div>
                     <div class="row align-items-center mt-3">
                         <div class="col-md-4">
-                            <p>{{ __('Expired Date') }}</p>
+                            <p>{{ __('business.Expired Date') }}</p>
                         </div>
                         <div class="col-1">
                             <p>:</p>
@@ -94,7 +94,7 @@
                     </div>
                     <div class="row align-items-center mt-3">
                         <div class="col-md-4">
-                            <p>{{ __('Created date') }}</p>
+                            <p>{{ __('business.Created date') }}</p>
                         </div>
                         <div class="col-1">
                             <p>:</p>

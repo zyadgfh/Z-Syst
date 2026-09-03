@@ -4,21 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SaleReturn extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
      *
      * @var array
-     */
-    protected $fillable = [
-        'business_id',
-        'sale_id',
-        'invoice_no',
-        'return_date',
+     */    protected $fillable = [
+        'business_id', 'sale_id', 'invoice_no', 'return_date',
+        'user_id', 'reason', 'total_amount', 'refund_amount', 'status',
     ];
 
     public static function boot()

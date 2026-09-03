@@ -5,9 +5,9 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
-                <h2>Purchase Orders</h2>
+                <h2>{{ __('purchases.Purchase Orders') }}</h2>
                 <a href="{{ route('admin.purchase-orders.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Create Purchase Order
+                    <i class="fas fa-plus"></i> {{ __('purchases.Create Purchase Order') }}
                 </a>
             </div>
         </div>
@@ -20,42 +20,42 @@
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Supplier</label>
+                                <label>{{ __('purchases.Supplier') }}</label>
                                 <select class="form-control" id="filter-supplier">
-                                    <option value="">All Suppliers</option>
+                                    <option value="">{{ __('purchases.All Suppliers') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Status</label>
+                                <label>{{ __('common.Status') }}</label>
                                 <select class="form-control" id="filter-status">
-                                    <option value="">All Status</option>
-                                    <option value="draft">Draft</option>
-                                    <option value="sent">Sent</option>
-                                    <option value="accepted">Accepted</option>
-                                    <option value="partially_received">Partially Received</option>
-                                    <option value="received">Received</option>
-                                    <option value="cancelled">Cancelled</option>
-                                    <option value="rejected">Rejected</option>
+                                    <option value="">{{ __('common.All Status') }}</option>
+                                    <option value="draft">{{ __('purchases.Draft') }}</option>
+                                    <option value="sent">{{ __('purchases.Sent') }}</option>
+                                    <option value="accepted">{{ __('purchases.Accepted') }}</option>
+                                    <option value="partially_received">{{ __('purchases.Partially Received') }}</option>
+                                    <option value="received">{{ __('purchases.Received') }}</option>
+                                    <option value="cancelled">{{ __('purchases.Cancelled') }}</option>
+                                    <option value="rejected">{{ __('purchases.Rejected') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Priority</label>
+                                <label>{{ __('purchases.Priority') }}</label>
                                 <select class="form-control" id="filter-priority">
-                                    <option value="">All Priorities</option>
-                                    <option value="low">Low</option>
-                                    <option value="normal">Normal</option>
-                                    <option value="high">High</option>
-                                    <option value="urgent">Urgent</option>
+                                    <option value="">{{ __('purchases.All Priorities') }}</option>
+                                    <option value="low">{{ __('purchases.Low') }}</option>
+                                    <option value="normal">{{ __('purchases.Normal') }}</option>
+                                    <option value="high">{{ __('purchases.High') }}</option>
+                                    <option value="urgent">{{ __('purchases.Urgent') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Search</label>
+                                <label>{{ __('common.Search') }}</label>
                                 <input type="text" class="form-control" id="search" placeholder="Search PO number...">
                             </div>
                         </div>
@@ -73,15 +73,15 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>PO Number</th>
-                                    <th>Supplier</th>
-                                    <th>Status</th>
-                                    <th>Priority</th>
-                                    <th>Total Amount</th>
-                                    <th>Expected Delivery</th>
-                                    <th>Items</th>
-                                    <th>Progress</th>
-                                    <th>Actions</th>
+                                    <th>{{ __('purchases.PO Number') }}</th>
+                                    <th>{{ __('purchases.Supplier') }}</th>
+                                    <th>{{ __('common.Status') }}</th>
+                                    <th>{{ __('purchases.Priority') }}</th>
+                                    <th>{{ __('purchases.Total Amount') }}</th>
+                                    <th>{{ __('purchases.Expected Delivery') }}</th>
+                                    <th>{{ __('common.Items') }}</th>
+                                    <th>{{ __('purchases.Progress') }}</th>
+                                    <th>{{ __('common.Actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody id="purchase-orders-table">
@@ -127,7 +127,7 @@
                         <td>${formatDate(po.expected_delivery_date)}</td>
                         <td>${po.total_quantity}</td>
                         <td>
-                            <div class="progress" style="height: 20px;">
+                            <div class="progress h-20">
                                 <div class="progress-bar" style="width: ${po.completion_percentage}%">
                                     ${po.completion_percentage.toFixed(0)}%
                                 </div>
@@ -214,7 +214,7 @@
 
     function sendPO(id) {
         if (confirm('Send this purchase order to supplier?')) {
-            $.post(`{{ route('admin.purchase-orders.send') }}`.replace('{purchaseOrder}', id), function(data) {
+            $.post('/admin/purchase-orders/' + id + '/send', function(data) {
                 alert('Purchase order sent successfully');
                 loadPurchaseOrders();
             });
@@ -223,7 +223,7 @@
 
     function approvePO(id) {
         if (confirm('Approve this purchase order?')) {
-            $.post(`{{ route('admin.purchase-orders.approve') }}`.replace('{purchaseOrder}', id), function(data) {
+            $.post('/admin/purchase-orders/' + id + '/approve', function(data) {
                 alert('Purchase order approved successfully');
                 loadPurchaseOrders();
             });
@@ -233,7 +233,7 @@
     function rejectPO(id) {
         const reason = prompt('Please enter rejection reason:');
         if (reason) {
-            $.post(`{{ route('admin.purchase-orders.reject') }}`.replace('{purchaseOrder}', id), { reason: reason }, function(data) {
+            $.post('/admin/purchase-orders/' + id + '/reject', { reason: reason }, function(data) {
                 alert('Purchase order rejected successfully');
                 loadPurchaseOrders();
             });
@@ -242,7 +242,7 @@
 
     function cancelPO(id) {
         if (confirm('Cancel this purchase order?')) {
-            $.post(`{{ route('admin.purchase-orders.cancel') }}`.replace('{purchaseOrder}', id), function(data) {
+            $.post('/admin/purchase-orders/' + id + '/cancel', function(data) {
                 alert('Purchase order cancelled successfully');
                 loadPurchaseOrders();
             });
@@ -251,7 +251,7 @@
 
     function convertToPurchase(id) {
         if (confirm('Convert this PO to Purchase?')) {
-            $.post(`{{ route('admin.purchase-orders.convert') }}`.replace('{purchaseOrder}', id), function(data) {
+            $.post('/admin/purchase-orders/' + id + '/convert', function(data) {
                 alert('Purchase order converted to purchase successfully');
                 loadPurchaseOrders();
             });
@@ -259,7 +259,7 @@
     }
 
     function viewPO(id) {
-        window.location.href = `{{ route('admin.purchase-orders.show') }}`.replace('{purchaseOrder}', id);
+        window.location.href = '/admin/purchase-orders/' + id;
     }
 </script>
 @endpush

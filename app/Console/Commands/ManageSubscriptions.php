@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 class ManageSubscriptions extends Command
 {
     protected $signature = 'subscriptions:manage';
+
     protected $description = 'Manage subscriptions - handle trials, expirations, and renewals';
 
     protected SubscriptionService $subscriptionService;
@@ -61,12 +62,12 @@ class ManageSubscriptions extends Command
                 // Generate first invoice
                 $this->subscriptionService->generateInvoice($subscription);
 
-                Log::info("Trial converted to active", [
+                Log::info('Trial converted to active', [
                     'subscription_id' => $subscription->id,
                     'business_id' => $subscription->business_id,
                 ]);
             } catch (\Exception $e) {
-                Log::error("Failed to convert trial to active", [
+                Log::error('Failed to convert trial to active', [
                     'subscription_id' => $subscription->id,
                     'error' => $e->getMessage(),
                 ]);
@@ -90,13 +91,13 @@ class ManageSubscriptions extends Command
 
                 $this->info("Subscription {$subscription->id} expires in {$daysRemaining} days");
 
-                Log::info("Subscription expiring soon", [
+                Log::info('Subscription expiring soon', [
                     'subscription_id' => $subscription->id,
                     'business_id' => $subscription->business_id,
                     'days_remaining' => $daysRemaining,
                 ]);
             } catch (\Exception $e) {
-                Log::error("Failed to handle expiring subscription", [
+                Log::error('Failed to handle expiring subscription', [
                     'subscription_id' => $subscription->id,
                     'error' => $e->getMessage(),
                 ]);
@@ -122,12 +123,12 @@ class ManageSubscriptions extends Command
 
                 $this->info("Subscription {$subscription->id} marked as expired");
 
-                Log::info("Subscription expired", [
+                Log::info('Subscription expired', [
                     'subscription_id' => $subscription->id,
                     'business_id' => $subscription->business_id,
                 ]);
             } catch (\Exception $e) {
-                Log::error("Failed to handle expired subscription", [
+                Log::error('Failed to handle expired subscription', [
                     'subscription_id' => $subscription->id,
                     'error' => $e->getMessage(),
                 ]);
@@ -151,18 +152,18 @@ class ManageSubscriptions extends Command
                     ->latest()
                     ->first();
 
-                if (!$lastInvoice) {
+                if (! $lastInvoice) {
                     $this->subscriptionService->generateInvoice($subscription);
                     $this->info("Generated invoice for subscription {$subscription->id}");
                 }
             } catch (\Exception $e) {
-                Log::error("Failed to generate invoice", [
+                Log::error('Failed to generate invoice', [
                     'subscription_id' => $subscription->id,
                     'error' => $e->getMessage(),
                 ]);
             }
         }
 
-        $this->info("Invoice generation completed.");
+        $this->info('Invoice generation completed.');
     }
 }

@@ -43,7 +43,8 @@
                 </div>
                 <div class="col-lg-5 align-self-center">
                     <div class="w-90 position-relative ms-auto about-img">
-                        <img src="{{ asset($page_data['about_image'] ?? 'assets/images/icons/img-upload.png') }}"
+                        
+<img loading="lazy" src="{{ asset($page_data['about_image'] ?? 'assets/images/icons/img-upload.png') }}"
                             alt="image" class="w-100" />
                     </div>
                 </div>

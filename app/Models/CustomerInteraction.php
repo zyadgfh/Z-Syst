@@ -78,7 +78,7 @@ class CustomerInteraction extends Model
      */
     public function getTypeLabelAttribute(): string
     {
-        return match($this->type) {
+        return match ($this->type) {
             'call' => __('Phone Call'),
             'visit' => __('In-Store Visit'),
             'email' => __('Email'),

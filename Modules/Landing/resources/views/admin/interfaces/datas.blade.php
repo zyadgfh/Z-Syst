@@ -22,8 +22,8 @@
                     <span class="slider round"></span>
                 </label>
             @else
-                <div class="badge bg-{{ $interface->status == 0 ? 'success' : 'danger' }}">
-                    {{ $interface->status == 0 ? 'Active' : 'Deactive' }}
+                <div class="badge bg-{{ $interface->status == 1 ? 'success' : 'danger' }}">
+                    {{ $interface->status == 1 ? 'Active' : 'Deactive' }}
                 </div>
             @endcan
         </td>

@@ -25,7 +25,7 @@ class PasswordReset extends Mailable
     public function build()
     {
         return $this->subject('Password reset code')
-            ->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
+            ->from(config('mail.from.address'), config('mail.from.name'))
             ->view('mail.password-reset')
             ->with([
                 'data' => $this->data,

@@ -25,6 +25,7 @@ class ZSystBannerController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Banner::class);
         $banners = Banner::latest()->paginate(10);
 
         return view('admin.banners.index', compact('banners'));
@@ -51,6 +52,7 @@ class ZSystBannerController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Banner::class);
         $request->validate([
             'name' => 'required|max:250',
             'status' => 'nullable|in:on',
@@ -71,6 +73,8 @@ class ZSystBannerController extends Controller
 
     public function update(Request $request, string $id)
     {
+        $banner = Banner::findOrFail($id);
+        $this->authorize('update', $banner);
         $request->validate([
             'name' => 'required|max:250',
             'status' => 'nullable|in:on',
@@ -94,6 +98,7 @@ class ZSystBannerController extends Controller
     public function destroy(string $id)
     {
         $banner = Banner::findOrFail($id);
+        $this->authorize('delete', $banner);
 
         if (file_exists($banner->imageUrl)) {
             Storage::delete($banner->imageUrl);

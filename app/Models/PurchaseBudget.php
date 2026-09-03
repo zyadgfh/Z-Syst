@@ -26,16 +26,50 @@ class PurchaseBudget extends Model
         'end_date' => 'datetime',
     ];
 
-    public function business(): BelongsTo { return $this->belongsTo(Business::class); }
-    public function branch(): BelongsTo { return $this->belongsTo(Branch::class); }
-    public function category(): BelongsTo { return $this->belongsTo(Category::class); }
-    public function createdBy(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
-    public function approvedBy(): BelongsTo { return $this->belongsTo(User::class, 'approved_by'); }
-    public function alerts(): HasMany { return $this->hasMany(BudgetAlert::class); }
-    public function transactions(): HasMany { return $this->hasMany(BudgetTransaction::class); }
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class);
+    }
 
-    public function scopeForBusiness($query, $businessId) { return $query->where('business_id', $businessId); }
-    public function scopeActive($query) { return $query->where('status', 'active'); }
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function alerts(): HasMany
+    {
+        return $this->hasMany(BudgetAlert::class);
+    }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(BudgetTransaction::class);
+    }
+
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $query->where('business_id', $businessId);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
 
     public function getSpentPercentageAttribute(): float
     {

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Notification;
 
 function cache_remember(string $key, callable $callback, int $ttl = 1800): mixed
 {
-    return cache()->remember($key, env('CACHE_LIFETIME', $ttl), $callback);
+    return cache()->remember($key, config('cache.lifetime', $ttl), $callback);
 }
 
 function normalize_manage_pages_option($value)

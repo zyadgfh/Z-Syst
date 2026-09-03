@@ -5,7 +5,7 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
-                <h2>Edit Supplier - {{ $supplier->company_name }}</h2>
+                <h2>{{ __('purchases.Edit Supplier') }} - {{ $supplier->company_name }}</h2>
                 <div class="btn-group">
                     <a href="{{ route('admin.suppliers.show', $supplier) }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Back
@@ -26,7 +26,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="company_name">Company Name *</label>
+                                    <label for="company_name">{{ __('purchases.Company Name') }} *</label>
                                     <input type="text" class="form-control" id="company_name" name="company_name" value="{{ $supplier->company_name }}" required>
                                     @error('company_name')
                                         <span class="text-danger">{{ $message }}</span>
@@ -35,7 +35,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="contact_person">Contact Person *</label>
+                                    <label for="contact_person">{{ __('purchases.Contact Person') }} *</label>
                                     <input type="text" class="form-control" id="contact_person" name="contact_person" value="{{ $supplier->contact_person }}" required>
                                     @error('contact_person')
                                         <span class="text-danger">{{ $message }}</span>
@@ -47,7 +47,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="email">Email *</label>
+                                    <label for="email">{{ __('common.Email') }} *</label>
                                     <input type="email" class="form-control" id="email" name="email" value="{{ $supplier->email }}" required>
                                     @error('email')
                                         <span class="text-danger">{{ $message }}</span>
@@ -56,7 +56,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="phone">Phone *</label>
+                                    <label for="phone">{{ __('common.Phone') }} *</label>
                                     <input type="text" class="form-control" id="phone" name="phone" value="{{ $supplier->phone }}" required>
                                     @error('phone')
                                         <span class="text-danger">{{ $message }}</span>
@@ -68,17 +68,17 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="address">Address</label>
+                                    <label for="address">{{ __('common.Address') }}</label>
                                     <textarea class="form-control" id="address" name="address" rows="3">{{ $supplier->address }}</textarea>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="tax_id">Tax ID</label>
+                                    <label for="tax_id">{{ __('purchases.Tax ID') }}</label>
                                     <input type="text" class="form-control" id="tax_id" name="tax_id" value="{{ $supplier->tax_id }}">
                                 </div>
                                 <div class="form-group">
-                                    <label for="license_number">License Number</label>
+                                    <label for="license_number">{{ __('purchases.License Number') }}</label>
                                     <input type="text" class="form-control" id="license_number" name="license_number" value="{{ $supplier->license_number }}">
                                 </div>
                             </div>
@@ -87,27 +87,27 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="payment_terms">Payment Terms</label>
+                                    <label for="payment_terms">{{ __('purchases.Payment Terms') }}</label>
                                     <select class="form-control" id="payment_terms" name="payment_terms">
-                                        <option value="net_30" {{ $supplier->payment_terms === 'net_30' ? 'selected' : '' }}>Net 30</option>
-                                        <option value="net_45" {{ $supplier->payment_terms === 'net_45' ? 'selected' : '' }}>Net 45</option>
-                                        <option value="net_60" {{ $supplier->payment_terms === 'net_60' ? 'selected' : '' }}>Net 60</option>
-                                        <option value="cod" {{ $supplier->payment_terms === 'cod' ? 'selected' : '' }}>COD</option>
+                                        <option value="net_30" {{ $supplier->payment_terms === 'net_30' ? 'selected' : '' }}>{{ __('purchases.Net 30') }}</option>
+                                        <option value="net_45" {{ $supplier->payment_terms === 'net_45' ? 'selected' : '' }}>{{ __('purchases.Net 45') }}</option>
+                                        <option value="net_60" {{ $supplier->payment_terms === 'net_60' ? 'selected' : '' }}>{{ __('purchases.Net 60') }}</option>
+                                        <option value="cod" {{ $supplier->payment_terms === 'cod' ? 'selected' : '' }}>{{ __('purchases.COD') }}</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="credit_limit">Credit Limit</label>
+                                    <label for="credit_limit">{{ __('purchases.Credit Limit') }}</label>
                                     <input type="number" class="form-control" id="credit_limit" name="credit_limit" step="0.01" min="0" value="{{ $supplier->credit_limit }}">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="is_active">Status</label>
+                                    <label for="is_active">{{ __('common.Status') }}</label>
                                     <select class="form-control" id="is_active" name="is_active">
-                                        <option value="1" {{ $supplier->is_active ? 'selected' : '' }}>Active</option>
-                                        <option value="0" {{ !$supplier->is_active ? 'selected' : '' }}>Inactive</option>
+                                        <option value="1" {{ $supplier->is_active ? 'selected' : '' }}>{{ __('common.Active') }}</option>
+                                        <option value="0" {{ !$supplier->is_active ? 'selected' : '' }}>{{ __('common.Inactive') }}</option>
                                     </select>
                                 </div>
                             </div>
@@ -116,26 +116,26 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="contract_start">Contract Start</label>
+                                    <label for="contract_start">{{ __('purchases.Contract Start') }}</label>
                                     <input type="date" class="form-control" id="contract_start" name="contract_start" value="{{ $supplier->contract_start ? $supplier->contract_start->format('Y-m-d') : '' }}">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="contract_end">Contract End</label>
+                                    <label for="contract_end">{{ __('purchases.Contract End') }}</label>
                                     <input type="date" class="form-control" id="contract_end" name="contract_end" value="{{ $supplier->contract_end ? $supplier->contract_end->format('Y-m-d') : '' }}">
                                 </div>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="notes">Notes</label>
+                            <label for="notes">{{ __('common.Notes') }}</label>
                             <textarea class="form-control" id="notes" name="notes" rows="3">{{ $supplier->notes }}</textarea>
                         </div>
 
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Update Supplier
+                                <i class="fas fa-save"></i> {{ __('purchases.Update Supplier') }}
                             </button>
                             <a href="{{ route('admin.suppliers.show', $supplier) }}" class="btn btn-secondary">
                                 Cancel

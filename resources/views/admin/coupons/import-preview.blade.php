@@ -1,0 +1,86 @@
+@extends('layouts.admin')
+
+@section('title', 'معاينة استيراد الكوبونات')
+
+@section('main_content')
+<div class="container-fluid" class="card-body-lg">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <a href="{{ route('admin.coupons.import') }}" class="link-blue">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </a>
+            <h4 class="heading-bold">معاينة الاستيراد — {{ count($validated) }} كوبون</h4>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ route('admin.coupons.import') }}" class="btn btn-apple-gray-sm">إلغاء</a>
+            @if (count($validated) > 0)
+                <form action="{{ route('admin.coupons.import.confirm') }}" method="POST" class="d-inline" onsubmit="return confirm('تأكيد استيراد {{ count($validated) }} كوبون؟')">
+                    @csrf
+                    <button type="submit" class="btn btn-apple-green" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon-align"><polyline points="20 6 9 17 4 12"/></svg>
+                        تأكيد الاستيراد ({{ count($validated) }})
+                    </button>
+                </form>
+            @endif
+        </div>
+    </div>
+
+    {{-- Errors --}}
+    @if (!empty($errors))
+        <div class="alert-amber">
+            <strong>{{ count($errors) }} صف(صفوف) بها أخطاء:</strong>
+            <ul class="mb-0 mt-2" class="list-unstyled">
+                @foreach ($errors as $line => $lineErrors)
+                    <li>سطر {{ $line }}: {{ implode(', ', $lineErrors) }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    {{-- Preview Table --}}
+    @if (count($validated) > 0)
+        <div class="card" class="card-clean">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" class="fs-13">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="tab-btn-xs">سطر</th>
+                            <th class="tab-btn-xs">الكود</th>
+                            <th class="tab-btn-xs">النوع</th>
+                            <th class="tab-btn-xs">القيمة</th>
+                            <th class="tab-btn-xs">الحد الأدنى</th>
+                            <th class="tab-btn-xs">حد الاستخدام</th>
+                            <th class="tab-btn-xs">الصلاحية</th>
+                            <th class="tab-btn-xs">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($validated as $row)
+                            <tr class="border-bottom-light">
+                                <td class="pad-sm-muted">{{ $row['line'] }}</td>
+                                <td class="p-10"><code class="badge-gray-tag-sm">{{ $row['code'] }}</code></td>
+                                <td class="p-10">
+                                    @if ($row['type'] === 'percentage')
+                                        <span class="badge-green-tag-sm">{{ $row['value'] }}%</span>
+                                    @else
+                                        <span class="badge-blue-tag-sm">${{ number_format($row['value'], 2) }}</span>
+                                    @endif
+                                </td>
+                                <td class="p-10">${{ number_format($row['minimum_order_amount'], 2) }}</td>
+                                <td class="p-10">{{ $row['usage_limit'] ?? '∞' }}</td>
+                                <td class="p-10">{{ $row['expires_at'] ?? '—' }}</td>
+                                <td class="p-10">{{ $row['active'] ? '✓' : '✗' }}</td>
+                                <td class="text-success-pad">جاهز</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @else
+        <div class="text-center py-5" class="text-muted-custom">
+            <p class="text-16">لا توجد كوبونات صالحة للاستيراد</p>
+        </div>
+    @endif
+</div>
+@endsection

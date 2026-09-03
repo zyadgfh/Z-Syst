@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\PrescriptionItem;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Prescription extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -20,6 +23,8 @@ class Prescription extends Model
         'business_id',
         'sale_id',
         'party_id',
+        'doctor_id',
+        'patient_id',
         'image',
         'notes',
         'status',
@@ -35,6 +40,11 @@ class Prescription extends Model
         'doctor_license',
         'used_at',
         'meta',
+        'max_refills',
+        'refill_count',
+        'refill_expiry_date',
+        'is_controlled_substance',
+        'schedule',
     ];
 
     /**
@@ -58,6 +68,22 @@ class Prescription extends Model
     }
 
     /**
+     * Get the doctor associated with the prescription.
+     */
+    public function doctor(): BelongsTo
+    {
+        return $this->belongsTo(Doctor::class);
+    }
+
+    /**
+     * Get the patient associated with the prescription.
+     */
+    public function patient(): BelongsTo
+    {
+        return $this->belongsTo(Patient::class);
+    }
+
+    /**
      * Get the sale associated with the prescription.
      */
     public function sale(): BelongsTo
@@ -71,6 +97,14 @@ class Prescription extends Model
     public function party(): BelongsTo
     {
         return $this->belongsTo(Party::class);
+    }
+
+    /**
+     * Get the items for this prescription.
+     */
+    public function items(): HasMany
+    {
+        return $this->hasMany(PrescriptionItem::class);
     }
 
     /**
@@ -151,5 +185,70 @@ class Prescription extends Model
         }
 
         return 'normal';
+    }
+
+    /**
+     * Check if prescription can be refilled.
+     */
+    public function canBeRefilled(): bool
+    {
+        if ($this->status === 'used' && $this->refill_count >= $this->max_refills) {
+            return false;
+        }
+
+        if ($this->refill_expiry_date && Carbon::parse($this->refill_expiry_date)->lt(now())) {
+            return false;
+        }
+
+        return $this->refill_count < $this->max_refills;
+    }
+
+    /**
+     * Get remaining refills count.
+     */
+    public function getRemainingRefills(): int
+    {
+        return max(0, $this->max_refills - $this->refill_count);
+    }
+
+    /**
+     * Increment refill count.
+     */
+    public function incrementRefill(): self
+    {
+        $this->increment('refill_count');
+        return $this->fresh();
+    }
+
+    /**
+     * Check if this is a controlled substance.
+     */
+    public function isControlledSubstance(): bool
+    {
+        return $this->is_controlled_substance ?? false;
+    }
+
+    /**
+     * Get controlled substance schedule.
+     */
+    public function getSchedule(): ?string
+    {
+        return $this->schedule;
+    }
+
+    /**
+     * Scope to filter by controlled substances.
+     */
+    public function scopeControlledSubstances($query)
+    {
+        return $query->where('is_controlled_substance', true);
+    }
+
+    /**
+     * Scope to filter by schedule.
+     */
+    public function scopeBySchedule($query, $schedule)
+    {
+        return $query->where('schedule', $schedule);
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreExpenseRequest;
+use App\Http\Requests\UpdateExpenseRequest;
 use App\Models\Business;
 use App\Models\Expense;
 use Illuminate\Http\Request;
@@ -25,12 +27,8 @@ class ZSystExpenseController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreExpenseRequest $request)
     {
-        $request->validate([
-            'amount' => 'required|numeric',
-            'expense_category_id' => 'required|exists:expense_categories,id',
-        ]);
 
         Business::findOrFail(auth()->user()->business_id)->decrement('remainingShopBalance', $request->amount);
 
@@ -45,13 +43,8 @@ class ZSystExpenseController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateExpenseRequest $request, $id)
     {
-
-        $request->validate([
-            'amount' => 'required|numeric',
-            'expense_category_id' => 'required|exists:expense_categories,id',
-        ]);
 
         $expense = Expense::findOrFail($id);
         $business = Business::findOrFail(auth()->user()->business_id);

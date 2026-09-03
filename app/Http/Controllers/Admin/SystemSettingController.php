@@ -82,8 +82,29 @@ class SystemSettingController extends Controller
             'CACHE_LIFETIME', 'TIMEZONE',
         ];
 
+        // Map setting keys to their config() paths for default value lookup
+        $configMap = [
+            'APP_NAME' => 'app.name',
+            'APP_ENV' => 'app.env',
+            'APP_DEBUG' => 'app.debug',
+            'APP_URL' => 'app.url',
+            'QUEUE_MAIL' => 'zsyst.queue_mail',
+            'MAIL_HOST' => 'mail.mailers.smtp.host',
+            'MAIL_PORT' => 'mail.mailers.smtp.port',
+            'MAIL_USERNAME' => 'mail.mailers.smtp.username',
+            'MAIL_ENCRYPTION' => 'mail.mailers.smtp.encryption',
+            'MAIL_FROM_ADDRESS' => 'mail.from.address',
+            'MAIL_FROM_NAME' => 'mail.from.name',
+            'CACHE_DRIVER' => 'cache.default',
+            'QUEUE_CONNECTION' => 'queue.default',
+            'SESSION_DRIVER' => 'session.driver',
+            'SESSION_LIFETIME' => 'session.lifetime',
+            'FILESYSTEM_DISK' => 'filesystems.default',
+            'CACHE_LIFETIME' => 'cache.lifetime',
+        ];
+
         foreach ($storeKeys as $k) {
-            $val = $validated[$k] ?? env($k);
+            $val = $validated[$k] ?? ($configMap[$k] ? config($configMap[$k]) : null);
             if (is_null($val)) {
                 continue;
             }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreLanguageRequest;
 use Illuminate\Http\Request;
 
 class ZSystLanguageController extends Controller
@@ -17,11 +18,8 @@ class ZSystLanguageController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreLanguageRequest $request)
     {
-        $request->validate([
-            'lang' => 'required|max:30|min:1|string',
-        ]);
 
         auth()->user()->update([
             'lang' => $request->lang,

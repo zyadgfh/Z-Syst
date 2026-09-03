@@ -44,8 +44,11 @@ class QualityCheck extends Model
      * Status constants
      */
     const STATUS_PENDING = 'pending';
+
     const STATUS_PASSED = 'passed';
+
     const STATUS_FAILED = 'failed';
+
     const STATUS_CONDITIONAL = 'conditional';
 
     /**

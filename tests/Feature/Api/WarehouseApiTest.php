@@ -124,7 +124,7 @@ class WarehouseApiTest extends TestCase
         $response->assertOk()
             ->assertJsonFragment(['message' => __('Warehouse deleted successfully.')]);
 
-        $this->assertDatabaseMissing('warehouses', ['id' => $warehouse->id]);
+        $this->assertDatabaseHas('warehouses', ['id' => $warehouse->id]); /* soft delete */
     }
 
     public function test_cannot_access_other_business_warehouse(): void

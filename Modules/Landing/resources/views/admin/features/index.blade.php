@@ -74,7 +74,7 @@
                     <table class="table">
                         <thead>
                             <tr>
-
+                                @can('features-delete')
                                 <th class="table-header-content d-print-none">
                                     <div class="d-flex align-items-center gap-1">
                                         <label class="table-custom-checkbox">
@@ -84,6 +84,7 @@
                                         </label>
                                     </div>
                                 </th>
+                                @endcan
 
                                 <th class="table-header-content">{{ __('SL') }}.</th>
                                 <th class="table-header-content">{{ __('Image') }}</th>
@@ -98,7 +99,7 @@
                     </table>
                 </div>
                 <div>
-                    {{ $features->links('pagination::bootstrap-5') }}
+                    {{ $features->links('vendor.pagination.bootstrap-5') }}
                 </div>
             </div>
         </div>

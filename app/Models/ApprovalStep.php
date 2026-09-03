@@ -20,10 +20,28 @@ class ApprovalStep extends Model
         'approved_at' => 'datetime',
     ];
 
-    public function workflow(): BelongsTo { return $this->belongsTo(ApprovalWorkflow::class); }
-    public function approver(): BelongsTo { return $this->belongsTo(User::class, 'approver_id'); }
+    public function workflow(): BelongsTo
+    {
+        return $this->belongsTo(ApprovalWorkflow::class);
+    }
 
-    public function scopePending($query) { return $query->where('status', 'pending'); }
-    public function scopeApproved($query) { return $query->where('status', 'approved'); }
-    public function scopeRejected($query) { return $query->where('status', 'rejected'); }
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approver_id');
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', 'approved');
+    }
+
+    public function scopeRejected($query)
+    {
+        return $query->where('status', 'rejected');
+    }
 }

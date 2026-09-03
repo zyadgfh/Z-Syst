@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\InitiateRecallRequest;
+use App\Http\Requests\StoreBatchLotRequest;
+use App\Http\Requests\UpdateBatchLotRequest;
 use App\Models\BatchLot;
 use App\Models\RecallEvent;
 use App\Services\TraceabilityService;
@@ -32,12 +35,12 @@ class TraceabilityController extends Controller
     public function batchLots(Request $request)
     {
         $businessId = $request->business_id ?? auth()->user()->business_id;
-        
+
         $batchLots = BatchLot::forBusiness($businessId)
             ->with('product:id,name')
             ->when($request->search, function ($q) use ($request) {
-                $q->where('batch_number', 'like', '%' . $request->search . '%')
-                    ->orWhere('lot_number', 'like', '%' . $request->search . '%');
+                $q->where('batch_number', 'like', '%'.$request->search.'%')
+                    ->orWhere('lot_number', 'like', '%'.$request->search.'%');
             })
             ->when($request->status, function ($q) use ($request) {
                 if ($request->status === 'expired') {
@@ -60,12 +63,12 @@ class TraceabilityController extends Controller
     public function recalls(Request $request)
     {
         $businessId = $request->business_id ?? auth()->user()->business_id;
-        
+
         $recalls = RecallEvent::forBusiness($businessId)
             ->with(['product:id,name', 'user:id,name'])
             ->when($request->search, function ($q) use ($request) {
-                $q->where('reason', 'like', '%' . $request->search . '%')
-                    ->orWhere('batch_lot_number', 'like', '%' . $request->search . '%');
+                $q->where('reason', 'like', '%'.$request->search.'%')
+                    ->orWhere('batch_lot_number', 'like', '%'.$request->search.'%');
             })
             ->when($request->status, function ($q) use ($request) {
                 $q->where('status', $request->status);
@@ -79,21 +82,10 @@ class TraceabilityController extends Controller
     /**
      * Create batch lot
      */
-    public function createBatchLot(Request $request)
+    public function createBatchLot(StoreBatchLotRequest $request)
     {
-        $request->validate([
-            'business_id' => 'required|exists:businesses,id',
-            'product_id' => 'required|exists:products,id',
-            'batch_number' => 'nullable|string|max:255',
-            'lot_number' => 'nullable|string|max:255',
-            'manufacture_date' => 'nullable|date',
-            'expiry_date' => 'nullable|date|after:manufacture_date',
-            'supplier_name' => 'nullable|string|max:255',
-            'notes' => 'nullable|string',
-        ]);
-
         try {
-            $batchLot = $this->traceabilityService->createBatchLot($request->all());
+            $batchLot = $this->traceabilityService->createBatchLot($request->validated());
 
             return response()->json([
                 'message' => __('Batch lot created successfully'),
@@ -101,7 +93,7 @@ class TraceabilityController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error creating batch lot: ') . $e->getMessage(),
+                'message' => __('Error creating batch lot: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -109,20 +101,10 @@ class TraceabilityController extends Controller
     /**
      * Update batch lot
      */
-    public function updateBatchLot(Request $request, BatchLot $batchLot)
+    public function updateBatchLot(UpdateBatchLotRequest $request, BatchLot $batchLot)
     {
-        $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'batch_number' => 'nullable|string|max:255',
-            'lot_number' => 'nullable|string|max:255',
-            'manufacture_date' => 'nullable|date',
-            'expiry_date' => 'nullable|date|after:manufacture_date',
-            'supplier_name' => 'nullable|string|max:255',
-            'notes' => 'nullable|string',
-        ]);
-
         try {
-            $batchLot = $this->traceabilityService->updateBatchLot($batchLot, $request->all());
+            $batchLot = $this->traceabilityService->updateBatchLot($batchLot, $request->validated());
 
             return response()->json([
                 'message' => __('Batch lot updated successfully'),
@@ -130,7 +112,7 @@ class TraceabilityController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error updating batch lot: ') . $e->getMessage(),
+                'message' => __('Error updating batch lot: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -149,7 +131,7 @@ class TraceabilityController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error deleting batch lot: ') . $e->getMessage(),
+                'message' => __('Error deleting batch lot: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -157,18 +139,12 @@ class TraceabilityController extends Controller
     /**
      * Initiate recall
      */
-    public function initiateRecall(Request $request)
+    public function initiateRecall(InitiateRecallRequest $request)
     {
-        $request->validate([
-            'business_id' => 'required|exists:businesses,id',
-            'product_id' => 'nullable|exists:products,id',
-            'batch_lot_number' => 'nullable|string|max:255',
-            'reason' => 'required|string|max:255',
-            'description' => 'nullable|string',
-        ]);
-
         try {
-            $recall = $this->traceabilityService->initiateRecall($request->all());
+            $data = $request->validated();
+            $data['user_id'] = auth()->id();
+            $recall = $this->traceabilityService->initiateRecall($data);
 
             return response()->json([
                 'message' => __('Recall initiated successfully'),
@@ -176,9 +152,113 @@ class TraceabilityController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error initiating recall: ') . $e->getMessage(),
+                'message' => __('Error initiating recall: ').$e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Get recall summary with affected batch details
+     */
+    public function recallSummary(RecallEvent $recall)
+    {
+        $summary = $this->traceabilityService->getRecallSummary($recall);
+
+        return response()->json($summary);
+    }
+
+    /**
+     * Quarantine an affected batch in a recall
+     */
+    public function quarantineBatch(Request $request, RecallEvent $recall)
+    {
+        $request->validate([
+            'batch_lot_id' => 'required|exists:batch_lots,id',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            $batchLot = \App\Models\BatchLot::findOrFail($request->batch_lot_id);
+            $this->traceabilityService->quarantineAffectedBatch($recall, $batchLot, $request->notes);
+
+            return response()->json([
+                'message' => __('Batch quarantined successfully'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => __('Error quarantining batch: ').$e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Release an affected batch from quarantine
+     */
+    public function releaseBatch(Request $request, RecallEvent $recall)
+    {
+        $request->validate([
+            'batch_lot_id' => 'required|exists:batch_lots,id',
+        ]);
+
+        try {
+            $batchLot = \App\Models\BatchLot::findOrFail($request->batch_lot_id);
+            $this->traceabilityService->releaseAffectedBatch($recall, $batchLot);
+
+            return response()->json([
+                'message' => __('Batch released from quarantine successfully'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => __('Error releasing batch: ').$e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Dispose of an affected batch
+     */
+    public function disposeBatch(Request $request, RecallEvent $recall)
+    {
+        $request->validate([
+            'batch_lot_id' => 'required|exists:batch_lots,id',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            $batchLot = \App\Models\BatchLot::findOrFail($request->batch_lot_id);
+            $this->traceabilityService->disposeAffectedBatch($recall, $batchLot, $request->notes);
+
+            return response()->json([
+                'message' => __('Batch disposed successfully'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => __('Error disposing batch: ').$e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Detect affected batches for a product/batch scenario
+     */
+    public function detectAffectedBatches(Request $request)
+    {
+        $request->validate([
+            'business_id' => 'required|exists:businesses,id',
+            'product_id' => 'nullable|exists:products,id',
+            'batch_lot_number' => 'nullable|string|max:255',
+        ]);
+
+        $batches = $this->traceabilityService->detectAffectedBatches(
+            $request->business_id,
+            $request->product_id,
+            $request->batch_lot_number
+        );
+
+        return response()->json([
+            'data' => $batches,
+            'total' => $batches->count(),
+        ]);
     }
 
     /**
@@ -195,7 +275,7 @@ class TraceabilityController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error resolving recall: ') . $e->getMessage(),
+                'message' => __('Error resolving recall: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -214,7 +294,7 @@ class TraceabilityController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error deleting recall: ') . $e->getMessage(),
+                'message' => __('Error deleting recall: ').$e->getMessage(),
             ], 500);
         }
     }
@@ -279,7 +359,7 @@ class TraceabilityController extends Controller
     {
         $days = $request->days ?? 30;
         $businessId = $request->business_id ?? auth()->user()->business_id;
-        
+
         $expiring = $this->traceabilityService->getExpiringBatches($businessId, $days);
 
         return response()->json($expiring);
@@ -291,7 +371,7 @@ class TraceabilityController extends Controller
     public function expiredBatches(Request $request)
     {
         $businessId = $request->business_id ?? auth()->user()->business_id;
-        
+
         $expired = $this->traceabilityService->getExpiredBatches($businessId);
 
         return response()->json($expired);

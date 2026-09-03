@@ -23,11 +23,13 @@
             <div class="row">
                 <div class="col-xl-8">
                     <div class="border rounded-16 blog-details-content mb-3">
-                        <img src="{{ asset($blog->image) }}" alt="" class="w-100 large-img rounded-top-16" />
+                        
+<img loading="lazy" src="{{ asset($blog->image) }}" alt="" class="w-100 large-img rounded-top-16" />
 
                         <div class="p-3">
                             <div class="d-flex align-items-center">
-                                <img src="{{ asset('assets/web/images/icons/clock.svg') }}" alt="" />
+                                
+<img loading="lazy" src="{{ asset('assets/web/images/icons/clock.svg') }}" alt="" />
                                 <p class="ms-1 mb-0">{{ formatted_date($blog->updated_at) }}</p>
                             </div>
                             <h6 class="mt-2">{{ Str::limit($blog->title, 60, '...') }}</h6>
@@ -89,11 +91,13 @@
                     <div class="blog-shadow rounded-16 mb-2">
                         <div class="d-flex align-items-center">
                             <a href="{{ route('blogs.show', $blog->slug) }}">
-                                <img src="{{ asset($blog->image ?? '') }}" class="object-fit-cover rounded-1 p-2 blog-small-image" alt="...">
+                                
+<img loading="lazy" src="{{ asset($blog->image ?? '') }}" class="object-fit-cover rounded-1 p-2 blog-small-image" alt="...">
                             </a>
                             <div class="mx-3">
                                 <div class="d-flex align-items-center">
-                                    <img src="{{ asset('assets/web/images/icons/clock.svg') }}" alt="" />
+                                    
+<img loading="lazy" src="{{ asset('assets/web/images/icons/clock.svg') }}" alt="" />
                                     <p class="ms-1 mb-0">{{ formatted_date($blog->updated_at) }}</p>
                                 </div>
 

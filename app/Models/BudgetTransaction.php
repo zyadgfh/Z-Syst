@@ -20,6 +20,13 @@ class BudgetTransaction extends Model
         'transaction_date' => 'datetime',
     ];
 
-    public function budget(): BelongsTo { return $this->belongsTo(PurchaseBudget::class); }
-    public function purchase(): BelongsTo { return $this->belongsTo(Purchase::class); }
+    public function budget(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseBudget::class);
+    }
+
+    public function purchase(): BelongsTo
+    {
+        return $this->belongsTo(Purchase::class);
+    }
 }

@@ -1,7 +1,7 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title')
-    {{ __('Subscriptions List') }}
+    {{ __('orders.Subscriptions List') }}
 @endsection
 
 @section('main_content')
@@ -10,11 +10,11 @@
             <div class="card">
                 <div class="card-bodys ">
                     <div class="table-header p-16">
-                        <h4>{{ __('Subscriptions List') }}</h4>
+                        <h4>{{ __('orders.Subscriptions List') }}</h4>
                     </div>
 
                     <div class="table-header justify-content-center border-0 text-center d-none d-block d-print-block">
-                        <h4 class="mt-2">{{ __('Subscriptions List') }}</h4>
+                        <h4 class="mt-2">{{ __('orders.Subscriptions List') }}</h4>
                     </div>
 
                     <div class="table-top-form sec-header d-print-none">
@@ -25,17 +25,17 @@
                             <div class="table-top-left d-flex gap-3 ">
                                 <div class="gpt-up-down-arrow position-relative">
                                     <select name="per_page" class="form-control">
-                                        <option value="10">{{ __('Show- 10') }}</option>
-                                        <option value="25">{{ __('Show- 25') }}</option>
-                                        <option value="50">{{ __('Show- 50') }}</option>
-                                        <option value="100">{{ __('Show- 100') }}</option>
+                                        <option value="10">{{ __('common.Show- 10') }}</option>
+                                        <option value="25">{{ __('common.Show- 25') }}</option>
+                                        <option value="50">{{ __('common.Show- 50') }}</option>
+                                        <option value="100">{{ __('common.Show- 100') }}</option>
                                     </select>
                                     <span></span>
                                 </div>
 
                                 <div class="table-search position-relative">
                                     <input class="form-control" type="text" name="search"
-                                        placeholder="{{ __('Search...') }}" value="{{ request('search') }}">
+                                        placeholder="{{ __('common.Search...') }}" value="{{ request('search') }}">
                                     <span class="position-absolute">
                                         <img src="{{ asset('assets/images/search.svg') }}" alt="">
                                     </span>
@@ -63,16 +63,16 @@
                     <table class="table" id="datatable">
                         <thead>
                             <tr>
-                                <th class="table-header-content">{{ __('SL') }}.</th>
-                                <th class="table-header-content">{{ __('Date') }}</th>
-                                <th class="table-header-content">{{ __('Shop Name') }}</th>
-                                <th class="table-header-content">{{ __('Category') }}</th>
-                                <th class="table-header-content">{{ __('Package') }}</th>
-                                <th class="table-header-content">{{ __('Started') }}</th>
-                                <th class="table-header-content">{{ __('End') }}</th>
-                                <th class="table-header-content">{{ __('Gateway Method') }}</th>
-                                <th class="table-header-content">{{ __('Status') }}</th>
-                                <th class="table-header-content d-print-none">{{ __('Action') }}</th>
+                                <th class="table-header-content">{{ __('common.SL') }}.</th>
+                                <th class="table-header-content">{{ __('common.Date') }}</th>
+                                <th class="table-header-content">{{ __('gateways.Shop Name') }}</th>
+                                <th class="table-header-content">{{ __('common.Category') }}</th>
+                                <th class="table-header-content">{{ __('common.Package') }}</th>
+                                <th class="table-header-content">{{ __('gateways.Started') }}</th>
+                                <th class="table-header-content">{{ __('gateways.End') }}</th>
+                                <th class="table-header-content">{{ __('gateways.Gateway Method') }}</th>
+                                <th class="table-header-content">{{ __('common.Status') }}</th>
+                                <th class="table-header-content d-print-none">{{ __('common.Action') }}</th>
                             </tr>
                         </thead>
 
@@ -94,7 +94,7 @@
     <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5">{{ __('Are you sure?') }}</h1>
+                <h1 class="modal-title fs-5">{{ __('common.Are you sure?') }}</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -104,15 +104,15 @@
                         @csrf
                         <div class="row">
                             <div class="mt-0">
-                                <label class="custom-top-label">{{ __('Enter Reason') }}</label>
-                                <textarea name="notes" rows="2" class="form-control" placeholder="{{ __('Enter Reason') }}"></textarea>
+                                <label class="custom-top-label">{{ __('gateways.Enter Reason') }}</label>
+                                <textarea name="notes" rows="2" class="form-control" placeholder="{{ __('gateways.Enter Reason') }}"></textarea>
                             </div>
                         </div>
 
                         <div class="col-lg-12">
                             <div class="button-group text-center mt-5">
-                                <a href="" class="theme-btn border-btn m-2">{{ __('Cancel') }}</a>
-                                <button class="theme-btn m-2 submit-btn">{{ __('Accept') }}</button>
+                                <a href="" class="theme-btn border-btn m-2">{{ __('common.Cancel') }}</a>
+                                <button class="theme-btn m-2 submit-btn">{{ __('gateways.Accept') }}</button>
                             </div>
                         </div>
                     </form>
@@ -126,7 +126,7 @@
     <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5">{{ __('Why are you reject it?') }}</h1>
+                <h1 class="modal-title fs-5">{{ __('gateways.Why are you reject it?') }}</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -136,15 +136,15 @@
                         @csrf
                         <div class="row">
                             <div class="mt-0 ">
-                                <label class="custom-top-label">{{ __('Enter Reason') }}</label>
-                                <textarea name="notes" rows="2" class="form-control" placeholder="{{ __('Enter Reason') }}"></textarea>
+                                <label class="custom-top-label">{{ __('gateways.Enter Reason') }}</label>
+                                <textarea name="notes" rows="2" class="form-control" placeholder="{{ __('gateways.Enter Reason') }}"></textarea>
                             </div>
                         </div>
 
                         <div class="col-lg-12">
                             <div class="button-group text-center mt-5">
-                                <a href="" class="theme-btn border-btn m-2">{{ __('Cancel') }}</a>
-                                <button class="theme-btn m-2 submit-btn">{{ __('Save') }}</button>
+                                <a href="" class="theme-btn border-btn m-2">{{ __('common.Cancel') }}</a>
+                                <button class="theme-btn m-2 submit-btn">{{ __('common.Save') }}</button>
                             </div>
                         </div>
                     </form>
@@ -159,7 +159,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5">{{ __('Subscriber View') }}</h1>
+                <h1 class="modal-title fs-5">{{ __('gateways.Subscriber View') }}</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -172,7 +172,7 @@
                     </div>
                     <div class="row align-items-center mt-4">
                         <div class="col-md-4">
-                            <p>{{ __('Business Name') }}</p>
+                            <p>{{ __('common.Business Name') }}</p>
                         </div>
                         <div class="col-1">
                             <p>:</p>
@@ -184,7 +184,7 @@
 
                     <div class="row align-items-center mt-3">
                         <div class="col-md-4">
-                            <p>{{ __('Business Category') }}</p>
+                            <p>{{ __('common.Business Category') }}</p>
                         </div>
                         <div class="col-1">
                             <p>:</p>
@@ -196,7 +196,7 @@
 
                     <div class="row align-items-center mt-3">
                         <div class="col-md-4">
-                            <p>{{ __('Package') }}</p>
+                            <p>{{ __('common.Package') }}</p>
                         </div>
                         <div class="col-1">
                             <p>:</p>
@@ -207,7 +207,7 @@
                     </div>
                     <div class="row align-items-center mt-3">
                         <div class="col-md-4">
-                            <p>{{ __('Gateway Name') }}</p>
+                            <p>{{ __('gateways.Gateway Name') }}</p>
                         </div>
                         <div class="col-1">
                             <p>:</p>
@@ -219,7 +219,7 @@
 
                     <div class="row align-items-center mt-3">
                         <div class="col-md-4">
-                            <p>{{ __('Enroll Date') }}</p>
+                            <p>{{ __('gateways.Enroll Date') }}</p>
                         </div>
                         <div class="col-1">
                             <p>:</p>
@@ -231,7 +231,7 @@
 
                     <div class="row align-items-center mt-3">
                         <div class="col-md-4">
-                            <p>{{ __('Expire date') }}</p>
+                            <p>{{ __('gateways.Expire date') }}</p>
                         </div>
                         <div class="col-1">
                             <p>:</p>

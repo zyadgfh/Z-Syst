@@ -1,7 +1,7 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title')
-    {{ __('Loyalty & CRM') }}
+    {{ __('loyalty.Loyalty & CRM') }}
 @endsection
 
 @section('main_content')
@@ -11,7 +11,7 @@
             <div class="couter-box">
                 <div class="content-side">
                     <h5 id="total_members">0</h5>
-                    <p>{{ __('Total Members') }}</p>
+                    <p>{{ __('loyalty.Total Members') }}</p>
                 </div>
                 <div class="icons">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -25,7 +25,7 @@
             <div class="couter-box">
                 <div class="content-side">
                     <h5 id="active_programs">0</h5>
-                    <p>{{ __('Active Programs') }}</p>
+                    <p>{{ __('loyalty.Active Programs') }}</p>
                 </div>
                 <div class="icons">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -39,7 +39,7 @@
             <div class="couter-box">
                 <div class="content-side">
                     <h5 id="points_issued">0</h5>
-                    <p>{{ __('Points Issued') }}</p>
+                    <p>{{ __('loyalty.Points Issued') }}</p>
                 </div>
                 <div class="icons">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -50,7 +50,7 @@
             <div class="couter-box">
                 <div class="content-side">
                     <h5 id="points_redeemed">0</h5>
-                    <p>{{ __('Points Redeemed') }}</p>
+                    <p>{{ __('loyalty.Points Redeemed') }}</p>
                 </div>
                 <div class="icons">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -65,38 +65,78 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body text-center p-4">
-                        <div class="display-4 mb-2" style="color: var(--color-primary);">
+                        <div class="display-4 mb-2 color-primary">
                             <i class="fas fa-gift"></i>
                         </div>
-                        <h5>{{ __('Loyalty Programs') }}</h5>
-                        <p class="text-muted small">{{ __('Manage programs') }}</p>
-                        <a href="{{ route('admin.loyalty.programs') }}" class="btn btn-primary btn-sm">{{ __('View Programs') }}</a>
+                        <h5>{{ __('loyalty.Loyalty Programs') }}</h5>
+                        <p class="text-muted small">{{ __('loyalty.Manage programs') }}</p>
+                        <a href="{{ route('admin.loyalty.programs') }}" class="btn btn-primary btn-sm">{{ __('loyalty.View Programs') }}</a>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body text-center p-4">
-                        <div class="display-4 mb-2" style="color: var(--color-accent);">
+                        <div class="display-4 mb-2 color-accent">
                             <i class="fas fa-history"></i>
                         </div>
-                        <h5>{{ __('Transactions') }}</h5>
-                        <p class="text-muted small">{{ __('Point redemption history') }}</p>
-                        <a href="{{ route('admin.loyalty.transactions') }}" class="btn btn-primary btn-sm">{{ __('View Transactions') }}</a>
+                        <h5>{{ __('loyalty.Transactions') }}</h5>
+                        <p class="text-muted small">{{ __('loyalty.Point redemption history') }}</p>
+                        <a href="{{ route('admin.loyalty.transactions') }}" class="btn btn-primary btn-sm">{{ __('loyalty.View Transactions') }}</a>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body text-center p-4">
-                        <div class="display-4 mb-2" style="color: var(--color-secondary);">
+                        <div class="display-4 mb-2 c-secondary">
                             <i class="fas fa-comments"></i>
                         </div>
-                        <h5>{{ __('Customer Interactions') }}</h5>
-                        <p class="text-muted small">{{ __('Track interactions') }}</p>
-                        <a href="{{ route('admin.loyalty.interactions') }}" class="btn btn-primary btn-sm">{{ __('View Interactions') }}</a>
+                        <h5>{{ __('loyalty.Customer Interactions') }}</h5>
+                        <p class="text-muted small">{{ __('loyalty.Track interactions') }}</p>
+                        <a href="{{ route('admin.loyalty.interactions') }}" class="btn btn-primary btn-sm">{{ __('loyalty.View Interactions') }}</a>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Expiring Points Widget -->
+        <div class="row g-3 mb-4">
+            <div class="col-12">
+                <div class="card" class="card-clean">
+                    <div class="card-body p-0">
+                        <div class="header-amber-gradient">
+                            <div class="row-cell">
+                                <span class="fz24">⏰</span>
+                                <div>
+                                    <h5 class="heading-dark">نقاط على وشك الانتهاء</h5>
+                                    <p class="text-caption">النقاط التي ستنتهي خلال 30 يوماً</p>
+                                </div>
+                            </div>
+                            <button onclick="loadExpiringPoints()" class="btn-orange">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                                تحديث
+                            </button>
+                        </div>
+                        <div id="expiringPointsList" class="p-8-0">
+                            <div class="empty-state-muted">جاري التحميل...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Link -->
+        <div class="row g-3 mb-4">
+            <div class="col-12">
+                <a href="{{ route('admin.loyalty.analytics') }}" class="card-gradient-purple" onmouseenter="this.style.transform='scale(1.01)'" onmouseleave="this.style.transform='scale(1)'">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    <div>
+                        <div class="fw-700-fz15">تحليلات نقاط الولاء</div>
+                        <div class="fz12-opacity">عرض الرسوم البيانية والاتجاهات الشهرية</div>
+                    </div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-auto"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
             </div>
         </div>
 
@@ -105,10 +145,10 @@
             <div class="card">
                 <div class="card-bodys">
                     <div class="chart-header p-16 border-0">
-                        <h4>{{ __('Top Loyalty Customers') }}</h4>
+                        <h4>{{ __('loyalty.Top Loyalty Customers') }}</h4>
                         <div class="d-flex align-items-center gap-2">
                             <a href="{{ route('admin.loyalty.customers') }}" class="view-btn">
-                                {{ __('View All') }} <i class="fas fa-arrow-right view-arrow"></i>
+                                {{ __('common.View All') }} <i class="fas fa-arrow-right view-arrow"></i>
                             </a>
                         </div>
                     </div>
@@ -117,12 +157,12 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th class="table-header-content">{{ __('SL') }}.</th>
-                                        <th class="table-header-content">{{ __('Customer') }}</th>
-                                        <th class="table-header-content">{{ __('Points Balance') }}</th>
-                                        <th class="table-header-content">{{ __('Tier') }}</th>
-                                        <th class="table-header-content">{{ __('Total Spent') }}</th>
-                                        <th class="table-header-content">{{ __('Joined') }}</th>
+                                        <th class="table-header-content">{{ __('common.SL') }}.</th>
+                                        <th class="table-header-content">{{ __('common.Customer') }}</th>
+                                        <th class="table-header-content">{{ __('loyalty.Points Balance') }}</th>
+                                        <th class="table-header-content">{{ __('loyalty.Tier') }}</th>
+                                        <th class="table-header-content">{{ __('loyalty.Total Spent') }}</th>
+                                        <th class="table-header-content">{{ __('loyalty.Joined') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -165,7 +205,7 @@
         </div>
     </div>
 
-    @push('script')
+    @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 // Initialize counters
@@ -191,6 +231,111 @@
                     }
                 }, 30);
             }
+
+            // ── Expiring Points Widget ──
+            function loadExpiringPoints() {
+                var listEl = document.getElementById('expiringPointsList');
+                if (!listEl) return;
+                listEl.innerHTML = '<div class="js-loading-state">جاري التحميل...</div>';
+
+                fetch('{{ route("admin.loyalty.expiring-soonest") }}?days=90', {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (!data.success || !data.data || data.data.length === 0) {
+                        listEl.innerHTML = '<div class="js-empty-state">✅ لا توجد نقاط على وشك الانتهاء حالياً</div>';
+                        return;
+                    }
+
+                    var html = '<div class="js-overflow-x">';
+                    html += '<table class="table table-hover js-table-compact">';
+                    html += '<thead class="js-table-header-bg">';
+                    html += '<tr>';
+                    html += '<th class="tab-btn-xs">العميل</th>';
+                    html += '<th class="tab-btn-xs">النقاط المهددة</th>';
+                    html += '<th class="tab-btn-xs">تنتهي خلال</th>';
+                    html += '<th class="tab-btn-xs">إجراء</th>';
+                    html += '</tr></thead><tbody>';
+
+                    data.data.forEach(function(item) {
+                        var user = item.user;
+                        var daysColor = item.days_left <= 7 ? '#ff3b30' : (item.days_left <= 14 ? '#ff9500' : '#ffcc00');
+                        html += '<tr class="js-table-row">';
+                        html += '<td class="js-table-cell">';
+                        html += '<div class="js-flex-row">';
+                        if (user && user.image) {
+                            html += '<img src="/storage/' + user.image + '" class="js-avatar-img">';
+                        } else {
+                            html += '<div class="js-avatar-sm">' + (user ? user.name.charAt(0) : '?') + '</div>';
+                        }
+                        html += '<div><div class="fw-600-dark">' + (user ? user.name : 'غير معروف') + '</div>';
+                        html += '<div class="fz11-muted">' + (user ? user.email : '') + '</div></div>';
+                        html += '</div></td>';
+                        html += '<td class="js-table-cell-center">';
+                        html += '<span class="js-badge-orange">' + item.total_points + ' نقطة</span>';
+                        html += '</td>';
+                        html += '<td class="js-table-cell-center">';
+                        html += '<span style="color:' + daysColor + ';font-weight:700;">' + item.days_left + ' يوم</span>';
+                        html += '</td>';
+                        html += '<td class="js-table-cell-center">';
+                        html += '<button onclick="sendExpiryReminder(' + item.user_id + ', this)" class="js-btn-primary-sm">';
+                        html += '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="js-spinner-svg"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>';
+                        html += 'إرسال تذكير</button>';
+                        html += '</td></tr>';
+                    });
+
+                    html += '</tbody></table></div>';
+                    listEl.innerHTML = html;
+                })
+                .catch(function() {
+                    listEl.innerHTML = '<div class="js-error-state">فشل تحميل البيانات</div>';
+                });
+            }
+
+            function sendExpiryReminder(userId, btn) {
+                var originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="js-spinning"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> جاري الإرسال...';
+                btn.style.opacity = '0.7';
+
+                fetch('{{ route("admin.loyalty.send-expiry-reminder") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify({ user_id: userId }),
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        btn.style.background = '#34c759';
+                        btn.innerHTML = '✓ تم الإرسال';
+                        setTimeout(function() {
+                            btn.innerHTML = originalText;
+                            btn.style.background = '#007aff';
+                            btn.disabled = false;
+                            btn.style.opacity = '1';
+                        }, 2500);
+                    } else {
+                        alert(data.message || 'فشل الإرسال');
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                    }
+                })
+                .catch(function() {
+                    alert('حدث خطأ في الاتصال');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                });
+            }
+
+            // Load expiring points on page load
+            setTimeout(loadExpiringPoints, 500);
         </script>
     @endpush
 @endsection

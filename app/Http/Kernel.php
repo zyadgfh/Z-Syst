@@ -8,12 +8,14 @@ use App\Http\Middleware\CheckSubscriptionLimits;
 use App\Http\Middleware\DemoMode;
 use App\Http\Middleware\EncryptCookies;
 use App\Http\Middleware\EnsureBusinessContext;
+use App\Http\Middleware\MaintenanceMode;
 use App\Http\Middleware\PageOptimizationMiddleware;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\SecurityCheck;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\TenantAccessCheck;
 use App\Http\Middleware\TenantContextMiddleware;
 use App\Http\Middleware\TrimStrings;
 use App\Http\Middleware\TrustProxies;
@@ -35,7 +37,9 @@ use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Laravel\LaravelInstaller\Middleware\CheckToken;
+// CheckToken middleware disabled - it deletes vendor/laravel on every web request
+// when vendor/autoload1.php is missing, which is destructive in production.
+// use Laravel\LaravelInstaller\Middleware\CheckToken;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
@@ -71,7 +75,7 @@ class Kernel extends HttpKernel
         'web' => [
             EncryptCookies::class,
             AddQueuedCookiesToResponse::class,
-            CheckToken::class,
+            // CheckToken::class, // Disabled: deletes vendor/laravel on every web request
             StartSession::class,
             ShareErrorsFromSession::class,
             VerifyCsrfToken::class,
@@ -79,11 +83,18 @@ class Kernel extends HttpKernel
             SubstituteBindings::class,
             SetLocale::class,
             DemoMode::class,
+            MaintenanceMode::class,
         ],
 
         'api' => [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            MaintenanceMode::class,
             ThrottleRequests::class.':api',
+            SubstituteBindings::class,
+        ],
+
+        'payment' => [
+            'throttle:10,1',
             SubstituteBindings::class,
         ],
     ];
@@ -106,14 +117,18 @@ class Kernel extends HttpKernel
         'precognitive' => HandlePrecognitiveRequests::class,
         'signed' => ValidateSignature::class,
         'throttle' => ThrottleRequests::class,
+        'throttle.auth' => 'throttle:5,1',
+        'throttle.payment' => 'throttle:10,1',
         'verified' => EnsureEmailIsVerified::class,
         'role' => RoleMiddleware::class,
         'permission' => PermissionMiddleware::class,
         'role_or_permission' => RoleOrPermissionMiddleware::class,
         'admin' => AdminMiddleware::class,
+        'cache' => \App\Http\Middleware\CacheResponse::class,
         'business.context' => EnsureBusinessContext::class,
-        'tenant.check' => \App\Http\Middleware\TenantAccessCheck::class,
+        'tenant.check' => TenantAccessCheck::class,
         'subscription.limit' => CheckSubscriptionLimits::class,
+        'clerk.auth' => \App\Http\Middleware\ClerkSessionAuth::class,
         // 'token_expired' => \App\Http\Middleware\TokenExpired::class,
     ];
 }

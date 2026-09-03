@@ -2,15 +2,23 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
+use App\Models\Plan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Landing\App\Models\Feature;
-use Modules\Landing\App\Models\Blog;
-use App\Models\Plan;
+use Tests\TestCase;
 
 class LandingApiTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        if (! class_exists(Feature::class)) {
+            $this->markTestSkipped('Landing module not available');
+        }
+    }
 
     /**
      * Test landing API returns required data structure

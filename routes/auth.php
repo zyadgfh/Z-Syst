@@ -10,7 +10,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
 
-    Route::post('register', [RegisteredUserController::class, 'store'])->name('register');
+    Route::get('register', function () {
+        return view('auth.register');
+    })->name('register');
+
+    Route::post('register', [RegisteredUserController::class, 'store']);
 
     Route::post('/otp-resend', [RegisteredUserController::class, 'otpResend'])->name('otp-resend');
     Route::post('/otp-submit', [RegisteredUserController::class, 'otpSubmit'])->name('otp-submit');

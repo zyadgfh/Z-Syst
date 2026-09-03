@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreExpenseCategoryRequest;
+use App\Http\Requests\UpdateExpenseCategoryRequest;
 use App\Models\ExpenseCategory;
 use Illuminate\Http\Request;
 
@@ -24,11 +26,8 @@ class ExpenseCategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreExpenseCategoryRequest $request)
     {
-        $request->validate([
-            'categoryName' => 'required|unique:expense_categories,categoryName,NULL,id,business_id,'.auth()->user()->business_id,
-        ]);
 
         $data = ExpenseCategory::create($request->except('status') + [
             'business_id' => auth()->user()->business_id,
@@ -44,16 +43,9 @@ class ExpenseCategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateExpenseCategoryRequest $request, $id)
     {
         $category = ExpenseCategory::findOrFail($id);
-
-        $request->validate([
-            'categoryName' => [
-                'required',
-                'unique:expense_categories,categoryName,'.$category->id.',id,business_id,'.auth()->user()->business_id,
-            ],
-        ]);
 
         $category->update($request->except('status') + [
             'business_id' => auth()->user()->business_id,

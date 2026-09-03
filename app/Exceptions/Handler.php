@@ -13,6 +13,10 @@ use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
+// Sentry integration (optional - requires sentry/sentry-laravel package)
+use Sentry\Laravel\Facades\Sentry;
+use Sentry\State\Scope;
+
 class Handler extends ExceptionHandler
 {
     /**
@@ -88,6 +92,17 @@ class Handler extends ExceptionHandler
                 ], 429);
             }
         });
+
+        // Authorization exception
+        $this->renderable(function (\App\Exceptions\AuthorizationException $e, $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'error_code' => 'AUTH_FORBIDDEN',
+                ], 403);
+            }
+        });
     }
 
     public function report(Throwable $e): void
@@ -95,11 +110,21 @@ class Handler extends ExceptionHandler
         if ($e instanceof RenderableException) {
             $e->report();
 
+            // Report to Sentry if configured
+            if (class_exists(\Sentry\Laravel\Facades\Sentry::class) && config('sentry.dsn')) {
+                \Sentry\Laravel\Facades\Sentry::captureException($e);
+            }
+
             return;
         }
 
         // Log all unhandled exceptions to errors channel
         Logger::error($e);
+
+        // Report to Sentry for unhandled exceptions
+        if (class_exists(\Sentry\Laravel\Facades\Sentry::class) && config('sentry.dsn')) {
+            \Sentry\Laravel\Facades\Sentry::captureException($e);
+        }
 
         parent::report($e);
     }
@@ -138,6 +163,11 @@ class Handler extends ExceptionHandler
                     'line' => $e->getLine(),
                     'trace' => $e->getTraceAsString(),
                 ];
+            }
+
+            // Report to Sentry for 500 errors
+            if ($status === 500 && class_exists(\Sentry\Laravel\Facades\Sentry::class) && config('sentry.dsn')) {
+                \Sentry\Laravel\Facades\Sentry::captureException($e);
             }
 
             return response()->json($response, $status);

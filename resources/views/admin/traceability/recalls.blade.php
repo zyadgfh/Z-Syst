@@ -1,7 +1,7 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title')
-    {{ __('Recall Events') }}
+    {{ __('audit.Recall Events') }}
 @endsection
 
 @section('main_content')
@@ -12,17 +12,17 @@
                     <div class="table-top-form">
                         <div class="table-search">
                             <span><i class="fas fa-search"></i></span>
-                            <input type="text" class="form-control" placeholder="{{ __('Search recalls...') }}" id="recall-search">
+                            <input type="text" class="form-control" placeholder="{{ __('audit.Search recalls...') }}" id="recall-search">
                         </div>
                         <div class="d-flex gap-2">
                             <select class="form-select" id="status-filter">
-                                <option value="all">{{ __('All Status') }}</option>
-                                <option value="active">{{ __('Active') }}</option>
-                                <option value="resolved">{{ __('Resolved') }}</option>
+                                <option value="all">{{ __('common.All Status') }}</option>
+                                <option value="active">{{ __('common.Active') }}</option>
+                                <option value="resolved">{{ __('audit.Resolved') }}</option>
                             </select>
                             @can('recalls-create')
                                 <a href="{{ route('admin.traceability.initiate-recall') }}" class="btn btn-primary">
-                                    <i class="fas fa-plus-circle me-2"></i>{{ __('Initiate Recall') }}
+                                    <i class="fas fa-plus-circle me-2"></i>{{ __('audit.Initiate Recall') }}
                                 </a>
                             @endcan
                         </div>
@@ -33,14 +33,14 @@
                             <table class="table table-hover" id="recalls-table">
                                 <thead>
                                     <tr>
-                                        <th class="table-header-content">{{ __('SL') }}.</th>
-                                        <th class="table-header-content">{{ __('Product') }}</th>
-                                        <th class="table-header-content">{{ __('Batch/Lot #') }}</th>
-                                        <th class="table-header-content">{{ __('Reason') }}</th>
-                                        <th class="table-header-content">{{ __('Initiated By') }}</th>
-                                        <th class="table-header-content">{{ __('Date') }}</th>
-                                        <th class="table-header-content">{{ __('Status') }}</th>
-                                        <th class="table-header-content">{{ __('Action') }}</th>
+                                        <th class="table-header-content">{{ __('common.SL') }}.</th>
+                                        <th class="table-header-content">{{ __('common.Product') }}</th>
+                                        <th class="table-header-content">{{ __('audit.Batch/Lot #') }}</th>
+                                        <th class="table-header-content">{{ __('common.Reason') }}</th>
+                                        <th class="table-header-content">{{ __('audit.Initiated By') }}</th>
+                                        <th class="table-header-content">{{ __('common.Date') }}</th>
+                                        <th class="table-header-content">{{ __('common.Status') }}</th>
+                                        <th class="table-header-content">{{ __('common.Action') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody id="recalls-data">
@@ -49,25 +49,25 @@
                                             <td class="table-single-content">{{ $loop->iteration }}</td>
                                             <td class="table-single-content">
                                                 <div>
-                                                    <strong>{{ $recall->product->name ?? __('Unknown') }}</strong>
+                                                    <strong>{{ $recall->product->name ?? __('common.Unknown') }}</strong>
                                                     <small class="d-block text-muted">{{ $recall->product->sku ?? '' }}</small>
                                                 </div>
                                             </td>
                                             <td class="table-single-content">{{ $recall->batch_lot_number }}</td>
                                             <td class="table-single-content">{{ Str::limit($recall->reason, 50) }}</td>
-                                            <td class="table-single-content">{{ $recall->user->name ?? __('Unknown') }}</td>
+                                            <td class="table-single-content">{{ $recall->user->name ?? __('common.Unknown') }}</td>
                                             <td class="table-single-content">{{ formatted_date($recall->created_at) }}</td>
                                             <td class="table-single-content">
                                                 @if ($recall->status === 'active')
-                                                    <span class="badge expired">{{ __('Active') }}</span>
+                                                    <span class="badge expired">{{ __('common.Active') }}</span>
                                                 @else
-                                                    <span class="badge-soft-success">{{ __('Resolved') }}</span>
+                                                    <span class="badge-soft-success">{{ __('audit.Resolved') }}</span>
                                                 @endif
                                             </td>
                                             <td class="table-single-content">
                                                 @if ($recall->status === 'active')
                                                     <button class="btn btn-sm btn-success resolve-recall-btn" data-id="{{ $recall->id }}">
-                                                        <i class="fas fa-check"></i> {{ __('Resolve') }}
+                                                        <i class="fas fa-check"></i> {{ __('audit.Resolve') }}
                                                     </button>
                                                 @else
                                                     <button class="btn btn-sm btn-info" onclick="viewRecallDetails({{ $recall->id }})">
@@ -78,7 +78,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="8" class="text-center py-4">{{ __('No recall events found') }}</td>
+                                            <td colspan="8" class="text-center py-4">{{ __('audit.No recall events found') }}</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -123,7 +123,7 @@
             document.querySelectorAll('.resolve-recall-btn').forEach(button => {
                 button.addEventListener('click', function() {
                     const id = this.dataset.id;
-                    if (confirm('{{ __("Are you sure you want to resolve this recall?") }}')) {
+                    if (confirm('{{ __('audit.Are you sure you want to resolve this recall?') }}')) {
                         resolveRecall(id);
                     }
                 });
@@ -149,7 +149,7 @@
                 }
             })
             .catch(error => {
-                toastr.error('{{ __("An error occurred") }}');
+                toastr.error('{{ __('common.An error occurred') }}');
             });
         }
 

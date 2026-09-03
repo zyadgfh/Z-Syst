@@ -14,7 +14,7 @@ class BladeServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(XSSProtectionService::class, function ($app) {
-            return new XSSProtectionService();
+            return new XSSProtectionService;
         });
     }
 
@@ -41,6 +41,11 @@ class BladeServiceProvider extends ServiceProvider
         // Custom directive for allowing specific HTML tags
         Blade::directive('stripExcept', function ($expression) {
             return "<?php echo e(\$__env->getContainer()->make(\App\Services\XSSProtectionService::class)->stripTagsExcept($expression)); ?>";
+        });
+
+        // Custom directive for sanitized HTML output using HTMLPurifier
+        Blade::directive('sanitized', function (string $expression) {
+            return "<?php echo \App\Helpers\HtmlSanitizer::sanitize({$expression}); ?>";
         });
     }
 }

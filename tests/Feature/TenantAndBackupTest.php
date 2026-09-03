@@ -16,6 +16,7 @@ class TenantAndBackupTest extends TestCase
         $request->setUserResolver(fn () => new class
         {
             public int $business_id = 42;
+            public ?string $role = null;
         });
 
         $this->assertSame(42, $resolver->resolve($request));

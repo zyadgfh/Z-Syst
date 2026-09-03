@@ -1,9 +1,9 @@
 <table>
     <thead>
         <tr>
-            <th>{{ __('SL') }}.</th>
-            <th>{{ __('Advertising Name') }}</th>
-            <th>{{ __('Status') }}</th>
+            <th>{{ __('common.SL') }}.</th>
+            <th>{{ __('business.Advertising Name') }}</th>
+            <th>{{ __('common.Status') }}</th>
         </tr>
     </thead>
 

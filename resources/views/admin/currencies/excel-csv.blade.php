@@ -1,11 +1,11 @@
 <table>
     <thead>
         <tr>
-            <th>{{ __('SL') }}.</th>
-            <th>{{ __('Name') }}</th>
-            <th>{{ __('Country Name') }}</th>
-            <th>{{ __('Code') }}</th>
-            <th>{{ __('Symbol') }}</th>
+            <th>{{ __('common.SL') }}.</th>
+            <th>{{ __('common.Name') }}</th>
+            <th>{{ __('common.Country Name') }}</th>
+            <th>{{ __('common.Code') }}</th>
+            <th>{{ __('common.Symbol') }}</th>
         </tr>
     </thead>
 

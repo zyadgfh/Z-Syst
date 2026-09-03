@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateFefoConfigRequest;
 use App\Models\FefoSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -30,18 +31,9 @@ class FefoConfigController extends Controller
      *
      * @return JsonResponse
      */
-    public function update(Request $request)
+    public function update(UpdateFefoConfigRequest $request)
     {
         $businessId = auth()->user()->business_id;
-
-        $request->validate([
-            'fefo_enabled' => 'boolean',
-            'deduction_mode' => 'in:automatic,manual_suggestion',
-            'expiry_grace_days' => 'integer|min:1|max:365',
-            'auto_deduct_expired_stock' => 'boolean',
-            'notify_on_fefo_deduction' => 'boolean',
-            'min_stock_for_fefo' => 'integer|min:0',
-        ]);
 
         $settings = FefoSetting::updateOrCreate(
             ['business_id' => $businessId],

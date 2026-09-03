@@ -21,8 +21,18 @@ class BudgetAlert extends Model
         'resolved_at' => 'datetime',
     ];
 
-    public function budget(): BelongsTo { return $this->belongsTo(PurchaseBudget::class); }
-    public function business(): BelongsTo { return $this->belongsTo(Business::class); }
+    public function budget(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseBudget::class);
+    }
 
-    public function scopeUnresolved($query) { return $query->whereNull('resolved_at'); }
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class);
+    }
+
+    public function scopeUnresolved($query)
+    {
+        return $query->whereNull('resolved_at');
+    }
 }

@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\CreditDebitItem;
 use App\Models\SupplierCredit;
 use App\Models\SupplierDebit;
-use App\Models\CreditDebitItem;
 use Illuminate\Support\Facades\DB;
 
 class CreditDebitService
@@ -94,6 +94,7 @@ class CreditDebitService
             'approved_by' => $approvedBy,
             'approved_at' => now(),
         ]);
+
         return $credit;
     }
 
@@ -104,6 +105,7 @@ class CreditDebitService
             'approved_by' => $approvedBy,
             'approved_at' => now(),
         ]);
+
         return $debit;
     }
 }

@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Business;
+use App\Models\User;
 use App\Services\TenantResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Tests\TestCase;
 
 class TenantContextTest extends TestCase
 {
@@ -26,7 +26,7 @@ class TenantContextTest extends TestCase
             return $user;
         });
 
-        $resolver = new TenantResolver();
+        $resolver = new TenantResolver;
         $tenantId = $resolver->resolve($request);
 
         $this->assertEquals($business->id, $tenantId);
@@ -40,7 +40,7 @@ class TenantContextTest extends TestCase
         $business = Business::factory()->create();
         $superAdmin = User::factory()->create([
             'business_id' => $business->id,
-            'role' => 'superadmin'
+            'role' => 'superadmin',
         ]);
 
         $request = Request::create('/admin/test', 'GET');
@@ -48,7 +48,7 @@ class TenantContextTest extends TestCase
             return $superAdmin;
         });
 
-        $resolver = new TenantResolver();
+        $resolver = new TenantResolver;
         $tenantId = $resolver->resolve($request);
 
         $this->assertNull($tenantId);
@@ -61,9 +61,9 @@ class TenantContextTest extends TestCase
     {
         $business = Business::factory()->create();
 
-        $request = Request::create('/api/v1/test?business_id=' . $business->id, 'GET');
+        $request = Request::create('/api/v1/test?business_id='.$business->id, 'GET');
 
-        $resolver = new TenantResolver();
+        $resolver = new TenantResolver;
         $tenantId = $resolver->resolve($request);
 
         $this->assertEquals($business->id, $tenantId);
@@ -78,7 +78,7 @@ class TenantContextTest extends TestCase
         $business2 = Business::factory()->create();
         $user = User::factory()->create(['business_id' => $business1->id]);
 
-        $resolver = new TenantResolver();
+        $resolver = new TenantResolver;
         $canAccess = $resolver->canAccessTenant($business2->id);
 
         $this->assertFalse($canAccess);
@@ -92,7 +92,8 @@ class TenantContextTest extends TestCase
         $business = Business::factory()->create();
         $user = User::factory()->create(['business_id' => $business->id]);
 
-        $resolver = new TenantResolver();
+        $this->actingAs($user);
+        $resolver = new TenantResolver;
         $canAccess = $resolver->canAccessTenant($business->id);
 
         $this->assertTrue($canAccess);
@@ -106,7 +107,8 @@ class TenantContextTest extends TestCase
         $business = Business::factory()->create();
         $superAdmin = User::factory()->create(['role' => 'superadmin']);
 
-        $resolver = new TenantResolver();
+        $this->actingAs($superAdmin);
+        $resolver = new TenantResolver;
         $canAccess = $resolver->canAccessTenant($business->id);
 
         $this->assertTrue($canAccess);
@@ -124,16 +126,14 @@ class TenantContextTest extends TestCase
         User::factory()->create(['business_id' => $business1->id]);
         User::factory()->create(['business_id' => $business2->id]);
 
-        // Simulate authenticated user from business1
-        auth()->shouldReceive('check')->andReturn(true);
-        auth()->shouldReceive('user')->andReturn(
-            User::factory()->make(['business_id' => $business1->id, 'role' => 'staff'])
-        );
+        // Authenticate as user from business1
+        $actingUser = User::factory()->create(['business_id' => $business1->id, 'role' => 'staff']);
+        $this->actingAs($actingUser);
 
         $users = User::all();
 
-        // Should only return users from business1
-        $this->assertCount(2, $users);
+        // Should return users from business1 (2 pre-created + acting user = 3)
+        $this->assertCount(3, $users);
         foreach ($users as $user) {
             $this->assertEquals($business1->id, $user->business_id);
         }
@@ -150,15 +150,13 @@ class TenantContextTest extends TestCase
         User::factory()->create(['business_id' => $business1->id]);
         User::factory()->create(['business_id' => $business2->id]);
 
-        // Simulate superadmin
-        auth()->shouldReceive('check')->andReturn(true);
-        auth()->shouldReceive('user')->andReturn(
-            User::factory()->make(['role' => 'superadmin'])
-        );
+        // Authenticate as superadmin
+        $actingSuperAdmin = User::factory()->create(['role' => 'superadmin']);
+        $this->actingAs($actingSuperAdmin);
 
         $users = User::all();
 
-        // Should return all users since superadmin is not filtered
-        $this->assertCount(2, $users);
+        // Should return all users since superadmin is not filtered (2 + acting superadmin = 3)
+        $this->assertCount(3, $users);
     }
 }

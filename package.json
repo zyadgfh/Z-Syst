@@ -2,9 +2,16 @@
     "private": true,
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "test:visual": "npx playwright test tests/visual/",
+        "test:visual:update": "npx playwright test tests/visual/ --update-snapshots",
+        "test:visual:report": "npx playwright show-report tests/visual/results",
+        "test:e2e": "npx playwright test tests/e2e/",
+        "test:e2e:ui": "npx playwright test tests/e2e/ --ui",
+        "test:e2e:report": "npx playwright show-report tests/results"
     },
     "devDependencies": {
+        "@playwright/test": "^1.62.1",
         "@tailwindcss/forms": "^0.5.2",
         "alpinejs": "^3.4.2",
         "autoprefixer": "^10.4.2",
@@ -16,7 +23,11 @@
         "vite": "^3.0.0"
     },
     "dependencies": {
+        "@clerk/clerk-js": "^6.29.2",
         "@dataconnect/generated": "file:src/dataconnect-generated",
+        "@supabase/server": "^1.4.1",
+        "@supabase/ssr": "^0.12.4",
+        "@supabase/supabase-js": "^2.112.2",
         "@vercel/analytics": "^2.0.1",
         "firebase": "^12.16.0"
     }

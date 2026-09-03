@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class NotificationController extends Controller
 {
@@ -43,10 +44,19 @@ class NotificationController extends Controller
             $notify->read_at = now();
             $notify->save();
 
-            return redirect($notify->data['url'] ?? '/');
+            // Open redirect protection: only allow local paths
+            $url = $notify->data['url'] ?? '/';
+            if (
+                Str::startsWith($url, ['http://', 'https://'])
+                && !Str::startsWith($url, url('/'))
+            ) {
+                $url = '/'; // Block external redirects
+            }
+
+            return redirect($url);
         }
 
-        return back()->with('error', __('Premission denied.'));
+        return back()->with('error', __('Permission denied.'));
     }
 
     public function mtReadAll()

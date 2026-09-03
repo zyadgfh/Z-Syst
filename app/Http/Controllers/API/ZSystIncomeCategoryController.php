@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreIncomeCategoryRequest;
+use App\Http\Requests\UpdateIncomeCategoryRequest;
 use App\Models\IncomeCategory;
 use Illuminate\Http\Request;
 
@@ -21,11 +23,8 @@ class ZSystIncomeCategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreIncomeCategoryRequest $request)
     {
-        $request->validate([
-            'categoryName' => 'required|unique:income_categories,categoryName,NULL,id,business_id,'.auth()->user()->business_id,
-        ]);
 
         $data = IncomeCategory::create($request->except('status') + [
             'business_id' => auth()->user()->business_id,
@@ -41,16 +40,9 @@ class ZSystIncomeCategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateIncomeCategoryRequest $request, $id)
     {
         $category = IncomeCategory::findOrFail($id);
-
-        $request->validate([
-            'categoryName' => [
-                'required',
-                'unique:income_categories,categoryName,'.$category->id.',id,business_id,'.auth()->user()->business_id,
-            ],
-        ]);
 
         $category->update($request->except('status') + [
             'business_id' => auth()->user()->business_id,

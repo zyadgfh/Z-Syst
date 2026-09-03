@@ -55,7 +55,7 @@ class GRNResource extends JsonResource
             'total_rejected_quantity' => $this->total_rejected_quantity,
             'total_value' => $this->total_value,
             'completion_percentage' => $this->completion_percentage,
-            'items_count' => $this->whenLoaded('items', fn() => $this->items->count()),
+            'items_count' => $this->whenLoaded('items', fn () => $this->items->count()),
             'items' => GRNItemResource::collection($this->whenLoaded('items')),
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),

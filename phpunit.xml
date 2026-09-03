@@ -1,56 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
-         bootstrap="vendor/autoload.php"
-         colors="true"
-         executionOrder="depends,defects"
-         failOnRisky="true"
-         failOnWarning="true"
-         beStrictAboutOutputDuringTests="true"
-         beStrictAboutTodoAnnotatedTests="true"
-         convertErrorsToExceptions="true"
-         convertNoticesToExceptions="true"
-         convertWarningsToExceptions="true"
-         stopOnFailure="false"
-         cacheDirectory=".phpunit.cache"
-         backupGlobals="false"
-         backupStaticAttributes="false"
->
-    <testsuites>
-        <testsuite name="Unit">
-            <directory>tests/Unit</directory>
-        </testsuite>
-        <testsuite name="Feature">
-            <directory>tests/Feature</directory>
-        </testsuite>
-    </testsuites>
-
-    <coverage processUncoveredFiles="true">
-        <include>
-            <directory suffix=".php">app</directory>
-        </include>
-        <exclude>
-            <directory suffix=".php">app/Console</directory>
-            <directory suffix=".php">app/Exceptions</directory>
-            <directory suffix=".php">app/Providers</directory>
-            <file>app/Http/Kernel.php</file>
-            <file>app/Http/Middleware/TrustProxies.php</file>
-        </exclude>
-        <report>
-            <html outputDirectory="coverage/html"/>
-            <text outputFile="php://stdout" showUncoveredFiles="true"/>
-        </report>
-    </coverage>
-
-    <php>
-        <env name="APP_ENV" value="testing"/>
-        <env name="BCRYPT_ROUNDS" value="4"/>
-        <env name="CACHE_DRIVER" value="array"/>
-        <env name="DB_CONNECTION" value="sqlite"/>
-        <env name="DB_DATABASE" value=":memory:"/>
-        <env name="MAIL_MAILER" value="array"/>
-        <env name="QUEUE_CONNECTION" value="sync"/>
-        <env name="SESSION_DRIVER" value="array"/>
-        <env name="TELESCOPE_ENABLED" value="false"/>
-    </php>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd" bootstrap="vendor/autoload.php" colors="true" executionOrder="depends,defects" failOnRisky="true" failOnWarning="true" beStrictAboutOutputDuringTests="true" stopOnFailure="false" cacheDirectory=".phpunit.cache" backupGlobals="false" backupStaticProperties="false">
+  <testsuites>
+    <testsuite name="Unit">
+      <directory>tests/Unit</directory>
+    </testsuite>
+    <testsuite name="Feature">
+      <directory>tests/Feature</directory>
+    </testsuite>
+    <testsuite name="Integration">
+      <directory>tests/Integration</directory>
+    </testsuite>
+    <!-- CI subset: new features only (recall, traceability, accounting) -->
+    <testsuite name="CI-NewFeatures">
+      <file>tests/Feature/AccountingApiTest.php</file>
+      <file>tests/Feature/RecallTraceabilityTest.php</file>
+    </testsuite>
+    <!-- Coverage-focused suites (used by CI coverage jobs) -->
+    <testsuite name="Coverage-Accounting">
+      <file>tests/Unit/Services/DoubleEntryServiceTest.php</file>
+      <file>tests/Unit/Models/InsuranceCompanyTest.php</file>
+      <file>tests/Unit/Models/StockTransferTest.php</file>
+    </testsuite>
+    <testsuite name="Coverage-Recall">
+      <file>tests/Feature/Api/TraceabilityApiTest.php</file>
+      <file>tests/Feature/InsuranceTest.php</file>
+    </testsuite>
+  </testsuites>
+  <coverage>
+    <report>
+      <html outputDirectory="coverage/html"/>
+      <text outputFile="php://stdout" showUncoveredFiles="true"/>
+    </report>
+  </coverage>
+  <php>
+    <ini name="memory_limit" value="1024M"/>
+    <env name="APP_ENV" value="testing"/>
+    <env name="BCRYPT_ROUNDS" value="4"/>
+    <env name="CACHE_DRIVER" value="array"/>
+    <env name="DB_CONNECTION" value="sqlite"/>
+    <env name="DB_DATABASE" value=":memory:"/>
+    <env name="MAIL_MAILER" value="array"/>
+    <env name="QUEUE_CONNECTION" value="sync"/>
+    <env name="SESSION_DRIVER" value="array"/>
+    <env name="TELESCOPE_ENABLED" value="false"/>
+  </php>
+  <source>
+    <include>
+      <directory suffix=".php">app</directory>
+    </include>
+    <exclude>
+      <directory suffix=".php">app/Console</directory>
+      <directory suffix=".php">app/Exceptions</directory>
+      <directory suffix=".php">app/Providers</directory>
+      <file>app/Http/Kernel.php</file>
+      <file>app/Http/Middleware/TrustProxies.php</file>
+    </exclude>
+  </source>
 </phpunit>

@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PurchaseOrderRequest;
 use App\Http\Resources\PurchaseOrderResource;
+use App\Models\Party;
+use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Services\PurchaseOrderService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class PurchaseOrderController extends Controller
@@ -55,11 +57,11 @@ class PurchaseOrderController extends Controller
      */
     public function create(Request $request)
     {
-        $suppliers = \App\Models\Party::where('type', 'supplier')
+        $suppliers = Party::where('type', 'supplier')
             ->forBusiness($request->user()->business_id)
             ->get();
 
-        $products = \App\Models\Product::forBusiness($request->user()->business_id)
+        $products = Product::forBusiness($request->user()->business_id)
             ->active()
             ->get();
 
@@ -110,11 +112,11 @@ class PurchaseOrderController extends Controller
      */
     public function edit(Request $request, PurchaseOrder $purchaseOrder)
     {
-        $suppliers = \App\Models\Party::where('type', 'supplier')
+        $suppliers = Party::where('type', 'supplier')
             ->forBusiness($request->user()->business_id)
             ->get();
 
-        $products = \App\Models\Product::forBusiness($request->user()->business_id)
+        $products = Product::forBusiness($request->user()->business_id)
             ->active()
             ->get();
 
@@ -233,7 +235,7 @@ class PurchaseOrderController extends Controller
 
         $pdf = \PDF::loadView('admin.purchase-orders.pdf', compact('purchaseOrder'));
 
-        return $pdf->download('PO-' . $purchaseOrder->po_number . '.pdf');
+        return $pdf->download('PO-'.$purchaseOrder->po_number.'.pdf');
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\InsuranceCompanyFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,7 +13,7 @@ class InsuranceCompany extends Model
 
     protected static function newFactory()
     {
-        return \Database\Factories\InsuranceCompanyFactory::new();
+        return InsuranceCompanyFactory::new();
     }
 
     protected $fillable = [
@@ -38,7 +39,7 @@ class InsuranceCompany extends Model
     ];
 
     protected $casts = [
-        'api_credentials' => 'encrypted',
+        'api_credentials' => 'encrypted:array',
         'default_coverage_percent' => 'decimal:2',
         'default_copay_percent' => 'decimal:2',
         'metadata' => 'json',
@@ -69,14 +70,18 @@ class InsuranceCompany extends Model
         return $query->where('business_id', $businessId);
     }
 
+    public function scopeByBusiness($query, $businessId)
+    {
+        return $query->where('business_id', $businessId);
+    }
+
     /**
      * Calculate default coverage for a given amount
      */
     public function calculateDefaultCoverage(float $amount): array
     {
         $coveredAmount = ($amount * $this->default_coverage_percent) / 100;
-        $copayAmount = ($amount * $this->default_copay_percent) / 100;
-        $patientResponsibility = $amount - $coveredAmount + $copayAmount;
+        $patientResponsibility = $amount - $coveredAmount;
 
         return [
             'covered_amount' => $coveredAmount,

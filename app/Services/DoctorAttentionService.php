@@ -8,7 +8,6 @@ use App\Models\DoctorAttentionScore;
 use App\Models\DoctorAttentionSettings;
 use App\Models\Party;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class DoctorAttentionService
@@ -16,7 +15,7 @@ class DoctorAttentionService
     /**
      * Calculate attention scores for all doctors in a business.
      */
-    public function calculateScoresForBusiness(int $businessId, int $branchId = null): void
+    public function calculateScoresForBusiness(int $businessId, ?int $branchId = null): void
     {
         $settings = DoctorAttentionSettings::getDefaults($businessId, $branchId);
         $doctors = Party::where('business_id', $businessId)
@@ -38,73 +37,73 @@ class DoctorAttentionService
     {
         $today = now();
         $periodDays = $settings->referral_drop_period_days;
-        
+
         // Get current period activity
         $currentPeriodStart = $today->copy()->subDays($periodDays);
         $currentPeriodActivity = DoctorActivity::forDoctor($doctor->id)
             ->inPeriod($currentPeriodStart, $today)
             ->sum('referral_count');
-        
+
         // Get previous period activity
         $previousPeriodStart = $currentPeriodStart->copy()->subDays($periodDays);
         $previousPeriodEnd = $currentPeriodStart->copy()->subDay();
         $previousPeriodActivity = DoctorActivity::forDoctor($doctor->id)
             ->inPeriod($previousPeriodStart, $previousPeriodEnd)
             ->sum('referral_count');
-        
+
         // Calculate baseline (average of current + previous)
         $baselineReferrals = ($currentPeriodActivity + $previousPeriodActivity) / 2;
-        
+
         // Calculate decline percentage
         $declinePercentage = 0;
         if ($baselineReferrals > 0) {
             $declinePercentage = (($baselineReferrals - $currentPeriodActivity) / $baselineReferrals) * 100;
         }
-        
+
         // Calculate days inactive
         $lastActivity = DoctorActivity::forDoctor($doctor->id)
             ->where('referral_count', '>', 0)
             ->latest('activity_date')
             ->first();
-        
+
         $daysInactive = 0;
         $lastReferralDate = null;
         if ($lastActivity) {
             $lastReferralDate = $lastActivity->activity_date;
             $daysInactive = $today->diffInDays($lastReferralDate);
         }
-        
+
         // Calculate attention score (0-100)
         $attentionScore = 100;
-        
+
         // Deduct for decline
         $attentionScore -= min($declinePercentage * 2, 50); // Max 50 points deduction
-        
+
         // Deduct for inactivity
         $attentionScore -= min($daysInactive * 2, 50); // Max 50 points deduction
-        
+
         // Ensure score is between 0 and 100
         $attentionScore = max(0, min(100, $attentionScore));
-        
+
         // Determine status
         $status = DoctorAttentionScore::STATUS_ACTIVE;
         $alertReason = null;
-        
-        if ($attentionScore <= $settings->attention_score_critical || 
+
+        if ($attentionScore <= $settings->attention_score_critical ||
             $daysInactive >= $settings->critical_inactivity_days) {
             $status = DoctorAttentionScore::STATUS_CRITICAL;
-            $alertReason = $daysInactive >= $settings->critical_inactivity_days 
-                ? 'Critical inactivity: ' . $daysInactive . ' days without referrals'
-                : 'Critical attention score: ' . $attentionScore;
-        } elseif ($attentionScore <= $settings->attention_score_warning || 
+            $alertReason = $daysInactive >= $settings->critical_inactivity_days
+                ? 'Critical inactivity: '.$daysInactive.' days without referrals'
+                : 'Critical attention score: '.$attentionScore;
+        } elseif ($attentionScore <= $settings->attention_score_warning ||
                    $declinePercentage >= $settings->referral_drop_threshold ||
                    $daysInactive >= $settings->inactivity_threshold_days) {
             $status = DoctorAttentionScore::STATUS_NEEDS_ATTENTION;
             $alertReason = $declinePercentage >= $settings->referral_drop_threshold
-                ? 'Referral drop: ' . round($declinePercentage, 1) . '%'
-                : 'Inactivity: ' . $daysInactive . ' days';
+                ? 'Referral drop: '.round($declinePercentage, 1).'%'
+                : 'Inactivity: '.$daysInactive.' days';
         }
-        
+
         // Create or update score
         $score = DoctorAttentionScore::updateOrCreate(
             [
@@ -125,12 +124,12 @@ class DoctorAttentionService
                 'alert_reason' => $alertReason,
             ]
         );
-        
+
         // Generate alert if needed
         if ($status !== DoctorAttentionScore::STATUS_ACTIVE) {
             $this->generateAlert($doctor, $score, $settings);
         }
-        
+
         return $score;
     }
 
@@ -144,15 +143,15 @@ class DoctorAttentionService
             ->where('created_at', '>=', now()->subHours($settings->alert_frequency_hours))
             ->where('is_sent', true)
             ->first();
-        
+
         if ($recentAlert) {
             return null; // Don't spam alerts
         }
-        
+
         // Determine alert type and severity
         $alertType = DoctorAttentionAlert::TYPE_INACTIVITY;
         $severity = DoctorAttentionAlert::SEVERITY_MEDIUM;
-        
+
         if ($score->isCritical()) {
             $alertType = DoctorAttentionAlert::TYPE_CRITICAL;
             $severity = DoctorAttentionAlert::SEVERITY_CRITICAL;
@@ -160,10 +159,10 @@ class DoctorAttentionService
             $alertType = DoctorAttentionAlert::TYPE_REFERRAL_DROP;
             $severity = DoctorAttentionAlert::SEVERITY_HIGH;
         }
-        
+
         // Create alert message
         $message = $this->generateAlertMessage($doctor, $score);
-        
+
         // Create alert
         $alert = DoctorAttentionAlert::create([
             'doctor_id' => $doctor->id,
@@ -182,20 +181,20 @@ class DoctorAttentionService
                 'baseline_referrals' => $score->baseline_referrals,
             ],
         ]);
-        
+
         // Send notification if enabled
         if ($settings->enable_push_notifications) {
             $this->sendPushNotification($alert, $settings);
         }
-        
+
         if ($settings->enable_email_notifications) {
             $this->sendEmailNotification($alert, $settings);
         }
-        
+
         if ($settings->enable_sms_notifications) {
             $this->sendSmsNotification($alert, $settings);
         }
-        
+
         return $alert;
     }
 
@@ -207,7 +206,7 @@ class DoctorAttentionService
         if ($score->isCritical()) {
             return "⚠️ CRITICAL: Dr. {$doctor->name} needs immediate attention. {$score->alert_reason}";
         }
-        
+
         return "🔔 Attention: Dr. {$doctor->name} needs attention. {$score->alert_reason}";
     }
 
@@ -218,13 +217,43 @@ class DoctorAttentionService
     {
         // Get notification recipients
         $recipients = $this->getNotificationRecipients($alert, $settings);
-        
-        // TODO: Implement push notification logic
-        // This would integrate with your notification system
-        // For now, we'll just mark as sent
+
+        // Dispatch push notifications via FCM for each recipient's registered devices
+        foreach ($recipients as $recipient) {
+            $devices = \App\Models\PushNotificationDevice::where('user_id', $recipient->id)
+                ->where('is_active', true)
+                ->get();
+
+            foreach ($devices as $device) {
+                try {
+                    // Store notification in DB for the device
+                    \App\Models\Notification::create([
+                        'business_id' => $alert->business_id,
+                        'user_id' => $recipient->id,
+                        'type' => 'doctor_attention_alert',
+                        'title' => 'Doctor Attention Alert',
+                        'message' => $alert->message,
+                        'data' => json_encode([
+                            'alert_id' => $alert->id,
+                            'doctor_id' => $alert->doctor_id,
+                            'severity' => $alert->severity,
+                            'device_token' => $device->token,
+                        ]),
+                        'read' => false,
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to create push notification', [
+                        'alert_id' => $alert->id,
+                        'device_id' => $device->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
+
         $alert->markAsSent();
-        
-        Log::info('Push notification sent for doctor attention alert', [
+
+        Log::info('Push notification dispatched for doctor attention alert', [
             'alert_id' => $alert->id,
             'doctor_id' => $alert->doctor_id,
             'recipients_count' => $recipients->count(),
@@ -237,13 +266,30 @@ class DoctorAttentionService
     private function sendEmailNotification(DoctorAttentionAlert $alert, DoctorAttentionSettings $settings): void
     {
         $recipients = $this->getNotificationRecipients($alert, $settings);
-        
-        // TODO: Implement email notification logic
-        // This would send emails to recipients
-        
-        Log::info('Email notification sent for doctor attention alert', [
+
+        // Send email notifications to each recipient
+        foreach ($recipients as $recipient) {
+            try {
+                if ($recipient->email) {
+                    \Illuminate\Support\Facades\Mail::raw($alert->message, function ($mail) use ($recipient, $alert) {
+                        $mail->to($recipient->email)
+                            ->subject('Doctor Attention Alert - ' . $alert->severity)
+                            ->from(config('mail.from.address'), config('mail.from.name'));
+                    });
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to send email notification for doctor attention', [
+                    'alert_id' => $alert->id,
+                    'recipient_id' => $recipient->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        Log::info('Email notification dispatched for doctor attention alert', [
             'alert_id' => $alert->id,
             'doctor_id' => $alert->doctor_id,
+            'recipients_count' => $recipients->count(),
         ]);
     }
 
@@ -253,13 +299,30 @@ class DoctorAttentionService
     private function sendSmsNotification(DoctorAttentionAlert $alert, DoctorAttentionSettings $settings): void
     {
         $recipients = $this->getNotificationRecipients($alert, $settings);
-        
-        // TODO: Implement SMS notification logic
-        // This would send SMS to recipients
-        
-        Log::info('SMS notification sent for doctor attention alert', [
+
+        // Send SMS notifications to each recipient with a phone number
+        foreach ($recipients as $recipient) {
+            try {
+                if ($recipient->phone) {
+                    // Use the app's SMS service if configured
+                    $smsService = app('sms');
+                    if ($smsService && method_exists($smsService, 'send')) {
+                        $smsService->send($recipient->phone, $alert->message);
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to send SMS notification for doctor attention', [
+                    'alert_id' => $alert->id,
+                    'recipient_id' => $recipient->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        Log::info('SMS notification dispatched for doctor attention alert', [
             'alert_id' => $alert->id,
             'doctor_id' => $alert->doctor_id,
+            'recipients_count' => $recipients->count(),
         ]);
     }
 
@@ -269,26 +332,26 @@ class DoctorAttentionService
     private function getNotificationRecipients(DoctorAttentionAlert $alert, DoctorAttentionSettings $settings)
     {
         $query = User::where('business_id', $alert->business_id);
-        
+
         // Filter by roles if specified
         if ($settings->notify_roles && is_array($settings->notify_roles)) {
             $query->whereHas('roles', function ($q) use ($settings) {
                 $q->whereIn('name', $settings->notify_roles);
             });
         }
-        
+
         // Filter by specific users if specified
         if ($settings->notify_users && is_array($settings->notify_users)) {
             $query->whereIn('id', $settings->notify_users);
         }
-        
+
         return $query->get();
     }
 
     /**
      * Get doctors needing attention.
      */
-    public function getDoctorsNeedingAttention(int $businessId, int $branchId = null)
+    public function getDoctorsNeedingAttention(int $businessId, ?int $branchId = null)
     {
         return DoctorAttentionScore::forBusiness($businessId)
             ->when($branchId, function ($query) use ($branchId) {
@@ -304,7 +367,7 @@ class DoctorAttentionService
     /**
      * Get critical doctors.
      */
-    public function getCriticalDoctors(int $businessId, int $branchId = null)
+    public function getCriticalDoctors(int $businessId, ?int $branchId = null)
     {
         return DoctorAttentionScore::forBusiness($businessId)
             ->when($branchId, function ($query) use ($branchId) {
@@ -362,26 +425,26 @@ class DoctorAttentionService
     /**
      * Get attention statistics.
      */
-    public function getStatistics(int $businessId, int $branchId = null): array
+    public function getStatistics(int $businessId, ?int $branchId = null): array
     {
         $query = DoctorAttentionScore::forBusiness($businessId)
             ->when($branchId, function ($query) use ($branchId) {
                 return $query->forBranch($branchId);
             })
             ->where('calculated_date', now()->toDateString());
-        
+
         $total = $query->count();
         $active = $query->clone()->byStatus(DoctorAttentionScore::STATUS_ACTIVE)->count();
         $needingAttention = $query->clone()->needingAttention()->count();
         $critical = $query->clone()->critical()->count();
-        
+
         $alertsToday = DoctorAttentionAlert::forBusiness($businessId)
             ->when($branchId, function ($query) use ($branchId) {
                 return $query->forBranch($branchId);
             })
             ->whereDate('created_at', today())
             ->count();
-        
+
         return [
             'total_doctors' => $total,
             'active' => $active,

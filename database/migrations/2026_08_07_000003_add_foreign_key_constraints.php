@@ -8,35 +8,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Ensure foreign keys are properly set up
-        Schema::table('products', function (Blueprint $table) {
-            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
-            $table->foreign('category_id')->references('id')->on('categories')->onDelete('set null');
-        });
-
-        Schema::table('sales', function (Blueprint $table) {
-            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
-            $table->foreign('party_id')->references('id')->on('parties')->onDelete('set null');
-        });
-
-        Schema::table('purchases', function (Blueprint $table) {
-            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
-            $table->foreign('party_id')->references('id')->on('parties')->onDelete('set null');
-        });
-
-        Schema::table('parties', function (Blueprint $table) {
-            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
-        });
-
-        Schema::table('sale_details', function (Blueprint $table) {
-            $table->foreign('sale_id')->references('id')->on('sales')->onDelete('cascade');
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
-        });
-
-        Schema::table('purchase_details', function (Blueprint $table) {
-            $table->foreign('purchase_id')->references('id')->on('purchases')->onDelete('cascade');
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
-        });
+        // Only add foreign keys for tables that DON'T already have them
+        // defined in their original create migrations.
+        //
+        // SKIP: products, sales, purchases, parties, sale_details,
+        //       purchase_details, users — already have FKs in create migrations.
+        //
+        // NOTE: The original create migrations define:
+        //   products.category_id     → cascadeOnDelete (correct for pharmacy)
+        //   sales.party_id           → nullOnDelete
+        //   purchases.party_id       → nullOnDelete
+        //   users.business_id        → cascadeOnDelete
 
         Schema::table('warehouses', function (Blueprint $table) {
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
@@ -60,7 +42,7 @@ return new class extends Migration
         Schema::table('loyalty_transactions', function (Blueprint $table) {
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
             $table->foreign('party_id')->references('id')->on('parties')->onDelete('cascade');
-            $table->foreign('program_id')->references('id')->on('loyalty_programs')->onDelete('cascade');
+            $table->foreign('loyalty_program_id')->references('id')->on('loyalty_programs')->onDelete('cascade');
         });
 
         Schema::table('customer_interactions', function (Blueprint $table) {
@@ -82,12 +64,12 @@ return new class extends Migration
 
         Schema::table('insurance_policies', function (Blueprint $table) {
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
-            $table->foreign('company_id')->references('id')->on('insurance_companies')->onDelete('cascade');
+            $table->foreign('insurance_company_id')->references('id')->on('insurance_companies')->onDelete('cascade');
         });
 
         Schema::table('insurance_claims', function (Blueprint $table) {
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
-            $table->foreign('policy_id')->references('id')->on('insurance_policies')->onDelete('cascade');
+            $table->foreign('insurance_policy_id')->references('id')->on('insurance_policies')->onDelete('cascade');
         });
 
         Schema::table('batch_lots', function (Blueprint $table) {
@@ -101,11 +83,7 @@ return new class extends Migration
 
         Schema::table('traceability_logs', function (Blueprint $table) {
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
-            $table->foreign('batch_lot_id')->references('id')->on('batch_lots')->onDelete('cascade');
-        });
-
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('set null');
+            // Note: traceability_logs.batch_lot_number is a string, not a FK to batch_lots
         });
 
         Schema::table('plan_subscribes', function (Blueprint $table) {
@@ -116,36 +94,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        // Drop foreign keys
-        Schema::table('products', function (Blueprint $table) {
-            $table->dropForeign(['business_id']);
-            $table->dropForeign(['category_id']);
-        });
-
-        Schema::table('sales', function (Blueprint $table) {
-            $table->dropForeign(['business_id']);
-            $table->dropForeign(['party_id']);
-        });
-
-        Schema::table('purchases', function (Blueprint $table) {
-            $table->dropForeign(['business_id']);
-            $table->dropForeign(['party_id']);
-        });
-
-        Schema::table('parties', function (Blueprint $table) {
-            $table->dropForeign(['business_id']);
-        });
-
-        Schema::table('sale_details', function (Blueprint $table) {
-            $table->dropForeign(['sale_id']);
-            $table->dropForeign(['product_id']);
-        });
-
-        Schema::table('purchase_details', function (Blueprint $table) {
-            $table->dropForeign(['purchase_id']);
-            $table->dropForeign(['product_id']);
-        });
-
         Schema::table('warehouses', function (Blueprint $table) {
             $table->dropForeign(['business_id']);
         });
@@ -168,7 +116,7 @@ return new class extends Migration
         Schema::table('loyalty_transactions', function (Blueprint $table) {
             $table->dropForeign(['business_id']);
             $table->dropForeign(['party_id']);
-            $table->dropForeign(['program_id']);
+            $table->dropForeign(['loyalty_program_id']);
         });
 
         Schema::table('customer_interactions', function (Blueprint $table) {
@@ -190,12 +138,12 @@ return new class extends Migration
 
         Schema::table('insurance_policies', function (Blueprint $table) {
             $table->dropForeign(['business_id']);
-            $table->dropForeign(['company_id']);
+            $table->dropForeign(['insurance_company_id']);
         });
 
         Schema::table('insurance_claims', function (Blueprint $table) {
             $table->dropForeign(['business_id']);
-            $table->dropForeign(['policy_id']);
+            $table->dropForeign(['insurance_policy_id']);
         });
 
         Schema::table('batch_lots', function (Blueprint $table) {
@@ -208,11 +156,6 @@ return new class extends Migration
         });
 
         Schema::table('traceability_logs', function (Blueprint $table) {
-            $table->dropForeign(['business_id']);
-            $table->dropForeign(['batch_lot_id']);
-        });
-
-        Schema::table('users', function (Blueprint $table) {
             $table->dropForeign(['business_id']);
         });
 

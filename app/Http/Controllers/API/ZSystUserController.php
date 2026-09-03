@@ -4,17 +4,41 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class ZSystUserController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Permission keys used for staff visibility.
      */
-    public function index()
+    private const VISIBILITY_KEYS = [
+        'dashboardPermission',
+        'addExpensePermission',
+        'dueListPermission',
+        'lossProfitPermission',
+        'partiesPermission',
+        'productPermission',
+        'profileEditPermission',
+        'purchaseListPermission',
+        'purchasePermission',
+        'reportsPermission',
+        'salePermission',
+        'salesListPermission',
+        'stockPermission',
+        'addIncomePermission',
+    ];
+
+    /**
+     * Display a listing of staff users for the current business.
+     */
+    public function index(): JsonResponse
     {
-        $data = User::where('business_id', auth()->user()->business_id)->where('role', 'staff')->latest()->get();
+        $data = User::where('business_id', auth()->user()->business_id)
+            ->where('role', 'staff')
+            ->latest()
+            ->get();
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -23,9 +47,9 @@ class ZSystUserController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created staff user.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $request->validate([
             'name' => 'required|max:30',
@@ -33,28 +57,15 @@ class ZSystUserController extends Controller
             'email' => 'required|email|unique:users,email',
         ]);
 
+        $businessId = auth()->user()->business_id;
+
         $data = User::create([
             'role' => 'staff',
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'business_id' => auth()->user()->business_id,
-            'visibility' => [
-                'dashboardPermission' => $request->dashboardPermission == 'true' ? true : false,
-                'addExpensePermission' => $request->addExpensePermission == 'true' ? true : false,
-                'dueListPermission' => $request->dueListPermission == 'true' ? true : false,
-                'lossProfitPermission' => $request->lossProfitPermission == 'true' ? true : false,
-                'partiesPermission' => $request->partiesPermission == 'true' ? true : false,
-                'productPermission' => $request->productPermission == 'true' ? true : false,
-                'profileEditPermission' => $request->profileEditPermission == 'true' ? true : false,
-                'purchaseListPermission' => $request->purchaseListPermission == 'true' ? true : false,
-                'purchasePermission' => $request->purchasePermission == 'true' ? true : false,
-                'reportsPermission' => $request->reportsPermission == 'true' ? true : false,
-                'salePermission' => $request->salePermission == 'true' ? true : false,
-                'salesListPermission' => $request->salesListPermission == 'true' ? true : false,
-                'stockPermission' => $request->stockPermission == 'true' ? true : false,
-                'addIncomePermission' => $request->addIncomePermission == 'true' ? true : false,
-            ],
+            'business_id' => $businessId,
+            'visibility' => $this->buildVisibility($request),
         ]);
 
         return response()->json([
@@ -64,38 +75,33 @@ class ZSystUserController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified staff user.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, User $user): JsonResponse
     {
+        $businessId = auth()->user()->business_id;
+
+        if ($user->business_id != $businessId) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+
         $request->validate([
             'name' => 'required|max:30',
             'password' => 'nullable|min:4|max:15',
             'email' => 'required|email|unique:users,email,'.$user->id,
         ]);
 
-        $user->update([
+        $updateData = [
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'business_id' => auth()->user()->business_id,
-            'visibility' => [
-                'dashboardPermission' => $request->dashboardPermission == 'true' ? true : false,
-                'addExpensePermission' => $request->addExpensePermission == 'true' ? true : false,
-                'dueListPermission' => $request->dueListPermission == 'true' ? true : false,
-                'lossProfitPermission' => $request->lossProfitPermission == 'true' ? true : false,
-                'partiesPermission' => $request->partiesPermission == 'true' ? true : false,
-                'productPermission' => $request->productPermission == 'true' ? true : false,
-                'profileEditPermission' => $request->profileEditPermission == 'true' ? true : false,
-                'purchaseListPermission' => $request->purchaseListPermission == 'true' ? true : false,
-                'purchasePermission' => $request->purchasePermission == 'true' ? true : false,
-                'reportsPermission' => $request->reportsPermission == 'true' ? true : false,
-                'salePermission' => $request->salePermission == 'true' ? true : false,
-                'salesListPermission' => $request->salesListPermission == 'true' ? true : false,
-                'stockPermission' => $request->stockPermission == 'true' ? true : false,
-                'addIncomePermission' => $request->addIncomePermission == 'true' ? true : false,
-            ],
-        ]);
+            'visibility' => $this->buildVisibility($request),
+        ];
+
+        if ($request->filled('password')) {
+            $updateData['password'] = Hash::make($request->password);
+        }
+
+        $user->update($updateData);
 
         return response()->json([
             'message' => __('Data saved successfully.'),
@@ -103,14 +109,30 @@ class ZSystUserController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified staff user.
      */
-    public function destroy(User $user)
+    public function destroy(User $user): JsonResponse
     {
+        $businessId = auth()->user()->business_id;
+
+        if ($user->business_id != $businessId) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+
         $user->delete();
 
         return response()->json([
             'message' => __('Data deleted successfully.'),
         ]);
+    }
+
+    /**
+     * Build the visibility permissions array from request input.
+     */
+    private function buildVisibility(Request $request): array
+    {
+        return collect(self::VISIBILITY_KEYS)->mapWithKeys(
+            fn (string $key) => [$key => $request->input($key) === 'true']
+        )->toArray();
     }
 }

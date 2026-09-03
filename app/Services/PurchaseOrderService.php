@@ -2,11 +2,14 @@
 
 namespace App\Services;
 
+use App\Models\Product;
+use App\Models\Purchase;
+use App\Models\PurchaseDetails;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
-use App\Models\Product;
-use App\Models\Party;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PurchaseOrderService
 {
@@ -16,10 +19,14 @@ class PurchaseOrderService
     public function create(array $data): PurchaseOrder
     {
         return DB::transaction(function () use ($data) {
+            $count = PurchaseOrder::where('business_id', $data['business_id'])->count() + 1;
+            $po_number = 'PO-' . date('Y') . '-' . str_pad($count, 6, '0', STR_PAD_LEFT);
+
             $po = PurchaseOrder::create([
                 'supplier_id' => $data['supplier_id'] ?? null,
                 'business_id' => $data['business_id'],
                 'branch_id' => $data['branch_id'] ?? null,
+                'po_number' => $po_number,
                 'status' => PurchaseOrder::STATUS_DRAFT,
                 'priority' => $data['priority'] ?? PurchaseOrder::PRIORITY_NORMAL,
                 'expected_delivery_date' => $data['expected_delivery_date'] ?? null,
@@ -48,21 +55,28 @@ class PurchaseOrderService
     {
         $product = Product::findOrFail($itemData['product_id']);
 
+        $unitPrice = $itemData['unit_price'] ?? $product->purchase_without_tax ?? 0;
+        $quantity = $itemData['quantity'];
+        $discount = $itemData['discount'] ?? 0;
+        $tax = $itemData['tax'] ?? 0;
+        $total = ($unitPrice * $quantity) - $discount + $tax;
+
         $poItem = PurchaseOrderItem::create([
             'purchase_order_id' => $po->id,
             'product_id' => $product->id,
-            'quantity' => $itemData['quantity'],
+            'quantity' => $quantity,
             'received_quantity' => 0,
-            'pending_quantity' => $itemData['quantity'],
-            'unit_price' => $itemData['unit_price'] ?? $product->purchase_without_tax ?? 0,
-            'discount' => $itemData['discount'] ?? 0,
-            'tax' => $itemData['tax'] ?? 0,
+            'pending_quantity' => $quantity,
+            'unit_price' => $unitPrice,
+            'discount' => $discount,
+            'tax' => $tax,
+            'total' => $total,
             'notes' => $itemData['notes'] ?? null,
         ]);
 
         $po->calculateTotal();
 
-        return $poItem;
+        return $poItem->refresh();
     }
 
     /**
@@ -99,14 +113,20 @@ class PurchaseOrderService
      */
     public function send(PurchaseOrder $po): PurchaseOrder
     {
-        if (!$po->isDraft()) {
+        if (! $po->isDraft()) {
             throw new \Exception('Only draft orders can be sent');
         }
 
         $po->markAsSent();
 
-        // TODO: Send notification to supplier
-        // TODO: Email supplier with PO details
+        // Notify business users that PO has been sent
+        $this->notifyStakeholders($po, 'sent');
+
+        Log::info('Purchase order sent to supplier', [
+            'po_id' => $po->id,
+            'po_number' => $po->po_number,
+            'supplier_id' => $po->supplier_id,
+        ]);
 
         return $po;
     }
@@ -116,14 +136,14 @@ class PurchaseOrderService
      */
     public function approve(PurchaseOrder $po, int $userId): PurchaseOrder
     {
-        if (!$po->isSent()) {
+        if (! $po->isSent()) {
             throw new \Exception('Only sent orders can be approved');
         }
 
         $po->approve($userId);
 
-        // TODO: Notify supplier
-        // TODO: Update purchase order status
+        // Notify stakeholders of approval
+        $this->notifyStakeholders($po, 'approved', $userId);
 
         return $po;
     }
@@ -133,14 +153,14 @@ class PurchaseOrderService
      */
     public function reject(PurchaseOrder $po, int $userId, string $reason): PurchaseOrder
     {
-        if (!$po->isSent()) {
+        if (! $po->isSent()) {
             throw new \Exception('Only sent orders can be rejected');
         }
 
         $po->reject($userId, $reason);
 
-        // TODO: Notify supplier
-        // TODO: Update purchase order status
+        // Notify stakeholders of rejection
+        $this->notifyStakeholders($po, 'rejected', $userId);
 
         return $po;
     }
@@ -156,8 +176,8 @@ class PurchaseOrderService
 
         $po->cancel();
 
-        // TODO: Notify supplier
-        // TODO: Update inventory if needed
+        // Notify stakeholders of cancellation
+        $this->notifyStakeholders($po, 'cancelled');
 
         return $po;
     }
@@ -167,28 +187,66 @@ class PurchaseOrderService
      */
     public function restore(PurchaseOrder $po): PurchaseOrder
     {
-        if (!$po->isCancelled()) {
+        if (! $po->isCancelled()) {
             throw new \Exception('Only cancelled orders can be restored');
         }
 
         $po->update(['status' => PurchaseOrder::STATUS_DRAFT]);
 
-        // TODO: Notify supplier
+        // Notify stakeholders of restoration
+        $this->notifyStakeholders($po, 'restored');
 
         return $po;
     }
 
     /**
+     * Notify stakeholders about purchase order status changes.
+     */
+    private function notifyStakeholders(PurchaseOrder $po, string $action, ?int $userId = null): void
+    {
+        try {
+            $users = User::where('business_id', $po->business_id)
+                ->whereHas('roles', function ($q) {
+                    $q->whereIn('name', ['admin', 'manager', 'purchaser']);
+                })
+                ->get();
+
+            foreach ($users as $user) {
+                \App\Models\Notification::create([
+                    'business_id' => $po->business_id,
+                    'user_id' => $user->id,
+                    'type' => 'purchase_order_' . $action,
+                    'title' => 'Purchase Order ' . ucfirst($action),
+                    'message' => "PO {$po->po_number} has been {$action}.",
+                    'data' => json_encode([
+                        'po_id' => $po->id,
+                        'po_number' => $po->po_number,
+                        'supplier_id' => $po->supplier_id,
+                        'action' => $action,
+                    ]),
+                    'read' => false,
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to send purchase order notification', [
+                'po_id' => $po->id,
+                'action' => $action,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
      * Convert PO to Purchase.
      */
-    public function convertToPurchase(PurchaseOrder $po): \App\Models\Purchase
+    public function convertToPurchase(PurchaseOrder $po): Purchase
     {
-        if (!$po->isApproved()) {
+        if (! $po->isApproved()) {
             throw new \Exception('Only approved orders can be converted to purchases');
         }
 
         return DB::transaction(function () use ($po) {
-            $purchase = \App\Models\Purchase::create([
+            $purchase = Purchase::create([
                 'party_id' => $po->supplier_id,
                 'business_id' => $po->business_id,
                 'branch_id' => $po->branch_id,
@@ -211,7 +269,7 @@ class PurchaseOrderService
 
             // Add purchase details
             foreach ($po->items as $poItem) {
-                \App\Models\PurchaseDetails::create([
+                PurchaseDetails::create([
                     'purchase_id' => $purchase->id,
                     'product_id' => $poItem->product_id,
                     'purchase_without_tax' => $poItem->unit_price,
@@ -304,7 +362,7 @@ class PurchaseOrderService
      */
     public function delete(PurchaseOrder $po): bool
     {
-        if (!$po->isDraft()) {
+        if (! $po->isDraft()) {
             throw new \Exception('Only draft orders can be deleted');
         }
 

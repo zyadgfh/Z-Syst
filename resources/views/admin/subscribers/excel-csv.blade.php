@@ -1,15 +1,15 @@
 <table>
     <thead>
         <tr>
-            <th>{{ __('SL') }}.</th>
-            <th>{{ __('Date') }}</th>
-            <th>{{ __('Shop Name') }}</th>
-            <th>{{ __('Category') }}</th>
-            <th>{{ __('Package') }}</th>
-            <th>{{ __('Started') }}</th>
-            <th>{{ __('End') }}</th>
-            <th>{{ __('Gateway Method') }}</th>
-            <th>{{ __('Status') }}</th>
+            <th>{{ __('common.SL') }}.</th>
+            <th>{{ __('common.Date') }}</th>
+            <th>{{ __('gateways.Shop Name') }}</th>
+            <th>{{ __('common.Category') }}</th>
+            <th>{{ __('common.Package') }}</th>
+            <th>{{ __('gateways.Started') }}</th>
+            <th>{{ __('gateways.End') }}</th>
+            <th>{{ __('gateways.Gateway Method') }}</th>
+            <th>{{ __('common.Status') }}</th>
         </tr>
     </thead>
 

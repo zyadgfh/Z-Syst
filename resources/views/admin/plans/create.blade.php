@@ -1,7 +1,7 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title')
-    {{ __('Add Subscription Plan') }}
+    {{ __('business.Add Subscription Plan') }}
 @endsection
 
 @section('main_content')
@@ -10,9 +10,9 @@
             <div class="card border-0">
                 <div class="card-bodys">
                     <div class="table-header p-16">
-                        <h4>{{__('Add new Package')}}</h4>
+                        <h4>{{__('business.Add new Package')}}</h4>
                         @can('plans-read')
-                            <a href="{{ route('admin.plans.index') }}" class="add-order-btn rounded-2 {{ Route::is('admin.users.create') ? 'active' : '' }}"><i class="far fa-list me-1" aria-hidden="true"></i> {{ __('Package List') }}</a>
+                            <a href="{{ route('admin.plans.index') }}" class="add-order-btn rounded-2 {{ Route::is('admin.users.create') ? 'active' : '' }}"><i class="far fa-list me-1" aria-hidden="true"></i> {{ __('business.Package List') }}</a>
                         @endcan
                     </div>
                     <div class="order-form-section  p-16">
@@ -21,28 +21,28 @@
                             <div class="add-suplier-modal-wrapper d-block">
                                 <div class="row">
                                     <div class="col-lg-6 mb-2">
-                                        <label>{{ __('Package Name') }}</label>
-                                        <input type="text" name="subscriptionName" required class="form-control" placeholder="{{ __('Enter Package Name') }}">
+                                        <label>{{ __('business.Package Name') }}</label>
+                                        <input type="text" name="subscriptionName" required class="form-control" placeholder="{{ __('business.Enter Package Name') }}">
                                     </div>
 
                                     <div class="col-lg-6 mb-2">
-                                        <label>{{ __('Duration in Days') }}</label>
-                                        <input type="number" step="any" name="duration" required class="form-control" placeholder="{{ __('Enter number') }}">
+                                        <label>{{ __('business.Duration in Days') }}</label>
+                                        <input type="number" step="any" name="duration" required class="form-control" placeholder="{{ __('business.Enter number') }}">
                                     </div>
 
                                     <div class="col-lg-6 mb-2">
-                                        <label>{{ __('Offer Price') }}</label>
-                                        <input type="number" step="any" name="offerPrice" class="form-control price" placeholder="{{ __('Enter Plan Price') }}">
+                                        <label>{{ __('business.Offer Price') }}</label>
+                                        <input type="number" step="any" name="offerPrice" class="form-control price" placeholder="{{ __('business.Enter Plan Price') }}">
                                     </div>
 
                                     <div class="col-lg-6 mb-2">
-                                        <label>{{ __('Subscription Price') }}</label>
-                                        <input type="number" step="any" name="subscriptionPrice" required class="form-control discount" placeholder="{{ __('Enter Subscription Price') }}">
+                                        <label>{{ __('business.Subscription Price') }}</label>
+                                        <input type="number" step="any" name="subscriptionPrice" required class="form-control discount" placeholder="{{ __('business.Enter Subscription Price') }}">
                                     </div>
 
                                     <div class="col-lg-6 mb-2">
                                         <div class="col-lg-12 my-2">
-                                            <label>{{ __('Status') }}</label>
+                                            <label>{{ __('common.Status') }}</label>
                                             <div class="form-control d-flex justify-content-between align-items-center radio-switcher">
                                                 <p class="dynamic-text"></p>
                                                 <label class="switch m-0">
@@ -54,10 +54,10 @@
                                     </div>
 
                                     <div class="col-lg-6 mt-2">
-                                        <label>{{ __('Add New Features') }}</label>
+                                        <label>{{ __('business.Add New Features') }}</label>
                                         <div class="input-group">
-                                            <input type="text" class="form-control add-feature border-0 bg-transparent" placeholder="{{ __('Enter features') }}">
-                                            <button class="feature-btn" id="feature-btn">{{ __('Save') }}</button>
+                                            <input type="text" class="form-control add-feature border-0 bg-transparent" placeholder="{{ __('business.Enter features') }}">
+                                            <button class="feature-btn" id="feature-btn">{{ __('common.Save') }}</button>
                                         </div>
                                     </div>
 
@@ -69,8 +69,8 @@
 
                                     <div class="col-lg-12">
                                         <div class="button-group text-center mt-5">
-                                            <button type="reset" class="theme-btn border-btn m-2">{{ __('Cancel') }}</button>
-                                            <button class="theme-btn m-2 submit-btn">{{ __('Save') }}</button>
+                                            <button type="reset" class="theme-btn border-btn m-2">{{ __('common.Cancel') }}</button>
+                                            <button class="theme-btn m-2 submit-btn">{{ __('common.Save') }}</button>
                                         </div>
                                     </div>
                                 </div>

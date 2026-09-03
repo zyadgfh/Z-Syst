@@ -5,9 +5,9 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
-                <h2>Goods Received Notes (GRN)</h2>
+                <h2>{{ __('purchases.Goods Received Notes (GRN)') }}</h2>
                 <a href="{{ route('admin.grn.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Create GRN
+                    <i class="fas fa-plus"></i> {{ __('purchases.Create GRN') }}
                 </a>
             </div>
         </div>
@@ -20,36 +20,36 @@
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Supplier</label>
+                                <label>{{ __('purchases.Supplier') }}</label>
                                 <select class="form-control" id="filter-supplier">
-                                    <option value="">All Suppliers</option>
+                                    <option value="">{{ __('purchases.All Suppliers') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Status</label>
+                                <label>{{ __('common.Status') }}</label>
                                 <select class="form-control" id="filter-status">
-                                    <option value="">All Status</option>
-                                    <option value="pending">Pending</option>
-                                    <option value="verified">Verified</option>
-                                    <option value="accepted">Accepted</option>
-                                    <option value="partially_accepted">Partially Accepted</option>
-                                    <option value="rejected">Rejected</option>
+                                    <option value="">{{ __('common.All Status') }}</option>
+                                    <option value="pending">{{ __('common.Pending') }}</option>
+                                    <option value="verified">{{ __('purchases.Verified') }}</option>
+                                    <option value="accepted">{{ __('purchases.Accepted') }}</option>
+                                    <option value="partially_accepted">{{ __('purchases.Partially Accepted') }}</option>
+                                    <option value="rejected">{{ __('purchases.Rejected') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Purchase Order</label>
+                                <label>{{ __('purchases.Purchase Order') }}</label>
                                 <select class="form-control" id="filter-po">
-                                    <option value="">All POs</option>
+                                    <option value="">{{ __('purchases.All POs') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Search</label>
+                                <label>{{ __('common.Search') }}</label>
                                 <input type="text" class="form-control" id="search" placeholder="Search GRN number...">
                             </div>
                         </div>
@@ -67,15 +67,15 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>GRN Number</th>
-                                    <th>Supplier</th>
-                                    <th>Purchase Order</th>
-                                    <th>Status</th>
-                                    <th>Received Date</th>
-                                    <th>Total Received</th>
-                                    <th>Total Accepted</th>
-                                    <th>Total Value</th>
-                                    <th>Actions</th>
+                                    <th>{{ __('purchases.GRN Number') }}</th>
+                                    <th>{{ __('purchases.Supplier') }}</th>
+                                    <th>{{ __('purchases.Purchase Order') }}</th>
+                                    <th>{{ __('common.Status') }}</th>
+                                    <th>{{ __('purchases.Received Date') }}</th>
+                                    <th>{{ __('purchases.Total Received') }}</th>
+                                    <th>{{ __('purchases.Total Accepted') }}</th>
+                                    <th>{{ __('purchases.Total Value') }}</th>
+                                    <th>{{ __('common.Actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody id="grn-table">
@@ -174,7 +174,7 @@
 
     function verifyGRN(id) {
         if (confirm('Verify this GRN and update stock?')) {
-            $.post(`{{ route('admin.grn.verify') }}`.replace('{grn}', id), function(data) {
+            $.post('/admin/grn/' + id + '/verify', function(data) {
                 alert('GRN verified successfully');
                 loadGRNs();
             });
@@ -183,7 +183,7 @@
 
     function acceptGRN(id) {
         if (confirm('Accept this GRN?')) {
-            $.post(`{{ route('admin.grn.accept') }}`.replace('{grn}', id), function(data) {
+            $.post('/admin/grn/' + id + '/accept', function(data) {
                 alert('GRN accepted successfully');
                 loadGRNs();
             });
@@ -192,7 +192,7 @@
 
     function rejectGRN(id) {
         if (confirm('Reject this GRN and rollback stock?')) {
-            $.post(`{{ route('admin.grn.reject') }}`.replace('{grn}', id), function(data) {
+            $.post('/admin/grn/' + id + '/reject', function(data) {
                 alert('GRN rejected successfully');
                 loadGRNs();
             });
@@ -200,7 +200,7 @@
     }
 
     function viewGRN(id) {
-        window.location.href = `{{ route('admin.grn.show') }}`.replace('{grn}', id);
+        window.location.href = '/admin/grn/' + id;
     }
 </script>
 @endpush

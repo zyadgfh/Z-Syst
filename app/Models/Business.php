@@ -25,6 +25,21 @@ class Business extends Model
         'subscriptionDate',
         'remainingShopBalance',
         'shopOpeningBalance',
+        'company_code',
+        'is_active',
+    ];
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'will_expire' => 'datetime',
+        'subscriptionDate' => 'datetime',
+        'remainingShopBalance' => 'decimal:2',
+        'shopOpeningBalance' => 'decimal:2',
+        'is_active' => 'boolean',
     ];
 
     public function enrolled_plan()
@@ -40,5 +55,20 @@ class Business extends Model
     public function users()
     {
         return $this->hasMany(User::class, 'business_id');
+    }
+
+    public function branches()
+    {
+        return $this->hasMany(Branch::class, 'company_id');
+    }
+
+    public function paymentGateways()
+    {
+        return $this->hasMany(CompanyPaymentGateway::class, 'company_id');
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(PaymentTransaction::class, 'company_id');
     }
 }

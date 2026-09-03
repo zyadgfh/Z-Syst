@@ -15,7 +15,7 @@
             </td>
             <td>
                 <div>
-                    {{ $interface->status == 0 ? 'Active' : 'Deactive' }}
+                    {{ $interface->status == 1 ? 'Active' : 'Deactive' }}
                 </div>
             </td>
         </tr>

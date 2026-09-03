@@ -5,9 +5,9 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
-                <h2>Suppliers</h2>
+                <h2>{{ __('products.Suppliers') }}</h2>
                 <a href="{{ route('admin.suppliers.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Add Supplier
+                    <i class="fas fa-plus"></i> {{ __('purchases.Add Supplier') }}
                 </a>
             </div>
         </div>
@@ -20,17 +20,17 @@
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Status</label>
+                                <label>{{ __('common.Status') }}</label>
                                 <select class="form-control" id="filter-status">
-                                    <option value="">All</option>
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
+                                    <option value="">{{ __('common.All') }}</option>
+                                    <option value="active">{{ __('common.Active') }}</option>
+                                    <option value="inactive">{{ __('common.Inactive') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Search</label>
+                                <label>{{ __('common.Search') }}</label>
                                 <input type="text" class="form-control" id="search" placeholder="Search name...">
                             </div>
                         </div>
@@ -48,15 +48,15 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Company</th>
-                                    <th>Contact Person</th>
-                                    <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Rating</th>
-                                    <th>Performance</th>
-                                    <th>Orders</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>{{ __('gateways.Company') }}</th>
+                                    <th>{{ __('purchases.Contact Person') }}</th>
+                                    <th>{{ __('common.Email') }}</th>
+                                    <th>{{ __('common.Phone') }}</th>
+                                    <th>{{ __('purchases.Rating') }}</th>
+                                    <th>{{ __('purchases.Performance') }}</th>
+                                    <th>{{ __('purchases.Orders') }}</th>
+                                    <th>{{ __('common.Status') }}</th>
+                                    <th>{{ __('common.Actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody id="suppliers-table">
@@ -124,12 +124,12 @@
     }
 
     function viewSupplier(id) {
-        window.location.href = `{{ route('admin.suppliers.show') }}`.replace('{supplier}', id);
+        window.location.href = '/admin/suppliers/' + id;
     }
 
     function calculatePerformance(id) {
         if (confirm('Calculate performance for this supplier?')) {
-            $.post(`{{ route('admin.suppliers.calculate-performance') }}`.replace('{supplier}', id), function(data) {
+            $.post('/admin/suppliers/' + id + '/calculate-performance', function(data) {
                 alert('Performance calculated successfully');
                 loadSuppliers();
             });

@@ -91,6 +91,9 @@ class PartyModelTest extends TestCase
 
         $party->delete();
 
-        $this->assertDatabaseMissing('parties', ['id' => $partyId]);
+        // Soft delete — record still exists in DB but excluded from default queries
+        $this->assertDatabaseHas('parties', ['id' => $partyId]);
+        $this->assertNull(Party::find($partyId));
+        $this->assertNotNull(Party::withTrashed()->find($partyId));
     }
 }

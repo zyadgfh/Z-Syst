@@ -31,7 +31,7 @@ class BarcodeResource extends JsonResource
             'branch_id' => $this->branch_id,
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),
-            
+
             // Relationships
             'product' => new ProductResource($this->whenLoaded('product')),
             'batch' => new StockResource($this->whenLoaded('batch')),

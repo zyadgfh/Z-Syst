@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Exports\UserExport;
 use App\Helpers\HasUploader;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use App\Services\UserManagementService;
 use Illuminate\Http\Request;
@@ -30,6 +32,7 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', User::class);
         $users = User::whereNotIn('role', ['superadmin', 'staff', 'shop-owner'])->latest()->paginate(10);
 
         return view('admin.users.index', compact('users'));
@@ -59,35 +62,30 @@ class UserController extends Controller
 
     public function create()
     {
+        $this->authorize('create', User::class);
         $roles = Role::where('name', '!=', 'superadmin')->latest()->get();
 
         return view('admin.users.create', compact('roles'));
     }
 
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'role' => 'required|string',
-            'phone' => 'nullable|string',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|string|confirmed',
-            'image' => 'nullable|image',
+        $this->authorize('create', User::class);
+        $validated = $request->validated();
+
+        $user = User::create($validated + [
+            'image' => $request->hasFile('image') ? $this->upload($request, 'image') : null,
+            'password' => Hash::make($validated['password']),
         ]);
 
-        $user = User::create($request->except('image', 'password') + [
-            'image' => $request->image ? $this->upload($request, 'image') : null,
-            'password' => Hash::make($request->password),
-        ]);
-
-        $role = Role::where('name', $request->role)->first();
+        $role = Role::where('name', $validated['role'])->first();
         $user->roles()->sync($role->id);
 
-        sendNotification($user->id, route('admin.users.index', ['users' => $request->role]), __(ucfirst($request->role).' has been created.'), 'action', null, null, true);
+        sendNotification($user->id, route('admin.users.index', ['users' => $validated['role']]), __(ucfirst($validated['role']).' has been created.'), 'action', null, null, true);
 
         return response()->json([
-            'message' => __(ucfirst($request->role).' created successfully'),
-            'redirect' => route('admin.users.index', ['users' => $request->role]),
+            'message' => __(ucfirst($validated['role']).' created successfully'),
+            'redirect' => route('admin.users.index', ['users' => $validated['role']]),
         ]);
     }
 
@@ -101,26 +99,19 @@ class UserController extends Controller
         return view('admin.users.edit', compact('user', 'roles'));
     }
 
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
+        $this->authorize('update', $user);
         if ($user->role == 'superadmin') {
             return response()->json(__('You can not update a superadmin.'), 400);
         }
-        $request->validate([
-            'role' => 'required|string',
-            'phone' => 'nullable|string',
-            'country' => 'nullable|string',
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,'.$user->id,
-            'password' => 'nullable|string|confirmed',
-            'image' => 'nullable|image',
-        ]);
 
-        $role = Role::where('name', $request->role)->first();
+        $validated = $request->validated();
+        $role = Role::where('name', $validated['role'])->first();
         $user->roles()->sync($role->id);
-        $user->update($request->except('image', 'password') + [
-            'image' => $request->image ? $this->upload($request, 'image', $user->image) : $user->image,
-            'password' => $request->password ? Hash::make($request->password) : $user->password,
+        $user->update($validated + [
+            'image' => $request->hasFile('image') ? $this->upload($request, 'image', $user->image) : $user->image,
+            'password' => $validated['password'] ? Hash::make($validated['password']) : $user->password,
         ]);
 
         return response()->json([
@@ -131,6 +122,7 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        $this->authorize('delete', $user);
         if ($user->role == 'superadmin') {
             return response()->json(__('You can not delete a superadmin.'), 400);
         }
@@ -149,6 +141,11 @@ class UserController extends Controller
 
     public function deleteAll(Request $request)
     {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:users,id',
+        ]);
+
         $deleted = $this->userManagementService->bulkDeleteUsers($request->ids);
 
         return response()->json([
@@ -236,8 +233,12 @@ class UserController extends Controller
             'target_user_id' => 'required|exists:users,id',
         ]);
 
-        $sourceUser = User::findOrFail($request->source_user_id);
-        $targetUser = User::findOrFail($request->target_user_id);
+        $sourceUser = User::where('id', $request->source_user_id)
+            ->where('business_id', auth()->user()->business_id)
+            ->firstOrFail();
+        $targetUser = User::where('id', $request->target_user_id)
+            ->where('business_id', auth()->user()->business_id)
+            ->firstOrFail();
 
         try {
             $user = $this->userManagementService->cloneUserPermissions($sourceUser, $targetUser);
@@ -248,7 +249,7 @@ class UserController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error cloning permissions: ') . $e->getMessage(),
+                'message' => __('Error cloning permissions: ').$e->getMessage(),
             ], 500);
         }
     }
