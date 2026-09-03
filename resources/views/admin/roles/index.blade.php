@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Roles') }}
+    {{ __('roles.Roles') }}
 @endsection
 
 @section('main_content')
@@ -10,7 +10,7 @@
             <div class="card">
                 <div class="card-bodys">
                     <div class="table-header p-16">
-                        <h4>{{ __('Roles List') }}</h4>
+                        <h4>{{ __('roles.Roles List') }}</h4>
                     </div>
                     <div class="row mb-4 p-16">
                         @can('roles-create')
@@ -27,9 +27,9 @@
                                             <div class="card-body text-sm-end text-center ps-sm-0 ms-2">
                                                 <a href="{{ route('admin.roles.create') }}">
                                                     <span
-                                                        class="btn btn-warning btn-custom-warning fw-bold text-uppercase btn-sm mb-1">{{ __('Add New Role') }}</span>
+                                                        class="btn btn-warning btn-custom-warning fw-bold text-uppercase btn-sm mb-1">{{ __('roles.Add New Role') }}</span>
                                                 </a>
-                                                <small class="mb-0 d-block text-light">{{ __('Add role, if it does not exist') }}</small>
+                                                <small class="mb-0 d-block text-light">{{ __('roles.Add role, if it does not exist') }}</small>
                                             </div>
                                         </div>
                                     </div>
@@ -65,7 +65,7 @@
                                                                 <path d="M12.6666 9.52018C12.6666 11.7118 12.6666 12.8076 12.0613 13.5452C11.9505 13.6802 11.8267 13.804 11.6917 13.9148C10.9541 14.5202 9.85827 14.5202 7.6666 14.5202H7.33333C4.81917 14.5202 3.56211 14.5202 2.78106 13.7391C2.00002 12.9581 2 11.701 2 9.18685V8.85352C2 6.66186 2 5.56604 2.60529 4.82848C2.71611 4.69345 2.83993 4.56963 2.97496 4.45881C3.71253 3.85352 4.80835 3.85352 7 3.85352" stroke="#00987F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                                                 </svg>
 
-                                                            {{ __('Edit Role') }}</small>
+                                                            {{ __('roles.Edit Role') }}</small>
                                                     </a>
                                                 @endcan
                                             </div>

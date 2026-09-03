@@ -41,7 +41,7 @@
 
         {{-- Filters --}}
         <div class="card mb-4" class="card-clean-bordered">
-            <div class="card-body" style="padding: 16px;">
+            <div class="card-body" class="p-16">
                 <form method="GET" class="row g-2 align-items-end">
                     <div class="col-md-4">
                         <label class="form-label-xs">بحث</label>
@@ -76,15 +76,15 @@
             <div style="display: flex; align-items: center; gap: 12px;">
                 <span id="selectedCount" style="font-size: 14px; font-weight: 600; color: #007aff;">0 محدد</span>
                 <button onclick="bulkToggleStatus(true)" style="background: #34c759; color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 2px;"><polyline points="20 6 9 17 4 12"/></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="va-middle-r2"><polyline points="20 6 9 17 4 12"/></svg>
                     تفعيل المحدد
                 </button>
                 <button onclick="bulkToggleStatus(false)" style="background: #ff9500; color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 2px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="va-middle-r2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     تعطيل المحدد
                 </button>
                 <button onclick="bulkDelete()" style="background: #ff3b30; color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 2px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="va-middle-r2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                     حذف المحدد
                 </button>
             </div>
@@ -95,7 +95,7 @@
         <div class="card" class="card-clean">
             <div class="table-responsive">
                 <table class="table table-hover mb-0" class="fs-14">
-                    <thead style="background: #f5f5f7;">
+                    <thead class="bg-light">
                         <tr>
                             <th style="border: none; padding: 12px 16px; width: 40px;">
                                 <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" style="width: 18px; height: 18px; border-radius: 4px; cursor: pointer;">
@@ -129,9 +129,9 @@
                                     {{ $coupon->minimum_order_amount > 0 ? number_format($coupon->minimum_order_amount, 2) : '—' }}
                                 </td>
                                 <td class="td-align">
-                                    <span style="font-weight: 600;">{{ $coupon->times_used }}</span>
+                                    <span class="fw-600">{{ $coupon->times_used }}</span>
                                     @if ($coupon->usage_limit)
-                                        <span style="color: #86868b;">/ {{ $coupon->usage_limit }}</span>
+                                        <span class="text-muted-custom">/ {{ $coupon->usage_limit }}</span>
                                     @endif
                                 </td>
                                 <td style="padding: 14px 16px; vertical-align: middle; font-size: 13px; color: #6e6e73;">
@@ -167,7 +167,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-4" style="color: #86868b;">لا توجد كوبونات بعد</td>
+                                <td colspan="7" class="text-center py-4" class="text-muted-custom">لا توجد كوبونات بعد</td>
                             </tr>
                         @endforelse
                     </tbody>

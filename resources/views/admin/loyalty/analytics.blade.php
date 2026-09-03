@@ -21,8 +21,8 @@
         {{-- Summary Cards --}}
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px;">
             <div style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-radius: 14px; padding: 20px; text-align: center;">
-                <div style="font-size: 28px; font-weight: 800; color: #2e7d32;">{{ number_format($totalIssued) }}</div>
-                <div style="font-size: 12px; color: #4a6e4a; margin-top: 4px;">نقاط صدرت</div>
+                <div class="badge-value-green">{{ number_format($totalIssued) }}</div>
+                <div class="fs-12-color-green">نقاط صدرت</div>
             </div>
             <div style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius: 14px; padding: 20px; text-align: center;">
                 <div style="font-size: 28px; font-weight: 800; color: #1565c0;">{{ number_format($totalRedeemed) }}</div>
@@ -103,7 +103,7 @@
                             @php $pct = $total > 0 ? ($count / $total) * 100 : 0; @endphp
                             <div style="margin-bottom: 16px;">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                                    <span style="font-size: 13px; font-weight: 600; color: #1d1d1f;">{{ $typeLabels[$type] ?? $type }}</span>
+                                    <span class="fs-13-color-heading">{{ $typeLabels[$type] ?? $type }}</span>
                                     <span style="font-size: 13px; color: #86868b;">{{ number_format($count) }} ({{ number_format($pct, 1) }}%)</span>
                                 </div>
                                 <div style="height: 10px; background: #f0f0f2; border-radius: 5px; overflow: hidden;">
@@ -126,7 +126,7 @@
             @else
                 <div class="table-responsive">
                     <table class="table table-hover mb-0" class="fs-14">
-                        <thead style="background: #f8f9fa;">
+                        <thead class="bg-subtle">
                             <tr>
                                 <th class="tab-btn">#</th>
                                 <th class="tab-btn">العضو</th>
@@ -147,15 +147,15 @@
                                                 <div style="width: 32px; height: 32px; border-radius: 50%; background: #e8f0fe; color: #007aff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">{{ substr($user->name ?? '?', 0, 1) }}</div>
                                             @endif
                                             <div>
-                                                <div style="font-weight: 600;">{{ $user->name ?? 'غير معروف' }}</div>
-                                                <div style="font-size: 11px; color: #86868b;">{{ $user->email ?? '' }}</div>
+                                                <div class="fw-600">{{ $user->name ?? 'غير معروف' }}</div>
+                                                <div class="fs-11-color-muted">{{ $user->email ?? '' }}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="card-body-sm">
                                         <span style="background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 6px; font-weight: 700;">{{ number_format($item['total_earned']) }} نقطة</span>
                                     </td>
-                                    <td style="padding: 12px 16px; font-weight: 600;">{{ $item['transactions'] }}</td>
+                                    <td class="p-12-16-600">{{ $item['transactions'] }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

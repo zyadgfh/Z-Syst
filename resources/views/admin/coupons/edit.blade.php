@@ -3,16 +3,16 @@
 @section('title', 'تعديل الكوبون: ' . $coupon->code)
 
 @section('main_content')
-    <div class="container-fluid" style="padding: 24px; max-width: 720px;">
+    <div class="container-fluid js-container-narrow">
         <div class="d-flex align-items-center mb-4">
-            <a href="{{ route('admin.coupons.index') }}" style="color: #007aff; text-decoration: none; font-size: 14px; margin-left: 16px;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <a href="{{ route('admin.coupons.index') }}" class="js-back-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="va-middle"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             </a>
             <h4 class="heading-bold">تعديل الكوبون: <code style="background: #f5f5f7; padding: 2px 8px; border-radius: 6px;">{{ $coupon->code }}</code></h4>
         </div>
 
         @if ($errors->any())
-            <div class="alert" style="background: #fff0f0; color: #ff3b30; border-radius: 12px; padding: 12px 16px; border: none; margin-bottom: 16px;">
+            <div class="alert js-alert-error">
                 <ul class="mb-0" class="list-unstyled">
                     @foreach ($errors->all() as $error)
                         <li class="fs-14">{{ $error }}</li>
@@ -21,7 +21,7 @@
             </div>
         @endif
 
-        <form action="{{ route('admin.coupons.update', $coupon) }}" method="POST" style="background: #fff; border-radius: 16px; border: 1px solid #e5e5ea; padding: 24px;">
+        <form action="{{ route('admin.coupons.update', $coupon) }}" method="POST" class="js-form-card">
             @csrf @method('PUT')
 
             <div class="row g-3">

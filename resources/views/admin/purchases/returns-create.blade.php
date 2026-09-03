@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Create Purchase Return') }}
+    {{ __('purchases.Create Purchase Return') }}
 @endsection
 
 @section('main_content')
@@ -10,18 +10,18 @@
         <div class="card">
             <div class="card-bodys">
                 <div class="table-header p-16 d-flex align-items-center justify-content-between flex-wrap gap-3">
-                    <h4 class="mb-0">{{ __('Create Purchase Return') }} — {{ $purchase->invoiceNumber }}</h4>
+                    <h4 class="mb-0">{{ __('purchases.Create Purchase Return') }} — {{ $purchase->invoiceNumber }}</h4>
                     <a href="{{ route('admin.purchases.show', $purchase->id) }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-arrow-left me-1"></i>{{ __('Back to Invoice') }}
+                        <i class="fas fa-arrow-left me-1"></i>{{ __('purchases.Back to Invoice') }}
                     </a>
                 </div>
 
                 <div class="p-16">
                     {{-- Purchase Info --}}
                     <div class="alert alert-info mb-4">
-                        <strong>{{ __('Supplier:') }}</strong> {{ $purchase->party->name ?? '—' }} |
-                        <strong>{{ __('Invoice:') }}</strong> {{ $purchase->invoiceNumber }} |
-                        <strong>{{ __('Date:') }}</strong> {{ $purchase->purchaseDate ? \Carbon\Carbon::parse($purchase->purchaseDate)->format('d/m/Y') : '—' }}
+                        <strong>{{ __('purchases.Supplier:') }}</strong> {{ $purchase->party->name ?? '—' }} |
+                        <strong>{{ __('purchases.Invoice:') }}</strong> {{ $purchase->invoiceNumber }} |
+                        <strong>{{ __('purchases.Date:') }}</strong> {{ $purchase->purchaseDate ? \Carbon\Carbon::parse($purchase->purchaseDate)->format('d/m/Y') : '—' }}
                     </div>
 
                     <form id="returnForm" onsubmit="return false;">
@@ -32,14 +32,14 @@
                             <table class="table table-bordered">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>{{ __('Product') }}</th>
-                                        <th>{{ __('Batch') }}</th>
-                                        <th class="text-center">{{ __('Purchased Qty') }}</th>
-                                        <th class="text-center">{{ __('Already Returned') }}</th>
-                                        <th class="text-center">{{ __('Returnable') }}</th>
-                                        <th class="text-center">{{ __('Return Qty') }}</th>
-                                        <th class="text-end">{{ __('Unit Price') }}</th>
-                                        <th class="text-end">{{ __('Credit Amount') }}</th>
+                                        <th>{{ __('common.Product') }}</th>
+                                        <th>{{ __('purchases.Batch') }}</th>
+                                        <th class="text-center">{{ __('purchases.Purchased Qty') }}</th>
+                                        <th class="text-center">{{ __('purchases.Already Returned') }}</th>
+                                        <th class="text-center">{{ __('purchases.Returnable') }}</th>
+                                        <th class="text-center">{{ __('purchases.Return Qty') }}</th>
+                                        <th class="text-end">{{ __('purchases.Unit Price') }}</th>
+                                        <th class="text-end">{{ __('purchases.Credit Amount') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -79,7 +79,7 @@
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between fw-bold fs-5">
-                                            <span>{{ __('Total Credit') }}</span>
+                                            <span>{{ __('purchases.Total Credit') }}</span>
                                             <span id="totalCredit" class="text-danger">0.00</span>
                                         </div>
                                     </div>
@@ -90,19 +90,19 @@
                         {{-- Reason --}}
                         <div class="row mt-4">
                             <div class="col-md-6">
-                                <label class="form-label">{{ __('Reason') }}</label>
-                                <textarea name="reason" class="form-control" rows="2" placeholder="{{ __('Reason for return...') }}"></textarea>
+                                <label class="form-label">{{ __('common.Reason') }}</label>
+                                <textarea name="reason" class="form-control" rows="2" placeholder="{{ __('purchases.Reason for return...') }}"></textarea>
                             </div>
                         </div>
 
                         {{-- Submit --}}
                         <div class="mt-4 d-flex justify-content-end gap-2">
-                            <a href="{{ route('admin.purchases.show', $purchase->id) }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
+                            <a href="{{ route('admin.purchases.show', $purchase->id) }}" class="btn btn-outline-secondary">{{ __('common.Cancel') }}</a>
                             <button type="button" class="btn btn-warning" id="processReturnBtn" onclick="confirmReturn()" disabled>
-                                <i class="fas fa-undo me-1"></i>{{ __('Process Return') }}
+                                <i class="fas fa-undo me-1"></i>{{ __('purchases.Process Return') }}
                             </button>
                             <div id="returnWarning" class="w-100 text-end text-muted mt-2" class="d-none">
-                                <small><i class="fas fa-info-circle me-1"></i>{{ __('Enter a return quantity above to enable this button.') }}</small>
+                                <small><i class="fas fa-info-circle me-1"></i>{{ __('purchases.Enter a return quantity above to enable this button.') }}</small>
                             </div>
                         </div>
                     </form>
@@ -117,17 +117,17 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">{{ __('Confirm Purchase Return') }}</h5>
+                <h5 class="modal-title">{{ __('purchases.Confirm Purchase Return') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>{{ __('Are you sure you want to process this purchase return? This will deduct stock and update the supplier balance.') }}</p>
-                <p><strong>{{ __('Total Credit:') }}</strong> <span id="confirmCredit" class="text-danger"></span></p>
+                <p>{{ __('purchases.Are you sure you want to process this purchase return? This will deduct stock and update the supplier balance.') }}</p>
+                <p><strong>{{ __('purchases.Total Credit:') }}</strong> <span id="confirmCredit" class="text-danger"></span></p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('common.Cancel') }}</button>
                 <button type="button" class="btn btn-warning" onclick="submitReturn()" id="confirmReturnBtn">
-                    <i class="fas fa-check me-1"></i>{{ __('Confirm') }}
+                    <i class="fas fa-check me-1"></i>{{ __('common.Confirm') }}
                 </button>
             </div>
         </div>
@@ -145,7 +145,7 @@
         const max = parseInt(input.dataset.returnable);
         if (parseInt(input.value) > max) {
             input.value = max;
-            toastr.warning(`{{ __("Maximum returnable quantity is") }} ${max}`);
+            toastr.warning(`{{ __('purchases.Maximum returnable quantity is') }} ${max}`);
         }
         if (parseInt(input.value) < 0) {
             input.value = 0;
@@ -187,7 +187,7 @@
             credit += qty * (parseFloat(i.dataset.unitPrice) || 0);
         });
         if (!hasQty) {
-            toastr.error('{{ __("Please enter return quantity for at least one item.") }}');
+            toastr.error('{{ __('purchases.Please enter return quantity for at least one item.') }}');
             return;
         }
         document.getElementById('confirmCredit').textContent = document.getElementById('totalCredit').textContent;
@@ -197,7 +197,7 @@
     function submitReturn() {
         const btn = document.getElementById('confirmReturnBtn');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ __("Processing...") }}';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ __('common.Processing...') }}';
 
         const items = [];
         document.querySelectorAll('.return-qty').forEach(input => {
@@ -225,13 +225,13 @@
             } else {
                 toastr.error(data.message);
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-check me-1"></i>{{ __("Confirm") }}';
+                btn.innerHTML = '<i class="fas fa-check me-1"></i>{{ __('common.Confirm') }}';
             }
         })
         .catch(() => {
-            toastr.error('{{ __("Error processing return.") }}');
+            toastr.error('{{ __('purchases.Error processing return.') }}');
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-check me-1"></i>{{ __("Confirm") }}';
+            btn.innerHTML = '<i class="fas fa-check me-1"></i>{{ __('common.Confirm') }}';
         });
     }
 </script>

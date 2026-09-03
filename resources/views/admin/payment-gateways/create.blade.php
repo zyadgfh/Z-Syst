@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Add Payment Gateway') }}
+    {{ __('gateways.Add Payment Gateway') }}
 @endsection
 
 @push('css')
@@ -77,12 +77,12 @@
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="mb-1">{{ __('Add Payment Gateway') }}</h2>
-            <p class="text-muted mb-0">{{ __('Configure a new payment gateway for your pharmacy') }}</p>
+            <h2 class="mb-1">{{ __('gateways.Add Payment Gateway') }}</h2>
+            <p class="text-muted mb-0">{{ __('gateways.Configure a new payment gateway for your pharmacy') }}</p>
         </div>
         <a href="{{ route('admin.payment-gateways.index', ['company_id' => $companyId, 'branch_id' => $branchId]) }}" 
            class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-2"></i> {{ __('Back to Gateways') }}
+            <i class="fas fa-arrow-left me-2"></i> {{ __('gateways.Back to Gateways') }}
         </a>
     </div>
 
@@ -92,13 +92,13 @@
                 @csrf
                 
                 <!-- Basic Information -->
-                <h5 class="mb-3">{{ __('Basic Information') }}</h5>
+                <h5 class="mb-3">{{ __('gateways.Basic Information') }}</h5>
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <div class="form-group mb-3">
-                            <label for="company_id" class="fw-bold">{{ __('Company') }} <span class="text-danger">*</span></label>
+                            <label for="company_id" class="fw-bold">{{ __('gateways.Company') }} <span class="text-danger">*</span></label>
                             <select class="form-select" id="company_id" name="company_id" required onchange="loadBranches()">
-                                <option value="">{{ __('Select Company') }}</option>
+                                <option value="">{{ __('gateways.Select Company') }}</option>
                                 @foreach(\App\Models\Business::all() as $company)
                                     <option value="{{ $company->id }}" {{ $companyId == $company->id ? 'selected' : '' }}>
                                         {{ $company->companyName }}
@@ -110,17 +110,17 @@
                     
                     <div class="col-md-6">
                         <div class="form-group mb-3">
-                            <label for="branch_id" class="fw-bold">{{ __('Branch') }}</label>
+                            <label for="branch_id" class="fw-bold">{{ __('common.Branch') }}</label>
                             <select class="form-select" id="branch_id" name="branch_id">
-                                <option value="">{{ __('All Branches') }}</option>
+                                <option value="">{{ __('gateways.All Branches') }}</option>
                             </select>
-                            <small class="text-muted">{{ __('Leave empty to apply to all branches') }}</small>
+                            <small class="text-muted">{{ __('gateways.Leave empty to apply to all branches') }}</small>
                         </div>
                     </div>
                 </div>
 
                 <!-- Gateway Type Selection -->
-                <h5 class="mb-3">{{ __('Select Gateway Type') }}</h5>
+                <h5 class="mb-3">{{ __('gateways.Select Gateway Type') }}</h5>
                 <div class="row mb-4">
                     @foreach($gatewayTypes as $type => $label)
                     <div class="col-md-4 mb-3">
@@ -140,11 +140,11 @@
                 </div>
 
                 <!-- Fees Configuration -->
-                <h5 class="mb-3">{{ __('Transaction Fees') }}</h5>
+                <h5 class="mb-3">{{ __('gateways.Transaction Fees') }}</h5>
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <div class="form-group mb-3">
-                            <label for="transaction_fee" class="fw-bold">{{ __('Transaction Fee') }}</label>
+                            <label for="transaction_fee" class="fw-bold">{{ __('gateways.Transaction Fee') }}</label>
                             <div class="input-group">
                                 <input type="number" step="0.01" class="form-control" id="transaction_fee" name="transaction_fee" value="0" min="0">
                                 <select class="form-select" id="transaction_fee_type" name="transaction_fee_type" style="max-width: 120px;">
@@ -152,36 +152,36 @@
                                     <option value="fixed">EGP</option>
                                 </select>
                             </div>
-                            <small class="text-muted">{{ __('Set to 0 for no transaction fee') }}</small>
+                            <small class="text-muted">{{ __('gateways.Set to 0 for no transaction fee') }}</small>
                         </div>
                     </div>
                     
                     <div class="col-md-6">
                         <div class="form-group mb-3">
-                            <label for="sort_order" class="fw-bold">{{ __('Display Priority') }}</label>
+                            <label for="sort_order" class="fw-bold">{{ __('gateways.Display Priority') }}</label>
                             <input type="number" class="form-control" id="sort_order" name="sort_order" value="0" min="0">
-                            <small class="text-muted">{{ __('Lower numbers appear first in payment selection') }}</small>
+                            <small class="text-muted">{{ __('gateways.Lower numbers appear first in payment selection') }}</small>
                         </div>
                     </div>
                 </div>
 
                 <!-- Gateway Configuration -->
                 <div id="configFields" class="config-section">
-                    <h5 class="mb-3">{{ __('Gateway Configuration') }}</h5>
+                    <h5 class="mb-3">{{ __('gateways.Gateway Configuration') }}</h5>
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle me-2"></i>
-                        {{ __('Select a gateway type above to see required configuration fields') }}
+                        {{ __('gateways.Select a gateway type above to see required configuration fields') }}
                     </div>
                 </div>
 
                 <!-- Additional Settings -->
-                <h5 class="mb-3">{{ __('Additional Settings') }}</h5>
+                <h5 class="mb-3">{{ __('gateways.Additional Settings') }}</h5>
                 <div class="row mb-4">
                     <div class="col-md-12">
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="is_active" name="is_active" checked>
                             <label class="form-check-label fw-bold" for="is_active">
-                                {{ __('Active') }}
+                                {{ __('common.Active') }}
                             </label>
                             <small class="text-muted d-block">{{ __('Enable this payment gateway for use' }}</small>
                         </div>
@@ -189,22 +189,22 @@
                 </div>
 
                 <div class="form-group mb-4">
-                    <label for="notes" class="fw-bold">{{ __('Notes') }}</label>
+                    <label for="notes" class="fw-bold">{{ __('common.Notes') }}</label>
                     <textarea class="form-control" id="notes" name="notes" rows="3" maxlength="1000" 
-                              placeholder="{{ __('Add any notes or instructions for this gateway configuration...') }}"></textarea>
+                              placeholder="{{ __('gateways.Add any notes or instructions for this gateway configuration...') }}"></textarea>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save me-2"></i> {{ __('Save Gateway') }}
+                        <i class="fas fa-save me-2"></i> {{ __('gateways.Save Gateway') }}
                     </button>
                     <button type="button" onclick="testConfiguration()" class="btn btn-info">
-                        <i class="fas fa-vial me-2"></i> {{ __('Test Configuration') }}
+                        <i class="fas fa-vial me-2"></i> {{ __('gateways.Test Configuration') }}
                     </button>
                     <a href="{{ route('admin.payment-gateways.index', ['company_id' => $companyId, 'branch_id' => $branchId]) }}" 
                        class="btn btn-secondary">
-                        {{ __('Cancel') }}
+                        {{ __('common.Cancel') }}
                     </a>
                 </div>
 
@@ -267,7 +267,7 @@ function loadBranches() {
     const companyId = document.getElementById('company_id').value;
     const branchSelect = document.getElementById('branch_id');
     
-    branchSelect.innerHTML = '<option value="">{{ __("All Branches") }}</option>';
+    branchSelect.innerHTML = '<option value="">{{ __('gateways.All Branches') }}</option>';
     
     if (companyId) {
         fetch(`/api/branches/${companyId}`)
@@ -288,10 +288,10 @@ function loadRequiredFields() {
     
     if (!selectedGatewayType) {
         configFieldsDiv.innerHTML = `
-            <h5 class="mb-3">{{ __('Gateway Configuration') }}</h5>
+            <h5 class="mb-3">{{ __('gateways.Gateway Configuration') }}</h5>
             <div class="alert alert-info">
                 <i class="fas fa-info-circle me-2"></i>
-                {{ __('Select a gateway type above to see required configuration fields') }}
+                {{ __('gateways.Select a gateway type above to see required configuration fields') }}
             </div>
         `;
         return;
@@ -301,14 +301,14 @@ function loadRequiredFields() {
         .then(response => response.json())
         .then(data => {
             if (data.success && data.fields) {
-                let html = '<h5 class="mb-3">{{ __("Gateway Configuration") }}</h5><div class="row">';
+                let html = '<h5 class="mb-3">{{ __('gateways.Gateway Configuration') }}</h5><div class="row">';
                 
                 for (const [key, label] of Object.entries(data.fields)) {
                     html += `
                         <div class="col-md-6 mb-3">
                             <label for="config_${key}" class="fw-bold required-field">${label}</label>
                             <input type="text" class="form-control" id="config_${key}" name="config_data[${key}]" required
-                                   placeholder="{{ __('Enter ') + label + '..." }}">
+                                   placeholder="{{ __('gateways.Enter ') + label + '..." }}">
                         </div>
                     `;
                 }
@@ -329,12 +329,12 @@ function testConfiguration() {
     });
     
     if (!selectedGatewayType) {
-        showTestResult(false, '{{ __("Please select a gateway type first") }}');
+        showTestResult(false, '{{ __('gateways.Please select a gateway type first') }}');
         return;
     }
     
     // Show loading state
-    showTestResult(false, '{{ __("Testing configuration...") }}');
+    showTestResult(false, '{{ __('gateways.Testing configuration...') }}');
     
     fetch('{{ route("admin.payment-gateways.test-configuration") }}', {
         method: 'POST',
@@ -350,13 +350,13 @@ function testConfiguration() {
     .then(response => response.json())
     .then(data => {
         if (data.valid) {
-            showTestResult(true, '{{ __("Configuration is valid! This gateway is ready to use.") }}');
+            showTestResult(true, '{{ __('gateways.Configuration is valid! This gateway is ready to use.') }}');
         } else {
-            showTestResult(false, '{{ __("Configuration is invalid:") }} ' + data.message);
+            showTestResult(false, '{{ __('gateways.Configuration is invalid:') }} ' + data.message);
         }
     })
     .catch(error => {
-        showTestResult(false, '{{ __("Error testing configuration:") }} ' + error);
+        showTestResult(false, '{{ __('gateways.Error testing configuration:') }} ' + error);
     });
 }
 

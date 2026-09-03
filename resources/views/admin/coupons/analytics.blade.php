@@ -16,34 +16,34 @@
     {{-- KPI Cards --}}
     <div class="row g-3 mb-4">
         <div class="col-md-3">
-            <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; background: linear-gradient(135deg, #e3f2fd, #fff);">
-                <div class="card-body" class="card-body">
+            <div class="card js-card-gradient-info">
+                <div class="card-body">
                     <p class="section-subtitle-xs">إجمالي الاستخدامات</p>
-                    <h3 style="font-weight: 700; color: #1565c0; margin: 6px 0 0;">{{ number_format($totalUsages) }}</h3>
+                    <h3 class="js-stat-value-lg" style="color: #1565c0;">{{ number_format($totalUsages) }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; background: linear-gradient(135deg, #e8f5e9, #fff);">
-                <div class="card-body" class="card-body">
+            <div class="card js-card-gradient-success">
+                <div class="card-body">
                     <p class="section-subtitle-xs">إجمالي الخصومات</p>
-                    <h3 style="font-weight: 700; color: #2e7d32; margin: 6px 0 0;">${{ number_format($totalDiscountGiven, 2) }}</h3>
+                    <h3 class="js-stat-value-lg" style="color: #2e7d32;">${{ number_format($totalDiscountGiven, 2) }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; background: linear-gradient(135deg, #f3e5f5, #fff);">
-                <div class="card-body" class="card-body">
+            <div class="card js-card-gradient-purple">
+                <div class="card-body">
                     <p class="section-subtitle-xs">الإيرادات بالكوبونات</p>
-                    <h3 style="font-weight: 700; color: #7b1fa2; margin: 6px 0 0;">${{ number_format($couponRevenue, 2) }}</h3>
+                    <h3 class="js-stat-value-lg" style="color: #7b1fa2;">${{ number_format($couponRevenue, 2) }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; background: linear-gradient(135deg, #fff8e1, #fff);">
-                <div class="card-body" class="card-body">
+            <div class="card js-card-gradient-amber">
+                <div class="card-body">
                     <p class="section-subtitle-xs">متوسط قيمة الطلب</p>
-                    <h3 style="font-weight: 700; color: #f57f17; margin: 6px 0 0;">${{ number_format($avgOrderValue ?? 0, 2) }}</h3>
+                    <h3 class="js-stat-value-lg" style="color: #f57f17;">${{ number_format($avgOrderValue ?? 0, 2) }}</h3>
                 </div>
             </div>
         </div>
@@ -53,39 +53,39 @@
     <div class="row g-3 mb-4">
         <div class="col-md-4">
             <div class="card" class="card-clean-bordered">
-                <div class="card-body d-flex align-items-center gap-3" style="padding: 16px 20px;">
-                    <div style="width: 40px; height: 40px; border-radius: 10px; background: #e3f2fd; display: flex; align-items: center; justify-content: center;">
+                <div class="card-body d-flex align-items-center gap-3" class="p-16-20">
+                    <div class="js-icon-container-sm" style="background: #e3f2fd;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1565c0" stroke-width="2"><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6"/><path d="M2 8h20v4H2z"/></svg>
                     </div>
                     <div>
-                        <p style="font-size: 12px; color: #86868b; margin: 0;">الكوبونات النشطة</p>
-                        <p style="font-size: 20px; font-weight: 700; margin: 0; color: #1d1d1f;">{{ $activeCoupons }} <span style="font-size: 13px; color: #86868b; font-weight: 400;">/ {{ $totalCoupons }}</span></p>
+                        <p class="fs-12-color-muted">الكوبونات النشطة</p>
+                        <p class="section-title-xl">{{ $activeCoupons }} <span class="section-subtitle">/ {{ $totalCoupons }}</span></p>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card" class="card-clean-bordered">
-                <div class="card-body d-flex align-items-center gap-3" style="padding: 16px 20px;">
-                    <div style="width: 40px; height: 40px; border-radius: 10px; background: #e8f5e9; display: flex; align-items: center; justify-content: center;">
+                <div class="card-body d-flex align-items-center gap-3" class="p-16-20">
+                    <div class="js-icon-container-sm" style="background: #e8f5e9;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                     </div>
                     <div>
-                        <p style="font-size: 12px; color: #86868b; margin: 0;">الطلبات باستخدام كوبونات</p>
-                        <p style="font-size: 20px; font-weight: 700; margin: 0; color: #1d1d1f;">{{ $ordersWithCoupons }} <span style="font-size: 13px; color: #86868b; font-weight: 400;">/ {{ $totalOrders }}</span></p>
+                        <p class="fs-12-color-muted">الطلبات باستخدام كوبونات</p>
+                        <p class="section-title-xl">{{ $ordersWithCoupons }} <span class="section-subtitle">/ {{ $totalOrders }}</span></p>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card" class="card-clean-bordered">
-                <div class="card-body d-flex align-items-center gap-3" style="padding: 16px 20px;">
-                    <div style="width: 40px; height: 40px; border-radius: 10px; background: #fff3e0; display: flex; align-items: center; justify-content: center;">
+                <div class="card-body d-flex align-items-center gap-3" class="p-16-20">
+                    <div class="js-icon-container-sm" style="background: #fff3e0;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e65100" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     </div>
                     <div>
-                        <p style="font-size: 12px; color: #86868b; margin: 0;">نسبة التحويل</p>
-                        <p style="font-size: 20px; font-weight: 700; margin: 0; color: #1d1d1f;">{{ $conversionRate }}%</p>
+                        <p class="fs-12-color-muted">نسبة التحويل</p>
+                        <p class="section-title-xl">{{ $conversionRate }}%</p>
                     </div>
                 </div>
             </div>
@@ -118,7 +118,7 @@
             <h6 class="heading-md">أكثر الكوبونات استخداماً</h6>
             <div class="table-responsive">
                 <table class="table table-hover mb-0" class="fs-14">
-                    <thead style="background: #f5f5f7;">
+                    <thead class="bg-light">
                         <tr>
                             <th class="tab-btn-upper">الكود</th>
                             <th class="tab-btn-upper">النوع</th>
@@ -130,27 +130,27 @@
                     <tbody>
                         @forelse ($topCoupons as $coupon)
                             <tr class="border-bottom-light">
-                                <td class="card-body-sm"><code style="background: #f5f5f7; padding: 4px 10px; border-radius: 6px; font-weight: 600;">{{ $coupon->code }}</code></td>
+                                <td class="card-body-sm"><code class="js-badge-code">{{ $coupon->code }}</code></td>
                                 <td class="card-body-sm">
                                     @if ($coupon->type === 'percentage')
-                                        <span style="background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600;">{{ $coupon->value }}%</span>
+                                        <span class="js-badge-success" style="font-size: 13px;">{{ $coupon->value }}%</span>
                                     @else
-                                        <span style="background: #e3f2fd; color: #1565c0; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600;">${{ number_format($coupon->value, 2) }}</span>
+                                        <span class="js-badge-info" style="font-size: 13px;">${{ number_format($coupon->value, 2) }}</span>
                                     @endif
                                 </td>
-                                <td style="padding: 12px 16px; font-weight: 600;">{{ $coupon->usages_count }}</td>
-                                <td style="padding: 12px 16px; font-weight: 600; color: #2e7d32;">${{ number_format($coupon->usages_sum_discount_amount ?? 0, 2) }}</td>
+                                <td class="p-12-16-600">{{ $coupon->usages_count }}</td>
+                                <td class="js-table-cell" style="font-weight: 600; color: #2e7d32;">${{ number_format($coupon->usages_sum_discount_amount ?? 0, 2) }}</td>
                                 <td class="card-body-sm">
                                     @if ($coupon->isCurrentlyValid())
-                                        <span style="background: #d4edda; color: #155724; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">نشط</span>
+                                        <span class="js-badge-success" style="font-size: 12px;">نشط</span>
                                     @else
-                                        <span style="background: #f8d7da; color: #721c24; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">منتهي</span>
+                                        <span class="js-badge-pill" style="background: #f8d7da; color: #721c24; font-size: 12px;">منتهي</span>
                                     @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-4" style="color: #86868b;">لا توجد بيانات بعد</td>
+                                <td colspan="5" class="text-center py-4" class="text-muted-custom">لا توجد بيانات بعد</td>
                             </tr>
                         @endforelse
                     </tbody>

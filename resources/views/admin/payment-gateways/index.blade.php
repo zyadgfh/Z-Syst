@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Payment Gateways Management') }}
+    {{ __('gateways.Payment Gateways Management') }}
 @endsection
 
 @push('css')
@@ -112,12 +112,12 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="mb-1">{{ __('Payment Gateways') }}</h2>
-            <p class="text-muted mb-0">{{ __('Manage Egyptian payment gateways for subscriptions and POS') }}</p>
+            <h2 class="mb-1">{{ __('business.Payment Gateways') }}</h2>
+            <p class="text-muted mb-0">{{ __('gateways.Manage Egyptian payment gateways for subscriptions and POS') }}</p>
         </div>
         <a href="{{ route('admin.payment-gateways.create', ['company_id' => $companyId, 'branch_id' => $branchId]) }}" 
            class="btn btn-primary btn-action">
-            <i class="fas fa-plus me-2"></i> {{ __('Add Gateway') }}
+            <i class="fas fa-plus me-2"></i> {{ __('gateways.Add Gateway') }}
         </a>
     </div>
 
@@ -125,30 +125,30 @@
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="stat-card bg-primary">
-                <h5>{{ __('Total Gateways') }}</h5>
+                <h5>{{ __('gateways.Total Gateways') }}</h5>
                 <h2>{{ $gateways->count() }}</h2>
-                <small>{{ __('Configured payment methods') }}</small>
+                <small>{{ __('gateways.Configured payment methods') }}</small>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card bg-success">
-                <h5>{{ __('Active') }}</h5>
+                <h5>{{ __('common.Active') }}</h5>
                 <h2>{{ $gateways->where('is_active', true)->count() }}</h2>
-                <small>{{ __('Currently active gateways') }}</small>
+                <small>{{ __('gateways.Currently active gateways') }}</small>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card bg-warning">
-                <h5>{{ __('By Company') }}</h5>
+                <h5>{{ __('gateways.By Company') }}</h5>
                 <h2>{{ $gateways->whereNull('branch_id')->count() }}</h2>
-                <small>{{ __('Company-level configurations') }}</small>
+                <small>{{ __('gateways.Company-level configurations') }}</small>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card bg-info">
-                <h5>{{ __('By Branch') }}</h5>
+                <h5>{{ __('gateways.By Branch') }}</h5>
                 <h2>{{ $gateways->whereNotNull('branch_id')->count() }}</h2>
-                <small>{{ __('Branch-specific configurations') }}</small>
+                <small>{{ __('gateways.Branch-specific configurations') }}</small>
             </div>
         </div>
     </div>
@@ -157,9 +157,9 @@
     <div class="filter-section">
         <div class="row">
             <div class="col-md-3">
-                <label class="form-label fw-bold">{{ __('Company') }}</label>
+                <label class="form-label fw-bold">{{ __('gateways.Company') }}</label>
                 <select class="form-select" id="companyFilter" onchange="filterGateways()">
-                    <option value="">{{ __('All Companies') }}</option>
+                    <option value="">{{ __('gateways.All Companies') }}</option>
                     @foreach(\App\Models\Business::all() as $company)
                         <option value="{{ $company->id }}" {{ $companyId == $company->id ? 'selected' : '' }}>
                             {{ $company->companyName }}
@@ -168,9 +168,9 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label fw-bold">{{ __('Branch') }}</label>
+                <label class="form-label fw-bold">{{ __('common.Branch') }}</label>
                 <select class="form-select" id="branchFilter" onchange="filterGateways()">
-                    <option value="">{{ __('All Branches') }}</option>
+                    <option value="">{{ __('gateways.All Branches') }}</option>
                     @foreach($branches as $branch)
                         <option value="{{ $branch->id }}" {{ $branchId == $branch->id ? 'selected' : '' }}>
                             {{ $branch->branch_name }}
@@ -179,20 +179,20 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label fw-bold">{{ __('Gateway Type') }}</label>
+                <label class="form-label fw-bold">{{ __('gateways.Gateway Type') }}</label>
                 <select class="form-select" id="gatewayTypeFilter" onchange="filterGateways()">
-                    <option value="">{{ __('All Types') }}</option>
+                    <option value="">{{ __('common.All Types') }}</option>
                     @foreach($gatewayTypes as $type => $label)
                         <option value="{{ $type }}">{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label fw-bold">{{ __('Status') }}</label>
+                <label class="form-label fw-bold">{{ __('common.Status') }}</label>
                 <select class="form-select" id="statusFilter" onchange="filterGateways()">
-                    <option value="">{{ __('All Status') }}</option>
-                    <option value="active">{{ __('Active') }}</option>
-                    <option value="inactive">{{ __('Inactive') }}</option>
+                    <option value="">{{ __('common.All Status') }}</option>
+                    <option value="active">{{ __('common.Active') }}</option>
+                    <option value="inactive">{{ __('common.Inactive') }}</option>
                 </select>
             </div>
         </div>
@@ -205,13 +205,13 @@
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th>{{ __('Gateway Type') }}</th>
-                            <th>{{ __('Company') }}</th>
-                            <th>{{ __('Branch') }}</th>
-                            <th>{{ __('Transaction Fee') }}</th>
-                            <th>{{ __('Status') }}</th>
-                            <th>{{ __('Priority') }}</th>
-                            <th>{{ __('Actions') }}</th>
+                            <th>{{ __('gateways.Gateway Type') }}</th>
+                            <th>{{ __('gateways.Company') }}</th>
+                            <th>{{ __('common.Branch') }}</th>
+                            <th>{{ __('gateways.Transaction Fee') }}</th>
+                            <th>{{ __('common.Status') }}</th>
+                            <th>{{ __('purchases.Priority') }}</th>
+                            <th>{{ __('common.Actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -225,7 +225,7 @@
                                     <div>
                                         <strong>{{ $gateway->gateway_type_label }}</strong>
                                         @if($gateway->branch_id)
-                                        <small class="text-muted d-block">{{ __('Branch-specific') }}</small>
+                                        <small class="text-muted d-block">{{ __('gateways.Branch-specific') }}</small>
                                         @endif
                                     </div>
                                 </div>
@@ -236,12 +236,12 @@
                                 @if($gateway->transaction_fee > 0)
                                     <span class="badge bg-info">{{ $gateway->transaction_fee }}{{ $gateway->transaction_fee_type == 'percentage' ? '%' : ' EGP' }}</span>
                                 @else
-                                    <span class="badge bg-secondary">{{ __('No Fee') }}</span>
+                                    <span class="badge bg-secondary">{{ __('gateways.No Fee') }}</span>
                                 @endif
                             </td>
                             <td>
                                 <span class="badge {{ $gateway->is_active ? 'bg-success' : 'bg-danger' }}">
-                                    {{ $gateway->is_active ? __('Active') : __('Inactive') }}
+                                    {{ $gateway->is_active ? __('common.Active') : __('common.Inactive') }}
                                 </span>
                             </td>
                             <td>
@@ -251,24 +251,24 @@
                                 <div class="btn-group">
                                     @can('gateways-edit')
                                     <a href="{{ route('admin.payment-gateways.edit', $gateway->id) }}" 
-                                       class="btn btn-sm btn-info btn-action" title="{{ __('Edit') }}">
+                                       class="btn btn-sm btn-info btn-action" title="{{ __('common.Edit') }}">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     @endcan
                                     @can('gateways-edit')
                                     <button onclick="toggleStatus({{ $gateway->id }})" 
                                             class="btn btn-sm {{ $gateway->is_active ? 'btn-warning' : 'btn-success' }} btn-action" 
-                                            title="{{ $gateway->is_active ? __('Deactivate') : __('Activate') }}">
+                                            title="{{ $gateway->is_active ? __('gateways.Deactivate') : __('gateways.Activate') }}">
                                         <i class="fas {{ $gateway->is_active ? 'fa-toggle-off' : 'fa-toggle-on' }}"></i>
                                     </button>
                                     @endcan
                                     <a href="{{ route('admin.payment-gateways.transactions', $gateway->id) }}" 
-                                       class="btn btn-sm btn-secondary btn-action" title="{{ __('Transactions') }}">
+                                       class="btn btn-sm btn-secondary btn-action" title="{{ __('loyalty.Transactions') }}">
                                         <i class="fas fa-list"></i>
                                     </a>
                                     @can('gateways-delete')
                                     <button onclick="deleteGateway({{ $gateway->id }})" 
-                                            class="btn btn-sm btn-danger btn-action" title="{{ __('Delete') }}">
+                                            class="btn btn-sm btn-danger btn-action" title="{{ __('common.Delete') }}">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                     @endcan
@@ -280,10 +280,10 @@
                             <td colspan="7" class="text-center py-5">
                                 <div class="text-muted">
                                     <i class="fas fa-credit-card fa-3x mb-3"></i>
-                                    <p class="mb-0">{{ __('No payment gateways found') }}</p>
+                                    <p class="mb-0">{{ __('gateways.No payment gateways found') }}</p>
                                     <a href="{{ route('admin.payment-gateways.create', ['company_id' => $companyId, 'branch_id' => $branchId]) }}" 
                                        class="btn btn-primary btn-sm mt-2">
-                                        {{ __('Add Your First Gateway') }}
+                                        {{ __('gateways.Add Your First Gateway') }}
                                     </a>
                                 </div>
                             </td>
@@ -329,7 +329,7 @@ function filterGateways() {
 }
 
 function toggleStatus(id) {
-    if (!confirm('{{ __("Are you sure you want to toggle the gateway status?") }}')) {
+    if (!confirm('{{ __('gateways.Are you sure you want to toggle the gateway status?') }}')) {
         return;
     }
     
@@ -354,7 +354,7 @@ function toggleStatus(id) {
 }
 
 function deleteGateway(id) {
-    if (!confirm('{{ __("Are you sure you want to delete this payment gateway?") }}')) {
+    if (!confirm('{{ __('gateways.Are you sure you want to delete this payment gateway?') }}')) {
         return;
     }
     

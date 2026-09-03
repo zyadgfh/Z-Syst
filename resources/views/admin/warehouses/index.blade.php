@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Warehouses') }}
+    {{ __('warehouses.Warehouses') }}
 @endsection
 
 @section('main_content')
@@ -10,10 +10,10 @@
             <div class="card">
                 <div class="card-bodys">
                     <div class="table-header p-16">
-                        <h4>{{ __('Warehouses') }}</h4>
+                        <h4>{{ __('warehouses.Warehouses') }}</h4>
                         @can('warehouses-create')
                             <a type="button" href="{{ route('admin.warehouses.create') }}" class="add-order-btn rounded-2 active">
-                                <i class="fas fa-plus-circle me-1"></i> {{ __('Add Warehouse') }}
+                                <i class="fas fa-plus-circle me-1"></i> {{ __('warehouses.Add Warehouse') }}
                             </a>
                         @endcan
                     </div>
@@ -21,7 +21,7 @@
                     <div class="table-top-form sec-header d-print-none">
                         <div class="d-flex gap-3">
                             <div class="table-search position-relative">
-                                <input class="form-control searchInput" type="text" id="warehouse-search" placeholder="{{ __('Search warehouses...') }}">
+                                <input class="form-control searchInput" type="text" id="warehouse-search" placeholder="{{ __('warehouses.Search warehouses...') }}">
                                 <span class="position-absolute">
                                     <img src="{{ asset('assets/images/search.svg') }}" alt="">
                                 </span>
@@ -33,14 +33,14 @@
                         <table class="table" id="warehouse-table">
                             <thead>
                                 <tr>
-                                    <th class="table-header-content">{{ __('SL') }}.</th>
-                                    <th class="table-header-content">{{ __('Name') }}</th>
-                                    <th class="table-header-content">{{ __('Code') }}</th>
-                                    <th class="table-header-content">{{ __('Location') }}</th>
-                                    <th class="table-header-content">{{ __('Type') }}</th>
-                                    <th class="table-header-content">{{ __('Status') }}</th>
-                                    <th class="table-header-content">{{ __('Default') }}</th>
-                                    <th class="table-header-content d-print-none">{{ __('Action') }}</th>
+                                    <th class="table-header-content">{{ __('common.SL') }}.</th>
+                                    <th class="table-header-content">{{ __('common.Name') }}</th>
+                                    <th class="table-header-content">{{ __('common.Code') }}</th>
+                                    <th class="table-header-content">{{ __('warehouses.Location') }}</th>
+                                    <th class="table-header-content">{{ __('common.Type') }}</th>
+                                    <th class="table-header-content">{{ __('common.Status') }}</th>
+                                    <th class="table-header-content">{{ __('common.Default') }}</th>
+                                    <th class="table-header-content d-print-none">{{ __('common.Action') }}</th>
                                 </tr>
                             </thead>
                             <tbody id="warehouse-data">
@@ -49,22 +49,22 @@
                                         <td class="table-single-content">{{ $loop->iteration }}</td>
                                         <td class="table-single-content">{{ $warehouse->name }}</td>
                                         <td class="table-single-content">{{ $warehouse->code }}</td>
-                                        <td class="table-single-content">{{ $warehouse->location ?? __('N/A') }}</td>
-                                        <td class="table-single-content">{{ $warehouse->type ?? __('Standard') }}</td>
+                                        <td class="table-single-content">{{ $warehouse->location ?? __('warehouses.N/A') }}</td>
+                                        <td class="table-single-content">{{ $warehouse->type ?? __('products.Standard') }}</td>
                                         <td class="table-single-content">
                                             @if ($warehouse->is_active)
-                                                <span class="badge bg-success">{{ __('Active') }}</span>
+                                                <span class="badge bg-success">{{ __('common.Active') }}</span>
                                             @else
-                                                <span class="badge bg-danger">{{ __('Inactive') }}</span>
+                                                <span class="badge bg-danger">{{ __('common.Inactive') }}</span>
                                             @endif
                                         </td>
                                         <td class="table-single-content">
                                             @if ($warehouse->is_default)
-                                                <span class="badge bg-soft-primary">{{ __('Yes') }}</span>
+                                                <span class="badge bg-soft-primary">{{ __('common.Yes') }}</span>
                                             @else
                                                 @if ($warehouse->is_active)
                                                     <button class="btn btn-sm btn-outline-primary set-default-btn" data-id="{{ $warehouse->id }}">
-                                                        {{ __('Set Default') }}
+                                                        {{ __('warehouses.Set Default') }}
                                                     </button>
                                                 @endif
                                             @endif
@@ -86,7 +86,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="text-center py-4">{{ __('No warehouses found') }}</td>
+                                        <td colspan="8" class="text-center py-4">{{ __('warehouses.No warehouses found') }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -120,7 +120,7 @@
             document.querySelectorAll('.delete-warehouse-btn').forEach(button => {
                 button.addEventListener('click', function() {
                     const id = this.dataset.id;
-                    if (confirm('{{ __("Are you sure you want to delete this warehouse?") }}')) {
+                    if (confirm('{{ __('warehouses.Are you sure you want to delete this warehouse?') }}')) {
                         fetch(`/admin/warehouses/${id}`, {
                             method: 'DELETE',
                             headers: {

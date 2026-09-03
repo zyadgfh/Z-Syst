@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Roles') }}
+    {{ __('roles.Roles') }}
 @endsection
 
 @section('main_content')
@@ -10,7 +10,7 @@
             <div class="card">
                 <div class="card-bodys">
                     <div class="table-header p-16">
-                        <h4>{{ __('Add New Role & Permission') }}</h4>
+                        <h4>{{ __('roles.Add New Role & Permission') }}</h4>
                     </div>
                     <div class="row justify-content-center mt-2 roles-permissions p-16">
                         <div class="col-md-12">
@@ -18,14 +18,14 @@
                                 @csrf
 
                                 <div class="col-12 form-group role-input-label">
-                                    <label for="name" class="required">{{ __('Role Name') }}</label>
+                                    <label for="name" class="required">{{ __('roles.Role Name') }}</label>
                                     <input type="text" name="name" id="name" class="form-control"
-                                        placeholder="{{ __('Enter role name') }}" required>
+                                        placeholder="{{ __('roles.Enter role name') }}" required>
                                 </div>
 
                                 <div class="col-12 ">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <h4 class="mt-3 mb-3 permission-title">{{ __('Select Permission') }}</h4>
+                                        <h4 class="mt-3 mb-3 permission-title">{{ __('roles.Select Permission') }}</h4>
                                         <div class="custom-control custom-checkbox d-flex align-items-center">
                                             <label for="" class="table-custom-checkbox">
                                                 <input type="checkbox"
@@ -35,7 +35,7 @@
                                                     class="table-custom-checkmark custom-control-label custom-checkmark"></label>
                                             </label>
                                             <label class="custom-control-label fw-bold"
-                                                for="selectAll">{{ __('Select All') }}</label>
+                                                for="selectAll">{{ __('roles.Select All') }}</label>
                                         </div>
                                     </div>
 
@@ -43,12 +43,12 @@
                                         <table class="table">
                                             <tbody>
                                                 <tr>
-                                                    <th class="table-header-content">{{ __('SL') }}.</th>
+                                                    <th class="table-header-content">{{ __('common.SL') }}.</th>
                                                     <th class="text-nowrap fw-bolder table-header-content text-start">
-                                                        {{ __('Setup role permissions') }}
+                                                        {{ __('roles.Setup role permissions') }}
                                                     </th>
                                                     <th class="table-header-content text-start">
-                                                        {{ __('Permission') }}
+                                                        {{ __('roles.Permission') }}
                                                     </th>
                                                 </tr>
                                                 @foreach ($groups as $key => $group)
@@ -88,8 +88,8 @@
 
                                     <div class="button-group text-center mt-3">
                                         <button type="reset"
-                                            class="theme-btn border-btn m-2">{{ __('Reset') }}</button>
-                                        <button class="theme-btn m-2 submit-btn">{{ __('Save') }}</button>
+                                            class="theme-btn border-btn m-2">{{ __('common.Reset') }}</button>
+                                        <button class="theme-btn m-2 submit-btn">{{ __('common.Save') }}</button>
                                     </div>
                                 </div>
                             </form>

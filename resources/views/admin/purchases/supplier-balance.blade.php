@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Supplier Balance Report') }}
+    {{ __('purchases.Supplier Balance Report') }}
 @endsection
 
 @section('main_content')
@@ -10,14 +10,14 @@
         <div class="card">
             <div class="card-bodys">
                 <div class="table-header p-16 d-flex align-items-center justify-content-between flex-wrap gap-3">
-                    <h4 class="mb-0"><i class="fas fa-balance-scale me-2"></i>{{ __('Supplier Balance Report') }}</h4>
+                    <h4 class="mb-0"><i class="fas fa-balance-scale me-2"></i>{{ __('purchases.Supplier Balance Report') }}</h4>
                     <div class="d-flex align-items-center gap-3">
                         <div class="text-end">
-                            <div class="text-muted">{{ __('Total Outstanding Balance') }}</div>
+                            <div class="text-muted">{{ __('purchases.Total Outstanding Balance') }}</div>
                             <h4 class="fw-bold text-danger mb-0">{{ number_format($totalBalance, 2) }}</h4>
                         </div>
                         <a href="{{ route('admin.purchases.reports') }}" class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-arrow-left me-1"></i>{{ __('Back') }}
+                            <i class="fas fa-arrow-left me-1"></i>{{ __('common.Back') }}
                         </a>
                     </div>
                 </div>
@@ -27,11 +27,11 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>{{ __('Supplier') }}</th>
-                                <th>{{ __('Phone') }}</th>
-                                <th>{{ __('Status') }}</th>
-                                <th class="text-end">{{ __('Balance (Due)') }}</th>
-                                <th>{{ __('Action') }}</th>
+                                <th>{{ __('purchases.Supplier') }}</th>
+                                <th>{{ __('common.Phone') }}</th>
+                                <th>{{ __('common.Status') }}</th>
+                                <th class="text-end">{{ __('purchases.Balance (Due)') }}</th>
+                                <th>{{ __('common.Action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -50,21 +50,21 @@
                                 </td>
                                 <td>
                                     <a href="{{ route('admin.suppliers.dashboard', $supplier->id) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-eye me-1"></i>{{ __('Dashboard') }}
+                                        <i class="fas fa-eye me-1"></i>{{ __('dashboard.Dashboard') }}
                                     </a>
                                 </td>
                             </tr>
                             @empty
                             <tr>
                                 <td colspan="6" class="text-center py-4 text-muted">
-                                    {{ __('No suppliers found.') }}
+                                    {{ __('purchases.No suppliers found.') }}
                                 </td>
                             </tr>
                             @endforelse
                         </tbody>
                         <tfoot>
                             <tr class="table-active fw-bold">
-                                <td colspan="4" class="text-end">{{ __('Total') }}</td>
+                                <td colspan="4" class="text-end">{{ __('common.Total') }}</td>
                                 <td class="text-end text-danger">{{ number_format($totalBalance, 2) }}</td>
                                 <td></td>
                             </tr>

@@ -7,10 +7,10 @@
 
 @if(in_array($role, ['staff']))
 {{-- ═══ Staff Dashboard ═══ --}}
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px;">
+<div class="js-grid-2col">
     {{-- Today's Sales --}}
-    <div class="card" style="padding:20px; border:1px solid #e5e7eb; border-radius:12px;">
-        <h3 style="font-size:14px; font-weight:600; color:#6b7280; margin-bottom:12px;">
+    <div class="card card-body">
+        <h3 class="section-subtitle">
             <i class="fas fa-shopping-cart" style="color:#22c55e; margin-right:6px;"></i>{{ __('Today\'s Sales') }}
         </h3>
         @php
@@ -19,13 +19,13 @@
                 ->selectRaw('COUNT(*) as count, SUM(totalAmount) as total')
                 ->first();
         @endphp
-        <div style="font-size:28px; font-weight:700; color:#1f2937;">{{ $todaySales->count ?? 0 }}</div>
-        <div style="font-size:13px; color:#6b7280;">{{ __('transactions') }} &middot; {{ number_format($todaySales->total ?? 0, 2) }}</div>
+        <div class="js-stat-value-lg" style="font-size:28px; color:#1f2937;">{{ $todaySales->count ?? 0 }}</div>
+        <div class="section-subtitle-xs" style="color:#6b7280;">{{ __('transactions') }} &middot; {{ number_format($todaySales->total ?? 0, 2) }}</div>
     </div>
 
     {{-- Low Stock Alert --}}
-    <div class="card" style="padding:20px; border:1px solid #e5e7eb; border-radius:12px;">
-        <h3 style="font-size:14px; font-weight:600; color:#6b7280; margin-bottom:12px;">
+    <div class="card card-body">
+        <h3 class="section-subtitle">
             <i class="fas fa-exclamation-triangle" style="color:#f59e0b; margin-right:6px;"></i>{{ __('Low Stock Items') }}
         </h3>
         @php
@@ -35,7 +35,7 @@
                 ->limit(5)
                 ->get();
         @endphp
-        <div style="font-size:28px; font-weight:700; color:{{ $lowStock->count() > 0 ? '#f59e0b' : '#22c55e' }};">
+        <div class="js-stat-value-lg" style="font-size:28px; color:{{ $lowStock->count() > 0 ? '#f59e0b' : '#22c55e' }};">
             {{ $lowStock->count() }}
         </div>
         @if($lowStock->count() > 0)
@@ -72,26 +72,26 @@
 @endif
 
 {{-- Quick Actions for Staff --}}
-<div class="card" style="padding:20px; border:1px solid #e5e7eb; border-radius:12px; margin-bottom:24px;">
-    <h3 style="font-size:14px; font-weight:600; color:#6b7280; margin-bottom:16px;">
+<div class="card card-body" style="margin-bottom:24px;">
+    <h3 class="section-subtitle" style="margin-bottom:16px;">
         <i class="fas fa-bolt" style="color:#6366f1; margin-right:6px;"></i>{{ __('Quick Actions') }}
     </h3>
-    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;">
-        <a href="{{ route('admin.prescriptions.index') }}" style="display:flex; flex-direction:column; align-items:center; gap:8px; padding:16px; border:1px solid #e5e7eb; border-radius:10px; text-decoration:none; color:#374151; transition:all 0.2s; text-align:center;">
+    <div class="js-grid-4col">
+        <a href="{{ route('admin.prescriptions.index') }}" class="feature-card">
             <i class="fas fa-prescription" style="font-size:20px; color:#6366f1;"></i>
-            <span style="font-size:12px; font-weight:500;">{{ __('Prescriptions') }}</span>
+            <span class="fs-12-500">{{ __('Prescriptions') }}</span>
         </a>
-        <a href="{{ route('admin.products.index') }}" style="display:flex; flex-direction:column; align-items:center; gap:8px; padding:16px; border:1px solid #e5e7eb; border-radius:10px; text-decoration:none; color:#374151; transition:all 0.2s; text-align:center;">
+        <a href="{{ route('admin.products.index') }}" class="feature-card">
             <i class="fas fa-pills" style="font-size:20px; color:#22c55e;"></i>
-            <span style="font-size:12px; font-weight:500;">{{ __('Products') }}</span>
+            <span class="fs-12-500">{{ __('Products') }}</span>
         </a>
-        <a href="{{ route('admin.inventory-alerts.index') }}" style="display:flex; flex-direction:column; align-items:center; gap:8px; padding:16px; border:1px solid #e5e7eb; border-radius:10px; text-decoration:none; color:#374151; transition:all 0.2s; text-align:center;">
+        <a href="{{ route('admin.inventory-alerts.index') }}" class="feature-card">
             <i class="fas fa-boxes" style="font-size:20px; color:#f59e0b;"></i>
-            <span style="font-size:12px; font-weight:500;">{{ __('Inventory') }}</span>
+            <span class="fs-12-500">{{ __('Inventory') }}</span>
         </a>
-        <a href="{{ route('admin.receipts.index') }}" style="display:flex; flex-direction:column; align-items:center; gap:8px; padding:16px; border:1px solid #e5e7eb; border-radius:10px; text-decoration:none; color:#374151; transition:all 0.2s; text-align:center;">
+        <a href="{{ route('admin.receipts.index') }}" class="feature-card">
             <i class="fas fa-receipt" style="font-size:20px; color:#8b5cf6;"></i>
-            <span style="font-size:12px; font-weight:500;">{{ __('Receipts') }}</span>
+            <span class="fs-12-500">{{ __('Receipts') }}</span>
         </a>
     </div>
 </div>

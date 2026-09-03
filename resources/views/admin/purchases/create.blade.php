@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('New Purchase Invoice') }}
+    {{ __('purchases.New Purchase Invoice') }}
 @endsection
 
 @section('main_content')
@@ -10,10 +10,10 @@
         <div class="card">
             <div class="card-bodys">
                 <div class="table-header p-16 d-flex align-items-center justify-content-between flex-wrap gap-3">
-                    <h4 class="mb-0">{{ __('New Purchase Invoice') }}</h4>
+                    <h4 class="mb-0">{{ __('purchases.New Purchase Invoice') }}</h4>
                     <div class="d-flex gap-2">
                         <a href="{{ route('admin.purchases.index') }}" class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-arrow-left me-1"></i>{{ __('Back to List') }}
+                            <i class="fas fa-arrow-left me-1"></i>{{ __('purchases.Back to List') }}
                         </a>
                     </div>
                 </div>
@@ -25,33 +25,33 @@
                         {{-- Header: Supplier, Branch, Date --}}
                         <div class="row g-3 mb-4">
                             <div class="col-md-3">
-                                <label class="form-label">{{ __('Supplier') }} <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('purchases.Supplier') }} <span class="text-danger">*</span></label>
                                 <select name="party_id" id="party_id" class="form-select" required>
-                                    <option value="">{{ __('Select Supplier') }}</option>
+                                    <option value="">{{ __('purchases.Select Supplier') }}</option>
                                     @foreach($suppliers as $supplier)
                                         <option value="{{ $supplier->id }}">{{ $supplier->name }} ({{ $supplier->phone ?? '' }})</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label">{{ __('Branch') }}</label>
+                                <label class="form-label">{{ __('common.Branch') }}</label>
                                 <select name="branch_id" id="branch_id" class="form-select">
-                                    <option value="">{{ __('Select Branch') }}</option>
+                                    <option value="">{{ __('purchases.Select Branch') }}</option>
                                     @foreach($branches as $branch)
                                         <option value="{{ $branch->id }}">{{ $branch->branch_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label">{{ __('Invoice Date') }} <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('purchases.Invoice Date') }} <span class="text-danger">*</span></label>
                                 <input type="date" name="purchaseDate" id="purchaseDate" class="form-control" value="{{ date('Y-m-d') }}" required>
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label">{{ __('Payment Type') }}</label>
+                                <label class="form-label">{{ __('purchases.Payment Type') }}</label>
                                 <select name="paymentType" id="paymentType" class="form-select">
-                                    <option value="Cash">{{ __('Cash') }}</option>
-                                    <option value="Card">{{ __('Card') }}</option>
-                                    <option value="Bank Transfer">{{ __('Bank Transfer') }}</option>
+                                    <option value="Cash">{{ __('purchases.Cash') }}</option>
+                                    <option value="Card">{{ __('purchases.Card') }}</option>
+                                    <option value="Bank Transfer">{{ __('purchases.Bank Transfer') }}</option>
                                 </select>
                             </div>
                         </div>
@@ -59,10 +59,10 @@
                         {{-- Barcode Search --}}
                         <div class="row g-3 mb-4">
                             <div class="col-md-4">
-                                <label class="form-label">{{ __('Scan Barcode or Search Product') }}</label>
+                                <label class="form-label">{{ __('purchases.Scan Barcode or Search Product') }}</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-barcode"></i></span>
-                                    <input type="text" id="barcodeInput" class="form-control" placeholder="{{ __('Scan barcode or type product name...') }}" autofocus>
+                                    <input type="text" id="barcodeInput" class="form-control" placeholder="{{ __('purchases.Scan barcode or type product name...') }}" autofocus>
                                     <button type="button" class="btn btn-outline-primary" onclick="searchByBarcode()">
                                         <i class="fas fa-search"></i>
                                     </button>
@@ -76,22 +76,22 @@
                             <table class="table table-bordered" id="itemsTable">
                                 <thead class="table-light">
                                     <tr>
-                                        <th style="width:40px">#</th>
-                                        <th>{{ __('Product') }}</th>
-                                        <th class="w-120">{{ __('Barcode') }}</th>
-                                        <th style="width:80px">{{ __('Batch') }}</th>
-                                        <th style="width:100px">{{ __('Qty') }}</th>
-                                        <th style="width:130px">{{ __('Purchase Price') }}</th>
-                                        <th style="width:100px">{{ __('Discount') }}</th>
-                                        <th style="width:100px">{{ __('Tax') }}</th>
-                                        <th style="width:130px">{{ __('Total') }}</th>
-                                        <th style="width:50px"></th>
+                                        <th class="w-40">#</th>
+                                        <th>{{ __('common.Product') }}</th>
+                                        <th class="w-120">{{ __('products.Barcode') }}</th>
+                                        <th class="w-80">{{ __('purchases.Batch') }}</th>
+                                        <th class="w-100">{{ __('common.Qty') }}</th>
+                                        <th class="w-130">{{ __('common.Purchase Price') }}</th>
+                                        <th class="w-100">{{ __('purchases.Discount') }}</th>
+                                        <th class="w-100">{{ __('common.Tax') }}</th>
+                                        <th class="w-130">{{ __('common.Total') }}</th>
+                                        <th class="w-50"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="itemsBody">
                                     <tr id="emptyRow">
                                         <td colspan="10" class="text-center text-muted py-4">
-                                            {{ __('No items added. Scan a barcode or search for a product.') }}
+                                            {{ __('purchases.No items added. Scan a barcode or search for a product.') }}
                                         </td>
                                     </tr>
                                 </tbody>
@@ -104,28 +104,28 @@
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between mb-2">
-                                            <span>{{ __('Subtotal') }}</span>
+                                            <span>{{ __('purchases.Subtotal') }}</span>
                                             <span id="subtotal">0.00</span>
                                         </div>
                                         <div class="d-flex justify-content-between mb-2">
-                                            <span>{{ __('Discount') }}</span>
+                                            <span>{{ __('purchases.Discount') }}</span>
                                             <input type="number" name="discountAmount" id="discountAmount" class="form-control form-control-sm text-end" class="w-120" value="0" min="0" step="0.01" onchange="recalculateTotals()">
                                         </div>
                                         <div class="d-flex justify-content-between mb-2">
-                                            <span>{{ __('Tax') }}</span>
+                                            <span>{{ __('common.Tax') }}</span>
                                             <input type="number" name="tax_amount" id="taxAmount" class="form-control form-control-sm text-end" class="w-120" value="0" min="0" step="0.01" onchange="recalculateTotals()">
                                         </div>
                                         <hr>
                                         <div class="d-flex justify-content-between mb-2 fw-bold fs-5">
-                                            <span>{{ __('Grand Total') }}</span>
+                                            <span>{{ __('purchases.Grand Total') }}</span>
                                             <span id="grandTotal" class="text-primary">0.00</span>
                                         </div>
                                         <div class="d-flex justify-content-between mb-2">
-                                            <span>{{ __('Paid Amount') }}</span>
+                                            <span>{{ __('purchases.Paid Amount') }}</span>
                                             <input type="number" name="paidAmount" id="paidAmount" class="form-control form-control-sm text-end" class="w-120" value="0" min="0" step="0.01" onchange="recalculateTotals()">
                                         </div>
                                         <div class="d-flex justify-content-between fw-bold {{ $errors->has('dueAmount') ? 'text-danger' : '' }}">
-                                            <span>{{ __('Remaining / Debt') }}</span>
+                                            <span>{{ __('purchases.Remaining / Debt') }}</span>
                                             <span id="dueAmount" class="text-danger">0.00</span>
                                         </div>
                                     </div>
@@ -136,16 +136,16 @@
                         {{-- Note --}}
                         <div class="row mt-4">
                             <div class="col-md-6">
-                                <label class="form-label">{{ __('Note') }}</label>
-                                <textarea name="note" id="note" class="form-control" rows="2" placeholder="{{ __('Optional notes...') }}"></textarea>
+                                <label class="form-label">{{ __('common.Note') }}</label>
+                                <textarea name="note" id="note" class="form-control" rows="2" placeholder="{{ __('purchases.Optional notes...') }}"></textarea>
                             </div>
                         </div>
 
                         {{-- Save Button --}}
                         <div class="mt-4 d-flex justify-content-end gap-2">
-                            <a href="{{ route('admin.purchases.index') }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
+                            <a href="{{ route('admin.purchases.index') }}" class="btn btn-outline-secondary">{{ __('common.Cancel') }}</a>
                             <button type="button" class="btn btn-primary btn-lg" onclick="confirmSave()" id="saveBtn">
-                                <i class="fas fa-save me-2"></i>{{ __('Save Invoice') }}
+                                <i class="fas fa-save me-2"></i>{{ __('purchases.Save Invoice') }}
                             </button>
                         </div>
                     </form>
@@ -160,16 +160,16 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">{{ __('Confirm Save') }}</h5>
+                <h5 class="modal-title">{{ __('purchases.Confirm Save') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <p id="confirmMessage"></p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('common.Cancel') }}</button>
                 <button type="button" class="btn btn-primary" onclick="submitPurchase()" id="confirmBtn">
-                    <i class="fas fa-check me-1"></i>{{ __('Confirm') }}
+                    <i class="fas fa-check me-1"></i>{{ __('common.Confirm') }}
                 </button>
             </div>
         </div>
@@ -181,20 +181,20 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-barcode me-2"></i>{{ __('Print Barcodes') }} — <span id="barcodeInvoiceNo"></span></h5>
+                <h5 class="modal-title"><i class="fas fa-barcode me-2"></i>{{ __('purchases.Print Barcodes') }} — <span id="barcodeInvoiceNo"></span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p class="text-muted">{{ __('Select the number of labels to print for each item.') }}</p>
+                <p class="text-muted">{{ __('purchases.Select the number of labels to print for each item.') }}</p>
                 <div class="table-responsive">
                     <table class="table table-sm">
                         <thead>
                             <tr>
-                                <th>{{ __('Product') }}</th>
-                                <th>{{ __('Barcode') }}</th>
-                                <th>{{ __('Batch') }}</th>
-                                <th>{{ __('Qty Purchased') }}</th>
-                                <th>{{ __('Labels to Print') }}</th>
+                                <th>{{ __('common.Product') }}</th>
+                                <th>{{ __('products.Barcode') }}</th>
+                                <th>{{ __('purchases.Batch') }}</th>
+                                <th>{{ __('purchases.Qty Purchased') }}</th>
+                                <th>{{ __('purchases.Labels to Print') }}</th>
                             </tr>
                         </thead>
                         <tbody id="barcodePrintBody"></tbody>
@@ -203,10 +203,10 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="skipBarcodePrint()">
-                    {{ __('Skip') }}
+                    {{ __('common.Skip') }}
                 </button>
                 <button type="button" class="btn btn-primary" onclick="printBarcodes()">
-                    <i class="fas fa-print me-1"></i>{{ __('Print Labels') }}
+                    <i class="fas fa-print me-1"></i>{{ __('purchases.Print Labels') }}
                 </button>
             </div>
         </div>
@@ -262,7 +262,7 @@
                 barcodeInput.focus();
                 document.getElementById('productSearchResults').style.display = 'none';
             } else {
-                toastr.warning(data.message || '{{ __("Product not found.") }}');
+                toastr.warning(data.message || '{{ __('purchases.Product not found.') }}');
             }
         });
     }
@@ -285,7 +285,7 @@
                 `).join('');
                 container.style.display = 'block';
             } else {
-                container.innerHTML = '<div class="list-group-item text-muted">{{ __("No products found.") }}</div>';
+                container.innerHTML = '<div class="list-group-item text-muted">{{ __('purchases.No products found.') }}</div>';
                 container.style.display = 'block';
             }
         });
@@ -319,7 +319,7 @@
                 <strong>${product.product_name}</strong>
             </td>
             <td><input type="text" name="products[${itemCounter}][barcode]" class="form-control form-control-sm" value="${product.barcode || ''}" readonly></td>
-            <td><input type="text" name="products[${itemCounter}][batch_no]" class="form-control form-control-sm" placeholder="{{ __('Batch') }}"></td>
+            <td><input type="text" name="products[${itemCounter}][batch_no]" class="form-control form-control-sm" placeholder="{{ __('purchases.Batch') }}"></td>
             <td><input type="number" name="products[${itemCounter}][quantities]" class="form-control form-control-sm qty-input" value="1" min="1" onchange="recalculateLine(this)" oninput="recalculateLine(this)"></td>
             <td><input type="number" name="products[${itemCounter}][purchase_with_tax]" class="form-control form-control-sm price-input" value="${price}" min="0" step="0.01" onchange="recalculateLine(this)" oninput="recalculateLine(this)"></td>
             <td><input type="number" name="products[${itemCounter}][discount]" class="form-control form-control-sm discount-input" value="0" min="0" step="0.01" onchange="recalculateLine(this)" oninput="recalculateLine(this)"></td>
@@ -338,7 +338,7 @@
         document.getElementById(rowId)?.remove();
         recalculateTotals();
         if (document.querySelectorAll('.item-row').length === 0) {
-            document.getElementById('itemsBody').innerHTML = '<tr id="emptyRow"><td colspan="10" class="text-center text-muted py-4">{{ __("No items added.") }}</td></tr>';
+            document.getElementById('itemsBody').innerHTML = '<tr id="emptyRow"><td colspan="10" class="text-center text-muted py-4">{{ __('purchases.No items added.') }}</td></tr>';
         }
     }
 
@@ -372,25 +372,25 @@
     function confirmSave() {
         const supplier = document.getElementById('party_id').value;
         if (!supplier) {
-            toastr.error('{{ __("Please select a supplier.") }}');
+            toastr.error('{{ __('purchases.Please select a supplier.') }}');
             return;
         }
         const items = document.querySelectorAll('.item-row');
         if (items.length === 0) {
-            toastr.error('{{ __("Please add at least one item.") }}');
+            toastr.error('{{ __('purchases.Please add at least one item.') }}');
             return;
         }
 
         const supplierName = document.getElementById('party_id').options[document.getElementById('party_id').selectedIndex].text;
         const total = document.getElementById('grandTotal').textContent;
-        document.getElementById('confirmMessage').innerHTML = `{{ __("Do you agree to save this purchase invoice?") }}<br><br><strong>{{ __("Supplier:") }}</strong> ${supplierName}<br><strong>{{ __("Total:") }}</strong> ${total}`;
+        document.getElementById('confirmMessage').innerHTML = `{{ __('purchases.Do you agree to save this purchase invoice?') }}<br><br><strong>{{ __('purchases.Supplier:') }}</strong> ${supplierName}<br><strong>{{ __('purchases.Total:') }}</strong> ${total}`;
         new bootstrap.Modal(document.getElementById('confirmModal')).show();
     }
 
     function submitPurchase() {
         const btn = document.getElementById('confirmBtn');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ __("Saving...") }}';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ __('common.Saving...') }}';
 
         // Collect form data
         const formData = {
@@ -437,13 +437,13 @@
             } else {
                 toastr.error(data.message);
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-check me-1"></i>{{ __("Confirm") }}';
+                btn.innerHTML = '<i class="fas fa-check me-1"></i>{{ __('common.Confirm') }}';
             }
         })
         .catch(() => {
-            toastr.error('{{ __("Error saving purchase.") }}');
+            toastr.error('{{ __('purchases.Error saving purchase.') }}');
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-check me-1"></i>{{ __("Confirm") }}';
+            btn.innerHTML = '<i class="fas fa-check me-1"></i>{{ __('common.Confirm') }}';
         });
     }
 
@@ -487,7 +487,7 @@
         });
 
         if (printData.length === 0) {
-            toastr.warning('{{ __("No barcodes to print.") }}');
+            toastr.warning('{{ __('purchases.No barcodes to print.') }}');
             return;
         }
 

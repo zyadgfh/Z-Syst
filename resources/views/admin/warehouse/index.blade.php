@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Warehouse & Stock') }}
+    {{ __('warehouses.Warehouse & Stock') }}
 @endsection
 
 @section('main_content')
@@ -11,7 +11,7 @@
             <div class="couter-box">
                 <div class="content-side">
                     <h5 id="total_items">0</h5>
-                    <p>{{ __('Total Items') }}</p>
+                    <p>{{ __('warehouses.Total Items') }}</p>
                 </div>
                 <div class="icons">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -22,7 +22,7 @@
             <div class="couter-box">
                 <div class="content-side">
                     <h5 id="total_value">$0</h5>
-                    <p>{{ __('Total Value') }}</p>
+                    <p>{{ __('purchases.Total Value') }}</p>
                 </div>
                 <div class="icons">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -33,7 +33,7 @@
             <div class="couter-box">
                 <div class="content-side">
                     <h5 id="low_stock_items">0</h5>
-                    <p>{{ __('Low Stock Items') }}</p>
+                    <p>{{ __('dashboard.Low Stock Items') }}</p>
                 </div>
                 <div class="icons">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -46,7 +46,7 @@
             <div class="couter-box">
                 <div class="content-side">
                     <h5 id="expired_items">0</h5>
-                    <p>{{ __('Expired Items') }}</p>
+                    <p>{{ __('warehouses.Expired Items') }}</p>
                 </div>
                 <div class="icons">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -64,24 +64,24 @@
                     <div class="table-top-form">
                         <div class="table-search">
                             <span><i class="fas fa-search"></i></span>
-                            <input type="text" class="form-control" placeholder="{{ __('Search stock...') }}" id="search-input">
+                            <input type="text" class="form-control" placeholder="{{ __('warehouses.Search stock...') }}" id="search-input">
                         </div>
                         <div class="d-flex gap-2">
                             <select class="form-select" id="filter-status">
-                                <option value="">{{ __('All Status') }}</option>
-                                <option value="in_stock">{{ __('In Stock') }}</option>
-                                <option value="low_stock">{{ __('Low Stock') }}</option>
-                                <option value="out_of_stock">{{ __('Out of Stock') }}</option>
+                                <option value="">{{ __('common.All Status') }}</option>
+                                <option value="in_stock">{{ __('products.In Stock') }}</option>
+                                <option value="low_stock">{{ __('products.Low Stock') }}</option>
+                                <option value="out_of_stock">{{ __('products.Out of Stock') }}</option>
                             </select>
                             <select class="form-select" id="filter-expiry">
-                                <option value="">{{ __('All Expiry') }}</option>
-                                <option value="expired">{{ __('Expired') }}</option>
-                                <option value="expiring_soon">{{ __('Expiring Soon') }}</option>
-                                <option value="good">{{ __('Good') }}</option>
+                                <option value="">{{ __('warehouses.All Expiry') }}</option>
+                                <option value="expired">{{ __('common.Expired') }}</option>
+                                <option value="expiring_soon">{{ __('audit.Expiring Soon') }}</option>
+                                <option value="good">{{ __('warehouses.Good') }}</option>
                             </select>
                             @can('stock-adjust')
                                 <button class="btn btn-primary" onclick="showAdjustModal()">
-                                    <i class="fas fa-plus me-2"></i>{{ __('Stock Adjustment') }}
+                                    <i class="fas fa-plus me-2"></i>{{ __('warehouses.Stock Adjustment') }}
                                 </button>
                             @endcan
                         </div>
@@ -92,15 +92,15 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th class="table-header-content">{{ __('SL') }}.</th>
-                                        <th class="table-header-content">{{ __('Product') }}</th>
-                                        <th class="table-header-content">{{ __('Batch Number') }}</th>
-                                        <th class="table-header-content">{{ __('Warehouse') }}</th>
-                                        <th class="table-header-content">{{ __('Quantity') }}</th>
-                                        <th class="table-header-content">{{ __('Purchase Price') }}</th>
-                                        <th class="table-header-content">{{ __('Expiry Date') }}</th>
-                                        <th class="table-header-content">{{ __('Status') }}</th>
-                                        <th class="table-header-content">{{ __('Actions') }}</th>
+                                        <th class="table-header-content">{{ __('common.SL') }}.</th>
+                                        <th class="table-header-content">{{ __('common.Product') }}</th>
+                                        <th class="table-header-content">{{ __('common.Batch Number') }}</th>
+                                        <th class="table-header-content">{{ __('warehouses.Warehouse') }}</th>
+                                        <th class="table-header-content">{{ __('common.Quantity') }}</th>
+                                        <th class="table-header-content">{{ __('common.Purchase Price') }}</th>
+                                        <th class="table-header-content">{{ __('common.Expiry Date') }}</th>
+                                        <th class="table-header-content">{{ __('common.Status') }}</th>
+                                        <th class="table-header-content">{{ __('common.Actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody id="stock-table-body">
@@ -132,24 +132,24 @@
                                             </td>
                                             <td class="table-single-content">
                                                 @if($batch->expiry_date && $batch->expiry_date < now())
-                                                    <span class="badge expired">{{ __('Expired') }}</span>
+                                                    <span class="badge expired">{{ __('common.Expired') }}</span>
                                                 @elseif($batch->quantity <= 0)
-                                                    <span class="badge out-of-stock">{{ __('Out of Stock') }}</span>
+                                                    <span class="badge out-of-stock">{{ __('products.Out of Stock') }}</span>
                                                 @elseif($batch->quantity <= $batch->product->reorder_level)
-                                                    <span class="badge low-stock">{{ __('Low Stock') }}</span>
+                                                    <span class="badge low-stock">{{ __('products.Low Stock') }}</span>
                                                 @else
-                                                    <span class="badge-soft-success">{{ __('In Stock') }}</span>
+                                                    <span class="badge-soft-success">{{ __('products.In Stock') }}</span>
                                                 @endif
                                             </td>
                                             <td class="table-single-content">
                                                 <div class="action-buttons">
                                                     @can('stock-read')
-                                                        <a href="{{ route('admin.stock.show', $batch->id) }}" class="btn btn-sm btn-info" title="{{ __('View') }}">
+                                                        <a href="{{ route('admin.stock.show', $batch->id) }}" class="btn btn-sm btn-info" title="{{ __('common.View') }}">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
                                                     @endcan
                                                     @can('stock-adjust')
-                                                        <button type="button" class="btn btn-sm btn-warning adjust-btn" data-id="{{ $batch->id }}" title="{{ __('Adjust') }}">
+                                                        <button type="button" class="btn btn-sm btn-warning adjust-btn" data-id="{{ $batch->id }}" title="{{ __('products.Adjust') }}">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
                                                     @endcan
@@ -177,7 +177,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">{{ __('Stock Adjustment') }}</h5>
+                    <h5 class="modal-title">{{ __('warehouses.Stock Adjustment') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -186,28 +186,28 @@
                         <input type="hidden" name="batch_id" id="adjust-batch-id">
                         
                         <div class="mb-3">
-                            <label class="form-label">{{ __('Adjustment Type') }}</label>
+                            <label class="form-label">{{ __('products.Adjustment Type') }}</label>
                             <select class="form-select" name="adjustment_type" required>
-                                <option value="add">{{ __('Add Stock') }}</option>
-                                <option value="remove">{{ __('Remove Stock') }}</option>
-                                <option value="adjust">{{ __('Adjust to Quantity') }}</option>
+                                <option value="add">{{ __('warehouses.Add Stock') }}</option>
+                                <option value="remove">{{ __('warehouses.Remove Stock') }}</option>
+                                <option value="adjust">{{ __('warehouses.Adjust to Quantity') }}</option>
                             </select>
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">{{ __('Quantity') }}</label>
+                            <label class="form-label">{{ __('common.Quantity') }}</label>
                             <input type="number" class="form-control" name="quantity" required min="1">
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">{{ __('Reason') }}</label>
+                            <label class="form-label">{{ __('common.Reason') }}</label>
                             <textarea class="form-control" name="reason" rows="3" required></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                    <button type="button" class="btn btn-primary" onclick="submitStockAdjustment()">{{ __('Save Adjustment') }}</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('common.Cancel') }}</button>
+                    <button type="button" class="btn btn-primary" onclick="submitStockAdjustment()">{{ __('warehouses.Save Adjustment') }}</button>
                 </div>
             </div>
         </div>
@@ -292,7 +292,7 @@
                     }
                 })
                 .catch(error => {
-                    toastr.error('{{ __("An error occurred") }}');
+                    toastr.error('{{ __('common.An error occurred') }}');
                 });
             }
 

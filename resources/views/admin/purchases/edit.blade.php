@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Edit Purchase Invoice') }} #{{ $purchase->invoiceNumber }}
+    {{ __('purchases.Edit Purchase Invoice') }} #{{ $purchase->invoiceNumber }}
 @endsection
 
 @section('main_content')
@@ -10,10 +10,10 @@
         <div class="card">
             <div class="card-bodys">
                 <div class="table-header p-16 d-flex align-items-center justify-content-between flex-wrap gap-3">
-                    <h4 class="mb-0">{{ __('Edit Purchase Invoice') }} #{{ $purchase->invoiceNumber }}</h4>
+                    <h4 class="mb-0">{{ __('purchases.Edit Purchase Invoice') }} #{{ $purchase->invoiceNumber }}</h4>
                     <div class="d-flex gap-2">
                         <a href="{{ route('admin.purchases.show', $purchase->id) }}" class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-arrow-left me-1"></i>{{ __('Back') }}
+                            <i class="fas fa-arrow-left me-1"></i>{{ __('common.Back') }}
                         </a>
                     </div>
                 </div>
@@ -25,33 +25,33 @@
 
                         <div class="row g-3 mb-4">
                             <div class="col-md-3">
-                                <label class="form-label">{{ __('Supplier') }} <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('purchases.Supplier') }} <span class="text-danger">*</span></label>
                                 <select name="party_id" id="party_id" class="form-select" required>
-                                    <option value="">{{ __('Select Supplier') }}</option>
+                                    <option value="">{{ __('purchases.Select Supplier') }}</option>
                                     @foreach($suppliers as $supplier)
                                         <option value="{{ $supplier->id }}" @selected($purchase->party_id == $supplier->id)>{{ $supplier->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label">{{ __('Branch') }}</label>
+                                <label class="form-label">{{ __('common.Branch') }}</label>
                                 <select name="branch_id" id="branch_id" class="form-select">
-                                    <option value="">{{ __('Select Branch') }}</option>
+                                    <option value="">{{ __('purchases.Select Branch') }}</option>
                                     @foreach($branches as $branch)
                                         <option value="{{ $branch->id }}" @selected($purchase->branch_id == $branch->id)>{{ $branch->branch_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label">{{ __('Invoice Date') }} <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('purchases.Invoice Date') }} <span class="text-danger">*</span></label>
                                 <input type="date" name="purchaseDate" id="purchaseDate" class="form-control" value="{{ $purchase->purchaseDate ? \Carbon\Carbon::parse($purchase->purchaseDate)->format('Y-m-d') : '' }}" required>
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label">{{ __('Payment Type') }}</label>
+                                <label class="form-label">{{ __('purchases.Payment Type') }}</label>
                                 <select name="paymentType" id="paymentType" class="form-select">
-                                    <option value="Cash" @selected($purchase->paymentType == 'Cash')>{{ __('Cash') }}</option>
-                                    <option value="Card" @selected($purchase->paymentType == 'Card')>{{ __('Card') }}</option>
-                                    <option value="Bank Transfer" @selected($purchase->paymentType == 'Bank Transfer')>{{ __('Bank Transfer') }}</option>
+                                    <option value="Cash" @selected($purchase->paymentType == 'Cash')>{{ __('purchases.Cash') }}</option>
+                                    <option value="Card" @selected($purchase->paymentType == 'Card')>{{ __('purchases.Card') }}</option>
+                                    <option value="Bank Transfer" @selected($purchase->paymentType == 'Bank Transfer')>{{ __('purchases.Bank Transfer') }}</option>
                                 </select>
                             </div>
                         </div>
@@ -59,10 +59,10 @@
                         {{-- Barcode Search --}}
                         <div class="row g-3 mb-4">
                             <div class="col-md-4">
-                                <label class="form-label">{{ __('Add Item (Barcode or Search)') }}</label>
+                                <label class="form-label">{{ __('purchases.Add Item (Barcode or Search)') }}</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-barcode"></i></span>
-                                    <input type="text" id="barcodeInput" class="form-control" placeholder="{{ __('Scan barcode or search...') }}">
+                                    <input type="text" id="barcodeInput" class="form-control" placeholder="{{ __('purchases.Scan barcode or search...') }}">
                                     <button type="button" class="btn btn-outline-primary" onclick="searchByBarcode()"><i class="fas fa-search"></i></button>
                                 </div>
                                 <div id="productSearchResults" class="list-group mt-1" style="display:none; max-height:200px; overflow-y:auto;"></div>
@@ -74,13 +74,13 @@
                             <table class="table table-bordered" id="itemsTable">
                                 <thead class="table-light">
                                     <tr>
-                                        <th style="width:40px">#</th>
-                                        <th>{{ __('Product') }}</th>
-                                        <th style="width:80px">{{ __('Batch') }}</th>
-                                        <th style="width:100px">{{ __('Qty') }}</th>
-                                        <th style="width:130px">{{ __('Purchase Price') }}</th>
-                                        <th style="width:130px">{{ __('Total') }}</th>
-                                        <th style="width:50px"></th>
+                                        <th class="w-40">#</th>
+                                        <th>{{ __('common.Product') }}</th>
+                                        <th class="w-80">{{ __('purchases.Batch') }}</th>
+                                        <th class="w-100">{{ __('common.Qty') }}</th>
+                                        <th class="w-130">{{ __('common.Purchase Price') }}</th>
+                                        <th class="w-130">{{ __('common.Total') }}</th>
+                                        <th class="w-50"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="itemsBody">
@@ -107,13 +107,13 @@
                             <div class="col-md-5">
                                 <div class="card">
                                     <div class="card-body">
-                                        <div class="d-flex justify-content-between mb-2"><span>{{ __('Subtotal') }}</span><span id="subtotal">0.00</span></div>
-                                        <div class="d-flex justify-content-between mb-2"><span>{{ __('Discount') }}</span><input type="number" name="discountAmount" id="discountAmount" class="form-control form-control-sm text-end" class="w-120" value="{{ $purchase->discountAmount }}" min="0" step="0.01" onchange="recalculateTotals()"></div>
-                                        <div class="d-flex justify-content-between mb-2"><span>{{ __('Tax') }}</span><input type="number" name="tax_amount" id="taxAmount" class="form-control form-control-sm text-end" class="w-120" value="{{ $purchase->tax_amount }}" min="0" step="0.01" onchange="recalculateTotals()"></div>
+                                        <div class="d-flex justify-content-between mb-2"><span>{{ __('purchases.Subtotal') }}</span><span id="subtotal">0.00</span></div>
+                                        <div class="d-flex justify-content-between mb-2"><span>{{ __('purchases.Discount') }}</span><input type="number" name="discountAmount" id="discountAmount" class="form-control form-control-sm text-end" class="w-120" value="{{ $purchase->discountAmount }}" min="0" step="0.01" onchange="recalculateTotals()"></div>
+                                        <div class="d-flex justify-content-between mb-2"><span>{{ __('common.Tax') }}</span><input type="number" name="tax_amount" id="taxAmount" class="form-control form-control-sm text-end" class="w-120" value="{{ $purchase->tax_amount }}" min="0" step="0.01" onchange="recalculateTotals()"></div>
                                         <hr>
-                                        <div class="d-flex justify-content-between mb-2 fw-bold fs-5"><span>{{ __('Grand Total') }}</span><span id="grandTotal" class="text-primary">0.00</span></div>
-                                        <div class="d-flex justify-content-between mb-2"><span>{{ __('Paid Amount') }}</span><input type="number" name="paidAmount" id="paidAmount" class="form-control form-control-sm text-end" class="w-120" value="{{ $purchase->paidAmount }}" min="0" step="0.01" onchange="recalculateTotals()"></div>
-                                        <div class="d-flex justify-content-between fw-bold"><span>{{ __('Remaining') }}</span><span id="dueAmount" class="text-danger">0.00</span></div>
+                                        <div class="d-flex justify-content-between mb-2 fw-bold fs-5"><span>{{ __('purchases.Grand Total') }}</span><span id="grandTotal" class="text-primary">0.00</span></div>
+                                        <div class="d-flex justify-content-between mb-2"><span>{{ __('purchases.Paid Amount') }}</span><input type="number" name="paidAmount" id="paidAmount" class="form-control form-control-sm text-end" class="w-120" value="{{ $purchase->paidAmount }}" min="0" step="0.01" onchange="recalculateTotals()"></div>
+                                        <div class="d-flex justify-content-between fw-bold"><span>{{ __('purchases.Remaining') }}</span><span id="dueAmount" class="text-danger">0.00</span></div>
                                     </div>
                                 </div>
                             </div>
@@ -121,15 +121,15 @@
 
                         <div class="row mt-4">
                             <div class="col-md-6">
-                                <label class="form-label">{{ __('Note') }}</label>
+                                <label class="form-label">{{ __('common.Note') }}</label>
                                 <textarea name="note" id="note" class="form-control" rows="2">{{ $purchase->note }}</textarea>
                             </div>
                         </div>
 
                         <div class="mt-4 d-flex justify-content-end gap-2">
-                            <a href="{{ route('admin.purchases.show', $purchase->id) }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
+                            <a href="{{ route('admin.purchases.show', $purchase->id) }}" class="btn btn-outline-secondary">{{ __('common.Cancel') }}</a>
                             <button type="button" class="btn btn-primary btn-lg" onclick="confirmSave()">
-                                <i class="fas fa-save me-2"></i>{{ __('Update Invoice') }}
+                                <i class="fas fa-save me-2"></i>{{ __('purchases.Update Invoice') }}
                             </button>
                         </div>
                     </form>
@@ -142,11 +142,11 @@
 <div class="modal fade" id="confirmModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title">{{ __('Confirm Update') }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-            <div class="modal-body"><p>{{ __('Are you sure you want to update this purchase invoice?') }}</p></div>
+            <div class="modal-header"><h5 class="modal-title">{{ __('purchases.Confirm Update') }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body"><p>{{ __('purchases.Are you sure you want to update this purchase invoice?') }}</p></div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                <button type="button" class="btn btn-primary" onclick="submitPurchase()" id="confirmBtn"><i class="fas fa-check me-1"></i>{{ __('Confirm') }}</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('common.Cancel') }}</button>
+                <button type="button" class="btn btn-primary" onclick="submitPurchase()" id="confirmBtn"><i class="fas fa-check me-1"></i>{{ __('common.Confirm') }}</button>
             </div>
         </div>
     </div>

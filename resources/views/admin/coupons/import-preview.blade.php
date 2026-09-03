@@ -42,7 +42,7 @@
         <div class="card" class="card-clean">
             <div class="table-responsive">
                 <table class="table table-hover mb-0" class="fs-13">
-                    <thead style="background: #f5f5f7;">
+                    <thead class="bg-light">
                         <tr>
                             <th class="tab-btn-xs">سطر</th>
                             <th class="tab-btn-xs">الكود</th>
@@ -78,7 +78,7 @@
             </div>
         </div>
     @else
-        <div class="text-center py-5" style="color: #86868b;">
+        <div class="text-center py-5" class="text-muted-custom">
             <p style="font-size: 16px;">لا توجد كوبونات صالحة للاستيراد</p>
         </div>
     @endif

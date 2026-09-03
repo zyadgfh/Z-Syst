@@ -5,7 +5,7 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
-                <h2>{{ __("Purchase Order") }} #{{ $purchaseOrder->po_number }}</h2>
+                <h2>{{ __('purchases.Purchase Order') }} #{{ $purchaseOrder->po_number }}</h2>
                 <div class="btn-group">
                     <a href="{{ route('admin.purchase-orders.index') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Back
@@ -30,49 +30,49 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h4>{{ __("Purchase Order Details") }}</h4>
+                    <h4>{{ __('purchases.Purchase Order Details') }}</h4>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <p><strong>{{ __("PO Number:") }}</strong> {{ $purchaseOrder->po_number }}</p>
-                            <p><strong>{{ __("Supplier:") }}</strong> {{ $purchaseOrder->supplier ? $purchaseOrder->supplier->name : 'N/A' }}</p>
-                            <p><strong>{{ __("Status:") }}</strong>
+                            <p><strong>{{ __('purchases.PO Number:') }}</strong> {{ $purchaseOrder->po_number }}</p>
+                            <p><strong>{{ __('purchases.Supplier:') }}</strong> {{ $purchaseOrder->supplier ? $purchaseOrder->supplier->name : 'N/A' }}</p>
+                            <p><strong>{{ __('purchases.Status:') }}</strong>
                                 <span class="badge badge-{{ getStatusClass($purchaseOrder->status) }}">
                                     {{ ucfirst($purchaseOrder->status) }}
                                 </span>
                             </p>
-                            <p><strong>{{ __("Priority:") }}</strong>
+                            <p><strong>{{ __('purchases.Priority:') }}</strong>
                                 <span class="badge badge-{{ getPriorityClass($purchaseOrder->priority) }}">
                                     {{ ucfirst($purchaseOrder->priority) }}
                                 </span>
                             </p>
                         </div>
                         <div class="col-md-6">
-                            <p><strong>{{ __("Order Date:") }}</strong> {{ formatDate($purchaseOrder->order_date) }}</p>
-                            <p><strong>{{ __("Expected Delivery:") }}</strong> {{ formatDate($purchaseOrder->expected_delivery_date) }}</p>
-                            <p><strong>{{ __("Created By:") }}</strong> {{ $purchaseOrder->createdBy ? $purchaseOrder->createdBy->name : 'N/A' }}</p>
-                            <p><strong>{{ __("Approved By:") }}</strong> {{ $purchaseOrder->approvedBy ? $purchaseOrder->approvedBy->name : 'N/A' }}</p>
+                            <p><strong>{{ __('purchases.Order Date:') }}</strong> {{ formatDate($purchaseOrder->order_date) }}</p>
+                            <p><strong>{{ __('purchases.Expected Delivery:') }}</strong> {{ formatDate($purchaseOrder->expected_delivery_date) }}</p>
+                            <p><strong>{{ __('purchases.Created By:') }}</strong> {{ $purchaseOrder->createdBy ? $purchaseOrder->createdBy->name : 'N/A' }}</p>
+                            <p><strong>{{ __('purchases.Approved By:') }}</strong> {{ $purchaseOrder->approvedBy ? $purchaseOrder->approvedBy->name : 'N/A' }}</p>
                         </div>
                     </div>
 
                     @if($purchaseOrder->shipping_address)
                         <div class="mt-3">
-                            <p><strong>{{ __("Shipping Address:") }}</strong></p>
+                            <p><strong>{{ __('purchases.Shipping Address:') }}</strong></p>
                             <p>{{ $purchaseOrder->shipping_address }}</p>
                         </div>
                     @endif
 
                     @if($purchaseOrder->terms)
                         <div class="mt-3">
-                            <p><strong>{{ __("Terms:") }}</strong></p>
+                            <p><strong>{{ __('purchases.Terms:') }}</strong></p>
                             <p>{{ $purchaseOrder->terms }}</p>
                         </div>
                     @endif
 
                     @if($purchaseOrder->notes)
                         <div class="mt-3">
-                            <p><strong>{{ __("Notes:") }}</strong></p>
+                            <p><strong>{{ __('purchases.Notes:') }}</strong></p>
                             <p>{{ $purchaseOrder->notes }}</p>
                         </div>
                     @endif
@@ -81,19 +81,19 @@
 
             <div class="card mt-3">
                 <div class="card-header">
-                    <h4>{{ __("Order Items") }}</h4>
+                    <h4>{{ __('purchases.Order Items') }}</h4>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>{{ __("Product") }}</th>
-                                    <th>{{ __("SKU") }}</th>
-                                    <th>{{ __("Quantity") }}</th>
-                                    <th>{{ __("Unit Price") }}</th>
-                                    <th>{{ __("Discount (%)") }}</th>
-                                    <th>{{ __("Total") }}</th>
+                                    <th>{{ __('common.Product') }}</th>
+                                    <th>{{ __('common.SKU') }}</th>
+                                    <th>{{ __('common.Quantity') }}</th>
+                                    <th>{{ __('purchases.Unit Price') }}</th>
+                                    <th>{{ __('purchases.Discount (%)') }}</th>
+                                    <th>{{ __('common.Total') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -110,19 +110,19 @@
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td colspan="5" class="text-right"><strong>{{ __("Subtotal:") }}</strong></td>
+                                    <td colspan="5" class="text-right"><strong>{{ __('purchases.Subtotal:') }}</strong></td>
                                     <td>{{ formatCurrency($purchaseOrder->subtotal) }}</td>
                                 </tr>
                                 <tr>
-                                    <td colspan="5" class="text-right"><strong>{{ __("Tax:") }}</strong></td>
+                                    <td colspan="5" class="text-right"><strong>{{ __('purchases.Tax:') }}</strong></td>
                                     <td>{{ formatCurrency($purchaseOrder->tax) }}</td>
                                 </tr>
                                 <tr>
-                                    <td colspan="5" class="text-right"><strong>{{ __("Shipping:") }}</strong></td>
+                                    <td colspan="5" class="text-right"><strong>{{ __('purchases.Shipping:') }}</strong></td>
                                     <td>{{ formatCurrency($purchaseOrder->shipping_cost) }}</td>
                                 </tr>
                                 <tr>
-                                    <td colspan="5" class="text-right"><strong>{{ __("Total:") }}</strong></td>
+                                    <td colspan="5" class="text-right"><strong>{{ __('purchases.Total:') }}</strong></td>
                                     <td><strong>{{ formatCurrency($purchaseOrder->total_amount) }}</strong></td>
                                 </tr>
                             </tfoot>
@@ -135,7 +135,7 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
-                    <h4>{{ __("Progress") }}</h4>
+                    <h4>{{ __('purchases.Progress') }}</h4>
                 </div>
                 <div class="card-body">
                     <div class="progress mb-3" style="height: 30px;">
@@ -143,15 +143,15 @@
                             {{ $purchaseOrder->completion_percentage }}%
                         </div>
                     </div>
-                    <p><strong>{{ __("Total Quantity:") }}</strong> {{ $purchaseOrder->total_quantity }}</p>
-                    <p><strong>{{ __("Received Quantity:") }}</strong> {{ $purchaseOrder->received_quantity }}</p>
-                    <p><strong>{{ __("Pending Quantity:") }}</strong> {{ $purchaseOrder->total_quantity - $purchaseOrder->received_quantity }}</p>
+                    <p><strong>{{ __('purchases.Total Quantity:') }}</strong> {{ $purchaseOrder->total_quantity }}</p>
+                    <p><strong>{{ __('purchases.Received Quantity:') }}</strong> {{ $purchaseOrder->received_quantity }}</p>
+                    <p><strong>{{ __('purchases.Pending Quantity:') }}</strong> {{ $purchaseOrder->total_quantity - $purchaseOrder->received_quantity }}</p>
                 </div>
             </div>
 
             <div class="card mt-3">
                 <div class="card-header">
-                    <h4>{{ __("Actions") }}</h4>
+                    <h4>{{ __('common.Actions') }}</h4>
                 </div>
                 <div class="card-body">
                     @if($purchaseOrder->status === 'draft')
@@ -191,26 +191,26 @@
 
             <div class="card mt-3">
                 <div class="card-header">
-                    <h4>{{ __("Timeline") }}</h4>
+                    <h4>{{ __('common.Timeline') }}</h4>
                 </div>
                 <div class="card-body">
                     <ul class="timeline">
                         <li>
-                            <strong>{{ __("Created:") }}</strong> {{ formatDateTime($purchaseOrder->created_at) }}
+                            <strong>{{ __('purchases.Created:') }}</strong> {{ formatDateTime($purchaseOrder->created_at) }}
                         </li>
                         @if($purchaseOrder->sent_at)
                             <li>
-                                <strong>{{ __("Sent:") }}</strong> {{ formatDateTime($purchaseOrder->sent_at) }}
+                                <strong>{{ __('purchases.Sent:') }}</strong> {{ formatDateTime($purchaseOrder->sent_at) }}
                             </li>
                         @endif
                         @if($purchaseOrder->approved_at)
                             <li>
-                                <strong>{{ __("Approved:") }}</strong> {{ formatDateTime($purchaseOrder->approved_at) }}
+                                <strong>{{ __('purchases.Approved:') }}</strong> {{ formatDateTime($purchaseOrder->approved_at) }}
                             </li>
                         @endif
                         @if($purchaseOrder->cancelled_at)
                             <li>
-                                <strong>{{ __("Cancelled:") }}</strong> {{ formatDateTime($purchaseOrder->cancelled_at) }}
+                                <strong>{{ __('purchases.Cancelled:') }}</strong> {{ formatDateTime($purchaseOrder->cancelled_at) }}
                             </li>
                         @endif
                     </ul>

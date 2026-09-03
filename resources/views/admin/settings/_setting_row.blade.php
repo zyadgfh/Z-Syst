@@ -14,7 +14,7 @@
             <div class="setting-name">
                 {{ __($def->name) }}
                 @if($isOverridden)
-                    <span class="badge bg-primary bg-opacity-10 text-primary ms-1" style="font-size:10px;">{{ __('Override') }}</span>
+                    <span class="badge bg-primary bg-opacity-10 text-primary ms-1" style="font-size:10px;">{{ __('common.Override') }}</span>
                 @endif
             </div>
             <div class="setting-description">{{ __($def->description) }}</div>
@@ -22,12 +22,12 @@
             <div class="mt-1">
                 @php
                     $sourceLabels = [
-                        'default' => __('Default'),
-                        'system' => __('System'),
-                        'organization' => __('Organization'),
-                        'branch' => __('Branch'),
-                        'role' => __('Role'),
-                        'user' => __('User'),
+                        'default' => __('common.Default'),
+                        'system' => __('common.System'),
+                        'organization' => __('settings.Organization'),
+                        'branch' => __('common.Branch'),
+                        'role' => __('roles.Role'),
+                        'user' => __('common.User'),
                     ];
                 @endphp
                 <span class="source-badge source-{{ $source }}">{{ $sourceLabels[$source] ?? $source }}</span>
@@ -45,7 +45,7 @@
                 </label>
 
             @elseif($def->type === 'select' && isset($def->type_options['options']))
-                <select class="form-select form-select-sm" style="width: 200px;"
+                <select class="form-select form-select-sm" class="w-200"
                         data-key="{{ $def->key }}"
                         data-type="select"
                         onchange="trackChange(this)">
@@ -59,7 +59,7 @@
             @elseif($def->type === 'integer')
                 <input type="number"
                        class="form-control form-control-sm"
-                       style="width: 120px;"
+                       class="w-120"
                        data-key="{{ $def->key }}"
                        data-type="integer"
                        value="{{ $effectiveValue ?? '' }}"
@@ -68,7 +68,7 @@
             @elseif($def->type === 'decimal')
                 <input type="number"
                        class="form-control form-control-sm"
-                       style="width: 120px;"
+                       class="w-120"
                        data-key="{{ $def->key }}"
                        data-type="decimal"
                        value="{{ $effectiveValue ?? '' }}"
@@ -78,7 +78,7 @@
             @else
                 <input type="text"
                        class="form-control form-control-sm"
-                       style="width: 200px;"
+                       class="w-200"
                        data-key="{{ $def->key }}"
                        data-type="string"
                        value="{{ $effectiveValue ?? '' }}"

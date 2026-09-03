@@ -12,14 +12,14 @@
                     <line x1="12" y1="2" x2="12" y2="4"/>
                 </svg>
                 تنبيهات المخزون
-                <span id="alerts-count-badge" style="background: #ff3b30; color: #fff; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 10px; vertical-align: super; margin-left: 8px;">{{ $stats['total'] }}</span>
+                <span id="alerts-count-badge" class="js-alert-count-badge">{{ $stats['total'] }}</span>
             </h4>
             <div class="d-flex gap-2">
                 <button onclick="runInventoryScan()" class="btn" id="scan-btn" style="background: #1d1d1f; color: #fff; border-radius: 10px; padding: 10px 20px; font-weight: 600; transition: transform 150ms ease;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align"><path d="M21 12a9 9 0 11-6.22-8.56"/><polyline points="21 3 21 9 15 9"/></svg>
                     فحص المخزون
                 </button>
-                <button onclick="acknowledgeAll()" class="btn" style="background: #f5f5f7; color: #1d1d1f; border-radius: 10px; padding: 10px 20px; font-weight: 600;">
+                <button onclick="acknowledgeAll()" class="btn js-btn-secondary">
                     تأكيد الكل
                 </button>
             </div>
@@ -80,7 +80,7 @@
                                 <p class="section-subtitle-xs">قرب انتهاء الصلاحية</p>
                                 <h3 style="font-weight: 700; color: #ff3b30; margin: 4px 0 0;">{{ $stats['expiring'] }}</h3>
                             </div>
-                            <div style="width: 44px; height: 44px; border-radius: 12px; background: #c0392b; display: flex; align-items: center; justify-content: center;">
+                            <div class="js-icon-container" style="background: #c0392b;">
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                             </div>
                         </div>
@@ -111,7 +111,7 @@
 
         {{-- Filters --}}
         <div class="card mb-4" class="card-clean-bordered">
-            <div class="card-body" style="padding: 16px;">
+            <div class="card-body" class="p-16">
                 <form method="GET" class="row g-2 align-items-end">
                     <div class="col-md-3">
                         <label class="form-label-xs">بحث</label>
@@ -315,7 +315,7 @@
         function runInventoryScan() {
             const btn = document.getElementById('scan-btn');
             btn.disabled = true;
-            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10"/></svg> جاري الفحص...';
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="js-spinning"><circle cx="12" cy="12" r="10"/></svg> جاري الفحص...';
 
             fetch('/admin/inventory-alerts/scan', {
                 method: 'POST',

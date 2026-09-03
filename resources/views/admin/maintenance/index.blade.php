@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Maintenance Mode') }}
+    {{ __('settings.Maintenance Mode') }}
 @endsection
 
 @section('main_content')
@@ -12,15 +12,15 @@
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h4>{{ __('Maintenance Mode Management') }}</h4>
-                                <p class="text-muted mb-0">{{ __('Control system-wide maintenance mode for all tenants') }}</p>
+                                <h4>{{ __('settings.Maintenance Mode Management') }}</h4>
+                                <p class="text-muted mb-0">{{ __('settings.Control system-wide maintenance mode for all tenants') }}</p>
                             </div>
                             <div class="header-actions">
                                 <button id="theme-toggle-btn" class="btn btn-outline-secondary btn-sm">
                                     <i class="fas fa-moon"></i>
                                 </button>
                                 <button id="refresh-status-btn" class="btn btn-outline-primary btn-sm">
-                                    <i class="fas fa-sync-alt"></i> {{ __('Refresh') }}
+                                    <i class="fas fa-sync-alt"></i> {{ __('common.Refresh') }}
                                 </button>
                             </div>
                         </div>
@@ -30,10 +30,10 @@
                         <div id="loading-state" class="loading-state">
                             <div class="loading-spinner">
                                 <div class="spinner-border text-primary" role="status">
-                                    <span class="sr-only">{{ __('Loading...') }}</span>
+                                    <span class="sr-only">{{ __('common.Loading...') }}</span>
                                 </div>
                             </div>
-                            <p class="text-muted">{{ __('Loading maintenance status...') }}</p>
+                            <p class="text-muted">{{ __('settings.Loading maintenance status...') }}</p>
                         </div>
 
                         <!-- Main Content -->
@@ -48,12 +48,12 @@
                                             </div>
                                         </div>
                                         <div class="status-info">
-                                            <h5 class="status-title" id="maintenance-status-text">{{ __('Checking status...') }}</h5>
-                                            <p class="status-subtitle" id="maintenance-subtitle">{{ __('Loading maintenance status') }}</p>
+                                            <h5 class="status-title" id="maintenance-status-text">{{ __('settings.Checking status...') }}</h5>
+                                            <p class="status-subtitle" id="maintenance-subtitle">{{ __('settings.Loading maintenance status') }}</p>
                                         </div>
                                         <div class="status-actions">
                                             <button id="maintenance-toggle-btn" class="btn btn-lg status-btn" disabled>
-                                                <span class="btn-text">{{ __('Loading...') }}</span>
+                                                <span class="btn-text">{{ __('common.Loading...') }}</span>
                                                 <span class="btn-icon">
                                                     <i class="fas fa-power-off"></i>
                                                 </span>
@@ -66,7 +66,7 @@
                             <!-- Maintenance Details -->
                             <div id="maintenance-details" class="maintenance-details" class="d-none">
                                 <div class="details-header">
-                                    <h6>{{ __('Maintenance Details') }}</h6>
+                                    <h6>{{ __('settings.Maintenance Details') }}</h6>
                                     <span class="details-badge" id="maintenance-status-badge"></span>
                                 </div>
                                 <div class="details-grid">
@@ -75,7 +75,7 @@
                                             <i class="fas fa-heading"></i>
                                         </div>
                                         <div class="detail-content">
-                                            <label>{{ __('Title') }}</label>
+                                            <label>{{ __('settings.Title') }}</label>
                                             <p id="maintenance-title">-</p>
                                         </div>
                                     </div>
@@ -84,7 +84,7 @@
                                             <i class="fas fa-clock"></i>
                                         </div>
                                         <div class="detail-content">
-                                            <label>{{ __('Estimated Completion') }}</label>
+                                            <label>{{ __('settings.Estimated Completion') }}</label>
                                             <p id="maintenance-estimated">-</p>
                                         </div>
                                     </div>
@@ -93,7 +93,7 @@
                                             <i class="fas fa-play-circle"></i>
                                         </div>
                                         <div class="detail-content">
-                                            <label>{{ __('Started At') }}</label>
+                                            <label>{{ __('settings.Started At') }}</label>
                                             <p id="maintenance-started">-</p>
                                         </div>
                                     </div>
@@ -102,7 +102,7 @@
                                             <i class="fas fa-stop-circle"></i>
                                         </div>
                                         <div class="detail-content">
-                                            <label>{{ __('Ended At') }}</label>
+                                            <label>{{ __('settings.Ended At') }}</label>
                                             <p id="maintenance-ended">-</p>
                                         </div>
                                     </div>
@@ -111,7 +111,7 @@
                                             <i class="fas fa-comment-alt"></i>
                                         </div>
                                         <div class="detail-content">
-                                            <label>{{ __('Message') }}</label>
+                                            <label>{{ __('settings.Message') }}</label>
                                             <p id="maintenance-message-text">-</p>
                                         </div>
                                     </div>
@@ -122,22 +122,22 @@
                             <div class="quick-actions">
                                 <button id="show-activate-form-btn" class="btn btn-action btn-action-primary">
                                     <i class="fas fa-power-off"></i>
-                                    <span>{{ __('Activate Maintenance') }}</span>
+                                    <span>{{ __('settings.Activate Maintenance') }}</span>
                                 </button>
                                 <button id="show-schedule-form-btn" class="btn btn-action btn-action-info">
                                     <i class="fas fa-calendar-alt"></i>
-                                    <span>{{ __('Schedule Maintenance') }}</span>
+                                    <span>{{ __('settings.Schedule Maintenance') }}</span>
                                 </button>
                                 <button id="view-history-btn" class="btn btn-action btn-action-secondary">
                                     <i class="fas fa-history"></i>
-                                    <span>{{ __('View History') }}</span>
+                                    <span>{{ __('settings.View History') }}</span>
                                 </button>
                             </div>
 
                             <!-- Maintenance Form -->
                             <div id="maintenance-form" class="maintenance-form animated-form" class="d-none">
                                 <div class="form-header">
-                                    <h5>{{ __('Activate Maintenance Mode') }}</h5>
+                                    <h5>{{ __('settings.Activate Maintenance Mode') }}</h5>
                                     <button type="button" class="btn-close" id="close-activate-form">
                                         <i class="fas fa-times"></i>
                                     </button>
@@ -146,48 +146,48 @@
                                     @csrf
                                     <div class="form-grid">
                                         <div class="form-group">
-                                            <label for="title">{{ __('Title') }}</label>
+                                            <label for="title">{{ __('settings.Title') }}</label>
                                             <input type="text" class="form-control" id="title" name="title" 
-                                                   value="{{ __('System Maintenance') }}" required>
-                                            <small class="form-text">{{ __('Display title for maintenance page') }}</small>
+                                                   value="{{ __('settings.System Maintenance') }}" required>
+                                            <small class="form-text">{{ __('settings.Display title for maintenance page') }}</small>
                                         </div>
                                         <div class="form-group">
-                                            <label for="estimated_completion">{{ __('Estimated Completion') }}</label>
+                                            <label for="estimated_completion">{{ __('settings.Estimated Completion') }}</label>
                                             <input type="text" class="form-control" id="estimated_completion" 
                                                    name="estimated_completion" value="2 hours" required>
-                                            <small class="form-text">{{ __('Estimated time for maintenance completion') }}</small>
+                                            <small class="form-text">{{ __('settings.Estimated time for maintenance completion') }}</small>
                                         </div>
                                         <div class="form-group full-width">
-                                            <label for="message">{{ __('Message') }}</label>
-                                            <textarea class="form-control" id="message" name="message" rows="3" required>{{ __('نحن نقوم بتحسين نظامنا لتقديم خدمة أفضل') }}</textarea>
-                                            <small class="form-text">{{ __('Message displayed to users during maintenance') }}</small>
+                                            <label for="message">{{ __('settings.Message') }}</label>
+                                            <textarea class="form-control" id="message" name="message" rows="3" required>{{ __('settings.نحن نقوم بتحسين نظامنا لتقديم خدمة أفضل') }}</textarea>
+                                            <small class="form-text">{{ __('settings.Message displayed to users during maintenance') }}</small>
                                         </div>
                                         <div class="form-group">
-                                            <label for="allowed_ips">{{ __('Allowed IPs (comma separated)') }}</label>
+                                            <label for="allowed_ips">{{ __('settings.Allowed IPs (comma separated)') }}</label>
                                             <input type="text" class="form-control" id="allowed_ips" name="allowed_ips" 
                                                    placeholder="192.168.1.1, 192.168.1.2">
-                                            <small class="form-text">{{ __('Leave empty to allow no specific IPs') }}</small>
+                                            <small class="form-text">{{ __('settings.Leave empty to allow no specific IPs') }}</small>
                                         </div>
                                         <div class="form-group">
-                                            <label for="allowed_users">{{ __('Allowed User IDs (comma separated)') }}</label>
+                                            <label for="allowed_users">{{ __('settings.Allowed User IDs (comma separated)') }}</label>
                                             <input type="text" class="form-control" id="allowed_users" name="allowed_users" 
                                                    placeholder="1, 2, 3">
-                                            <small class="form-text">{{ __('Leave empty to allow no specific users') }}</small>
+                                            <small class="form-text">{{ __('settings.Leave empty to allow no specific users') }}</small>
                                         </div>
                                         <div class="form-group">
-                                            <label for="ended_at">{{ __('End Time (Optional)') }}</label>
+                                            <label for="ended_at">{{ __('settings.End Time (Optional)') }}</label>
                                             <input type="datetime-local" class="form-control" id="ended_at" name="ended_at">
-                                            <small class="form-text">{{ __('Auto-deactivate maintenance at this time') }}</small>
+                                            <small class="form-text">{{ __('settings.Auto-deactivate maintenance at this time') }}</small>
                                         </div>
                                     </div>
                                     <div class="form-actions">
                                         <button type="submit" class="btn btn-success">
                                             <i class="fas fa-check"></i>
-                                            {{ __('Activate Maintenance Mode') }}
+                                            {{ __('settings.Activate Maintenance Mode') }}
                                         </button>
                                         <button type="button" class="btn btn-secondary" id="cancel-activate-btn">
                                             <i class="fas fa-times"></i>
-                                            {{ __('Cancel') }}
+                                            {{ __('common.Cancel') }}
                                         </button>
                                     </div>
                                 </form>
@@ -196,7 +196,7 @@
                             <!-- Schedule Maintenance Form -->
                             <div id="schedule-maintenance-form" class="maintenance-form animated-form" class="d-none">
                                 <div class="form-header">
-                                    <h5>{{ __('Schedule Maintenance') }}</h5>
+                                    <h5>{{ __('settings.Schedule Maintenance') }}</h5>
                                     <button type="button" class="btn-close" id="close-schedule-form">
                                         <i class="fas fa-times"></i>
                                     </button>
@@ -205,33 +205,33 @@
                                     @csrf
                                     <div class="form-grid">
                                         <div class="form-group">
-                                            <label for="schedule_title">{{ __('Title') }}</label>
+                                            <label for="schedule_title">{{ __('settings.Title') }}</label>
                                             <input type="text" class="form-control" id="schedule_title" name="title" 
-                                                   value="{{ __('Scheduled Maintenance') }}" required>
+                                                   value="{{ __('settings.Scheduled Maintenance') }}" required>
                                         </div>
                                         <div class="form-group">
-                                            <label for="schedule_estimated">{{ __('Estimated Completion') }}</label>
+                                            <label for="schedule_estimated">{{ __('settings.Estimated Completion') }}</label>
                                             <input type="text" class="form-control" id="schedule_estimated" 
                                                    name="estimated_completion" value="1 hour" required>
                                         </div>
                                         <div class="form-group full-width">
-                                            <label for="schedule_message">{{ __('Message') }}</label>
-                                            <textarea class="form-control" id="schedule_message" name="message" rows="3" required>{{ __('صيانة مجدولة لتحسين النظام') }}</textarea>
+                                            <label for="schedule_message">{{ __('settings.Message') }}</label>
+                                            <textarea class="form-control" id="schedule_message" name="message" rows="3" required>{{ __('settings.صيانة مجدولة لتحسين النظام') }}</textarea>
                                         </div>
                                         <div class="form-group">
-                                            <label for="scheduled_for">{{ __('Scheduled For') }}</label>
+                                            <label for="scheduled_for">{{ __('settings.Scheduled For') }}</label>
                                             <input type="datetime-local" class="form-control" id="scheduled_for" name="scheduled_for" required>
-                                            <small class="form-text">{{ __('When maintenance should automatically start') }}</small>
+                                            <small class="form-text">{{ __('settings.When maintenance should automatically start') }}</small>
                                         </div>
                                     </div>
                                     <div class="form-actions">
                                         <button type="submit" class="btn btn-info">
                                             <i class="fas fa-calendar-check"></i>
-                                            {{ __('Schedule Maintenance') }}
+                                            {{ __('settings.Schedule Maintenance') }}
                                         </button>
                                         <button type="button" class="btn btn-secondary" id="cancel-schedule-btn">
                                             <i class="fas fa-times"></i>
-                                            {{ __('Cancel') }}
+                                            {{ __('common.Cancel') }}
                                         </button>
                                     </div>
                                 </form>
@@ -240,7 +240,7 @@
                             <!-- Maintenance History -->
                             <div id="maintenance-history" class="maintenance-history animated-form" class="d-none">
                                 <div class="history-header">
-                                    <h5>{{ __('Maintenance History') }}</h5>
+                                    <h5>{{ __('settings.Maintenance History') }}</h5>
                                     <button type="button" class="btn-close" id="close-history">
                                         <i class="fas fa-times"></i>
                                     </button>
@@ -249,12 +249,12 @@
                                     <table class="table table-hover">
                                         <thead>
                                             <tr>
-                                                <th>{{ __('ID') }}</th>
-                                                <th>{{ __('Title') }}</th>
-                                                <th>{{ __('Status') }}</th>
-                                                <th>{{ __('Started At') }}</th>
-                                                <th>{{ __('Ended At') }}</th>
-                                                <th>{{ __('Duration') }}</th>
+                                                <th>{{ __('common.ID') }}</th>
+                                                <th>{{ __('settings.Title') }}</th>
+                                                <th>{{ __('common.Status') }}</th>
+                                                <th>{{ __('settings.Started At') }}</th>
+                                                <th>{{ __('settings.Ended At') }}</th>
+                                                <th>{{ __('business.Duration') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody id="maintenance-history-body">
@@ -270,11 +270,11 @@
                             <div class="error-icon">
                                 <i class="fas fa-exclamation-triangle"></i>
                             </div>
-                            <h5>{{ __('Error Loading Maintenance Status') }}</h5>
-                            <p class="text-muted" id="error-message">{{ __('An error occurred while loading the maintenance status. Please try again.') }}</p>
+                            <h5>{{ __('settings.Error Loading Maintenance Status') }}</h5>
+                            <p class="text-muted" id="error-message">{{ __('settings.An error occurred while loading the maintenance status. Please try again.') }}</p>
                             <button id="retry-btn" class="btn btn-primary">
                                 <i class="fas fa-redo"></i>
-                                {{ __('Retry') }}
+                                {{ __('settings.Retry') }}
                             </button>
                         </div>
                     </div>
@@ -897,12 +897,12 @@
                     updateMaintenanceStatus(data.maintenance);
                     showMainContent();
                 } else {
-                    showError(data.message || '{{ __("Failed to load maintenance status") }}');
+                    showError(data.message || '{{ __('settings.Failed to load maintenance status') }}');
                 }
             })
             .catch(error => {
                 console.error('Error loading maintenance status:', error);
-                showError('{{ __("An error occurred while loading maintenance status") }}');
+                showError('{{ __('settings.An error occurred while loading maintenance status') }}');
             });
         }
 
@@ -917,10 +917,10 @@
             if (maintenance && maintenance.is_enabled) {
                 statusIndicator.classList.remove('inactive');
                 statusIndicator.classList.add('active');
-                statusText.textContent = '{{ __("Maintenance Mode Active") }}';
-                statusSubtitle.textContent = maintenance.message || '{{ __("System is under maintenance") }}';
+                statusText.textContent = '{{ __('settings.Maintenance Mode Active') }}';
+                statusSubtitle.textContent = maintenance.message || '{{ __('settings.System is under maintenance') }}';
                 toggleBtn.innerHTML = `
-                    <span class="btn-text">{{ __("Deactivate Maintenance") }}</span>
+                    <span class="btn-text">{{ __('settings.Deactivate Maintenance') }}</span>
                     <span class="btn-icon"><i class="fas fa-power-off"></i></span>
                 `;
                 toggleBtn.dataset.active = 'true';
@@ -929,7 +929,7 @@
                 
                 // Show details
                 detailsDiv.style.display = 'block';
-                statusBadge.textContent = '{{ __("Active") }}';
+                statusBadge.textContent = '{{ __('common.Active') }}';
                 statusBadge.classList.add('active');
                 statusBadge.classList.remove('inactive');
                 
@@ -941,10 +941,10 @@
             } else {
                 statusIndicator.classList.remove('active');
                 statusIndicator.classList.add('inactive');
-                statusText.textContent = '{{ __("Maintenance Mode Inactive") }}';
-                statusSubtitle.textContent = '{{ __("System is running normally") }}';
+                statusText.textContent = '{{ __('settings.Maintenance Mode Inactive') }}';
+                statusSubtitle.textContent = '{{ __('settings.System is running normally') }}';
                 toggleBtn.innerHTML = `
-                    <span class="btn-text">{{ __("Activate Maintenance") }}</span>
+                    <span class="btn-text">{{ __('settings.Activate Maintenance') }}</span>
                     <span class="btn-icon"><i class="fas fa-power-off"></i></span>
                 `;
                 toggleBtn.dataset.active = 'false';
@@ -1009,7 +1009,7 @@
             const submitBtn = form.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ __("Activating...") }}';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ __('settings.Activating...') }}';
             
             fetch('/admin/maintenance/activate', {
                 method: 'POST',
@@ -1023,16 +1023,16 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showSuccessAlert('{{ __("Maintenance mode activated successfully") }}');
+                    showSuccessAlert('{{ __('settings.Maintenance mode activated successfully') }}');
                     hideAllForms();
                     loadMaintenanceStatus();
                 } else {
-                    showErrorAlert(data.message || '{{ __("Failed to activate maintenance mode") }}');
+                    showErrorAlert(data.message || '{{ __('settings.Failed to activate maintenance mode') }}');
                 }
             })
             .catch(error => {
                 console.error('Error activating maintenance:', error);
-                showErrorAlert('{{ __("An error occurred") }}');
+                showErrorAlert('{{ __('common.An error occurred') }}');
             })
             .finally(() => {
                 submitBtn.disabled = false;
@@ -1041,14 +1041,14 @@
         }
 
         function deactivateMaintenance() {
-            if (!confirm('{{ __("Are you sure you want to deactivate maintenance mode?") }}')) {
+            if (!confirm('{{ __('settings.Are you sure you want to deactivate maintenance mode?') }}')) {
                 return;
             }
 
             const toggleBtn = document.getElementById('maintenance-toggle-btn');
             const originalText = toggleBtn.innerHTML;
             toggleBtn.disabled = true;
-            toggleBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ __("Deactivating...") }}';
+            toggleBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ __('settings.Deactivating...') }}';
 
             fetch('/admin/maintenance/deactivate', {
                 method: 'POST',
@@ -1060,15 +1060,15 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showSuccessAlert('{{ __("Maintenance mode deactivated successfully") }}');
+                    showSuccessAlert('{{ __('settings.Maintenance mode deactivated successfully') }}');
                     loadMaintenanceStatus();
                 } else {
-                    showErrorAlert(data.message || '{{ __("Failed to deactivate maintenance mode") }}');
+                    showErrorAlert(data.message || '{{ __('settings.Failed to deactivate maintenance mode') }}');
                 }
             })
             .catch(error => {
                 console.error('Error deactivating maintenance:', error);
-                showErrorAlert('{{ __("An error occurred") }}');
+                showErrorAlert('{{ __('common.An error occurred') }}');
             })
             .finally(() => {
                 toggleBtn.disabled = false;
@@ -1092,7 +1092,7 @@
             const submitBtn = form.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ __("Scheduling...") }}';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ __('settings.Scheduling...') }}';
             
             fetch('/admin/maintenance/schedule', {
                 method: 'POST',
@@ -1106,16 +1106,16 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showSuccessAlert('{{ __("Maintenance scheduled successfully") }}');
+                    showSuccessAlert('{{ __('settings.Maintenance scheduled successfully') }}');
                     hideAllForms();
                     loadMaintenanceStatus();
                 } else {
-                    showErrorAlert(data.message || '{{ __("Failed to schedule maintenance") }}');
+                    showErrorAlert(data.message || '{{ __('settings.Failed to schedule maintenance') }}');
                 }
             })
             .catch(error => {
                 console.error('Error scheduling maintenance:', error);
-                showErrorAlert('{{ __("An error occurred") }}');
+                showErrorAlert('{{ __('common.An error occurred') }}');
             })
             .finally(() => {
                 submitBtn.disabled = false;
@@ -1153,7 +1153,7 @@
                         <td>${item.title || '-'}</td>
                         <td>
                             <span class="badge ${item.is_enabled ? 'badge-success' : 'badge-secondary'}">
-                                ${item.is_enabled ? '{{ __("Active") }}' : '{{ __("Inactive") }}'}
+                                ${item.is_enabled ? '{{ __('common.Active') }}' : '{{ __('common.Inactive') }}'}
                             </span>
                         </td>
                         <td>${item.started_at || '-'}</td>
@@ -1163,7 +1163,7 @@
                     tbody.appendChild(row);
                 });
             } else {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center">{{ __("No maintenance history found") }}</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">{{ __('settings.No maintenance history found') }}</td></tr>';
             }
         }
 

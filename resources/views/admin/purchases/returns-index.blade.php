@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Purchase Returns') }}
+    {{ __('purchases.Purchase Returns') }}
 @endsection
 
 @section('main_content')
@@ -10,9 +10,9 @@
         <div class="card">
             <div class="card-bodys">
                 <div class="table-header p-16 d-flex align-items-center justify-content-between flex-wrap gap-3">
-                    <h4 class="mb-0">{{ __('Purchase Returns') }}</h4>
+                    <h4 class="mb-0">{{ __('purchases.Purchase Returns') }}</h4>
                     <a href="{{ route('admin.purchases.index') }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-arrow-left me-1"></i>{{ __('Back to Purchases') }}
+                        <i class="fas fa-arrow-left me-1"></i>{{ __('purchases.Back to Purchases') }}
                     </a>
                 </div>
 
@@ -20,13 +20,13 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>{{ __('Return #') }}</th>
-                                <th>{{ __('Purchase Invoice') }}</th>
-                                <th>{{ __('Supplier') }}</th>
-                                <th>{{ __('Date') }}</th>
-                                <th class="text-end">{{ __('Credit Amount') }}</th>
-                                <th>{{ __('Status') }}</th>
-                                <th>{{ __('Action') }}</th>
+                                <th>{{ __('purchases.Return #') }}</th>
+                                <th>{{ __('purchases.Purchase Invoice') }}</th>
+                                <th>{{ __('purchases.Supplier') }}</th>
+                                <th>{{ __('common.Date') }}</th>
+                                <th class="text-end">{{ __('purchases.Credit Amount') }}</th>
+                                <th>{{ __('common.Status') }}</th>
+                                <th>{{ __('common.Action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -56,7 +56,7 @@
                             <tr>
                                 <td colspan="7" class="text-center py-4 text-muted">
                                     <i class="fas fa-undo fa-2x mb-2 opacity-25"></i>
-                                    <p>{{ __('No purchase returns found.') }}</p>
+                                    <p>{{ __('purchases.No purchase returns found.') }}</p>
                                 </td>
                             </tr>
                             @endforelse

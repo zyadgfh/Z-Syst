@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Application Settings') }}
+    {{ __('settings.Application Settings') }}
 @endsection
 
 @section('main_content')
@@ -10,12 +10,12 @@
         <div class="card">
             <div class="card-bodys">
                 <div class="table-header border-0 p-16 d-flex align-items-center justify-content-between flex-wrap gap-3">
-                    <h4 class="mb-0">{{ __('Application Settings') }}</h4>
+                    <h4 class="mb-0">{{ __('settings.Application Settings') }}</h4>
                     <div class="d-flex align-items-center gap-2">
                         {{-- Search --}}
                         <div class="position-relative" style="min-width: 280px;">
                             <input type="text" id="settings-search" class="form-control"
-                                   placeholder="{{ __('Search settings...') }}" autocomplete="off">
+                                   placeholder="{{ __('settings.Search settings...') }}" autocomplete="off">
                             <i class="fas fa-search position-absolute" style="right: 12px; top: 50%; transform: translateY(-50%); color: #999;"></i>
                         </div>
                     </div>
@@ -24,9 +24,9 @@
                 {{-- Search Results Overlay --}}
                 <div id="search-results" class="d-none p-16 border-top">
                     <div class="d-flex align-items-center justify-content-between mb-3">
-                        <h5 class="mb-0">{{ __('Search Results') }} <span id="search-count" class="badge bg-primary ms-2">0</span></h5>
+                        <h5 class="mb-0">{{ __('settings.Search Results') }} <span id="search-count" class="badge bg-primary ms-2">0</span></h5>
                         <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearSearch()">
-                            <i class="fas fa-times me-1"></i>{{ __('Clear Search') }}
+                            <i class="fas fa-times me-1"></i>{{ __('settings.Clear Search') }}
                         </button>
                     </div>
                     <div id="search-results-list"></div>
@@ -39,7 +39,7 @@
                             @can('settings-edit')
                             <div class="mb-3">
                                 <button type="button" class="btn btn-sm btn-outline-primary w-100" onclick="seedDefaults()">
-                                    <i class="fas fa-sync-alt me-1"></i>{{ __('Seed/Refresh Defaults') }}
+                                    <i class="fas fa-sync-alt me-1"></i>{{ __('settings.Seed/Refresh Defaults') }}
                                 </button>
                             </div>
                             @endcan
@@ -65,7 +65,7 @@
                                            data-module="audit"
                                            onclick="showAuditLog(event)">
                                             <i class="fas fa-history me-2"></i>
-                                            {{ __('Audit Log') }}
+                                            {{ __('settings.Audit Log') }}
                                         </a>
                                     </li>
                                 </ul>
@@ -88,10 +88,10 @@
                                 </div>
                                 <div class="d-flex gap-2">
                                     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="resetAllModule('{{ $currentModule }}')">
-                                        <i class="fas fa-undo me-1"></i>{{ __('Reset All') }}
+                                        <i class="fas fa-undo me-1"></i>{{ __('settings.Reset All') }}
                                     </button>
                                     <button type="button" class="btn btn-sm btn-primary" onclick="saveAllModule()">
-                                        <i class="fas fa-save me-1"></i>{{ __('Save Changes') }}
+                                        <i class="fas fa-save me-1"></i>{{ __('roles.Save Changes') }}
                                     </button>
                                 </div>
                             </div>
@@ -105,7 +105,7 @@
                                 @else
                                     <div class="text-center py-5 text-muted">
                                         <i class="fas fa-cog fa-3x mb-3 opacity-25"></i>
-                                        <p>{{ __('No settings found for this module.') }}</p>
+                                        <p>{{ __('settings.No settings found for this module.') }}</p>
                                     </div>
                                 @endif
                             </div>
@@ -113,28 +113,28 @@
                             {{-- Audit Log View --}}
                             <div id="audit-log-view" class="d-none">
                                 <div class="d-flex align-items-center justify-content-between mb-4">
-                                    <h4 class="mb-0">{{ __('Settings Audit Log') }}</h4>
+                                    <h4 class="mb-0">{{ __('settings.Settings Audit Log') }}</h4>
                                     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="hideAuditLog()">
-                                        <i class="fas fa-arrow-left me-1"></i>{{ __('Back to Settings') }}
+                                        <i class="fas fa-arrow-left me-1"></i>{{ __('settings.Back to Settings') }}
                                     </button>
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table table-hover" id="audit-table">
                                         <thead>
                                             <tr>
-                                                <th>{{ __('Date') }}</th>
-                                                <th>{{ __('User') }}</th>
-                                                <th>{{ __('Setting') }}</th>
-                                                <th>{{ __('Scope') }}</th>
-                                                <th>{{ __('Old Value') }}</th>
-                                                <th>{{ __('New Value') }}</th>
-                                                <th>{{ __('Action') }}</th>
+                                                <th>{{ __('common.Date') }}</th>
+                                                <th>{{ __('common.User') }}</th>
+                                                <th>{{ __('settings.Setting') }}</th>
+                                                <th>{{ __('settings.Scope') }}</th>
+                                                <th>{{ __('settings.Old Value') }}</th>
+                                                <th>{{ __('products.New Value') }}</th>
+                                                <th>{{ __('common.Action') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody id="audit-log-body">
                                             <tr>
                                                 <td colspan="7" class="text-center text-muted py-4">
-                                                    {{ __('Loading audit log...') }}
+                                                    {{ __('settings.Loading audit log...') }}
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -322,7 +322,7 @@
     function switchModule(module, event) {
         if (event) event.preventDefault();
         if (Object.keys(unsavedChanges).length > 0) {
-            if (!confirm('{{ __("You have unsaved changes. Discard them?") }}')) return;
+            if (!confirm('{{ __('settings.You have unsaved changes. Discard them?') }}')) return;
         }
         unsavedChanges = {};
         currentModule = module;
@@ -364,7 +364,7 @@
             } else {
                 html = `<div class="text-center py-5 text-muted">
                     <i class="fas fa-cog fa-3x mb-3 opacity-25"></i>
-                    <p>{{ __('No settings found for this module.') }}</p>
+                    <p>{{ __('settings.No settings found for this module.') }}</p>
                 </div>`;
             }
             document.getElementById('settings-list').innerHTML = html;
@@ -383,19 +383,19 @@
 
         // Source badge
         const sourceLabels = {
-            'default': '{{ __("Default") }}',
-            'system': '{{ __("System") }}',
-            'organization': '{{ __("Organization") }}',
-            'branch': '{{ __("Branch") }}',
-            'role': '{{ __("Role") }}',
-            'user': '{{ __("User") }}'
+            'default': '{{ __('common.Default') }}',
+            'system': '{{ __('common.System') }}',
+            'organization': '{{ __('settings.Organization') }}',
+            'branch': '{{ __('common.Branch') }}',
+            'role': '{{ __('roles.Role') }}',
+            'user': '{{ __('common.User') }}'
         };
         sourceHtml = `<span class="source-badge source-${source}">${sourceLabels[source] || source}</span>`;
 
         // Override indicator
         let overrideBadge = '';
         if (isOverridden) {
-            overrideBadge = `<span class="badge bg-primary bg-opacity-10 text-primary ms-1" style="font-size:10px;">{{ __("Override") }}</span>`;
+            overrideBadge = `<span class="badge bg-primary bg-opacity-10 text-primary ms-1" style="font-size:10px;">{{ __('common.Override') }}</span>`;
         }
 
         // Control based on type
@@ -413,25 +413,25 @@
                 optionsHtml += `<option value="${opt.value}" ${effectiveValue == opt.value ? 'selected' : ''}>${opt.label}</option>`;
             });
             controlHtml = `
-                <select class="form-select form-select-sm" style="width: 200px;" data-key="${def.key}" data-type="select" onchange="trackChange(this)">
+                <select class="form-select form-select-sm" class="w-200" data-key="${def.key}" data-type="select" onchange="trackChange(this)">
                     ${optionsHtml}
                 </select>`;
         } else if (def.type === 'integer') {
             controlHtml = `
-                <input type="number" class="form-control form-control-sm" style="width: 120px;"
+                <input type="number" class="form-control form-control-sm" class="w-120"
                        data-key="${def.key}" data-type="integer"
                        value="${effectiveValue !== null ? effectiveValue : ''}"
                        onchange="trackChange(this)">`;
         } else if (def.type === 'decimal') {
             controlHtml = `
-                <input type="number" class="form-control form-control-sm" style="width: 120px;"
+                <input type="number" class="form-control form-control-sm" class="w-120"
                        data-key="${def.key}" data-type="decimal"
                        value="${effectiveValue !== null ? effectiveValue : ''}"
                        step="0.01"
                        onchange="trackChange(this)">`;
         } else {
             controlHtml = `
-                <input type="text" class="form-control form-control-sm" style="width: 200px;"
+                <input type="text" class="form-control form-control-sm" class="w-200"
                        data-key="${def.key}" data-type="string"
                        value="${effectiveValue !== null ? String(effectiveValue).replace(/"/g, '&quot;') : ''}"
                        onchange="trackChange(this)">`;
@@ -479,16 +479,16 @@
     function updateSaveIndicator() {
         const count = Object.keys(unsavedChanges).length;
         if (count > 0) {
-            document.title = `(${count}) {{ __('Application Settings') }} - {{ get_option('general')['title'] ?? config('app.name') }}`;
+            document.title = `(${count}) {{ __('settings.Application Settings') }} - {{ get_option('general')['title'] ?? config('app.name') }}`;
         } else {
-            document.title = `{{ __('Application Settings') }} - {{ get_option('general')['title'] ?? config('app.name') }}`;
+            document.title = `{{ __('settings.Application Settings') }} - {{ get_option('general')['title'] ?? config('app.name') }}`;
         }
     }
 
     // Save all module settings
     function saveAllModule() {
         if (Object.keys(unsavedChanges).length === 0) {
-            showToast('{{ __("No changes to save.") }}', 'info');
+            showToast('{{ __('settings.No changes to save.') }}', 'info');
             return;
         }
 
@@ -511,23 +511,23 @@
         .then(data => {
             unsavedChanges = {};
             updateSaveIndicator();
-            showToast('{{ __("Settings saved successfully.") }}', 'success');
+            showToast('{{ __('settings.Settings saved successfully.') }}', 'success');
             loadModuleSettings(currentModule);
         })
         .catch(err => {
-            showToast('{{ __("Error saving settings.") }}', 'error');
+            showToast('{{ __('settings.Error saving settings.') }}', 'error');
         });
     }
 
     // Reset all module settings
     function resetAllModule(module) {
-        if (!confirm('{{ __("Reset all settings in this module to their default values?") }}')) return;
+        if (!confirm('{{ __('settings.Reset all settings in this module to their default values?') }}')) return;
 
         // Reload module to reset unsaved changes
         unsavedChanges = {};
         updateSaveIndicator();
         loadModuleSettings(module);
-        showToast('{{ __("Settings reset to defaults.") }}', 'info');
+        showToast('{{ __('settings.Settings reset to defaults.') }}', 'info');
     }
 
     // Seed defaults
@@ -541,11 +541,11 @@
         })
         .then(r => r.json())
         .then(data => {
-            showToast('{{ __("Settings definitions seeded successfully.") }}', 'success');
+            showToast('{{ __('settings.Settings definitions seeded successfully.') }}', 'success');
             loadModuleSettings(currentModule);
         })
         .catch(err => {
-            showToast('{{ __("Error seeding defaults.") }}', 'error');
+            showToast('{{ __('settings.Error seeding defaults.') }}', 'error');
         });
     }
 
@@ -585,7 +585,7 @@
         if (!settings || settings.length === 0) {
             list.innerHTML = `<div class="text-center py-4 text-muted">
                 <i class="fas fa-search fa-2x mb-2 opacity-25"></i>
-                <p>{{ __("No settings found for") }} "${query}"</p>
+                <p>{{ __('settings.No settings found for') }} "${query}"</p>
             </div>`;
             count.textContent = '0';
             container.classList.remove('d-none');
@@ -658,7 +658,7 @@
         .then(data => {
             const tbody = document.getElementById('audit-log-body');
             if (!data.logs || data.logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">{{ __("No audit log entries found.") }}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">{{ __('settings.No audit log entries found.') }}</td></tr>`;
                 return;
             }
 

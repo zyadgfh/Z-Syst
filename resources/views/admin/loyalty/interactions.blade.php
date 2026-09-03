@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Customer Interactions') }}
+    {{ __('loyalty.Customer Interactions') }}
 @endsection
 
 @section('main_content')
@@ -10,17 +10,17 @@
             <div class="card">
                 <div class="card-bodys">
                     <div class="table-header p-16">
-                        <h4>{{ __('Customer Interactions') }}</h4>
+                        <h4>{{ __('loyalty.Customer Interactions') }}</h4>
                         <div class="d-flex gap-2">
                             <select class="form-select" id="type-filter">
-                                <option value="all">{{ __('All Types') }}</option>
-                                <option value="sale">{{ __('Sale') }}</option>
-                                <option value="inquiry">{{ __('Inquiry') }}</option>
-                                <option value="support">{{ __('Support') }}</option>
-                                <option value="feedback">{{ __('Feedback') }}</option>
+                                <option value="all">{{ __('common.All Types') }}</option>
+                                <option value="sale">{{ __('gateways.Sale') }}</option>
+                                <option value="inquiry">{{ __('loyalty.Inquiry') }}</option>
+                                <option value="support">{{ __('loyalty.Support') }}</option>
+                                <option value="feedback">{{ __('loyalty.Feedback') }}</option>
                             </select>
                             <div class="table-search position-relative">
-                                <input class="form-control" type="text" id="interaction-search" placeholder="{{ __('Search...') }}">
+                                <input class="form-control" type="text" id="interaction-search" placeholder="{{ __('common.Search...') }}">
                                 <span class="position-absolute">
                                     <img src="{{ asset('assets/images/search.svg') }}" alt="">
                                 </span>
@@ -32,12 +32,12 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th class="table-header-content">{{ __('SL') }}.</th>
-                                    <th class="table-header-content">{{ __('Date') }}</th>
-                                    <th class="table-header-content">{{ __('Customer') }}</th>
-                                    <th class="table-header-content">{{ __('Type') }}</th>
-                                    <th class="table-header-content">{{ __('Notes') }}</th>
-                                    <th class="table-header-content">{{ __('Staff') }}</th>
+                                    <th class="table-header-content">{{ __('common.SL') }}.</th>
+                                    <th class="table-header-content">{{ __('common.Date') }}</th>
+                                    <th class="table-header-content">{{ __('common.Customer') }}</th>
+                                    <th class="table-header-content">{{ __('common.Type') }}</th>
+                                    <th class="table-header-content">{{ __('common.Notes') }}</th>
+                                    <th class="table-header-content">{{ __('loyalty.Staff') }}</th>
                                 </tr>
                             </thead>
                             <tbody id="interactions-data">
@@ -45,7 +45,7 @@
                                     <tr class="table-content" data-type="{{ $interaction->interaction_type }}">
                                         <td class="table-single-content">{{ $loop->iteration }}</td>
                                         <td class="table-single-content">{{ \Carbon\Carbon::parse($interaction->created_at)->format('Y-m-d H:i') }}</td>
-                                        <td class="table-single-content">{{ $interaction->party->name ?? __('Unknown') }}</td>
+                                        <td class="table-single-content">{{ $interaction->party->name ?? __('common.Unknown') }}</td>
                                         <td class="table-single-content">
                                             <span class="badge bg-soft-primary">{{ ucfirst(str_replace('_', ' ', $interaction->interaction_type)) }}</span>
                                         </td>
@@ -54,7 +54,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center py-4">{{ __('No interactions found') }}</td>
+                                        <td colspan="6" class="text-center py-4">{{ __('loyalty.No interactions found') }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>

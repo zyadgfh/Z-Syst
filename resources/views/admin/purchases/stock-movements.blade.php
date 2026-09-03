@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Stock Movement Report') }}
+    {{ __('purchases.Stock Movement Report') }}
 @endsection
 
 @section('main_content')
@@ -10,9 +10,9 @@
         <div class="card">
             <div class="card-bodys">
                 <div class="table-header p-16 d-flex align-items-center justify-content-between flex-wrap gap-3">
-                    <h4 class="mb-0"><i class="fas fa-exchange-alt me-2"></i>{{ __('Stock Movement Report') }}</h4>
+                    <h4 class="mb-0"><i class="fas fa-exchange-alt me-2"></i>{{ __('purchases.Stock Movement Report') }}</h4>
                     <a href="{{ route('admin.purchases.reports') }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-arrow-left me-1"></i>{{ __('Back') }}
+                        <i class="fas fa-arrow-left me-1"></i>{{ __('common.Back') }}
                     </a>
                 </div>
 
@@ -20,16 +20,16 @@
                 <div class="p-16 border-top">
                     <form method="GET" class="row g-3 align-items-end">
                         <div class="col-md-3">
-                            <label class="form-label">{{ __('From Date') }}</label>
+                            <label class="form-label">{{ __('purchases.From Date') }}</label>
                             <input type="date" name="from_date" class="form-control" value="{{ $fromDate }}">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">{{ __('To Date') }}</label>
+                            <label class="form-label">{{ __('purchases.To Date') }}</label>
                             <input type="date" name="to_date" class="form-control" value="{{ $toDate }}">
                         </div>
                         <div class="col-md-2">
                             <button type="submit" class="btn btn-primary w-100">
-                                <i class="fas fa-filter me-1"></i>{{ __('Filter') }}
+                                <i class="fas fa-filter me-1"></i>{{ __('common.Filter') }}
                             </button>
                         </div>
                     </form>
@@ -43,12 +43,12 @@
                             <div class="card border-start border-{{ match($item->movement_type) { 'in' => 'success', 'out' => 'danger', 'adjustment' => 'warning', default => 'secondary' } }} border-4">
                                 <div class="card-body">
                                     <div class="text-muted">{{ ucfirst($item->movement_type) }}</div>
-                                    <h4 class="fw-bold mb-0">{{ $item->count }} <small class="text-muted">({{ $item->total_qty }} {{ __('units') }})</small></h4>
+                                    <h4 class="fw-bold mb-0">{{ $item->count }} <small class="text-muted">({{ $item->total_qty }} {{ __('products.units') }})</small></h4>
                                 </div>
                             </div>
                         </div>
                         @empty
-                        <div class="col-12 text-center text-muted py-3">{{ __('No movement data for this period.') }}</div>
+                        <div class="col-12 text-center text-muted py-3">{{ __('purchases.No movement data for this period.') }}</div>
                         @endforelse
                     </div>
                 </div>
@@ -58,15 +58,15 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>{{ __('Date') }}</th>
-                                <th>{{ __('Product') }}</th>
-                                <th>{{ __('Type') }}</th>
-                                <th class="text-center">{{ __('Qty') }}</th>
-                                <th class="text-end">{{ __('Before') }}</th>
-                                <th class="text-end">{{ __('After') }}</th>
-                                <th>{{ __('Batch') }}</th>
-                                <th>{{ __('User') }}</th>
-                                <th>{{ __('Notes') }}</th>
+                                <th>{{ __('common.Date') }}</th>
+                                <th>{{ __('common.Product') }}</th>
+                                <th>{{ __('common.Type') }}</th>
+                                <th class="text-center">{{ __('common.Qty') }}</th>
+                                <th class="text-end">{{ __('products.Before') }}</th>
+                                <th class="text-end">{{ __('products.After') }}</th>
+                                <th>{{ __('purchases.Batch') }}</th>
+                                <th>{{ __('common.User') }}</th>
+                                <th>{{ __('common.Notes') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -92,7 +92,7 @@
                             @empty
                             <tr>
                                 <td colspan="9" class="text-center py-4 text-muted">
-                                    {{ __('No stock movements found.') }}
+                                    {{ __('purchases.No stock movements found.') }}
                                 </td>
                             </tr>
                             @endforelse

@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Receipt: ') }}{{ $receipt->receipt_number }}
+    {{ __('gateways.Receipt: ') }}{{ $receipt->receipt_number }}
 @endsection
 
 @section('main_content')
@@ -10,16 +10,16 @@
             <div class="card">
                 <div class="card-bodys">
                     <div class="table-header p-16">
-                        <h4>{{ __('Receipt #') }}{{ $receipt->receipt_number }}</h4>
+                        <h4>{{ __('gateways.Receipt #') }}{{ $receipt->receipt_number }}</h4>
                         <div class="d-flex gap-2">
                             <a href="{{ route('admin.receipts.index') }}" class="add-order-btn rounded-2 active">
-                                <i class="fas fa-arrow-left me-1"></i> {{ __('Back') }}
+                                <i class="fas fa-arrow-left me-1"></i> {{ __('common.Back') }}
                             </a>
                             <a href="{{ route('admin.receipts.show', $receipt) }}?download=1" class="btn btn-primary btn-sm">
-                                <i class="fas fa-download me-1"></i> {{ __('Download PDF') }}
+                                <i class="fas fa-download me-1"></i> {{ __('products.Download PDF') }}
                             </a>
                             <button class="btn btn-success btn-sm" onclick="window.print()">
-                                <i class="fas fa-print me-1"></i> {{ __('Print') }}
+                                <i class="fas fa-print me-1"></i> {{ __('common.Print') }}
                             </button>
                         </div>
                     </div>
@@ -34,27 +34,27 @@
                             <div class="receipt-body">
                                 <div class="row g-3 mb-3">
                                     <div class="col-6">
-                                        <strong>{{ __('Receipt Number:') }}</strong>
+                                        <strong>{{ __('gateways.Receipt Number:') }}</strong>
                                         <span>{{ $receipt->receipt_number }}</span>
                                     </div>
                                     <div class="col-6 text-end">
-                                        <strong>{{ __('Date:') }}</strong>
+                                        <strong>{{ __('purchases.Date:') }}</strong>
                                         <span>{{ \Carbon\Carbon::parse($receipt->created_at)->format('Y-m-d H:i') }}</span>
                                     </div>
                                 </div>
 
                                 <div class="row g-3 mb-3">
                                     <div class="col-6">
-                                        <strong>{{ __('Customer:') }}</strong>
-                                        <span>{{ $receipt->party->name ?? __('Unknown') }}</span>
+                                        <strong>{{ __('gateways.Customer:') }}</strong>
+                                        <span>{{ $receipt->party->name ?? __('common.Unknown') }}</span>
                                     </div>
                                     <div class="col-6">
-                                        <strong>{{ __('Type:') }}</strong>
+                                        <strong>{{ __('gateways.Type:') }}</strong>
                                         <span>
                                             @if ($receipt->receiptable_type === 'sale')
-                                                {{ __('Sale') }}
+                                                {{ __('gateways.Sale') }}
                                             @else
-                                                {{ __('Purchase') }}
+                                                {{ __('gateways.Purchase') }}
                                             @endif
                                         </span>
                                     </div>
@@ -64,10 +64,10 @@
                                     <table class="table table-bordered">
                                         <thead>
                                             <tr>
-                                                <th>{{ __('Item') }}</th>
-                                                <th class="text-center">{{ __('Qty') }}</th>
-                                                <th class="text-end">{{ __('Price') }}</th>
-                                                <th class="text-end">{{ __('Total') }}</th>
+                                                <th>{{ __('gateways.Item') }}</th>
+                                                <th class="text-center">{{ __('common.Qty') }}</th>
+                                                <th class="text-end">{{ __('common.Price') }}</th>
+                                                <th class="text-end">{{ __('common.Total') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -76,20 +76,20 @@
                                             @endphp
                                             @forelse($items as $item)
                                                 <tr>
-                                                    <td>{{ $item->product->name ?? $item->product_name ?? $item->name ?? __('Unknown Item') }}</td>
+                                                    <td>{{ $item->product->name ?? $item->product_name ?? $item->name ?? __('gateways.Unknown Item') }}</td>
                                                     <td class="text-center">{{ $item->qty ?? $item->quantity ?? 1 }}</td>
                                                     <td class="text-end">{{ $item->price ?? 0 }}</td>
                                                     <td class="text-end">{{ ($item->qty ?? 1) * ($item->price ?? 0) }}</td>
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="4" class="text-center">{{ __('No items available') }}</td>
+                                                    <td colspan="4" class="text-center">{{ __('common.No items available') }}</td>
                                                 </tr>
                                             @endforelse
                                         </tbody>
                                         <tfoot>
                                             <tr>
-                                                <td colspan="3" class="text-end fw-bold">{{ __('Total:') }}</td>
+                                                <td colspan="3" class="text-end fw-bold">{{ __('purchases.Total:') }}</td>
                                                 <td class="text-end fw-bold">{{ $receipt->total_amount }}</td>
                                             </tr>
                                         </tfoot>
@@ -98,7 +98,7 @@
 
                                 @if($receipt->payment_status)
                                     <div class="receipt-payment mt-3">
-                                        <strong>{{ __('Payment Status:') }}</strong>
+                                        <strong>{{ __('gateways.Payment Status:') }}</strong>
                                         <span class="badge bg-success">{{ ucfirst($receipt->payment_status) }}</span>
                                     </div>
                                 @endif
@@ -107,7 +107,7 @@
                                     <div class="receipt-footer mt-4 pt-3 border-top">
                                         <p class="text-muted small">{{ $settings->receipt_footer }}</p>
                                         @if($settings->tax_number ?? false)
-                                            <p class="text-muted small">{{ __('Tax:') }} {{ $settings->tax_number }}</p>
+                                            <p class="text-muted small">{{ __('purchases.Tax:') }} {{ $settings->tax_number }}</p>
                                         @endif
                                     </div>
                                 @endif

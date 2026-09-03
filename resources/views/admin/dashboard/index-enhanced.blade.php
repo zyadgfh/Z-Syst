@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Dashboard') }}
+    {{ __('dashboard.Dashboard') }}
 @endsection
 
 @section('main_content')
@@ -10,15 +10,15 @@
         <div class="dashboard-header mb-4">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h2 class="dashboard-title">{{ __('Welcome Back') }}!</h2>
-                    <p class="dashboard-subtitle">{{ __('Here\'s what\'s happening with your business today') }}</p>
+                    <h2 class="dashboard-title">{{ __('dashboard.Welcome Back') }}!</h2>
+                    <p class="dashboard-subtitle">{{ __('dashboard.Here\'s what\'s happening with your business today') }}</p>
                 </div>
                 <div class="header-actions">
                     <button class="btn btn-modern btn-primary-soft">
-                        <i class="fas fa-download me-2"></i>{{ __('Export Report') }}
+                        <i class="fas fa-download me-2"></i>{{ __('dashboard.Export Report') }}
                     </button>
                     <button class="btn btn-modern btn-outline-primary">
-                        <i class="fas fa-sync-alt me-2"></i>{{ __('Refresh') }}
+                        <i class="fas fa-sync-alt me-2"></i>{{ __('common.Refresh') }}
                     </button>
                 </div>
             </div>
@@ -38,7 +38,7 @@
                         </div>
                         <div class="stat-info">
                             <h3 class="stat-value" id="total_businesses">0</h3>
-                            <p class="stat-label">{{ __('Total Shops') }}</p>
+                            <p class="stat-label">{{ __('dashboard.Total Shops') }}</p>
                             <div class="stat-trend stat-trend-up">
                                 <i class="fas fa-arrow-up"></i>
                                 <span>12%</span>
@@ -58,7 +58,7 @@
                         </div>
                         <div class="stat-info">
                             <h3 class="stat-value" id="expired_businesses">0</h3>
-                            <p class="stat-label">{{ __('Expired Businesses') }}</p>
+                            <p class="stat-label">{{ __('dashboard.Expired Businesses') }}</p>
                             <div class="stat-trend stat-trend-down">
                                 <i class="fas fa-arrow-down"></i>
                                 <span>5%</span>
@@ -78,7 +78,7 @@
                         </div>
                         <div class="stat-info">
                             <h3 class="stat-value" id="plan_subscribes">0</h3>
-                            <p class="stat-label">{{ __('Plan Subscribes') }}</p>
+                            <p class="stat-label">{{ __('dashboard.Plan Subscribes') }}</p>
                             <div class="stat-trend stat-trend-up">
                                 <i class="fas fa-arrow-up"></i>
                                 <span>8%</span>
@@ -98,7 +98,7 @@
                         </div>
                         <div class="stat-info">
                             <h3 class="stat-value" id="business_categories">0</h3>
-                            <p class="stat-label">{{ __('Total Categories') }}</p>
+                            <p class="stat-label">{{ __('dashboard.Total Categories') }}</p>
                             <div class="stat-trend stat-trend-up">
                                 <i class="fas fa-arrow-up"></i>
                                 <span>3%</span>
@@ -118,7 +118,7 @@
                         </div>
                         <div class="stat-info">
                             <h3 class="stat-value" id="total_plans">0</h3>
-                            <p class="stat-label">{{ __('Total Plans') }}</p>
+                            <p class="stat-label">{{ __('dashboard.Total Plans') }}</p>
                             <div class="stat-trend stat-trend-up">
                                 <i class="fas fa-arrow-up"></i>
                                 <span>15%</span>
@@ -138,7 +138,7 @@
                         </div>
                         <div class="stat-info">
                             <h3 class="stat-value" id="total_revenue">$0</h3>
-                            <p class="stat-label">{{ __('Total Revenue') }}</p>
+                            <p class="stat-label">{{ __('dashboard.Total Revenue') }}</p>
                             <div class="stat-trend stat-trend-up">
                                 <i class="fas fa-arrow-up"></i>
                                 <span>22%</span>
@@ -157,8 +157,8 @@
                     <div class="modern-card modern-card-chart">
                         <div class="modern-card-header">
                             <div class="card-title-group">
-                                <h4>{{ __('Subscription Plans') }}</h4>
-                                <p class="card-subtitle">{{ __('Monthly subscriptions overview') }}</p>
+                                <h4>{{ __('dashboard.Subscription Plans') }}</h4>
+                                <p class="card-subtitle">{{ __('dashboard.Monthly subscriptions overview') }}</p>
                             </div>
                             <div class="card-actions">
                                 <select class="form-select form-select-sm modern-select">
@@ -185,8 +185,8 @@
                     <div class="modern-card modern-card-chart">
                         <div class="modern-card-header">
                             <div class="card-title-group">
-                                <h4>{{ __('Finance Overview') }}</h4>
-                                <p class="card-subtitle">{{ __('Revenue and expenses analysis') }}</p>
+                                <h4>{{ __('dashboard.Finance Overview') }}</h4>
+                                <p class="card-subtitle">{{ __('dashboard.Revenue and expenses analysis') }}</p>
                             </div>
                             <div class="card-actions">
                                 <select class="form-select form-select-sm modern-select">
@@ -211,8 +211,8 @@
         <div class="quick-actions-section">
             <div class="modern-card">
                 <div class="modern-card-header">
-                    <h4>{{ __('Quick Actions') }}</h4>
-                    <p class="card-subtitle">{{ __('Frequently used actions') }}</p>
+                    <h4>{{ __('dashboard.Quick Actions') }}</h4>
+                    <p class="card-subtitle">{{ __('dashboard.Frequently used actions') }}</p>
                 </div>
                 <div class="modern-card-body">
                     <div class="quick-actions-grid">
@@ -220,37 +220,37 @@
                             <div class="action-icon action-icon-blue">
                                 <i class="fas fa-plus"></i>
                             </div>
-                            <span>{{ __('Add Business') }}</span>
+                            <span>{{ __('dashboard.Add Business') }}</span>
                         </a>
                         <a href="{{ route('admin.users.create') }}" class="quick-action-item">
                             <div class="action-icon action-icon-green">
                                 <i class="fas fa-user-plus"></i>
                             </div>
-                            <span>{{ __('Add User') }}</span>
+                            <span>{{ __('dashboard.Add User') }}</span>
                         </a>
                         <a href="{{ route('admin.plans.create') }}" class="quick-action-item">
                             <div class="action-icon action-icon-purple">
                                 <i class="fas fa-file-plus"></i>
                             </div>
-                            <span>{{ __('Create Plan') }}</span>
+                            <span>{{ __('dashboard.Create Plan') }}</span>
                         </a>
                         <a href="{{ route('admin.business-categories.create') }}" class="quick-action-item">
                             <div class="action-icon action-icon-orange">
                                 <i class="fas fa-folder-plus"></i>
                             </div>
-                            <span>{{ __('Add Category') }}</span>
+                            <span>{{ __('dashboard.Add Category') }}</span>
                         </a>
                         <a href="{{ route('admin.reports.active-stores.index') }}" class="quick-action-item">
                             <div class="action-icon action-icon-pink">
                                 <i class="fas fa-chart-bar"></i>
                             </div>
-                            <span>{{ __('View Reports') }}</span>
+                            <span>{{ __('dashboard.View Reports') }}</span>
                         </a>
                         <a href="{{ route('admin.maintenance.index') }}" class="quick-action-item">
                             <div class="action-icon action-icon-red">
                                 <i class="fas fa-tools"></i>
                             </div>
-                            <span>{{ __('Maintenance') }}</span>
+                            <span>{{ __('dashboard.Maintenance') }}</span>
                         </a>
                     </div>
                 </div>

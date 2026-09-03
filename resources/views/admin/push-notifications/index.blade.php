@@ -25,11 +25,11 @@
                 </h5>
                 <p style="margin: 4px 0 0; font-size: 13px; color: #6e6e73;">اختر أنواع الإشعارات التي تريد تلقيها</p>
             </div>
-            <div style="padding: 16px 20px;">
+            <div class="p-16-20">
                 <form id="prefForm">
                     @foreach ($notificationTypes as $type => $info)
                         <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 0; {{ !$loop->last ? 'border-bottom: 1px solid #f0f0f2;' : '' }}">
-                            <div style="flex: 1; min-width: 0;">
+                            <div class="flex-1-min">
                                 <div style="font-weight: 600; font-size: 14px; color: #1d1d1f;">{{ $info['label'] }}</div>
                                 <div style="font-size: 12px; color: #86868b; margin-top: 2px;">{{ $info['description'] }}</div>
                             </div>
@@ -69,7 +69,7 @@
                     <p style="color: #86868b; font-size: 13px; margin: 4px 0 0;">سيظهر هنا أي جهاز يسجل للإشعارات من لوحة التحكم</p>
                 </div>
             @else
-                <div style="padding: 8px 0;">
+                <div class="p-8-0">
                     @foreach ($devices as $device)
                         <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; {{ !$loop->last ? 'border-bottom: 1px solid #f0f0f2;' : '' }}" data-device-id="{{ $device->id }}">
                             <div style="display: flex; align-items: center; gap: 12px;">

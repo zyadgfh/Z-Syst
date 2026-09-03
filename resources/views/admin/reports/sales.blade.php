@@ -15,7 +15,7 @@
 
     {{-- Date Range Filter --}}
     <div class="card mb-4" class="card-clean-bordered">
-        <div class="card-body" style="padding: 16px;">
+        <div class="card-body" class="p-16">
             <form method="GET" class="row g-2 align-items-end">
                 <div class="col-md-3">
                     <label class="form-label-xs">من تاريخ</label>
@@ -38,8 +38,8 @@
     {{-- Summary Cards --}}
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px;">
         <div style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-radius: 14px; padding: 20px; text-align: center;">
-            <div style="font-size: 28px; font-weight: 800; color: #2e7d32;">{{ number_format($summary->total_revenue, 2) }}</div>
-            <div style="font-size: 12px; color: #4a6e4a; margin-top: 4px;">إجمالي الإيرادات</div>
+            <div class="badge-value-green">{{ number_format($summary->total_revenue, 2) }}</div>
+            <div class="fs-12-color-green">إجمالي الإيرادات</div>
         </div>
         <div style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius: 14px; padding: 20px; text-align: center;">
             <div style="font-size: 28px; font-weight: 800; color: #1565c0;">{{ number_format($summary->total_orders) }}</div>
@@ -50,8 +50,8 @@
             <div style="font-size: 12px; color: #8a6e4a; margin-top: 4px;">متوسط قيمة الطلب</div>
         </div>
         <div style="background: linear-gradient(135deg, #d4edda, #b2dfdb); border-radius: 14px; padding: 20px; text-align: center;">
-            <div style="font-size: 28px; font-weight: 800; color: #2e7d32;">{{ number_format($summary->total_paid, 2) }}</div>
-            <div style="font-size: 12px; color: #4a6e4a; margin-top: 4px;">المدفوع</div>
+            <div class="badge-value-green">{{ number_format($summary->total_paid, 2) }}</div>
+            <div class="fs-12-color-green">المدفوع</div>
         </div>
         <div style="background: linear-gradient(135deg, #fce4ec, #f8bbd0); border-radius: 14px; padding: 20px; text-align: center;">
             <div style="font-size: 28px; font-weight: 800; color: #c62828;">{{ number_format($summary->total_due, 2) }}</div>
@@ -108,7 +108,7 @@
                             @php $pct = $totalByType > 0 ? ($pt->total / $totalByType) * 100 : 0; @endphp
                             <div style="margin-bottom: 16px;">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                                    <span style="font-size: 13px; font-weight: 600; color: #1d1d1f;">{{ ucfirst($pt->payment_type) }}</span>
+                                    <span class="fs-13-color-heading">{{ ucfirst($pt->payment_type) }}</span>
                                     <span style="font-size: 13px; color: #86868b;">{{ number_format($pt->total) }} ({{ number_format($pct, 1) }}%)</span>
                                 </div>
                                 <div style="height: 8px; background: #f0f0f2; border-radius: 4px; overflow: hidden;">
@@ -132,7 +132,7 @@
         @else
             <div class="table-responsive">
                 <table class="table table-hover mb-0" class="fs-14">
-                    <thead style="background: #f8f9fa;">
+                    <thead class="bg-subtle">
                         <tr>
                             <th class="tab-btn">#</th>
                             <th class="tab-btn">المنتج</th>
@@ -153,10 +153,10 @@
                                                 <span style="font-size: 16px;">💊</span>
                                             @endif
                                         </div>
-                                        <span style="font-weight: 600;">{{ $product->productName }}</span>
+                                        <span class="fw-600">{{ $product->productName }}</span>
                                     </div>
                                 </td>
-                                <td style="padding: 12px 16px; font-weight: 600;">{{ number_format($product->total_qty) }}</td>
+                                <td class="p-12-16-600">{{ number_format($product->total_qty) }}</td>
                                 <td class="card-body-sm">
                                     <span style="background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 6px; font-weight: 700;">{{ number_format($product->total_revenue, 2) }}</span>
                                 </td>
@@ -178,7 +178,7 @@
         @else
             <div class="table-responsive">
                 <table class="table table-hover mb-0" class="fs-14">
-                    <thead style="background: #f8f9fa;">
+                    <thead class="bg-subtle">
                         <tr>
                             <th class="tab-btn">رقم الفاتورة</th>
                             <th class="tab-btn">التاريخ</th>

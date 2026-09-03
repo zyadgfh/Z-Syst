@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', __('Order') . ' ' . $order->order_number)
+@section('title', __('orders.Order') . ' ' . $order->order_number)
 
 @section('main_content')
 <div class="container-fluid m-h-100">
@@ -8,15 +8,15 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <a href="{{ route('admin.customer-orders.index') }}" class="text-decoration-none mb-2 d-inline-block" style="color: #15803d; font-size: 14px;">
-                ← {{ __('Back to Orders') }}
+                ← {{ __('orders.Back to Orders') }}
             </a>
-            <h2 class="dashboard-title">{{ __('Order') }} {{ $order->order_number }}</h2>
+            <h2 class="dashboard-title">{{ __('orders.Order') }} {{ $order->order_number }}</h2>
         </div>
         <div class="d-flex gap-2">
             <!-- Status Update -->
             <div class="dropdown">
                 <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-sync me-2"></i>{{ __('Update Status') }}
+                    <i class="fas fa-sync me-2"></i>{{ __('orders.Update Status') }}
                 </button>
                 <ul class="dropdown-menu">
                     @foreach (['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'] as $status)
@@ -32,7 +32,7 @@
             <!-- Payment Update -->
             <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-credit-card me-2"></i>{{ __('Payment') }}
+                    <i class="fas fa-credit-card me-2"></i>{{ __('orders.Payment') }}
                 </button>
                 <ul class="dropdown-menu">
                     @foreach (['unpaid', 'paid', 'partially_refunded', 'refunded'] as $ps)
@@ -79,16 +79,16 @@
                         $currentIndex = array_search($order->status, $statuses);
                         if ($currentIndex === false) $currentIndex = -1;
                     @endphp
-                    <div style="display: flex; align-items: center; gap: 0;">
+                    <div class="js-step-progress">
                         @foreach ($statuses as $index => $st)
-                            <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
-                                <div style="width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; background: {{ $index <= $currentIndex ? '#15803d' : '#e5e7eb' }}; color: {{ $index <= $currentIndex ? '#fff' : '#9ca3af' }};">
+                            <div class="js-step-column">
+                                <div class="js-step-circle" style="background: {{ $index <= $currentIndex ? '#15803d' : '#e5e7eb' }}; color: {{ $index <= $currentIndex ? '#fff' : '#9ca3af' }};">
                                     {{ $index <= $currentIndex ? '✓' : ($index + 1) }}
                                 </div>
-                                <div style="font-size: 11px; font-weight: 500; margin-top: 4px; color: {{ $index <= $currentIndex ? '#111827' : '#9ca3af' }};">{{ $statusLabels[$st] }}</div>
+                                <div class="section-subtitle-xs" style="color: {{ $index <= $currentIndex ? '#111827' : '#9ca3af' }};">{{ $statusLabels[$st] }}</div>
                             </div>
                             @if ($index < count($statuses) - 1)
-                                <div style="flex: 1; height: 3px; background: {{ $index < $currentIndex ? '#15803d' : '#e5e7eb' }};"></div>
+                                <div class="js-step-connector" style="background: {{ $index < $currentIndex ? '#15803d' : '#e5e7eb' }};"></div>
                             @endif
                         @endforeach
                     </div>
@@ -99,12 +99,12 @@
             @if ($order->statusHistory->count() > 0)
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0">{{ __('Status History') }}</h5>
+                    <h5 class="mb-0">{{ __('orders.Status History') }}</h5>
                 </div>
                 <div class="card-body">
-                    <div style="position: relative; padding-left: 24px;">
+                    <div class="js-timeline">
                         {{-- Vertical line --}}
-                        <div style="position: absolute; left: 10px; top: 4px; bottom: 4px; width: 2px; background: #e5e7eb;"></div>
+                        <div class="js-timeline-line"></div>
 
                         @foreach ($order->statusHistory->sortByDesc('changed_at') as $idx => $history)
                             @php
@@ -116,16 +116,16 @@
                             @endphp
                             <div style="position: relative; padding-bottom: 20px; {{ $loop->last ? 'padding-bottom: 0;' : '' }}">
                                 {{-- Dot --}}
-                                <div style="position: absolute; left: -20px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: {{ $color }}; border: 3px solid #fff; box-shadow: 0 0 0 2px {{ $color }}; z-index: 1;"></div>
+                                <div class="js-timeline-dot" style="background: {{ $color }}; box-shadow: 0 0 0 2px {{ $color }};"></div>
 
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div class="d-flex justify-content-between align-items-start">
                                     <div>
                                         <div style="font-weight: 600; font-size: 14px; color: #111827;">
                                             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: {{ $color }}; margin-right: 6px;"></span>
                                             {{ ucfirst($history->status) }}
                                         </div>
                                         @if ($history->note)
-                                            <div style="background: #f3f4f6; border-radius: 8px; padding: 8px 12px; margin-top: 6px; font-size: 13px; color: #4b5563; max-width: 400px;">
+                                            <div class="card-body-sm" style="background: #f3f4f6; margin-top: 6px; font-size: 13px; color: #4b5563; max-width: 400px;">
                                                 💬 {{ $history->note }}
                                             </div>
                                         @endif
@@ -147,18 +147,18 @@
             <!-- Order Items -->
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0">{{ __('Order Items') }}</h5>
+                    <h5 class="mb-0">{{ __('purchases.Order Items') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table align-middle">
                             <thead>
                                 <tr>
-                                    <th>{{ __('Product') }}</th>
-                                    <th>{{ __('SKU') }}</th>
-                                    <th class="text-center">{{ __('Qty') }}</th>
-                                    <th class="text-end">{{ __('Price') }}</th>
-                                    <th class="text-end">{{ __('Total') }}</th>
+                                    <th>{{ __('common.Product') }}</th>
+                                    <th>{{ __('common.SKU') }}</th>
+                                    <th class="text-center">{{ __('common.Qty') }}</th>
+                                    <th class="text-end">{{ __('common.Price') }}</th>
+                                    <th class="text-end">{{ __('common.Total') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -166,9 +166,9 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center gap-2">
-                                                <div class="rounded" style="width: 40px; height: 40px; background: #f3f4f6; display: flex; align-items: center; justify-content: center;">
+                                                <div class="js-product-thumb">
                                                     @if ($item->product && $item->product->images && is_array($item->product->images) && count($item->product->images) > 0)
-                                                        <img src="{{ asset('storage/' . $item->product->images[0]) }}" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover;">
+                                                        <img src="{{ asset('storage/' . $item->product->images[0]) }}" style="border-radius: 6px;">
                                                     @else
                                                         <i class="fas fa-box" style="color: #9ca3af;"></i>
                                                     @endif
@@ -196,30 +196,30 @@
             <!-- Order Summary -->
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0">{{ __('Order Summary') }}</h5>
+                    <h5 class="mb-0">{{ __('orders.Order Summary') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">{{ __('Subtotal') }}</span>
+                        <span class="text-muted">{{ __('purchases.Subtotal') }}</span>
                         <span>${{ number_format($order->subtotal, 2) }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">{{ __('Shipping') }}</span>
+                        <span class="text-muted">{{ __('orders.Shipping') }}</span>
                         <span>${{ number_format($order->shipping_amount, 2) }}</span>
                     </div>
                     @if ($order->discount_amount > 0)
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">{{ __('Discount') }}</span>
+                            <span class="text-muted">{{ __('purchases.Discount') }}</span>
                             <span class="text-green">-${{ number_format($order->discount_amount, 2) }}</span>
                         </div>
                     @endif
                     <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">{{ __('Tax') }}</span>
+                        <span class="text-muted">{{ __('common.Tax') }}</span>
                         <span>${{ number_format($order->tax_amount, 2) }}</span>
                     </div>
                     <div class="border-top pt-2 mt-2 d-flex justify-content-between">
-                        <strong>{{ __('Total') }}</strong>
-                        <strong style="color: #15803d;">${{ number_format($order->total_amount, 2) }}</strong>
+                        <strong>{{ __('common.Total') }}</strong>
+                        <strong class="text-green-dark">${{ number_format($order->total_amount, 2) }}</strong>
                     </div>
                 </div>
             </div>
@@ -227,7 +227,7 @@
             <!-- Customer Info -->
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0">{{ __('Customer') }}</h5>
+                    <h5 class="mb-0">{{ __('common.Customer') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-2"><strong>{{ $order->customer_name }}</strong></div>
@@ -243,7 +243,7 @@
             <!-- Shipping -->
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0">{{ __('Shipping') }}</h5>
+                    <h5 class="mb-0">{{ __('orders.Shipping') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="text-muted" class="fs-13">
@@ -262,7 +262,7 @@
             @if ($order->notes)
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0">{{ __('Notes') }}</h5>
+                        <h5 class="mb-0">{{ __('common.Notes') }}</h5>
                     </div>
                     <div class="card-body">
                         <p class="text-muted mb-0" class="fs-13">{{ $order->notes }}</p>

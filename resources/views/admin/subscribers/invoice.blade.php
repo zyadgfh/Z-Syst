@@ -1,7 +1,7 @@
 @extends('layouts.blank')
 
 @section('title')
-    {{ __('Subscriptions Report') }}
+    {{ __('orders.Subscriptions Report') }}
 @endsection
 
 @section('main_content')
@@ -11,7 +11,7 @@
             <div class="py-2 d-flex align-items-start justify-content-between border-bottom print-container">
 
                 <div class="d-flex align-items-center p-2 table-header border-0 d-print-none">
-                    <h4 class="Money-Receipt ms-2">{{ __('Subscription Report') }}</h4>
+                    <h4 class="Money-Receipt ms-2">{{ __('orders.Subscription Report') }}</h4>
                 </div>
 
 
@@ -29,7 +29,7 @@
                         <h3 class="mb-0">{{ $subscriber->business?->companyName ?? '' }}</h3>
                     </div>
                 </div>
-                <h3 class="right-invoice mb-0 align-self-center">{{ __('INVOICE') }}</h3>
+                <h3 class="right-invoice mb-0 align-self-center">{{ __('gateways.INVOICE') }}</h3>
             </div>
 
 
@@ -38,15 +38,15 @@
                     <table class="table">
                         <tbody>
                         <tr class="in-table-row">
-                            <td class="text-start">{{ __('Bill To') }}</td>
+                            <td class="text-start">{{ __('gateways.Bill To') }}</td>
                             <td class="text-start">: {{ $subscriber->business?->companyName ?? '' }}</td>
                         </tr>
                         <tr class="in-table-row">
-                            <td class="text-start">{{ __('Mobile') }}</td>
+                            <td class="text-start">{{ __('gateways.Mobile') }}</td>
                             <td class="text-start">:  {{ $subscriber->business?->phoneNumber ?? '' }} </td>
                         </tr>
                         <tr class="in-table-row">
-                            <td class="text-start">{{ __('Address') }}</td>
+                            <td class="text-start">{{ __('common.Address') }}</td>
                             <td class="text-start">: {{ $subscriber->business?->address ?? '' }}</td>
                         </tr>
                         </tbody>
@@ -59,12 +59,12 @@
                 <table class="table table-striped">
                     <thead>
                         <tr class="in-table-header">
-                            <th class="head-red text-center">{{ __('SL') }}</th>
-                            <th class="head-red text-center">{{ __('Business Name') }}</th>
-                            <th class="head-black text-center">{{ __('Package Name') }}</th>
-                            <th class="head-black text-center">{{ __('Started') }}</th>
-                            <th class="head-black text-center">{{ __('End') }}</th>
-                            <th class="head-black text-center">{{ __('Gateway Name') }}</th>
+                            <th class="head-red text-center">{{ __('common.SL') }}</th>
+                            <th class="head-red text-center">{{ __('common.Business Name') }}</th>
+                            <th class="head-black text-center">{{ __('business.Package Name') }}</th>
+                            <th class="head-black text-center">{{ __('gateways.Started') }}</th>
+                            <th class="head-black text-center">{{ __('gateways.End') }}</th>
+                            <th class="head-black text-center">{{ __('gateways.Gateway Name') }}</th>
                         </tr>
                     </thead>
 

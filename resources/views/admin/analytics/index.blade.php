@@ -1,14 +1,14 @@
 @extends('layouts.master')
 
-@section('title', __('Analytics Dashboard'))
+@section('title', __('dashboard.Analytics Dashboard'))
 
 @section('main_content')
 <!-- Analytics Header -->
 <div class="analytics-header mb-xl">
     <div class="card">
         <div class="card-body">
-            <h1>{{ __('Analytics Dashboard') }}</h1>
-            <p class="text-muted">{{ __('Advanced analytics and performance metrics') }}</p>
+            <h1>{{ __('dashboard.Analytics Dashboard') }}</h1>
+            <p class="text-muted">{{ __('dashboard.Advanced analytics and performance metrics') }}</p>
         </div>
     </div>
 </div>
@@ -17,7 +17,7 @@
 <div class="performance-overview mb-xl">
     <div class="card">
         <div class="card-header">
-            <h2>{{ __('Performance Overview') }}</h2>
+            <h2>{{ __('dashboard.Performance Overview') }}</h2>
         </div>
         <div class="card-body">
             <canvas id="performanceChart" height="120"></canvas>
@@ -38,7 +38,7 @@
                     </svg>
                 </div>
                 <h3 class="kpi-value">$245,670</h3>
-                <p class="kpi-label text-muted">{{ __('Monthly Revenue') }}</p>
+                <p class="kpi-label text-muted">{{ __('dashboard.Monthly Revenue') }}</p>
                 <div class="kpi-trend text-success">
                     <i class="fas fa-arrow-up"></i> 22.4%
                 </div>
@@ -53,7 +53,7 @@
                     </svg>
                 </div>
                 <h3 class="kpi-value">15.2%</h3>
-                <p class="kpi-label text-muted">{{ __('Growth Rate') }}</p>
+                <p class="kpi-label text-muted">{{ __('dashboard.Growth Rate') }}</p>
                 <div class="kpi-trend text-success">
                     <i class="fas fa-arrow-up"></i> 3.8%
                 </div>
@@ -68,7 +68,7 @@
                     </svg>
                 </div>
                 <h3 class="kpi-value">94.5%</h3>
-                <p class="kpi-label text-muted">{{ __('Customer Satisfaction') }}</p>
+                <p class="kpi-label text-muted">{{ __('dashboard.Customer Satisfaction') }}</p>
                 <div class="kpi-trend text-success">
                     <i class="fas fa-arrow-up"></i> 1.2%
                 </div>
@@ -83,7 +83,7 @@
                     </svg>
                 </div>
                 <h3 class="kpi-value">1,847</h3>
-                <p class="kpi-label text-muted">{{ __('Active Customers') }}</p>
+                <p class="kpi-label text-muted">{{ __('dashboard.Active Customers') }}</p>
                 <div class="kpi-trend text-success">
                     <i class="fas fa-arrow-up"></i> 8.7%
                 </div>
@@ -98,7 +98,7 @@
         <!-- Revenue by Category -->
         <div class="card">
             <div class="card-header">
-                <h2>{{ __('Revenue by Category') }}</h2>
+                <h2>{{ __('dashboard.Revenue by Category') }}</h2>
             </div>
             <div class="card-body">
                 <canvas id="revenueCategoryChart" height="100"></canvas>
@@ -108,7 +108,7 @@
         <!-- Customer Retention -->
         <div class="card">
             <div class="card-header">
-                <h2>{{ __('Customer Retention') }}</h2>
+                <h2>{{ __('dashboard.Customer Retention') }}</h2>
             </div>
             <div class="card-body">
                 <canvas id="retentionChart" height="100"></canvas>
@@ -121,7 +121,7 @@
 <div class="forecast-section mb-xl">
     <div class="card">
         <div class="card-header">
-            <h2>{{ __('AI-Powered Forecasting') }}</h2>
+            <h2>{{ __('dashboard.AI-Powered Forecasting') }}</h2>
         </div>
         <div class="card-body">
             <div class="forecast-alert mb-lg">
@@ -134,8 +134,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h4>{{ __('AI Prediction') }}</h4>
-                        <p class="text-muted text-sm">{{ __('Based on historical data, sales are expected to increase by 15% next month') }}</p>
+                        <h4>{{ __('dashboard.AI Prediction') }}</h4>
+                        <p class="text-muted text-sm">{{ __('dashboard.Based on historical data, sales are expected to increase by 15% next month') }}</p>
                     </div>
                 </div>
             </div>

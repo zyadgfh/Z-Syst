@@ -91,14 +91,14 @@
 </head>
 <body>
     <div class="header">
-        <h1>{{ __("PURCHASE ORDER") }}</h1>
+        <h1>{{ __('purchases.PURCHASE ORDER') }}</h1>
         <p>PO Number: {{ $purchaseOrder->po_number }}</p>
         <p>Date: {{ $purchaseOrder->order_date ? $purchaseOrder->order_date->format('d M Y') : now()->format('d M Y') }}</p>
     </div>
 
     <div class="info-grid">
         <div class="info-box">
-            <h3>{{ __("Supplier Information") }}</h3>
+            <h3>{{ __('purchases.Supplier Information') }}</h3>
             @if($purchaseOrder->supplier)
                 <p><strong>{{ $purchaseOrder->supplier->name }}</strong></p>
                 <p>{{ $purchaseOrder->supplier->address ?? '' }}</p>
@@ -109,17 +109,17 @@
             @endif
         </div>
         <div class="info-box">
-            <h3>{{ __("Order Information") }}</h3>
-            <p><strong>{{ __("Status:") }}</strong> {{ ucfirst($purchaseOrder->status) }}</p>
-            <p><strong>{{ __("Priority:") }}</strong> {{ ucfirst($purchaseOrder->priority) }}</p>
-            <p><strong>{{ __("Expected Delivery:") }}</strong> {{ $purchaseOrder->expected_delivery_date ? $purchaseOrder->expected_delivery_date->format('d M Y') : 'N/A' }}</p>
-            <p><strong>{{ __("Created By:") }}</strong> {{ $purchaseOrder->createdBy ? $purchaseOrder->createdBy->name : 'N/A' }}</p>
+            <h3>{{ __('purchases.Order Information') }}</h3>
+            <p><strong>{{ __('purchases.Status:') }}</strong> {{ ucfirst($purchaseOrder->status) }}</p>
+            <p><strong>{{ __('purchases.Priority:') }}</strong> {{ ucfirst($purchaseOrder->priority) }}</p>
+            <p><strong>{{ __('purchases.Expected Delivery:') }}</strong> {{ $purchaseOrder->expected_delivery_date ? $purchaseOrder->expected_delivery_date->format('d M Y') : 'N/A' }}</p>
+            <p><strong>{{ __('purchases.Created By:') }}</strong> {{ $purchaseOrder->createdBy ? $purchaseOrder->createdBy->name : 'N/A' }}</p>
         </div>
     </div>
 
     @if($purchaseOrder->shipping_address)
         <div class="info-box" style="margin-bottom: 30px;">
-            <h3>{{ __("Shipping Address") }}</h3>
+            <h3>{{ __('purchases.Shipping Address') }}</h3>
             <p>{{ $purchaseOrder->shipping_address }}</p>
         </div>
     @endif
@@ -128,12 +128,12 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>{{ __("Product") }}</th>
-                <th>{{ __("SKU") }}</th>
-                <th>{{ __("Quantity") }}</th>
-                <th>{{ __("Unit Price") }}</th>
-                <th>{{ __("Discount") }}</th>
-                <th>{{ __("Total") }}</th>
+                <th>{{ __('common.Product') }}</th>
+                <th>{{ __('common.SKU') }}</th>
+                <th>{{ __('common.Quantity') }}</th>
+                <th>{{ __('purchases.Unit Price') }}</th>
+                <th>{{ __('purchases.Discount') }}</th>
+                <th>{{ __('common.Total') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -154,23 +154,23 @@
     <div class="totals">
         <table>
             <tr>
-                <td><strong>{{ __("Subtotal:") }}</strong></td>
+                <td><strong>{{ __('purchases.Subtotal:') }}</strong></td>
                 <td>{{ number_format($purchaseOrder->subtotal, 2) }}</td>
             </tr>
             <tr>
-                <td><strong>{{ __("Tax:") }}</strong></td>
+                <td><strong>{{ __('purchases.Tax:') }}</strong></td>
                 <td>{{ number_format($purchaseOrder->tax, 2) }}</td>
             </tr>
             <tr>
-                <td><strong>{{ __("Shipping:") }}</strong></td>
+                <td><strong>{{ __('purchases.Shipping:') }}</strong></td>
                 <td>{{ number_format($purchaseOrder->shipping_cost, 2) }}</td>
             </tr>
             <tr>
-                <td><strong>{{ __("Discount:") }}</strong></td>
+                <td><strong>{{ __('purchases.Discount:') }}</strong></td>
                 <td>{{ number_format($purchaseOrder->discount_amount, 2) }}</td>
             </tr>
             <tr class="total">
-                <td><strong>{{ __("Total:") }}</strong></td>
+                <td><strong>{{ __('purchases.Total:') }}</strong></td>
                 <td>{{ number_format($purchaseOrder->total_amount, 2) }}</td>
             </tr>
         </table>
@@ -185,7 +185,7 @@
 
     @if($purchaseOrder->notes)
         <div class="info-box" style="margin-top: 20px;">
-            <h3>{{ __("Notes") }}</h3>
+            <h3>{{ __('common.Notes') }}</h3>
             <p>{{ $purchaseOrder->notes }}</p>
         </div>
     @endif
@@ -194,15 +194,15 @@
         <div class="footer-grid">
             <div class="signature-box">
                 <p>__________________________</p>
-                <p>{{ __("Supplier Signature") }}</p>
+                <p>{{ __('purchases.Supplier Signature') }}</p>
             </div>
             <div class="signature-box">
                 <p>__________________________</p>
-                <p>{{ __("Authorized Signature") }}</p>
+                <p>{{ __('purchases.Authorized Signature') }}</p>
             </div>
             <div class="signature-box">
                 <p>__________________________</p>
-                <p>{{ __("Date") }}</p>
+                <p>{{ __('common.Date') }}</p>
             </div>
         </div>
     </div>

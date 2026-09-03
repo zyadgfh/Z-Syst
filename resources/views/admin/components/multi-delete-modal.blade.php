@@ -8,14 +8,14 @@
             </div>
             <div class="modal-body pt-0">
                 <div class="delete-modal">
-                    <h5>{{ __('Are You Sure?') }}</h5>
-                    <p>{{ __("You want to delete everything!") }}</p>
+                    <h5>{{ __('common.Are You Sure?') }}</h5>
+                    <p>{{ __('common.You want to delete everything!') }}</p>
                 </div>
                 <div class="multiple-button-group">
-                    <button class="btn reset-btn" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                    <button class="btn reset-btn" data-bs-dismiss="modal">{{ __('common.Cancel') }}</button>
                     <form id="dynamic-delete-form" method="POST" class="ajaxform_instant_reload">
                         @csrf
-                        <button class="btn theme-btn submit-btn create-all-delete" type="submit">{{ __('Yes, Delete It!') }}</button>
+                        <button class="btn theme-btn submit-btn create-all-delete" type="submit">{{ __('common.Yes, Delete It!') }}</button>
                     </form>
                 </div>
             </div>

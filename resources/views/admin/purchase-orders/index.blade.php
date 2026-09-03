@@ -5,9 +5,9 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
-                <h2>{{ __("Purchase Orders") }}</h2>
+                <h2>{{ __('purchases.Purchase Orders') }}</h2>
                 <a href="{{ route('admin.purchase-orders.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> {{ __("Create Purchase Order") }}
+                    <i class="fas fa-plus"></i> {{ __('purchases.Create Purchase Order') }}
                 </a>
             </div>
         </div>
@@ -20,42 +20,42 @@
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>{{ __("Supplier") }}</label>
+                                <label>{{ __('purchases.Supplier') }}</label>
                                 <select class="form-control" id="filter-supplier">
-                                    <option value="">{{ __("All Suppliers") }}</option>
+                                    <option value="">{{ __('purchases.All Suppliers') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>{{ __("Status") }}</label>
+                                <label>{{ __('common.Status') }}</label>
                                 <select class="form-control" id="filter-status">
-                                    <option value="">{{ __("All Status") }}</option>
-                                    <option value="draft">{{ __("Draft") }}</option>
-                                    <option value="sent">{{ __("Sent") }}</option>
-                                    <option value="accepted">{{ __("Accepted") }}</option>
-                                    <option value="partially_received">{{ __("Partially Received") }}</option>
-                                    <option value="received">{{ __("Received") }}</option>
-                                    <option value="cancelled">{{ __("Cancelled") }}</option>
-                                    <option value="rejected">{{ __("Rejected") }}</option>
+                                    <option value="">{{ __('common.All Status') }}</option>
+                                    <option value="draft">{{ __('purchases.Draft') }}</option>
+                                    <option value="sent">{{ __('purchases.Sent') }}</option>
+                                    <option value="accepted">{{ __('purchases.Accepted') }}</option>
+                                    <option value="partially_received">{{ __('purchases.Partially Received') }}</option>
+                                    <option value="received">{{ __('purchases.Received') }}</option>
+                                    <option value="cancelled">{{ __('purchases.Cancelled') }}</option>
+                                    <option value="rejected">{{ __('purchases.Rejected') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>{{ __("Priority") }}</label>
+                                <label>{{ __('purchases.Priority') }}</label>
                                 <select class="form-control" id="filter-priority">
-                                    <option value="">{{ __("All Priorities") }}</option>
-                                    <option value="low">{{ __("Low") }}</option>
-                                    <option value="normal">{{ __("Normal") }}</option>
-                                    <option value="high">{{ __("High") }}</option>
-                                    <option value="urgent">{{ __("Urgent") }}</option>
+                                    <option value="">{{ __('purchases.All Priorities') }}</option>
+                                    <option value="low">{{ __('purchases.Low') }}</option>
+                                    <option value="normal">{{ __('purchases.Normal') }}</option>
+                                    <option value="high">{{ __('purchases.High') }}</option>
+                                    <option value="urgent">{{ __('purchases.Urgent') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>{{ __("Search") }}</label>
+                                <label>{{ __('common.Search') }}</label>
                                 <input type="text" class="form-control" id="search" placeholder="Search PO number...">
                             </div>
                         </div>
@@ -73,15 +73,15 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>{{ __("PO Number") }}</th>
-                                    <th>{{ __("Supplier") }}</th>
-                                    <th>{{ __("Status") }}</th>
-                                    <th>{{ __("Priority") }}</th>
-                                    <th>{{ __("Total Amount") }}</th>
-                                    <th>{{ __("Expected Delivery") }}</th>
-                                    <th>{{ __("Items") }}</th>
-                                    <th>{{ __("Progress") }}</th>
-                                    <th>{{ __("Actions") }}</th>
+                                    <th>{{ __('purchases.PO Number') }}</th>
+                                    <th>{{ __('purchases.Supplier') }}</th>
+                                    <th>{{ __('common.Status') }}</th>
+                                    <th>{{ __('purchases.Priority') }}</th>
+                                    <th>{{ __('purchases.Total Amount') }}</th>
+                                    <th>{{ __('purchases.Expected Delivery') }}</th>
+                                    <th>{{ __('common.Items') }}</th>
+                                    <th>{{ __('purchases.Progress') }}</th>
+                                    <th>{{ __('common.Actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody id="purchase-orders-table">

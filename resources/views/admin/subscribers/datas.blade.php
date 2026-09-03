@@ -48,14 +48,14 @@
                             data-expired="{{  $subscriber->created_at ? formatted_date($subscriber->created_at->addDays($subscriber->duration)) : '' }}"
                         >
                             <img src="{{ asset('assets/images/icons/eye.svg') }}" alt="">
-                            {{ __('View') }}
+                            {{ __('common.View') }}
                         </a>
 
                     </li>
 
                     <li>
                         <a target="_blank" href="{{ route('admin.subscription-reports.invoice', $subscriber->id) }}">
-                            <img src="{{ asset('assets/images/icons/invoice.svg') }}" alt="">                            {{ __('Invoice') }}
+                            <img src="{{ asset('assets/images/icons/invoice.svg') }}" alt="">                            {{ __('common.Invoice') }}
                         </a>
                     </li>
 
@@ -64,13 +64,13 @@
                     <li>
                         <a href="#approve-modal" class="modal-approve" data-bs-toggle="modal" data-bs-target="#approve-modal" data-url="{{ route('admin.subscription-reports.paid', $subscriber->id) }}">
                             <img src="{{ asset('assets/images/icons/accept.svg') }}" alt="">
-                            {{ __('Accept') }}
+                            {{ __('gateways.Accept') }}
                         </a>
                     </li>
                     <li>
                         <a href="#reject-modal" class="modal-reject" data-bs-toggle="modal" data-bs-target="#reject-modal" data-url="{{ route('admin.subscription-reports.reject', $subscriber->id) }}">
                             <img src="{{ asset('assets/images/icons/reject.svg') }}" alt="">
-                            {{ __('Reject') }}
+                            {{ __('common.Reject') }}
                         </a>
                     </li>
                     @endcan

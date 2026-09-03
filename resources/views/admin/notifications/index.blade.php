@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Notifications List') }}
+    {{ __('security.Notifications List') }}
 @endsection
 
 @section('main_content')
@@ -10,7 +10,7 @@
             <div class="card">
                 <div class="card-bodys ">
                     <div class="table-header p-16">
-                        <h4>{{ __('Notifications List') }}</h4>
+                        <h4>{{ __('security.Notifications List') }}</h4>
                     </div>
                     <div class="table-top-form p-16-0">
                     </div>

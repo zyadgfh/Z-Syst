@@ -1,13 +1,13 @@
 <table>
     <thead>
         <tr>
-            <th>{{ __('SL') }}.</th>
-            <th>{{ __('Business Name') }}</th>
-            <th>{{ __('Business Category') }}</th>
-            <th>{{ __('Phone') }}</th>
-            <th>{{ __('Package') }}</th>
-            <th>{{ __('Last Enroll') }}</th>
-            <th>{{ __('Expired Date') }}</th>
+            <th>{{ __('common.SL') }}.</th>
+            <th>{{ __('common.Business Name') }}</th>
+            <th>{{ __('common.Business Category') }}</th>
+            <th>{{ __('common.Phone') }}</th>
+            <th>{{ __('common.Package') }}</th>
+            <th>{{ __('business.Last Enroll') }}</th>
+            <th>{{ __('business.Expired Date') }}</th>
         </tr>
     </thead>
 

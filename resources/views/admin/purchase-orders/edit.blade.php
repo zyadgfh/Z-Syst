@@ -5,10 +5,10 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
-                <h2>{{ __("Edit Purchase Order") }} #{{ $purchaseOrder->po_number }}</h2>
+                <h2>{{ __('purchases.Edit Purchase Order') }} #{{ $purchaseOrder->po_number }}</h2>
                 <div class="btn-group">
                     <a href="{{ route('admin.purchase-orders.show', $purchaseOrder) }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> {{ __("Back") }}
+                        <i class="fas fa-arrow-left"></i> {{ __('common.Back') }}
                     </a>
                 </div>
             </div>
@@ -26,9 +26,9 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="supplier_id">{{ __("Supplier") }} *</label>
+                                    <label for="supplier_id">{{ __('purchases.Supplier') }} *</label>
                                     <select class="form-control select2" id="supplier_id" name="supplier_id" required>
-                                        <option value="">{{ __("Select Supplier") }}</option>
+                                        <option value="">{{ __('purchases.Select Supplier') }}</option>
                                         @foreach($suppliers as $supplier)
                                             <option value="{{ $supplier->id }}" {{ $purchaseOrder->supplier_id == $supplier->id ? 'selected' : '' }}>
                                                 {{ $supplier->name }}
@@ -42,12 +42,12 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="priority">{{ __("Priority") }} *</label>
+                                    <label for="priority">{{ __('purchases.Priority') }} *</label>
                                     <select class="form-control" id="priority" name="priority" required>
-                                        <option value="normal" {{ $purchaseOrder->priority === 'normal' ? 'selected' : '' }}>{{ __("Normal") }}</option>
-                                        <option value="low" {{ $purchaseOrder->priority === 'low' ? 'selected' : '' }}>{{ __("Low") }}</option>
-                                        <option value="high" {{ $purchaseOrder->priority === 'high' ? 'selected' : '' }}>{{ __("High") }}</option>
-                                        <option value="urgent" {{ $purchaseOrder->priority === 'urgent' ? 'selected' : '' }}>{{ __("Urgent") }}</option>
+                                        <option value="normal" {{ $purchaseOrder->priority === 'normal' ? 'selected' : '' }}>{{ __('purchases.Normal') }}</option>
+                                        <option value="low" {{ $purchaseOrder->priority === 'low' ? 'selected' : '' }}>{{ __('purchases.Low') }}</option>
+                                        <option value="high" {{ $purchaseOrder->priority === 'high' ? 'selected' : '' }}>{{ __('purchases.High') }}</option>
+                                        <option value="urgent" {{ $purchaseOrder->priority === 'urgent' ? 'selected' : '' }}>{{ __('purchases.Urgent') }}</option>
                                     </select>
                                     @error('priority')
                                         <span class="text-danger">{{ $message }}</span>
@@ -59,7 +59,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="expected_delivery_date">{{ __("Expected Delivery Date") }} *</label>
+                                    <label for="expected_delivery_date">{{ __('purchases.Expected Delivery Date') }} *</label>
                                     <input type="date" class="form-control" id="expected_delivery_date" name="expected_delivery_date" value="{{ $purchaseOrder->expected_delivery_date ? $purchaseOrder->expected_delivery_date->format('Y-m-d') : '' }}" required>
                                     @error('expected_delivery_date')
                                         <span class="text-danger">{{ $message }}</span>
@@ -68,7 +68,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="shipping_address">{{ __("Shipping Address") }}</label>
+                                    <label for="shipping_address">{{ __('purchases.Shipping Address') }}</label>
                                     <input type="text" class="form-control" id="shipping_address" name="shipping_address" value="{{ $purchaseOrder->shipping_address }}">
                                     @error('shipping_address')
                                         <span class="text-danger">{{ $message }}</span>
@@ -80,7 +80,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="terms">{{ __("Terms") }}</label>
+                                    <label for="terms">{{ __('purchases.Terms') }}</label>
                                     <textarea class="form-control" id="terms" name="terms" rows="3">{{ $purchaseOrder->terms }}</textarea>
                                     @error('terms')
                                         <span class="text-danger">{{ $message }}</span>
@@ -89,7 +89,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="notes">{{ __("Notes") }}</label>
+                                    <label for="notes">{{ __('common.Notes') }}</label>
                                     <textarea class="form-control" id="notes" name="notes" rows="3">{{ $purchaseOrder->notes }}</textarea>
                                     @error('notes')
                                         <span class="text-danger">{{ $message }}</span>
@@ -100,17 +100,17 @@
 
                         <hr>
 
-                        <h4>{{ __("Order Items") }}</h4>
+                        <h4>{{ __('purchases.Order Items') }}</h4>
                         <div class="table-responsive">
                             <table class="table" id="items-table">
                                 <thead>
                                     <tr>
-                                        <th>{{ __("Product") }}</th>
-                                        <th>{{ __("Quantity") }}</th>
-                                        <th>{{ __("Unit Price") }}</th>
-                                        <th>{{ __("Discount (%)") }}</th>
-                                        <th>{{ __("Total") }}</th>
-                                        <th>{{ __("Actions") }}</th>
+                                        <th>{{ __('common.Product') }}</th>
+                                        <th>{{ __('common.Quantity') }}</th>
+                                        <th>{{ __('purchases.Unit Price') }}</th>
+                                        <th>{{ __('purchases.Discount (%)') }}</th>
+                                        <th>{{ __('common.Total') }}</th>
+                                        <th>{{ __('common.Actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -118,7 +118,7 @@
                                         <tr>
                                             <td>
                                                 <select class="form-control product-select" name="items[{{ $index }}][product_id]" required>
-                                                    <option value="">{{ __("Select Product") }}</option>
+                                                    <option value="">{{ __('purchases.Select Product') }}</option>
                                                     @foreach($products as $product)
                                                         <option value="{{ $product->id }}" data-price="{{ $product->purchase_price }}" {{ $item->product_id == $product->id ? 'selected' : '' }}>
                                                             {{ $product->name }} ({{ $product->sku }})
@@ -150,7 +150,7 @@
                         </div>
 
                         <button type="button" class="btn btn-success btn-sm" id="add-item">
-                            <i class="fas fa-plus"></i> {{ __("Add Item") }}
+                            <i class="fas fa-plus"></i> {{ __('purchases.Add Item') }}
                         </button>
 
                         <hr>
@@ -158,15 +158,15 @@
                         <div class="row">
                             <div class="col-md-6 offset-md-6">
                                 <div class="form-group">
-                                    <label>{{ __("Tax") }}</label>
+                                    <label>{{ __('common.Tax') }}</label>
                                     <input type="number" class="form-control" id="tax" name="tax" step="0.01" min="0" value="{{ $purchaseOrder->tax }}">
                                 </div>
                                 <div class="form-group">
-                                    <label>{{ __("Shipping Cost") }}</label>
+                                    <label>{{ __('purchases.Shipping Cost') }}</label>
                                     <input type="number" class="form-control" id="shipping_cost" name="shipping_cost" step="0.01" min="0" value="{{ $purchaseOrder->shipping_cost }}">
                                 </div>
                                 <div class="form-group">
-                                    <label><strong>{{ __("Total Amount") }}</strong></label>
+                                    <label><strong>{{ __('purchases.Total Amount') }}</strong></label>
                                     <input type="number" class="form-control" id="total_amount" name="total_amount" step="0.01" min="0" value="{{ $purchaseOrder->total_amount }}" readonly>
                                 </div>
                             </div>
@@ -174,7 +174,7 @@
 
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> {{ __("Update Purchase Order") }}
+                                <i class="fas fa-save"></i> {{ __('purchases.Update Purchase Order') }}
                             </button>
                             <a href="{{ route('admin.purchase-orders.show', $purchaseOrder) }}" class="btn btn-secondary">
                                 Cancel
@@ -200,7 +200,7 @@
                 <tr>
                     <td>
                         <select class="form-control product-select" name="items[${itemCount}][product_id]" required>
-                            <option value="">{{ __("Select Product") }}</option>
+                            <option value="">{{ __('purchases.Select Product') }}</option>
                             @foreach($products as $product)
                                 <option value="{{ $product->id }}" data-price="{{ $product->purchase_price }}">
                                     {{ $product->name }} ({{ $product->sku }})

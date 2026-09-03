@@ -1,11 +1,11 @@
 <table>
     <thead>
         <tr>
-            <th>{{ __('SL') }}.</th>
-            <th>{{ __('Subscription Name') }}</th>
-            <th>{{ __('Duration') }}</th>
-            <th>{{ __('Offer Price') }}</th>
-            <th>{{ __('Subscription Price') }}</th>
+            <th>{{ __('common.SL') }}.</th>
+            <th>{{ __('business.Subscription Name') }}</th>
+            <th>{{ __('business.Duration') }}</th>
+            <th>{{ __('business.Offer Price') }}</th>
+            <th>{{ __('business.Subscription Price') }}</th>
         </tr>
     </thead>
 

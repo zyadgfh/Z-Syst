@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Getting Started') }}
+    {{ __('business.Getting Started') }}
 @endsection
 
 @section('main_content')
@@ -10,10 +10,10 @@
     {{-- Header --}}
     <div style="text-align: center; margin-bottom: 32px;">
         <h1 style="font-size: 28px; font-weight: 700; color: #1f2937; margin-bottom: 8px;">
-            {{ __('Welcome to Z-Syst! 🎉') }}
+            {{ __('business.Welcome to Z-Syst! 🎉') }}
         </h1>
         <p style="font-size: 15px; color: #6b7280;">
-            {{ __('Let\'s set up your store in a few quick steps.') }}
+            {{ __('business.Let\'s set up your store in a few quick steps.') }}
         </p>
     </div>
 
@@ -45,7 +45,7 @@
     {{-- Skip link --}}
     <div style="text-align: center; margin-top: 24px;">
         <a href="{{ route('admin.onboarding.skip') }}" style="font-size: 13px; color: #9ca3af; text-decoration: none;">
-            {{ __('Skip onboarding') }} <i class="fas fa-arrow-right" style="font-size: 10px;"></i>
+            {{ __('business.Skip onboarding') }} <i class="fas fa-arrow-right" style="font-size: 10px;"></i>
         </a>
     </div>
 </div>

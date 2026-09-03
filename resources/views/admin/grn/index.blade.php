@@ -5,9 +5,9 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
-                <h2>{{ __('Goods Received Notes (GRN)') }}</h2>
+                <h2>{{ __('purchases.Goods Received Notes (GRN)') }}</h2>
                 <a href="{{ route('admin.grn.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> {{ __("Create GRN") }}
+                    <i class="fas fa-plus"></i> {{ __('purchases.Create GRN') }}
                 </a>
             </div>
         </div>
@@ -20,36 +20,36 @@
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>{{ __("Supplier") }}</label>
+                                <label>{{ __('purchases.Supplier') }}</label>
                                 <select class="form-control" id="filter-supplier">
-                                    <option value="">{{ __("All Suppliers") }}</option>
+                                    <option value="">{{ __('purchases.All Suppliers') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>{{ __("Status") }}</label>
+                                <label>{{ __('common.Status') }}</label>
                                 <select class="form-control" id="filter-status">
-                                    <option value="">{{ __("All Status") }}</option>
-                                    <option value="pending">{{ __("Pending") }}</option>
-                                    <option value="verified">{{ __("Verified") }}</option>
-                                    <option value="accepted">{{ __("Accepted") }}</option>
-                                    <option value="partially_accepted">{{ __("Partially Accepted") }}</option>
-                                    <option value="rejected">{{ __("Rejected") }}</option>
+                                    <option value="">{{ __('common.All Status') }}</option>
+                                    <option value="pending">{{ __('common.Pending') }}</option>
+                                    <option value="verified">{{ __('purchases.Verified') }}</option>
+                                    <option value="accepted">{{ __('purchases.Accepted') }}</option>
+                                    <option value="partially_accepted">{{ __('purchases.Partially Accepted') }}</option>
+                                    <option value="rejected">{{ __('purchases.Rejected') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>{{ __("Purchase Order") }}</label>
+                                <label>{{ __('purchases.Purchase Order') }}</label>
                                 <select class="form-control" id="filter-po">
-                                    <option value="">{{ __("All POs") }}</option>
+                                    <option value="">{{ __('purchases.All POs') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>{{ __('Search') }}</label>
+                                <label>{{ __('common.Search') }}</label>
                                 <input type="text" class="form-control" id="search" placeholder="Search GRN number...">
                             </div>
                         </div>
@@ -67,15 +67,15 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>{{ __("GRN Number") }}</th>
-                                    <th>{{ __("Supplier") }}</th>
-                                    <th>{{ __("Purchase Order") }}</th>
-                                    <th>{{ __("Status") }}</th>
-                                    <th>{{ __("Received Date") }}</th>
-                                    <th>{{ __("Total Received") }}</th>
-                                    <th>{{ __("Total Accepted") }}</th>
-                                    <th>{{ __("Total Value") }}</th>
-                                    <th>{{ __("Actions") }}</th>
+                                    <th>{{ __('purchases.GRN Number') }}</th>
+                                    <th>{{ __('purchases.Supplier') }}</th>
+                                    <th>{{ __('purchases.Purchase Order') }}</th>
+                                    <th>{{ __('common.Status') }}</th>
+                                    <th>{{ __('purchases.Received Date') }}</th>
+                                    <th>{{ __('purchases.Total Received') }}</th>
+                                    <th>{{ __('purchases.Total Accepted') }}</th>
+                                    <th>{{ __('purchases.Total Value') }}</th>
+                                    <th>{{ __('common.Actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody id="grn-table">

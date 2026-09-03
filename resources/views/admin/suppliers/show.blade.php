@@ -24,34 +24,34 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h4>{{ __("Supplier Details") }}</h4>
+                    <h4>{{ __('purchases.Supplier Details') }}</h4>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <p><strong>{{ __("Company Name:") }}</strong> {{ $supplier->company_name }}</p>
-                            <p><strong>{{ __("Contact Person:") }}</strong> {{ $supplier->contact_person }}</p>
-                            <p><strong>{{ __("Email:") }}</strong> {{ $supplier->email }}</p>
-                            <p><strong>{{ __("Phone:") }}</strong> {{ $supplier->phone }}</p>
+                            <p><strong>{{ __('purchases.Company Name:') }}</strong> {{ $supplier->company_name }}</p>
+                            <p><strong>{{ __('purchases.Contact Person:') }}</strong> {{ $supplier->contact_person }}</p>
+                            <p><strong>{{ __('purchases.Email:') }}</strong> {{ $supplier->email }}</p>
+                            <p><strong>{{ __('purchases.Phone:') }}</strong> {{ $supplier->phone }}</p>
                         </div>
                         <div class="col-md-6">
-                            <p><strong>{{ __("Tax ID:") }}</strong> {{ $supplier->tax_id ?? 'N/A' }}</p>
-                            <p><strong>{{ __("License Number:") }}</strong> {{ $supplier->license_number ?? 'N/A' }}</p>
-                            <p><strong>{{ __("Payment Terms:") }}</strong> {{ ucfirst(str_replace('_', ' ', $supplier->payment_terms)) }}</p>
-                            <p><strong>{{ __("Credit Limit:") }}</strong> {{ number_format($supplier->credit_limit, 2) }}</p>
+                            <p><strong>{{ __('purchases.Tax ID:') }}</strong> {{ $supplier->tax_id ?? 'N/A' }}</p>
+                            <p><strong>{{ __('purchases.License Number:') }}</strong> {{ $supplier->license_number ?? 'N/A' }}</p>
+                            <p><strong>{{ __('purchases.Payment Terms:') }}</strong> {{ ucfirst(str_replace('_', ' ', $supplier->payment_terms)) }}</p>
+                            <p><strong>{{ __('purchases.Credit Limit:') }}</strong> {{ number_format($supplier->credit_limit, 2) }}</p>
                         </div>
                     </div>
 
                     @if($supplier->address)
                         <div class="mt-3">
-                            <p><strong>{{ __("Address:") }}</strong></p>
+                            <p><strong>{{ __('purchases.Address:') }}</strong></p>
                             <p>{{ $supplier->address }}</p>
                         </div>
                     @endif
 
                     @if($supplier->notes)
                         <div class="mt-3">
-                            <p><strong>{{ __("Notes:") }}</strong></p>
+                            <p><strong>{{ __('purchases.Notes:') }}</strong></p>
                             <p>{{ $supplier->notes }}</p>
                         </div>
                     @endif
@@ -60,7 +60,7 @@
 
             <div class="card mt-3">
                 <div class="card-header">
-                    <h4>{{ __("Performance Metrics") }}</h4>
+                    <h4>{{ __('purchases.Performance Metrics') }}</h4>
                 </div>
                 <div class="card-body">
                     @if($supplier->performance)
@@ -68,34 +68,34 @@
                             <div class="col-md-3">
                                 <div class="text-center">
                                     <h3>{{ $supplier->performance->on_time_delivery_rate }}%</h3>
-                                    <p>{{ __("On-Time Delivery") }}</p>
+                                    <p>{{ __('purchases.On-Time Delivery') }}</p>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="text-center">
                                     <h3>{{ $supplier->performance->quality_score }}%</h3>
-                                    <p>{{ __("Quality Score") }}</p>
+                                    <p>{{ __('purchases.Quality Score') }}</p>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="text-center">
                                     <h3>{{ $supplier->performance->price_competitiveness }}%</h3>
-                                    <p>{{ __("Price Competitiveness") }}</p>
+                                    <p>{{ __('purchases.Price Competitiveness') }}</p>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="text-center">
                                     <h3>{{ $supplier->performance->responsiveness }}%</h3>
-                                    <p>{{ __("Responsiveness") }}</p>
+                                    <p>{{ __('purchases.Responsiveness') }}</p>
                                 </div>
                             </div>
                         </div>
                         <div class="row mt-3">
                             <div class="col-md-6">
-                                <p><strong>{{ __("Total Orders:") }}</strong> {{ $supplier->performance->total_orders }}</p>
+                                <p><strong>{{ __('purchases.Total Orders:') }}</strong> {{ $supplier->performance->total_orders }}</p>
                             </div>
                             <div class="col-md-6">
-                                <p><strong>{{ __("Total Disputes:") }}</strong> {{ $supplier->performance->total_disputes }}</p>
+                                <p><strong>{{ __('purchases.Total Disputes:') }}</strong> {{ $supplier->performance->total_disputes }}</p>
                             </div>
                         </div>
                     @else
@@ -108,7 +108,7 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
-                    <h4>{{ __("Actions") }}</h4>
+                    <h4>{{ __('common.Actions') }}</h4>
                 </div>
                 <div class="card-body">
                     <button class="btn btn-success btn-block mb-2" onclick="calculatePerformance()">
@@ -125,20 +125,20 @@
 
             <div class="card mt-3">
                 <div class="card-header">
-                    <h4>{{ __("Statistics") }}</h4>
+                    <h4>{{ __('purchases.Statistics') }}</h4>
                 </div>
                 <div class="card-body">
-                    <p><strong>{{ __("Average Rating:") }}</strong> {{ number_format($supplier->average_rating, 1) }}/5</p>
-                    <p><strong>{{ __("Performance Score:") }}</strong> {{ number_format($supplier->performance_score, 1) }}/100</p>
-                    <p><strong>{{ __("Total Orders:") }}</strong> {{ $supplier->purchaseOrders->count() }}</p>
-                    <p><strong>{{ __("Ratings:") }}</strong> {{ $supplier->ratings->count() }}</p>
-                    <p><strong>{{ __("Contracts:") }}</strong> {{ $supplier->contracts->count() }}</p>
+                    <p><strong>{{ __('purchases.Average Rating:') }}</strong> {{ number_format($supplier->average_rating, 1) }}/5</p>
+                    <p><strong>{{ __('purchases.Performance Score:') }}</strong> {{ number_format($supplier->performance_score, 1) }}/100</p>
+                    <p><strong>{{ __('purchases.Total Orders:') }}</strong> {{ $supplier->purchaseOrders->count() }}</p>
+                    <p><strong>{{ __('purchases.Ratings:') }}</strong> {{ $supplier->ratings->count() }}</p>
+                    <p><strong>{{ __('purchases.Contracts:') }}</strong> {{ $supplier->contracts->count() }}</p>
                 </div>
             </div>
 
             <div class="card mt-3">
                 <div class="card-header">
-                    <h4>{{ __("Recent Orders") }}</h4>
+                    <h4>{{ __('orders.Recent Orders') }}</h4>
                 </div>
                 <div class="card-body">
                     @if($supplier->purchaseOrders->count() > 0)

@@ -3,7 +3,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">{{ __('Add New Advertising') }}</h5>
+                <h5 class="modal-title" id="exampleModalLabel">{{ __('business.Add New Advertising') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -11,15 +11,15 @@
                     @csrf
 
                     <div class="mt-3">
-                        <label>{{ __('Advertising Name') }}</label>
-                        <input type="text" name="name" required class="form-control" placeholder="{{ __('Enter Name') }}">
+                        <label>{{ __('business.Advertising Name') }}</label>
+                        <input type="text" name="name" required class="form-control" placeholder="{{ __('common.Enter Name') }}">
                     </div>
 
                     <div class="mt-3">
-                        <label>{{ __('Status') }}</label>
+                        <label>{{ __('common.Status') }}</label>
                         <div
                             class="form-control bg-light d-flex justify-content-between align-items-center radio-switcher">
-                            <p class="dynamic-text mb-0">{{ __('Active') }}</p>
+                            <p class="dynamic-text mb-0">{{ __('common.Active') }}</p>
                             <label class="switch m-0 top-0">
                                 <input type="checkbox" name="status" class="change-text" checked>
                                 <span class="slider round"></span>
@@ -28,7 +28,7 @@
                     </div>
 
                     <div class="mt-3 position-relative">
-                        <label class="upload-img-label">{{ __('Image') }}</label>
+                        <label class="upload-img-label">{{ __('common.Image') }}</label>
                         <div class="chosen-img">
                             <label class="d-flex align-items-center gap-2">
                                 <input type="file" name="imageUrl" class="form-control bg-light"
@@ -44,8 +44,8 @@
 
                     <div class="col-lg-12">
                         <div class="button-group text-center mt-3">
-                            <button type="reset" class="theme-btn border-btn m-2" data-bs-dismiss="modal" aria-label="Close">{{ __('Cancel') }}</button>
-                            <button class="theme-btn m-2 submit-btn">{{ __('Save') }}</button>
+                            <button type="reset" class="theme-btn border-btn m-2" data-bs-dismiss="modal" aria-label="Close">{{ __('common.Cancel') }}</button>
+                            <button class="theme-btn m-2 submit-btn">{{ __('common.Save') }}</button>
                         </div>
                     </div>
                 </form>

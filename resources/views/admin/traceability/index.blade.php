@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('Traceability & Recalls') }}
+    {{ __('audit.Traceability & Recalls') }}
 @endsection
 
 @section('main_content')
@@ -11,7 +11,7 @@
             <div class="couter-box">
                 <div class="content-side">
                     <h5 id="total_batches">0</h5>
-                    <p>{{ __('Total Batches') }}</p>
+                    <p>{{ __('audit.Total Batches') }}</p>
                 </div>
                 <div class="icons">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -22,7 +22,7 @@
             <div class="couter-box">
                 <div class="content-side">
                     <h5 id="active_recalls">0</h5>
-                    <p>{{ __('Active Recalls') }}</p>
+                    <p>{{ __('audit.Active Recalls') }}</p>
                 </div>
                 <div class="icons">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -35,7 +35,7 @@
             <div class="couter-box">
                 <div class="content-side">
                     <h5 id="pending_actions">0</h5>
-                    <p>{{ __('Pending Actions') }}</p>
+                    <p>{{ __('audit.Pending Actions') }}</p>
                 </div>
                 <div class="icons">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -47,7 +47,7 @@
             <div class="couter-box">
                 <div class="content-side">
                     <h5 id="completed_actions">0</h5>
-                    <p>{{ __('Completed Actions') }}</p>
+                    <p>{{ __('audit.Completed Actions') }}</p>
                 </div>
                 <div class="icons">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -65,9 +65,9 @@
                         <div class="display-4 mb-2" style="color: var(--color-primary);">
                             <i class="fas fa-clipboard-list"></i>
                         </div>
-                        <h5>{{ __('Batch Lots') }}</h5>
-                        <p class="text-muted small">{{ __('Manage batch lot tracking') }}</p>
-                        <a href="{{ route('admin.traceability.batch-lots') }}" class="btn btn-primary btn-sm">{{ __('View Batch Lots') }}</a>
+                        <h5>{{ __('audit.Batch Lots') }}</h5>
+                        <p class="text-muted small">{{ __('audit.Manage batch lot tracking') }}</p>
+                        <a href="{{ route('admin.traceability.batch-lots') }}" class="btn btn-primary btn-sm">{{ __('audit.View Batch Lots') }}</a>
                     </div>
                 </div>
             </div>
@@ -77,9 +77,9 @@
                         <div class="display-4 mb-2" style="color: var(--color-destructive);">
                             <i class="fas fa-exclamation-triangle"></i>
                         </div>
-                        <h5>{{ __('Recall Events') }}</h5>
-                        <p class="text-muted small">{{ __('Initiate and manage recalls') }}</p>
-                        <a href="{{ route('admin.traceability.recalls') }}" class="btn btn-primary btn-sm">{{ __('Manage Recalls') }}</a>
+                        <h5>{{ __('audit.Recall Events') }}</h5>
+                        <p class="text-muted small">{{ __('audit.Initiate and manage recalls') }}</p>
+                        <a href="{{ route('admin.traceability.recalls') }}" class="btn btn-primary btn-sm">{{ __('audit.Manage Recalls') }}</a>
                     </div>
                 </div>
             </div>
@@ -89,9 +89,9 @@
                         <div class="display-4 mb-2" style="color: var(--color-accent);">
                             <i class="fas fa-sitemap"></i>
                         </div>
-                        <h5>{{ __('Traceability Logs') }}</h5>
-                        <p class="text-muted small">{{ __('View batch lot history') }}</p>
-                        <a href="{{ route('admin.traceability.logs') }}" class="btn btn-primary btn-sm">{{ __('View Logs') }}</a>
+                        <h5>{{ __('audit.Traceability Logs') }}</h5>
+                        <p class="text-muted small">{{ __('audit.View batch lot history') }}</p>
+                        <a href="{{ route('admin.traceability.logs') }}" class="btn btn-primary btn-sm">{{ __('audit.View Logs') }}</a>
                     </div>
                 </div>
             </div>
@@ -102,10 +102,10 @@
             <div class="card">
                 <div class="card-bodys">
                     <div class="chart-header p-16 border-0">
-                        <h4>{{ __('Recent Traceability Activity') }}</h4>
+                        <h4>{{ __('audit.Recent Traceability Activity') }}</h4>
                         <div class="d-flex align-items-center gap-2">
                             <a href="{{ route('admin.traceability.logs') }}" class="view-btn">
-                                {{ __('View All') }} <i class="fas fa-arrow-right view-arrow"></i>
+                                {{ __('common.View All') }} <i class="fas fa-arrow-right view-arrow"></i>
                             </a>
                         </div>
                     </div>
@@ -114,13 +114,13 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th class="table-header-content">{{ __('SL') }}.</th>
-                                        <th class="table-header-content">{{ __('Date') }}</th>
-                                        <th class="table-header-content">{{ __('Product') }}</th>
-                                        <th class="table-header-content">{{ __('Batch Number') }}</th>
-                                        <th class="table-header-content">{{ __('Action Type') }}</th>
-                                        <th class="table-header-content">{{ __('Quantity') }}</th>
-                                        <th class="table-header-content">{{ __('Reference') }}</th>
+                                        <th class="table-header-content">{{ __('common.SL') }}.</th>
+                                        <th class="table-header-content">{{ __('common.Date') }}</th>
+                                        <th class="table-header-content">{{ __('common.Product') }}</th>
+                                        <th class="table-header-content">{{ __('common.Batch Number') }}</th>
+                                        <th class="table-header-content">{{ __('audit.Action Type') }}</th>
+                                        <th class="table-header-content">{{ __('common.Quantity') }}</th>
+                                        <th class="table-header-content">{{ __('common.Reference') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>

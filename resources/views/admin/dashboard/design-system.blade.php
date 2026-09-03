@@ -1,14 +1,14 @@
 @extends('layouts.master')
 
-@section('title', __('Dashboard'))
+@section('title', __('dashboard.Dashboard'))
 
 @section('main_content')
 <!-- Dashboard Hero Section -->
 <div class="dashboard-hero mb-3xl">
     <div class="card">
         <div class="card-header">
-            <h1>{{ __('Welcome Back') }}, {{ auth()->user()->name }}</h1>
-            <p class="text-muted">{{ __('Here\'s what\'s happening with your pharmacy today') }}</p>
+            <h1>{{ __('dashboard.Welcome Back') }}, {{ auth()->user()->name }}</h1>
+            <p class="text-muted">{{ __('dashboard.Here\'s what\'s happening with your pharmacy today') }}</p>
         </div>
     </div>
 </div>
@@ -27,7 +27,7 @@
                     </svg>
                 </div>
                 <h3 class="kpi-value">{{ number_format($totalSales ?? 0) }}</h3>
-                <p class="kpi-label text-muted">{{ __('Total Sales') }}</p>
+                <p class="kpi-label text-muted">{{ __('dashboard.Total Sales') }}</p>
                 <div class="kpi-trend text-success">
                     <i class="fas fa-arrow-up"></i> 12.5%
                 </div>
@@ -44,7 +44,7 @@
                     </svg>
                 </div>
                 <h3 class="kpi-value">{{ number_format($totalOrders ?? 0) }}</h3>
-                <p class="kpi-label text-muted">{{ __('Total Orders') }}</p>
+                <p class="kpi-label text-muted">{{ __('dashboard.Total Orders') }}</p>
                 <div class="kpi-trend text-success">
                     <i class="fas fa-arrow-up"></i> 8.2%
                 </div>
@@ -62,7 +62,7 @@
                     </svg>
                 </div>
                 <h3 class="kpi-value">{{ number_format($lowStockItems ?? 0) }}</h3>
-                <p class="kpi-label text-muted">{{ __('Low Stock Items') }}</p>
+                <p class="kpi-label text-muted">{{ __('dashboard.Low Stock Items') }}</p>
                 <div class="kpi-trend text-destructive">
                     <i class="fas fa-arrow-down"></i> 3.1%
                 </div>
@@ -80,7 +80,7 @@
                     </svg>
                 </div>
                 <h3 class="kpi-value">{{ number_format($pendingApprovals ?? 0) }}</h3>
-                <p class="kpi-label text-muted">{{ __('Pending Approvals') }}</p>
+                <p class="kpi-label text-muted">{{ __('dashboard.Pending Approvals') }}</p>
                 <div class="kpi-trend text-info">
                     <i class="fas fa-clock"></i> Active
                 </div>
@@ -93,25 +93,25 @@
 <div class="quick-actions mb-3xl">
     <div class="card">
         <div class="card-header">
-            <h2>{{ __('Quick Actions') }}</h2>
+            <h2>{{ __('dashboard.Quick Actions') }}</h2>
         </div>
         <div class="card-body">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-lg">
                 <a href="{{ route('admin.sales.create') }}" class="quick-action btn btn-primary">
                     <i class="fas fa-plus"></i>
-                    <span>{{ __('New Sale') }}</span>
+                    <span>{{ __('dashboard.New Sale') }}</span>
                 </a>
                 <a href="{{ route('admin.purchases.create') }}" class="quick-action btn btn-secondary">
                     <i class="fas fa-shopping-cart"></i>
-                    <span>{{ __('New Purchase') }}</span>
+                    <span>{{ __('dashboard.New Purchase') }}</span>
                 </a>
                 <a href="{{ route('admin.products.index') }}" class="quick-action btn btn-secondary">
                     <i class="fas fa-box"></i>
-                    <span>{{ __('Manage Products') }}</span>
+                    <span>{{ __('dashboard.Manage Products') }}</span>
                 </a>
                 <a href="{{ route('admin.reports.index') }}" class="quick-action btn btn-secondary">
                     <i class="fas fa-chart-bar"></i>
-                    <span>{{ __('View Reports') }}</span>
+                    <span>{{ __('dashboard.View Reports') }}</span>
                 </a>
             </div>
         </div>
@@ -122,30 +122,30 @@
 <div class="recent-activity mb-3xl">
     <div class="card">
         <div class="card-header">
-            <h2>{{ __('Recent Activity') }}</h2>
+            <h2>{{ __('dashboard.Recent Activity') }}</h2>
         </div>
         <div class="card-body">
             <table class="table">
                 <thead>
                     <tr>
-                        <th>{{ __('Activity') }}</th>
-                        <th>{{ __('User') }}</th>
-                        <th>{{ __('Time') }}</th>
+                        <th>{{ __('dashboard.Activity') }}</th>
+                        <th>{{ __('common.User') }}</th>
+                        <th>{{ __('dashboard.Time') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>{{ __('New sale created') }}</td>
+                        <td>{{ __('dashboard.New sale created') }}</td>
                         <td>{{ auth()->user()->name }}</td>
                         <td>{{ now()->diffForHumans() }}</td>
                     </tr>
                     <tr>
-                        <td>{{ __('Stock updated') }}</td>
+                        <td>{{ __('dashboard.Stock updated') }}</td>
                         <td>{{ auth()->user()->name }}</td>
                         <td>{{ now()->subHours(2)->diffForHumans() }}</td>
                     </tr>
                     <tr>
-                        <td>{{ __('New product added') }}</td>
+                        <td>{{ __('dashboard.New product added') }}</td>
                         <td>{{ auth()->user()->name }}</td>
                         <td>{{ now()->subHours(4)->diffForHumans() }}</td>
                     </tr>
