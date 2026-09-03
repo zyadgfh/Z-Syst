@@ -63,7 +63,7 @@ class OnboardingE2ETest extends TestCase
     {
         $response = $this->get('/register');
         $response->assertStatus(200);
-        $response->assertSee('Create Your Account');
+        $response->assertSee(__('Create Your Account'));
     }
 
     public function test_register_page_has_required_fields(): void
@@ -88,35 +88,35 @@ class OnboardingE2ETest extends TestCase
     {
         $response = $this->actingAs($this->owner)->get(route('admin.onboarding.index'));
         $response->assertStatus(200);
-        $response->assertSee('Welcome to Z-Syst');
+        $response->assertSee(__('business.Welcome to Z-Syst! 🎉'));
     }
 
     public function test_onboarding_step1_loads(): void
     {
         $response = $this->actingAs($this->owner)->get(route('admin.onboarding.step', 1));
         $response->assertStatus(200);
-        $response->assertSee('Business Information');
+        $response->assertSee(__('business.Business Information'));
     }
 
     public function test_onboarding_step2_loads(): void
     {
         $response = $this->actingAs($this->owner)->get(route('admin.onboarding.step', 2));
         $response->assertStatus(200);
-        $response->assertSee('Product Categories');
+        $response->assertSee(__('business.Product Categories'));
     }
 
     public function test_onboarding_step3_loads(): void
     {
         $response = $this->actingAs($this->owner)->get(route('admin.onboarding.step', 3));
         $response->assertStatus(200);
-        $response->assertSee('Add Your First Product');
+        $response->assertSee(__('Add Your First Product'));
     }
 
     public function test_onboarding_step4_loads(): void
     {
         $response = $this->actingAs($this->owner)->get(route('admin.onboarding.step', 4));
         $response->assertStatus(200);
-        $response->assertSee('Review');
+        $response->assertSee(__('business.Review & Complete'));
     }
 
     public function test_onboarding_save_step1(): void
@@ -191,19 +191,19 @@ class OnboardingE2ETest extends TestCase
     {
         $response = $this->actingAs($this->owner)->get(route('admin.dashboard.index'));
         $response->assertStatus(200);
-        $response->assertSee('Getting Started');
-        $response->assertSee('Business Setup');
-        $response->assertSee('Add Categories');
-        $response->assertSee('Add Products');
+        $response->assertSee(__('Getting Started'));
+        $response->assertSee(__('Business Setup'));
+        $response->assertSee(__('Add Categories'));
+        $response->assertSee(__('Add Products'));
     }
 
     public function test_dashboard_shows_role_based_content_for_staff(): void
     {
         $response = $this->actingAs($this->staff)->get(route('admin.dashboard.index'));
         $response->assertStatus(200);
-        $response->assertSee("Today's Sales");
-        $response->assertSee('Low Stock Items');
-        $response->assertSee('Quick Actions');
+        $response->assertSee(__('Today\'s Sales'));
+        $response->assertSee(__('Low Stock Items'));
+        $response->assertSee(__('Quick Actions'));
     }
 
     // ─── Flash Messages ────────────────────────────────────

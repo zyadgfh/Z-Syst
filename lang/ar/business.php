@@ -8,7 +8,7 @@ return [
     'Add Product' => 'إضافة منتج',
     'Add Store' => 'إضافة متجر',
     'Add Subscription Plan' => 'إضافة خطة اشتراك',
-    'Add Your First Product' => 'Add Your First Product',
+    'Add Your First Product' => 'أضف منتجك الأول',
     'Add at least one product to get started. You can add more from the Products page.' => 'أضف منتجاً واحداً على الأقل للبدء. يمكنك الإضافة من صفحة المنتجات.',
     'Add more products from the Products page' => 'أضف المزيد من المنتجات من صفحة المنتجات',
     'Add new Category' => 'إضافة فئة جديدة',
