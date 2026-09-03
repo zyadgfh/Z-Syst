@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title', 'إضافة كوبون جديد')
 
@@ -78,18 +78,18 @@
                         class="form-input-clean">
                 </div>
                 <div class="col-md-12">
-                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px;">
-                        <input type="checkbox" name="single_use" value="1" {{ old('single_use') ? 'checked' : '' }} style="width: 18px; height: 18px; border-radius: 4px;">
+                    <label class="d-inline-flex cursor-pointer text-14">
+                        <input type="checkbox" name="single_use" value="1" {{ old('single_use') ? 'checked' : '' }} class="checkbox-sm">
                         استخدام واحد لكل مستخدم
                     </label>
                 </div>
             </div>
 
             <div class="d-flex gap-2 mt-4">
-                <button type="submit" class="btn" style="background: #007aff; color: #fff; border-radius: 10px; padding: 10px 28px; font-weight: 600; transition: transform 150ms ease;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
+                <button type="submit" class="btn" class="btn-primary-blue" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
                     إنشاء الكوبون
                 </button>
-                <a href="{{ route('admin.coupons.index') }}" class="btn" style="background: #f5f5f7; color: #1d1d1f; border-radius: 10px; padding: 10px 28px; font-weight: 600; text-decoration: none;">إلغاء</a>
+                <a href="{{ route('admin.coupons.index') }}" class="btn" class="btn-secondary">إلغاء</a>
             </div>
         </form>
     </div>

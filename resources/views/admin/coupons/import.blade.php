@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title', 'استيراد كوبونات بالجملة')
 
@@ -48,7 +48,7 @@
                      ondragover="event.preventDefault(); this.style.borderColor='#007aff'; this.style.background='#f0f7ff'"
                      ondragleave="this.style.borderColor='#d2d2d7'; this.style.background='transparent'"
                      ondrop="event.preventDefault(); this.style.borderColor='#007aff'; this.style.background='#f0f7ff'">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#86868b" stroke-width="1.5" style="margin-bottom: 12px;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#86868b" stroke-width="1.5" class="mb-12">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
                     </svg>
                     <p style="font-size: 16px; font-weight: 600; color: #1d1d1f; margin-bottom: 4px;">اختر ملف CSV</p>

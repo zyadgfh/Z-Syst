@@ -1,11 +1,11 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title', 'إدارة الكوبونات')
 
 @section('main_content')
     <div class="container-fluid" class="card-body-lg">
         <div class="d-flex align-items-center justify-content-between mb-4">
-            <h4 style="font-weight: 700;">
+            <h4 class="fw-700">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align-lg">
                     <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6"/>
                     <path d="M2 8h20v4H2z"/>
@@ -13,15 +13,15 @@
                 </svg>
                 الكوبونات والخصومات
             <div class="d-flex gap-2">
-                <a href="{{ route('admin.coupons.import') }}" class="btn" style="background: #f5f5f7; color: #1d1d1f; border-radius: 10px; padding: 10px 16px; font-weight: 600; text-decoration: none; transition: transform 150ms ease; font-size: 14px;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
+                <a href="{{ route('admin.coupons.import') }}" class="btn" class="btn-secondary" style="padding: 10px 16px; font-size: 14px;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     استيراد CSV
                 </a>
-                <a href="{{ route('admin.coupons.analytics') }}" class="btn" style="background: #f5f5f7; color: #1d1d1f; border-radius: 10px; padding: 10px 16px; font-weight: 600; text-decoration: none; transition: transform 150ms ease; font-size: 14px;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
+                <a href="{{ route('admin.coupons.analytics') }}" class="btn" class="btn-secondary" style="padding: 10px 16px; font-size: 14px;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                     التحليلات
                 </a>
-                <a href="{{ route('admin.coupons.bulk-generate') }}" class="btn" style="background: #5856d6; color: #fff; border-radius: 10px; padding: 10px 16px; font-weight: 600; text-decoration: none; transition: transform 150ms ease; font-size: 14px;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'>
+                <a href="{{ route('admin.coupons.bulk-generate') }}" class="btn" class="btn-purple" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
                     إنشاء بالجملة
                 </a>
@@ -34,7 +34,7 @@
         </div>
 
         @if (session('success'))
-            <div class="alert" style="background: #d4edda; color: #155724; border-radius: 12px; padding: 12px 16px; border: none; font-size: 14px;">
+            <div class="alert" class="alert-success-custom">
                 {{ session('success') }}
             </div>
         @endif
@@ -65,30 +65,30 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <button type="submit" class="btn w-100" style="background: #1d1d1f; color: #fff; border-radius: 10px; padding: 10px; font-weight: 600;">بحث</button>
+                        <button type="submit" class="btn w-100" class="btn-dark" style="padding: 10px;">بحث</button>
                     </div>
                 </form>
             </div>
         </div>
 
         {{-- Bulk Actions Bar --}}
-        <div id="bulkActionsBar" style="display: none; background: #f0f7ff; border-radius: 12px; padding: 12px 20px; margin-bottom: 16px; display: none; align-items: center; justify-content: space-between;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <span id="selectedCount" style="font-size: 14px; font-weight: 600; color: #007aff;">0 محدد</span>
-                <button onclick="bulkToggleStatus(true)" style="background: #34c759; color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;">
+        <div id="bulkActionsBar" class="bulk-action-bar">
+            <div class="row-cell-gap12">
+                <span id="selectedCount" class="selected-count">0 محدد</span>
+                <button onclick="bulkToggleStatus(true)" class="btn-bulk-green">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="va-middle-r2"><polyline points="20 6 9 17 4 12"/></svg>
                     تفعيل المحدد
                 </button>
-                <button onclick="bulkToggleStatus(false)" style="background: #ff9500; color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                <button onclick="bulkToggleStatus(false)" class="btn-bulk-amber">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="va-middle-r2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     تعطيل المحدد
                 </button>
-                <button onclick="bulkDelete()" style="background: #ff3b30; color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                <button onclick="bulkDelete()" class="btn-bulk-red">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="va-middle-r2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                     حذف المحدد
                 </button>
             </div>
-            <button onclick="clearSelection()" style="background: none; border: none; color: #86868b; font-size: 13px; cursor: pointer; font-weight: 600;">إلغاء التحديد</button>
+            <button onclick="clearSelection()" class="btn-link-gray">إلغاء التحديد</button>
         </div>
 
         {{-- Coupons Table --}}
@@ -97,8 +97,8 @@
                 <table class="table table-hover mb-0" class="fs-14">
                     <thead class="bg-light">
                         <tr>
-                            <th style="border: none; padding: 12px 16px; width: 40px;">
-                                <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" style="width: 18px; height: 18px; border-radius: 4px; cursor: pointer;">
+                            <th class="th-clean">
+                                <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" class="cursor-pointer" class="checkbox-sm">
                             </th>
                             <th class="tab-btn-upper">الكود</th>
                             <th class="tab-btn-upper">النوع والقيمة</th>
@@ -113,19 +113,19 @@
                         @forelse ($coupons as $coupon)
                             <tr class="border-bottom-light" data-coupon-id="{{ $coupon->id }}">
                                 <td class="td-align">
-                                    <input type="checkbox" class="coupon-checkbox" value="{{ $coupon->id }}" onchange="updateBulkActions()" style="width: 18px; height: 18px; border-radius: 4px; cursor: pointer;">
+                                    <input type="checkbox" class="coupon-checkbox" value="{{ $coupon->id }}" onchange="updateBulkActions()" class="cursor-pointer" class="checkbox-sm">
                                 </td>
                                 <td class="td-align">
-                                    <code style="background: #f5f5f7; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 14px; letter-spacing: 0.04em;">{{ $coupon->code }}</code>
+                                    <code class="code-badge">{{ $coupon->code }}</code>
                                 </td>
                                 <td class="td-align">
                                     @if ($coupon->type === 'percentage')
-                                        <span style="background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600;">{{ $coupon->value }}%</span>
+                                        <span class="type-badge-green">{{ $coupon->value }}%</span>
                                     @else
-                                        <span style="background: #e3f2fd; color: #1565c0; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600;">{{ number_format($coupon->value, 2) }}</span>
+                                        <span class="type-badge-blue">{{ number_format($coupon->value, 2) }}</span>
                                     @endif
                                 </td>
-                                <td style="padding: 14px 16px; vertical-align: middle; color: #6e6e73;">
+                                <td class="td-middle">
                                     {{ $coupon->minimum_order_amount > 0 ? number_format($coupon->minimum_order_amount, 2) : '—' }}
                                 </td>
                                 <td class="td-align">
@@ -134,7 +134,7 @@
                                         <span class="text-muted-custom">/ {{ $coupon->usage_limit }}</span>
                                     @endif
                                 </td>
-                                <td style="padding: 14px 16px; vertical-align: middle; font-size: 13px; color: #6e6e73;">
+                                <td class="td-middle-muted">
                                     @if ($coupon->expires_at)
                                         <span class="{{ $coupon->expires_at->isPast() ? 'text-danger' : '' }}">
                                             {{ $coupon->expires_at->format('Y-m-d') }}
@@ -145,21 +145,21 @@
                                 </td>
                                 <td class="td-align">
                                     <button onclick="toggleCouponStatus({{ $coupon->id }}, this)"
-                                        class="badge" style="border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 150ms ease; {{ $coupon->active ? 'background: #d4edda; color: #155724;' : 'background: #f8d7da; color: #721c24;' }}">
+                                        class="badge {{ $coupon->active ? 'btn-toggle-active' : 'btn-toggle-inactive' }}" style="border: none; cursor: pointer;">
                                         {{ $coupon->active ? 'نشط' : 'معطّل' }}
                                     </button>
                                 </td>
                                 <td class="td-align">
                                     <div class="d-flex gap-2">
                                         @can('coupons-update')
-                                        <a href="{{ route('admin.coupons.edit', $coupon) }}" class="btn btn-sm" style="background: #f5f5f7; border: none; border-radius: 8px; padding: 6px 12px; font-size: 13px; text-decoration: none; color: #1d1d1f;">
+                                        <a href="{{ route('admin.coupons.edit', $coupon) }}" class="btn btn-sm" class="btn-edit">
                                             تعديل
                                         </a>
                                         @endcan
                                         @can('coupons-delete')
-                                        <form action="{{ route('admin.coupons.destroy', $coupon) }}" method="POST" style="display: inline;" onsubmit="return confirm('هل أنت متأكد من حذف هذا الكوبون؟')">
+                                        <form action="{{ route('admin.coupons.destroy', $coupon) }}" method="POST" class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا الكوبون؟')">
                                             @csrf @method('DELETE')
-                                            <button type="submit" class="btn btn-sm" style="background: #fff0f0; border: none; border-radius: 8px; padding: 6px 12px; font-size: 13px; color: #ff3b30;">حذف</button>
+                                            <button type="submit" class="btn btn-sm" class="btn-delete">حذف</button>
                                         </form>
                                         @endcan
                                     </div>

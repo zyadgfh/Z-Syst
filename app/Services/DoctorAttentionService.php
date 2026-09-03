@@ -218,12 +218,42 @@ class DoctorAttentionService
         // Get notification recipients
         $recipients = $this->getNotificationRecipients($alert, $settings);
 
-        // TODO: Implement push notification logic
-        // This would integrate with your notification system
-        // For now, we'll just mark as sent
+        // Dispatch push notifications via FCM for each recipient's registered devices
+        foreach ($recipients as $recipient) {
+            $devices = \App\Models\PushNotificationDevice::where('user_id', $recipient->id)
+                ->where('is_active', true)
+                ->get();
+
+            foreach ($devices as $device) {
+                try {
+                    // Store notification in DB for the device
+                    \App\Models\Notification::create([
+                        'business_id' => $alert->business_id,
+                        'user_id' => $recipient->id,
+                        'type' => 'doctor_attention_alert',
+                        'title' => 'Doctor Attention Alert',
+                        'message' => $alert->message,
+                        'data' => json_encode([
+                            'alert_id' => $alert->id,
+                            'doctor_id' => $alert->doctor_id,
+                            'severity' => $alert->severity,
+                            'device_token' => $device->token,
+                        ]),
+                        'read' => false,
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to create push notification', [
+                        'alert_id' => $alert->id,
+                        'device_id' => $device->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
+
         $alert->markAsSent();
 
-        Log::info('Push notification sent for doctor attention alert', [
+        Log::info('Push notification dispatched for doctor attention alert', [
             'alert_id' => $alert->id,
             'doctor_id' => $alert->doctor_id,
             'recipients_count' => $recipients->count(),
@@ -237,12 +267,29 @@ class DoctorAttentionService
     {
         $recipients = $this->getNotificationRecipients($alert, $settings);
 
-        // TODO: Implement email notification logic
-        // This would send emails to recipients
+        // Send email notifications to each recipient
+        foreach ($recipients as $recipient) {
+            try {
+                if ($recipient->email) {
+                    \Illuminate\Support\Facades\Mail::raw($alert->message, function ($mail) use ($recipient, $alert) {
+                        $mail->to($recipient->email)
+                            ->subject('Doctor Attention Alert - ' . $alert->severity)
+                            ->from(config('mail.from.address'), config('mail.from.name'));
+                    });
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to send email notification for doctor attention', [
+                    'alert_id' => $alert->id,
+                    'recipient_id' => $recipient->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
 
-        Log::info('Email notification sent for doctor attention alert', [
+        Log::info('Email notification dispatched for doctor attention alert', [
             'alert_id' => $alert->id,
             'doctor_id' => $alert->doctor_id,
+            'recipients_count' => $recipients->count(),
         ]);
     }
 
@@ -253,12 +300,29 @@ class DoctorAttentionService
     {
         $recipients = $this->getNotificationRecipients($alert, $settings);
 
-        // TODO: Implement SMS notification logic
-        // This would send SMS to recipients
+        // Send SMS notifications to each recipient with a phone number
+        foreach ($recipients as $recipient) {
+            try {
+                if ($recipient->phone) {
+                    // Use the app's SMS service if configured
+                    $smsService = app('sms');
+                    if ($smsService && method_exists($smsService, 'send')) {
+                        $smsService->send($recipient->phone, $alert->message);
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to send SMS notification for doctor attention', [
+                    'alert_id' => $alert->id,
+                    'recipient_id' => $recipient->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
 
-        Log::info('SMS notification sent for doctor attention alert', [
+        Log::info('SMS notification dispatched for doctor attention alert', [
             'alert_id' => $alert->id,
             'doctor_id' => $alert->doctor_id,
+            'recipients_count' => $recipients->count(),
         ]);
     }
 

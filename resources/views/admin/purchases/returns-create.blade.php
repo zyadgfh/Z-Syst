@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title')
     {{ __('purchases.Create Purchase Return') }}
@@ -57,7 +57,7 @@
                                         <td class="text-center">
                                             <input type="number" name="items[{{ $index }}][return_qty]"
                                                    class="form-control form-control-sm text-center return-qty"
-                                                   style="width:80px; display:inline-block"
+                                                   class="d-inline-block" style="width:80px;"
                                                    value="0" min="0" max="{{ $item['returnable_qty'] }}"
                                                    data-unit-price="{{ $item['unit_price'] }}"
                                                    data-returnable="{{ $item['returnable_qty'] }}"

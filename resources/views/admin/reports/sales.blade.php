@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title', 'تقرير المبيعات')
 
@@ -26,7 +26,7 @@
                     <input type="date" name="date_to" value="{{ $dateTo }}" class="form-control" class="input-clean-sm">
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn w-100" style="background: #007aff; color: #fff; border-radius: 10px; padding: 10px; font-weight: 600;">بحث</button>
+                    <button type="submit" class="btn w-100" class="btn-primary-blue">بحث</button>
                 </div>
                 <div class="col-md-2">
                     <a href="{{ route('admin.sales-report.index') }}" class="btn w-100" style="background: #f5f5f7; color: #1d1d1f; border-radius: 10px; padding: 10px; font-weight: 600; text-decoration: none;">هذا الشهر</a>
@@ -36,26 +36,26 @@
     </div>
 
     {{-- Summary Cards --}}
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px;">
-        <div style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-radius: 14px; padding: 20px; text-align: center;">
+    <div class="kpi-grid">
+        <div class="card-gradient-green">
             <div class="badge-value-green">{{ number_format($summary->total_revenue, 2) }}</div>
             <div class="fs-12-color-green">إجمالي الإيرادات</div>
         </div>
-        <div style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius: 14px; padding: 20px; text-align: center;">
-            <div style="font-size: 28px; font-weight: 800; color: #1565c0;">{{ number_format($summary->total_orders) }}</div>
-            <div style="font-size: 12px; color: #4a6e73; margin-top: 4px;">إجمالي الطلبات</div>
+        <div class="card-gradient-blue">
+            <div class="stat-xl-blue">{{ number_format($summary->total_orders) }}</div>
+            <div class="stat-label-green">إجمالي الطلبات</div>
         </div>
-        <div style="background: linear-gradient(135deg, #fff3e0, #ffe0b2); border-radius: 14px; padding: 20px; text-align: center;">
-            <div style="font-size: 28px; font-weight: 800; color: #e65100;">{{ number_format($summary->avg_order_value, 2) }}</div>
-            <div style="font-size: 12px; color: #8a6e4a; margin-top: 4px;">متوسط قيمة الطلب</div>
+        <div class="card-gradient-amber">
+            <div class="stat-xl-amber">{{ number_format($summary->avg_order_value, 2) }}</div>
+            <div class="stat-label-amber">متوسط قيمة الطلب</div>
         </div>
-        <div style="background: linear-gradient(135deg, #d4edda, #b2dfdb); border-radius: 14px; padding: 20px; text-align: center;">
+        <div class="card-gradient-mint">
             <div class="badge-value-green">{{ number_format($summary->total_paid, 2) }}</div>
             <div class="fs-12-color-green">المدفوع</div>
         </div>
-        <div style="background: linear-gradient(135deg, #fce4ec, #f8bbd0); border-radius: 14px; padding: 20px; text-align: center;">
-            <div style="font-size: 28px; font-weight: 800; color: #c62828;">{{ number_format($summary->total_due, 2) }}</div>
-            <div style="font-size: 12px; color: #8a4a4a; margin-top: 4px;">المستحق</div>
+        <div class="card-gradient-red">
+            <div class="stat-xl-red">{{ number_format($summary->total_due, 2) }}</div>
+            <div class="stat-label-red">المستحق</div>
         </div>
     </div>
 
@@ -68,7 +68,7 @@
                 </div>
                 <div class="card-body">
                     @if ($dailyRevenue->isEmpty())
-                        <div style="text-align: center; color: #86868b; padding: 40px;">لا توجد مبيعات في الفترة المحددة</div>
+                        <div class="empty-state-center">لا توجد مبيعات في الفترة المحددة</div>
                     @else
                         @php
                             $maxRevenue = max($dailyRevenue->pluck('revenue')->max(), 1);
@@ -76,11 +76,11 @@
                         <div style="display: flex; align-items: flex-end; gap: 4px; height: 200px; padding-bottom: 30px; position: relative;">
                             @foreach ($dailyRevenue as $day)
                                 @php $height = ($day->revenue / $maxRevenue) * 170; @endphp
-                                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; position: relative;" title="{{ $day->date }}: {{ number_format($day->revenue) }} ({{ $day->orders }} طلب)">
-                                    <span style="position: absolute; top: -18px; font-size: 10px; color: #6e6e73; font-weight: 600;">{{ number_format($day->revenue, 0) }}</span>
-                                    <div style="width: 100%; max-width: 24px; height: {{ $height }}px; background: linear-gradient(180deg, #007aff, #5ac8fa); border-radius: 4px 4px 0 0; min-height: 2px;"></div>
+                                <div class="bar-col" title="{{ $day->date }}: {{ number_format($day->revenue) }} ({{ $day->orders }} طلب)">
+                                    <span class="bar-value">{{ number_format($day->revenue, 0) }}</span>
+                                    <div data-bar-height data-bar-style="--bar-h: {{ $height }}"></div>
                                     @if ($loop->iteration % 5 === 0 || $loop->last || $loop->count <= 15)
-                                        <span style="position: absolute; bottom: -20px; font-size: 9px; color: #86868b; white-space: nowrap;">{{ \Carbon\Carbon::parse($day->date)->format('d/m') }}</span>
+                                        <span class="bar-date">{{ \Carbon\Carbon::parse($day->date)->format('d/m') }}</span>
                                     @endif
                                 </div>
                             @endforeach
@@ -102,17 +102,17 @@
                         $typeColors = ['cash' => '#34c759', 'card' => '#007aff', 'online' => '#5856d6', 'other' => '#86868b'];
                     @endphp
                     @if ($byPaymentType->isEmpty())
-                        <div style="text-align: center; color: #86868b; padding: 20px;">لا توجد بيانات</div>
+                        <div class="empty-state-center-sm">لا توجد بيانات</div>
                     @else
                         @foreach ($byPaymentType as $pt)
                             @php $pct = $totalByType > 0 ? ($pt->total / $totalByType) * 100 : 0; @endphp
-                            <div style="margin-bottom: 16px;">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <div class="progress-row">
+                                <div class="progress-row-header">
                                     <span class="fs-13-color-heading">{{ ucfirst($pt->payment_type) }}</span>
-                                    <span style="font-size: 13px; color: #86868b;">{{ number_format($pt->total) }} ({{ number_format($pct, 1) }}%)</span>
+                                    <span class="text-13" style="color: #86868b;">{{ number_format($pt->total) }} ({{ number_format($pct, 1) }}%)</span>
                                 </div>
-                                <div style="height: 8px; background: #f0f0f2; border-radius: 4px; overflow: hidden;">
-                                    <div style="height: 100%; width: {{ $pct }}%; background: {{ $typeColors[$pt->payment_type] ?? '#86868b' }}; border-radius: 4px;"></div>
+                                <div class="progress-bar-container-sm">
+                                    <div class="progress-bar-fill-sm" style="width: {{ $pct }}%; background: {{ $typeColors[$pt->payment_type] ?? '#86868b' }};"></div>
                                 </div>
                             </div>
                         @endforeach
@@ -143,14 +143,14 @@
                     <tbody>
                         @foreach ($topProducts as $product)
                             <tr class="border-bottom-light">
-                                <td style="padding: 12px 16px; font-weight: 700; color: {{ $loop->index < 3 ? '#ff9500' : '#6e6e73' }};">{{ $loop->index + 1 }}</td>
+                                <td style="padding: 12px 16px; font-weight: 700; color: {{ $loop->index < 3 ? '#ff9500' : '#6e6e73' }}">{{ $loop->index + 1 }}</td>
                                 <td class="card-body-sm">
-                                    <div style="display: flex; align-items: center; gap: 10px;">
-                                        <div style="width: 36px; height: 36px; border-radius: 8px; background: #f5f5f7; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                                    <div class="row-cell">
+                                        <div class="icon-container-36 icon-container-subtle">
                                             @if ($product->images && is_array($product->images) && count($product->images) > 0)
-                                                <img src="{{ asset($product->images[0]) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                                <img src="{{ asset($product->images[0]) }}" class="img-cover">
                                             @else
-                                                <span style="font-size: 16px;">💊</span>
+                                                <span class="text-16">💊</span>
                                             @endif
                                         </div>
                                         <span class="fw-600">{{ $product->productName }}</span>
@@ -158,7 +158,7 @@
                                 </td>
                                 <td class="p-12-16-600">{{ number_format($product->total_qty) }}</td>
                                 <td class="card-body-sm">
-                                    <span style="background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 6px; font-weight: 700;">{{ number_format($product->total_revenue, 2) }}</span>
+                                    <span class="badge-green">{{ number_format($product->total_revenue, 2) }}</span>
                                 </td>
                             </tr>
                         @endforeach
@@ -191,18 +191,18 @@
                     <tbody>
                         @foreach ($recentSales as $sale)
                             <tr class="border-bottom-light">
-                                <td class="card-body-sm"><code style="background: #f5f5f7; padding: 3px 8px; border-radius: 6px; font-size: 13px;">{{ $sale->invoiceNumber }}</code></td>
+                                <td class="card-body-sm"><code class="code-badge-sm">{{ $sale->invoiceNumber }}</code></td>
                                 <td style="padding: 12px 16px; font-size: 13px; color: #6e6e73;">{{ $sale->saleDate ? \Carbon\Carbon::parse($sale->saleDate)->format('Y-m-d H:i') : '—' }}</td>
                                 <td class="card-body-sm">{{ $sale->party->name ?? '—' }}</td>
                                 <td class="card-body-sm">{{ $sale->user->name ?? '—' }}</td>
-                                <td style="padding: 12px 16px; font-weight: 700;">{{ number_format($sale->totalAmount, 2) }}</td>
+                                <td class="row-amount">{{ number_format($sale->totalAmount, 2) }}</td>
                                 <td class="card-body-sm">
                                     @if ($sale->isPaid)
-                                        <span style="background: #d4edda; color: #155724; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">مدفوع</span>
+                                        <span class="badge-green-sm">مدفوع</span>
                                     @elseif ($sale->dueAmount > 0 && $sale->paidAmount > 0)
-                                        <span style="background: #fff3e0; color: #e65100; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">جزئي</span>
+                                        <span class="badge-amber-sm">جزئي</span>
                                     @else
-                                        <span style="background: #f8d7da; color: #721c24; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">غير مدفوع</span>
+                                        <span class="badge-red-sm">غير مدفوع</span>
                                     @endif
                                 </td>
                             </tr>

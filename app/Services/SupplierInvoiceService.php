@@ -7,7 +7,9 @@ use App\Models\Purchase;
 use App\Models\SupplierInvoice;
 use App\Models\SupplierInvoiceItem;
 use App\Models\SupplierInvoicePayment;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SupplierInvoiceService
 {
@@ -180,8 +182,14 @@ class SupplierInvoiceService
 
         $invoice->approve($userId);
 
-        // TODO: Send notification to supplier
-        // TODO: Update purchase status if linked
+        // Update linked purchase status if exists
+        if ($invoice->purchase_id) {
+            Purchase::where('id', $invoice->purchase_id)
+                ->update(['status' => 'approved']);
+        }
+
+        // Notify supplier and business users
+        $this->notifyStakeholders($invoice, 'approved', $userId);
 
         return $invoice;
     }
@@ -197,7 +205,8 @@ class SupplierInvoiceService
 
         $invoice->reject($userId, $reason);
 
-        // TODO: Send notification to supplier
+        // Notify supplier and business users
+        $this->notifyStakeholders($invoice, 'rejected', $userId);
 
         return $invoice;
     }
@@ -213,8 +222,19 @@ class SupplierInvoiceService
 
         $invoice->cancel($reason);
 
-        // TODO: Reverse any payments
-        // TODO: Update purchase status if linked
+        // Reverse any approved payments by marking them cancelled
+        SupplierInvoicePayment::where('supplier_invoice_id', $invoice->id)
+            ->where('status', '!=', SupplierInvoicePayment::STATUS_CANCELLED)
+            ->update(['status' => SupplierInvoicePayment::STATUS_CANCELLED]);
+
+        // Update linked purchase status if exists
+        if ($invoice->purchase_id) {
+            Purchase::where('id', $invoice->purchase_id)
+                ->update(['status' => 'cancelled']);
+        }
+
+        // Notify stakeholders
+        $this->notifyStakeholders($invoice, 'cancelled');
 
         return $invoice;
     }
@@ -419,6 +439,43 @@ class SupplierInvoiceService
             'period_90_plus' => $period90Plus,
             'total' => $period30 + $period60 + $period90 + $period90Plus,
         ];
+    }
+
+    /**
+     * Notify stakeholders about invoice status changes.
+     */
+    private function notifyStakeholders(SupplierInvoice $invoice, string $action, ?int $userId = null): void
+    {
+        try {
+            $users = User::where('business_id', $invoice->business_id)
+                ->whereHas('roles', function ($q) {
+                    $q->whereIn('name', ['admin', 'manager', 'purchaser']);
+                })
+                ->get();
+
+            foreach ($users as $user) {
+                \App\Models\Notification::create([
+                    'business_id' => $invoice->business_id,
+                    'user_id' => $user->id,
+                    'type' => 'supplier_invoice_' . $action,
+                    'title' => 'Supplier Invoice ' . ucfirst($action),
+                    'message' => "Invoice {$invoice->invoice_number} has been {$action}.",
+                    'data' => json_encode([
+                        'invoice_id' => $invoice->id,
+                        'invoice_number' => $invoice->invoice_number,
+                        'supplier_id' => $invoice->supplier_id,
+                        'action' => $action,
+                    ]),
+                    'read' => false,
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to send supplier invoice notification', [
+                'invoice_id' => $invoice->id,
+                'action' => $action,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

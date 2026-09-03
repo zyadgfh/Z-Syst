@@ -7,7 +7,9 @@ use App\Models\Purchase;
 use App\Models\PurchaseDetails;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PurchaseOrderService
 {
@@ -117,8 +119,14 @@ class PurchaseOrderService
 
         $po->markAsSent();
 
-        // TODO: Send notification to supplier
-        // TODO: Email supplier with PO details
+        // Notify business users that PO has been sent
+        $this->notifyStakeholders($po, 'sent');
+
+        Log::info('Purchase order sent to supplier', [
+            'po_id' => $po->id,
+            'po_number' => $po->po_number,
+            'supplier_id' => $po->supplier_id,
+        ]);
 
         return $po;
     }
@@ -134,8 +142,8 @@ class PurchaseOrderService
 
         $po->approve($userId);
 
-        // TODO: Notify supplier
-        // TODO: Update purchase order status
+        // Notify stakeholders of approval
+        $this->notifyStakeholders($po, 'approved', $userId);
 
         return $po;
     }
@@ -151,8 +159,8 @@ class PurchaseOrderService
 
         $po->reject($userId, $reason);
 
-        // TODO: Notify supplier
-        // TODO: Update purchase order status
+        // Notify stakeholders of rejection
+        $this->notifyStakeholders($po, 'rejected', $userId);
 
         return $po;
     }
@@ -168,8 +176,8 @@ class PurchaseOrderService
 
         $po->cancel();
 
-        // TODO: Notify supplier
-        // TODO: Update inventory if needed
+        // Notify stakeholders of cancellation
+        $this->notifyStakeholders($po, 'cancelled');
 
         return $po;
     }
@@ -185,9 +193,47 @@ class PurchaseOrderService
 
         $po->update(['status' => PurchaseOrder::STATUS_DRAFT]);
 
-        // TODO: Notify supplier
+        // Notify stakeholders of restoration
+        $this->notifyStakeholders($po, 'restored');
 
         return $po;
+    }
+
+    /**
+     * Notify stakeholders about purchase order status changes.
+     */
+    private function notifyStakeholders(PurchaseOrder $po, string $action, ?int $userId = null): void
+    {
+        try {
+            $users = User::where('business_id', $po->business_id)
+                ->whereHas('roles', function ($q) {
+                    $q->whereIn('name', ['admin', 'manager', 'purchaser']);
+                })
+                ->get();
+
+            foreach ($users as $user) {
+                \App\Models\Notification::create([
+                    'business_id' => $po->business_id,
+                    'user_id' => $user->id,
+                    'type' => 'purchase_order_' . $action,
+                    'title' => 'Purchase Order ' . ucfirst($action),
+                    'message' => "PO {$po->po_number} has been {$action}.",
+                    'data' => json_encode([
+                        'po_id' => $po->id,
+                        'po_number' => $po->po_number,
+                        'supplier_id' => $po->supplier_id,
+                        'action' => $action,
+                    ]),
+                    'read' => false,
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to send purchase order notification', [
+                'po_id' => $po->id,
+                'action' => $action,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

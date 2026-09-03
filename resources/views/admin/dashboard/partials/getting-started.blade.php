@@ -86,8 +86,8 @@
                     <i class="fas {{ $step['icon'] }}" class="fs-14"></i>
                 @endif
             </div>
-            <div style="flex: 1; {{ $step['done'] ? 'opacity: 0.6;' : '' }}">
-                <div style="font-size: 14px; font-weight: 500; color: #1f2937; {{ $step['done'] ? 'text-decoration: line-through;' : '' }}">
+            <div class="flex-1" style="{{ $step['done'] ? 'opacity: 0.6;' : '' }}">
+                <div class="fw-600 text-14" style="color: #1f2937; {{ $step['done'] ? 'text-decoration: line-through;' : '' }}">
                     {{ $step['title'] }}
                 </div>
                 <div style="font-size: 12px; color: #6b7280; margin-top: 2px;">{{ $step['description'] }}</div>

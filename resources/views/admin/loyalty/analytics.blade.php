@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title', 'تحليلات نقاط الولاء')
 
@@ -19,30 +19,30 @@
         </div>
 
         {{-- Summary Cards --}}
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px;">
-            <div style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-radius: 14px; padding: 20px; text-align: center;">
+        <div class="kpi-grid">
+            <div class="card-gradient-green">
                 <div class="badge-value-green">{{ number_format($totalIssued) }}</div>
                 <div class="fs-12-color-green">نقاط صدرت</div>
             </div>
-            <div style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius: 14px; padding: 20px; text-align: center;">
-                <div style="font-size: 28px; font-weight: 800; color: #1565c0;">{{ number_format($totalRedeemed) }}</div>
-                <div style="font-size: 12px; color: #4a6e73; margin-top: 4px;">نقاط مستبدلة</div>
+            <div class="card-gradient-blue">
+                <div class="stat-xl-blue">{{ number_format($totalRedeemed) }}</div>
+                <div class="stat-label-green">نقاط مستبدلة</div>
             </div>
-            <div style="background: linear-gradient(135deg, #fff3e0, #ffe0b2); border-radius: 14px; padding: 20px; text-align: center;">
-                <div style="font-size: 28px; font-weight: 800; color: #e65100;">{{ number_format($activePoints) }}</div>
-                <div style="font-size: 12px; color: #8a6e4a; margin-top: 4px;">نقاط نشطة</div>
+            <div class="card-gradient-amber">
+                <div class="stat-xl-amber">{{ number_format($activePoints) }}</div>
+                <div class="stat-label-amber">نقاط نشطة</div>
             </div>
-            <div style="background: linear-gradient(135deg, #fce4ec, #f8bbd0); border-radius: 14px; padding: 20px; text-align: center;">
-                <div style="font-size: 28px; font-weight: 800; color: #c62828;">{{ number_format($expiredPoints) }}</div>
-                <div style="font-size: 12px; color: #8a4a4a; margin-top: 4px;">نقاط منتهية</div>
+            <div class="card-gradient-red">
+                <div class="stat-xl-red">{{ number_format($expiredPoints) }}</div>
+                <div class="stat-label-red">نقاط منتهية</div>
             </div>
-            <div style="background: linear-gradient(135deg, #f3e5f5, #e1bee7); border-radius: 14px; padding: 20px; text-align: center;">
-                <div style="font-size: 28px; font-weight: 800; color: #7b1fa2;">{{ $uniqueMembers }}</div>
-                <div style="font-size: 12px; color: #6e4a6e; margin-top: 4px;">أعضاء مسجلين</div>
+            <div class="card-gradient-purple">
+                <div class="stat-xl-purple">{{ $uniqueMembers }}</div>
+                <div class="stat-label-purple">أعضاء مسجلين</div>
             </div>
-            <div style="background: linear-gradient(135deg, #e0f7fa, #b2ebf2); border-radius: 14px; padding: 20px; text-align: center;">
-                <div style="font-size: 28px; font-weight: 800; color: #00695c;">{{ number_format($expiringSoonPoints) }}</div>
-                <div style="font-size: 12px; color: #4a6e6e; margin-top: 4px;">تنتهي خلال 30 يوم</div>
+            <div class="card-gradient-teal">
+                <div class="stat-xl-teal">{{ number_format($expiringSoonPoints) }}</div>
+                <div class="stat-label-teal">تنتهي خلال 30 يوم</div>
             </div>
         </div>
 
@@ -52,15 +52,15 @@
                 <div class="card" class="card-clean">
                     <div class="table-section-header">
                         <h5 class="section-title">📈 الاتجاه الشهري (12 شهر)</h5>
-                        <div style="display: flex; gap: 16px; margin-top: 8px; font-size: 12px;">
-                            <span><span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #34c759; margin-right: 4px;"></span>صدرت</span>
-                            <span><span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #007aff; margin-right: 4px;"></span>مستبدلة</span>
-                            <span><span style="display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #ff9500; margin-right: 4px;"></span>منتهية</span>
+                        <div class="chart-legend">
+                            <span><span class="legend-dot legend-dot-green"></span>صدرت</span>
+                            <span><span class="legend-dot legend-dot-blue"></span>مستبدلة</span>
+                            <span><span class="legend-dot legend-dot-amber"></span>منتهية</span>
                         </div>
                     </div>
                     <div class="card-body">
                         @if ($monthlyTrend->isEmpty())
-                            <div style="text-align: center; color: #86868b; padding: 40px;">لا توجد بيانات كافية — سيظهر الرسم بعد استخدام نقاط الولاء</div>
+                            <div class="empty-state-center">لا توجد بيانات كافية — سيظهر الرسم بعد استخدام نقاط الولاء</div>
                         @else
                             @php
                                 $maxVal = max($monthlyTrend->pluck('earned')->max(), $monthlyTrend->pluck('redeemed')->max(), 1);
@@ -73,11 +73,11 @@
                                         $hExpired = ($month->expired / $maxVal) * 170;
                                     @endphp
                                     <div style="flex: 1; display: flex; gap: 2px; align-items: flex-end; position: relative;" title="{{ $month->month }}: صدرت {{ number_format($month->earned) }} / مستبدلة {{ number_format($month->redeemed) }}">
-                                        <div style="flex: 1; height: {{ $hEarned }}px; background: #34c759; border-radius: 3px 3px 0 0; min-height: 2px;"></div>
-                                        <div style="flex: 1; height: {{ $hRedeemed }}px; background: #007aff; border-radius: 3px 3px 0 0; min-height: 2px;"></div>
-                                        <div style="flex: 1; height: {{ $hExpired }}px; background: #ff9500; border-radius: 3px 3px 0 0; min-height: 2px;"></div>
+                                        <div class="flex-1" data-bar-height data-bar-green data-bar-style="--bar-h: {{ $hEarned }}"></div>
+                                        <div class="flex-1" data-bar-height data-bar-blue data-bar-style="--bar-h: {{ $hRedeemed }}"></div>
+                                        <div class="flex-1" data-bar-height data-bar-amber data-bar-style="--bar-h: {{ $hExpired }}"></div>
                                         @if ($loop->iteration % 2 === 0 || $loop->last)
-                                            <span style="position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #86868b; white-space: nowrap;">{{ \Carbon\Carbon::parse($month->month . '-01')->format('M') }}</span>
+                                            <span class="bar-date-center">{{ \Carbon\Carbon::parse($month->month . '-01')->format('M') }}</span>
                                         @endif
                                     </div>
                                 @endforeach
@@ -101,13 +101,13 @@
                         @endphp
                         @foreach ($byType as $type => $count)
                             @php $pct = $total > 0 ? ($count / $total) * 100 : 0; @endphp
-                            <div style="margin-bottom: 16px;">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <div class="progress-row">
+                                <div class="progress-row-header">
                                     <span class="fs-13-color-heading">{{ $typeLabels[$type] ?? $type }}</span>
-                                    <span style="font-size: 13px; color: #86868b;">{{ number_format($count) }} ({{ number_format($pct, 1) }}%)</span>
+                                    <span class="text-13" style="color: #86868b;">{{ number_format($count) }} ({{ number_format($pct, 1) }}%)</span>
                                 </div>
-                                <div style="height: 10px; background: #f0f0f2; border-radius: 5px; overflow: hidden;">
-                                    <div style="height: 100%; width: {{ $pct }}%; background: {{ $typeColors[$type] ?? '#86868b' }}; border-radius: 5px; transition: width 0.5s;"></div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill" style="width: {{ $pct }}%; background: {{ $typeColors[$type] ?? '#86868b' }};"></div>
                                 </div>
                             </div>
                         @endforeach
@@ -138,13 +138,13 @@
                             @foreach ($topEarners as $item)
                                 @php $user = $item['user']; @endphp
                                 <tr class="border-bottom-light">
-                                    <td style="padding: 12px 16px; font-weight: 700; color: {{ $loop->index < 3 ? '#ff9500' : '#6e6e73' }};">{{ $loop->index + 1 }}</td>
+                                    <td style="padding: 12px 16px; font-weight: 700; color: {{ $loop->index < 3 ? '#ff9500' : '#6e6e73' }}">{{ $loop->index + 1 }}</td>
                                     <td class="card-body-sm">
-                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div class="d-flex-center">
                                             @if ($user?->image)
-                                                <img src="{{ asset($user->image) }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                                                <img src="{{ asset($user->image) }}" class="avatar-sm">
                                             @else
-                                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #e8f0fe; color: #007aff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">{{ substr($user->name ?? '?', 0, 1) }}</div>
+                                                <div class="avatar-placeholder">{{ substr($user->name ?? '?', 0, 1) }}</div>
                                             @endif
                                             <div>
                                                 <div class="fw-600">{{ $user->name ?? 'غير معروف' }}</div>
@@ -153,7 +153,7 @@
                                         </div>
                                     </td>
                                     <td class="card-body-sm">
-                                        <span style="background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 6px; font-weight: 700;">{{ number_format($item['total_earned']) }} نقطة</span>
+                                        <span class="badge-green">{{ number_format($item['total_earned']) }} نقطة</span>
                                     </td>
                                     <td class="p-12-16-600">{{ $item['transactions'] }}</td>
                                 </tr>

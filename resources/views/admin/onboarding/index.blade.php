@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title')
     {{ __('business.Getting Started') }}
@@ -20,7 +20,7 @@
     {{-- Step Indicator --}}
     <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 40px;">
         @foreach($steps as $num => $step)
-        <div style="display: flex; align-items: center; gap: 8px;">
+        <div class="d-flex-center">
             <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600;
                 {{ $step['done'] ? 'background: #dcfce7; color: #16a34a;' : (($num == request()->segment(3) || ($num == 1 && request()->is('*/onboarding'))) ? 'background: #6366f1; color: #fff;' : 'background: #f3f4f6; color: #9ca3af;') }}">
                 @if($step['done'])
@@ -33,7 +33,7 @@
                 {{ $step['title'] }}
             </span>
             @if(!$loop->last)
-            <div style="width: 30px; height: 2px; background: {{ $step['done'] ? '#22c55e' : '#e5e7eb' }}; margin: 0 4px;"></div>
+            <div data-step-line="{{ $step['done'] ? 'done' : 'pending' }}"></div>
             @endif
         </div>
         @endforeach

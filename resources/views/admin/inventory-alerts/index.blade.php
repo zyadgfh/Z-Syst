@@ -1,11 +1,11 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title', 'تنبيهات المخزون')
 
 @section('main_content')
     <div class="container-fluid" class="card-body-lg">
         <div class="d-flex align-items-center justify-content-between mb-4">
-            <h4 style="font-weight: 700;">
+            <h4 class="fw-700">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align-lg">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                     <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
@@ -15,7 +15,7 @@
                 <span id="alerts-count-badge" class="js-alert-count-badge">{{ $stats['total'] }}</span>
             </h4>
             <div class="d-flex gap-2">
-                <button onclick="runInventoryScan()" class="btn" id="scan-btn" style="background: #1d1d1f; color: #fff; border-radius: 10px; padding: 10px 20px; font-weight: 600; transition: transform 150ms ease;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
+                <button onclick="runInventoryScan()" class="btn" id="scan-btn" class="btn-dark" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-align"><path d="M21 12a9 9 0 11-6.22-8.56"/><polyline points="21 3 21 9 15 9"/></svg>
                     فحص المخزون
                 </button>
@@ -28,14 +28,14 @@
         {{-- Stats Cards --}}
         <div class="row g-3 mb-4">
             <div class="col-md-3">
-                <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; background: linear-gradient(135deg, #fff0f0, #fff);">
+                <div class="card" class="card-border-gradient-red">
                     <div class="card-body" class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <p class="section-subtitle-xs">حرج</p>
-                                <h3 style="font-weight: 700; color: #ff3b30; margin: 4px 0 0;">{{ $stats['critical'] }}</h3>
+                                <h3 class="stat-lg-red">{{ $stats['critical'] }}</h3>
                             </div>
-                            <div style="width: 44px; height: 44px; border-radius: 12px; background: #ff3b30; display: flex; align-items: center; justify-content: center;">
+                            <div class="icon-container-44 icon-container-red">
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                             </div>
                         </div>
@@ -43,14 +43,14 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card" style="border-radius: 14px; border: 1px solid #e5e5ea; background: linear-gradient(135deg, #fff8e1, #fff);">
+                <div class="card" class="card-border-gradient-amber">
                     <div class="card-body" class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <p class="section-subtitle-xs">تحذير</p>
-                                <h3 style="font-weight: 700; color: #ff9500; margin: 4px 0 0;">{{ $stats['warning'] }}</h3>
+                                <h3 class="stat-lg-amber">{{ $stats['warning'] }}</h3>
                             </div>
-                            <div style="width: 44px; height: 44px; border-radius: 12px; background: #ff9500; display: flex; align-items: center; justify-content: center;">
+                            <div class="icon-container-44 icon-container-amber">
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                             </div>
                         </div>
@@ -65,7 +65,7 @@
                                 <p class="section-subtitle-xs">نفذ من المخزون</p>
                                 <h3 style="font-weight: 700; color: #1d1d1f; margin: 4px 0 0;">{{ $stats['out_of_stock'] }}</h3>
                             </div>
-                            <div style="width: 44px; height: 44px; border-radius: 12px; background: #6e6e73; display: flex; align-items: center; justify-content: center;">
+                            <div class="icon-container-44" style="background: #6e6e73;">
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
                             </div>
                         </div>
@@ -78,7 +78,7 @@
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <p class="section-subtitle-xs">قرب انتهاء الصلاحية</p>
-                                <h3 style="font-weight: 700; color: #ff3b30; margin: 4px 0 0;">{{ $stats['expiring'] }}</h3>
+                                <h3 class="stat-lg-red">{{ $stats['expiring'] }}</h3>
                             </div>
                             <div class="js-icon-container" style="background: #c0392b;">
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -143,7 +143,7 @@
                         </label>
                     </div>
                     <div class="col-md-3">
-                        <button type="submit" class="btn w-100" style="background: #1d1d1f; color: #fff; border-radius: 10px; padding: 10px; font-weight: 600;">بحث</button>
+                        <button type="submit" class="btn w-100" class="btn-dark" style="padding: 10px;">بحث</button>
                     </div>
                 </form>
             </div>
@@ -152,14 +152,14 @@
         {{-- Alerts List --}}
         <div class="card" class="card-clean">
             @forelse ($alerts as $alert)
-                <div id="alert-{{ $alert->id }}" class="alert-item d-flex align-items-start gap-3" style="padding: 16px 20px; border-bottom: 1px solid #f0f0f2; transition: background 150ms ease; {{ $alert->acknowledged ? 'opacity: 0.5;' : '' }}"
+                <div id="alert-{{ $alert->id }}" class="alert-item d-flex align-items-start gap-3" class="card-header" style="border-bottom: 1px solid #f0f0f2; transition: background 150ms ease; {{ $alert->acknowledged ? 'opacity: 0.5;' : '' }}"
                      onmouseenter="this.style.background='#f9f9fb'" onmouseleave="this.style.background='transparent'">
                     {{-- Severity indicator --}}
-                    <div style="width: 10px; height: 10px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; background: {{ match($alert->severity) { 'critical' => '#ff3b30', 'warning' => '#ff9500', default => '#34c759' } }};"></div>
+                    <div data-severity-dot="{{ match($alert->severity) { 'critical' => 'critical', 'warning' => 'warning', default => 'info' } }}"></div>
 
                     <div class="flex-grow-1">
                         <div class="d-flex align-items-center gap-2 mb-1">
-                            <span class="badge" style="background: {{ match($alert->type) { 'low_stock' => '#fff3cd', 'out_of_stock' => '#f8d7da', 'expiring_soon' => '#d4edda', 'expired' => '#f8d7da', 'overstock' => '#d1ecf1', default => '#e2e3e5' }}; color: {{ match($alert->type) { 'low_stock' => '#856404', 'out_of_stock' => '#721c24', 'expiring_soon' => '#155724', 'expired' => '#721c24', 'overstock' => '#0c5460', default => '#383d41' } }}; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; border: none;">
+                            <span class="badge" data-alert-type="{{ $alert->type }}">
                                 {{ match($alert->type) { 'low_stock' => 'مخزون منخفض', 'out_of_stock' => 'نفذ من المخزون', 'expiring_soon' => 'قرب انتهاء', 'expired' => 'منتهي الصلاحية', 'overstock' => 'مخزون زائد', default => $alert->type } }}
                             </span>
                             @if ($alert->product)
@@ -167,7 +167,7 @@
                             @endif
                         </div>
                         <p style="font-size: 13px; color: #6e6e73; margin: 0;">{{ $alert->message }}</p>
-                        <div class="d-flex align-items-center gap-3 mt-2" style="font-size: 12px; color: #86868b;">
+                        <div class="d-flex align-items-center gap-3 mt-2" class="stat-label">
                             <span>{{ $alert->created_at->diffForHumans() }}</span>
                             @if ($alert->current_stock > 0)
                                 <span>المخزون الحالي: <strong>{{ $alert->current_stock }}</strong></span>
@@ -197,12 +197,12 @@
                 </div>
             @empty
                 <div class="text-center py-5">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#34c759" stroke-width="1.5" style="margin-bottom: 12px;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#34c759" stroke-width="1.5" class="mb-12">
                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                         <polyline points="22 4 12 14.01 9 11.01"/>
                     </svg>
                     <h5 style="color: #1d1d1f; font-weight: 600;">لا توجد تنبيهات</h5>
-                    <p style="color: #86868b; font-size: 14px;">جميع المنتجات في حالة مخزون جيدة</p>
+                    <p class="text-14 text-muted">جميع المنتجات في حالة مخزون جيدة</p>
                 </div>
             @endforelse
         </div>

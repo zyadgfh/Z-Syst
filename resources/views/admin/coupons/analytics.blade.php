@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title', 'تحليلات الكوبونات')
 
@@ -133,16 +133,16 @@
                                 <td class="card-body-sm"><code class="js-badge-code">{{ $coupon->code }}</code></td>
                                 <td class="card-body-sm">
                                     @if ($coupon->type === 'percentage')
-                                        <span class="js-badge-success" style="font-size: 13px;">{{ $coupon->value }}%</span>
+                                        <span class="js-badge-success" class="text-13">{{ $coupon->value }}%</span>
                                     @else
-                                        <span class="js-badge-info" style="font-size: 13px;">${{ number_format($coupon->value, 2) }}</span>
+                                        <span class="js-badge-info" class="text-13">${{ number_format($coupon->value, 2) }}</span>
                                     @endif
                                 </td>
                                 <td class="p-12-16-600">{{ $coupon->usages_count }}</td>
                                 <td class="js-table-cell" style="font-weight: 600; color: #2e7d32;">${{ number_format($coupon->usages_sum_discount_amount ?? 0, 2) }}</td>
                                 <td class="card-body-sm">
                                     @if ($coupon->isCurrentlyValid())
-                                        <span class="js-badge-success" style="font-size: 12px;">نشط</span>
+                                        <span class="js-badge-success" class="text-12">نشط</span>
                                     @else
                                         <span class="js-badge-pill" style="background: #f8d7da; color: #721c24; font-size: 12px;">منتهي</span>
                                     @endif

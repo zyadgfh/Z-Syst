@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title', __('orders.Order') . ' ' . $order->order_number)
 
@@ -66,7 +66,7 @@
                         } }}">
                             {{ ucfirst($order->status) }}
                         </span>
-                        <span class="badge p-2" style="font-size: 14px; background: {{ $order->payment_status === 'paid' ? '#f0fdf4; color: #166534' : '#fef2f2; color: #991b1b' }}">
+                        <span class="badge p-2" class="text-14" style="background: {{ $order->payment_status === 'paid' ? '#f0fdf4; color: #166534' : '#fef2f2; color: #991b1b' }}">
                             {{ ucfirst(str_replace('_', ' ', $order->payment_status)) }}
                         </span>
                         <span class="ms-auto text-muted" class="fs-13">{{ $order->created_at->format('M d, Y g:i A') }}</span>
@@ -121,7 +121,7 @@
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
                                         <div style="font-weight: 600; font-size: 14px; color: #111827;">
-                                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: {{ $color }}; margin-right: 6px;"></span>
+                                            <span data-dot-style="--dot-color: {{ $color }}"></span>
                                             {{ ucfirst($history->status) }}
                                         </div>
                                         @if ($history->note)

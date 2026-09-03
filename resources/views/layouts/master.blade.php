@@ -20,7 +20,9 @@
     
     <!-- Design System CSS -->
     <link rel="stylesheet" href="{{ asset('css/design-system.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/admin-components.css') }}">
+    
+    {{-- Admin CSS loaded conditionally via @push('admin_css') in admin layouts --}}
+    @stack('admin_css')
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,6 +40,20 @@
         } else {
             document.documentElement.classList.remove('dark');
         }
+        
+        // Apply CSS custom properties from data-*-style attributes
+        // Enables data-bar-height data-bar-style="--bar-h: 120" pattern
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('[data-bar-style]').forEach(function(el) {
+                el.style.cssText += ';' + el.getAttribute('data-bar-style');
+            });
+            document.querySelectorAll('[data-progress-style]').forEach(function(el) {
+                el.style.cssText += ';' + el.getAttribute('data-progress-style');
+            });
+            document.querySelectorAll('[data-dot-style]').forEach(function(el) {
+                el.style.cssText += ';' + el.getAttribute('data-dot-style');
+            });
+        });
     </script>
 </head>
 <body class="{{ session('dark_mode') ? 'dark:bg-gray-900 dark:text-white' : 'bg-white text-gray-900' }}" style="background-color: var(--color-background); color: var(--color-foreground);">

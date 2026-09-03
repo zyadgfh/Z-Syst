@@ -35,7 +35,7 @@
                 ->limit(5)
                 ->get();
         @endphp
-        <div class="js-stat-value-lg" style="font-size:28px; color:{{ $lowStock->count() > 0 ? '#f59e0b' : '#22c55e' }};">
+        <div class="js-stat-value-lg" class="stat-xl" style="font-size:28px; color:{{ $lowStock->count() > 0 ? '#f59e0b' : '#22c55e' }};">
             {{ $lowStock->count() }}
         </div>
         @if($lowStock->count() > 0)
@@ -59,7 +59,7 @@
 @if($pendingRx > 0)
 <div class="card" style="padding:16px 20px; border:1px solid #fef3c7; border-radius:12px; background:#fffbeb; margin-bottom:24px;">
     <div style="display:flex; align-items:center; gap:12px;">
-        <i class="fas fa-prescription" style="font-size:20px; color:#f59e0b;"></i>
+        <i class="fas fa-prescription" class="text-20" style="color:#f59e0b;"></i>
         <div>
             <strong style="color:#92400e;">{{ __(':count pending prescription(s)', ['count' => $pendingRx]) }}</strong>
             <div style="font-size:12px; color:#b45309;">{{ __('Review and dispense pending prescriptions') }}</div>
@@ -86,7 +86,7 @@
             <span class="fs-12-500">{{ __('Products') }}</span>
         </a>
         <a href="{{ route('admin.inventory-alerts.index') }}" class="feature-card">
-            <i class="fas fa-boxes" style="font-size:20px; color:#f59e0b;"></i>
+            <i class="fas fa-boxes" class="text-20" style="color:#f59e0b;"></i>
             <span class="fs-12-500">{{ __('Inventory') }}</span>
         </a>
         <a href="{{ route('admin.receipts.index') }}" class="feature-card">

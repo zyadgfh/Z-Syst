@@ -10,11 +10,11 @@
 
 <div class="setting-row {{ $isOverridden ? 'has-override' : '' }}" id="setting-{{ str_replace('.', '-', $def->key) }}">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <div style="flex: 1; min-width: 200px;">
+        <div class="flex-1" style="min-width: 200px;">
             <div class="setting-name">
                 {{ __($def->name) }}
                 @if($isOverridden)
-                    <span class="badge bg-primary bg-opacity-10 text-primary ms-1" style="font-size:10px;">{{ __('common.Override') }}</span>
+                    <span class="badge bg-primary bg-opacity-10 text-primary ms-1" class="text-10">{{ __('common.Override') }}</span>
                 @endif
             </div>
             <div class="setting-description">{{ __($def->description) }}</div>

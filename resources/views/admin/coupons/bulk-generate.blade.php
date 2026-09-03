@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title', 'إنشاء أكواد كوبونات بالجملة')
 
@@ -51,7 +51,7 @@
                         البادئة (اختياري)
                     </label>
                     <input type="text" name="prefix" value="{{ old('prefix') }}" maxlength="10"
-                        style="width: 100%; border-radius: 10px; border: 1px solid #d2d2d7; padding:10px 14px; font-size: 15px; text-transform: uppercase; letter-spacing: 0.04em;"
+                        class="input-clean-uppercase"
                         placeholder="مثال: CAMPAIGN">
                 </div>
                 <div class="col-md-4">
@@ -141,19 +141,19 @@
                 </div>
 
                 <div class="col-md-4 d-flex align-items-end">
-                    <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px;">
-                        <input type="checkbox" name="single_use" value="1" {{ old('single_use', 1) ? 'checked' : '' }} style="width: 18px; height: 18px; border-radius: 4px;">
+                    <label class="d-inline-flex cursor-pointer text-14">
+                        <input type="checkbox" name="single_use" value="1" {{ old('single_use', 1) ? 'checked' : '' }} class="checkbox-sm">
                         استخدام واحد لكل مستخدم
                     </label>
                 </div>
             </div>
 
             <div class="d-flex gap-2 mt-4">
-                <button type="submit" class="btn" style="background: #007aff; color: #fff; border-radius: 10px; padding: 10px 28px; font-weight: 600; transition: transform 150ms ease;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
+                <button type="submit" class="btn" class="btn-primary-blue" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon-align"><path d="M12 5v14M5 12h14"/></svg>
                     إنشاء الأكواد
                 </button>
-                <a href="{{ route('admin.coupons.index') }}" class="btn" style="background: #f5f5f7; color: #1d1d1f; border-radius: 10px; padding: 10px 28px; font-weight: 600; text-decoration: none;">إلغاء</a>
+                <a href="{{ route('admin.coupons.index') }}" class="btn" class="btn-secondary">إلغاء</a>
             </div>
         </form>
     </div>

@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title', 'تعديل الكوبون: ' . $coupon->code)
 
@@ -81,7 +81,7 @@
 
             <div class="d-flex gap-2 mt-4">
                 <button type="submit" class="btn" style="background: #007aff; color: #fff; border-radius: 10px; padding: 10px 28px; font-weight: 600;">تحديث</button>
-                <a href="{{ route('admin.coupons.index') }}" class="btn" style="background: #f5f5f7; color: #1d1d1f; border-radius: 10px; padding: 10px 28px; font-weight: 600; text-decoration: none;">إلغاء</a>
+                <a href="{{ route('admin.coupons.index') }}" class="btn" class="btn-secondary">إلغاء</a>
             </div>
         </form>
     </div>

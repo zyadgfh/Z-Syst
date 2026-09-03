@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title', 'أكواد الكوبونات — QR Codes')
 
@@ -29,8 +29,8 @@
         <div id="qrGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;">
             @foreach ($codes as $item)
                 <div class="qr-card" style="background: #fff; border-radius: 14px; border: 1px solid #e5e5ea; padding: 16px; text-align: center; transition: box-shadow 150ms ease;" onmouseenter="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'" onmouseleave="this.style.boxShadow='none'">
-                    <div style="width: 160px; height: 160px; margin: 0 auto 12px; background: #f8f8fa; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                        <img src="{{ $item['qr_url'] }}" alt="QR Code for {{ $item['code'] }}" style="width: 100%; height: 100%; object-fit: contain;" loading="lazy">
+                    <div class="img-preview">
+                        <img src="{{ $item['qr_url'] }}" alt="QR Code for {{ $item['code'] }}" class="thumb-contain" style="width: 100%; height: 100%;" loading="lazy">
                     </div>
 
                     <code style="display: block; font-size: 16px; font-weight: 700; color: #1d1d1f; letter-spacing: 0.06em; margin-bottom: 6px; background: #f5f5f7; padding: 6px 12px; border-radius: 8px;">{{ $item['code'] }}</code>

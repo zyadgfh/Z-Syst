@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title')
     {{ __('gateways.Payment Transactions') }} - {{ $gateway->gateway_type_label }}

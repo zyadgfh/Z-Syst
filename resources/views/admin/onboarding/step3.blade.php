@@ -19,7 +19,7 @@
 
     <form method="POST" action="{{ route('admin.onboarding.saveStep3') }}">
         @csrf
-        <div style="display: grid; gap: 20px;">
+        <div class="grid-gap-20">
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
                 <div>
                     <label class="form-label-md">
@@ -46,7 +46,7 @@
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="grid-2col">
                 <div>
                     <label class="form-label-md">
                         {{ __('products.Selling Price') }} <span class="text-red">*</span>

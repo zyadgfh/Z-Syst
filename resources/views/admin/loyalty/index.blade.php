@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title')
     {{ __('loyalty.Loyalty & CRM') }}
@@ -106,7 +106,7 @@
                 <div class="card" class="card-clean">
                     <div class="card-body" style="padding: 0;">
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #f0f0f2; background: linear-gradient(135deg, #fff3e0 0%, #fff8e1 100%);">
-                            <div style="display: flex; align-items: center; gap: 10px;">
+                            <div class="row-cell">
                                 <span style="font-size: 24px;">⏰</span>
                                 <div>
                                     <h5 style="margin: 0; font-size: 16px; font-weight: 700; color: #1d1d1f;">نقاط على وشك الانتهاء</h5>

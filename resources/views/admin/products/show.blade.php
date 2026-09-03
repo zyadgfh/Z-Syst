@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title')
     {{ $product->productName }} — {{ __('products.Item Details') }}

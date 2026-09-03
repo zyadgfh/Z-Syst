@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title')
     {{ __('settings.General Settings') }}
@@ -47,7 +47,7 @@
                                     <label class="form-label">{{ __('settings.Admin Logo') }}</label>
                                     <div class="image-upload">
                                         <div class="upload-preview" id="admin-logo-preview">
-                                            <img src="{{ asset($general->value['admin_logo'] ?? 'assets/images/logo/logo.png') }}" alt="Admin Logo" style="max-width: 200px; max-height: 100px; object-fit: contain;">
+                                            <img src="{{ asset($general->value['admin_logo'] ?? 'assets/images/logo/logo.png') }}" alt="Admin Logo" class="thumb-contain">
                                         </div>
                                         <input type="file" name="admin_logo" class="form-control" accept="image/*" id="admin-logo-input">
                                     </div>
@@ -67,7 +67,7 @@
                                     <label class="form-label">{{ __('settings.Frontend Logo') }}</label>
                                     <div class="image-upload">
                                         <div class="upload-preview" id="frontend-logo-preview">
-                                            <img src="{{ asset($general->value['frontend_logo'] ?? 'assets/images/logo/logo.png') }}" alt="Frontend Logo" style="max-width: 200px; max-height: 100px; object-fit: contain;">
+                                            <img src="{{ asset($general->value['frontend_logo'] ?? 'assets/images/logo/logo.png') }}" alt="Frontend Logo" class="thumb-contain">
                                         </div>
                                         <input type="file" name="frontend_logo" class="form-control" accept="image/*" id="frontend-logo-input">
                                     </div>

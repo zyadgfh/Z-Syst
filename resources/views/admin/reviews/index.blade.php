@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title', __('orders.Product Reviews'))
 
@@ -27,7 +27,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card kpi-card p-3 text-center" style="border-left: 3px solid #10b981;">
+            <div class="card kpi-card p-3 text-center" class="border-left-green" style="border-left: 3px solid #10b981;">
                 <div class="kpi-value" class="text-green">{{ $stats['approved'] }}</div>
                 <div class="kpi-label">{{ __('common.Approved') }}</div>
             </div>

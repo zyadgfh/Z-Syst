@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title')
     {{ __('products.Items Management') }}
@@ -43,7 +43,7 @@
                     </div>
 
                     {{-- Advanced Filters --}}
-                    <div id="filterPanel" class="px-3 pb-3" style="display:{{ collect($filters)->filter()->isNotEmpty() ? 'block' : 'none' }}">
+                    <div id="filterPanel" class="px-3 pb-3" style="{{ collect($filters)->filter()->isNotEmpty() ? '' : 'display: none;' }}">
                         <form method="GET" action="{{ route('admin.items.index') }}" id="filterForm">
                             <div class="row g-3">
                                 <div class="col-md-3">

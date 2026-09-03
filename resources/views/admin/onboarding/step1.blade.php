@@ -11,18 +11,18 @@
 
     <form method="POST" action="{{ route('admin.onboarding.saveStep1') }}">
         @csrf
-        <div style="display: grid; gap: 20px;">
+        <div class="grid-gap-20">
             <div>
                 <label class="form-label-md">
                     {{ __('business.Store Name') }} <span class="text-red">*</span>
                 </label>
                 <input type="text" name="companyName" value="{{ old('companyName', $business->companyName ?? '') }}"
-                    style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none; transition: border 0.2s;"
+                    class="input-clean-bordered"
                     placeholder="{{ __('business.e.g. Al-Shifa Pharmacy') }}" required>
                 @error('companyName') <p class="text-red-sm">{{ $message }}</p> @enderror
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="grid-2col">
                 <div>
                     <label class="form-label-md">
                         {{ __('common.Phone Number') }}

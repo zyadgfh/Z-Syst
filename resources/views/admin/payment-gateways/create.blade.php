@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title')
     {{ __('gateways.Add Payment Gateway') }}
@@ -126,7 +126,7 @@
                     <div class="col-md-4 mb-3">
                         <div class="gateway-preview {{ $selectedType == $type ? 'selected' : '' }}" 
                              onclick="selectGatewayType('{{ $type }}')" 
-                             style="cursor: pointer;"
+                             class="cursor-pointer"
                              data-gateway-type="{{ $type }}">
                             <div class="gateway-icon-large {{ str_replace('_', '-', $type) }}">
                                 <i class="fas {{ getGatewayIcon($type) }}"></i>
@@ -147,7 +147,7 @@
                             <label for="transaction_fee" class="fw-bold">{{ __('gateways.Transaction Fee') }}</label>
                             <div class="input-group">
                                 <input type="number" step="0.01" class="form-control" id="transaction_fee" name="transaction_fee" value="0" min="0">
-                                <select class="form-select" id="transaction_fee_type" name="transaction_fee_type" style="max-width: 120px;">
+                                <select class="form-select" id="transaction_fee_type" name="transaction_fee_type" class="thumb-contain-sm">
                                     <option value="percentage">%</option>
                                     <option value="fixed">EGP</option>
                                 </select>

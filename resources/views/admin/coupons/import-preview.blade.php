@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title', 'معاينة استيراد الكوبونات')
 
@@ -14,7 +14,7 @@
         <div class="d-flex gap-2">
             <a href="{{ route('admin.coupons.import') }}" class="btn" style="background: #f5f5f7; color: #1d1d1f; border-radius: 10px; padding: 10px 20px; font-weight: 600; text-decoration: none;">إلغاء</a>
             @if (count($validated) > 0)
-                <form action="{{ route('admin.coupons.import.confirm') }}" method="POST" style="display: inline;" onsubmit="return confirm('تأكيد استيراد {{ count($validated) }} كوبون؟')">
+                <form action="{{ route('admin.coupons.import.confirm') }}" method="POST" class="d-inline" onsubmit="return confirm('تأكيد استيراد {{ count($validated) }} كوبون؟')">
                     @csrf
                     <button type="submit" class="btn" style="background: #34c759; color: #fff; border-radius: 10px; padding: 10px 20px; font-weight: 600; transition: transform 150ms ease;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon-align"><polyline points="20 6 9 17 4 12"/></svg>
@@ -79,7 +79,7 @@
         </div>
     @else
         <div class="text-center py-5" class="text-muted-custom">
-            <p style="font-size: 16px;">لا توجد كوبونات صالحة للاستيراد</p>
+            <p class="text-16">لا توجد كوبونات صالحة للاستيراد</p>
         </div>
     @endif
 </div>

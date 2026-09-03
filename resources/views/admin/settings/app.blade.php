@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title')
     {{ __('settings.Application Settings') }}
@@ -395,7 +395,7 @@
         // Override indicator
         let overrideBadge = '';
         if (isOverridden) {
-            overrideBadge = `<span class="badge bg-primary bg-opacity-10 text-primary ms-1" style="font-size:10px;">{{ __('common.Override') }}</span>`;
+            overrideBadge = `<span class="badge bg-primary bg-opacity-10 text-primary ms-1" class="text-10">{{ __('common.Override') }}</span>`;
         }
 
         // Control based on type
@@ -440,7 +440,7 @@
         return `
         <div class="setting-row ${isOverridden ? 'has-override' : ''}" id="setting-${def.key.replace(/\./g, '-')}">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                <div style="flex: 1; min-width: 200px;">
+                <div class="flex-1" style="min-width: 200px;">
                     <div class="setting-name">
                         ${def.name}
                         ${overrideBadge}
@@ -595,7 +595,7 @@
         count.textContent = settings.length;
         let html = '';
         settings.forEach(def => {
-            html += `<div class="setting-row mb-2" style="cursor: pointer;" onclick="jumpToSetting('${def.key}')">
+            html += `<div class="setting-row mb-2" class="cursor-pointer" onclick="jumpToSetting('${def.key}')">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <div class="setting-name">${def.name}</div>

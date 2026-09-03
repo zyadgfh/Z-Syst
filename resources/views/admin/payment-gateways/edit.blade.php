@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title')
     {{ __('gateways.Edit Payment Gateway') }}: {{ $gateway->gateway_type_label }}
@@ -131,7 +131,7 @@
                             <label for="transaction_fee" class="fw-bold">{{ __('gateways.Transaction Fee') }}</label>
                             <div class="input-group">
                                 <input type="number" step="0.01" class="form-control" id="transaction_fee" name="transaction_fee" value="{{ $gateway->transaction_fee }}" min="0">
-                                <select class="form-select" id="transaction_fee_type" name="transaction_fee_type" style="max-width: 120px;">
+                                <select class="form-select" id="transaction_fee_type" name="transaction_fee_type" class="thumb-contain-sm">
                                     <option value="percentage" {{ $gateway->transaction_fee_type == 'percentage' ? 'selected' : '' }}>%</option>
                                     <option value="fixed" {{ $gateway->transaction_fee_type == 'fixed' ? 'selected' : '' }}>EGP</option>
                                 </select>

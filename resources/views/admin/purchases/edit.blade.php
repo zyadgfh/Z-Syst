@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.admin')
 
 @section('title')
     {{ __('purchases.Edit Purchase Invoice') }} #{{ $purchase->invoiceNumber }}
