@@ -1,6 +1,6 @@
 begin;
 
-select plan(13);
+select plan(15);
 
 insert into public.businesses(company_name) values ('TEST BUSINESS A'), ('TEST BUSINESS B');
 create temp table tx_fixture(a bigint,b bigint,w bigint,p bigint,u1 uuid,u2 uuid) on commit drop;
@@ -51,9 +51,9 @@ select ok(true,'sale + financial ledger + cash transaction commit atomically');
 select throws_ok(
   $$select public.api_post_sale_financial(
     (select a from tx_fixture),null,
-    (select id from public.warehouses where business_id=(select id from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1) limit 1),
+    (select id from public.warehouses where business_id=(select a from tx_fixture) limit 1),
     'TEST-INV-FAIL','cash',1000,0,0,
-    jsonb_build_array(jsonb_build_object('product_id',(select id from public.products where business_id=(select id from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1) limit 1),'quantity',999,'unit_price',10)),
+    jsonb_build_array(jsonb_build_object('product_id',(select id from public.products where business_id=(select a from tx_fixture) limit 1),'quantity',999,'unit_price',10)),
     'atomic-test-fail',null)$$,
   'insufficient warehouse stock',
   'oversell is rejected atomically'
@@ -131,10 +131,10 @@ begin
 end $$;
 
 select is((select count(*) from public.financial_transactions),1::bigint,'tenant A sees only tenant A financial rows');
-select ok((select count(*) from public.sales where business_id=(select id from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1))=1,'tenant A sales intact');
-select ok((select count(*) from public.warehouse_stocks where business_id=(select id from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1))=1,'tenant A inventory intact');
-select ok((select count(*) from public.cash_register_transactions where business_id=(select id from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1))=1,'tenant A cash flow isolated');
-select ok((select count(*) from public.financial_transactions where business_id=(select id from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1))=1,'tenant A financial flow isolated');
+select ok((select count(*) from public.sales where business_id=(select a from tx_fixture))=1,'tenant A sales intact');
+select ok((select count(*) from public.warehouse_stocks where business_id=(select a from tx_fixture))=1,'tenant A inventory intact');
+select ok((select count(*) from public.cash_register_transactions where business_id=(select a from tx_fixture))=1,'tenant A cash flow isolated');
+select ok((select count(*) from public.financial_transactions where business_id=(select a from tx_fixture))=1,'tenant A financial flow isolated');
 
 select is(
   has_function_privilege('anon','public.api_post_sale_financial(bigint,bigint,bigint,text,text,numeric,numeric,numeric,jsonb,text,bigint)','execute'),
