@@ -19,10 +19,13 @@ class StockTransfer extends Model
         'status',
         'notes',
         'user_id',
+        'idempotency_key',
+        'completed_at',
     ];
 
     protected $casts = [
         'quantity' => 'integer',
+        'completed_at' => 'datetime',
     ];
 
     public function business(): BelongsTo
