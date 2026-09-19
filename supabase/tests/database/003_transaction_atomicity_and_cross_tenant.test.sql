@@ -25,7 +25,7 @@ begin
   values(a,u1,'open',100);
 end $$;
 
-set local role authenticated;
+grant select on tx_fixture to authenticated;\n\nset local role authenticated;
 
 do $$
 declare a bigint; u1 uuid; w bigint; p bigint; sale_id bigint;
