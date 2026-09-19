@@ -61,4 +61,4 @@ jobs:
           BROADCAST_CONNECTION: log
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
-        run: php artisan test --verbosity=normal --colors=never
+        run: php artisan test --colors=never
