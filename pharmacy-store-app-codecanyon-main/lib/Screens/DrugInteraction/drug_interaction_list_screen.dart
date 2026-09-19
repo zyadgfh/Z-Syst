@@ -156,7 +156,7 @@ class _DrugInteractionListScreenState extends State<DrugInteractionListScreen> {
                 SizedBox(
                   height: 48,
                   child: DropdownButtonFormField<String>(
-                    initialValue: _selectedSeverity,
+                    value: _selectedSeverity,
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
@@ -185,7 +185,7 @@ class _DrugInteractionListScreenState extends State<DrugInteractionListScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          const Divider(color: kOutlineBorder, thickness: 1.0),
+          Divider(color: kOutlineBorder, thickness: 1.0),
           Expanded(
             child: RefreshIndicator.adaptive(
               onRefresh: () async => _pagingController.refresh(),
@@ -370,7 +370,7 @@ class _DrugInteractionListScreenState extends State<DrugInteractionListScreen> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                initialValue: severity,
+                value: severity,
                 decoration: const InputDecoration(labelText: 'Severity *', border: OutlineInputBorder()),
                 items: const [
                   DropdownMenuItem(value: 'contraindicated', child: Text('Contraindicated - Do Not Use Together')),
