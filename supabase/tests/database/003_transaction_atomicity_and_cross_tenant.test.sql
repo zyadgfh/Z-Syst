@@ -8,7 +8,7 @@ create temp table tx_fixture(a bigint,b bigint,w bigint,p bigint,u1 uuid,u2 uuid
 do $$
 declare a bigint; b bigint; w bigint; p bigint; u1 uuid:=gen_random_uuid(); u2 uuid:=gen_random_uuid();
 begin
-  select f.a into a from tx_fixture f limit 1;
+  select id into a from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1;
   select id into b from public.businesses where company_name='TEST BUSINESS B' order by id desc limit 1;
   insert into auth.users(id,aud,role,email,created_at,updated_at,email_confirmed_at)
   values
