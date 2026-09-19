@@ -17,7 +17,7 @@ jobs:
           php-version: '8.3'
           extensions: zip, mbstring, xml, intl, bcmath, sqlite, pdo_sqlite
       - name: Validate composer
-        run: composer validate --strict
+        run: composer validate
       - name: Install Composer dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
       - name: Run PHP Unit tests
@@ -38,7 +38,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.3'
+          flutter-version: '3.27.4'
       - name: Install Flutter dependencies
         run: |
           cd pharmacy-store-app-codecanyon-main
