@@ -21,6 +21,14 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
       - name: Run PHP Unit tests
+        env:
+          APP_ENV: testing
+          CACHE_DRIVER: array
+          SESSION_DRIVER: array
+          QUEUE_CONNECTION: sync
+          BROADCAST_CONNECTION: log
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
         run: vendor/bin/phpunit --colors=always
 
   flutter:
