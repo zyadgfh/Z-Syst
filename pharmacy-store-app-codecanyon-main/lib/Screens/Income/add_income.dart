@@ -227,7 +227,7 @@ class _AddIncomeState extends State<AddIncome> {
                         // Payment Method
                         DropdownButtonFormField<String>(
                           hint: Text(l10n.selectOne),
-                          initialValue: selectedPaymentType,
+                          value: selectedPaymentType,
                           onChanged: (value) {
                             setState(() {
                               selectedPaymentType = value!;
