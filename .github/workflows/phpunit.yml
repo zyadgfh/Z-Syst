@@ -56,6 +56,10 @@ jobs:
           DB_DATABASE: ':memory:'
         run: php artisan migrate --no-interaction --force
 
+      - name: Recheck Sanctum package config after migrations
+        run: |
+          test -f vendor/laravel/sanctum/config/sanctum.php || cp config/sanctum.php vendor/laravel/sanctum/config/sanctum.php
+
       - name: Run tests
         env:
           APP_ENV: testing
