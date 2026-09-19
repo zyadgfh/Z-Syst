@@ -102,7 +102,7 @@ class _AddIncomeState extends State<AddIncome> {
     selectedPaymentType ??= paymentMethods.first;
     print(paymentMethods);
     final theme = Theme.of(context);
-    final l10n = l10n.S.of(context);
+    final l10n = lang.S.of(context);
     return Consumer(
       builder: (context, ref, __) {
         final data = ref.watch(incomeCategoryProvider);
