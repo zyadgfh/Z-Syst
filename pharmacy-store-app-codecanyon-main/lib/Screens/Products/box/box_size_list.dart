@@ -32,12 +32,12 @@ class _BoxListState extends State<BoxList> {
 
   @override
   Widget build(BuildContext context) {
-    final lang = lang.S.of(context);
+    final l10n = l10n.S.of(context);
     final theme = Theme.of(context);
     return AcnooScafoldWidget(
       appBar: AppBar(
         title: Text(
-          lang.leafOrBoxSize,
+          l10n.leafOrBoxSize,
           style: GoogleFonts.poppins(
             color: kWhite,
             fontSize: 20.0,
@@ -79,7 +79,7 @@ class _BoxListState extends State<BoxList> {
                           textFieldType: TextFieldType.NAME,
                           decoration: InputDecoration(
                             border: const OutlineInputBorder(),
-                            hintText: lang.S.of(context).search,
+                            hintText: l10n.S.of(context).search,
                             prefixIcon: Icon(
                               Icons.search,
                               color: kGreyTextColor.withValues(alpha: 0.5),
@@ -163,7 +163,7 @@ class _BoxListState extends State<BoxList> {
                   Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Text(
-                      lang.S.of(context).noDataFound,
+                      l10n.S.of(context).noDataFound,
                     ),
                   ),
               ],
