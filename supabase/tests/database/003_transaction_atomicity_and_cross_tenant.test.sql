@@ -9,7 +9,7 @@ do $$
 declare a bigint; b bigint; w bigint; p bigint; u1 uuid:=gen_random_uuid(); u2 uuid:=gen_random_uuid();
 begin
   select f.a into a from tx_fixture f limit 1;
-  select f.b into b from tx_fixture f limit 1;
+  select id into b from public.businesses where company_name='TEST BUSINESS B' order by id desc limit 1;
   insert into auth.users(id,aud,role,email,created_at,updated_at,email_confirmed_at)
   values
     (u1,'authenticated','authenticated','tx-a-'||u1||'@example.test',now(),now(),now()),
