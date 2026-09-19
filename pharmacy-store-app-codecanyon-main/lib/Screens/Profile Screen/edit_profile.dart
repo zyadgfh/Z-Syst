@@ -216,7 +216,7 @@ class _EditProfileState extends State<EditProfile> {
                         ),
                       ),
                       hint: Text(lang.selectBusinessCategory),
-                      initialValue: selectedBusinessCategory,
+                      value: selectedBusinessCategory,
                       style: theme.textTheme.bodyMedium?.copyWith(color: kTitleColor),
                       items: data.map((BusinessCategoryModel category) {
                         return DropdownMenuItem<BusinessCategoryModel>(
