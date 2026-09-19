@@ -108,15 +108,32 @@ class WarehouseService
     public function createTransfer(array $data): StockTransfer
     {
         return DB::transaction(function () use ($data) {
-            // Validate source warehouse has sufficient stock
-            $fromWarehouse = Warehouse::find($data['from_warehouse_id']);
-            if (!$fromWarehouse->hasSufficientStock($data['product_id'], $data['quantity'])) {
-                throw new \Exception('Insufficient stock in source warehouse');
+            $fromWarehouse = Warehouse::where('id', $data['from_warehouse_id'])
+                ->where('business_id', $data['business_id'])
+                ->where('is_active', true)
+                ->first();
+            $toWarehouse = Warehouse::where('id', $data['to_warehouse_id'])
+                ->where('business_id', $data['business_id'])
+                ->where('is_active', true)
+                ->first();
+
+            if (!$fromWarehouse || !$toWarehouse) {
+                throw new \Exception('Invalid warehouse for current business');
             }
 
-            // Validate transfer is not to same warehouse
-            if ($data['from_warehouse_id'] === $data['to_warehouse_id']) {
+            if ((int) $data['from_warehouse_id'] === (int) $data['to_warehouse_id']) {
                 throw new \Exception('Cannot transfer to same warehouse');
+            }
+
+            $product = Product::where('id', $data['product_id'])
+                ->where('business_id', $data['business_id'])
+                ->first();
+            if (!$product) {
+                throw new \Exception('Invalid product for current business');
+            }
+
+            if (!$fromWarehouse->hasSufficientStock($data['product_id'], $data['quantity'])) {
+                throw new \Exception('Insufficient stock in source warehouse');
             }
 
             return StockTransfer::create($data);
@@ -128,6 +145,22 @@ class WarehouseService
      */
     public function completeTransfer(StockTransfer $transfer): StockTransfer
     {
+        if (config('database.default') === 'pgsql' && env('SUPABASE_URL')) {
+            $row = DB::selectOne(
+                'select * from private.complete_stock_transfer(?)',
+                [$transfer->getKey()]
+            );
+
+            if (!$row) {
+                throw new \Exception('Cannot complete transfer');
+            }
+
+            $model = new StockTransfer();
+            $model->setRawAttributes((array) $row, true);
+            $model->exists = true;
+            return $model;
+        }
+
         if (!$transfer->complete()) {
             throw new \Exception('Cannot complete transfer');
         }
