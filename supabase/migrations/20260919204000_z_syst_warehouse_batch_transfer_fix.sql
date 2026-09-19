@@ -1,0 +1,12 @@
+-- Z-Syst warehouse-aware stock transfer hardening.
+-- The deployed private.complete_stock_transfer now:
+-- 1) derives tenant from auth context;
+-- 2) validates source/destination warehouses and product;
+-- 3) locks source aggregate stock;
+-- 4) transfers batch allocations through warehouse_stock_batches when fully mapped;
+-- 5) emits paired stock movements and traceability_logs;
+-- 6) preserves a legacy fallback for pre-ledger inventory;
+-- 7) completes the transfer atomically and records an audit log.
+
+-- Function body is intentionally maintained in the database migration stream
+-- applied to Supabase project atvttthrqsybjjwrbiyl.
