@@ -244,7 +244,7 @@ class _AddExpenseState extends State<AddExpense> {
                     // Payment type
                     DropdownButtonFormField<String>(
                       hint: Text(lang.selectOne),
-                      initialValue: selectedPaymentType,
+                      value: selectedPaymentType,
                       onChanged: (value) {
                         setState(() {
                           selectedPaymentType = value!;
