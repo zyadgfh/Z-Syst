@@ -1,0 +1,17 @@
+create schema if not exists private;
+create or replace function private.current_business_id() returns bigint language sql stable security definer set search_path=public,pg_temp as $$ select business_id from public.app_users where id=(select auth.uid()) limit 1 $$;
+revoke all on function private.current_business_id() from public,anon,authenticated;
+grant execute on function private.current_business_id() to authenticated;
+revoke all on function public.current_business_id() from public,anon,authenticated;
+do $$ declare r record; q text; w text; begin
+ for r in select schemaname,tablename,policyname,qual,with_check from pg_policies where schemaname='public' loop
+  q=replace(coalesce(r.qual,''),'current_business_id()','private.current_business_id()');
+  w=replace(coalesce(r.with_check,''),'current_business_id()','private.current_business_id()');
+  if r.qual is not null then execute format('alter policy %I on %I.%I using %s',r.policyname,r.schemaname,r.tablename,q); end if;
+  if r.with_check is not null then execute format('alter policy %I on %I.%I with check %s',r.policyname,r.schemaname,r.tablename,w); end if;
+ end loop;
+end $$;
+create or replace function public.enforce_same_business() returns trigger language plpgsql set search_path=public,pg_temp as $$ begin if new.business_id is null then raise exception 'business_id is required'; end if; if tg_table_name='products' then if new.category_id is not null and not exists(select 1 from public.categories c where c.id=new.category_id and c.business_id=new.business_id) then raise exception 'category belongs to another business'; end if; if new.unit_id is not null and not exists(select 1 from public.units u where u.id=new.unit_id and u.business_id=new.business_id) then raise exception 'unit belongs to another business'; end if; if new.tax_id is not null and not exists(select 1 from public.taxes t where t.id=new.tax_id and t.business_id=new.business_id) then raise exception 'tax belongs to another business'; end if; end if; return new; end $$;
+create or replace function public.enforce_child_same_business() returns trigger language plpgsql set search_path=public,pg_temp as $$ begin if tg_table_name='purchase_details' and not exists(select 1 from public.purchases x where x.id=new.purchase_id and x.business_id=new.business_id) then raise exception 'purchase belongs to another business'; end if; if tg_table_name='sale_details' and not exists(select 1 from public.sales x where x.id=new.sale_id and x.business_id=new.business_id) then raise exception 'sale belongs to another business'; end if; if tg_table_name='purchase_return_details' and not exists(select 1 from public.purchase_returns x where x.id=new.purchase_return_id and x.business_id=new.business_id) then raise exception 'purchase return belongs to another business'; end if; if tg_table_name='sale_return_details' and not exists(select 1 from public.sale_returns x where x.id=new.sale_return_id and x.business_id=new.business_id) then raise exception 'sale return belongs to another business'; end if; return new; end $$;
+revoke all on function public.enforce_same_business() from public,anon,authenticated;
+revoke all on function public.enforce_child_same_business() from public,anon,authenticated;
