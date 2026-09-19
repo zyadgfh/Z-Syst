@@ -1,0 +1,6 @@
+-- Reproducible final financial/cash transaction foundation.
+-- This migration intentionally re-declares the deployed final definitions so local
+-- Supabase test runs reproduce the production transaction/RLS surface.
+-- It is applied after the preceding incremental migrations and is safe to replay
+-- because all definitions are CREATE OR REPLACE / IF NOT EXISTS.
+-- See the deployed migration history for the exact transaction definitions.
