@@ -200,7 +200,7 @@ class _DateRangePickerState extends State<DateRangePicker> {
                 DropdownButtonFormField<String?>(
                   hint: Text(lang.selectType),
                   decoration: InputDecoration(labelText: lang.paymentStatus),
-                  initialValue: _status,
+                  value: _status,
                   items: [
                     "Paid",
                     "Unpaid",
