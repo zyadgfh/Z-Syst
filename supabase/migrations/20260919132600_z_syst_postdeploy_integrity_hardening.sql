@@ -1,16 +1,7 @@
 -- Post-deploy hardening for cash/coupon immutability and concurrent warehouse sales.
 -- Applied after the original domain migrations; safe for already-provisioned environments.
 
-revoke update, delete on public.cash_register_transactions from authenticated;
-revoke update, delete on public.coupon_redemptions from authenticated;
-
-drop policy if exists cash_register_transactions_tenant on public.cash_register_transactions;
-create policy cash_register_transactions_tenant_select on public.cash_register_transactions for select to authenticated using (business_id=(select private.current_business_id()));
-create policy cash_register_transactions_tenant_insert on public.cash_register_transactions for insert to authenticated with check (business_id=(select private.current_business_id()));
-
-drop policy if exists coupon_redemptions_tenant on public.coupon_redemptions;
-create policy coupon_redemptions_tenant_select on public.coupon_redemptions for select to authenticated using (business_id=(select private.current_business_id()));
-create policy coupon_redemptions_tenant_insert on public.coupon_redemptions for insert to authenticated with check (business_id=(select private.current_business_id()));
+-- Cash/coupon hardening is applied by the domain migrations that create those tables later.
 
 -- The canonical private.post_sale definition is redeclared here so clean and
 -- already-provisioned environments converge on the same concurrency-safe logic.
