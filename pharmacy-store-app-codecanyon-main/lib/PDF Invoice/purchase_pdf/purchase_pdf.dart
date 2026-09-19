@@ -868,7 +868,7 @@ pw.Widget _buildHeaderData({required String key, required double keyWidth, requi
 pw.Widget _buildTableRowHeader(String title, Color color, pw.TextAlign alignment) {
   return pw.Container(
     decoration: pw.BoxDecoration(
-      color: PdfColor.fromInt(color.toARGB32()),
+      color: PdfColor.fromInt(color.value),
     ),
     padding: const pw.EdgeInsets.all(8.0),
     child: pw.Text(
