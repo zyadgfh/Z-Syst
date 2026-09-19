@@ -103,8 +103,9 @@ end $;
 select ok(true,'cash sale without open register rolls back sale and stock atomically');
 
 insert into public.cash_registers(business_id,opened_by,status,opening_balance)
-select a,id,'open',0 from public.app_users where business_id=a limit 1
-from (select id as a from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1) x;
+select x.a,u.id,'open',0
+from (select id as a from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1) x
+join lateral (select id from public.app_users where business_id=x.a limit 1) u on true;
 
 
 do $$
