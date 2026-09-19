@@ -41,6 +41,10 @@ jobs:
           QUEUE_CONNECTION: sync
           BROADCAST_CONNECTION: log
 
+      - name: Ensure Sanctum package config is present
+        run: |
+          test -f vendor/laravel/sanctum/config/sanctum.php || cp config/sanctum.php vendor/laravel/sanctum/config/sanctum.php
+
       - name: Run migrations
         env:
           APP_ENV: testing
