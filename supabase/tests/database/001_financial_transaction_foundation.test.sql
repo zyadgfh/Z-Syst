@@ -16,11 +16,11 @@ select is(
   'financial ledger has RLS'
 );
 select ok(
-  has_table('public','cash_registers') and has_table('public','cash_register_transactions'),
+  to_regclass('public.cash_registers') is not null and to_regclass('public.cash_register_transactions') is not null,
   'cash register primitives exist'
 );
 select ok(
-  has_index('public','financial_transactions','financial_transactions_business_created_idx'),
+  to_regclass('public.financial_transactions_business_created_idx') is not null,
   'financial ledger has tenant/time index'
 );
 select is(
