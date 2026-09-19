@@ -22,11 +22,8 @@ class TenantResolver
             return (int) $user->business_id;
         }
 
-        // For API requests, allow business_id parameter
-        if ($request->has('business_id')) {
-            return (int) $request->input('business_id');
-        }
-
+        // Never trust a client-supplied business_id as tenant context.
+        // Tenant context must come from the authenticated user's membership.
         return null;
     }
 
