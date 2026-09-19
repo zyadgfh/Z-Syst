@@ -136,7 +136,7 @@ class StockTransfer extends Model
             $toStock->increase($this->quantity);
 
             // Update transfer status
-            $this->update(['status' => 'completed']);
+            $this->update(['status' => 'completed', 'completed_at' => now()]);
 
             return true;
         });
