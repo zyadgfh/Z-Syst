@@ -1,6 +1,6 @@
 begin;
 
-select plan(12);
+select plan(11);
 
 insert into public.businesses(company_name) values ('TEST BUSINESS A'), ('TEST BUSINESS B');
 
