@@ -19,7 +19,7 @@ jobs:
       - name: Validate composer
         run: composer validate
       - name: Install Composer dependencies
-        run: composer install --no-interaction --no-progress --prefer-dist
+        run: composer install --no-interaction --no-progress --prefer-source
       - name: Ensure Sanctum package config is present
         run: |
           test -f vendor/laravel/sanctum/config/sanctum.php || cp config/sanctum.php vendor/laravel/sanctum/config/sanctum.php
