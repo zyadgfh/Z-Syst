@@ -120,8 +120,8 @@ class FeatureStatusService
             [
                 'key' => 'multi_warehouse',
                 'label' => 'Multi-Warehouse',
-                'status' => 'pending',
-                'details' => 'Not started. Needs warehouses, warehouse_stocks, and stock_transfers tables.',
+                'status' => 'completed',
+                'details' => 'Warehouses, warehouse stock, transfer workflow, tenant validation, and atomic Supabase/PostgreSQL completion are implemented.',
             ],
             [
                 'key' => 'traceability',
