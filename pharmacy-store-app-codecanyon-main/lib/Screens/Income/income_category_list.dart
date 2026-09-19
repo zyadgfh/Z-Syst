@@ -23,7 +23,7 @@ class _IncomeCategoryListState extends State<IncomeCategoryList> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = l10n.S.of(context);
+    final l10n = lang.S.of(context);
     return Consumer(builder: (context, ref, _) {
       final data = ref.watch(incomeCategoryProvider);
 
