@@ -234,7 +234,7 @@ class _DueListScreenState extends State<DueListScreen> with SingleTickerProvider
                           borderRadius: BorderRadius.circular(30),
                         ),
                       ),
-                      initialValue: _status,
+                      value: _status,
                       icon: const Icon(Icons.keyboard_arrow_down, color: kGreyTextColor),
                       items: [
                         "All",
