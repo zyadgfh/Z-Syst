@@ -1,6 +1,6 @@
 begin;
 
-select plan(11);
+select plan(16);
 
 insert into public.businesses(company_name) values ('TEST BUSINESS A'), ('TEST BUSINESS B');
 
@@ -59,6 +59,53 @@ select throws_ok(
 
 select is((select count(*) from public.sales where invoice_number='TEST-INV-FAIL'),0::bigint,'failed sale leaves no sale row');
 select is((select count(*) from public.financial_transactions where reference_type='sale' and metadata->>'idempotency_key'='atomic-test-fail'),0::bigint,'failed sale leaves no financial row');
+
+do $
+declare a bigint; u1 uuid; w bigint; p bigint; first_sale bigint; second_sale bigint;
+begin
+  select id into a from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1;
+  select id into u1 from public.app_users where business_id=a limit 1;
+  select id into w from public.warehouses where business_id=a limit 1;
+  select id into p from public.products where business_id=a limit 1;
+  perform set_config('request.jwt.claims',json_build_object('sub',u1::text,'role','authenticated')::text,true);
+  select public.api_post_sale_financial(a,null,w,'TEST-INV-IDEMP','cash',10,0,0,
+    jsonb_build_array(jsonb_build_object('product_id',p,'quantity',1,'unit_price',10)),'same-key',null) into first_sale;
+  select public.api_post_sale_financial(a,null,w,'TEST-INV-IDEMP','cash',10,0,0,
+    jsonb_build_array(jsonb_build_object('product_id',p,'quantity',1,'unit_price',10)),'same-key',null) into second_sale;
+  if first_sale <> second_sale then raise exception 'idempotency returned different sale ids'; end if;
+end $;
+
+select is((select count(*) from public.sales where idempotency_key='same-key'),1::bigint,'sale idempotency prevents duplicate sale');
+select is((select count(*) from public.financial_transactions where transaction_type='sale' and reference_type='sale' and metadata->>'idempotency_key'='same-key'),1::bigint,'sale idempotency prevents duplicate financial posting');
+select is((select count(*) from public.cash_register_transactions where reference_type='sale' and reference_id=(select min(id) from public.sales where idempotency_key='same-key')),1::bigint,'sale idempotency prevents duplicate cash posting');
+
+do $
+declare a bigint; u1 uuid; w bigint; p bigint; before_stock integer;
+begin
+  select id into a from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1;
+  select id into u1 from public.app_users where business_id=a limit 1;
+  select id into w from public.warehouses where business_id=a limit 1;
+  select id into p from public.products where business_id=a limit 1;
+  select product_stock into before_stock from public.stocks where business_id=a and product_id=p limit 1;
+  update public.cash_registers set status='closed',closed_at=now() where business_id=a;
+  perform set_config('request.jwt.claims',json_build_object('sub',u1::text,'role','authenticated')::text,true);
+  begin
+    perform public.api_post_sale_financial(a,null,w,'TEST-INV-NO-REGISTER','cash',10,0,0,
+      jsonb_build_array(jsonb_build_object('product_id',p,'quantity',1,'unit_price',10)),'no-register',null);
+    raise exception 'expected missing register failure';
+  exception when others then
+    if sqlerrm not like '%No open cash register%' then raise; end if;
+  end;
+  if (select count(*) from public.sales where invoice_number='TEST-INV-NO-REGISTER') <> 0 then raise exception 'sale committed without register'; end if;
+  if (select product_stock from public.stocks where business_id=a and product_id=p limit 1) <> before_stock then raise exception 'stock changed after rollback'; end if;
+end $;
+
+select ok(true,'cash sale without open register rolls back sale and stock atomically');
+
+insert into public.cash_registers(business_id,opened_by,status,opening_balance)
+select a,id,'open',0 from public.app_users where business_id=a limit 1
+from (select id as a from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1) x;
+
 
 do $$
 declare b bigint; u2 uuid;
