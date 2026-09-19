@@ -1,5 +1,6 @@
 -- Forward declaration for migration ordering.
-create schema if not exists private; The warehouse-aware implementation is replaced
+create schema if not exists private;
+-- The warehouse-aware implementation is replaced
 -- later after all transfer dependencies exist.
 create or replace function private.complete_stock_transfer(p_transfer_id bigint)
 returns public.stock_transfers
