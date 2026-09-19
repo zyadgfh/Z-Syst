@@ -2,7 +2,10 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.1",
@@ -44,9 +47,12 @@
     },
     "scripts": {
         "post-autoload-dump": [
-            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump"
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php scripts/ensure_sanctum_config.php"
         ],
-        "post-update-cmd": [],
+        "post-update-cmd": [
+            "@php scripts/ensure_sanctum_config.php"
+        ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ],
@@ -56,7 +62,9 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": ["Nwidart\\Modules\\ModulesServiceProvider"]
+            "dont-discover": [
+                "Nwidart\\Modules\\ModulesServiceProvider"
+            ]
         }
     },
     "config": {
