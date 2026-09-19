@@ -3,12 +3,13 @@ begin;
 select plan(13);
 
 insert into public.businesses(company_name) values ('TEST BUSINESS A'), ('TEST BUSINESS B');
+create temp table tx_fixture(a bigint,b bigint,w bigint,p bigint,u1 uuid,u2 uuid) on commit drop;
 
 do $$
-declare a bigint; b bigint; u1 uuid:=gen_random_uuid(); u2 uuid:=gen_random_uuid();
+declare a bigint; b bigint; w bigint; p bigint; u1 uuid:=gen_random_uuid(); u2 uuid:=gen_random_uuid();
 begin
-  select id into a from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1;
-  select id into b from public.businesses where company_name='TEST BUSINESS B' order by id desc limit 1;
+  select f.a into a from tx_fixture f limit 1;
+  select f.b into b from tx_fixture f limit 1;
   insert into auth.users(id,aud,role,email,created_at,updated_at,email_confirmed_at)
   values
     (u1,'authenticated','authenticated','tx-a-'||u1||'@example.test',now(),now(),now()),
@@ -16,9 +17,10 @@ begin
   insert into public.app_users(id,business_id,name,role,status)
   values(u1,a,'Test User A','admin','active'),(u2,b,'Test User B','admin','active');
   insert into public.warehouses(business_id,name,code,is_default,is_active)
-  values(a,'Test Warehouse A','TWA',true,true);
+  values(a,'Test Warehouse A','TWA',true,true) returning id into w;
   insert into public.products(business_id,product_name,purchase_without_tax,purchase_with_tax,profit_percent,sales_price,alert_qty,wholesale_price,tax_type)
-  values(a,'Test Medicine A',5,5,20,10,1,8,'none');
+  values(a,'Test Medicine A',5,5,20,10,1,8,'none') returning id into p;
+  insert into tx_fixture values(a,b,w,p,u1,u2);
   insert into public.cash_registers(business_id,opened_by,status,opening_balance)
   values(a,u1,'open',100);
 end $$;
@@ -30,8 +32,8 @@ declare a bigint; u1 uuid; w bigint; p bigint; sale_id bigint;
 begin
   select id into a from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1;
   select id into u1 from public.app_users where business_id=a limit 1;
-  select id into w from public.warehouses where business_id=a limit 1;
-  select id into p from public.products where business_id=a limit 1;
+  select f.w into w from tx_fixture f limit 1;
+  select f.p into p from tx_fixture f limit 1;
   insert into public.stocks(business_id,product_id,product_stock,batch_no) values(a,p,10,'TEST-BATCH');
   insert into public.warehouse_stocks(business_id,warehouse_id,product_id,quantity) values(a,w,p,10);
   perform set_config('request.jwt.claims',json_build_object('sub',u1::text,'role','authenticated')::text,true);
@@ -48,7 +50,7 @@ select ok(true,'sale + financial ledger + cash transaction commit atomically');
 
 select throws_ok(
   $$select public.api_post_sale_financial(
-    (select id from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1),null,
+    (select a from tx_fixture),null,
     (select id from public.warehouses where business_id=(select id from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1) limit 1),
     'TEST-INV-FAIL','cash',1000,0,0,
     jsonb_build_array(jsonb_build_object('product_id',(select id from public.products where business_id=(select id from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1) limit 1),'quantity',999,'unit_price',10)),
