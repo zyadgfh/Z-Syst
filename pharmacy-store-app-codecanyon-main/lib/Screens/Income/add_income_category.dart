@@ -34,7 +34,7 @@ class _AddIncomeCategoryState extends State<AddIncomeCategory> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = l10n.S.of(context);
+    final l10n = lang.S.of(context);
     return Consumer(builder: (context, ref, __) {
       //final allCategory = ref.watch(expanseCategoryProvider);
       return AcnooScafoldWidget(
