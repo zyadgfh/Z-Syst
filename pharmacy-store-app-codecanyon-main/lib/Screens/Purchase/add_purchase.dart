@@ -233,7 +233,7 @@ class AddPurchaseScreenState extends ConsumerState<AddPurchaseScreen> {
                             return Expanded(
                               child: AppTextField(
                                 textFieldType: TextFieldType.NAME,
-                                initialValue: widget.purchaseDetails != null ? widget.purchaseDetails?.data?.invoiceNumber : snapshot.data.toString(),
+                                value: widget.purchaseDetails != null ? widget.purchaseDetails?.data?.invoiceNumber : snapshot.data.toString(),
                                 textStyle: theme.textTheme.bodyLarge?.copyWith(color: kNutral700),
                                 readOnly: true,
                                 decoration: InputDecoration(
@@ -987,7 +987,7 @@ class AddPurchaseScreenState extends ConsumerState<AddPurchaseScreen> {
                                       focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xff404040))),
                                     ),
                                     isExpanded: true,
-                                    initialValue: cartProviderData.selectedTax,
+                                    value: cartProviderData.selectedTax,
                                     items: dataList.map((TaxModel tax) {
                                       return DropdownMenuItem<TaxModel>(
                                         value: tax,
