@@ -23,7 +23,7 @@ class _IncomeCategoryListState extends State<IncomeCategoryList> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final lang = lang.S.of(context);
+    final l10n = l10n.S.of(context);
     return Consumer(builder: (context, ref, _) {
       final data = ref.watch(incomeCategoryProvider);
 
@@ -44,7 +44,7 @@ class _IncomeCategoryListState extends State<IncomeCategoryList> {
       return AcnooScafoldWidget(
         appBar: AppBar(
           title: Text(
-            lang.incomeCategories,
+            l10n.incomeCategories,
             style: GoogleFonts.poppins(
               color: Colors.white,
               fontSize: 20.0,
@@ -73,7 +73,7 @@ class _IncomeCategoryListState extends State<IncomeCategoryList> {
                       },
                       decoration: InputDecoration(
                         border: const OutlineInputBorder(),
-                        hintText: lang.S.of(context).search,
+                        hintText: l10n.S.of(context).search,
                         prefixIcon: Icon(
                           Icons.search,
                           color: kGreyTextColor.withValues(alpha: 0.5),
@@ -108,7 +108,7 @@ class _IncomeCategoryListState extends State<IncomeCategoryList> {
                   ? Center(
                       child: Padding(
                       padding: const EdgeInsets.all(20.0),
-                      child: Text(lang.noCategoryFound),
+                      child: Text(l10n.noCategoryFound),
                     ))
                   : Expanded(
                       child: ListView.builder(
@@ -154,7 +154,7 @@ class _IncomeCategoryListState extends State<IncomeCategoryList> {
                                       filteredData[index],
                                     );
                                   },
-                                  child: Text(lang.choose),
+                                  child: Text(l10n.choose),
                                 ),
                               ),
                             ),
