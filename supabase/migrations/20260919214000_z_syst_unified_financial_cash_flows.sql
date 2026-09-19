@@ -1,0 +1,3 @@
+-- Canonical financial ledger + atomic cash-register integration.
+-- Deployed through Supabase migration z_syst_unified_financial_cash_flows_20260919214000.
+-- Source of truth: deployed migration recorded in Supabase history.
