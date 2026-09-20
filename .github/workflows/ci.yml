@@ -22,7 +22,8 @@ jobs:
         run: composer install --no-interaction --no-progress --prefer-source
       - name: Ensure Sanctum package config is present
         run: |
-          test -f vendor/laravel/sanctum/config/sanctum.php || cp config/sanctum.php vendor/laravel/sanctum/config/sanctum.php
+          mkdir -p vendor/laravel/sanctum/config
+          cp config/sanctum.php vendor/laravel/sanctum/config/sanctum.php
       - name: Recheck Sanctum package config after dependency/bootstrap steps
         run: |
           test -f vendor/laravel/sanctum/config/sanctum.php || cp config/sanctum.php vendor/laravel/sanctum/config/sanctum.php
