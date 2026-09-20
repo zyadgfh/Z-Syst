@@ -73,7 +73,7 @@ class _IncomeCategoryListState extends State<IncomeCategoryList> {
                       },
                       decoration: InputDecoration(
                         border: const OutlineInputBorder(),
-                        hintText: l10n.S.of(context).search,
+                        hintText: l10n.search,
                         prefixIcon: Icon(
                           Icons.search,
                           color: kGreyTextColor.withValues(alpha: 0.5),
