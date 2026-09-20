@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 import 'dart:io';
+import 'package:mobile_pos/generated/l10n.dart' as lang;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_pos/Screens/SplashScreen/on_board.dart';
@@ -186,7 +187,7 @@ class _SplashScreenState extends rv.ConsumerState<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final lang = lang.S.of(context);
+    final l10n = lang.S.of(context);
     return ProviderNetworkObserver(
       child: Scaffold(
         backgroundColor: kMainColor,
@@ -230,7 +231,7 @@ class _SplashScreenState extends rv.ConsumerState<SplashScreen> {
                         children: [
                           Center(
                             child: Text(
-                              '${lang.poweredBy} ${AppConfig.companyName}',
+                              '${l10n.poweredBy} ${AppConfig.companyName}',
                               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                     fontWeight: FontWeight.w600,
                                     color: kWhite,
@@ -239,7 +240,7 @@ class _SplashScreenState extends rv.ConsumerState<SplashScreen> {
                           ),
                           Center(
                             child: Text(
-                              '${lang.version} ${AppConfig.appVersion}',
+                              '${l10n.version} ${AppConfig.appVersion}',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w500,
                                     color: kWhite,

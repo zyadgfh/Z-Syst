@@ -216,7 +216,7 @@ class _AddStockState extends State<AddStock> {
                         child: DropdownButtonFormField<String?>(
                           hint: Text('Select Type'),
                           decoration: InputDecoration(labelText: lang.taxType),
-                          initialValue: selectedTaxType,
+                          value: selectedTaxType,
                           items: [
                             "Inclusive",
                             "Exclusive",

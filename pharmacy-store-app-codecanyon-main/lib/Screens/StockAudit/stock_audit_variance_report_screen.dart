@@ -232,7 +232,7 @@ class _StockAuditVarianceScreenState extends State<StockAuditVarianceScreen> {
                                             onPressed: () =>
                                                 _reconcileItem(item),
                                             icon: const Icon(
-                                                Icons.balance_scale_outlined),
+                                                Icons.scale_outlined),
                                             label: const Text('Reconcile'),
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: kMainColor,
@@ -292,7 +292,7 @@ class _StockAuditVarianceScreenState extends State<StockAuditVarianceScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        child: [
+        children: [
           Text(
             'Summary',
             style: theme.textTheme.titleSmall?.copyWith(

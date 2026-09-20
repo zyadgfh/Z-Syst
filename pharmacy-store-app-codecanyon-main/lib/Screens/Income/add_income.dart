@@ -102,7 +102,7 @@ class _AddIncomeState extends State<AddIncome> {
     selectedPaymentType ??= paymentMethods.first;
     print(paymentMethods);
     final theme = Theme.of(context);
-    final lang = lang.S.of(context);
+    final l10n = lang.S.of(context);
     return Consumer(
       builder: (context, ref, __) {
         final data = ref.watch(incomeCategoryProvider);
@@ -111,7 +111,7 @@ class _AddIncomeState extends State<AddIncome> {
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             title: Text(
-              widget.income != null ? lang.editIncome : lang.createIncome,
+              widget.income != null ? l10n.editIncome : l10n.createIncome,
               style: theme.textTheme.titleLarge?.copyWith(color: Colors.white),
             ),
             centerTitle: true,
@@ -134,7 +134,7 @@ class _AddIncomeState extends State<AddIncome> {
                           validator: (value) {
                             if (value.isEmptyOrNull) {
                               //return 'Please Enter Name';
-                              return lang.S.of(context).pleaseEnterName;
+                              return l10n.pleaseEnterName;
                             }
                             return null;
                           },
@@ -144,8 +144,8 @@ class _AddIncomeState extends State<AddIncome> {
                           decoration: InputDecoration(
                             floatingLabelBehavior: FloatingLabelBehavior.always,
                             // border: const OutlineInputBorder(),
-                            labelText: lang.incomeTitle,
-                            hintText: lang.S.of(context).enterName,
+                            labelText: l10n.incomeTitle,
+                            hintText: l10n.enterName,
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -158,7 +158,7 @@ class _AddIncomeState extends State<AddIncome> {
                               showCursor: false,
                               readOnly: true,
                               controller: TextEditingController(
-                                text: selectedCategory?.categoryName ?? lang.selectACategory,
+                                text: selectedCategory?.categoryName ?? l10n.selectACategory,
                               ),
                               onTap: () async {
                                 selectedCategory = await const IncomeCategoryList().launch(context);
@@ -166,7 +166,7 @@ class _AddIncomeState extends State<AddIncome> {
                               },
                               decoration: InputDecoration(
                                 floatingLabelBehavior: FloatingLabelBehavior.always,
-                                labelText: lang.incomeCategory,
+                                labelText: l10n.incomeCategory,
                                 suffixIcon: const Icon(Icons.keyboard_arrow_down, color: kGreyTextColor),
                               ),
                             );
@@ -188,8 +188,8 @@ class _AddIncomeState extends State<AddIncome> {
                           readOnly: true,
                           onTap: () => _selectDate(context),
                           decoration: InputDecoration(
-                            labelText: lang.incomeDate,
-                            hintText: lang.enterIncomeDate,
+                            labelText: l10n.incomeDate,
+                            hintText: l10n.enterIncomeDate,
                             suffixIcon: Icon(Icons.calendar_month, color: Colors.grey),
                             border: OutlineInputBorder(),
                           ),
@@ -204,7 +204,7 @@ class _AddIncomeState extends State<AddIncome> {
                           validator: (value) {
                             if (value.isEmptyOrNull) {
                               //return 'Please Enter Amount';
-                              return lang.S.of(context).pleaseEnterAmount;
+                              return l10n.pleaseEnterAmount;
                             }
                             return null;
                           },
@@ -216,9 +216,9 @@ class _AddIncomeState extends State<AddIncome> {
                             errorBorder: const OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.red),
                             ),
-                            labelText: lang.S.of(context).amount,
+                            labelText: l10n.amount,
                             floatingLabelBehavior: FloatingLabelBehavior.always,
-                            hintText: lang.S.of(context).enterAmount,
+                            hintText: l10n.enterAmount,
                           ),
                           keyboardType: TextInputType.number,
                         ),
@@ -226,8 +226,8 @@ class _AddIncomeState extends State<AddIncome> {
 
                         // Payment Method
                         DropdownButtonFormField<String>(
-                          hint: Text(lang.selectOne),
-                          initialValue: selectedPaymentType,
+                          hint: Text(l10n.selectOne),
+                          value: selectedPaymentType,
                           onChanged: (value) {
                             setState(() {
                               selectedPaymentType = value!;
@@ -235,7 +235,7 @@ class _AddIncomeState extends State<AddIncome> {
                           },
                           icon: const Icon(Icons.keyboard_arrow_down, color: kGreyTextColor),
                           decoration: InputDecoration(
-                            labelText: lang.S.of(context).paymentTypes,
+                            labelText: l10n.paymentTypes,
                             border: OutlineInputBorder(),
                           ),
                           items: paymentMethods.map((String des) {
@@ -262,9 +262,9 @@ class _AddIncomeState extends State<AddIncome> {
                           },
                           decoration: InputDecoration(
                             border: const OutlineInputBorder(),
-                            labelText: lang.S.of(context).referenceNo,
+                            labelText: l10n.referenceNo,
                             floatingLabelBehavior: FloatingLabelBehavior.always,
-                            hintText: lang.S.of(context).enterRefNumber,
+                            hintText: l10n.enterRefNumber,
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -276,7 +276,7 @@ class _AddIncomeState extends State<AddIncome> {
                           validator: (value) {
                             if (value == null) {
                               //return 'please Inter Amount';
-                              return lang.S.of(context).pleaseEnterAmount;
+                              return l10n.pleaseEnterAmount;
                             }
                             return null;
                           },
@@ -286,9 +286,9 @@ class _AddIncomeState extends State<AddIncome> {
                           maxLines: 4,
                           decoration: InputDecoration(
                             border: const OutlineInputBorder(),
-                            labelText: lang.S.of(context).note,
+                            labelText: l10n.note,
                             contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                            hintText: lang.S.of(context).enterNote,
+                            hintText: l10n.enterNote,
                           ),
                         ),
                       ],
@@ -356,7 +356,7 @@ class _AddIncomeState extends State<AddIncome> {
                             );
                           }
                           widget.pagingController?.refresh();
-                          EasyLoading.showSuccess(lang.savedSuccessFully);
+                          EasyLoading.showSuccess(l10n.savedSuccessFully);
                           Navigator.pop(context);
                         } catch (e) {
                           EasyLoading.showError('Failed to save: $e');
@@ -365,13 +365,13 @@ class _AddIncomeState extends State<AddIncome> {
                         }
                       } else {
                         EasyLoading.showError(
-                          lang.S.of(context).pleaseSelectAExpenseCategory,
+                          l10n.pleaseSelectAExpenseCategory,
                           //'Please select a expense category'
                         );
                       }
                     }
                   },
-                  child: Text(lang.save),
+                  child: Text(l10n.save),
                 ),
               ],
             ),

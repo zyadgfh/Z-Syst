@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\StockTransfer;
 use App\Services\WarehouseService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class StockTransferController extends Controller
 {
@@ -59,22 +60,34 @@ class StockTransferController extends Controller
 
     public function store(Request $request)
     {
+        $businessId = (int) auth()->user()->business_id;
         $request->validate([
-            'business_id' => 'required|exists:businesses,id',
-            'from_warehouse_id' => 'required|exists:warehouses,id',
-            'to_warehouse_id' => 'required|exists:warehouses,id|different:from_warehouse_id',
-            'product_id' => 'required|exists:products,id',
+            'from_warehouse_id' => [
+                'required','integer',
+                Rule::exists('warehouses','id')->where(fn($q) => $q->where('business_id',$businessId)->where('is_active',true)),
+            ],
+            'to_warehouse_id' => [
+                'required','integer','different:from_warehouse_id',
+                Rule::exists('warehouses','id')->where(fn($q) => $q->where('business_id',$businessId)->where('is_active',true)),
+            ],
+            'product_id' => [
+                'required','integer',
+                Rule::exists('products','id')->where(fn($q) => $q->where('business_id',$businessId)),
+            ],
             'quantity' => 'required|integer|min:1',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:2000',
         ]);
 
         try {
-            $transfer = $this->warehouseService->createTransfer($request->all());
+            $payload = $request->only(['from_warehouse_id','to_warehouse_id','product_id','quantity','notes']);
+            $payload['business_id'] = $businessId;
+            $transfer = $this->warehouseService->createTransfer($payload);
 
             return response()->json([
                 'message' => __('Stock transfer created successfully'),
                 'redirect' => route('admin.stock-transfers.index'),
-            ]);
+                'transfer_id' => $transfer->id,
+            ], 201);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => __('Error creating stock transfer: ') . $e->getMessage(),

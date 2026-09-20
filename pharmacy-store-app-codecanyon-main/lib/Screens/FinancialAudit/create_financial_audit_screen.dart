@@ -177,7 +177,7 @@ class _CreateFinancialAuditScreenState extends State<CreateFinancialAuditScreen>
                     ),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   );
-                }),
+                }).toList(),
               ),
               const SizedBox(height: 24),
 

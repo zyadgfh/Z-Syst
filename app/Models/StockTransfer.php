@@ -19,10 +19,13 @@ class StockTransfer extends Model
         'status',
         'notes',
         'user_id',
+        'idempotency_key',
+        'completed_at',
     ];
 
     protected $casts = [
         'quantity' => 'integer',
+        'completed_at' => 'datetime',
     ];
 
     public function business(): BelongsTo
@@ -133,7 +136,7 @@ class StockTransfer extends Model
             $toStock->increase($this->quantity);
 
             // Update transfer status
-            $this->update(['status' => 'completed']);
+            $this->update(['status' => 'completed', 'completed_at' => now()]);
 
             return true;
         });

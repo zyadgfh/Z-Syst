@@ -1,5 +1,6 @@
 // ignore_for_file: unused_result
 import 'package:flutter/material.dart';
+import 'package:mobile_pos/generated/l10n.dart' as lang;
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_pos/Screens/Income/Repo/income_category_repo.dart';
@@ -34,14 +35,14 @@ class _AddIncomeCategoryState extends State<AddIncomeCategory> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final lang = lang.S.of(context);
+    final l10n = lang.S.of(context);
     return Consumer(builder: (context, ref, __) {
       //final allCategory = ref.watch(expanseCategoryProvider);
       return AcnooScafoldWidget(
         // backgroundColor: kWhite,
         appBar: AppBar(
           title: Text(
-            widget.category != null ? lang.editCategory : lang.addCategory,
+            widget.category != null ? l10n.editCategory : l10n.addCategory,
             style: theme.textTheme.titleMedium?.copyWith(color: Colors.white),
           ),
           iconTheme: const IconThemeData(color: Colors.white),
@@ -68,7 +69,7 @@ class _AddIncomeCategoryState extends State<AddIncomeCategory> {
                     validator: (value) {
                       if (value?.trim().isEmptyOrNull ?? true) {
                         //return 'Enter expanse category name';
-                        return lang.enterIncomeCategoryName;
+                        return l10n.enterIncomeCategoryName;
                       }
                       return null;
                     },
@@ -76,8 +77,8 @@ class _AddIncomeCategoryState extends State<AddIncomeCategory> {
                     decoration: InputDecoration(
                         border: const OutlineInputBorder(),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
-                        labelText: lang.S.of(context).categoryName,
-                        hintText: lang.enterCategoryName),
+                        labelText: l10n.categoryName,
+                        hintText: l10n.enterCategoryName),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -88,7 +89,7 @@ class _AddIncomeCategoryState extends State<AddIncomeCategory> {
                   ),
                   onPressed: () async {
                     if (key.currentState?.validate() ?? false) {
-                      EasyLoading.show(status: '${lang.saving}...');
+                      EasyLoading.show(status: '${l10n.saving}...');
                       final incomeRepo = IncomeCategoryRepo();
 
                       try {
@@ -107,7 +108,7 @@ class _AddIncomeCategoryState extends State<AddIncomeCategory> {
                           );
                         }
                         ref.refresh(incomeCategoryProvider);
-                        EasyLoading.showSuccess(lang.savedSuccessFully);
+                        EasyLoading.showSuccess(l10n.savedSuccessFully);
                         Navigator.pop(context);
                       } catch (e) {
                         EasyLoading.showError('Failed to save: $e');
@@ -117,7 +118,7 @@ class _AddIncomeCategoryState extends State<AddIncomeCategory> {
                     }
                   },
                   child: Text(
-                    lang.S.of(context).save,
+                    l10n.save,
                   ),
                 )
               ],

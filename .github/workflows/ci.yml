@@ -14,13 +14,28 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.1
-          extensions: zip, mbstring, xml, intl
+          php-version: '8.3'
+          extensions: zip, mbstring, xml, intl, bcmath, sqlite, pdo_sqlite
       - name: Validate composer
-        run: composer --version
+        run: composer validate
       - name: Install Composer dependencies
-        run: composer install --no-interaction --no-progress --prefer-dist
+        run: composer install --no-interaction --no-progress --prefer-source
+      - name: Ensure Sanctum package config is present
+        run: |
+          mkdir -p vendor/laravel/sanctum/config
+          cp config/sanctum.php vendor/laravel/sanctum/config/sanctum.php
+      - name: Recheck Sanctum package config after dependency/bootstrap steps
+        run: |
+          test -f vendor/laravel/sanctum/config/sanctum.php || cp config/sanctum.php vendor/laravel/sanctum/config/sanctum.php
       - name: Run PHP Unit tests
+        env:
+          APP_ENV: testing
+          CACHE_DRIVER: array
+          SESSION_DRIVER: array
+          QUEUE_CONNECTION: sync
+          BROADCAST_CONNECTION: log
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
         run: vendor/bin/phpunit --colors=always
 
   flutter:
@@ -30,7 +45,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'
+          flutter-version: '3.27.4'
       - name: Install Flutter dependencies
         run: |
           cd pharmacy-store-app-codecanyon-main

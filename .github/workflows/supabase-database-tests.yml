@@ -1,0 +1,31 @@
+name: Supabase Database Tests
+
+on:
+  pull_request:
+    paths:
+      - "supabase/**"
+      - ".github/workflows/supabase-database-tests.yml"
+  push:
+    branches: ["main", "fix/enterprise-foundation-2026-09-19"]
+    paths:
+      - "supabase/**"
+
+jobs:
+  database-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase
+        run: supabase start
+
+      - name: Run pgTAP database tests
+        run: supabase test db
+
+      - name: Stop local Supabase
+        if: always()
+        run: supabase stop

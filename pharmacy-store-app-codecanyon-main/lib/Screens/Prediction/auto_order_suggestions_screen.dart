@@ -286,7 +286,7 @@ class _AutoOrderSuggestionsScreenState
         children: [
           Expanded(
             child: DropdownButtonFormField<String?>(
-              initialValue: _statusFilter,
+              value: _statusFilter,
               decoration: const InputDecoration(
                 labelText: 'الحالة',
                 isDense: true,
@@ -309,7 +309,7 @@ class _AutoOrderSuggestionsScreenState
           const SizedBox(width: 8),
           Expanded(
             child: DropdownButtonFormField<String?>(
-              initialValue: _priorityFilter,
+              value: _priorityFilter,
               decoration: const InputDecoration(
                 labelText: 'الأولوية',
                 isDense: true,

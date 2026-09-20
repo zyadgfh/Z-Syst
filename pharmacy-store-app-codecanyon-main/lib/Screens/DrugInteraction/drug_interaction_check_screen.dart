@@ -234,7 +234,7 @@ class _DrugInteractionCheckScreenState extends State<DrugInteractionCheckScreen>
             ),
           ),
           const SizedBox(height: 8),
-          const Divider(color: kOutlineBorder, thickness: 1.0),
+          Divider(color: kOutlineBorder, thickness: 1.0),
 
           // Results or product list
           Expanded(

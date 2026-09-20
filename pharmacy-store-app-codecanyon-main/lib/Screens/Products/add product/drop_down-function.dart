@@ -92,7 +92,7 @@ class _GenericDropdownState<T> extends State<GenericDropdown<T>> {
         disabledBorder: (widget.fromAddAction ?? false) ? UnderlineInputBorder() : null,
         border: (widget.fromAddAction ?? false) ? UnderlineInputBorder() : null,
       ),
-      initialValue: widget.selectedValue,
+      value: widget.selectedValue,
       validator: widget.validator,
       items: (widget.showAddButton == false)
           ? [

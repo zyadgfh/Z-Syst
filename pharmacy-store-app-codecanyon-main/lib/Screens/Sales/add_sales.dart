@@ -194,10 +194,9 @@ class AddSalesScreenState extends ConsumerState<AddSalesScreen> {
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
                           return Expanded(
-                            child: AppTextField(
-                              textFieldType: TextFieldType.NAME,
+                            child: TextFormField(
                               initialValue: widget.salesDetails != null ? widget.salesDetails?.data?.invoiceNumber : snapshot.data.toString(),
-                              textStyle: theme.textTheme.bodyMedium?.copyWith(color: kNutral700),
+                              style: theme.textTheme.bodyMedium?.copyWith(color: kNutral700),
                               readOnly: true,
                               decoration: InputDecoration(
                                 floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -890,7 +889,7 @@ class AddSalesScreenState extends ConsumerState<AddSalesScreen> {
                                     focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xff404040))),
                                   ),
                                   isExpanded: true,
-                                  initialValue: cartProvider.selectedTax,
+                                  value: cartProvider.selectedTax,
                                   items: dataList.map((TaxModel tax) {
                                     return DropdownMenuItem<TaxModel>(
                                       value: tax,

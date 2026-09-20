@@ -222,7 +222,7 @@ class _InsurancePolicyListScreenState extends State<InsurancePolicyListScreen> {
         ? DateTime.tryParse(policy.endDate!)?.isBefore(now) ?? false
         : false;
     final expiryDate = policy.endDate != null
-        ? DateTime.tryParse(policy.endDate)
+        ? DateTime.tryParse(policy.endDate!)
         : null;
     final daysUntilExpiry =
         expiryDate != null ? expiryDate.difference(now).inDays : null;
