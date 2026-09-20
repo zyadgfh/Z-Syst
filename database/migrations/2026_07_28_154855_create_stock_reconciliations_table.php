@@ -24,10 +24,10 @@ return new class extends Migration
             $table->integer('previous_quantity')->default(0);
             $table->integer('new_quantity')->default(0);
             $table->integer('adjustment_quantity')->default(0);
-            $table->double('unit_cost')->default(0);
-            $table->double('adjustment_value')->default(0);
+            $table->decimal('unit_cost')->default(0);
+            $table->decimal('adjustment_value')->default(0);
             $table->string('reference_type')->nullable();
-            $table->unsignedBigInteger('reference_id')->nullable();
+            $table->bigInteger('reference_id')->nullable();
             $table->text('reason')->nullable();
             $table->boolean('is_posted')->default(false);
             $table->timestamp('posted_at')->nullable();

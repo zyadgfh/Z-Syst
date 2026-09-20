@@ -21,8 +21,8 @@ return new class extends Migration
             $table->string('phoneNumber')->nullable();
             $table->string('pictureUrl')->nullable();
             $table->timestamp('subscriptionDate')->nullable();
-            $table->double('remainingShopBalance', 10, 2)->default(0);
-            $table->double('shopOpeningBalance', 10, 2)->default(0);
+            $table->decimal('remainingShopBalance', 10, 2)->default(0);
+            $table->decimal('shopOpeningBalance', 10, 2)->default(0);
             $table->timestamps();
         });
     }

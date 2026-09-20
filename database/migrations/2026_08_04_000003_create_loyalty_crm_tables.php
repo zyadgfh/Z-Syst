@@ -28,7 +28,7 @@ return new class extends Migration
             $table->integer('points')->default(0);
             $table->string('type')->default('earned');
             $table->string('reference_type')->nullable();
-            $table->unsignedBigInteger('reference_id')->nullable();
+            $table->bigInteger('reference_id')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
 

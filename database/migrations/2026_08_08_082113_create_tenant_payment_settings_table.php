@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('tenant_payment_settings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tenant_id')->constrained('businesses')->onDelete('cascade');
-            $table->unsignedBigInteger('branch_id')->nullable();
+            $table->bigInteger('branch_id')->nullable();
             $table->foreignId('gateway_id')->constrained('gateways')->onDelete('cascade');
             $table->json('settings')->nullable();
             $table->boolean('is_active')->default(true);

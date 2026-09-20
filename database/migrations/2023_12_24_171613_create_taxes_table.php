@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
-            $table->double('rate')->default(0);
+            $table->decimal('rate')->default(0);
             $table->longText('sub_tax')->nullable();
             $table->boolean('status')->default(1);
             $table->timestamps();

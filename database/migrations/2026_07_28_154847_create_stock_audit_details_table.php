@@ -22,8 +22,8 @@ return new class extends Migration
             $table->integer('system_quantity')->default(0);
             $table->integer('physical_quantity')->default(0);
             $table->integer('variance')->default(0);
-            $table->double('unit_cost')->default(0);
-            $table->double('variance_value')->default(0);
+            $table->decimal('unit_cost')->default(0);
+            $table->decimal('variance_value')->default(0);
             $table->enum('variance_type', ['none', 'positive', 'negative'])->default('none');
             $table->text('notes')->nullable();
             $table->timestamps();

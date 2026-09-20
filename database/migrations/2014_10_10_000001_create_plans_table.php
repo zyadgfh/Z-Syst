@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('subscriptionName');
             $table->integer('duration')->default(0); // Duration in days
-            $table->double('offerPrice', 10, 2)->nullable();
-            $table->double('subscriptionPrice', 10, 2)->default(0);
+            $table->decimal('offerPrice', 10, 2)->nullable();
+            $table->decimal('subscriptionPrice', 10, 2)->default(0);
             $table->boolean('status')->default(1);
             $table->longText('features')->nullable();
             $table->timestamps();

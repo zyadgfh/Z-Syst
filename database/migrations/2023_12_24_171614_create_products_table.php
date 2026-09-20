@@ -20,12 +20,12 @@ return new class extends Migration
             $table->foreignId('type_id')->nullable()->constrained('medicine_types')->cascadeOnDelete();
             $table->foreignId('manufacturer_id')->nullable()->constrained('manufacturers')->cascadeOnDelete();
             $table->foreignId('box_size_id')->nullable()->constrained()->cascadeOnDelete();
-            $table->double('purchase_without_tax')->default(0);
-            $table->double('purchase_with_tax')->default(0);
-            $table->double('profit_percent')->default(0);
-            $table->double('sales_price')->default(0);
+            $table->decimal('purchase_without_tax')->default(0);
+            $table->decimal('purchase_with_tax')->default(0);
+            $table->decimal('profit_percent')->default(0);
+            $table->decimal('sales_price')->default(0);
             $table->integer('alert_qty')->default(0);
-            $table->double('wholesale_price')->default(0);
+            $table->decimal('wholesale_price')->default(0);
             $table->string('productCode')->nullable();
             $table->longText('images')->nullable();
             $table->foreignId('tax_id')->nullable()->constrained()->cascadeOnDelete();

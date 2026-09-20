@@ -20,11 +20,11 @@ return new class extends Migration
             $table->date('start_date');
             $table->date('end_date');
             $table->enum('status', ['pending', 'in_progress', 'completed', 'cancelled'])->default('pending');
-            $table->double('opening_balance')->default(0);
-            $table->double('total_revenue')->default(0);
-            $table->double('total_expenses')->default(0);
-            $table->double('closing_balance')->default(0);
-            $table->double('variance')->default(0);
+            $table->decimal('opening_balance')->default(0);
+            $table->decimal('total_revenue')->default(0);
+            $table->decimal('total_expenses')->default(0);
+            $table->decimal('closing_balance')->default(0);
+            $table->decimal('variance')->default(0);
             $table->text('notes')->nullable();
             $table->json('metadata')->nullable();
             $table->timestamp('completed_at')->nullable();

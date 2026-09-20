@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('batch_no')->nullable();
             $table->date('expire_date')->nullable();
             $table->string('reference_type')->nullable();
-            $table->unsignedBigInteger('reference_id')->nullable();
+            $table->bigInteger('reference_id')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
 

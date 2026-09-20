@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('approval_workflows', function (Blueprint $table) {
             $table->id();
             $table->string('type');
-            $table->unsignedBigInteger('entity_id');
+            $table->bigInteger('entity_id');
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
 
             $table->integer('current_step')->default(1);

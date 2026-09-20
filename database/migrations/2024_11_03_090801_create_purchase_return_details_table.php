@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('purchase_return_id')->constrained('purchase_returns')->cascadeOnDelete();
             $table->foreignId('purchase_detail_id')->constrained('purchase_details')->cascadeOnDelete();
-            $table->double('return_amount', 10, 2)->default(0);
+            $table->decimal('return_amount', 10, 2)->default(0);
             $table->integer('return_qty');
         });
     }

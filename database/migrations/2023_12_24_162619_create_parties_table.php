@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('email')->nullable();
             $table->string('type')->default('Retailer'); // Retailer || Wholesaler || Supplier
             $table->string('phone')->unique()->nullable();
-            $table->double('due', 10, 2)->default(0);
-            $table->double('opening_balance', 10, 2)->default(0);
+            $table->decimal('due', 10, 2)->default(0);
+            $table->decimal('opening_balance', 10, 2)->default(0);
             $table->string('address')->nullable();
             $table->string('image')->nullable();
             $table->boolean('status')->default(1);

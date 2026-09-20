@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('plan_id')->constrained()->cascadeOnDelete();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('gateway_id')->nullable()->constrained()->cascadeOnDelete();
-            $table->double('price', 10, 2)->default(0);
+            $table->decimal('price', 10, 2)->default(0);
             $table->string('payment_status')->default('unpaid');
             $table->integer('duration')->default(0);
             $table->text('notes')->nullable();

@@ -44,7 +44,7 @@ return new class extends Migration
         // Add barcode column to products table if not exists
         if (!Schema::hasColumn('products', 'barcode')) {
             Schema::table('products', function (Blueprint $table) {
-                $table->string('barcode', 50)->nullable()->after('sku');
+                $table->string('barcode', 50)->nullable();
                 $table->index('barcode');
             });
         }
@@ -52,7 +52,7 @@ return new class extends Migration
         // Add barcode column to stocks table if not exists
         if (!Schema::hasColumn('stocks', 'barcode')) {
             Schema::table('stocks', function (Blueprint $table) {
-                $table->string('barcode', 50)->nullable()->after('batch_no');
+                $table->string('barcode', 50)->nullable();
                 $table->index('barcode');
             });
         }
