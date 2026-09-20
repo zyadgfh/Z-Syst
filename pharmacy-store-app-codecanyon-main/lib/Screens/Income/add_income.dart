@@ -35,11 +35,11 @@ class _AddIncomeState extends State<AddIncome> {
   List<String> paymentMethods = [];
   List<String> _getPaymentMethod(BuildContext context) {
     return [
-      l10n.S.of(context).cash,
-      l10n.S.of(context).bank,
-      l10n.S.of(context).card,
-      l10n.S.of(context).mobilePayment,
-      l10n.S.of(context).due,
+      l10n.cash,
+      l10n.bank,
+      l10n.card,
+      l10n.mobilePayment,
+      l10n.due,
     ];
   }
 
@@ -134,7 +134,7 @@ class _AddIncomeState extends State<AddIncome> {
                           validator: (value) {
                             if (value.isEmptyOrNull) {
                               //return 'Please Enter Name';
-                              return l10n.S.of(context).pleaseEnterName;
+                              return l10n.pleaseEnterName;
                             }
                             return null;
                           },
@@ -145,7 +145,7 @@ class _AddIncomeState extends State<AddIncome> {
                             floatingLabelBehavior: FloatingLabelBehavior.always,
                             // border: const OutlineInputBorder(),
                             labelText: l10n.incomeTitle,
-                            hintText: l10n.S.of(context).enterName,
+                            hintText: l10n.enterName,
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -204,7 +204,7 @@ class _AddIncomeState extends State<AddIncome> {
                           validator: (value) {
                             if (value.isEmptyOrNull) {
                               //return 'Please Enter Amount';
-                              return l10n.S.of(context).pleaseEnterAmount;
+                              return l10n.pleaseEnterAmount;
                             }
                             return null;
                           },
@@ -216,9 +216,9 @@ class _AddIncomeState extends State<AddIncome> {
                             errorBorder: const OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.red),
                             ),
-                            labelText: l10n.S.of(context).amount,
+                            labelText: l10n.amount,
                             floatingLabelBehavior: FloatingLabelBehavior.always,
-                            hintText: l10n.S.of(context).enterAmount,
+                            hintText: l10n.enterAmount,
                           ),
                           keyboardType: TextInputType.number,
                         ),
@@ -235,7 +235,7 @@ class _AddIncomeState extends State<AddIncome> {
                           },
                           icon: const Icon(Icons.keyboard_arrow_down, color: kGreyTextColor),
                           decoration: InputDecoration(
-                            labelText: l10n.S.of(context).paymentTypes,
+                            labelText: l10n.paymentTypes,
                             border: OutlineInputBorder(),
                           ),
                           items: paymentMethods.map((String des) {
@@ -262,9 +262,9 @@ class _AddIncomeState extends State<AddIncome> {
                           },
                           decoration: InputDecoration(
                             border: const OutlineInputBorder(),
-                            labelText: l10n.S.of(context).referenceNo,
+                            labelText: l10n.referenceNo,
                             floatingLabelBehavior: FloatingLabelBehavior.always,
-                            hintText: l10n.S.of(context).enterRefNumber,
+                            hintText: l10n.enterRefNumber,
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -276,7 +276,7 @@ class _AddIncomeState extends State<AddIncome> {
                           validator: (value) {
                             if (value == null) {
                               //return 'please Inter Amount';
-                              return l10n.S.of(context).pleaseEnterAmount;
+                              return l10n.pleaseEnterAmount;
                             }
                             return null;
                           },
@@ -286,9 +286,9 @@ class _AddIncomeState extends State<AddIncome> {
                           maxLines: 4,
                           decoration: InputDecoration(
                             border: const OutlineInputBorder(),
-                            labelText: l10n.S.of(context).note,
+                            labelText: l10n.note,
                             contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                            hintText: l10n.S.of(context).enterNote,
+                            hintText: l10n.enterNote,
                           ),
                         ),
                       ],
@@ -365,7 +365,7 @@ class _AddIncomeState extends State<AddIncome> {
                         }
                       } else {
                         EasyLoading.showError(
-                          l10n.S.of(context).pleaseSelectAExpenseCategory,
+                          l10n.pleaseSelectAExpenseCategory,
                           //'Please select a expense category'
                         );
                       }
