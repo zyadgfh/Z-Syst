@@ -25,7 +25,12 @@ begin
   values(a,u1,'open',100);
 end $$;
 
-grant select on tx_fixture to authenticated;
+select set_config('test.business_a', a::text, false) from tx_fixture limit 1;
+select set_config('test.business_b', b::text, false) from tx_fixture limit 1;
+select set_config('test.warehouse_a', w::text, false) from tx_fixture limit 1;
+select set_config('test.product_a', p::text, false) from tx_fixture limit 1;
+select set_config('test.user_a', u1::text, false) from tx_fixture limit 1;
+select set_config('test.user_b', u2::text, false) from tx_fixture limit 1;
 
 set local role authenticated;
 
@@ -52,7 +57,7 @@ select ok(true,'sale + financial ledger + cash transaction commit atomically');
 
 select throws_ok(
   $$select public.api_post_sale_financial(
-    (select a from tx_fixture),null,
+    current_setting('test.business_a')::bigint,null,
     (select id from public.warehouses where business_id=(select a from tx_fixture) limit 1),
     'TEST-INV-FAIL','cash',1000,0,0,
     jsonb_build_array(jsonb_build_object('product_id',(select id from public.products where business_id=(select a from tx_fixture) limit 1),'quantity',999,'unit_price',10)),
