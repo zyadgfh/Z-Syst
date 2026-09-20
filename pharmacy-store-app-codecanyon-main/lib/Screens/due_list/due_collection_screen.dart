@@ -197,10 +197,9 @@ class _DueCollectionScreenState extends State<DueCollectionScreen> {
                           const SizedBox(height: 10),
 
                           // Customer name
-                          AppTextField(
-                            textFieldType: TextFieldType.NAME,
+                          TextFormField(
+                            initialValue: snapShot.data.name?.toString() ?? 'n/a',
                             readOnly: true,
-                            value: snapShot.data.name.toString() ?? 'n/a',
                             decoration: InputDecoration(
                               floatingLabelBehavior: FloatingLabelBehavior.always,
                               labelText: l.S.of(context).customerName,
