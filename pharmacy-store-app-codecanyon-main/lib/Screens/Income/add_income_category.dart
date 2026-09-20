@@ -76,7 +76,7 @@ class _AddIncomeCategoryState extends State<AddIncomeCategory> {
                     decoration: InputDecoration(
                         border: const OutlineInputBorder(),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
-                        labelText: l10n.S.of(context).categoryName,
+                        labelText: l10n.categoryName,
                         hintText: l10n.enterCategoryName),
                   ),
                 ),
@@ -117,7 +117,7 @@ class _AddIncomeCategoryState extends State<AddIncomeCategory> {
                     }
                   },
                   child: Text(
-                    l10n.S.of(context).save,
+                    l10n.save,
                   ),
                 )
               ],
