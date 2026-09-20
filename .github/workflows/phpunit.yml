@@ -43,7 +43,8 @@ jobs:
 
       - name: Ensure Sanctum package config is present
         run: |
-          test -f vendor/laravel/sanctum/config/sanctum.php || cp config/sanctum.php vendor/laravel/sanctum/config/sanctum.php
+          mkdir -p vendor/laravel/sanctum/config
+          cp config/sanctum.php vendor/laravel/sanctum/config/sanctum.php
 
       - name: Run migrations
         env:
@@ -58,7 +59,8 @@ jobs:
 
       - name: Recheck Sanctum package config after migrations
         run: |
-          test -f vendor/laravel/sanctum/config/sanctum.php || cp config/sanctum.php vendor/laravel/sanctum/config/sanctum.php
+          mkdir -p vendor/laravel/sanctum/config
+          cp config/sanctum.php vendor/laravel/sanctum/config/sanctum.php
 
       - name: Run tests
         env:
