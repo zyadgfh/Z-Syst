@@ -175,7 +175,7 @@ class _AddExpenseState extends State<AddExpense> {
                           showCursor: false,
                           readOnly: true,
                           controller: TextEditingController(
-                            text: selectedCategory?.categoryName ?? lang.selectACategory,
+                            text: selectedCategory?.categoryName ?? l10n.selectACategory,
                           ),
                           onTap: () async {
                             selectedCategory = await const ExpenseCategoryList().launch(context);
@@ -183,7 +183,7 @@ class _AddExpenseState extends State<AddExpense> {
                           },
                           decoration: InputDecoration(
                             floatingLabelBehavior: FloatingLabelBehavior.always,
-                            labelText: lang.incomeCategory,
+                            labelText: l10n.incomeCategory,
                             suffixIcon: const Icon(Icons.keyboard_arrow_down, color: kGreyTextColor),
                           ),
                         );
@@ -205,8 +205,8 @@ class _AddExpenseState extends State<AddExpense> {
                       readOnly: true,
                       onTap: () => _selectDate(context),
                       decoration: InputDecoration(
-                        labelText: lang.incomeDate,
-                        hintText: lang.enterIncomeDate,
+                        labelText: l10n.incomeDate,
+                        hintText: l10n.enterIncomeDate,
                         suffixIcon: Icon(Icons.calendar_month, color: Colors.grey),
                         border: OutlineInputBorder(),
                       ),
@@ -243,7 +243,7 @@ class _AddExpenseState extends State<AddExpense> {
 
                     // Payment type
                     DropdownButtonFormField<String>(
-                      hint: Text(lang.selectOne),
+                      hint: Text(l10n.selectOne),
                       value: selectedPaymentType,
                       onChanged: (value) {
                         setState(() {
@@ -373,7 +373,7 @@ class _AddExpenseState extends State<AddExpense> {
                         }
                         // ref.refresh(expenseProvider);
                         widget.pagingController?.refresh();
-                        EasyLoading.showSuccess(lang.savedSuccessFully);
+                        EasyLoading.showSuccess(l10n.savedSuccessFully);
                         Navigator.pop(context);
                       } catch (e) {
                         EasyLoading.showError('Failed to save: $e');
@@ -388,7 +388,7 @@ class _AddExpenseState extends State<AddExpense> {
                     }
                   }
                 },
-                child: Text(lang.save),
+                child: Text(l10n.save),
               ),
             ],
           ),
