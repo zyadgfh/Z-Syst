@@ -299,7 +299,7 @@ class _FinancialAuditDetailScreenState
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        child: [
+        children: [
           Text(
             'Financial Balances',
             style: theme.textTheme.titleSmall?.copyWith(
