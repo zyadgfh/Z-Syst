@@ -194,10 +194,9 @@ class AddSalesScreenState extends ConsumerState<AddSalesScreen> {
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
                           return Expanded(
-                            child: AppTextField(
-                              textFieldType: TextFieldType.NAME,
-                              value: widget.salesDetails != null ? widget.salesDetails?.data?.invoiceNumber : snapshot.data.toString(),
-                              textStyle: theme.textTheme.bodyMedium?.copyWith(color: kNutral700),
+                            child: TextFormField(
+                              initialValue: widget.salesDetails != null ? widget.salesDetails?.data?.invoiceNumber : snapshot.data.toString(),
+                              style: theme.textTheme.bodyMedium?.copyWith(color: kNutral700),
                               readOnly: true,
                               decoration: InputDecoration(
                                 floatingLabelBehavior: FloatingLabelBehavior.always,
