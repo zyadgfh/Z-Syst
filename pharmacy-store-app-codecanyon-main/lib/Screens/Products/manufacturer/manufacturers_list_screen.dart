@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:mobile_pos/generated/l10n.dart' as lang;
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,7 +40,7 @@ class _ManufacturersListScreenState extends State<ManufacturersListScreen> {
     return AcnooScafoldWidget(
       appBar: AppBar(
         title: Text(
-          lang.manufacturer,
+          l10n.manufacturer,
           style: GoogleFonts.poppins(
             color: kWhite,
             fontSize: 20.0,
