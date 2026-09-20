@@ -38,11 +38,11 @@ class _AddExpenseState extends State<AddExpense> {
 
   List<String> _getPaymentMethod(BuildContext context) {
     return [
-      lang.S.of(context).cash,
-      lang.S.of(context).bank,
-      lang.S.of(context).card,
-      lang.S.of(context).mobilePayment,
-      lang.S.of(context).due,
+      l10n.cash,
+      l10n.bank,
+      l10n.card,
+      l10n.mobilePayment,
+      l10n.due,
     ];
   }
 
@@ -123,14 +123,14 @@ class _AddExpenseState extends State<AddExpense> {
     final theme = Theme.of(context);
     final paymentMethods = _getPaymentMethod(context);
     selectedPaymentType ??= paymentMethods.first;
-    final lang = lang.S.of(context);
+    final l10n = lang.S.of(context);
     return Consumer(builder: (context, ref, __) {
       final data = ref.watch(expanseCategoryProvider);
       return AcnooScafoldWidget(
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           title: Text(
-            widget.expenseList != null ? lang.editExpense : lang.S.of(context).addExpense,
+            widget.expenseList != null ? lang.editExpense : l10n.addExpense,
             style: theme.textTheme.titleLarge?.copyWith(color: Colors.white),
           ),
           centerTitle: true,
@@ -152,7 +152,7 @@ class _AddExpenseState extends State<AddExpense> {
                       controller: expanseTitleController,
                       validator: (value) {
                         if (value.isEmptyOrNull) {
-                          return lang.S.of(context).pleaseEnterName;
+                          return l10n.pleaseEnterName;
                         }
                         return null;
                       },
@@ -161,8 +161,8 @@ class _AddExpenseState extends State<AddExpense> {
                       },
                       decoration: InputDecoration(
                         floatingLabelBehavior: FloatingLabelBehavior.always,
-                        labelText: lang.S.of(context).expenseFor,
-                        hintText: lang.S.of(context).enterName,
+                        labelText: l10n.expenseFor,
+                        hintText: l10n.enterName,
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -221,7 +221,7 @@ class _AddExpenseState extends State<AddExpense> {
                       validator: (value) {
                         if (value.isEmptyOrNull) {
                           //return 'Please Enter Amount';
-                          return lang.S.of(context).pleaseEnterAmount;
+                          return l10n.pleaseEnterAmount;
                         }
                         return null;
                       },
@@ -233,9 +233,9 @@ class _AddExpenseState extends State<AddExpense> {
                         errorBorder: const OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.red),
                         ),
-                        labelText: lang.S.of(context).amount,
+                        labelText: l10n.amount,
                         floatingLabelBehavior: FloatingLabelBehavior.always,
-                        hintText: lang.S.of(context).enterAmount,
+                        hintText: l10n.enterAmount,
                       ),
                       keyboardType: TextInputType.number,
                     ),
@@ -252,7 +252,7 @@ class _AddExpenseState extends State<AddExpense> {
                       },
                       icon: const Icon(Icons.keyboard_arrow_down, color: kGreyTextColor),
                       decoration: InputDecoration(
-                        labelText: lang.S.of(context).paymentTypes,
+                        labelText: l10n.paymentTypes,
                         border: OutlineInputBorder(),
                       ),
                       items: paymentMethods.map((String des) {
@@ -279,9 +279,9 @@ class _AddExpenseState extends State<AddExpense> {
                       },
                       decoration: InputDecoration(
                         border: const OutlineInputBorder(),
-                        labelText: lang.S.of(context).referenceNo,
+                        labelText: l10n.referenceNo,
                         floatingLabelBehavior: FloatingLabelBehavior.always,
-                        hintText: lang.S.of(context).enterRefNumber,
+                        hintText: l10n.enterRefNumber,
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -293,7 +293,7 @@ class _AddExpenseState extends State<AddExpense> {
                       validator: (value) {
                         if (value == null) {
                           //return 'please Inter Amount';
-                          return lang.S.of(context).pleaseEnterAmount;
+                          return l10n.pleaseEnterAmount;
                         }
                         return null;
                       },
@@ -303,9 +303,9 @@ class _AddExpenseState extends State<AddExpense> {
                       maxLines: 4,
                       decoration: InputDecoration(
                         border: const OutlineInputBorder(),
-                        labelText: lang.S.of(context).note,
+                        labelText: l10n.note,
                         contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                        hintText: lang.S.of(context).enterNote,
+                        hintText: l10n.enterNote,
                       ),
                     ),
                   ],
@@ -382,7 +382,7 @@ class _AddExpenseState extends State<AddExpense> {
                       }
                     } else {
                       EasyLoading.showError(
-                        lang.S.of(context).pleaseSelectAExpenseCategory,
+                        l10n.pleaseSelectAExpenseCategory,
                         //'Please select a expense category'
                       );
                     }
