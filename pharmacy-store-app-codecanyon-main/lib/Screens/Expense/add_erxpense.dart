@@ -38,11 +38,11 @@ class _AddExpenseState extends State<AddExpense> {
 
   List<String> _getPaymentMethod(BuildContext context) {
     return [
-      l10n.cash,
-      l10n.bank,
-      l10n.card,
-      l10n.mobilePayment,
-      l10n.due,
+      lang.S.of(context).cash,
+      lang.S.of(context).bank,
+      lang.S.of(context).card,
+      lang.S.of(context).mobilePayment,
+      lang.S.of(context).due,
     ];
   }
 
@@ -130,7 +130,7 @@ class _AddExpenseState extends State<AddExpense> {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           title: Text(
-            widget.expenseList != null ? lang.editExpense : l10n.addExpense,
+            widget.expenseList != null ? l10n.editExpense : l10n.addExpense,
             style: theme.textTheme.titleLarge?.copyWith(color: Colors.white),
           ),
           centerTitle: true,
