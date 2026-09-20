@@ -21,16 +21,15 @@ begin
   insert into public.products(business_id,product_name,purchase_without_tax,purchase_with_tax,profit_percent,sales_price,alert_qty,wholesale_price,tax_type)
   values(a,'Test Medicine A',5,5,20,10,1,8,'none') returning id into p;
   insert into tx_fixture values(a,b,w,p,u1,u2);
+  perform set_config('test.business_a',a::text,false);
+  perform set_config('test.business_b',b::text,false);
+  perform set_config('test.warehouse_a',w::text,false);
+  perform set_config('test.product_a',p::text,false);
+  perform set_config('test.user_a',u1::text,false);
+  perform set_config('test.user_b',u2::text,false);
   insert into public.cash_registers(business_id,opened_by,status,opening_balance)
   values(a,u1,'open',100);
 end $$;
-
-select set_config('test.business_a', a::text, false) from tx_fixture limit 1;
-select set_config('test.business_b', b::text, false) from tx_fixture limit 1;
-select set_config('test.warehouse_a', w::text, false) from tx_fixture limit 1;
-select set_config('test.product_a', p::text, false) from tx_fixture limit 1;
-select set_config('test.user_a', u1::text, false) from tx_fixture limit 1;
-select set_config('test.user_b', u2::text, false) from tx_fixture limit 1;
 
 set local role authenticated;
 
