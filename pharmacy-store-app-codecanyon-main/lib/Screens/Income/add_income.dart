@@ -35,11 +35,11 @@ class _AddIncomeState extends State<AddIncome> {
   List<String> paymentMethods = [];
   List<String> _getPaymentMethod(BuildContext context) {
     return [
-      l10n.cash,
-      l10n.bank,
-      l10n.card,
-      l10n.mobilePayment,
-      l10n.due,
+      lang.S.of(context).cash,
+      lang.S.of(context).bank,
+      lang.S.of(context).card,
+      lang.S.of(context).mobilePayment,
+      lang.S.of(context).due,
     ];
   }
 
