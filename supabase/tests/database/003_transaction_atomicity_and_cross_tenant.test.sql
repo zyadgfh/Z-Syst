@@ -8,8 +8,8 @@ create temp table tx_fixture(a bigint,b bigint,w bigint,p bigint,u1 uuid,u2 uuid
 do $$
 declare a bigint; b bigint; w bigint; p bigint; u1 uuid:=gen_random_uuid(); u2 uuid:=gen_random_uuid();
 begin
-  select id into a from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1;
-  select id into b from public.businesses where company_name='TEST BUSINESS B' order by id desc limit 1;
+  a := current_setting('test.business_a')::bigint;
+  b := current_setting('test.business_b')::bigint;
   insert into auth.users(id,aud,role,email,created_at,updated_at,email_confirmed_at)
   values
     (u1,'authenticated','authenticated','tx-a-'||u1||'@example.test',now(),now(),now()),
@@ -37,10 +37,10 @@ set local role authenticated;
 do $$
 declare a bigint; u1 uuid; w bigint; p bigint; sale_id bigint;
 begin
-  select id into a from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1;
-  select id into u1 from public.app_users where business_id=a limit 1;
-  select f.w into w from tx_fixture f limit 1;
-  select f.p into p from tx_fixture f limit 1;
+  a := current_setting('test.business_a')::bigint;
+  u1 := current_setting('test.user_a')::uuid;
+  w := current_setting('test.warehouse_a')::bigint;
+  p := current_setting('test.product_a')::bigint;
   insert into public.stocks(business_id,product_id,product_stock,batch_no) values(a,p,10,'TEST-BATCH');
   insert into public.warehouse_stocks(business_id,warehouse_id,product_id,quantity) values(a,w,p,10);
   perform set_config('request.jwt.claims',json_build_object('sub',u1::text,'role','authenticated')::text,true);
@@ -58,9 +58,9 @@ select ok(true,'sale + financial ledger + cash transaction commit atomically');
 select throws_ok(
   $$select public.api_post_sale_financial(
     current_setting('test.business_a')::bigint,null,
-    (select id from public.warehouses where business_id=(select a from tx_fixture) limit 1),
+    (select id from public.warehouses where business_id=current_setting('test.business_a')::bigint limit 1),
     'TEST-INV-FAIL','cash',1000,0,0,
-    jsonb_build_array(jsonb_build_object('product_id',(select id from public.products where business_id=(select a from tx_fixture) limit 1),'quantity',999,'unit_price',10)),
+    jsonb_build_array(jsonb_build_object('product_id',(select id from public.products where business_id=current_setting('test.business_a')::bigint limit 1),'quantity',999,'unit_price',10)),
     'atomic-test-fail',null)$$,
   'insufficient warehouse stock',
   'oversell is rejected atomically'
@@ -72,10 +72,10 @@ select is((select count(*) from public.financial_transactions where reference_ty
 do $
 declare a bigint; u1 uuid; w bigint; p bigint; first_sale bigint; second_sale bigint;
 begin
-  select id into a from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1;
-  select id into u1 from public.app_users where business_id=a limit 1;
-  select id into w from public.warehouses where business_id=a limit 1;
-  select id into p from public.products where business_id=a limit 1;
+  a := current_setting('test.business_a')::bigint;
+  u1 := current_setting('test.user_a')::uuid;
+  w := current_setting('test.warehouse_a')::bigint;
+  p := current_setting('test.product_a')::bigint;
   perform set_config('request.jwt.claims',json_build_object('sub',u1::text,'role','authenticated')::text,true);
   select public.api_post_sale_financial(a,null,w,'TEST-INV-IDEMP','cash',10,0,0,
     jsonb_build_array(jsonb_build_object('product_id',p,'quantity',1,'unit_price',10)),'same-key',null) into first_sale;
@@ -91,10 +91,10 @@ select is((select count(*) from public.cash_register_transactions where referenc
 do $
 declare a bigint; u1 uuid; w bigint; p bigint; before_stock integer;
 begin
-  select id into a from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1;
-  select id into u1 from public.app_users where business_id=a limit 1;
-  select id into w from public.warehouses where business_id=a limit 1;
-  select id into p from public.products where business_id=a limit 1;
+  a := current_setting('test.business_a')::bigint;
+  u1 := current_setting('test.user_a')::uuid;
+  w := current_setting('test.warehouse_a')::bigint;
+  p := current_setting('test.product_a')::bigint;
   select product_stock into before_stock from public.stocks where business_id=a and product_id=p limit 1;
   update public.cash_registers set status='closed',closed_at=now() where business_id=a;
   perform set_config('request.jwt.claims',json_build_object('sub',u1::text,'role','authenticated')::text,true);
@@ -120,8 +120,8 @@ join lateral (select id from public.app_users where business_id=x.a limit 1) u o
 do $$
 declare b bigint; u2 uuid;
 begin
-  select id into b from public.businesses where company_name='TEST BUSINESS B' order by id desc limit 1;
-  select id into u2 from public.app_users where business_id=b limit 1;
+  b := current_setting('test.business_b')::bigint;
+  u2 := current_setting('test.user_b')::uuid;
   insert into public.financial_transactions(business_id,transaction_type,direction,payment_method,amount,metadata)
   values(b,'test','in','cash',50,'{"tenant_fixture":true}');
   perform set_config('request.jwt.claims',json_build_object('sub',u2::text,'role','authenticated')::text,true);
@@ -132,16 +132,16 @@ select is((select count(*) from public.financial_transactions),1::bigint,'tenant
 do $$
 declare a bigint; u1 uuid;
 begin
-  select id into a from public.businesses where company_name='TEST BUSINESS A' order by id desc limit 1;
-  select id into u1 from public.app_users where business_id=a limit 1;
+  a := current_setting('test.business_a')::bigint;
+  u1 := current_setting('test.user_a')::uuid;
   perform set_config('request.jwt.claims',json_build_object('sub',u1::text,'role','authenticated')::text,true);
 end $$;
 
 select is((select count(*) from public.financial_transactions),1::bigint,'tenant A sees only tenant A financial rows');
-select ok((select count(*) from public.sales where business_id=(select a from tx_fixture))=1,'tenant A sales intact');
-select ok((select count(*) from public.warehouse_stocks where business_id=(select a from tx_fixture))=1,'tenant A inventory intact');
-select ok((select count(*) from public.cash_register_transactions where business_id=(select a from tx_fixture))=1,'tenant A cash flow isolated');
-select ok((select count(*) from public.financial_transactions where business_id=(select a from tx_fixture))=1,'tenant A financial flow isolated');
+select ok((select count(*) from public.sales where business_id=current_setting('test.business_a')::bigint)=1,'tenant A sales intact');
+select ok((select count(*) from public.warehouse_stocks where business_id=current_setting('test.business_a')::bigint)=1,'tenant A inventory intact');
+select ok((select count(*) from public.cash_register_transactions where business_id=current_setting('test.business_a')::bigint)=1,'tenant A cash flow isolated');
+select ok((select count(*) from public.financial_transactions where business_id=current_setting('test.business_a')::bigint)=1,'tenant A financial flow isolated');
 
 select is(
   has_function_privilege('anon','public.api_post_sale_financial(bigint,bigint,bigint,text,text,numeric,numeric,numeric,jsonb,text,bigint)','execute'),
