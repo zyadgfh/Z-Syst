@@ -231,10 +231,9 @@ class AddPurchaseScreenState extends ConsumerState<AddPurchaseScreen> {
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
                             return Expanded(
-                              child: AppTextField(
-                                textFieldType: TextFieldType.NAME,
-                                value: widget.purchaseDetails != null ? widget.purchaseDetails?.data?.invoiceNumber : snapshot.data.toString(),
-                                textStyle: theme.textTheme.bodyLarge?.copyWith(color: kNutral700),
+                              child: TextFormField(
+                                initialValue: widget.purchaseDetails != null ? widget.purchaseDetails?.data?.invoiceNumber : snapshot.data.toString(),
+                                style: theme.textTheme.bodyLarge?.copyWith(color: kNutral700),
                                 readOnly: true,
                                 decoration: InputDecoration(
                                   labelText: l.S.of(context).inv,
