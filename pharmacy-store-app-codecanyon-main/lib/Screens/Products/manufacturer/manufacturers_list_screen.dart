@@ -35,7 +35,7 @@ class _ManufacturersListScreenState extends State<ManufacturersListScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final lang = lang.S.of(context);
+    final l10n = lang.S.of(context);
     return AcnooScafoldWidget(
       appBar: AppBar(
         title: Text(
@@ -80,7 +80,7 @@ class _ManufacturersListScreenState extends State<ManufacturersListScreen> {
                           textFieldType: TextFieldType.NAME,
                           decoration: InputDecoration(
                             border: const OutlineInputBorder(),
-                            hintText: lang.S.of(context).search,
+                            hintText: l10n.search,
                             prefixIcon: Icon(
                               Icons.search,
                               color: kGreyTextColor.withValues(alpha: 0.5),
@@ -162,7 +162,7 @@ class _ManufacturersListScreenState extends State<ManufacturersListScreen> {
                   Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Text(
-                      lang.S.of(context).noDataFound,
+                      l10n.noDataFound,
                     ),
                   ),
               ],
