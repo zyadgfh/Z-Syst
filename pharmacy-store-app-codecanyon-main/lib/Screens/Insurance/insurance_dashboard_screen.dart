@@ -269,14 +269,7 @@ class _InsuranceDashboardScreenState extends State<InsuranceDashboardScreen> {
                       radius: 24,
                     ),
                 ],
-                borderData: FlBorderData(show: false),
-                centerText:
-                    '${d.claimsCount?.toString() ?? '0'}\nClaims',
-                centerTextStyle: const TextStyle(
-                  color: kNutral800,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
-                ),
+                borderData: FlBorderData(show: false) ,
                 sectionsSpace: 2,
               ),
             ),
