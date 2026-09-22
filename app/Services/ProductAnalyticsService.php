@@ -5,6 +5,7 @@ namespace App\Services;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class ProductAnalyticsService
 {
@@ -12,8 +13,39 @@ class ProductAnalyticsService
     {
         [$from, $to, $period] = $this->resolvePeriod($filters);
         $productId = !empty($filters['product_id']) ? (int) $filters['product_id'] : null;
+        $warehouseId = !empty($filters['warehouse_id']) ? (int) $filters['warehouse_id'] : null;
 
-        $sales = $this->salesByDay($businessId, $from, $to, $productId);
+        $cacheKey = sprintf(
+            'analytics:product:%d:%s:%s:%s:%s',
+            $businessId,
+            $period,
+            $from->toDateString(),
+            $to->toDateString(),
+            md5((string) json_encode([
+                'product_id' => $productId,
+                'warehouse_id' => $warehouseId,
+            ]))
+        );
+
+        return Cache::remember($cacheKey, 60, function () use (
+            $businessId,
+            $filters,
+            $from,
+            $to,
+            $period,
+            $productId,
+            $warehouseId
+        ) {
+            return $this->buildAnalytics(
+                $businessId,
+                $filters,
+                $from,
+                $to,
+                $period,
+                $productId,
+                $warehouseId
+            );
+        });
         $salesByDay = $this->emptyBuckets($from, $to);
 
         foreach ($sales as $row) {
@@ -82,7 +114,78 @@ class ProductAnalyticsService
         ];
     }
 
-    private function salesByDay(int $businessId, Carbon $from, Carbon $to, ?int $productId): array
+    private function buildAnalytics(
+        int $businessId,
+        array $filters,
+        Carbon $from,
+        Carbon $to,
+        string $period,
+        ?int $productId,
+        ?int $warehouseId
+    ): array {
+        $sales = $this->salesByDay($businessId, $from, $to, $productId);
+        $salesByDay = $this->emptyBuckets($from, $to);
+
+        foreach ($sales as $row) {
+            $key = Carbon::parse($row->bucket_date)->format('Y-m-d');
+            if (!isset($salesByDay[$key])) {
+                continue;
+            }
+
+            $salesByDay[$key]['revenue'] = (float) $row->revenue;
+            $salesByDay[$key]['orders'] = (int) $row->orders;
+            $salesByDay[$key]['quantity'] = (float) $row->quantity;
+        }
+
+        $days = max(1, $from->copy()->startOfDay()->diffInDays($to->copy()->startOfDay()) + 1);
+        $revenue = (float) collect($salesByDay)->sum('revenue');
+        $orders = (int) collect($salesByDay)->sum('orders');
+        $soldQuantity = (float) collect($salesByDay)->sum('quantity');
+
+        $previousFrom = $from->copy()->subDays($days)->startOfDay();
+        $previousTo = $from->copy()->subDay()->endOfDay();
+        $previous = $this->salesTotals($businessId, $previousFrom, $previousTo, $productId);
+
+        $movementTotals = $this->movementTotals($businessId, $from, $to, $productId, $warehouseId);
+        $aggregates = $this->periodAggregates($salesByDay, $from, $to, $period);
+
+        return [
+            'period' => [
+                'type' => $period,
+                'from' => $from->toDateString(),
+                'to' => $to->toDateString(),
+                'days' => $days,
+            ],
+            'sales' => [
+                'revenue' => round($revenue, 2),
+                'orders' => $orders,
+                'quantity' => round($soldQuantity, 2),
+                'average_daily_revenue' => round($revenue / $days, 2),
+                'average_daily_quantity' => round($soldQuantity / $days, 2),
+                'average_order_value' => $orders ? round($revenue / $orders, 2) : 0,
+                'averages' => [
+                    'weekly_revenue' => round($aggregates['average_weekly_revenue'], 2),
+                    'monthly_revenue' => round($aggregates['average_monthly_revenue'], 2),
+                    'yearly_revenue' => round($aggregates['average_yearly_revenue'], 2),
+                ],
+                'comparison' => [
+                    'previous_revenue' => round($previous['revenue'], 2),
+                    'revenue_change_percent' => $this->change($previous['revenue'], $revenue),
+                    'previous_orders' => $previous['orders'],
+                    'orders_change_percent' => $this->change($previous['orders'], $orders),
+                ],
+                'daily' => array_values($salesByDay),
+                'buckets' => $aggregates['buckets'],
+            ],
+            'movements' => array_map(
+                fn ($value) => is_numeric($value) ? round($value, 2) : $value,
+                $movementTotals
+            ),
+            'products' => $this->productBreakdown($businessId, $from, $to, $productId),
+        ];
+    }
+
+    private function salesByDay(int $businessId, Carbon $from, Carbon $to, ?int $productId)
     {
         $query = DB::table('sales')
             ->where('sales.business_id', $businessId)
