@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-Z-Syst is a comprehensive SaaS Multi-Tenant Pharmacy Management Platform built with Laravel 12. It provides advanced features for pharmacy operations including inventory management, sales, purchases, insurance, loyalty programs, and more.
+Z-Syst is a comprehensive SaaS Multi-Tenant Pharmacy Management Platform built with Laravel 10 and PHP 8.1+. It provides advanced features for pharmacy operations including inventory management, sales, purchases, insurance, loyalty programs, and more.
 
 ## 🚀 Features
 
@@ -107,9 +107,9 @@ z-syst/
 ## 🔧 Installation
 
 ### Prerequisites
-- PHP 8.2+
-- MySQL 8.0+
-- Redis 6.0+
+- PHP 8.1+
+- PostgreSQL 15+ (Supabase PostgreSQL 17.x recommended)
+- Redis 6.0+ (optional for local development)
 - Composer 2.0+
 - Node.js 18+
 
@@ -135,12 +135,15 @@ php artisan key:generate
 
 4. **Configure database**
 ```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=z_syst_pharmacy
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
+DB_CONNECTION=pgsql
+DB_HOST=your-supabase-host
+DB_PORT=5432
+DB_DATABASE=postgres
+DB_USERNAME=postgres
+DB_PASSWORD=your-database-password
+
+# For Supabase, use the connection settings from Project Settings → Database.
+# Keep all secrets in .env; never commit them.
 ```
 
 5. **Run migrations**
@@ -396,6 +399,6 @@ This project is proprietary software owned by Z-Syst Pharmacy Management System.
 
 ---
 
-**Version:** 1.0.0  
-**Last Updated:** 2026-08-07  
-**Status:** Production Ready
+**Version:** 1.1.0  
+**Last Updated:** 2026-09-22  
+**Status:** Production Readiness Audit Active
