@@ -163,11 +163,17 @@ class CacheService
     {
         if (Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
             $redis = Cache::getStore()->connection();
-            $keys = $redis->keys($pattern);
-            
-            if (!empty($keys)) {
-                $redis->del($keys);
-            }
+            $cursor = 0;
+
+            do {
+                $result = $redis->scan($cursor, ['match' => $pattern, 'count' => 100]);
+                $cursor = is_array($result) ? (int) ($result[0] ?? 0) : 0;
+                $keys = is_array($result) ? ($result[1] ?? []) : [];
+
+                if (!empty($keys)) {
+                    $redis->del($keys);
+                }
+            } while ($cursor !== 0);
         }
     }
 
