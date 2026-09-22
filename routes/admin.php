@@ -293,6 +293,7 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('dashboard-reports/loyalty', [ADMIN\DashboardReportController::class, 'loyalty'])->name('dashboard-reports.loyalty');
     Route::get('dashboard-reports/receipts', [ADMIN\DashboardReportController::class, 'receipts'])->name('dashboard-reports.receipts');
     Route::get('dashboard-reports/comprehensive', [ADMIN\DashboardReportController::class, 'comprehensive'])->name('dashboard-reports.comprehensive');
+    Route::get('product-analytics', [ADMIN\DashboardReportController::class, 'index'])->name('product-analytics.index');
 
     // Audit Logs
     Route::get('audit-logs', [ADMIN\AuditLogController::class, 'index'])->name('audit-logs.index');
