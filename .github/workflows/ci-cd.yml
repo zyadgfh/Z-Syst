@@ -19,7 +19,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: mbstring, xml, mysql, bcmath, gd, intl, zip
+          extensions: curl, mbstring, xml, mysql, bcmath, gd, intl, zip
           coverage: xdebug
 
       - name: Copy .env
@@ -63,8 +63,9 @@ jobs:
       - name: Run security audit
         run: composer audit
 
+      - name: Install Laravel security checker
+        run: composer require enlightn/security-checker --dev --no-interaction
       - name: Run Laravel security check
-        run: composer require enlightn/security-checker --dev
         run: vendor/bin/security-checker
 
   code-quality:
@@ -83,12 +84,14 @@ jobs:
       - name: Install dependencies
         run: composer install --no-progress --no-interaction
 
+      - name: Install PHPStan
+        run: composer require phpstan/phpstan --dev --no-interaction
       - name: Run PHPStan
-        run: composer require phpstan/phpstan --dev
         run: vendor/bin/phpstan analyse --memory-limit=2G
 
+      - name: Install Pint
+        run: composer require laravel/pint --dev --no-interaction
       - name: Run Pint
-        run: composer require laravel/pint --dev
         run: vendor/bin/pint --test
 
   deploy-staging:
