@@ -17,14 +17,13 @@ class ProductAnalyticsController extends Controller
             'date_from'=>'nullable|date',
             'date_to'=>'nullable|date|after_or_equal:date_from',
             'product_id'=>'nullable|integer|min:1',
-            'branch_id'=>'nullable|integer|min:1',
             'warehouse_id'=>'nullable|integer|min:1',
         ]);
 
         return response()->json([
             'message'=>__('Data fetched successfully.'),
             'data'=>$this->service->analyze(auth()->user()->business_id,$request->only([
-                'period','date','date_from','date_to','product_id'
+                'period','date','date_from','date_to','product_id','warehouse_id'
             ])),
         ]);
     }
