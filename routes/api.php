@@ -23,7 +23,7 @@ Route::prefix('v1')->group(function () {
         Route::get('summary', [Api\StatisticsController::class, 'summary']);
         Route::get('dashboard', [Api\StatisticsController::class, 'dashboard']);
         Route::get('features', [Api\FeatureStatusController::class, 'index']);
-        Route::get('product-analytics', [Api\ProductAnalyticsController::class, 'index']);
+        Route::middleware(['business.context', 'throttle:20,1'])->get('product-analytics', [Api\ProductAnalyticsController::class, 'index']);
 
         Route::middleware(['business.context', 'throttle:20,1'])->group(function () {
             Route::post('backup', [Api\BackupController::class, 'store']);
