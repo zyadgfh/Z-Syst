@@ -104,17 +104,33 @@ class ProductAnalyticsService
                 ->all();
         }
 
-        return $query
+        $headers = $query
             ->selectRaw(
                 'DATE(sales.sale_date) AS bucket_date,
                  SUM(sales.total_amount) AS revenue,
-                 COUNT(*) AS orders,
-                 COALESCE(SUM((sales.sale_data->>\'total_quantity\')::numeric), 0) AS quantity'
+                 COUNT(*) AS orders'
             )
             ->groupByRaw('DATE(sales.sale_date)')
             ->orderBy('bucket_date')
             ->get()
-            ->all();
+            ->keyBy('bucket_date');
+
+        $quantities = DB::table('sale_details')
+            ->join('sales', 'sale_details.sale_id', '=', 'sales.id')
+            ->where('sales.business_id', $businessId)
+            ->whereBetween('sales.sale_date', [$from, $to])
+            ->selectRaw(
+                'DATE(sales.sale_date) AS bucket_date,
+                 COALESCE(SUM(sale_details.quantities), 0) AS quantity'
+            )
+            ->groupByRaw('DATE(sales.sale_date)')
+            ->get()
+            ->keyBy('bucket_date');
+
+        return $headers->map(function ($row, $key) use ($quantities) {
+            $row->quantity = (float) ($quantities->get($key)->quantity ?? 0);
+            return $row;
+        })->values()->all();
     }
 
     private function salesTotals(int $businessId, Carbon $from, Carbon $to, ?int $productId): array
