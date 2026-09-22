@@ -21,11 +21,15 @@
     <div class="card mb-4">
         <div class="card-body">
             <div class="row g-2 align-items-end">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label">{{ __('Product ID (optional)') }}</label>
                     <input id="product-id" type="number" min="1" class="form-control" placeholder="{{ __('All products') }}">
                 </div>
                 <div class="col-md-3">
+                    <label class="form-label">{{ __('Warehouse ID (optional)') }}</label>
+                    <input id="warehouse-id" type="number" min="1" class="form-control" placeholder="{{ __('All warehouses') }}">
+                </div>
+                <div class="col-md-2">
                     <label class="form-label">{{ __('From') }}</label>
                     <input id="date-from" type="date" class="form-control">
                 </div>
@@ -47,6 +51,12 @@
         <div class="col-xl-3 col-md-6"><div class="card h-100"><div class="card-body"><small class="text-muted">{{ __('Average Daily Sales') }}</small><h3 id="avg-daily">0</h3><span class="small text-muted" id="period-label"></span></div></div></div>
         <div class="col-xl-3 col-md-6"><div class="card h-100"><div class="card-body"><small class="text-muted">{{ __('Average Order Value') }}</small><h3 id="avg-order">0</h3></div></div></div>
         <div class="col-xl-3 col-md-6"><div class="card h-100"><div class="card-body"><small class="text-muted">{{ __('Sold Quantity') }}</small><h3 id="sold-qty">0</h3><span class="small text-muted" id="avg-qty"></span></div></div></div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4"><div class="card h-100"><div class="card-body"><small class="text-muted">{{ __('Average Weekly Sales') }}</small><h4 id="avg-weekly">0</h4></div></div></div>
+        <div class="col-md-4"><div class="card h-100"><div class="card-body"><small class="text-muted">{{ __('Average Monthly Sales') }}</small><h4 id="avg-monthly">0</h4></div></div></div>
+        <div class="col-md-4"><div class="card h-100"><div class="card-body"><small class="text-muted">{{ __('Average Yearly Sales') }}</small><h4 id="avg-yearly">0</h4></div></div></div>
     </div>
 
     <div class="row g-3 mb-4">
@@ -103,6 +113,9 @@
         const productId = document.getElementById('product-id').value.trim();
         if (productId) params.set('product_id', productId);
 
+        const warehouseId = document.getElementById('warehouse-id').value.trim();
+        if (warehouseId) params.set('warehouse_id', warehouseId);
+
         if (custom) {
             const from = document.getElementById('date-from').value;
             const to = document.getElementById('date-to').value;
@@ -131,6 +144,9 @@
             document.getElementById('avg-daily').textContent = money(data.sales.average_daily_revenue);
             document.getElementById('avg-order').textContent = money(data.sales.average_order_value);
             document.getElementById('sold-qty').textContent = money(data.sales.quantity);
+            document.getElementById('avg-weekly').textContent = money(data.sales.averages.weekly_revenue);
+            document.getElementById('avg-monthly').textContent = money(data.sales.averages.monthly_revenue);
+            document.getElementById('avg-yearly').textContent = money(data.sales.averages.yearly_revenue);
             document.getElementById('avg-qty').textContent = money(data.sales.average_daily_quantity) + ' / day';
             document.getElementById('period-label').textContent = data.period.from + ' → ' + data.period.to;
 
@@ -152,8 +168,9 @@
                 ).join('')
                 : '<tr><td colspan="4" class="text-center text-muted py-4">No sales data</td></tr>';
 
-            const labels = data.sales.daily.map(row => row.date);
-            const values = data.sales.daily.map(row => row.revenue);
+            const chartRows = data.period.type === 'year' ? data.sales.buckets : data.sales.daily;
+            const labels = chartRows.map(row => data.period.type === 'year' ? row.period : row.date);
+            const values = chartRows.map(row => row.revenue);
 
             if (chart) chart.destroy();
             chart = new Chart(document.getElementById('sales-chart'), {
