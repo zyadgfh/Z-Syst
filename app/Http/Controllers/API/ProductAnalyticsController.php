@@ -17,6 +17,8 @@ class ProductAnalyticsController extends Controller
             'date_from'=>'nullable|date',
             'date_to'=>'nullable|date|after_or_equal:date_from',
             'product_id'=>'nullable|integer|min:1',
+            'branch_id'=>'nullable|integer|min:1',
+            'warehouse_id'=>'nullable|integer|min:1',
         ]);
 
         return response()->json([
