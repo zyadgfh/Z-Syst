@@ -22,13 +22,22 @@ class TenantContextMiddleware
 
         $tenantId = $this->resolver->resolve($request);
 
-        if ($tenantId !== null) {
+        $contextSet = $tenantId !== null;
+
+        if ($contextSet) {
             $request->attributes->set('tenant_id', $tenantId);
             $request->merge(['tenant_id' => $tenantId]);
             app()->instance('tenant_id', $tenantId);
             config(['app.current_business_id' => $tenantId]);
         }
 
-        return $next($request);
+        try {
+            return $next($request);
+        } finally {
+            if ($contextSet) {
+                app()->forgetInstance('tenant_id');
+                config(['app.current_business_id' => null]);
+            }
+        }
     }
 }
