@@ -19,8 +19,32 @@ class InsuranceService
     public function createCompany(array $data): InsuranceCompany
     {
         return DB::transaction(function () use ($data) {
-            $data['code'] = $this->generateUniqueCompanyCode();
-            return InsuranceCompany::create($data);
+            $businessId = (int) ($data['business_id'] ?? (app()->bound('tenant_id') ? app('tenant_id') : 0));
+            if ($businessId <= 0) {
+                throw new \InvalidArgumentException('Business context is required.');
+            }
+
+            return InsuranceCompany::create([
+                'business_id' => $businessId,
+                'name' => $data['name'],
+                'code' => $this->generateUniqueCompanyCode(),
+                'contact_person' => $data['contact_person'] ?? null,
+                'phone' => $data['phone'] ?? null,
+                'email' => $data['email'] ?? null,
+                'address' => $data['address'] ?? null,
+                'city' => $data['city'] ?? null,
+                'country' => $data['country'] ?? null,
+                'tax_id' => $data['tax_id'] ?? null,
+                'status' => $data['status'] ?? 'active',
+                'integration_type' => $data['integration_type'] ?? 'manual',
+                'api_endpoint' => $data['api_endpoint'] ?? null,
+                'api_credentials' => $data['api_credentials'] ?? null,
+                'default_coverage_percent' => $data['default_coverage_percent'] ?? 0,
+                'default_copay_percent' => $data['default_copay_percent'] ?? 0,
+                'settlement_days' => $data['settlement_days'] ?? 1,
+                'notes' => $data['notes'] ?? null,
+                'metadata' => $data['metadata'] ?? null,
+            ]);
         });
     }
 
@@ -29,7 +53,26 @@ class InsuranceService
      */
     public function updateCompany(InsuranceCompany $company, array $data): InsuranceCompany
     {
-        $company->update($data);
+        $company->update([
+            'name' => $data['name'] ?? $company->name,
+            'contact_person' => $data['contact_person'] ?? $company->contact_person,
+            'phone' => $data['phone'] ?? $company->phone,
+            'email' => $data['email'] ?? $company->email,
+            'address' => $data['address'] ?? $company->address,
+            'city' => $data['city'] ?? $company->city,
+            'country' => $data['country'] ?? $company->country,
+            'tax_id' => $data['tax_id'] ?? $company->tax_id,
+            'status' => $data['status'] ?? $company->status,
+            'integration_type' => $data['integration_type'] ?? $company->integration_type,
+            'api_endpoint' => $data['api_endpoint'] ?? $company->api_endpoint,
+            'api_credentials' => $data['api_credentials'] ?? $company->api_credentials,
+            'default_coverage_percent' => $data['default_coverage_percent'] ?? $company->default_coverage_percent,
+            'default_copay_percent' => $data['default_copay_percent'] ?? $company->default_copay_percent,
+            'settlement_days' => $data['settlement_days'] ?? $company->settlement_days,
+            'notes' => $data['notes'] ?? $company->notes,
+            'metadata' => $data['metadata'] ?? $company->metadata,
+        ]);
+
         return $company->fresh();
     }
 
@@ -39,14 +82,43 @@ class InsuranceService
     public function createPolicy(array $data): InsurancePolicy
     {
         return DB::transaction(function () use ($data) {
-            $data['policy_number'] = $this->generateUniquePolicyNumber();
-            
-            // Calculate remaining limit if annual limit is provided
-            if (isset($data['annual_limit'])) {
-                $data['remaining_limit'] = $data['annual_limit'];
+            $businessId = (int) ($data['business_id'] ?? (app()->bound('tenant_id') ? app('tenant_id') : 0));
+            if ($businessId <= 0) {
+                throw new \InvalidArgumentException('Business context is required.');
             }
 
-            return InsurancePolicy::create($data);
+            InsuranceCompany::where('business_id', $businessId)->findOrFail($data['insurance_company_id']);
+            if (isset($data['customer_id'])) {
+                \App\Models\Party::where('business_id', $businessId)->findOrFail($data['customer_id']);
+            }
+
+            $annualLimit = isset($data['annual_limit']) ? (float) $data['annual_limit'] : 0;
+
+            return InsurancePolicy::create([
+                'business_id' => $businessId,
+                'insurance_company_id' => $data['insurance_company_id'],
+                'customer_id' => $data['customer_id'] ?? null,
+                'policy_number' => $this->generateUniquePolicyNumber(),
+                'member_id' => $data['member_id'] ?? null,
+                'card_number' => $data['card_number'] ?? null,
+                'holder_name' => $data['holder_name'],
+                'holder_dob' => $data['holder_dob'] ?? null,
+                'holder_gender' => $data['holder_gender'] ?? null,
+                'holder_phone' => $data['holder_phone'] ?? null,
+                'holder_email' => $data['holder_email'] ?? null,
+                'holder_address' => $data['holder_address'] ?? null,
+                'plan_type' => $data['plan_type'],
+                'status' => $data['status'] ?? 'pending',
+                'start_date' => $data['start_date'],
+                'end_date' => $data['end_date'],
+                'annual_limit' => $annualLimit,
+                'used_amount' => 0,
+                'remaining_limit' => $annualLimit,
+                'coverage_percent' => $data['coverage_percent'] ?? null,
+                'copay_percent' => $data['copay_percent'] ?? null,
+                'notes' => $data['notes'] ?? null,
+                'metadata' => $data['metadata'] ?? null,
+            ]);
         });
     }
 
@@ -55,7 +127,36 @@ class InsuranceService
      */
     public function updatePolicy(InsurancePolicy $policy, array $data): InsurancePolicy
     {
-        $policy->update($data);
+        if (isset($data['insurance_company_id'])) {
+            InsuranceCompany::where('business_id', $policy->business_id)->findOrFail($data['insurance_company_id']);
+        }
+
+        if (isset($data['customer_id'])) {
+            \App\Models\Party::where('business_id', $policy->business_id)->findOrFail($data['customer_id']);
+        }
+
+        $policy->update([
+            'insurance_company_id' => $data['insurance_company_id'] ?? $policy->insurance_company_id,
+            'customer_id' => $data['customer_id'] ?? $policy->customer_id,
+            'member_id' => $data['member_id'] ?? $policy->member_id,
+            'card_number' => $data['card_number'] ?? $policy->card_number,
+            'holder_name' => $data['holder_name'] ?? $policy->holder_name,
+            'holder_dob' => $data['holder_dob'] ?? $policy->holder_dob,
+            'holder_gender' => $data['holder_gender'] ?? $policy->holder_gender,
+            'holder_phone' => $data['holder_phone'] ?? $policy->holder_phone,
+            'holder_email' => $data['holder_email'] ?? $policy->holder_email,
+            'holder_address' => $data['holder_address'] ?? $policy->holder_address,
+            'plan_type' => $data['plan_type'] ?? $policy->plan_type,
+            'status' => $data['status'] ?? $policy->status,
+            'start_date' => $data['start_date'] ?? $policy->start_date,
+            'end_date' => $data['end_date'] ?? $policy->end_date,
+            'annual_limit' => $data['annual_limit'] ?? $policy->annual_limit,
+            'coverage_percent' => $data['coverage_percent'] ?? $policy->coverage_percent,
+            'copay_percent' => $data['copay_percent'] ?? $policy->copay_percent,
+            'notes' => $data['notes'] ?? $policy->notes,
+            'metadata' => $data['metadata'] ?? $policy->metadata,
+        ]);
+
         return $policy->fresh();
     }
 
@@ -65,16 +166,62 @@ class InsuranceService
     public function createClaim(array $data): InsuranceClaim
     {
         return DB::transaction(function () use ($data) {
-            $data['claim_number'] = $this->generateUniqueClaimNumber();
-            
-            // Auto-calculate coverage if not provided
-            if (!isset($data['covered_amount']) || !isset($data['patient_responsibility'])) {
-                $coverage = $this->calculateClaimCoverage($data);
-                $data['covered_amount'] = $coverage['covered_amount'];
-                $data['patient_responsibility'] = $coverage['patient_responsibility'];
+            $businessId = (int) ($data['business_id'] ?? (app()->bound('tenant_id') ? app('tenant_id') : 0));
+            if ($businessId <= 0) {
+                throw new \InvalidArgumentException('Business context is required.');
             }
 
-            return InsuranceClaim::create($data);
+            $policy = InsurancePolicy::where('business_id', $businessId)->findOrFail($data['insurance_policy_id']);
+            InsuranceCompany::where('business_id', $businessId)->findOrFail($data['insurance_company_id']);
+
+            if (isset($data['sale_id'])) {
+                \App\Models\Sale::where('business_id', $businessId)->findOrFail($data['sale_id']);
+            }
+            if (isset($data['prescription_id'])) {
+                \App\Models\Prescription::where('business_id', $businessId)->findOrFail($data['prescription_id']);
+            }
+            if (isset($data['customer_id'])) {
+                \App\Models\Party::where('business_id', $businessId)->findOrFail($data['customer_id']);
+            }
+
+            $claimData = [
+                'business_id' => $businessId,
+                'insurance_company_id' => $data['insurance_company_id'],
+                'insurance_policy_id' => $policy->id,
+                'sale_id' => $data['sale_id'] ?? null,
+                'prescription_id' => $data['prescription_id'] ?? null,
+                'customer_id' => $data['customer_id'] ?? null,
+                'user_id' => auth()->id(),
+                'claim_number' => $this->generateUniqueClaimNumber(),
+                'service_date' => $data['service_date'],
+                'total_amount' => $data['total_amount'],
+                'covered_amount' => $data['covered_amount'] ?? null,
+                'patient_responsibility' => $data['patient_responsibility'] ?? null,
+                'approved_amount' => 0,
+                'paid_amount' => 0,
+                'rejected_amount' => 0,
+                'status' => 'draft',
+                'submission_date' => null,
+                'rejection_reason' => null,
+                'external_reference' => null,
+                'settlement_date' => null,
+                'notes' => $data['notes'] ?? null,
+                'line_items' => $data['line_items'] ?? null,
+                'metadata' => $data['metadata'] ?? null,
+            ];
+
+            if ($claimData['covered_amount'] === null || $claimData['patient_responsibility'] === null) {
+                $coverage = $this->calculateClaimCoverage($claimData);
+                $claimData['covered_amount'] = $coverage['covered_amount'];
+                $claimData['patient_responsibility'] = $coverage['patient_responsibility'];
+            }
+
+            if ((float) $claimData['covered_amount'] > (float) $claimData['total_amount']
+                || (float) $claimData['patient_responsibility'] > (float) $claimData['total_amount']) {
+                throw new \DomainException('Claim allocation cannot exceed total amount.');
+            }
+
+            return InsuranceClaim::create($claimData);
         });
     }
 
