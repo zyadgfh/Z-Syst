@@ -45,6 +45,19 @@ The current API route map declares endpoints for:
 
 A route declaration is not considered feature verification. The CI route-list gate and feature/E2E tests must confirm that every declared controller resolves and behaves correctly.
 
+## Supabase verification — 2026-09-26
+
+- Active project: Supabase PostgreSQL 17.6.
+- 88 public tables were checked; all 88 have RLS enabled.
+- Supabase security advisor currently reports 0 security lints.
+- PostgreSQL integrity checks returned zero violations for negative stock, invalid transfers, invalid coupon values, invalid cash-register balances, invalid cash transactions, and invalid coupon redemptions.
+- Previously `NOT VALID` integrity constraints were validated successfully in Supabase and the equivalent PostgreSQL-aware Laravel migration was added to the branch.
+- The performance advisor reports 228 unused-index notices. These are informational and are intentionally not removed until production workload/query statistics justify each removal.
+
+## Agent skill alignment
+
+The implementation follows the repository's Z-Syst pharmacy skill, Clean Code/DDD rules, UI/UX Pro Max guidance where UI changes apply, and the project's security/vulnerability scanning workflow. Changes use minimum-footprint refactors, service-layer business logic, database-first verification, regression tests, and explicit release gates.
+
 ## Remaining release gates
 
 ### P0 — must pass before production
