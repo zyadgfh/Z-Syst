@@ -47,7 +47,7 @@ class InsuranceClaimController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'business_id' => 'required|exists:businesses,id',
+            'business_id' => 'nullable|integer|exists:businesses,id',
             'insurance_company_id' => 'required|exists:insurance_companies,id',
             'insurance_policy_id' => 'required|exists:insurance_policies,id',
             'sale_id' => 'nullable|exists:sales,id',
@@ -63,7 +63,20 @@ class InsuranceClaimController extends Controller
         ]);
 
         try {
-            $claim = $this->insuranceService->createClaim($request->all());
+            $claim = $this->insuranceService->createClaim([
+                'business_id' => auth()->user()->role === 'superadmin' ? $request->business_id : auth()->user()->business_id,
+                'insurance_company_id' => $request->insurance_company_id,
+                'insurance_policy_id' => $request->insurance_policy_id,
+                'sale_id' => $request->sale_id,
+                'prescription_id' => $request->prescription_id,
+                'customer_id' => $request->customer_id,
+                'service_date' => $request->service_date,
+                'total_amount' => $request->total_amount,
+                'covered_amount' => $request->covered_amount,
+                'patient_responsibility' => $request->patient_responsibility,
+                'line_items' => $request->line_items,
+                'notes' => $request->notes,
+            ]);
 
             return response()->json([
                 'message' => __('Insurance claim created successfully'),
@@ -112,7 +125,14 @@ class InsuranceClaimController extends Controller
         ]);
 
         try {
-            $claim->update($request->all());
+            $claim->update([
+                'service_date' => $request->service_date,
+                'total_amount' => $request->total_amount,
+                'covered_amount' => $request->covered_amount,
+                'patient_responsibility' => $request->patient_responsibility,
+                'line_items' => $request->line_items,
+                'notes' => $request->notes,
+            ]);
 
             return response()->json([
                 'message' => __('Insurance claim updated successfully'),
@@ -180,7 +200,12 @@ class InsuranceClaimController extends Controller
         ]);
 
         try {
-            $claim = $this->insuranceService->processClaim($claim, $request->all());
+            $claim = $this->insuranceService->processClaim($claim, [
+                'status' => $request->status,
+                'approved_amount' => $request->approved_amount,
+                'rejection_reason' => $request->rejection_reason,
+                'external_reference' => $request->external_reference,
+            ]);
 
             return response()->json([
                 'message' => __('Insurance claim processed successfully'),
@@ -199,7 +224,7 @@ class InsuranceClaimController extends Controller
     public function processPayment(Request $request, InsuranceClaim $claim)
     {
         $request->validate([
-            'amount' => 'required|numeric|min:0',
+            'amount' => 'required|numeric|min:0.01',
         ]);
 
         try {
