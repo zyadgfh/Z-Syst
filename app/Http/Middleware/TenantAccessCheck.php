@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Business;
+
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -24,6 +26,14 @@ class TenantAccessCheck
 
         if (!$user) {
             return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        $tenantId = $this->resolver->resolve($request);
+        if ($tenantId !== null) {
+            $request->attributes->set('tenant_id', $tenantId);
+            $request->merge(['tenant_id' => $tenantId]);
+            app()->instance('tenant_id', $tenantId);
+            config(['app.current_business_id' => $tenantId]);
         }
 
         // Superadmins are the only users allowed to cross tenant boundaries.
@@ -50,6 +60,10 @@ class TenantAccessCheck
             }
 
             $modelTenantId = $parameter->getAttribute('business_id');
+
+            if ($parameter instanceof Business) {
+                $modelTenantId = $parameter->getKey();
+            }
 
             if ($modelTenantId !== null && (int) $modelTenantId !== (int) $user->business_id) {
                 abort(403, 'You do not have permission to access this tenant data.');
