@@ -4,7 +4,7 @@
 > Covers setup, common issues, the database trap that bit us, deployment notes, and how
 > to roll forward.
 
-Last updated: 2026-07-29
+Last updated: 2026-09-26
 
 ---
 
@@ -40,7 +40,7 @@ SQLSTATE[HY000] [2002] No connection could be made because the target machine
 actively refused it (Connection: mysql, ...)
 ```
 
-`php artisan migrate:status`, every test, and every DB call fail with this.
+The old Windows/MySQL troubleshooting details below are historical only. Current production verification is against Supabase PostgreSQL; use the current `.env`/connection configuration rather than assuming MySQL.
 
 ### Root cause (this machine, 2026-07-29)
 
@@ -154,7 +154,7 @@ Expected: all green.
 
 ---
 
-## 5. Where the Real Gaps Are (post 2026-07-29 audit)
+## 5. Current Release Gaps (post 2026-09-26 hardening pass)
 
 The original `GAP_ANALYSIS.md` is stale. Current honest assessment:
 
