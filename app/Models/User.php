@@ -30,12 +30,14 @@ class User extends Authenticatable
     protected static function booted()
     {
         static::addGlobalScope('tenant', function ($query) {
+            $user = request()->user();
+
             if (
-                auth()->check() &&
-                auth()->user()->role !== 'superadmin' &&
+                $user &&
+                $user->role !== 'superadmin' &&
                 !request()->is('admin/*')
             ) {
-                $query->where('business_id', auth()->user()->business_id);
+                $query->where('business_id', $user->business_id);
             }
         });
     }
