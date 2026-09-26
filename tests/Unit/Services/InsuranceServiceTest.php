@@ -69,6 +69,7 @@ class InsuranceServiceTest extends TestCase
         $this->assertSame('approved', $approved->status);
         $this->assertSame('80.00', $approved->approved_amount);
         $this->assertSame('EXT-1', $approved->external_reference);
+        $this->assertSame('80.00', $this->policy->fresh()->used_amount);
     }
 
     public function test_partial_approval_is_recorded(): void
@@ -80,6 +81,7 @@ class InsuranceServiceTest extends TestCase
         $this->assertSame('partially_approved', $approved->status);
         $this->assertSame('50.00', $approved->approved_amount);
         $this->assertSame('30.00', $approved->rejected_amount);
+        $this->assertSame('50.00', $this->policy->fresh()->used_amount);
     }
 
     public function test_rejection_requires_submitted_state(): void
@@ -89,6 +91,17 @@ class InsuranceServiceTest extends TestCase
         $this->expectException(\DomainException::class);
 
         $this->service->rejectClaim($claim, 'Eligibility failed');
+    }
+
+    public function test_reprocessing_approval_adjusts_policy_usage_by_the_delta(): void
+    {
+        $claim = $this->claim();
+
+        $this->service->recordApproval($claim, 80);
+        $updated = $this->service->recordApproval($claim, 50);
+
+        $this->assertSame('50.00', $updated->approved_amount);
+        $this->assertSame('50.00', $this->policy->fresh()->used_amount);
     }
 
     public function test_payment_cannot_exceed_approved_amount(): void
@@ -111,5 +124,15 @@ class InsuranceServiceTest extends TestCase
         $this->assertSame('paid', $paid->status);
         $this->assertSame('60.00', $paid->paid_amount);
         $this->assertNotNull($paid->settlement_date);
+    }
+
+    public function test_rejection_does_not_create_policy_usage(): void
+    {
+        $claim = $this->claim();
+
+        $rejected = $this->service->rejectClaim($claim, 'Eligibility failed');
+
+        $this->assertSame('rejected', $rejected->status);
+        $this->assertSame('0.00', $this->policy->fresh()->used_amount);
     }
 }
