@@ -28,18 +28,26 @@ class TenantAccessCheck
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
+        $hadTenantContext = app()->bound('tenant_id');
         $tenantId = $this->resolver->resolve($request);
+        $contextSetHere = false;
+
         if ($tenantId !== null) {
+            if (!$hadTenantContext) {
+                $contextSetHere = true;
+            }
+
             $request->attributes->set('tenant_id', $tenantId);
             $request->merge(['tenant_id' => $tenantId]);
             app()->instance('tenant_id', $tenantId);
             config(['app.current_business_id' => $tenantId]);
         }
 
-        // Superadmins are the only users allowed to cross tenant boundaries.
-        if ($user->role === 'superadmin') {
-            return $next($request);
-        }
+        try {
+            // Superadmins are the only users allowed to cross tenant boundaries.
+            if ($user->role === 'superadmin') {
+                return $next($request);
+            }
 
         if (empty($user->business_id)) {
             abort(403, 'Tenant context is required.');
@@ -71,5 +79,11 @@ class TenantAccessCheck
         }
 
         return $next($request);
+        } finally {
+            if ($contextSetHere) {
+                app()->forgetInstance('tenant_id');
+                config(['app.current_business_id' => null]);
+            }
+        }
     }
 }
