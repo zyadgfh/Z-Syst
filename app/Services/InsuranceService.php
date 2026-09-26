@@ -127,6 +127,91 @@ class InsuranceService
     }
 
     /**
+     * Record claim approval.
+     */
+    public function recordApproval(InsuranceClaim $claim, float $approvedAmount, ?string $externalReference = null): InsuranceClaim
+    {
+        return DB::transaction(function () use ($claim, $approvedAmount, $externalReference) {
+            $claim->refresh();
+
+            if (!in_array($claim->status, ['submitted', 'under_review'])) {
+                throw new \DomainException('Only submitted claims can be approved.');
+            }
+
+            if ($approvedAmount < 0 || $approvedAmount > (float) $claim->covered_amount) {
+                throw new \DomainException('Approved amount exceeds the covered claim amount.');
+            }
+
+            $status = $approvedAmount < (float) $claim->covered_amount
+                ? 'partially_approved'
+                : 'approved';
+
+            $claim->update([
+                'status' => $status,
+                'approved_amount' => $approvedAmount,
+                'rejected_amount' => max(0, (float) $claim->covered_amount - $approvedAmount),
+                'external_reference' => $externalReference,
+            ]);
+
+            return $claim->fresh();
+        });
+    }
+
+    /**
+     * Reject a submitted claim.
+     */
+    public function rejectClaim(InsuranceClaim $claim, string $reason): InsuranceClaim
+    {
+        return DB::transaction(function () use ($claim, $reason) {
+            $claim->refresh();
+
+            if (!in_array($claim->status, ['submitted', 'under_review'])) {
+                throw new \DomainException('Only submitted claims can be rejected.');
+            }
+
+            $claim->update([
+                'status' => 'rejected',
+                'approved_amount' => 0,
+                'rejected_amount' => $claim->covered_amount,
+                'rejection_reason' => $reason,
+            ]);
+
+            return $claim->fresh();
+        });
+    }
+
+    /**
+     * Record a payment against an approved claim.
+     */
+    public function recordPayment(InsuranceClaim $claim, float $paidAmount, ?\Carbon\Carbon $settlementDate = null): InsuranceClaim
+    {
+        return DB::transaction(function () use ($claim, $paidAmount, $settlementDate) {
+            $claim->refresh();
+
+            if (!$claim->isApproved()) {
+                throw new \DomainException('Only approved claims can be paid.');
+            }
+
+            $approved = (float) ($claim->approved_amount ?? 0);
+            $currentPaid = (float) ($claim->paid_amount ?? 0);
+
+            if ($paidAmount <= 0 || $currentPaid + $paidAmount > $approved) {
+                throw new \DomainException('Payment exceeds the approved claim amount.');
+            }
+
+            $newPaid = $currentPaid + $paidAmount;
+
+            $claim->update([
+                'status' => $newPaid >= $approved ? 'paid' : $claim->status,
+                'paid_amount' => $newPaid,
+                'settlement_date' => $settlementDate ?? now(),
+            ]);
+
+            return $claim->fresh();
+        });
+    }
+
+    /**
      * Process claim payment
      */
     public function processPayment(InsuranceClaim $claim, float $amount): InsuranceClaim
