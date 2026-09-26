@@ -15,11 +15,19 @@ class LoyaltyService
      */
     public function createProgram(array $data): LoyaltyProgram
     {
-        $program = LoyaltyProgram::create($data);
+        $businessId = (int) ($data['business_id'] ?? (app()->bound('tenant_id') ? app('tenant_id') : 0));
 
-        if ($program->business_id === null && app()->bound('tenant_id')) {
-            $program->forceFill(['business_id' => (int) app('tenant_id')])->save();
+        if ($businessId <= 0) {
+            throw new \InvalidArgumentException('Business context is required.');
         }
+
+        $program = LoyaltyProgram::create([
+            'business_id' => $businessId,
+            'name' => $data['name'],
+            'points_per_currency' => $data['points_per_currency'],
+            'min_points_for_reward' => $data['min_points_for_reward'],
+            'is_active' => $data['is_active'] ?? true,
+        ]);
 
         return $program;
     }
@@ -29,7 +37,13 @@ class LoyaltyService
      */
     public function updateProgram(LoyaltyProgram $program, array $data): LoyaltyProgram
     {
-        $program->update($data);
+        $program->update([
+            'name' => $data['name'],
+            'points_per_currency' => $data['points_per_currency'],
+            'min_points_for_reward' => $data['min_points_for_reward'],
+            'is_active' => $data['is_active'] ?? $program->is_active,
+        ]);
+
         return $program->fresh();
     }
 
@@ -185,7 +199,23 @@ class LoyaltyService
      */
     public function createInteraction(array $data): CustomerInteraction
     {
-        return CustomerInteraction::create($data);
+        $businessId = (int) ($data['business_id'] ?? (app()->bound('tenant_id') ? app('tenant_id') : 0));
+        if ($businessId <= 0) {
+            throw new \InvalidArgumentException('Business context is required.');
+        }
+
+        if (isset($data['party_id'])) {
+            Party::where('business_id', $businessId)->findOrFail($data['party_id']);
+        }
+
+        return CustomerInteraction::create([
+            'business_id' => $businessId,
+            'party_id' => $data['party_id'],
+            'type' => $data['type'],
+            'notes' => $data['notes'] ?? null,
+            'user_id' => $data['user_id'] ?? auth()->id(),
+            'loyalty_program_id' => $data['loyalty_program_id'] ?? null,
+        ]);
     }
 
     /**
