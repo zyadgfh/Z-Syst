@@ -114,20 +114,20 @@ class FeatureStatusService
             [
                 'key' => 'insurance',
                 'label' => 'Insurance',
-                'status' => 'in_progress',
-                'details' => 'Module scaffold pending. Tables, models, service, controller, and tests are in progress.',
+                'status' => 'completed',
+                'details' => 'Companies, policies, coverage rules, claims, submission, approval, rejection, and payment workflows are implemented with API coverage and lifecycle tests.',
             ],
             [
                 'key' => 'multi_warehouse',
                 'label' => 'Multi-Warehouse',
-                'status' => 'pending',
-                'details' => 'Not started. Needs warehouses, warehouse_stocks, and stock_transfers tables.',
+                'status' => 'completed',
+                'details' => 'Warehouses, warehouse stock, transfers, statistics, and tenant isolation are implemented with API and service tests.',
             ],
             [
                 'key' => 'traceability',
                 'label' => 'Drug Recall & Traceability',
-                'status' => 'pending',
-                'details' => 'Not started. Needs batch serial tracking and recall event workflow.',
+                'status' => 'completed',
+                'details' => 'Batch lots, expiry views, traceability logs, recall initiation/resolution, and tenant isolation are implemented and tested.',
             ],
         ];
     }
