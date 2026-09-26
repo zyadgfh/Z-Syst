@@ -74,14 +74,7 @@ class InsuranceService
                 $data['patient_responsibility'] = $coverage['patient_responsibility'];
             }
 
-            $claim = InsuranceClaim::create($data);
-
-            // Update policy used amount
-            if ($claim->policy) {
-                $claim->policy->increment('used_amount', $claim->covered_amount);
-            }
-
-            return $claim;
+            return InsuranceClaim::create($data);
         });
     }
 
@@ -153,12 +146,13 @@ class InsuranceService
 
             if ($claim->policy) {
                 $policy = $claim->policy()->lockForUpdate()->firstOrFail();
-                $difference = $approvedAmount - (float) $claim->covered_amount;
+                $previousApproved = (float) ($claim->getOriginal('approved_amount') ?? 0);
+                $difference = $approvedAmount - $previousApproved;
 
-                if ($difference >= 0) {
+                if ($difference > 0) {
                     $policy->increment('used_amount', $difference);
-                } else {
-                    $policy->decrement('used_amount', abs($difference));
+                } elseif ($difference < 0) {
+                    $policy->decrement('used_amount', min(abs($difference), (float) $policy->used_amount));
                 }
             }
 
@@ -187,7 +181,8 @@ class InsuranceService
 
             if ($claim->policy) {
                 $policy = $claim->policy()->lockForUpdate()->firstOrFail();
-                $policy->decrement('used_amount', min((float) $claim->covered_amount, (float) $policy->used_amount));
+                $previousApproved = (float) ($claim->getOriginal('approved_amount') ?? 0);
+                $policy->decrement('used_amount', min($previousApproved, (float) $policy->used_amount));
             }
 
             return $claim->fresh();
