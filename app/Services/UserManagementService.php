@@ -26,10 +26,13 @@ class UserManagementService
                 'phone' => $userData['phone'] ?? null,
                 'image' => $userData['image'] ?? null,
                 'password' => Hash::make($userData['password']),
-                'business_id' => $userData['business_id'] ?? null,
                 'lang' => $userData['lang'] ?? 'en',
                 'status' => $userData['status'] ?? 1,
             ]);
+
+            if (isset($userData['business_id'])) {
+                $user->assignToBusiness((int) $userData['business_id']);
+            }
 
             $user->roles()->sync($role->id);
 
