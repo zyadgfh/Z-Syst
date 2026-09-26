@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use App\Models\Business;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use App\Services\TenantResolver;
@@ -46,6 +47,11 @@ class TenantAccessCheck
             }
 
             $modelTenantId = $parameter->getAttribute('business_id');
+
+            // A Business model is itself the tenant; its primary key is the tenant id.
+            if ($parameter instanceof Business) {
+                $modelTenantId = $parameter->getKey();
+            }
 
             if ($modelTenantId !== null && (int) $modelTenantId !== (int) $user->business_id) {
                 abort(403, 'You do not have permission to access this tenant data.');
