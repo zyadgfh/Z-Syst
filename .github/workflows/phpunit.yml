@@ -38,6 +38,12 @@ jobs:
         env:
           APP_ENV: testing
 
+      - name: Validate Laravel route bindings
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: php artisan route:list --no-ansi
+
       - name: Run migrations
         env:
           DB_CONNECTION: sqlite
