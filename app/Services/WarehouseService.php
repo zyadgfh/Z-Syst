@@ -67,7 +67,14 @@ class WarehouseService
      */
     public function addStock(int $warehouseId, int $productId, int $quantity, int $businessId): WarehouseStock
     {
+        if ($quantity <= 0) {
+            throw new \InvalidArgumentException('Stock quantity must be positive.');
+        }
+
         return DB::transaction(function () use ($warehouseId, $productId, $quantity, $businessId) {
+            Warehouse::forBusiness($businessId)->findOrFail($warehouseId);
+            Product::where('business_id', $businessId)->findOrFail($productId);
+
             $stock = WarehouseStock::firstOrCreate([
                 'warehouse_id' => $warehouseId,
                 'product_id' => $productId,
@@ -84,8 +91,22 @@ class WarehouseService
      */
     public function removeStock(int $warehouseId, int $productId, int $quantity): bool
     {
+        if ($quantity <= 0) {
+            throw new \InvalidArgumentException('Stock quantity must be positive.');
+        }
+
         return DB::transaction(function () use ($warehouseId, $productId, $quantity) {
-            $stock = WarehouseStock::where([
+            Warehouse::findOrFail($warehouseId);
+            Product::findOrFail($productId);
+
+            $businessId = app()->bound('tenant_id') ? (int) app('tenant_id') : null;
+            $query = WarehouseStock::query();
+
+            if ($businessId !== null) {
+                $query->where('business_id', $businessId);
+            }
+
+            $stock = $query->where([
                 'warehouse_id' => $warehouseId,
                 'product_id' => $productId,
             ])->first();
@@ -108,8 +129,20 @@ class WarehouseService
     public function createTransfer(array $data): StockTransfer
     {
         return DB::transaction(function () use ($data) {
-            // Validate source warehouse has sufficient stock
-            $fromWarehouse = Warehouse::find($data['from_warehouse_id']);
+            // Validate source/destination/product all belong to the active tenant.
+            $businessId = (int) ($data['business_id'] ?? (app()->bound('tenant_id') ? app('tenant_id') : 0));
+            if ($businessId <= 0) {
+                throw new \InvalidArgumentException('Business context is required for stock transfers.');
+            }
+
+            $fromWarehouse = Warehouse::forBusiness($businessId)->findOrFail($data['from_warehouse_id']);
+            $toWarehouse = Warehouse::forBusiness($businessId)->findOrFail($data['to_warehouse_id']);
+            Product::where('business_id', $businessId)->findOrFail($data['product_id']);
+
+            if ((int) $data['quantity'] <= 0) {
+                throw new \InvalidArgumentException('Transfer quantity must be positive.');
+            }
+
             if (!$fromWarehouse->hasSufficientStock($data['product_id'], $data['quantity'])) {
                 throw new \Exception('Insufficient stock in source warehouse');
             }
@@ -119,7 +152,16 @@ class WarehouseService
                 throw new \Exception('Cannot transfer to same warehouse');
             }
 
-            return StockTransfer::create($data);
+            return StockTransfer::create([
+                'business_id' => $businessId,
+                'from_warehouse_id' => $fromWarehouse->id,
+                'to_warehouse_id' => $toWarehouse->id,
+                'product_id' => $data['product_id'],
+                'quantity' => $data['quantity'],
+                'notes' => $data['notes'] ?? null,
+                'status' => $data['status'] ?? 'pending',
+                'created_by' => $data['created_by'] ?? auth()->id(),
+            ]);
         });
     }
 
