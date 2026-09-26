@@ -143,10 +143,10 @@ Expected: all green.
 | Inventory Turnover | ✅ | `app/Services/InventoryTurnoverService.php` |
 | **Stock Audit & Reconciliation** | ✅ | `app/Services/StockAuditService.php` |
 | **Financial Audit** | ✅ | `app/Services/FinancialAuditService.php` |
-| Insurance | ❌ | (not started — see §5) |
-| Multi-Warehouse | ❌ | (not started) |
-| Drug Recall / Traceability | ❌ | (not started) |
-| Loyalty / CRM | ⚠️ | (basic only) |
+| Insurance | ✅ | `app/Services/InsuranceService.php` + API controller + tests |
+| Multi-Warehouse | ✅ | `app/Services/WarehouseStockService.php` + API controller + tests |
+| Drug Recall / Traceability | ✅ | `app/Services/TraceabilityService.php` + API controller + tests |
+| Loyalty / CRM | ✅ | `app/Services/LoyaltyService.php` + API controller + tests |
 
 > **Note:** Stock Audit, Financial Audit, and Inventory Turnover were completed
 > on 2026-07-27/28 but the `GAP_ANALYSIS.md` was not refreshed to reflect this.
