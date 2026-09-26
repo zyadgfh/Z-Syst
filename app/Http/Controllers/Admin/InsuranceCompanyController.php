@@ -42,7 +42,7 @@ class InsuranceCompanyController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'business_id' => 'required|exists:businesses,id',
+            'business_id' => 'nullable|integer|exists:businesses,id',
             'name' => 'required|string|max:255',
             'contact_person' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:50',
@@ -62,7 +62,25 @@ class InsuranceCompanyController extends Controller
         ]);
 
         try {
-            $company = $this->insuranceService->createCompany($request->all());
+            $company = $this->insuranceService->createCompany([
+                'business_id' => auth()->user()->role === 'superadmin' ? $request->business_id : auth()->user()->business_id,
+                'name' => $request->name,
+                'contact_person' => $request->contact_person,
+                'phone' => $request->phone,
+                'email' => $request->email,
+                'address' => $request->address,
+                'city' => $request->city,
+                'country' => $request->country,
+                'tax_id' => $request->tax_id,
+                'status' => $request->status,
+                'integration_type' => $request->integration_type,
+                'api_endpoint' => $request->api_endpoint,
+                'api_credentials' => $request->api_credentials,
+                'default_coverage_percent' => $request->default_coverage_percent,
+                'default_copay_percent' => $request->default_copay_percent,
+                'settlement_days' => $request->settlement_days,
+                'notes' => $request->notes,
+            ]);
 
             return response()->json([
                 'message' => __('Insurance company created successfully'),
@@ -108,7 +126,23 @@ class InsuranceCompanyController extends Controller
         ]);
 
         try {
-            $company = $this->insuranceService->updateCompany($company, $request->all());
+            $company = $this->insuranceService->updateCompany($company, [
+                'name' => $request->name,
+                'contact_person' => $request->contact_person,
+                'phone' => $request->phone,
+                'email' => $request->email,
+                'address' => $request->address,
+                'city' => $request->city,
+                'country' => $request->country,
+                'tax_id' => $request->tax_id,
+                'status' => $request->status,
+                'integration_type' => $request->integration_type,
+                'api_endpoint' => $request->api_endpoint,
+                'api_credentials' => $request->api_credentials,
+                'default_coverage_percent' => $request->default_coverage_percent,
+                'settlement_days' => $request->settlement_days,
+                'notes' => $request->notes,
+            ]);
 
             return response()->json([
                 'message' => __('Insurance company updated successfully'),

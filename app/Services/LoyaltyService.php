@@ -15,7 +15,21 @@ class LoyaltyService
      */
     public function createProgram(array $data): LoyaltyProgram
     {
-        return LoyaltyProgram::create($data);
+        $businessId = (int) ($data['business_id'] ?? (app()->bound('tenant_id') ? app('tenant_id') : 0));
+
+        if ($businessId <= 0) {
+            throw new \InvalidArgumentException('Business context is required.');
+        }
+
+        $program = LoyaltyProgram::create([
+            'business_id' => $businessId,
+            'name' => $data['name'],
+            'points_per_currency' => $data['points_per_currency'],
+            'min_points_for_reward' => $data['min_points_for_reward'],
+            'is_active' => $data['is_active'] ?? true,
+        ]);
+
+        return $program;
     }
 
     /**
@@ -23,7 +37,13 @@ class LoyaltyService
      */
     public function updateProgram(LoyaltyProgram $program, array $data): LoyaltyProgram
     {
-        $program->update($data);
+        $program->update([
+            'name' => $data['name'],
+            'points_per_currency' => $data['points_per_currency'],
+            'min_points_for_reward' => $data['min_points_for_reward'],
+            'is_active' => $data['is_active'] ?? $program->is_active,
+        ]);
+
         return $program->fresh();
     }
 
@@ -33,7 +53,12 @@ class LoyaltyService
     public function earnPoints(int $programId, int $partyId, float $amount, string $referenceType = null, int $referenceId = null): LoyaltyTransaction
     {
         return DB::transaction(function () use ($programId, $partyId, $amount, $referenceType, $referenceId) {
+            if ($amount <= 0) {
+                throw new \InvalidArgumentException('Loyalty earn amount must be positive.');
+            }
+
             $program = LoyaltyProgram::findOrFail($programId);
+            Party::where('business_id', $program->business_id)->findOrFail($partyId);
             $points = $program->calculatePoints($amount);
 
             return LoyaltyTransaction::create([
@@ -55,7 +80,12 @@ class LoyaltyService
     public function redeemPoints(int $programId, int $partyId, int $points, string $notes = null): LoyaltyTransaction
     {
         return DB::transaction(function () use ($programId, $partyId, $points, $notes) {
+            if ($points <= 0) {
+                throw new \InvalidArgumentException('Redeemed points must be positive.');
+            }
+
             $program = LoyaltyProgram::findOrFail($programId);
+            Party::where('business_id', $program->business_id)->findOrFail($partyId);
             $currentBalance = $this->getCustomerBalance($partyId, $programId);
 
             if ($currentBalance < $points) {
@@ -169,7 +199,23 @@ class LoyaltyService
      */
     public function createInteraction(array $data): CustomerInteraction
     {
-        return CustomerInteraction::create($data);
+        $businessId = (int) ($data['business_id'] ?? (app()->bound('tenant_id') ? app('tenant_id') : 0));
+        if ($businessId <= 0) {
+            throw new \InvalidArgumentException('Business context is required.');
+        }
+
+        if (isset($data['party_id'])) {
+            Party::where('business_id', $businessId)->findOrFail($data['party_id']);
+        }
+
+        return CustomerInteraction::create([
+            'business_id' => $businessId,
+            'party_id' => $data['party_id'],
+            'type' => $data['type'],
+            'notes' => $data['notes'] ?? null,
+            'user_id' => $data['user_id'] ?? auth()->id(),
+            'loyalty_program_id' => $data['loyalty_program_id'] ?? null,
+        ]);
     }
 
     /**
@@ -240,7 +286,10 @@ class LoyaltyService
      */
     public function getTopLoyalCustomers(int $businessId, int $programId, int $limit = 10): array
     {
-        $customerBalances = LoyaltyTransaction::where('loyalty_program_id', $programId)
+        LoyaltyProgram::forBusiness($businessId)->findOrFail($programId);
+
+        $customerBalances = LoyaltyTransaction::forBusiness($businessId)
+            ->where('loyalty_program_id', $programId)
             ->selectRaw('party_id, SUM(points) as balance')
             ->groupBy('party_id')
             ->orderByDesc('balance')
@@ -248,7 +297,7 @@ class LoyaltyService
             ->get();
 
         return $customerBalances->map(function ($item) {
-            $party = Party::find($item->party_id);
+            $party = Party::where('business_id', $businessId)->find($item->party_id);
             return [
                 'party_id' => $item->party_id,
                 'party_name' => $party?->name ?? 'Unknown',

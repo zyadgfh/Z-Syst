@@ -4,7 +4,7 @@
 > Covers setup, common issues, the database trap that bit us, deployment notes, and how
 > to roll forward.
 
-Last updated: 2026-07-29
+Last updated: 2026-09-26
 
 ---
 
@@ -40,7 +40,7 @@ SQLSTATE[HY000] [2002] No connection could be made because the target machine
 actively refused it (Connection: mysql, ...)
 ```
 
-`php artisan migrate:status`, every test, and every DB call fail with this.
+The old Windows/MySQL troubleshooting details below are historical only. Current production verification is against Supabase PostgreSQL; use the current `.env`/connection configuration rather than assuming MySQL.
 
 ### Root cause (this machine, 2026-07-29)
 
@@ -143,10 +143,10 @@ Expected: all green.
 | Inventory Turnover | ✅ | `app/Services/InventoryTurnoverService.php` |
 | **Stock Audit & Reconciliation** | ✅ | `app/Services/StockAuditService.php` |
 | **Financial Audit** | ✅ | `app/Services/FinancialAuditService.php` |
-| Insurance | ❌ | (not started — see §5) |
-| Multi-Warehouse | ❌ | (not started) |
-| Drug Recall / Traceability | ❌ | (not started) |
-| Loyalty / CRM | ⚠️ | (basic only) |
+| Insurance | ✅ | `app/Services/InsuranceService.php` + API controller + tests |
+| Multi-Warehouse | ✅ | `app/Services/WarehouseStockService.php` + API controller + tests |
+| Drug Recall / Traceability | ✅ | `app/Services/TraceabilityService.php` + API controller + tests |
+| Loyalty / CRM | ✅ | `app/Services/LoyaltyService.php` + API controller + tests |
 
 > **Note:** Stock Audit, Financial Audit, and Inventory Turnover were completed
 > on 2026-07-27/28 but the `GAP_ANALYSIS.md` was not refreshed to reflect this.
@@ -154,7 +154,7 @@ Expected: all green.
 
 ---
 
-## 5. Where the Real Gaps Are (post 2026-07-29 audit)
+## 5. Current Release Gaps (post 2026-09-26 hardening pass)
 
 The original `GAP_ANALYSIS.md` is stale. Current honest assessment:
 

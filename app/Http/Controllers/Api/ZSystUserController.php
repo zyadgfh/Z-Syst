@@ -38,7 +38,6 @@ class ZSystUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'business_id' => auth()->user()->business_id,
             'visibility' => [
                 'dashboardPermission' => $request->dashboardPermission == 'true' ? true : false,
                 'addExpensePermission' => $request->addExpensePermission == 'true' ? true : false,
@@ -55,7 +54,7 @@ class ZSystUserController extends Controller
                 'stockPermission' => $request->stockPermission == 'true' ? true : false,
                 'addIncomePermission' => $request->addIncomePermission == 'true' ? true : false,
             ],
-        ]);
+        ])->assignToBusiness((int) auth()->user()->business_id);
 
         return response()->json([
             'message' => __('Data saved successfully.'),

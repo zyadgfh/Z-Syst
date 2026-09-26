@@ -8,10 +8,17 @@ use Maatwebsite\Excel\Concerns\FromView;
 
 class UserExport implements FromView
 {
+    public function __construct(private readonly ?int $businessId = null)
+    {
+    }
+
     public function view(): View
     {
         return view('admin.users.excel-csv', [
-            'users' => User::whereNotIn('role', ['superadmin', 'staff', 'shop-owner'])->latest()->get(),
+            'users' => User::whereNotIn('role', ['superadmin', 'staff', 'shop-owner'])
+                ->when($this->businessId !== null, fn ($query) => $query->where('business_id', $this->businessId))
+                ->latest()
+                ->get(),
         ]);
     }
 }

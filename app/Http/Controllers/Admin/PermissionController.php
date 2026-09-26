@@ -30,7 +30,11 @@ class PermissionController extends Controller
             'roles' => ['required', 'exists:roles,id'],
         ]);
 
-        $user = User::findOrFail($request->input('user'));
+        $query = User::query();
+        if (auth()->user()->role !== 'superadmin') {
+            $query->where('business_id', (int) auth()->user()->business_id);
+        }
+        $user = $query->findOrFail($request->input('user'));
         $user->roles()->sync($request->input('roles'));
 
         return response()->json([

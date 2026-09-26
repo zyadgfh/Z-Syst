@@ -6,6 +6,7 @@ use App\Helpers\HasUploader;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Stock;
+use App\Models\Tax;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -84,14 +85,36 @@ class ZSystProductController extends Controller
         DB::beginTransaction();
         try {
 
-            $product = Product::create($request->except('images') + [
+            $this->assertOwnedReferences($request, $business_id);
+
+            $product = Product::create([
+                'productName' => $request->productName,
                 'business_id' => $business_id,
+                'category_id' => $request->category_id,
+                'unit_id' => $request->unit_id,
+                'type_id' => $request->type_id,
+                'manufacturer_id' => $request->manufacturer_id,
+                'box_size_id' => $request->box_size_id,
+                'productCode' => $request->productCode,
+                'tax_type' => $request->tax_type,
+                'tax_id' => $request->tax_id,
+                'purchase_without_tax' => $request->purchase_without_tax,
+                'purchase_with_tax' => $request->purchase_with_tax,
+                'profit_percent' => $request->profit_percent,
+                'sales_price' => $request->sales_price,
+                'wholesale_price' => $request->wholesale_price,
+                'alert_qty' => $request->alert_qty,
+                'meta' => $request->meta,
                 'images' => $request->images ? $this->multipleUpload($request, 'images') : null,
             ]);
 
-            Stock::create($request->all() + [
+            Stock::create([
                 'product_id' => $product->id,
                 'business_id' => $business_id,
+                'batch_no' => $request->batch_no,
+                'expire_date' => $request->expire_date,
+                'productStock' => $request->qty ?? 0,
+                'barcode' => $request->barcode,
             ]);
 
             DB::commit();
@@ -112,7 +135,7 @@ class ZSystProductController extends Controller
 
     public function show($id)
     {
-        $data = Product::query()
+        $data = Product::where('business_id', (int) auth()->user()->business_id)
             ->with('unit:id,unitName', 'medicine_type:id,name', 'manufacterer:id,name', 'box_size:id,name', 'category:id,categoryName', 'stocks:id,expire_date,product_id,batch_no,productStock', 'tax:id,rate')
             ->withSum('stocks', 'productStock')
             ->findOrFail($id);
@@ -126,7 +149,7 @@ class ZSystProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $business_id = auth()->user()->business_id;
-        $stock = Stock::where('product_id', $product->id)->first();
+        $stock = Stock::where('business_id', $business_id)->where('product_id', $product->id)->first();
 
         $request->validate([
             'productName' => 'required|string',
@@ -147,6 +170,7 @@ class ZSystProductController extends Controller
 
         DB::beginTransaction();
         try {
+            $this->assertOwnedReferences($request, $business_id);
 
             if ($request->removed_images) {
 
@@ -165,7 +189,7 @@ class ZSystProductController extends Controller
             $new_images = $request->images ? $this->multipleUpload($request, 'images') : [];
             $merged_images = array_merge($prev_images, $new_images);
 
-            $stock = Stock::where('product_id', $product->id)->first();
+            $stock = Stock::where('business_id', $business_id)->where('product_id', $product->id)->first();
 
             if ($stock) {
                 $stock->update([
@@ -174,16 +198,33 @@ class ZSystProductController extends Controller
                     'productStock' => $stock->productStock + $request->qty,
                 ]);
             } else {
-                Stock::create($request->all() + [
+                Stock::create([
                     'product_id' => $product->id,
                     'business_id' => $business_id,
                     'productStock' => $request->qty,
                     'batch_no' => $request->batch_no,
                     'expire_date' => $request->expire_date,
+                    'barcode' => $request->barcode,
                 ]);
             }
 
-            $product->update($request->except('images') + [
+            $product->update([
+                'productName' => $request->productName,
+                'category_id' => $request->category_id,
+                'unit_id' => $request->unit_id,
+                'type_id' => $request->type_id,
+                'manufacturer_id' => $request->manufacturer_id,
+                'box_size_id' => $request->box_size_id,
+                'productCode' => $request->productCode,
+                'tax_type' => $request->tax_type,
+                'tax_id' => $request->tax_id,
+                'purchase_without_tax' => $request->purchase_without_tax,
+                'purchase_with_tax' => $request->purchase_with_tax,
+                'profit_percent' => $request->profit_percent,
+                'sales_price' => $request->sales_price,
+                'wholesale_price' => $request->wholesale_price,
+                'alert_qty' => $request->alert_qty,
+                'meta' => $request->meta,
                 'images' => $merged_images,
             ]);
 
@@ -215,16 +256,29 @@ class ZSystProductController extends Controller
             'profit_percent' => 'nullable|numeric',
             'sales_price' => 'required|numeric',
             'wholesale_price' => 'required|numeric',
-            'qty' => 'required|integer',
+            'qty' => 'required|integer|min:0',
         ]);
 
         DB::beginTransaction();
         try {
 
-            $product = Product::findOrFail($id);
-            $product->update($request->all());
+            $businessId = (int) auth()->user()->business_id;
+            $product = Product::where('business_id', $businessId)->findOrFail($id);
+            $this->assertOwnedReferences($request, $businessId);
+            $product->update([
+                'purchase_without_tax' => $request->purchase_without_tax,
+                'purchase_with_tax' => $request->purchase_with_tax,
+                'profit_percent' => $request->profit_percent,
+                'sales_price' => $request->sales_price,
+                'wholesale_price' => $request->wholesale_price,
+                'tax_type' => $request->tax_type,
+                'tax_id' => $request->tax_id,
+            ]);
 
-            $stock = Stock::where('product_id', $product->id)->where('batch_no', $request->batch_no)->first();
+            $stock = Stock::where('business_id', $businessId)
+                ->where('product_id', $product->id)
+                ->where('batch_no', $request->batch_no)
+                ->first();
 
             if ($stock) {
                 $stock->update([
@@ -237,7 +291,7 @@ class ZSystProductController extends Controller
                     'product_id' => $product->id,
                     'productStock' => $request->qty,
                     'expire_date' => $request->expire_date,
-                    'business_id' => auth()->user()->business_id,
+                    'business_id' => $businessId,
                 ]);
             }
 
@@ -270,6 +324,23 @@ class ZSystProductController extends Controller
         return response()->json([
             'message' => __('Data deleted successfully.'),
         ]);
+    }
+
+    private function assertOwnedReferences(Request $request, int $businessId): void
+    {
+        foreach ([
+            'category_id' => Category::class,
+            'unit_id' => Unit::class,
+            'type_id' => MedicineType::class,
+            'manufacturer_id' => Manufacturer::class,
+            'box_size_id' => BoxSize::class,
+            'tax_id' => Tax::class,
+        ] as $field => $modelClass) {
+            $id = $request->input($field);
+            if ($id !== null && ! $modelClass::where('business_id', $businessId)->whereKey($id)->exists()) {
+                abort(403, "Referenced {$field} does not belong to the current tenant.");
+            }
+        }
     }
 
     public function stocksWithProduct(Request $request)

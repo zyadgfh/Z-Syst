@@ -3,17 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Unit;
+use App\Models\MedicineType;
 use Illuminate\Http\Request;
 
-class UnitController extends Controller
+class ZSystMedicineTypeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $data = Unit::where('business_id', auth()->user()->business_id)->latest()->get();
+        $data = MedicineType::where('business_id', auth()->user()->business_id)->latest()->get();
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -21,17 +18,15 @@ class UnitController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'unitName' => 'required|unique:units,unitName,NULL,id,business_id,'.auth()->user()->business_id,
+            'name' => 'required|unique:medicine_types,name,NULL,id,business_id,'.auth()->user()->business_id,
         ]);
 
-        $data = Unit::create($request->all() + [
+        $data = MedicineType::create([
             'business_id' => auth()->user()->business_id,
+            'name' => $request->name,
         ]);
 
         return response()->json([
@@ -40,32 +35,30 @@ class UnitController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Unit $unit)
+    public function update(Request $request, MedicineType $medicineType)
     {
         $request->validate([
-            'unitName' => [
+            'name' => [
                 'required',
-                'unique:units,unitName,'.$unit->id.',id,business_id,'.auth()->user()->business_id,
+                'unique:medicine_types,name,'.$medicineType->id.',id,business_id,'.auth()->user()->business_id,
             ],
         ]);
 
-        $unit = $unit->update($request->all());
+        $medicineType->update([
+            'name' => $request->name,
+        ]);
+
+        $medicineType = $medicineType->fresh();
 
         return response()->json([
             'message' => __('Data saved successfully.'),
-            'data' => $unit,
+            'data' => $medicineType,
         ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Unit $unit)
+    public function destroy(MedicineType $medicineType)
     {
-        $unit->delete();
+        $medicineType->delete();
 
         return response()->json([
             'message' => __('Data deleted successfully.'),

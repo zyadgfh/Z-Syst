@@ -3,7 +3,7 @@
 use App\Http\Controllers\Admin as ADMIN;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'admin']], function () {
+Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'admin', 'tenant.check']], function () {
     Route::get('/', [ADMIN\DashboardController::class, 'index'])->name('dashboard.index');
     Route::get('/get-dashboard', [ADMIN\DashboardController::class, 'getDashboardData'])->name('dashboard.data');
     Route::get('/yearly-subscriptions', [ADMIN\DashboardController::class, 'yearlySubscriptions'])->name('dashboard.subscriptions');
@@ -37,7 +37,7 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('plans-excel', [ADMIN\ZSystPlanController::class, 'exportExcel'])->name('plans.excel');
     Route::get('plans-csv', [ADMIN\ZSystPlanController::class, 'exportCsv'])->name('plans.csv');
     Route::get('plans/statistics', [ADMIN\ZSystPlanController::class, 'statistics'])->name('plans.statistics');
-    Route::get('plans/popular', [ADMIN\ZystPlanController::class, 'popularPlans'])->name('plans.popular');
+    Route::get('plans/popular', [ADMIN\ZSystPlanController::class, 'popularPlans'])->name('plans.popular');
     Route::get('plans/{plan}/usage', [ADMIN\ZSystPlanController::class, 'planUsage'])->name('plans.usage');
     Route::post('plans/calculate-proration', [ADMIN\ZSystPlanController::class, 'calculateProration'])->name('plans.calculate-proration');
 

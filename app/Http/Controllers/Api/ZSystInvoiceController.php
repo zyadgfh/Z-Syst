@@ -15,10 +15,14 @@ class ZSystInvoiceController extends Controller
     public function index(Request $request)
     {
         $request->validate([
-            'party_id' => 'required|exists:parties,id',
+            'party_id' => 'required|integer|exists:parties,id',
         ]);
 
-        $party = Party::select('id', 'due', 'name', 'type', 'opening_balance')->find($request->input('party_id'));
+        $businessId = (int) $request->user()->business_id;
+        $party = Party::query()
+            ->where('business_id', $businessId)
+            ->select('id', 'business_id', 'due', 'name', 'type', 'opening_balance')
+            ->findOrFail($request->input('party_id'));
 
         if ($party->type == 'Supplier') {
             $data = $party->load('purchases_dues:id,party_id,dueAmount,paidAmount,totalAmount,invoiceNumber');

@@ -101,10 +101,10 @@ class ZSystSaleController extends Controller
             'isPaid' => 'nullable|boolean',
             'paymentType' => 'nullable|string',
             'products.*.product_id' => 'required|exists:products,id',
-            'products.*.price' => 'required|numeric',
+            'products.*.price' => 'required|numeric|min:0',
             'products.*.lossProfit' => 'required|numeric',
             'products.*.batch_no' => 'nullable|string',
-            'products.*.quantities' => 'required|integer',
+            'products.*.quantities' => 'required|integer|min:1',
         ]);
 
         $sale = TransactionHelper::run(function () use ($request) {
@@ -193,7 +193,16 @@ class ZSystSaleController extends Controller
             }
 
             if ($request->party_id) {
-                $party = Party::findOrFail($request->party_id);
+                $party = Party::where('business_id', $business_id)->findOrFail($request->party_id);
+            }
+
+            $productIds = collect($request->products)->pluck('product_id')->filter()->unique()->values();
+            if (Product::where('business_id', $business_id)->whereIn('id', $productIds)->count() !== $productIds->count()) {
+                abort(403, 'One or more products do not belong to the current tenant.');
+            }
+
+            if ($request->tax_id) {
+                \App\Models\Tax::where('business_id', $business_id)->findOrFail($request->tax_id);
             }
 
             if ($request->dueAmount && isset($party)) {
@@ -210,10 +219,20 @@ class ZSystSaleController extends Controller
 
             $lossProfit = collect($request->products)->pluck('lossProfit')->toArray();
 
-            $sale = Sale::create($request->all() + [
+            $sale = Sale::create([
                 'user_id' => auth()->id(),
                 'business_id' => $business_id,
+                'party_id' => $request->party_id,
+                'tax_id' => $request->tax_id,
+                'discountAmount' => $request->discountAmount ?? 0,
+                'dueAmount' => $request->dueAmount ?? 0,
+                'isPaid' => $request->isPaid ?? false,
+                'tax_amount' => $request->tax_amount ?? 0,
+                'paidAmount' => $request->paidAmount ?? 0,
+                'totalAmount' => $request->totalAmount ?? 0,
                 'lossProfit' => array_sum($lossProfit) - ($request->discountAmount ?? 0),
+                'paymentType' => $request->paymentType,
+                'saleDate' => $request->saleDate,
                 'meta' => [
                     'notes' => $request->notes,
                     'customer_phone' => $request->customer_phone,
@@ -381,7 +400,14 @@ class ZSystSaleController extends Controller
             $productIds = collect($request->products)->pluck('product_id')->filter()->unique()->values()->all();
             $allProductIds = collect([...$productIds, $prevDetails->pluck('product_id')->all()])->filter()->unique()->values()->all();
             $businessStocks = $this->loadBusinessStocks($business_id, $allProductIds);
-            $products = Product::select('id', 'productName')->whereIn('id', $productIds)->get();
+            $products = Product::select('id', 'productName')
+                ->where('business_id', $business_id)
+                ->whereIn('id', $productIds)
+                ->get();
+
+            if ($products->count() !== count($productIds)) {
+                abort(403, 'One or more products do not belong to the current tenant.');
+            }
 
             foreach ($products as $key => $product) {
                 $prevProduct = $prevDetails->first(function ($item) use ($product) {
@@ -452,13 +478,13 @@ class ZSystSaleController extends Controller
 
             // Update financial and business logic
             if ($sale->dueAmount || $request->dueAmount) {
-                $party = Party::findOrFail($request->party_id);
+                $party = Party::where('business_id', $business_id)->findOrFail($request->party_id);
                 $party->update([
                     'due' => $request->party_id == $sale->party_id ? (($party->due - $sale->dueAmount) + $request->dueAmount) : ($party->due + $request->dueAmount),
                 ]);
 
                 if ($request->party_id != $sale->party_id) {
-                    $prevParty = Party::findOrFail($sale->party_id);
+                    $prevParty = Party::where('business_id', $business_id)->findOrFail($sale->party_id);
                     $prevParty->update([
                         'due' => $prevParty->due - $sale->dueAmount,
                     ]);
@@ -472,10 +498,19 @@ class ZSystSaleController extends Controller
 
             $lossProfit = collect($request->products)->pluck('lossProfit')->toArray();
 
-            $sale->update($request->all() + [
+            $sale->update([
                 'user_id' => auth()->id(),
-                'business_id' => $business_id,
+                'party_id' => $request->party_id,
+                'tax_id' => $request->tax_id,
+                'discountAmount' => $request->discountAmount ?? 0,
+                'dueAmount' => $request->dueAmount ?? 0,
+                'isPaid' => $request->isPaid ?? false,
+                'tax_amount' => $request->tax_amount ?? 0,
+                'paidAmount' => $request->paidAmount ?? 0,
+                'totalAmount' => $request->totalAmount ?? 0,
                 'lossProfit' => array_sum($lossProfit) - ($request->discountAmount ?? 0),
+                'paymentType' => $request->paymentType,
+                'saleDate' => $request->saleDate,
                 'meta' => [
                     'notes' => $request->notes,
                     'customer_phone' => $request->customer_phone,
@@ -523,7 +558,7 @@ class ZSystSaleController extends Controller
             }
 
             if ($sale->dueAmount) {
-                $party = Party::findOrFail($sale->party_id);
+                $party = Party::where('business_id', $business_id)->findOrFail($sale->party_id);
                 $party->update([
                     'due' => $party->due - $sale->dueAmount,
                 ]);
