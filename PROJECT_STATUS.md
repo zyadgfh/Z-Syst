@@ -22,7 +22,7 @@ Last reviewed: 2026-09-26
 - Route-bound Eloquent models with a `business_id` are checked against the authenticated tenant.
 - `User::business_id` is no longer mass assignable.
 - Regression tests cover tenant selection, cross-tenant route-model access, same-tenant access, superadmin access, and user mass-assignment protection.
-- CI now validates Laravel route bindings before running migrations/tests.
+- CI now validates Laravel route bindings, dependency compatibility, code style, dependency audit, Laravel tests, Flutter analysis, and Flutter tests.
 
 ## Functional domains declared by the current API
 
@@ -58,12 +58,18 @@ A route declaration is not considered feature verification. The CI route-list ga
 
 The implementation follows the repository's Z-Syst pharmacy skill, Clean Code/DDD rules, UI/UX Pro Max guidance where UI changes apply, and the project's security/vulnerability scanning workflow. Changes use minimum-footprint refactors, service-layer business logic, database-first verification, regression tests, and explicit release gates.
 
+## Verification status — 2026-09-26
+
+- Latest Secret Scan: the last completed run passed.
+- The first consolidated CI run exposed environment/dependency mismatches before tests: PHP 8.2 was incompatible with locked `maennchen/zipstream-php 3.2.2`, Flutter 3.24.3 was below the locked SDK floor of 3.27.0, and `composer validate --strict` treated existing version-constraint warnings as errors.
+- CI was corrected to PHP 8.3, Flutter 3.27.0, and non-strict Composer validation. The orphaned `.agents/skills/skills` gitlink was also removed from the hardening branch. A fresh CI cycle is now the verification gate.
+
 ## Remaining release gates
 
 ### P0 — must pass before production
 
-1. Laravel route-list validation.
-2. Full PHPUnit suite.
+1. Green Laravel CI run including route-list validation and full PHPUnit suite.
+2. Green Flutter analysis/test run.
 3. Tenant isolation tests across representative resources.
 4. Authorization tests for every state-changing endpoint.
 5. Financial transaction invariants for sales, payments, returns and refunds.
