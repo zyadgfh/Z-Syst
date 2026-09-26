@@ -38,6 +38,16 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    /**
+     * Assign a tenant explicitly without allowing business_id mass assignment.
+     */
+    public function assignToBusiness(int $businessId): static
+    {
+        $this->forceFill(['business_id' => $businessId])->save();
+
+        return $this;
+    }
+
     public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
