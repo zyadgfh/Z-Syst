@@ -23,7 +23,20 @@ class WarehouseService
                     ->update(['is_default' => false]);
             }
 
-            $data['code'] = $this->generateUniqueWarehouseCode($data['business_id']);
+            $businessId = (int) ($data['business_id'] ?? (app()->bound('tenant_id') ? app('tenant_id') : 0));
+            if ($businessId <= 0) {
+                throw new \InvalidArgumentException('Business context is required.');
+            }
+
+            $data = [
+                'business_id' => $businessId,
+                'name' => $data['name'],
+                'location' => $data['location'] ?? null,
+                'is_default' => $data['is_default'] ?? false,
+                'is_active' => $data['is_active'] ?? true,
+            ];
+
+            $data['code'] = $this->generateUniqueWarehouseCode($businessId);
             return Warehouse::create($data);
         });
     }
@@ -41,7 +54,12 @@ class WarehouseService
                     ->update(['is_default' => false]);
             }
 
-            $warehouse->update($data);
+            $warehouse->update([
+                'name' => $data['name'] ?? $warehouse->name,
+                'location' => $data['location'] ?? $warehouse->location,
+                'is_default' => $data['is_default'] ?? $warehouse->is_default,
+                'is_active' => $data['is_active'] ?? $warehouse->is_active,
+            ]);
             return $warehouse->fresh();
         });
     }
