@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\User;
 use App\Services\AuditService;
 use Illuminate\Http\Request;
 
@@ -23,7 +24,9 @@ class AuditLogController extends Controller
      */
     public function index(Request $request)
     {
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = (auth()->user()->role === 'superadmin' && $request->filled('business_id'))
+            ? (int) $request->business_id
+            : (int) auth()->user()->business_id;
         
         $filters = [
             'action' => $request->action,
@@ -76,7 +79,28 @@ class AuditLogController extends Controller
             'model_id' => 'required|integer',
         ]);
 
-        $model = app($request->model_type)->findOrFail($request->model_id);
+        $allowedModels = [
+            \App\Models\Product::class,
+            \App\Models\Sale::class,
+            \App\Models\Purchase::class,
+            \App\Models\Party::class,
+            \App\Models\Stock::class,
+            \App\Models\SupplierInvoice::class,
+            \App\Models\Prescription::class,
+        ];
+
+        abort_unless(
+            in_array($request->model_type, $allowedModels, true),
+            422,
+            'Unsupported audit model.'
+        );
+
+        $modelQuery = $request->model_type::query();
+        if (auth()->user()->role !== 'superadmin') {
+            $modelQuery->where('business_id', (int) auth()->user()->business_id);
+        }
+
+        $model = $modelQuery->findOrFail($request->model_id);
         $logs = $this->auditService->getLogsForModel($model);
 
         return response()->json($logs);
@@ -91,7 +115,14 @@ class AuditLogController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        $limit = $request->limit ?? 100;
+        $limit = min((int) ($request->limit ?? 100), 500);
+        $user = User::query()->findOrFail($request->user_id);
+
+        if (auth()->user()->role !== 'superadmin'
+            && (int) $user->business_id !== (int) auth()->user()->business_id) {
+            abort(403);
+        }
+
         $logs = $this->auditService->getLogsForUser($request->user_id, $limit);
 
         return response()->json($logs);
