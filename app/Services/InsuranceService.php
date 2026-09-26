@@ -107,23 +107,21 @@ class InsuranceService
      */
     public function processClaim(InsuranceClaim $claim, array $data): InsuranceClaim
     {
-        return DB::transaction(function () use ($claim, $data) {
-            $claim->update([
-                'status' => $data['status'],
-                'approved_amount' => $data['approved_amount'] ?? 0,
-                'rejected_amount' => $data['rejected_amount'] ?? 0,
-                'rejection_reason' => $data['rejection_reason'] ?? null,
-                'external_reference' => $data['external_reference'] ?? null,
-            ]);
+        $status = $data['status'] ?? null;
 
-            // Update policy used amount based on approval
-            if ($claim->policy && $claim->isApproved()) {
-                $difference = $claim->approved_amount - $claim->covered_amount;
-                $claim->policy->increment('used_amount', $difference);
-            }
+        if (in_array($status, ['approved', 'partially_approved'], true)) {
+            return $this->recordApproval(
+                $claim,
+                (float) ($data['approved_amount'] ?? 0),
+                $data['external_reference'] ?? null
+            );
+        }
 
-            return $claim->fresh();
-        });
+        if ($status === 'rejected') {
+            return $this->rejectClaim($claim, (string) ($data['rejection_reason'] ?? 'Claim rejected.'));
+        }
+
+        throw new \DomainException('Unsupported claim processing status.');
     }
 
     /**
@@ -153,8 +151,15 @@ class InsuranceService
                 'external_reference' => $externalReference,
             ]);
 
-            if ($claim->policy && $approvedAmount > 0) {
-                $claim->policy()->lockForUpdate()->first()->increment('used_amount', $approvedAmount);
+            if ($claim->policy) {
+                $policy = $claim->policy()->lockForUpdate()->firstOrFail();
+                $difference = $approvedAmount - (float) $claim->covered_amount;
+
+                if ($difference >= 0) {
+                    $policy->increment('used_amount', $difference);
+                } else {
+                    $policy->decrement('used_amount', abs($difference));
+                }
             }
 
             return $claim->fresh();
@@ -179,6 +184,11 @@ class InsuranceService
                 'rejected_amount' => $claim->covered_amount,
                 'rejection_reason' => $reason,
             ]);
+
+            if ($claim->policy) {
+                $policy = $claim->policy()->lockForUpdate()->firstOrFail();
+                $policy->decrement('used_amount', min((float) $claim->covered_amount, (float) $policy->used_amount));
+            }
 
             return $claim->fresh();
         });
@@ -205,10 +215,12 @@ class InsuranceService
 
             $newPaid = $currentPaid + $paidAmount;
 
+            $fullyPaid = $newPaid >= $approved;
+
             $claim->update([
-                'status' => $newPaid >= $approved ? 'paid' : $claim->status,
+                'status' => $fullyPaid ? 'paid' : $claim->status,
                 'paid_amount' => $newPaid,
-                'settlement_date' => $settlementDate ?? now(),
+                'settlement_date' => $fullyPaid ? ($settlementDate ?? now()) : $claim->settlement_date,
             ]);
 
             return $claim->fresh();
@@ -220,15 +232,7 @@ class InsuranceService
      */
     public function processPayment(InsuranceClaim $claim, float $amount): InsuranceClaim
     {
-        return DB::transaction(function () use ($claim, $amount) {
-            $claim->update([
-                'status' => 'paid',
-                'paid_amount' => $claim->paid_amount + $amount,
-                'settlement_date' => now(),
-            ]);
-
-            return $claim->fresh();
-        });
+        return $this->recordPayment($claim, $amount);
     }
 
     /**
