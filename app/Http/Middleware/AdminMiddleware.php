@@ -16,11 +16,12 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && (Auth::user()->role != 'shop-owner' && Auth::user()->role != 'staff')) {
+        $user = Auth::user();
+
+        if ($user && in_array($user->role, ['admin', 'superadmin'], true)) {
             return $next($request);
         }
 
-        // Redirect if the user is not an admin
         return redirect('/');
     }
 }
