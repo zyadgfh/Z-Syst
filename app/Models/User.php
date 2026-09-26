@@ -27,21 +27,6 @@ class User extends Authenticatable
         'email_verified_at',
     ];
 
-    protected static function booted()
-    {
-        static::addGlobalScope('tenant', function ($query) {
-            $user = request()->user();
-
-            if (
-                $user &&
-                $user->role !== 'superadmin' &&
-                !request()->is('admin/*')
-            ) {
-                $query->where('business_id', $user->business_id);
-            }
-        });
-    }
-
     protected $hidden = [
         'password',
         'remember_token',
