@@ -153,6 +153,10 @@ class InsuranceService
                 'external_reference' => $externalReference,
             ]);
 
+            if ($claim->policy && $approvedAmount > 0) {
+                $claim->policy()->lockForUpdate()->first()->increment('used_amount', $approvedAmount);
+            }
+
             return $claim->fresh();
         });
     }
