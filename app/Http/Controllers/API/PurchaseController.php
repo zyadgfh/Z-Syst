@@ -382,6 +382,7 @@ class PurchaseController extends Controller
     public function destroy(Purchase $purchase)
     {
         TransactionHelper::run(function () use ($purchase) {
+            $business_id = (int) auth()->user()->business_id;
             $purchase_details = PurchaseDetails::where('purchase_id', $purchase->id)->get();
             $prev_stocks = Stock::where('business_id', $business_id)
                 ->whereIn('batch_no', $purchase_details->pluck('batch_no'))
@@ -410,7 +411,7 @@ class PurchaseController extends Controller
                 ]);
             }
 
-            $business = Business::findOrFail(auth()->user()->business_id);
+            $business = Business::findOrFail($business_id);
             $business->update([
                 'remainingShopBalance' => $business->remainingShopBalance + $purchase->paidAmount,
             ]);
