@@ -2,40 +2,80 @@ name: CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, develop ]
+
+permissions:
+  contents: read
 
 jobs:
   php:
+    name: Laravel quality and tests
     runs-on: ubuntu-latest
+    env:
+      APP_ENV: testing
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
+      CACHE_DRIVER: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.1
-          extensions: curl, bcmath, gd, zip, mbstring, xml, intl
-      - name: Validate composer
-        run: composer --version
+          php-version: '8.2'
+          extensions: curl, bcmath, gd, zip, mbstring, xml, intl, sqlite, pdo_sqlite
+          coverage: none
+
+      - name: Validate composer files
+        run: composer validate --strict
+
       - name: Install Composer dependencies
-        run: composer install --no-interaction --no-progress --prefer-dist
-      - name: Run PHP Unit tests
-        run: vendor/bin/phpunit --colors=always
+        run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Generate application key
+        run: php artisan key:generate --ansi
+
+      - name: Check code style
+        run: vendor/bin/pint --test
+
+      - name: Run composer security audit
+        run: composer audit --locked --no-interaction
+
+      - name: Validate routes
+        run: php artisan route:list --no-ansi
+
+      - name: Run migrations
+        run: php artisan migrate --no-interaction --force
+
+      - name: Run PHPUnit
+        run: php artisan test --colors=never --no-interaction
 
   flutter:
+    name: Flutter tests and analysis
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pharmacy-store-app-codecanyon-main
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'
+          flutter-version: '3.24.3'
+          channel: stable
+          cache: true
+
       - name: Install Flutter dependencies
-        run: |
-          cd pharmacy-store-app-codecanyon-main
-          flutter pub get
+        run: flutter pub get
+
+      - name: Analyze Flutter code
+        run: flutter analyze
+
       - name: Run Flutter tests
-        run: |
-          cd pharmacy-store-app-codecanyon-main
-          flutter test --coverage
+        run: flutter test --coverage
