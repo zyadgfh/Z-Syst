@@ -8,6 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // This migration supersedes an earlier audit_logs table definition.
+        // The follow-up migration expands the existing table on fresh databases.
+        if (Schema::hasTable('audit_logs')) {
+            return;
+        }
+
         Schema::create('audit_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('business_id')->nullable()->constrained()->nullOnDelete();

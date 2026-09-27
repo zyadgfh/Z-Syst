@@ -61,10 +61,10 @@ class BarcodeController extends Controller
         $validated = $request->validated();
 
         if ($request->has('batch_id')) {
-            $batch = Stock::findOrFail($validated['batch_id']);
+            $batch = Stock::where('business_id', (int) $request->user()->business_id)->findOrFail($validated['batch_id']);
             $barcode = $this->barcodeService->generateForBatch($batch, $validated);
         } else {
-            $product = Product::findOrFail($validated['product_id']);
+            $product = Product::where('business_id', (int) $request->user()->business_id)->findOrFail($validated['product_id']);
             $barcode = $this->barcodeService->generateForProduct($product, $validated);
         }
 
@@ -129,7 +129,7 @@ class BarcodeController extends Controller
             'size' => 'nullable|in:small,standard,large',
         ]);
 
-        $product = Product::findOrFail($request->product_id);
+        $product = Product::where('business_id', (int) $request->user()->business_id)->findOrFail($request->product_id);
         $barcodes = $this->barcodeService->generateMultipleForProduct(
             $product,
             $request->quantity,
@@ -155,7 +155,7 @@ class BarcodeController extends Controller
             'size' => 'nullable|in:small,standard,large',
         ]);
 
-        $batch = Stock::findOrFail($request->batch_id);
+        $batch = Stock::where('business_id', (int) $request->user()->business_id)->findOrFail($request->batch_id);
         $barcodes = $this->barcodeService->generateMultipleForBatch(
             $batch,
             $request->quantity,
@@ -193,11 +193,20 @@ class BarcodeController extends Controller
     {
         $request->validate([
             'barcode_ids' => 'required|array',
-            'barcode_ids.*' => 'exists:barcodes,id',
+            'barcode_ids.*' => 'integer|exists:barcodes,id',
         ]);
 
+        $barcodeIds = Barcode::where('business_id', (int) $request->user()->business_id)
+            ->whereIn('id', $request->barcode_ids)
+            ->pluck('id')
+            ->all();
+
+        if (count($barcodeIds) !== count(array_unique($request->barcode_ids))) {
+            abort(403, 'One or more barcodes do not belong to the current tenant.');
+        }
+
         $pdfPath = $this->barcodeService->printMultipleBarcodes(
-            $request->barcode_ids,
+            $barcodeIds,
             $request->user()->id
         );
 
@@ -287,16 +296,23 @@ class BarcodeController extends Controller
      */
     public function download(Request $request, string $filename)
     {
-        $path = storage_path('app/public/' . $filename);
-        
-        if (!file_exists($path)) {
+        $safeFilename = ltrim(str_replace('\\', '/', $filename), '/');
+        if ($safeFilename !== $filename || str_contains($safeFilename, '..')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid filename',
+            ], 400);
+        }
+
+        $disk = Storage::disk('public');
+        if (!$disk->exists($safeFilename)) {
             return response()->json([
                 'success' => false,
                 'message' => 'File not found',
             ], 404);
         }
 
-        return response()->download($path);
+        return response()->download($disk->path($safeFilename));
     }
 
     /**

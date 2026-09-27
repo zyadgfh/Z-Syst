@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\MedicineType;
+use App\Models\BoxSize;
 use Illuminate\Http\Request;
 
-class ZSystMedicineTypeController extends Controller
+class ZSystBoxSizeController extends Controller
 {
     public function index()
     {
-        $data = MedicineType::where('business_id', auth()->user()->business_id)->latest()->get();
+        $data = BoxSize::where('business_id', auth()->user()->business_id)->latest()->get();
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -21,11 +21,12 @@ class ZSystMedicineTypeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|unique:medicine_types,name,NULL,id,business_id,'.auth()->user()->business_id,
+            'name' => 'required|unique:box_sizes,name,NULL,id,business_id,'.auth()->user()->business_id,
         ]);
 
-        $data = MedicineType::create($request->all() + [
+        $data = BoxSize::create([
             'business_id' => auth()->user()->business_id,
+            'name' => $request->name,
         ]);
 
         return response()->json([
@@ -34,26 +35,30 @@ class ZSystMedicineTypeController extends Controller
         ]);
     }
 
-    public function update(Request $request, MedicineType $medicineType)
+    public function update(Request $request, BoxSize $boxSize)
     {
         $request->validate([
             'name' => [
                 'required',
-                'unique:medicine_types,name,'.$medicineType->id.',id,business_id,'.auth()->user()->business_id,
+                'unique:box_sizes,name,'.$boxSize->id.',id,business_id,'.auth()->user()->business_id,
             ],
         ]);
 
-        $medicineType = $medicineType->update($request->all());
+        $boxSize->update([
+            'name' => $request->name,
+        ]);
+
+        $boxSize = $boxSize->fresh();
 
         return response()->json([
             'message' => __('Data saved successfully.'),
-            'data' => $medicineType,
+            'data' => $boxSize,
         ]);
     }
 
-    public function destroy(MedicineType $medicineType)
+    public function destroy(BoxSize $boxSize)
     {
-        $medicineType->delete();
+        $boxSize->delete();
 
         return response()->json([
             'message' => __('Data deleted successfully.'),

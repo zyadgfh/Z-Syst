@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_pos/Screens/Fefo/repo/fefo_repo.dart';
 import 'package:mobile_pos/Screens/Fefo/model/fefo_model.dart';
-import 'package:mobile_pos/Provider/language_provider.dart';
+import 'package:mobile_pos/Screens/language/language_provider.dart';
 import 'package:provider/provider.dart';
 
 class FefoSettingsScreen extends StatefulWidget {

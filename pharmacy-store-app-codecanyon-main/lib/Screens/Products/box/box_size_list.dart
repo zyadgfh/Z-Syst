@@ -32,7 +32,7 @@ class _BoxListState extends State<BoxList> {
 
   @override
   Widget build(BuildContext context) {
-    final lang = lang.S.of(context);
+    final l10n = l10n.S.of(context);
     final theme = Theme.of(context);
     return AcnooScafoldWidget(
       appBar: AppBar(

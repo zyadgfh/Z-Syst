@@ -43,25 +43,30 @@ class PurchaseReturnController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'purchase_id' => 'required|exists:purchases,id',
-            'return_date' => 'required',
-            'purchase_detail_id' => 'required|array',
-            'return_amount' => 'required|array',
-            'return_qty' => 'required|array',
+            'purchase_id' => 'required|integer|exists:purchases,id',
+            'return_date' => 'required|date',
+            'purchase_detail_id' => 'required|array|min:1',
+            'purchase_detail_id.*' => 'integer|exists:purchase_details,id',
+            'return_amount' => 'required|array|min:1',
+            'return_amount.*' => 'required|numeric|min:0',
+            'return_qty' => 'required|array|min:1',
+            'return_qty.*' => 'required|integer|min:1',
         ]);
 
         $purchase_return = TransactionHelper::run(function () use ($request) {
             $business_id = auth()->user()->business_id;
 
             // Create Purchase Return record
-            $purchase_return = PurchaseReturn::create($request->all() + [
+            $purchase_return = PurchaseReturn::create([
                 'business_id' => $business_id,
+                'purchase_id' => $request->purchase_id,
+                'return_date' => $request->return_date,
             ]);
 
-            $purchase = Purchase::findOrFail($request->purchase_id);
+            $purchase = Purchase::where('business_id', $business_id)->findOrFail($request->purchase_id);
             $purchase_data = $purchase->purchase_data ?? $purchase->load('details.product:id,productName');
 
-            $party = Party::find($purchase->party_id);
+            $party = Party::where('business_id', $business_id)->find($purchase->party_id);
             $total_return_amount = array_sum($request->return_amount);
 
             if ($party) {
@@ -81,10 +86,23 @@ class PurchaseReturnController extends Controller
 
             $data = [];
             foreach ($request->purchase_detail_id as $key => $detail_id) {
-                $purchase_detail = PurchaseDetails::findOrFail($detail_id);
+                $purchase_detail = PurchaseDetails::where('purchase_id', $purchase->id)->findOrFail($detail_id);
+
+                if ($request->return_qty[$key] > $purchase_detail->quantities) {
+                    throw new BusinessRuleException(
+                        ErrorCode::BUSINESS_BATCH_QUANTITY_MISMATCH,
+                        __('Return quantity exceeds the purchased quantity.'),
+                        [
+                            'purchase_detail_id' => $detail_id,
+                            'purchased_qty' => $purchase_detail->quantities,
+                            'return_qty' => $request->return_qty[$key],
+                        ]
+                    );
+                }
 
                 // Update stock for the specific batch
-                $batch = Stock::where('product_id', $purchase_detail->product_id)
+                $batch = Stock::where('business_id', $business_id)
+                    ->where('product_id', $purchase_detail->product_id)
                     ->when($purchase_detail->batch_no ?? false, function ($query) use ($purchase_detail) {
                         return $query->where('batch_no', $purchase_detail->batch_no);
                     })
@@ -130,11 +148,12 @@ class PurchaseReturnController extends Controller
 
     public function show($id)
     {
-        $data = PurchaseReturn::with(
-            'purchase:id,party_id,isPaid,totalAmount,dueAmount,paidAmount,invoiceNumber',
-            'purchase.party:id,name',
-            'details'
-        )
+        $data = PurchaseReturn::where('business_id', (int) auth()->user()->business_id)
+            ->with(
+                'purchase:id,party_id,isPaid,totalAmount,dueAmount,paidAmount,invoiceNumber',
+                'purchase.party:id,name',
+                'details'
+            )
             ->findOrFail($id);
 
         return response()->json([

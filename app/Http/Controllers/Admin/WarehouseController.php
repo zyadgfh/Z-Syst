@@ -42,7 +42,7 @@ class WarehouseController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'business_id' => 'required|exists:businesses,id',
+            'business_id' => 'nullable|integer|exists:businesses,id',
             'name' => 'required|string|max:255',
             'location' => 'nullable|string|max:255',
             'is_default' => 'boolean',
@@ -50,7 +50,15 @@ class WarehouseController extends Controller
         ]);
 
         try {
-            $warehouse = $this->warehouseService->createWarehouse($request->all());
+            $warehouse = $this->warehouseService->createWarehouse([
+                'business_id' => auth()->user()->role === 'superadmin'
+                    ? $request->business_id
+                    : auth()->user()->business_id,
+                'name' => $request->name,
+                'location' => $request->location,
+                'is_default' => $request->boolean('is_default'),
+                'is_active' => $request->boolean('is_active'),
+            ]);
 
             return response()->json([
                 'message' => __('Warehouse created successfully'),
@@ -86,7 +94,12 @@ class WarehouseController extends Controller
         ]);
 
         try {
-            $warehouse = $this->warehouseService->updateWarehouse($warehouse, $request->all());
+            $warehouse = $this->warehouseService->updateWarehouse($warehouse, [
+                'name' => $request->name,
+                'location' => $request->location,
+                'is_default' => $request->boolean('is_default'),
+                'is_active' => $request->boolean('is_active'),
+            ]);
 
             return response()->json([
                 'message' => __('Warehouse updated successfully'),
@@ -195,7 +208,9 @@ class WarehouseController extends Controller
      */
     public function statistics(Request $request)
     {
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = auth()->user()->role === 'superadmin' && $request->filled('business_id')
+            ? (int) $request->business_id
+            : (int) auth()->user()->business_id;
         $warehouseId = $request->warehouse_id ?? null;
 
         $statistics = $this->warehouseService->getWarehouseStatistics($businessId, $warehouseId);

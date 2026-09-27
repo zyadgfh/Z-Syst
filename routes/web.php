@@ -41,31 +41,15 @@ Route::group([
 // Payment success/failed routes
 Route::get('/payment/success', [Web\PaymentController::class, 'success'])->name('payment.success');
 Route::get('/payment/failed', [Web\PaymentController::class, 'failed'])->name('payment.failed');
-Route::get('/cache-clear', function () {
+Route::middleware('auth')->get('/cache-clear', function () {
+    abort_unless(auth()->user()?->role === 'superadmin', 403);
+
     Artisan::call('cache:clear');
     Artisan::call('config:clear');
     Artisan::call('route:clear');
     Artisan::call('view:clear');
 
     return back()->with('success', __('Cache has been cleared.'));
-});
-
-Route::get('/update', function () {
-    if (file_exists(base_path('storage/installed'))) {
-        touch(base_path('vendor/autoload1.php'));
-    }
-
-    Artisan::call('module:publish Landing');
-    Artisan::call('module:migrate Landing');
-    Artisan::call('module:seed Landing');
-
-    Artisan::call('migrate');
-    Artisan::call('cache:clear');
-    Artisan::call('config:clear');
-    Artisan::call('route:clear');
-    Artisan::call('view:clear');
-
-    return redirect('/')->with('message', __('System updated successfully.'));
 });
 
 require __DIR__.'/auth.php';

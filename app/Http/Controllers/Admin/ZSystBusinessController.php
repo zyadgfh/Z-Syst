@@ -106,7 +106,6 @@ class ZSystBusinessController extends Controller
             ]);
 
             User::create([
-                'business_id' => $business->id,
                 'name' => $request->companyName,
                 'email' => $request->email,
                 'phone' => $request->phoneNumber,
@@ -114,7 +113,7 @@ class ZSystBusinessController extends Controller
                 'password' => Hash::make($request->password),
                 'user_id' => $user->id,
                 'lang' => 'en',
-            ]);
+            ])->assignToBusiness($business->id);
 
             if ($request->plan_subscribe_id) {
                 $plan = Plan::findOrFail($request->plan_subscribe_id);

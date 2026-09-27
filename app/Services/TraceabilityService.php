@@ -16,7 +16,25 @@ class TraceabilityService
      */
     public function createBatchLot(array $data): BatchLot
     {
-        return BatchLot::create($data);
+        $businessId = (int) ($data['business_id'] ?? (app()->bound('tenant_id') ? app('tenant_id') : 0));
+        if ($businessId <= 0) {
+            throw new \InvalidArgumentException('Business context is required.');
+        }
+
+        if (isset($data['product_id'])) {
+            \App\Models\Product::where('business_id', $businessId)->findOrFail($data['product_id']);
+        }
+
+        return BatchLot::create([
+            'business_id' => $businessId,
+            'product_id' => $data['product_id'] ?? null,
+            'batch_number' => $data['batch_number'] ?? null,
+            'lot_number' => $data['lot_number'] ?? null,
+            'manufacture_date' => $data['manufacture_date'] ?? null,
+            'expiry_date' => $data['expiry_date'] ?? null,
+            'supplier_name' => $data['supplier_name'] ?? null,
+            'notes' => $data['notes'] ?? null,
+        ]);
     }
 
     /**
@@ -24,7 +42,20 @@ class TraceabilityService
      */
     public function updateBatchLot(BatchLot $batchLot, array $data): BatchLot
     {
-        $batchLot->update($data);
+        if (isset($data['product_id'])) {
+            \App\Models\Product::where('business_id', $batchLot->business_id)->findOrFail($data['product_id']);
+        }
+
+        $batchLot->update([
+            'product_id' => $data['product_id'] ?? $batchLot->product_id,
+            'batch_number' => $data['batch_number'] ?? $batchLot->batch_number,
+            'lot_number' => $data['lot_number'] ?? $batchLot->lot_number,
+            'manufacture_date' => $data['manufacture_date'] ?? $batchLot->manufacture_date,
+            'expiry_date' => $data['expiry_date'] ?? $batchLot->expiry_date,
+            'supplier_name' => $data['supplier_name'] ?? $batchLot->supplier_name,
+            'notes' => $data['notes'] ?? $batchLot->notes,
+        ]);
+
         return $batchLot->fresh();
     }
 
@@ -70,7 +101,34 @@ class TraceabilityService
      */
     public function logTraceability(array $data): TraceabilityLog
     {
-        return TraceabilityLog::create($data);
+        $businessId = (int) ($data['business_id'] ?? (app()->bound('tenant_id') ? app('tenant_id') : 0));
+        if ($businessId <= 0) {
+            throw new \InvalidArgumentException('Business context is required.');
+        }
+
+        if (isset($data['product_id'])) {
+            \App\Models\Product::where('business_id', $businessId)->findOrFail($data['product_id']);
+        }
+
+        foreach (['from_warehouse_id', 'to_warehouse_id'] as $field) {
+            if (isset($data[$field])) {
+                Warehouse::forBusiness($businessId)->findOrFail($data[$field]);
+            }
+        }
+
+        return TraceabilityLog::create([
+            'business_id' => $businessId,
+            'product_id' => $data['product_id'] ?? null,
+            'type' => $data['type'],
+            'batch_lot_number' => $data['batch_lot_number'] ?? null,
+            'quantity' => $data['quantity'] ?? 0,
+            'from_warehouse_id' => $data['from_warehouse_id'] ?? null,
+            'to_warehouse_id' => $data['to_warehouse_id'] ?? null,
+            'user_id' => auth()->id(),
+            'notes' => $data['notes'] ?? null,
+            'reference_type' => $data['reference_type'] ?? null,
+            'reference_id' => $data['reference_id'] ?? null,
+        ]);
     }
 
     /**

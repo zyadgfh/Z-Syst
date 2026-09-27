@@ -39,24 +39,29 @@ class SaleReturnController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'sale_id' => 'required|exists:sales,id',
-            'return_date' => 'required',
-            'sale_detail_id' => 'required|array',
-            'return_amount' => 'required|array',
-            'return_qty' => 'required|array',
+            'sale_id' => 'required|integer|exists:sales,id',
+            'return_date' => 'required|date',
+            'sale_detail_id' => 'required|array|min:1',
+            'sale_detail_id.*' => 'integer|exists:sale_details,id',
+            'return_amount' => 'required|array|min:1',
+            'return_amount.*' => 'required|numeric|min:0',
+            'return_qty' => 'required|array|min:1',
+            'return_qty.*' => 'required|integer|min:1',
         ]);
 
         $sale_return = TransactionHelper::run(function () use ($request) {
             $business_id = auth()->user()->business_id;
 
-            $sale_return = SaleReturn::create($request->all() + [
+            $sale_return = SaleReturn::create([
                 'business_id' => $business_id,
+                'sale_id' => $request->sale_id,
+                'return_date' => $request->return_date,
             ]);
 
-            $sale = Sale::findOrFail($request->sale_id);
+            $sale = Sale::where('business_id', $business_id)->findOrFail($request->sale_id);
             $prev_sale_data = $sale->sale_data ?? $sale->load('details.product:id,productName');
 
-            $party = Party::find($sale->party_id);
+            $party = Party::where('business_id', $business_id)->find($sale->party_id);
             $total_return_amount = array_sum($request->return_amount);
 
             if ($party) {
@@ -77,10 +82,23 @@ class SaleReturnController extends Controller
 
             $data = [];
             foreach ($request->sale_detail_id as $key => $detail_id) {
-                $sale_detail = SaleDetails::findOrFail($detail_id);
+                $sale_detail = SaleDetails::where('sale_id', $sale->id)->findOrFail($detail_id);
+
+                if ($request->return_qty[$key] > $sale_detail->quantities) {
+                    throw new BusinessRuleException(
+                        ErrorCode::BUSINESS_BATCH_QUANTITY_MISMATCH,
+                        __('Return quantity exceeds the sold quantity.'),
+                        [
+                            'sale_detail_id' => $detail_id,
+                            'sold_qty' => $sale_detail->quantities,
+                            'return_qty' => $request->return_qty[$key],
+                        ]
+                    );
+                }
 
                 // Update stock for the specific batch
-                $batch = Stock::where('product_id', $sale_detail->product_id)
+                $batch = Stock::where('business_id', $business_id)
+                    ->where('product_id', $sale_detail->product_id)
                     ->when($sale_detail->batch_no ?? false, function ($query) use ($sale_detail) {
                         return $query->where('batch_no', $sale_detail->batch_no);
                     })
@@ -127,11 +145,13 @@ class SaleReturnController extends Controller
 
     public function show($id)
     {
-        $data = SaleReturn::with(
-            'sale:id,party_id,isPaid,totalAmount,dueAmount,paidAmount,invoiceNumber',
-            'sale.party:id,name',
-            'details'
-        )->findOrFail($id);
+        $data = SaleReturn::where('business_id', (int) auth()->user()->business_id)
+            ->with(
+                'sale:id,party_id,isPaid,totalAmount,dueAmount,paidAmount,invoiceNumber',
+                'sale.party:id,name',
+                'details'
+            )
+            ->findOrFail($id);
 
         return response()->json([
             'message' => __('Data fetched successfully.'),

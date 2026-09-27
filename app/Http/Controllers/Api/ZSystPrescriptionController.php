@@ -57,7 +57,7 @@ class ZSystPrescriptionController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'party_id' => 'nullable|exists:parties,id',
+            'party_id' => 'nullable|integer|exists:parties,id',
             'notes' => 'nullable|string|max:1000',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
             'prescription_number' => 'nullable|string|max:50',
@@ -73,6 +73,11 @@ class ZSystPrescriptionController extends Controller
         ]);
 
         $prescription = TransactionHelper::run(function () use ($request) {
+            if ($request->party_id) {
+                \App\Models\Party::where('business_id', (int) Auth::user()->business_id)
+                    ->findOrFail($request->party_id);
+            }
+
             $prescription = Prescription::create([
                 'business_id' => Auth::user()?->business_id,
                 'party_id' => $request->party_id,
@@ -147,7 +152,7 @@ class ZSystPrescriptionController extends Controller
         ]);
 
         $prescription = TransactionHelper::run(function () use ($request, $id) {
-            $prescription = Prescription::findOrFail($id);
+            $prescription = Prescription::where('business_id', (int) Auth::user()->business_id)->findOrFail($id);
             $reviewStatus = $request->review_status ?? $prescription->review_status ?? 'pending';
             $meta = (array) ($prescription->meta ?? []);
 
@@ -197,7 +202,7 @@ class ZSystPrescriptionController extends Controller
      */
     public function destroy($id)
     {
-        $prescription = Prescription::findOrFail($id);
+        $prescription = Prescription::where('business_id', (int) Auth::user()->business_id)->findOrFail($id);
 
         if (file_exists($prescription->image)) {
             Storage::delete($prescription->image);
@@ -239,14 +244,16 @@ class ZSystPrescriptionController extends Controller
     public function linkToSale(Request $request)
     {
         $request->validate([
-            'prescription_id' => 'required|exists:prescriptions,id',
-            'sale_id' => 'required|exists:sales,id',
+            'prescription_id' => 'required|integer|exists:prescriptions,id',
+            'sale_id' => 'required|integer|exists:sales,id',
             'batch_no' => 'nullable|string|max:100',
             'expiry_date' => 'nullable|date',
         ]);
 
         $prescription = TransactionHelper::run(function () use ($request) {
-            $prescription = Prescription::findOrFail($request->prescription_id);
+            $businessId = (int) Auth::user()->business_id;
+            $prescription = Prescription::where('business_id', $businessId)->findOrFail($request->prescription_id);
+            $sale = Sale::where('business_id', $businessId)->findOrFail($request->sale_id);
 
             if (! $prescription->canBeUsed()) {
                 throw ValidationException::withMessages([
@@ -263,7 +270,7 @@ class ZSystPrescriptionController extends Controller
             }
 
             $prescription->update([
-                'sale_id' => $request->sale_id,
+                'sale_id' => $sale->id,
                 'status' => 'used',
                 'used_at' => now(),
                 'meta' => $meta,

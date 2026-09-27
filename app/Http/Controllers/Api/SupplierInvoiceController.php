@@ -174,7 +174,8 @@ class SupplierInvoiceController extends Controller
      */
     public function approvePayment(Request $request, $paymentId): JsonResponse
     {
-        $payment = SupplierInvoicePayment::findOrFail($paymentId);
+        $payment = SupplierInvoicePayment::where('business_id', (int) $request->user()->business_id)
+            ->findOrFail($paymentId);
         $payment = $this->invoiceService->approvePayment($payment, $request->user()->id);
 
         return response()->json([
@@ -249,7 +250,8 @@ class SupplierInvoiceController extends Controller
             'purchase_id' => 'required|exists:purchases,id',
         ]);
 
-        $purchase = \App\Models\Purchase::findOrFail($request->purchase_id);
+        $purchase = \App\Models\Purchase::where('business_id', (int) $request->user()->business_id)
+            ->findOrFail($request->purchase_id);
         $invoice = $this->invoiceService->createFromPurchase($purchase);
 
         return response()->json([

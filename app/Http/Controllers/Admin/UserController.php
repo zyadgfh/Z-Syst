@@ -30,14 +30,21 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        $users = User::whereNotIn('role', ['superadmin', 'staff', 'shop-owner'])->latest()->paginate(10);
+        $businessId = $this->currentBusinessId();
+        $users = User::whereNotIn('role', ['superadmin', 'staff', 'shop-owner'])
+            ->when($businessId !== null, fn ($query) => $query->where('business_id', $businessId))
+            ->latest()
+            ->paginate(10);
 
         return view('admin.users.index', compact('users'));
     }
 
     public function zsystFilter(Request $request)
     {
-        $users = User::whereNotIn('role', ['superadmin', 'staff', 'shop-owner'])->when(request('search'), function ($q) {
+        $businessId = $this->currentBusinessId();
+        $users = User::whereNotIn('role', ['superadmin', 'staff', 'shop-owner'])
+            ->when($businessId !== null, fn ($query) => $query->where('business_id', $businessId))
+            ->when(request('search'), function ($q) {
             $q->where(function ($q) {
                 $q->where('name', 'like', '%'.request('search').'%')
                     ->orWhere('email', 'like', '%'.request('search').'%')
@@ -68,17 +75,31 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'role' => 'required|string',
+            'role' => 'required|string|not_in:superadmin',
             'phone' => 'nullable|string',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|confirmed',
             'image' => 'nullable|image',
+            'business_id' => 'nullable|integer|exists:businesses,id',
         ]);
 
-        $user = User::create($request->except('image', 'password') + [
+        $businessId = $this->currentBusinessId();
+        if ($businessId === null && $request->filled('business_id')) {
+            $businessId = (int) $request->business_id;
+        }
+
+        $user = User::create([
+            'name' => $request->name,
+            'role' => $request->role,
+            'phone' => $request->phone,
+            'email' => $request->email,
             'image' => $request->image ? $this->upload($request, 'image') : null,
             'password' => Hash::make($request->password),
         ]);
+
+        if ($businessId !== null) {
+            $user->assignToBusiness($businessId);
+        }
 
         $role = Role::where('name', $request->role)->first();
         $user->roles()->sync($role->id);
@@ -107,7 +128,7 @@ class UserController extends Controller
             return response()->json(__('You can not update a superadmin.'), 400);
         }
         $request->validate([
-            'role' => 'required|string',
+            'role' => 'required|string|not_in:superadmin',
             'phone' => 'nullable|string',
             'country' => 'nullable|string',
             'name' => 'required|string|max:255',
@@ -116,9 +137,14 @@ class UserController extends Controller
             'image' => 'nullable|image',
         ]);
 
-        $role = Role::where('name', $request->role)->first();
+        $role = Role::where('name', $request->role)->firstOrFail();
         $user->roles()->sync($role->id);
-        $user->update($request->except('image', 'password') + [
+        $user->update([
+            'name' => $request->name,
+            'role' => $request->role,
+            'phone' => $request->phone,
+            'country' => $request->country,
+            'email' => $request->email,
             'image' => $request->image ? $this->upload($request, 'image', $user->image) : $user->image,
             'password' => $request->password ? Hash::make($request->password) : $user->password,
         ]);
@@ -149,7 +175,15 @@ class UserController extends Controller
 
     public function deleteAll(Request $request)
     {
-        $deleted = $this->userManagementService->bulkDeleteUsers($request->ids);
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'integer|exists:users,id',
+        ]);
+
+        $deleted = $this->userManagementService->bulkDeleteUsers(
+            $request->ids,
+            $this->currentBusinessId()
+        );
 
         return response()->json([
             'message' => __('Selected Staff deleted successfully'),
@@ -168,7 +202,11 @@ class UserController extends Controller
             'status' => 'required|integer|in:0,1',
         ]);
 
-        $updated = $this->userManagementService->bulkChangeUserStatus($request->ids, $request->status);
+        $updated = $this->userManagementService->bulkChangeUserStatus(
+            $request->ids,
+            $request->status,
+            $this->currentBusinessId()
+        );
 
         return response()->json([
             'message' => __('User status updated successfully'),
@@ -181,10 +219,22 @@ class UserController extends Controller
      */
     public function statistics(Request $request)
     {
+        $businessId = $this->currentBusinessId();
+
+        $request->validate([
+            'business_id' => 'nullable|integer|exists:businesses,id',
+            'role' => 'nullable|string',
+            'status' => 'nullable|integer',
+        ]);
+
+        if ($businessId === null && $request->filled('business_id')) {
+            $businessId = (int) $request->business_id;
+        }
+
         $filters = [
             'role' => $request->role,
             'status' => $request->status,
-            'business_id' => $request->business_id,
+            'business_id' => $businessId,
         ];
 
         $statistics = $this->userManagementService->getUserStatistics($filters);
@@ -197,7 +247,7 @@ class UserController extends Controller
      */
     public function roleStatistics()
     {
-        $statistics = $this->userManagementService->getRoleStatistics();
+        $statistics = $this->userManagementService->getRoleStatistics($this->currentBusinessId());
 
         return response()->json($statistics);
     }
@@ -236,11 +286,21 @@ class UserController extends Controller
             'target_user_id' => 'required|exists:users,id',
         ]);
 
-        $sourceUser = User::findOrFail($request->source_user_id);
-        $targetUser = User::findOrFail($request->target_user_id);
+        $businessId = $this->currentBusinessId();
+
+        $sourceQuery = User::query();
+        $targetQuery = User::query();
+
+        if ($businessId !== null) {
+            $sourceQuery->where('business_id', $businessId);
+            $targetQuery->where('business_id', $businessId);
+        }
+
+        $sourceUser = $sourceQuery->findOrFail($request->source_user_id);
+        $targetUser = $targetQuery->findOrFail($request->target_user_id);
 
         try {
-            $user = $this->userManagementService->cloneUserPermissions($sourceUser, $targetUser);
+            $user = $this->userManagementService->cloneUserPermissions($sourceUser, $targetUser, $businessId);
 
             return response()->json([
                 'message' => __('Permissions cloned successfully'),
@@ -255,11 +315,26 @@ class UserController extends Controller
 
     public function exportExcel()
     {
-        return Excel::download(new UserExport, 'users.xlsx');
+        return Excel::download(new UserExport($this->currentBusinessId()), 'users.xlsx');
     }
 
     public function exportCsv()
     {
-        return Excel::download(new UserExport, 'users.csv');
+        return Excel::download(new UserExport($this->currentBusinessId()), 'users.csv');
+    }
+
+    private function currentBusinessId(): ?int
+    {
+        $user = auth()->user();
+
+        if ($user?->role === 'superadmin') {
+            return null;
+        }
+
+        if (empty($user?->business_id)) {
+            abort(403, 'Tenant context is required.');
+        }
+
+        return (int) $user->business_id;
     }
 }

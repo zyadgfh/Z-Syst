@@ -20,6 +20,10 @@ $app = new Application(
     $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
 );
 
+// Laravel 12 keeps the legacy application structure, but explicitly pin
+// the config path so framework/package discovery cannot resolve vendor config.
+$app->useConfigPath($app->basePath('config'));
+
 /*
 |--------------------------------------------------------------------------
 | Bind Important Interfaces

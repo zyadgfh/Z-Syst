@@ -69,7 +69,14 @@ class StockTransferController extends Controller
         ]);
 
         try {
-            $transfer = $this->warehouseService->createTransfer($request->all());
+            $transfer = $this->warehouseService->createTransfer([
+                'business_id' => auth()->user()->role === 'superadmin' ? $request->business_id : auth()->user()->business_id,
+                'from_warehouse_id' => $request->from_warehouse_id,
+                'to_warehouse_id' => $request->to_warehouse_id,
+                'product_id' => $request->product_id,
+                'quantity' => $request->quantity,
+                'notes' => $request->notes,
+            ]);
 
             return response()->json([
                 'message' => __('Stock transfer created successfully'),
@@ -167,7 +174,9 @@ class StockTransferController extends Controller
             'warehouse_id' => $request->warehouse_id,
         ];
 
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = auth()->user()->role === 'superadmin' && $request->filled('business_id')
+            ? (int) $request->business_id
+            : (int) auth()->user()->business_id;
         $statistics = $this->warehouseService->getTransferStatistics($businessId, $filters);
 
         return response()->json($statistics);

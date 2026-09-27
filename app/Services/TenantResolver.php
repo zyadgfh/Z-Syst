@@ -12,51 +12,53 @@ class TenantResolver
     {
         $user = $request->user();
 
-        // Super admin should not have tenant context for admin routes
-        if ($user && $user->role === 'superadmin' && $request->is('admin/*')) {
+        // Tenant context must never be selected from an unauthenticated
+        // request. Authentication middleware remains authoritative.
+        if (!$user) {
             return null;
         }
 
-        // Regular users get their business_id
-        if ($user && isset($user->business_id)) {
-            return (int) $user->business_id;
+        // Superadmins may explicitly select a tenant for API/admin work.
+        if ($user->role === 'superadmin') {
+            if ($request->has('business_id')) {
+                return (int) $request->input('business_id');
+            }
+
+            // Superadmin admin routes intentionally operate without a tenant.
+            if ($request->is('admin/*')) {
+                return null;
+            }
+
+            return null;
         }
 
-        // For API requests, allow business_id parameter
-        if ($request->has('business_id')) {
-            return (int) $request->input('business_id');
+        // Regular users are permanently bound to their own business.
+        if (isset($user->business_id)) {
+            return (int) $user->business_id;
         }
 
         return null;
     }
 
-    /**
-     * Get current tenant model
-     *
-     * @return Business|null
-     */
     public function getCurrentTenant(): ?Business
     {
-        $tenantId = app('tenant_id');
+        $tenantId = app()->bound('tenant_id') ? app('tenant_id') : null;
+
         return $tenantId ? Business::find($tenantId) : null;
     }
 
-    /**
-     * Check if current user can access specified tenant
-     *
-     * @param int $businessId
-     * @return bool
-     */
     public function canAccessTenant(int $businessId): bool
     {
         $user = Auth::user();
-        
-        // Super admin can access all tenants
-        if ($user && $user->role === 'superadmin') {
+
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->role === 'superadmin') {
             return true;
         }
 
-        // Regular users can only access their own tenant
-        return $user && $user->business_id === $businessId;
+        return (int) $user->business_id === $businessId;
     }
 }

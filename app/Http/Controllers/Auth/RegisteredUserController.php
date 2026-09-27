@@ -58,12 +58,11 @@ class RegisteredUserController extends Controller
 
             // Create user
             $user = User::create([
-                'business_id' => $business->id,
                 'phone' => $request->phoneNumber,
                 'name' => $business->companyName,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-            ]);
+            ])->assignToBusiness($business->id);
 
             // Assign free plan if available
             if ($free_plan) {

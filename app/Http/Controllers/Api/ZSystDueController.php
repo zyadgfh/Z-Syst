@@ -65,25 +65,28 @@ class ZSystDueController extends Controller
 
     public function store(Request $request)
     {
-        $party = Party::find($request->party_id);
-
         $request->validate([
-            'paymentType' => 'required|string',
-            'paymentDate' => 'required|string',
-            'payDueAmount' => 'required|numeric',
-            'party_id' => 'required|exists:parties,id',
-            'invoiceNumber' => 'nullable|exists:'.($party->type == 'Supplier' ? 'purchases' : 'sales').',invoiceNumber',
+            'paymentType' => 'required|string|max:50',
+            'paymentDate' => 'required|date',
+            'payDueAmount' => 'required|numeric|min:0.01',
+            'party_id' => 'required|integer|exists:parties,id',
+            'invoiceNumber' => 'nullable|string|max:100',
         ]);
+
+        $businessId = (int) $request->user()->business_id;
+        $party = Party::where('business_id', $businessId)->findOrFail($request->party_id);
 
         // Find invoice if invoiceNumber provided
         $invoice = null;
         if ($request->invoiceNumber) {
             if ($party->type == 'Supplier') {
-                $invoice = Purchase::where('invoiceNumber', $request->invoiceNumber)
+                $invoice = Purchase::where('business_id', $businessId)
+                    ->where('invoiceNumber', $request->invoiceNumber)
                     ->where('party_id', $request->party_id)
                     ->first();
             } else {
-                $invoice = Sale::where('invoiceNumber', $request->invoiceNumber)
+                $invoice = Sale::where('business_id', $businessId)
+                    ->where('invoiceNumber', $request->invoiceNumber)
                     ->where('party_id', $request->party_id)
                     ->first();
             }
@@ -121,9 +124,14 @@ class ZSystDueController extends Controller
             }
         }
 
-        $data = DueCollect::create($request->all() + [
+        $data = DueCollect::create([
+            'paymentType' => $request->paymentType,
+            'paymentDate' => $request->paymentDate,
+            'payDueAmount' => $request->payDueAmount,
+            'party_id' => $request->party_id,
+            'invoiceNumber' => $request->invoiceNumber,
             'user_id' => auth()->id(),
-            'business_id' => auth()->user()->business_id,
+            'business_id' => $businessId,
             'sale_id' => $party->type != 'Supplier' && isset($invoice) ? $invoice->id : null,
             'purchase_id' => $party->type == 'Supplier' && isset($invoice) ? $invoice->id : null,
             'totalDue' => isset($invoice) ? $invoice->dueAmount : $party->due,
@@ -136,7 +144,7 @@ class ZSystDueController extends Controller
             ]);
         }
 
-        $business = Business::findOrFail(auth()->user()->business_id);
+        $business = Business::findOrFail($businessId);
         $business_name = $business->companyName;
         $business->update([
             'remainingShopBalance' => $party->type == 'Supplier' ? ($business->remainingShopBalance - $request->payDueAmount) : ($business->remainingShopBalance + $request->payDueAmount),

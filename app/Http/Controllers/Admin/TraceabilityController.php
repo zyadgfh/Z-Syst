@@ -31,7 +31,9 @@ class TraceabilityController extends Controller
      */
     public function batchLots(Request $request)
     {
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = auth()->user()->role === 'superadmin' && $request->filled('business_id')
+            ? (int) $request->business_id
+            : (int) auth()->user()->business_id;
         
         $batchLots = BatchLot::forBusiness($businessId)
             ->with('product:id,name')
@@ -82,7 +84,7 @@ class TraceabilityController extends Controller
     public function createBatchLot(Request $request)
     {
         $request->validate([
-            'business_id' => 'required|exists:businesses,id',
+            'business_id' => 'nullable|integer|exists:businesses,id',
             'product_id' => 'required|exists:products,id',
             'batch_number' => 'nullable|string|max:255',
             'lot_number' => 'nullable|string|max:255',
@@ -93,7 +95,16 @@ class TraceabilityController extends Controller
         ]);
 
         try {
-            $batchLot = $this->traceabilityService->createBatchLot($request->all());
+            $batchLot = $this->traceabilityService->createBatchLot([
+                'business_id' => auth()->user()->role === 'superadmin' ? $request->business_id : auth()->user()->business_id,
+                'product_id' => $request->product_id,
+                'batch_number' => $request->batch_number,
+                'lot_number' => $request->lot_number,
+                'manufacture_date' => $request->manufacture_date,
+                'expiry_date' => $request->expiry_date,
+                'supplier_name' => $request->supplier_name,
+                'notes' => $request->notes,
+            ]);
 
             return response()->json([
                 'message' => __('Batch lot created successfully'),
@@ -122,7 +133,15 @@ class TraceabilityController extends Controller
         ]);
 
         try {
-            $batchLot = $this->traceabilityService->updateBatchLot($batchLot, $request->all());
+            $batchLot = $this->traceabilityService->updateBatchLot($batchLot, [
+                'product_id' => $request->product_id,
+                'batch_number' => $request->batch_number,
+                'lot_number' => $request->lot_number,
+                'manufacture_date' => $request->manufacture_date,
+                'expiry_date' => $request->expiry_date,
+                'supplier_name' => $request->supplier_name,
+                'notes' => $request->notes,
+            ]);
 
             return response()->json([
                 'message' => __('Batch lot updated successfully'),
@@ -168,7 +187,13 @@ class TraceabilityController extends Controller
         ]);
 
         try {
-            $recall = $this->traceabilityService->initiateRecall($request->all());
+            $recall = $this->traceabilityService->initiateRecall([
+                'business_id' => auth()->user()->role === 'superadmin' ? $request->business_id : auth()->user()->business_id,
+                'product_id' => $request->product_id,
+                'batch_lot_number' => $request->batch_lot_number,
+                'reason' => $request->reason,
+                'description' => $request->description,
+            ]);
 
             return response()->json([
                 'message' => __('Recall initiated successfully'),

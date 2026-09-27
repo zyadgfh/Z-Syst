@@ -108,7 +108,7 @@ class _FinancialAuditReportScreenState
           IconButton(
             icon: const Icon(Icons.copy_rounded, color: kWhite),
             onPressed: () {
-              Clipboard.setData(ClipboardText(
+              Clipboard.setData(ClipboardData(text: 
                   _buildReportText()));
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Report copied to clipboard')),
@@ -177,7 +177,7 @@ class _FinancialAuditReportScreenState
                             materialTapTargetSize:
                                 MaterialTapTargetSize.shrinkWrap,
                           );
-                        }),
+                        }).toList(),
                       ),
 
                       // Transaction Details
@@ -225,10 +225,10 @@ class _FinancialAuditReportScreenState
     if (report.varianceAnalysis != null) {
       final va = report.varianceAnalysis!;
       buffer.writeln(
-          'Is Balanced: ${va.isBalanced ? 'Yes' : 'No'}');
+          'Is Balanced: ${va.isBalanced == true ? 'Yes' : 'No'}');
       buffer.writeln('Variance Percentage: ${va.variancePercentage}%');
       buffer.writeln(
-          'Requires Investigation: ${va.requiresInvestigation ? 'Yes' : 'No'}');
+          'Requires Investigation: ${va.requiresInvestigation == true ? 'Yes' : 'No'}');
     }
 
     return buffer.toString();

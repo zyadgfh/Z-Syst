@@ -26,10 +26,13 @@ class UserManagementService
                 'phone' => $userData['phone'] ?? null,
                 'image' => $userData['image'] ?? null,
                 'password' => Hash::make($userData['password']),
-                'business_id' => $userData['business_id'] ?? null,
                 'lang' => $userData['lang'] ?? 'en',
                 'status' => $userData['status'] ?? 1,
             ]);
+
+            if (isset($userData['business_id'])) {
+                $user->assignToBusiness((int) $userData['business_id']);
+            }
 
             $user->roles()->sync($role->id);
 
@@ -121,7 +124,7 @@ class UserManagementService
             $query->where('status', $filters['status']);
         }
 
-        if (isset($filters['business_id'])) {
+        if (array_key_exists('business_id', $filters) && $filters['business_id'] !== null) {
             $query->where('business_id', $filters['business_id']);
         }
 
@@ -139,17 +142,22 @@ class UserManagementService
     /**
      * Get role statistics
      */
-    public function getRoleStatistics(): array
+    public function getRoleStatistics(?int $businessId = null): array
     {
-        $roles = Role::withCount('users')->get();
+        $roles = Role::with('permissions')->get();
+        $userCounts = User::query()
+            ->when($businessId !== null, fn ($query) => $query->where('business_id', $businessId))
+            ->selectRaw('role, COUNT(*) as aggregate')
+            ->groupBy('role')
+            ->pluck('aggregate', 'role');
 
         return [
             'total_roles' => $roles->count(),
-            'roles' => $roles->map(function ($role) {
+            'roles' => $roles->map(function ($role) use ($userCounts) {
                 return [
                     'id' => $role->id,
                     'name' => $role->name,
-                    'users_count' => $role->users_count,
+                    'users_count' => (int) ($userCounts[$role->name] ?? 0),
                     'permissions_count' => $role->permissions->count(),
                 ];
             })->toArray(),
@@ -193,12 +201,16 @@ class UserManagementService
     /**
      * Bulk delete users
      */
-    public function bulkDeleteUsers(array $userIds): int
+    public function bulkDeleteUsers(array $userIds, ?int $businessId = null): int
     {
-        // Prevent deleting superadmin
-        $safeIds = User::whereIn('id', $userIds)
-            ->where('role', '!=', 'superadmin')
-            ->pluck('id');
+        $query = User::whereIn('id', $userIds)
+            ->where('role', '!=', 'superadmin');
+
+        if ($businessId !== null) {
+            $query->where('business_id', $businessId);
+        }
+
+        $safeIds = $query->pluck('id');
 
         return User::whereIn('id', $safeIds)->delete();
     }
@@ -206,20 +218,31 @@ class UserManagementService
     /**
      * Bulk change user status
      */
-    public function bulkChangeUserStatus(array $userIds, int $status): int
+    public function bulkChangeUserStatus(array $userIds, int $status, ?int $businessId = null): int
     {
-        return User::whereIn('id', $userIds)
-            ->where('role', '!=', 'superadmin')
-            ->update(['status' => $status]);
+        $query = User::whereIn('id', $userIds)
+            ->where('role', '!=', 'superadmin');
+
+        if ($businessId !== null) {
+            $query->where('business_id', $businessId);
+        }
+
+        return $query->update(['status' => $status]);
     }
 
     /**
      * Clone user permissions from template user
      */
-    public function cloneUserPermissions(User $sourceUser, User $targetUser): User
+    public function cloneUserPermissions(User $sourceUser, User $targetUser, ?int $businessId = null): User
     {
-        if ($sourceUser->role === 'superadmin') {
+        if ($sourceUser->role === 'superadmin' || $targetUser->role === 'superadmin') {
             throw new \Exception('Cannot clone superadmin permissions');
+        }
+
+        if ($businessId !== null
+            && ((int) $sourceUser->business_id !== $businessId
+                || (int) $targetUser->business_id !== $businessId)) {
+            throw new \Exception('Users must belong to the current tenant');
         }
 
         $targetUser->roles()->sync($sourceUser->roles->pluck('id'));

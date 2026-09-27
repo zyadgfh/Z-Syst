@@ -18,7 +18,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/password-reset', [Api\Auth\ZSystForgotPasswordController::class, 'resetPassword']);
     });
 
-    Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::group(['middleware' => ['auth:sanctum', 'tenant.check']], function () {
 
         Route::get('summary', [Api\StatisticsController::class, 'summary']);
         Route::get('dashboard', [Api\StatisticsController::class, 'dashboard']);

@@ -33,19 +33,31 @@ class ZSystTaxController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'tax_ids' => 'required_if:rate,null',
-            'rate' => 'required_if:rate,null|numeric',
+            'tax_ids' => 'nullable|array|min:1',
+            'tax_ids.*' => 'integer|exists:taxes,id',
+            'rate' => 'nullable|numeric|min:0|max:100',
         ]);
 
         if ($request->rate && ! $request->tax_ids) {
 
-            $tax = Tax::create($request->all() + [
+            $tax = Tax::create([
+                'rate' => $request->rate,
+                'sub_tax' => null,
+                'name' => $request->name,
+                'status' => $request->input('status', 1),
                 'business_id' => auth()->user()->business_id,
             ]);
 
         } elseif (! $request->rate && $request->tax_ids) {
 
-            $taxs = Tax::whereIn('id', $request->tax_ids)->select('id', 'name', 'rate')->get();
+            $taxs = Tax::where('business_id', auth()->user()->business_id)
+                ->whereIn('id', $request->tax_ids)
+                ->select('id', 'name', 'rate')
+                ->get();
+
+            if ($taxs->count() !== count($request->tax_ids)) {
+                abort(403, 'One or more tax references do not belong to the current tenant.');
+            }
 
             $tax_rate = 0;
             $sub_taxes = [];
@@ -88,11 +100,23 @@ class ZSystTaxController extends Controller
 
         if ($request->rate && ! $request->tax_ids) {
 
-            $tax = $tax->update($request->all());
+            $tax->update([
+                'rate' => $request->rate,
+                'name' => $request->name,
+                'status' => $request->input('status', $tax->status),
+                'sub_tax' => null,
+            ]);
 
         } elseif (! $request->rate && $request->tax_ids) {
 
-            $taxes = Tax::whereIn('id', $request->tax_ids)->select('id', 'name', 'rate')->get();
+            $taxes = Tax::where('business_id', auth()->user()->business_id)
+                ->whereIn('id', $request->tax_ids)
+                ->select('id', 'name', 'rate')
+                ->get();
+
+            if ($taxes->count() !== count($request->tax_ids)) {
+                abort(403, 'One or more tax references do not belong to the current tenant.');
+            }
 
             $tax_rate = 0;
             $sub_taxes = [];

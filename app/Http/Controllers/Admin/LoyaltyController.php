@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\LoyaltyProgram;
 use App\Models\LoyaltyTransaction;
 use App\Models\CustomerInteraction;
+use App\Models\Party;
 use App\Services\LoyaltyService;
 use Illuminate\Http\Request;
 
@@ -45,7 +46,7 @@ class LoyaltyController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'business_id' => 'required|exists:businesses,id',
+            'business_id' => 'nullable|integer|exists:businesses,id',
             'name' => 'required|string|max:255',
             'points_per_currency' => 'required|integer|min:1',
             'min_points_for_reward' => 'required|integer|min:1',
@@ -53,7 +54,15 @@ class LoyaltyController extends Controller
         ]);
 
         try {
-            $program = $this->loyaltyService->createProgram($request->all());
+            $program = $this->loyaltyService->createProgram([
+                'business_id' => auth()->user()->role === 'superadmin'
+                    ? $request->business_id
+                    : auth()->user()->business_id,
+                'name' => $request->name,
+                'points_per_currency' => $request->points_per_currency,
+                'min_points_for_reward' => $request->min_points_for_reward,
+                'is_active' => $request->boolean('is_active'),
+            ]);
 
             return response()->json([
                 'message' => __('Loyalty program created successfully'),
@@ -81,7 +90,12 @@ class LoyaltyController extends Controller
         ]);
 
         try {
-            $program = $this->loyaltyService->updateProgram($program, $request->all());
+            $program = $this->loyaltyService->updateProgram($program, [
+                'name' => $request->name,
+                'points_per_currency' => $request->points_per_currency,
+                'min_points_for_reward' => $request->min_points_for_reward,
+                'is_active' => $request->boolean('is_active'),
+            ]);
 
             return response()->json([
                 'message' => __('Loyalty program updated successfully'),
@@ -136,15 +150,25 @@ class LoyaltyController extends Controller
     public function createInteraction(Request $request)
     {
         $request->validate([
-            'business_id' => 'required|exists:businesses,id',
-            'party_id' => 'required|exists:parties,id',
+            'business_id' => 'nullable|integer|exists:businesses,id',
+            'party_id' => 'required|integer|exists:parties,id',
             'type' => 'required|in:call,visit,email,meeting,support',
             'notes' => 'nullable|string',
-            'user_id' => 'nullable|exists:users,id',
+            'user_id' => 'nullable|integer|exists:users,id',
+            'loyalty_program_id' => 'nullable|integer|exists:loyalty_programs,id',
         ]);
 
         try {
-            $interaction = $this->loyaltyService->createInteraction($request->all());
+            $interaction = $this->loyaltyService->createInteraction([
+                'business_id' => auth()->user()->role === 'superadmin'
+                    ? $request->business_id
+                    : auth()->user()->business_id,
+                'party_id' => $request->party_id,
+                'type' => $request->type,
+                'notes' => $request->notes,
+                'user_id' => auth()->id(),
+                'loyalty_program_id' => $request->loyalty_program_id,
+            ]);
 
             return response()->json([
                 'message' => __('Customer interaction created successfully'),
@@ -162,7 +186,9 @@ class LoyaltyController extends Controller
      */
     public function statistics(Request $request)
     {
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = auth()->user()->role === 'superadmin' && $request->filled('business_id')
+            ? (int) $request->business_id
+            : (int) auth()->user()->business_id;
         $programId = $request->program_id ?? null;
 
         $statistics = $this->loyaltyService->getProgramStatistics($businessId, $programId);
@@ -196,9 +222,13 @@ class LoyaltyController extends Controller
             'program_id' => 'required|exists:loyalty_programs,id',
         ]);
 
+        $program = LoyaltyProgram::where('business_id', (int) auth()->user()->business_id)->findOrFail($request->program_id);
+        CustomerInteraction::query(); // keep model import usage stable
+        Party::where('business_id', (int) auth()->user()->business_id)->findOrFail($request->party_id);
+
         $loyaltyData = $this->loyaltyService->getCustomerTransactions(
             $request->party_id,
-            $request->program_id
+            $program->id
         );
 
         return response()->json($loyaltyData);

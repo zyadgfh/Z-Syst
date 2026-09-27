@@ -2,163 +2,102 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Business;
+use App\Models\Product;
+use App\Models\User;
 use App\Services\TenantResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Tests\TestCase;
 
 class TenantContextTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * Test tenant resolver resolves from authenticated user
-     */
-    public function test_tenant_resolver_resolves_from_authenticated_user()
+    public function test_tenant_resolver_resolves_regular_user_tenant(): void
     {
         $business = Business::factory()->create();
         $user = User::factory()->create(['business_id' => $business->id]);
 
-        $request = Request::create('/api/v1/test', 'GET');
-        $request->setUserResolver(function () use ($user) {
-            return $user;
-        });
+        $request = Request::create('/api/v1/products', 'GET');
+        $request->setUserResolver(fn () => $user);
 
-        $resolver = new TenantResolver();
-        $tenantId = $resolver->resolve($request);
-
-        $this->assertEquals($business->id, $tenantId);
+        $this->assertSame($business->id, app(TenantResolver::class)->resolve($request));
     }
 
-    /**
-     * Test tenant resolver skips superadmin
-     */
-    public function test_tenant_resolver_skips_superadmin()
+    public function test_tenant_resolver_rejects_requested_tenant_for_regular_user(): void
     {
         $business = Business::factory()->create();
-        $superAdmin = User::factory()->create([
-            'business_id' => $business->id,
-            'role' => 'superadmin'
-        ]);
-
-        $request = Request::create('/admin/test', 'GET');
-        $request->setUserResolver(function () use ($superAdmin) {
-            return $superAdmin;
-        });
-
-        $resolver = new TenantResolver();
-        $tenantId = $resolver->resolve($request);
-
-        $this->assertNull($tenantId);
-    }
-
-    /**
-     * Test tenant resolver accepts business_id parameter
-     */
-    public function test_tenant_resolver_accepts_business_id_parameter()
-    {
-        $business = Business::factory()->create();
-
-        $request = Request::create('/api/v1/test?business_id=' . $business->id, 'GET');
-
-        $resolver = new TenantResolver();
-        $tenantId = $resolver->resolve($request);
-
-        $this->assertEquals($business->id, $tenantId);
-    }
-
-    /**
-     * Test tenant access check blocks cross-tenant access
-     */
-    public function test_tenant_access_check_blocks_cross_tenant_access()
-    {
-        $business1 = Business::factory()->create();
-        $business2 = Business::factory()->create();
-        $user = User::factory()->create(['business_id' => $business1->id]);
-
-        $resolver = new TenantResolver();
-        $canAccess = $resolver->canAccessTenant($business2->id);
-
-        $this->assertFalse($canAccess);
-    }
-
-    /**
-     * Test tenant access check allows same-tenant access
-     */
-    public function test_tenant_access_check_allows_same_tenant_access()
-    {
-        $business = Business::factory()->create();
+        $otherBusiness = Business::factory()->create();
         $user = User::factory()->create(['business_id' => $business->id]);
 
-        $resolver = new TenantResolver();
-        $canAccess = $resolver->canAccessTenant($business->id);
+        $request = Request::create('/api/v1/products', 'GET', ['business_id' => $otherBusiness->id]);
+        $request->setUserResolver(fn () => $user);
 
-        $this->assertTrue($canAccess);
+        $this->assertSame($business->id, app(TenantResolver::class)->resolve($request));
+        $this->assertFalse(app(TenantResolver::class)->canAccessTenant($otherBusiness->id));
     }
 
-    /**
-     * Test tenant access check allows superadmin
-     */
-    public function test_tenant_access_check_allows_superadmin()
+    public function test_superadmin_can_select_an_explicit_tenant(): void
     {
         $business = Business::factory()->create();
         $superAdmin = User::factory()->create(['role' => 'superadmin']);
 
-        $resolver = new TenantResolver();
-        $canAccess = $resolver->canAccessTenant($business->id);
+        $request = Request::create('/api/v1/products', 'GET', ['business_id' => $business->id]);
+        $request->setUserResolver(fn () => $superAdmin);
 
-        $this->assertTrue($canAccess);
+        $this->assertSame($business->id, app(TenantResolver::class)->resolve($request));
+        $this->assertTrue(app(TenantResolver::class)->canAccessTenant($business->id));
     }
 
-    /**
-     * Test user model global scope applies tenant filtering
-     */
-    public function test_user_model_global_scope_applies_tenant_filtering()
+    public function test_regular_user_without_tenant_fails_closed_in_tenant_access_middleware(): void
     {
-        $business1 = Business::factory()->create();
-        $business2 = Business::factory()->create();
+        $user = User::factory()->create(['business_id' => null]);
 
-        User::factory()->create(['business_id' => $business1->id]);
-        User::factory()->create(['business_id' => $business1->id]);
-        User::factory()->create(['business_id' => $business2->id]);
-
-        // Simulate authenticated user from business1
-        auth()->shouldReceive('check')->andReturn(true);
-        auth()->shouldReceive('user')->andReturn(
-            User::factory()->make(['business_id' => $business1->id, 'role' => 'staff'])
-        );
-
-        $users = User::all();
-
-        // Should only return users from business1
-        $this->assertCount(2, $users);
-        foreach ($users as $user) {
-            $this->assertEquals($business1->id, $user->business_id);
-        }
+        $this->actingAs($user, 'sanctum')
+            ->getJson('/api/v1/products')
+            ->assertForbidden();
     }
 
-    /**
-     * Test user model global scope skips for superadmin
-     */
-    public function test_user_model_global_scope_skips_for_superadmin()
+    public function test_business_models_are_globally_scoped_by_active_tenant_context(): void
     {
-        $business1 = Business::factory()->create();
-        $business2 = Business::factory()->create();
+        app()->forgetInstance('tenant_id');
 
-        User::factory()->create(['business_id' => $business1->id]);
-        User::factory()->create(['business_id' => $business2->id]);
+        $businessA = Business::factory()->create();
+        $businessB = Business::factory()->create();
 
-        // Simulate superadmin
-        auth()->shouldReceive('check')->andReturn(true);
-        auth()->shouldReceive('user')->andReturn(
-            User::factory()->make(['role' => 'superadmin'])
-        );
+        Product::factory()->create(['business_id' => $businessA->id]);
+        Product::factory()->create(['business_id' => $businessB->id]);
 
-        $users = User::all();
+        app()->instance('tenant_id', $businessA->id);
 
-        // Should return all users since superadmin is not filtered
-        $this->assertCount(2, $users);
+        $products = Product::query()->get();
+
+        $this->assertCount(1, $products);
+        $this->assertSame($businessA->id, (int) $products->first()->business_id);
+    }
+
+    public function test_cross_tenant_product_cannot_be_loaded_through_api(): void
+    {
+        app()->forgetInstance('tenant_id');
+
+        $businessA = Business::factory()->create();
+        $businessB = Business::factory()->create();
+
+        $userA = User::factory()->create(['business_id' => $businessA->id]);
+        $productB = Product::factory()->create(['business_id' => $businessB->id]);
+
+        $this->actingAs($userA, 'sanctum')
+            ->getJson("/api/v1/products/{$productB->id}")
+            ->assertNotFound();
+    }
+
+    public function test_model_cannot_be_created_for_another_tenant_when_context_is_active(): void
+    {
+        app()->instance('tenant_id', 12345);
+
+        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+
+        Product::factory()->create(['business_id' => 12346]);
     }
 }

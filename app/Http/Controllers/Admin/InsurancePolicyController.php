@@ -47,7 +47,7 @@ class InsurancePolicyController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'business_id' => 'required|exists:businesses,id',
+            'business_id' => 'nullable|integer|exists:businesses,id',
             'insurance_company_id' => 'required|exists:insurance_companies,id',
             'customer_id' => 'nullable|exists:parties,id',
             'member_id' => 'nullable|string|max:255',
@@ -69,7 +69,27 @@ class InsurancePolicyController extends Controller
         ]);
 
         try {
-            $policy = $this->insuranceService->createPolicy($request->all());
+            $policy = $this->insuranceService->createPolicy([
+                'business_id' => auth()->user()->role === 'superadmin' ? $request->business_id : auth()->user()->business_id,
+                'insurance_company_id' => $request->insurance_company_id,
+                'customer_id' => $request->customer_id,
+                'member_id' => $request->member_id,
+                'card_number' => $request->card_number,
+                'holder_name' => $request->holder_name,
+                'holder_dob' => $request->holder_dob,
+                'holder_gender' => $request->holder_gender,
+                'holder_phone' => $request->holder_phone,
+                'holder_email' => $request->holder_email,
+                'holder_address' => $request->holder_address,
+                'plan_type' => $request->plan_type,
+                'status' => $request->status,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'annual_limit' => $request->annual_limit,
+                'coverage_percent' => $request->coverage_percent,
+                'copay_percent' => $request->copay_percent,
+                'notes' => $request->notes,
+            ]);
 
             return response()->json([
                 'message' => __('Insurance policy created successfully'),
@@ -118,7 +138,26 @@ class InsurancePolicyController extends Controller
         ]);
 
         try {
-            $policy = $this->insuranceService->updatePolicy($policy, $request->all());
+            $policy = $this->insuranceService->updatePolicy($policy, [
+                'insurance_company_id' => $request->insurance_company_id,
+                'customer_id' => $request->customer_id,
+                'member_id' => $request->member_id,
+                'card_number' => $request->card_number,
+                'holder_name' => $request->holder_name,
+                'holder_dob' => $request->holder_dob,
+                'holder_gender' => $request->holder_gender,
+                'holder_phone' => $request->holder_phone,
+                'holder_email' => $request->holder_email,
+                'holder_address' => $request->holder_address,
+                'plan_type' => $request->plan_type,
+                'status' => $request->status,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'annual_limit' => $request->annual_limit,
+                'coverage_percent' => $request->coverage_percent,
+                'copay_percent' => $request->copay_percent,
+                'notes' => $request->notes,
+            ]);
 
             return response()->json([
                 'message' => __('Insurance policy updated successfully'),

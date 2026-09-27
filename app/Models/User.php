@@ -13,13 +13,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
-        'business_id',
         'name',
         'role',
         'email',
@@ -33,41 +27,26 @@ class User extends Authenticatable
         'email_verified_at',
     ];
 
-    /**
-     * The "booted" method of the model.
-     */
-    protected static function booted()
-    {
-        // Only apply tenant scope in non-admin contexts
-        static::addGlobalScope('tenant', function ($query) {
-            if (auth()->check() && 
-                auth()->user()->role !== 'superadmin' && 
-                !request()->is('admin/*')) {
-                $query->where('business_id', auth()->user()->business_id);
-            }
-        });
-    }
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'password' => 'hashed',
         'visibility' => 'json',
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Assign a tenant explicitly without allowing business_id mass assignment.
+     */
+    public function assignToBusiness(int $businessId): static
+    {
+        $this->forceFill(['business_id' => $businessId])->save();
+
+        return $this;
+    }
 
     public function business(): BelongsTo
     {
