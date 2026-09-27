@@ -185,7 +185,7 @@ class _DrugInteractionListScreenState extends State<DrugInteractionListScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          const Divider(color: kOutlineBorder, thickness: 1.0),
+          Divider(color: kOutlineBorder, thickness: 1.0),
           Expanded(
             child: RefreshIndicator.adaptive(
               onRefresh: () async => _pagingController.refresh(),
