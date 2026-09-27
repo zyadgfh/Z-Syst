@@ -307,9 +307,9 @@ class PurchaseController extends Controller
                 ]);
 
                 if ($item['batch_no']) {
-                    $stock = Stock::where('product_id', $product->id)->where('batch_no', $item['batch_no'])->first();
+                    $stock = Stock::where('business_id', $business_id)->where('product_id', $product->id)->where('batch_no', $item['batch_no'])->first();
                 } else {
-                    $stock = Stock::where('product_id', $product->id)->first();
+                    $stock = Stock::where('business_id', $business_id)->where('product_id', $product->id)->first();
                 }
 
                 if ($stock ?? false) {
@@ -319,7 +319,7 @@ class PurchaseController extends Controller
                         'productStock' => $stock->productStock + $item['quantities'],
                     ]);
                 } else {
-                    Stock::create($request->all() + [
+                    Stock::create([
                         'business_id' => $business_id,
                         'batch_no' => $item['batch_no'],
                         'product_id' => $item['product_id'],
