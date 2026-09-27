@@ -186,7 +186,7 @@ class _SplashScreenState extends rv.ConsumerState<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final lang = lang.S.of(context);
+    final l10n = l10n.S.of(context);
     return ProviderNetworkObserver(
       child: Scaffold(
         backgroundColor: kMainColor,
