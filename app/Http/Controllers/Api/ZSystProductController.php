@@ -287,11 +287,12 @@ class ZSystProductController extends Controller
                     'productStock' => $stock->productStock + $request->qty,
                 ]);
             } else {
-                Stock::create($request->all() + [
+                Stock::create([
                     'product_id' => $product->id,
                     'productStock' => $request->qty,
                     'expire_date' => $request->expire_date,
                     'business_id' => $businessId,
+                    'batch_no' => $request->batch_no,
                 ]);
             }
 
