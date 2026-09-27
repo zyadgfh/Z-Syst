@@ -102,7 +102,7 @@ class _AddIncomeState extends State<AddIncome> {
     selectedPaymentType ??= paymentMethods.first;
     print(paymentMethods);
     final theme = Theme.of(context);
-    final lang = lang.S.of(context);
+    final l10n = lang.S.of(context);
     return Consumer(
       builder: (context, ref, __) {
         final data = ref.watch(incomeCategoryProvider);
@@ -111,7 +111,7 @@ class _AddIncomeState extends State<AddIncome> {
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             title: Text(
-              widget.income != null ? lang.editIncome : lang.createIncome,
+              widget.income != null ? l10n.editIncome : l10n.createIncome,
               style: theme.textTheme.titleLarge?.copyWith(color: Colors.white),
             ),
             centerTitle: true,
