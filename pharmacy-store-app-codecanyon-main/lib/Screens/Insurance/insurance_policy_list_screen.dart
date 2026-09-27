@@ -222,12 +222,12 @@ class _InsurancePolicyListScreenState extends State<InsurancePolicyListScreen> {
         ? DateTime.tryParse(policy.endDate!)?.isBefore(now) ?? false
         : false;
     final expiryDate = policy.endDate != null
-        ? DateTime.tryParse(policy.endDate)
+        ? DateTime.tryParse(policy.endDate!)
         : null;
     final daysUntilExpiry =
         expiryDate != null ? expiryDate.difference(now).inDays : null;
 
-    Color statusColor = _getStatusColor(policy.status);
+    Color statusColor = _getStatusColor(policy.status ?? 'pending');
     if (isExpired) statusColor = const Color(0xFFE53935);
 
     return Card(
