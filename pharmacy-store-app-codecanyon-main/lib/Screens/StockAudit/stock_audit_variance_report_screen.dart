@@ -292,7 +292,7 @@ class _StockAuditVarianceScreenState extends State<StockAuditVarianceScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        child: [
+        children: [
           Text(
             'Summary',
             style: theme.textTheme.titleSmall?.copyWith(
