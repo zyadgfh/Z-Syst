@@ -108,7 +108,7 @@ class _FinancialAuditReportScreenState
           IconButton(
             icon: const Icon(Icons.copy_rounded, color: kWhite),
             onPressed: () {
-              Clipboard.setData(ClipboardText(
+              Clipboard.setData(ClipboardData(text: 
                   _buildReportText()));
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Report copied to clipboard')),

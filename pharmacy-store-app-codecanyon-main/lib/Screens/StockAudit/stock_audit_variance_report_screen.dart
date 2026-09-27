@@ -232,7 +232,7 @@ class _StockAuditVarianceScreenState extends State<StockAuditVarianceScreen> {
                                             onPressed: () =>
                                                 _reconcileItem(item),
                                             icon: const Icon(
-                                                Icons.balance_scale_outlined),
+                                                Icons.balance_outlined),
                                             label: const Text('Reconcile'),
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: kMainColor,

@@ -81,13 +81,13 @@ class KeyValueRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final titleStyle = titleStyle ??
+    final resolvedTitleStyle = this.titleStyle ??
         theme.textTheme.bodyMedium?.copyWith(
           color: kNutral700,
         );
 
-    final descriptionStyle = descriptionStyle ??
-        titleStyle?.copyWith(
+    final resolvedDescriptionStyle = this.descriptionStyle ??
+        resolvedTitleStyle?.copyWith(
           color: kNutrals900,
         );
 
@@ -107,7 +107,7 @@ class KeyValueRow extends StatelessWidget {
                     title,
                     maxLines: titleMaxLines,
                     overflow: titleOverflow,
-                    style: titleStyle,
+                    style: resolvedTitleStyle,
                   ),
                 ),
                 Text(':', style: titleStyle),
@@ -121,7 +121,7 @@ class KeyValueRow extends StatelessWidget {
               description,
               maxLines: descriptionMaxLines,
               overflow: descriptionOverflow,
-              style: descriptionStyle,
+              style: resolvedDescriptionStyle,
             ),
           )
         ],

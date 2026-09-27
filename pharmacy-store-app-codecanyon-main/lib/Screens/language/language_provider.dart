@@ -10,3 +10,8 @@ class LanguageChangeProvider with ChangeNotifier {
     notifyListeners();
   }
 }
+
+
+class LanguageProvider extends LanguageChangeProvider {
+  String get currentLang => currentLocale.languageCode;
+}
