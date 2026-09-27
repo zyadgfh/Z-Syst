@@ -89,13 +89,14 @@ class _AutoOrderSuggestionsScreenState
   }
 
   Future<void> _rejectSuggestion(int id) async {
+    final rejectionController = TextEditingController();
     final reason = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('سبب الرفض'),
         content: TextField(
           decoration: const InputDecoration(hintText: 'اختياري'),
-          onChanged: (v) => reason = v,
+          controller: rejectionController,
         ),
         actions: [
           TextButton(
@@ -109,6 +110,7 @@ class _AutoOrderSuggestionsScreenState
         ],
       ),
     );
+    rejectionController.dispose();
     if (reason != null) {
       final success = await _repo.rejectSuggestion(id, reason: reason);
       if (mounted) {
