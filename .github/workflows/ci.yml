@@ -42,11 +42,15 @@ jobs:
 
       - name: Check code style for changed PHP files
         run: |
-          files=$(git diff --name-only HEAD^ HEAD -- '*.php')
+          commit="$GITHUB_SHA"
+          if git rev-parse "$GITHUB_SHA^2" >/dev/null 2>&1; then
+            commit="$GITHUB_SHA^2"
+          fi
+          files=$(git diff-tree --no-commit-id --name-only -r "$commit" -- '*.php')
           if [ -n "$files" ]; then
             echo "$files" | xargs vendor/bin/pint --test
           else
-            echo "No PHP files changed in this commit."
+            echo "No PHP files changed in the latest commit."
           fi
 
       - name: Run composer security audit
