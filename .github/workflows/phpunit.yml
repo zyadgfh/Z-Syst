@@ -10,6 +10,13 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     services: {}
+    env:
+      APP_ENV: testing
+      CACHE_DRIVER: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
     steps:
       - uses: actions/checkout@v4
 
@@ -35,26 +42,12 @@ jobs:
           cp .env.example .env || true
           php -r "file_exists('.env') || copy('.env.example', '.env');"
           php artisan key:generate --ansi
-        env:
-          APP_ENV: testing
-          CACHE_DRIVER: array
-          SESSION_DRIVER: array
-          QUEUE_CONNECTION: sync
 
       - name: Validate Laravel route bindings
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: ':memory:'
         run: php artisan route:list --no-ansi
 
       - name: Run migrations
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: ':memory:'
         run: php artisan migrate --no-interaction --force
 
       - name: Run tests
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: ':memory:'
         run: php artisan test --verbosity=normal --colors=never
