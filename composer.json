@@ -16,7 +16,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10",
         "maatwebsite/excel": "^3.1.70",
-        "nwidart/laravel-modules": "10.0.6",
+        "nwidart/laravel-modules": "^12.0",
         "safiull/laravel-installer": "^3.3",
         "spatie/laravel-permission": "^6.3",
         "league/commonmark": "^2.10"
