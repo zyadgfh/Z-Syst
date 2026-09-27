@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:infinite_scroll_paging/infinite_scroll_paging.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:mobile_pos/constant.dart';
 import 'package:mobile_pos/Screens/StockAudit/model/stock_audit_model.dart';
 import 'package:mobile_pos/Screens/StockAudit/repo/stock_audit_repo.dart';
