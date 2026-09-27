@@ -34,16 +34,23 @@ return new class extends Migration
             }
         });
 
-        // These indexes are intentionally created only when their columns exist.
+        $existingIndexes = collect(Schema::getIndexes('audit_logs'))
+            ->pluck('name')
+            ->all();
+
         $indexes = [
-            ['model_type', 'model_id'],
-            ['business_id', 'created_at'],
-            ['user_id', 'created_at'],
+            'audit_logs_model_type_model_id_index' => ['model_type', 'model_id'],
+            'audit_logs_business_id_created_at_index' => ['business_id', 'created_at'],
+            'audit_logs_user_id_created_at_index' => ['user_id', 'created_at'],
         ];
 
-        foreach ($indexes as $columns) {
-            Schema::table('audit_logs', function (Blueprint $table) use ($columns) {
-                $table->index($columns);
+        foreach ($indexes as $name => $columns) {
+            if (in_array($name, $existingIndexes, true)) {
+                continue;
+            }
+
+            Schema::table('audit_logs', function (Blueprint $table) use ($name, $columns) {
+                $table->index($columns, $name);
             });
         }
     }
