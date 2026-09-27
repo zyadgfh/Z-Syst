@@ -123,14 +123,14 @@ class _AddExpenseState extends State<AddExpense> {
     final theme = Theme.of(context);
     final paymentMethods = _getPaymentMethod(context);
     selectedPaymentType ??= paymentMethods.first;
-    final lang = lang.S.of(context);
+    final l10n = lang.S.of(context);
     return Consumer(builder: (context, ref, __) {
       final data = ref.watch(expanseCategoryProvider);
       return AcnooScafoldWidget(
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           title: Text(
-            widget.expenseList != null ? lang.editExpense : lang.S.of(context).addExpense,
+            widget.expenseList != null ? l10n.editExpense : l10n.addExpense,
             style: theme.textTheme.titleLarge?.copyWith(color: Colors.white),
           ),
           centerTitle: true,
