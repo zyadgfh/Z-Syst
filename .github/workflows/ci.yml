@@ -47,6 +47,7 @@ jobs:
             echo "$files" | xargs vendor/bin/pint --test
           else
             echo "No PHP files changed in this commit."
+          fi
 
       - name: Run composer security audit
         run: composer audit --locked --no-interaction
