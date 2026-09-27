@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:mobile_pos/Repository/constant_functions.dart';
 import 'package:mobile_pos/app_config/api_config.dart';
-import 'model/financial_audit_model.dart';
+import '../model/financial_audit_model.dart';
 
 class FinancialAuditRepo {
   // Fetch paginated list of financial audits
