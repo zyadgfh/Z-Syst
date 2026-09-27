@@ -177,7 +177,7 @@ class _FinancialAuditReportScreenState
                             materialTapTargetSize:
                                 MaterialTapTargetSize.shrinkWrap,
                           );
-                        }),
+                        }).toList(),
                       ),
 
                       // Transaction Details
@@ -225,10 +225,10 @@ class _FinancialAuditReportScreenState
     if (report.varianceAnalysis != null) {
       final va = report.varianceAnalysis!;
       buffer.writeln(
-          'Is Balanced: ${va.isBalanced ? 'Yes' : 'No'}');
+          'Is Balanced: ${va.isBalanced == true ? 'Yes' : 'No'}');
       buffer.writeln('Variance Percentage: ${va.variancePercentage}%');
       buffer.writeln(
-          'Requires Investigation: ${va.requiresInvestigation ? 'Yes' : 'No'}');
+          'Requires Investigation: ${va.requiresInvestigation == true ? 'Yes' : 'No'}');
     }
 
     return buffer.toString();
