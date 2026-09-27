@@ -138,7 +138,7 @@ class _StockAuditItemFormScreenState extends State<StockAuditItemFormScreen> {
 
               // System Info (read-only, populated from backend)
               _buildReadOnlyField('Product Name', _productName, theme),
-              const SizedBox(height(16) - 16,
+              const SizedBox(height: 16),
               _buildReadOnlyField('Batch No', _batchNo.isNotEmpty ? _batchNo : 'Auto', theme),
               const SizedBox(height: 16),
               _buildReadOnlyField('System Quantity',
