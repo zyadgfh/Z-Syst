@@ -50,4 +50,4 @@ jobs:
         run: php artisan migrate --no-interaction --force
 
       - name: Run tests
-        run: php artisan test --verbosity=normal --colors=never
+        run: php artisan test --colors=never
