@@ -270,13 +270,6 @@ class _InsuranceDashboardScreenState extends State<InsuranceDashboardScreen> {
                     ),
                 ],
                 borderData: FlBorderData(show: false),
-                centerText:
-                    '${d.claimsCount?.toString() ?? '0'}\nClaims',
-                centerTextStyle: const TextStyle(
-                  color: kNutral800,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
-                ),
                 sectionsSpace: 2,
               ),
             ),
