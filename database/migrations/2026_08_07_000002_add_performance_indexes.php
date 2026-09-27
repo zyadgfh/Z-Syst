@@ -8,194 +8,107 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Products table indexes
-        Schema::table('products', function (Blueprint $table) {
-            $table->index(['business_id', 'is_active']);
-            $table->index('expiry_date');
-            $table->index('category_id');
-            $table->index('created_at');
-        });
+        $addIndex = static function (string $tableName, array $columns): void {
+            $indexName = $tableName . '_' . implode('_', $columns) . '_index';
+            $existingIndexes = collect(Schema::getIndexes($tableName))
+                ->pluck('name')
+                ->all();
 
-        // Sales table indexes
-        Schema::table('sales', function (Blueprint $table) {
-            $table->index(['business_id', 'saleDate']);
-            $table->index('party_id');
-            $table->index('invoiceNumber');
-            $table->index('created_at');
-        });
+            if (in_array($indexName, $existingIndexes, true)) {
+                return;
+            }
 
-        // Purchases table indexes
-        Schema::table('purchases', function (Blueprint $table) {
-            $table->index(['business_id', 'purchaseDate']);
-            $table->index('party_id');
-            $table->index('invoiceNumber');
-            $table->index('created_at');
-        });
+            Schema::table($tableName, function (Blueprint $table) use ($columns, $indexName): void {
+                $table->index($columns, $indexName);
+            });
+        };
 
-        // Parties table indexes
-        Schema::table('parties', function (Blueprint $table) {
-            $table->index(['business_id', 'type']);
-            $table->index('phone');
-            $table->index('name');
-        });
+        $indexes = [
+            'products' => [
+                ['business_id', 'is_active'],
+                ['expiry_date'],
+                ['category_id'],
+                ['created_at'],
+            ],
+            'sales' => [
+                ['business_id', 'saleDate'],
+                ['party_id'],
+                ['invoiceNumber'],
+                ['created_at'],
+            ],
+            'purchases' => [
+                ['business_id', 'purchaseDate'],
+                ['party_id'],
+                ['invoiceNumber'],
+                ['created_at'],
+            ],
+            'parties' => [
+                ['business_id', 'type'],
+                ['phone'],
+                ['name'],
+            ],
+            'sale_details' => [
+                ['sale_id'],
+                ['product_id'],
+                ['sale_id', 'product_id'],
+            ],
+            'purchase_details' => [
+                ['purchase_id'],
+                ['product_id'],
+                ['purchase_id', 'product_id'],
+            ],
+            'loyalty_transactions' => [
+                ['business_id', 'created_at'],
+                ['party_id'],
+                ['program_id'],
+            ],
+            'customer_interactions' => [
+                ['business_id', 'created_at'],
+                ['party_id'],
+                ['user_id'],
+            ],
+            'receipts' => [
+                ['business_id', 'created_at'],
+                ['receipt_number'],
+                ['sale_id'],
+                ['purchase_id'],
+            ],
+            'warehouses' => [
+                ['business_id', 'is_active'],
+            ],
+            'warehouse_stocks' => [
+                ['warehouse_id', 'product_id'],
+                ['product_id'],
+            ],
+            'stock_transfers' => [
+                ['business_id', 'transfer_date'],
+                ['from_warehouse_id'],
+                ['to_warehouse_id'],
+                ['status'],
+            ],
+            'users' => [
+                ['business_id', 'status'],
+                ['email'],
+                ['phone'],
+            ],
+            'businesses' => [
+                ['plan_subscribe_id'],
+                ['status'],
+                ['will_expire'],
+            ],
+        ];
 
-        // Sale details table indexes
-        Schema::table('sale_details', function (Blueprint $table) {
-            $table->index('sale_id');
-            $table->index('product_id');
-            $table->index(['sale_id', 'product_id']);
-        });
-
-        // Purchase details table indexes
-        Schema::table('purchase_details', function (Blueprint $table) {
-            $table->index('purchase_id');
-            $table->index('product_id');
-            $table->index(['purchase_id', 'product_id']);
-        });
-
-        // Loyalty transactions table indexes
-        Schema::table('loyalty_transactions', function (Blueprint $table) {
-            $table->index(['business_id', 'created_at']);
-            $table->index('party_id');
-            $table->index('program_id');
-        });
-
-        // Customer interactions table indexes
-        Schema::table('customer_interactions', function (Blueprint $table) {
-            $table->index(['business_id', 'created_at']);
-            $table->index('party_id');
-            $table->index('user_id');
-        });
-
-        // Receipts table indexes
-        Schema::table('receipts', function (Blueprint $table) {
-            $table->index(['business_id', 'created_at']);
-            $table->index('receipt_number');
-            $table->index('sale_id');
-            $table->index('purchase_id');
-        });
-
-        // Warehouses table indexes
-        Schema::table('warehouses', function (Blueprint $table) {
-            $table->index(['business_id', 'is_active']);
-        });
-
-        // Warehouse stocks table indexes
-        Schema::table('warehouse_stocks', function (Blueprint $table) {
-            $table->index(['warehouse_id', 'product_id']);
-            $table->index('product_id');
-        });
-
-        // Stock transfers table indexes
-        Schema::table('stock_transfers', function (Blueprint $table) {
-            $table->index(['business_id', 'transfer_date']);
-            $table->index('from_warehouse_id');
-            $table->index('to_warehouse_id');
-            $table->index('status');
-        });
-
-        // Users table indexes
-        Schema::table('users', function (Blueprint $table) {
-            $table->index(['business_id', 'status']);
-            $table->index('email');
-            $table->index('phone');
-        });
-
-        // Businesses table indexes
-        Schema::table('businesses', function (Blueprint $table) {
-            $table->index('plan_subscribe_id');
-            $table->index('status');
-            $table->index('will_expire');
-        });
+        foreach ($indexes as $tableName => $tableIndexes) {
+            foreach ($tableIndexes as $columns) {
+                $addIndex($tableName, $columns);
+            }
+        }
     }
 
     public function down(): void
     {
-        // Drop indexes
-        Schema::table('products', function (Blueprint $table) {
-            $table->dropIndex(['business_id', 'is_active']);
-            $table->dropIndex('expiry_date');
-            $table->dropIndex('category_id');
-            $table->dropIndex('created_at');
-        });
-
-        Schema::table('sales', function (Blueprint $table) {
-            $table->dropIndex(['business_id', 'saleDate']);
-            $table->dropIndex('party_id');
-            $table->dropIndex('invoiceNumber');
-            $table->dropIndex('created_at');
-        });
-
-        Schema::table('purchases', function (Blueprint $table) {
-            $table->dropIndex(['business_id', 'purchaseDate']);
-            $table->dropIndex('party_id');
-            $table->dropIndex('invoiceNumber');
-            $table->dropIndex('created_at');
-        });
-
-        Schema::table('parties', function (Blueprint $table) {
-            $table->dropIndex(['business_id', 'type']);
-            $table->dropIndex('phone');
-            $table->dropIndex('name');
-        });
-
-        Schema::table('sale_details', function (Blueprint $table) {
-            $table->dropIndex('sale_id');
-            $table->dropIndex('product_id');
-            $table->dropIndex(['sale_id', 'product_id']);
-        });
-
-        Schema::table('purchase_details', function (Blueprint $table) {
-            $table->dropIndex('purchase_id');
-            $table->dropIndex('product_id');
-            $table->dropIndex(['purchase_id', 'product_id']);
-        });
-
-        Schema::table('loyalty_transactions', function (Blueprint $table) {
-            $table->dropIndex(['business_id', 'created_at']);
-            $table->dropIndex('party_id');
-            $table->dropIndex('program_id');
-        });
-
-        Schema::table('customer_interactions', function (Blueprint $table) {
-            $table->dropIndex(['business_id', 'created_at']);
-            $table->dropIndex('party_id');
-            $table->dropIndex('user_id');
-        });
-
-        Schema::table('receipts', function (Blueprint $table) {
-            $table->dropIndex(['business_id', 'created_at']);
-            $table->dropIndex('receipt_number');
-            $table->dropIndex('sale_id');
-            $table->dropIndex('purchase_id');
-        });
-
-        Schema::table('warehouses', function (Blueprint $table) {
-            $table->dropIndex(['business_id', 'is_active']);
-        });
-
-        Schema::table('warehouse_stocks', function (Blueprint $table) {
-            $table->dropIndex(['warehouse_id', 'product_id']);
-            $table->dropIndex('product_id');
-        });
-
-        Schema::table('stock_transfers', function (Blueprint $table) {
-            $table->dropIndex(['business_id', 'transfer_date']);
-            $table->dropIndex('from_warehouse_id');
-            $table->dropIndex('to_warehouse_id');
-            $table->dropIndex('status');
-        });
-
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropIndex(['business_id', 'status']);
-            $table->dropIndex('email');
-            $table->dropIndex('phone');
-        });
-
-        Schema::table('businesses', function (Blueprint $table) {
-            $table->dropIndex('plan_subscribe_id');
-            $table->dropIndex('status');
-            $table->dropIndex('will_expire');
-        });
+        // These indexes are optional performance enhancements. Leaving existing
+        // indexes intact during rollback is safer than dropping indexes created
+        // by earlier migrations or by production-specific schema changes.
     }
 };
