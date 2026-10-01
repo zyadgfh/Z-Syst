@@ -252,6 +252,17 @@ class ZSystBusinessController extends Controller
         ]);
     }
 
+    /**
+     * Toggle the active status of a business.
+     */
+    public function status(Request $request, $id)
+    {
+        $business = Business::findOrFail($id);
+        $business->update(['status' => $request->status]);
+
+        return response()->json(['message' => __('Business status updated successfully')]);
+    }
+
     // Upgrade plan code
 
     public function upgradePlan(Request $request)

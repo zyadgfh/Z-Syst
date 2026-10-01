@@ -7,9 +7,20 @@ use App\Models\PurchaseOrderItem;
 use App\Models\Product;
 use App\Models\Party;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PurchaseOrderService
 {
+    /**
+     * Notification dispatcher used to inform suppliers about PO lifecycle events.
+     */
+    protected NotificationService $notifications;
+
+    public function __construct(?NotificationService $notifications = null)
+    {
+        $this->notifications = $notifications ?? app(NotificationService::class);
+    }
+
     /**
      * Create a new purchase order.
      */
@@ -105,8 +116,8 @@ class PurchaseOrderService
 
         $po->markAsSent();
 
-        // TODO: Send notification to supplier
-        // TODO: Email supplier with PO details
+        // Email + SMS the supplier with the full PO details.
+        $this->notifySupplier($po, 'sent');
 
         return $po;
     }
@@ -122,8 +133,8 @@ class PurchaseOrderService
 
         $po->approve($userId);
 
-        // TODO: Notify supplier
-        // TODO: Update purchase order status
+        // Status already moved to accepted by approve(); inform the supplier.
+        $this->notifySupplier($po, 'approved');
 
         return $po;
     }
@@ -139,8 +150,8 @@ class PurchaseOrderService
 
         $po->reject($userId, $reason);
 
-        // TODO: Notify supplier
-        // TODO: Update purchase order status
+        // Status already moved to rejected by reject(); inform the supplier.
+        $this->notifySupplier($po, 'rejected', $reason ? "Reason: {$reason}" : null);
 
         return $po;
     }
@@ -156,8 +167,13 @@ class PurchaseOrderService
 
         $po->cancel();
 
-        // TODO: Notify supplier
-        // TODO: Update inventory if needed
+        // Inform the supplier about the cancellation.
+        $this->notifySupplier($po, 'cancelled');
+
+        // No inventory rollback is required here: orders that already have
+        // received quantities (received / partially received) cannot reach
+        // this point, so no stock movements were ever recorded for a
+        // cancellable PO.
 
         return $po;
     }
@@ -173,7 +189,8 @@ class PurchaseOrderService
 
         $po->update(['status' => PurchaseOrder::STATUS_DRAFT]);
 
-        // TODO: Notify supplier
+        // Let the supplier know the previously cancelled order is back on.
+        $this->notifySupplier($po, 'restored');
 
         return $po;
     }
@@ -309,5 +326,62 @@ class PurchaseOrderService
         }
 
         return $po->delete();
+    }
+
+    /**
+     * Notify the linked supplier (email + SMS) about a PO lifecycle event.
+     *
+     * @param  PurchaseOrder  $po  The purchase order.
+     * @param  string  $event  Past-tense verb, e.g. "sent", "approved", "cancelled".
+     * @param  string|null  $note  Optional extra line (e.g. a rejection reason).
+     */
+    protected function notifySupplier(PurchaseOrder $po, string $event, ?string $note = null): void
+    {
+        $po->loadMissing(['supplier', 'items.product']);
+
+        $supplier = $po->supplier;
+
+        $lines = [
+            "Purchase order {$po->po_number} has been {$event}.",
+            'Status: '.$po->status,
+            'Priority: '.($po->priority ?? 'normal'),
+            'Items: '.$po->items->count(),
+            'Total: '.number_format((float) ($po->total_amount ?? 0), 2),
+        ];
+
+        if ($po->expected_delivery_date) {
+            $lines[] = 'Expected delivery: '.$po->expected_delivery_date->toDateString();
+        }
+
+        if ($note) {
+            $lines[] = $note;
+        }
+
+        $table = [
+            'headers' => ['Product', 'Quantity', 'Unit Price', 'Total'],
+            'rows' => $po->items->map(function (PurchaseOrderItem $item) {
+                return [
+                    $item->product?->name ?? "Product #{$item->product_id}",
+                    (string) $item->quantity,
+                    number_format((float) $item->unit_price, 2),
+                    number_format((float) $item->total, 2),
+                ];
+            })->values()->toArray(),
+        ];
+
+        $result = $this->notifications->notifySupplier(
+            $supplier,
+            "Purchase Order {$po->po_number} {$event}",
+            $lines,
+            $table
+        );
+
+        Log::info("Supplier notified about purchase order {$event}", [
+            'purchase_order_id' => $po->id,
+            'po_number' => $po->po_number,
+            'supplier_id' => $supplier?->id,
+            'email_sent' => $result['email'],
+            'sms_sent' => $result['sms'],
+        ]);
     }
 }

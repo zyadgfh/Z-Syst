@@ -46,6 +46,8 @@ class ProductAnalyticsService
                 $warehouseId
             );
         });
+    }
+
     private function buildAnalytics(
         int $businessId,
         array $filters,
