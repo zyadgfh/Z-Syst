@@ -9,10 +9,21 @@ use App\Models\Purchase;
 use App\Models\PurchaseDetails;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class SupplierInvoiceService
 {
+    /**
+     * Notification dispatcher used to inform suppliers about invoice events.
+     */
+    protected NotificationService $notifications;
+
+    public function __construct(?NotificationService $notifications = null)
+    {
+        $this->notifications = $notifications ?? app(NotificationService::class);
+    }
+
     /**
      * Create a new supplier invoice.
      */
@@ -169,8 +180,11 @@ class SupplierInvoiceService
 
         $invoice->approve($userId);
 
-        // TODO: Send notification to supplier
-        // TODO: Update purchase status if linked
+        // Inform the supplier the invoice was approved.
+        $this->notifySupplier($invoice, 'approved');
+
+        // Keep the linked purchase in sync (audit trail + status where applicable).
+        $this->syncLinkedPurchase($invoice, 'approved');
 
         return $invoice;
     }
@@ -186,7 +200,8 @@ class SupplierInvoiceService
 
         $invoice->reject($userId, $reason);
 
-        // TODO: Send notification to supplier
+        // Inform the supplier why the invoice was rejected.
+        $this->notifySupplier($invoice, 'rejected', $reason ? "Reason: {$reason}" : null);
 
         return $invoice;
     }
@@ -202,10 +217,137 @@ class SupplierInvoiceService
 
         $invoice->cancel($reason);
 
-        // TODO: Reverse any payments
-        // TODO: Update purchase status if linked
+        // Reverse any payments recorded against this invoice.
+        $this->reversePayments($invoice);
+
+        // Keep the linked purchase in sync.
+        $this->syncLinkedPurchase($invoice, 'cancelled');
+
+        // Inform the supplier about the cancellation.
+        $this->notifySupplier($invoice, 'cancelled', $reason ? "Reason: {$reason}" : null);
 
         return $invoice;
+    }
+
+    /**
+     * Reverse all non-cancelled payments attached to a cancelled invoice.
+     *
+     * Approved/completed payments contributed to the invoice balance and are
+     * reversed through the model's cancel() (which restores paid_amount /
+     * balance). Pending payments never touched the balance, so they are
+     * simply closed out.
+     */
+    protected function reversePayments(SupplierInvoice $invoice): void
+    {
+        $payments = $invoice->payments()->get();
+
+        foreach ($payments as $payment) {
+            if ($payment->status === SupplierInvoicePayment::STATUS_CANCELLED) {
+                continue;
+            }
+
+            if ($payment->isPending()) {
+                $payment->update(['status' => SupplierInvoicePayment::STATUS_CANCELLED]);
+
+                continue;
+            }
+
+            // Approved / completed payment: cancel() reverses the amounts.
+            $payment->cancel();
+        }
+
+        $invoice->refresh();
+    }
+
+    /**
+     * Sync the purchase linked to an invoice after a lifecycle event.
+     *
+     * The Purchase model has no dedicated status column, so this records an
+     * audit-trail entry tying the invoice event to the linked purchase.
+     */
+    protected function syncLinkedPurchase(SupplierInvoice $invoice, string $event): void
+    {
+        if (! $invoice->purchase_id) {
+            return;
+        }
+
+        $purchase = $invoice->purchase;
+
+        if (! $purchase) {
+            return;
+        }
+
+        AuditLogger::log(
+            'supplier_invoice.purchase_synced',
+            "Supplier invoice {$invoice->invoice_number} {$event}; linked purchase #{$purchase->id}.",
+            [
+                'supplier_invoice_id' => $invoice->id,
+                'purchase_id' => $purchase->id,
+                'event' => $event,
+            ]
+        );
+
+        Log::info("Linked purchase synced after invoice {$event}", [
+            'supplier_invoice_id' => $invoice->id,
+            'purchase_id' => $purchase->id,
+        ]);
+    }
+
+    /**
+     * Notify the linked supplier (email + SMS) about an invoice lifecycle event.
+     *
+     * @param  SupplierInvoice  $invoice  The supplier invoice.
+     * @param  string  $event  Past-tense verb, e.g. "approved", "rejected".
+     * @param  string|null  $note  Optional extra line (e.g. a reason).
+     */
+    protected function notifySupplier(SupplierInvoice $invoice, string $event, ?string $note = null): void
+    {
+        $invoice->loadMissing(['supplier', 'items.product']);
+
+        $supplier = $invoice->supplier;
+
+        $lines = [
+            "Supplier invoice {$invoice->invoice_number} has been {$event}.",
+            'Status: '.$invoice->status,
+            'Total: '.number_format((float) ($invoice->total_amount ?? 0), 2),
+            'Balance: '.number_format((float) ($invoice->balance ?? 0), 2),
+            'Currency: '.($invoice->currency ?? 'N/A'),
+        ];
+
+        if ($invoice->due_date) {
+            $lines[] = 'Due date: '.$invoice->due_date->toDateString();
+        }
+
+        if ($note) {
+            $lines[] = $note;
+        }
+
+        $table = [
+            'headers' => ['Description', 'Quantity', 'Unit Price', 'Total'],
+            'rows' => $invoice->items->map(function (SupplierInvoiceItem $item) {
+                return [
+                    $item->description ?? ($item->product?->name ?? 'Item'),
+                    (string) $item->quantity,
+                    number_format((float) $item->unit_price, 2),
+                    number_format((float) $item->total, 2),
+                ];
+            })->values()->toArray(),
+        ];
+
+        $result = $this->notifications->notifySupplier(
+            $supplier,
+            "Supplier Invoice {$invoice->invoice_number} {$event}",
+            $lines,
+            $table
+        );
+
+        Log::info("Supplier notified about invoice {$event}", [
+            'supplier_invoice_id' => $invoice->id,
+            'invoice_number' => $invoice->invoice_number,
+            'supplier_id' => $supplier?->id,
+            'email_sent' => $result['email'],
+            'sms_sent' => $result['sms'],
+        ]);
     }
 
     /**

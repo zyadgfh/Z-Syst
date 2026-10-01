@@ -27,8 +27,10 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function map(): void
     {
-        // Don't load routes during package discovery or console commands
-        if ($this->app->runningInConsole()) {
+        // Don't load routes during package discovery or plain console commands,
+        // but keep them registered for HTTP feature tests (which also run in
+        // the console).
+        if ($this->app->runningInConsole() && ! $this->app->runningUnitTests()) {
             return;
         }
 

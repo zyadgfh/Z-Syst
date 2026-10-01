@@ -29,9 +29,11 @@ class LandingServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Temporarily disabled to prevent auth class issue during package discovery
-        // Routes will be loaded via RouteServiceProvider in main app
-        // $this->app->register(RouteServiceProvider::class);
+        // Routes are registered through the module RouteServiceProvider. That
+        // provider skips registration during plain console bootstraps (package
+        // discovery, artisan commands), so registering it here is safe and
+        // restores the Landing module's web/API routes.
+        $this->app->register(RouteServiceProvider::class);
     }
 
     /**

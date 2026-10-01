@@ -1,5 +1,16 @@
 # GAP ANALYSIS
 
+> ## تحديث الحالة (2026-10-01)
+> تم إغلاق الفجوات التالية فعليًا في الفرع `arena/01a0f4bb-z-syst`:
+>
+> - **Landing module**: أُصلح ملف المسارات التالف `Modules/Landing/routes/api.php`، وأُعيد تفعيل `RouteServiceProvider` لتحميل مسارات الوحدة (الويب وواجهة API العامة `/api/v1/landing*`)، مع حماية مسارات التطوير (`/publish`, `/reset`, `/cache-clear`) لتكون متاحة فقط خارج بيئة الإنتاج.
+> - **الإشعارات**: نُفّذ منطق الإشعارات المعلق (push/بريد/SMS) عبر خدمة موحّدة `App\Services\NotificationService` و Mailable جديد `App\Mail\BusinessMail` مع قالب `mail.business`. تم تفعيل إشعارات المورّد في `PurchaseOrderService` و`SupplierInvoiceService` وإشعارات تنبيهات الأطباء في `DoctorAttentionService`، بالإضافة إلى عكس المدفوعات عند إلغاء فاتورة المورّد ومزامنة المشتريات المرتبطة.
+> - **أعمدة/حقول مفقودة**: أُضيف عمود `status` لجدول `businesses` (كان مفهرسًا دون أن يكون موجودًا) ولجدول `testimonials`، وأُضيف `name` accessor لنموذج `Product` (يُصلح عرض أسماء المنتجات في الإيصالات والتقارير والتتبع).
+> - **مسارات معطلة**: أُصلحت أخطاء مسارات إدارية (كتابات ناقصة/أسماء خاطئة) في `routes/admin.php` ومسارات وحدة Landing، وأُضيفت دوال `status` المفقودة في `UserController` و`ZSystBusinessController` و`ZSystTestimonialController`.
+> - **تغطية الاختبارات**: أُضيفت 13 مصنّعًا (Factory) كانت مفقودة وكانت تمنع تشغيل جزء كبير من الاختبارات (الموردون، فواتير المورّد، أوامر الشراء، GRN، الباركود، مستودعات، الاشتراكات، وميزة الوحدة). كما أُضيفت اختبارات جديدة لخدمة الإشعارات وإشعارات أوامر الشراء، وأُصلح خطأ صياغة قاتل في `ProductAnalyticsService`.
+>
+> البنود أدناه تمثل التحليل الأصلي وتبقى كمرجع؛ ما ذُكر أعلاه لم يعد فجوة قائمة.
+
 ## نظرة عامة
 
 تم جمع هذا التحليل بناءً على بنية المشروع الحالية في Laravel، والملفات الرئيسية مثل [routes/api.php](routes/api.php)، [Modules/Landing/routes/api.php](Modules/Landing/routes/api.php)، [firestore.rules](firestore.rules)، و [app/Http/Controllers/Admin/SystemSettingController.php](app/Http/Controllers/Admin/SystemSettingController.php). الهدف منه هو تحديد الفجوات الواقعية بين ما هو موجود بالفعل وبين ما يحتاجه المشروع ليصبح جاهزًا للمرحلة القادمة.

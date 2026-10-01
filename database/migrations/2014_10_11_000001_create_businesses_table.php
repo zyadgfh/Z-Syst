@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('plan_subscribe_id')->nullable();
             $table->foreignId('business_category_id')->constrained()->cascadeOnDelete();
             $table->string('companyName');
+            $table->boolean('status')->default(true);
             $table->date('will_expire')->nullable();
             $table->string('address')->nullable();
             $table->string('phoneNumber')->nullable();
