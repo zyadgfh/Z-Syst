@@ -14,6 +14,21 @@ use Illuminate\Support\Facades\Log;
 class DoctorAttentionService
 {
     /**
+     * Notification dispatcher used for push/email/SMS alert delivery.
+     */
+    protected NotificationService $notifications;
+
+    /**
+     * Create the service. The dispatcher defaults to the container binding
+     * so the service keeps working when instantiated manually (e.g. from
+     * console commands).
+     */
+    public function __construct(?NotificationService $notifications = null)
+    {
+        $this->notifications = $notifications ?? app(NotificationService::class);
+    }
+
+    /**
      * Calculate attention scores for all doctors in a business.
      */
     public function calculateScoresForBusiness(int $businessId, int $branchId = null): void
@@ -218,12 +233,17 @@ class DoctorAttentionService
     {
         // Get notification recipients
         $recipients = $this->getNotificationRecipients($alert, $settings);
-        
-        // TODO: Implement push notification logic
-        // This would integrate with your notification system
-        // For now, we'll just mark as sent
+
+        // Deliver an in-app (database) notification to every recipient.
+        $this->notifications->notifyUsers(
+            $recipients,
+            'Doctor Attention Alert',
+            $alert->message ?? 'A doctor requires attention.',
+            ['url' => '/admin/doctor-attention', 'alert_id' => $alert->id]
+        );
+
         $alert->markAsSent();
-        
+
         Log::info('Push notification sent for doctor attention alert', [
             'alert_id' => $alert->id,
             'doctor_id' => $alert->doctor_id,
@@ -237,10 +257,22 @@ class DoctorAttentionService
     private function sendEmailNotification(DoctorAttentionAlert $alert, DoctorAttentionSettings $settings): void
     {
         $recipients = $this->getNotificationRecipients($alert, $settings);
-        
-        // TODO: Implement email notification logic
-        // This would send emails to recipients
-        
+
+        $doctorName = $alert->doctor?->name ?? "Doctor #{$alert->doctor_id}";
+        $isCritical = $alert->severity === DoctorAttentionAlert::SEVERITY_CRITICAL;
+
+        $this->notifications->emailUsers(
+            $recipients,
+            ($isCritical ? '[Critical] ' : '').'Doctor Attention Alert',
+            [
+                "Dr. {$doctorName} needs ".($isCritical ? 'immediate ' : '').'attention.',
+                'Alert type: '.($alert->alert_type ?? 'N/A'),
+                'Severity: '.($alert->severity ?? 'normal'),
+                'Details: '.($alert->message ?? 'N/A'),
+                'Generated at: '.now()->toDateTimeString(),
+            ]
+        );
+
         Log::info('Email notification sent for doctor attention alert', [
             'alert_id' => $alert->id,
             'doctor_id' => $alert->doctor_id,
@@ -253,10 +285,12 @@ class DoctorAttentionService
     private function sendSmsNotification(DoctorAttentionAlert $alert, DoctorAttentionSettings $settings): void
     {
         $recipients = $this->getNotificationRecipients($alert, $settings);
-        
-        // TODO: Implement SMS notification logic
-        // This would send SMS to recipients
-        
+
+        $this->notifications->sms(
+            $recipients->pluck('phone')->filter()->unique()->values(),
+            $alert->message ?? 'A doctor requires attention.'
+        );
+
         Log::info('SMS notification sent for doctor attention alert', [
             'alert_id' => $alert->id,
             'doctor_id' => $alert->doctor_id,

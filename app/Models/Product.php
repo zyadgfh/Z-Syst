@@ -37,6 +37,18 @@ class Product extends Model
         'tax_type',
     ];
 
+    /**
+     * Display-name accessor.
+     *
+     * A lot of the codebase (receipts, reports, traceability, notifications)
+     * reads $product->name, but the physical column is productName. Expose a
+     * name attribute so those references resolve instead of returning null.
+     */
+    public function getNameAttribute(): ?string
+    {
+        return $this->productName;
+    }
+
     public function stocks(): HasMany
     {
         return $this->hasMany(Stock::class)->where('productStock', '>', 0);

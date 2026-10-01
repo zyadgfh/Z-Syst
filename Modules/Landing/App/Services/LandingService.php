@@ -102,7 +102,7 @@ class LandingService
      */
     protected function getTestimonials()
     {
-        return Testimonial::latest()->get();
+        return Testimonial::whereStatus(true)->latest()->get();
     }
 
     /**

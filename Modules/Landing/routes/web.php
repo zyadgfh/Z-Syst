@@ -14,24 +14,28 @@ Route::resource('blogs', Web\BlogController::class)->only('index', 'show', 'stor
 Route::get('/plans', [Web\PlanController::class, 'index'])->name('plan.index');
 Route::get('/filter-blogs-by-tag', [Web\BlogController::class, 'filterBlogsByTag'])->name('frontend.tag.filter');
 
-Route::get('/cache-clear', function () {
-    Artisan::call('cache:clear');
+// Development helpers - only available outside production to prevent
+// unauthenticated cache clearing / migrations on live environments.
+if (app()->environment('local', 'testing', 'development')) {
+    Route::get('/cache-clear', function () {
+        Artisan::call('cache:clear');
 
-    return back()->with('success', __('Cache has been cleared.'));
-});
+        return back()->with('success', __('Cache has been cleared.'));
+    });
 
-Route::get('/publish', function () {
-    Artisan::call('cache:clear');
-    Artisan::call('module:migrate Landing');
-    Artisan::call('module:seed Landing');
-    Artisan::call('module:publish Landing');
+    Route::get('/publish', function () {
+        Artisan::call('cache:clear');
+        Artisan::call('module:migrate Landing');
+        Artisan::call('module:seed Landing');
+        Artisan::call('module:publish Landing');
 
-    return 'success';
-});
+        return 'success';
+    });
 
-Route::get('/reset', function () {
-    Artisan::call('cache:clear');
-    Artisan::call('migrate:fresh --seed');
+    Route::get('/reset', function () {
+        Artisan::call('cache:clear');
+        Artisan::call('migrate:fresh --seed');
 
-    return back()->with('success', __('Restart.'));
-});
+        return back()->with('success', __('Restart.'));
+    });
+}

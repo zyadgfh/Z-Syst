@@ -31,4 +31,19 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | SMS
+    |--------------------------------------------------------------------------
+    |
+    | Driver used by the NotificationService for SMS messages. Only the
+    | "log" driver is bundled; configure an external gateway driver here
+    | once an SMS package is installed.
+    |
+    */
+
+    'sms' => [
+        'driver' => env('SMS_DRIVER', 'log'),
+    ],
+
 ];

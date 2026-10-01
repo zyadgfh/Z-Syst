@@ -130,6 +130,14 @@ class ZSystTestimonialController extends Controller
         ]);
     }
 
+    public function status(Request $request, $id)
+    {
+        $testimonial = Testimonial::findOrFail($id);
+        $testimonial->update(['status' => $request->status]);
+
+        return response()->json(['message' => 'Testimonial']);
+    }
+
     public function exportExcel()
     {
         return Excel::download(new ExportTestimonial, 'testimonials.xlsx');

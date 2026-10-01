@@ -177,6 +177,26 @@ class UserController extends Controller
     }
 
     /**
+     * Toggle the status of a single user.
+     */
+    public function status(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|integer|in:0,1',
+        ]);
+
+        $user = User::findOrFail($id);
+
+        if ($user->role === 'superadmin') {
+            return response()->json(['message' => __('Cannot change superadmin status')], 403);
+        }
+
+        $user->update(['status' => $request->status]);
+
+        return response()->json(['message' => __('User status updated successfully')]);
+    }
+
+    /**
      * Get user statistics
      */
     public function statistics(Request $request)

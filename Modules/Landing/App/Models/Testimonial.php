@@ -15,5 +15,10 @@ class Testimonial extends Model
         'client_name',
         'client_image',
         'work_at',
+        'status',
+    ];
+
+    protected $casts = [
+        'status' => 'boolean',
     ];
 }

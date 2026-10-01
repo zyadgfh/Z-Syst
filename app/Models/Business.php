@@ -25,6 +25,16 @@ class Business extends Model
         'subscriptionDate',
         'remainingShopBalance',
         'shopOpeningBalance',
+        'status',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'status' => 'boolean',
     ];
 
     public function enrolled_plan()
