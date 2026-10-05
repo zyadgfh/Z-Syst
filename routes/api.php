@@ -18,7 +18,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/password-reset', [Api\Auth\ZSystForgotPasswordController::class, 'resetPassword']);
     });
 
-    Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::group(['middleware' => ['auth:sanctum', 'tenant.check']], function () {
 
         Route::get('summary', [Api\StatisticsController::class, 'summary']);
         Route::get('dashboard', [Api\StatisticsController::class, 'dashboard']);
@@ -53,7 +53,9 @@ Route::prefix('v1')->group(function () {
             Route::post('barcodes/print-for-product', [Api\BarcodeController::class, 'printForProduct'])->name('barcodes.print-for-product');
             Route::post('barcodes/print-for-batch', [Api\BarcodeController::class, 'printForBatch'])->name('barcodes.print-for-batch');
             Route::post('barcodes/{barcode}/reprint', [Api\BarcodeController::class, 'reprint'])->name('barcodes.reprint');
-            Route::get('barcodes/download/{filename}', [Api\BarcodeController::class, 'download'])->name('barcodes.download');
+            Route::get('barcodes/download/{filename}', [Api\BarcodeController::class, 'download'])
+                ->where('filename', '.*')
+                ->name('barcodes.download');
             Route::get('barcodes/search', [Api\BarcodeController::class, 'search'])->name('barcodes.search');
             Route::get('barcodes/settings', [Api\BarcodeController::class, 'settings'])->name('barcodes.settings');
             Route::get('barcodes/not-printed', [Api\BarcodeController::class, 'notPrinted'])->name('barcodes.not-printed');

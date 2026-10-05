@@ -37,12 +37,15 @@ class TenantAccessCheck
             }
         }
 
-        // Check route parameters for tenant IDs
-        $routeParameters = $request->route()->parameters();
-        foreach ($routeParameters as $key => $value) {
-            if (str_ends_with($key, '_id') || str_ends_with($key, 'Id')) {
-                // This is a basic check - specific models should have their own policies
-                // Add more sophisticated checking as needed
+        // Route model binding happens before route middleware. Enforce the tenant
+        // boundary for every bound model that exposes a business_id, including
+        // resources whose controller does not repeat the check.
+        if ($user && $user->business_id) {
+            foreach ($request->route()->parameters() as $value) {
+                if (is_object($value) && isset($value->business_id)
+                    && (int) $value->business_id !== (int) $user->business_id) {
+                    abort(404);
+                }
             }
         }
 
