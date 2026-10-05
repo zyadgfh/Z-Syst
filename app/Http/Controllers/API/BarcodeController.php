@@ -61,10 +61,14 @@ class BarcodeController extends Controller
         $validated = $request->validated();
 
         if ($request->has('batch_id')) {
-            $batch = Stock::findOrFail($validated['batch_id']);
+            $batch = Stock::query()
+                ->when($request->user()->role !== 'superadmin', fn ($query) => $query->where('business_id', $request->user()->business_id))
+                ->findOrFail($validated['batch_id']);
             $barcode = $this->barcodeService->generateForBatch($batch, $validated);
         } else {
-            $product = Product::findOrFail($validated['product_id']);
+            $product = Product::query()
+                ->when($request->user()->role !== 'superadmin', fn ($query) => $query->where('business_id', $request->user()->business_id))
+                ->findOrFail($validated['product_id']);
             $barcode = $this->barcodeService->generateForProduct($product, $validated);
         }
 
@@ -80,6 +84,8 @@ class BarcodeController extends Controller
      */
     public function show(Barcode $barcode): JsonResponse
     {
+        abort_unless(request()->user()->role === 'superadmin'
+            || (int) $barcode->business_id === (int) request()->user()->business_id, 404);
         $barcode->load(['product', 'batch']);
 
         return response()->json([
@@ -93,6 +99,8 @@ class BarcodeController extends Controller
      */
     public function update(BarcodeRequest $request, Barcode $barcode): JsonResponse
     {
+        abort_unless($request->user()->role === 'superadmin'
+            || (int) $barcode->business_id === (int) $request->user()->business_id, 404);
         $validated = $request->validated();
         
         $barcode->update($validated);
@@ -109,6 +117,8 @@ class BarcodeController extends Controller
      */
     public function destroy(Barcode $barcode): JsonResponse
     {
+        abort_unless(request()->user()->role === 'superadmin'
+            || (int) $barcode->business_id === (int) request()->user()->business_id, 404);
         $this->barcodeService->deleteBarcode($barcode);
 
         return response()->json([
@@ -129,7 +139,9 @@ class BarcodeController extends Controller
             'size' => 'nullable|in:small,standard,large',
         ]);
 
-        $product = Product::findOrFail($request->product_id);
+        $product = Product::query()
+            ->when($request->user()->role !== 'superadmin', fn ($query) => $query->where('business_id', $request->user()->business_id))
+            ->findOrFail($request->product_id);
         $barcodes = $this->barcodeService->generateMultipleForProduct(
             $product,
             $request->quantity,
@@ -155,7 +167,9 @@ class BarcodeController extends Controller
             'size' => 'nullable|in:small,standard,large',
         ]);
 
-        $batch = Stock::findOrFail($request->batch_id);
+        $batch = Stock::query()
+            ->when($request->user()->role !== 'superadmin', fn ($query) => $query->where('business_id', $request->user()->business_id))
+            ->findOrFail($request->batch_id);
         $barcodes = $this->barcodeService->generateMultipleForBatch(
             $batch,
             $request->quantity,
@@ -174,6 +188,7 @@ class BarcodeController extends Controller
      */
     public function print(Request $request, Barcode $barcode): JsonResponse
     {
+        abort_unless((int) $barcode->business_id === (int) $request->user()->business_id, 404);
         $pdfPath = $this->barcodeService->printBarcode($barcode, $request->user()->id);
 
         return response()->json([
@@ -192,12 +207,22 @@ class BarcodeController extends Controller
     public function printMultiple(Request $request): JsonResponse
     {
         $request->validate([
-            'barcode_ids' => 'required|array',
+            'barcode_ids' => 'required|array|min:1|max:100',
             'barcode_ids.*' => 'exists:barcodes,id',
         ]);
 
+        $barcodeIds = Barcode::query()
+            ->when($request->user()->role !== 'superadmin', fn ($query) => $query->where('business_id', $request->user()->business_id))
+            ->whereIn('id', $request->barcode_ids)
+            ->pluck('id')
+            ->all();
+
+        if (count($barcodeIds) !== count($request->barcode_ids)) {
+            abort(404);
+        }
+
         $pdfPath = $this->barcodeService->printMultipleBarcodes(
-            $request->barcode_ids,
+            $barcodeIds,
             $request->user()->id
         );
 
@@ -221,7 +246,9 @@ class BarcodeController extends Controller
             'quantity' => 'required|integer|min:1|max:100',
         ]);
 
-        $product = Product::findOrFail($request->product_id);
+        $product = Product::query()
+            ->when($request->user()->role !== 'superadmin', fn ($query) => $query->where('business_id', $request->user()->business_id))
+            ->findOrFail($request->product_id);
         $pdfPath = $this->barcodeService->printForProduct(
             $product,
             $request->quantity,
@@ -248,7 +275,9 @@ class BarcodeController extends Controller
             'quantity' => 'required|integer|min:1|max:100',
         ]);
 
-        $batch = Stock::findOrFail($request->batch_id);
+        $batch = Stock::query()
+            ->when($request->user()->role !== 'superadmin', fn ($query) => $query->where('business_id', $request->user()->business_id))
+            ->findOrFail($request->batch_id);
         $pdfPath = $this->barcodeService->printForBatch(
             $batch,
             $request->quantity,
@@ -270,6 +299,7 @@ class BarcodeController extends Controller
      */
     public function reprint(Request $request, Barcode $barcode): JsonResponse
     {
+        abort_unless((int) $barcode->business_id === (int) $request->user()->business_id, 404);
         $pdfPath = $this->barcodeService->reprintBarcode($barcode, $request->user()->id);
 
         return response()->json([
@@ -287,9 +317,14 @@ class BarcodeController extends Controller
      */
     public function download(Request $request, string $filename)
     {
-        $path = storage_path('app/public/' . $filename);
+        $basePath = realpath(storage_path('app/public'));
+        $relativePath = ltrim(str_replace('\\', '/', $filename), '/');
+        $tenantPrefix = 'barcodes/' . (int) $request->user()->business_id . '/';
+        $path = realpath(storage_path('app/public/' . $relativePath));
         
-        if (!file_exists($path)) {
+        if (!$basePath || !$path || !str_starts_with($path, $basePath . DIRECTORY_SEPARATOR)
+            || ($request->user()->role !== 'superadmin' && !str_starts_with($relativePath, $tenantPrefix))
+            || pathinfo($path, PATHINFO_EXTENSION) !== 'pdf') {
             return response()->json([
                 'success' => false,
                 'message' => 'File not found',

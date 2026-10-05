@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Barcode;
 use App\Models\Product;
 use App\Models\Stock;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use PDF;
@@ -195,7 +196,8 @@ class BarcodeService
 
         $pdf = PDF::loadView('barcodes.single', $data);
         
-        $filename = "barcodes/barcode_{$barcode->id}_{$barcode->barcode_number}.pdf";
+        $directory = $this->barcodeDirectory((int) $barcode->business_id);
+        $filename = "{$directory}/barcode_{$barcode->id}_{$barcode->barcode_number}.pdf";
         $path = storage_path('app/public/' . $filename);
         
         $pdf->save($path);
@@ -214,12 +216,23 @@ class BarcodeService
 
         $pdf = PDF::loadView('barcodes.multiple', $data);
         
-        $filename = "barcodes/barcodes_" . time() . ".pdf";
+        $firstBarcode = is_array($barcodes) ? reset($barcodes) : $barcodes->first();
+        $businessId = (int) $firstBarcode->business_id;
+        $directory = $this->barcodeDirectory($businessId);
+        $filename = "{$directory}/barcodes_" . time() . "_" . Str::random(12) . ".pdf";
         $path = storage_path('app/public/' . $filename);
         
         $pdf->save($path);
         
         return $filename;
+    }
+
+    private function barcodeDirectory(int $businessId): string
+    {
+        $directory = "barcodes/{$businessId}";
+        File::ensureDirectoryExists(storage_path('app/public/' . $directory));
+
+        return $directory;
     }
 
     /**
