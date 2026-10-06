@@ -9,8 +9,8 @@ use App\Models\Barcode;
 use App\Models\Product;
 use App\Models\Stock;
 use App\Services\BarcodeService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Storage;
 
@@ -102,7 +102,7 @@ class BarcodeController extends Controller
         abort_unless($request->user()->role === 'superadmin'
             || (int) $barcode->business_id === (int) $request->user()->business_id, 404);
         $validated = $request->validated();
-        
+
         $barcode->update($validated);
 
         return response()->json([
@@ -319,11 +319,11 @@ class BarcodeController extends Controller
     {
         $basePath = realpath(storage_path('app/public'));
         $relativePath = ltrim(str_replace('\\', '/', $filename), '/');
-        $tenantPrefix = 'barcodes/' . (int) $request->user()->business_id . '/';
-        $path = realpath(storage_path('app/public/' . $relativePath));
-        
-        if (!$basePath || !$path || !str_starts_with($path, $basePath . DIRECTORY_SEPARATOR)
-            || ($request->user()->role !== 'superadmin' && !str_starts_with($relativePath, $tenantPrefix))
+        $tenantPrefix = 'barcodes/'.(int) $request->user()->business_id.'/';
+        $path = realpath(storage_path('app/public/'.$relativePath));
+
+        if (! $basePath || ! $path || ! str_starts_with($path, $basePath.DIRECTORY_SEPARATOR)
+            || ($request->user()->role !== 'superadmin' && ! str_starts_with($relativePath, $tenantPrefix))
             || pathinfo($path, PATHINFO_EXTENSION) !== 'pdf') {
             return response()->json([
                 'success' => false,
@@ -348,7 +348,7 @@ class BarcodeController extends Controller
             $request->user()->business_id
         );
 
-        if (!$barcode) {
+        if (! $barcode) {
             return response()->json([
                 'success' => false,
                 'message' => 'Barcode not found',
