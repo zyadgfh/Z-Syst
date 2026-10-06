@@ -19,5 +19,8 @@
         "@dataconnect/generated": "file:src/dataconnect-generated",
         "@vercel/analytics": "^2.0.1",
         "firebase": "^12.16.0"
+    },
+    "overrides": {
+        "@grpc/grpc-js": ">=1.13.6"
     }
 }

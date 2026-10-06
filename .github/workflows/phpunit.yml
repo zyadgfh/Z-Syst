@@ -9,6 +9,10 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    env:
+      CACHE_DRIVER: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
     services: {}
     steps:
       - uses: actions/checkout@v4
@@ -16,7 +20,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.3'
           extensions: curl, bcmath, gd, mbstring, xml, sqlite, pdo_sqlite
 
       - name: Get composer cache
@@ -48,4 +52,4 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
-        run: php artisan test --verbosity=normal --colors=never
+        run: vendor/bin/phpunit --colors=never

@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\Barcode;
 use App\Models\Product;
 use App\Models\Stock;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use PDF;
@@ -88,6 +90,7 @@ class BarcodeService
         for ($i = 0; $i < $quantity; $i++) {
             $barcodes[] = $this->generateForProduct($product, $options);
         }
+
         return $barcodes;
     }
 
@@ -100,6 +103,7 @@ class BarcodeService
         for ($i = 0; $i < $quantity; $i++) {
             $barcodes[] = $this->generateForBatch($batch, $options);
         }
+
         return $barcodes;
     }
 
@@ -119,14 +123,14 @@ class BarcodeService
         // This is a placeholder for barcode image generation
         // In production, you would use a library like picqer/php-barcode-generator
         // For now, we'll return a placeholder path
-        
+
         $filename = "barcodes/{$barcode->id}_{$barcode->barcode_number}.png";
-        
+
         // Placeholder - in production, generate actual barcode image
         // $barcodeGenerator = new \Picqer\Barcode\BarcodeGenerator();
         // $barcodeImage = $barcodeGenerator->getBarcode($barcode->barcode_number, $barcode->barcode_type);
         // Storage::disk('public')->put($filename, $barcodeImage);
-        
+
         return $filename;
     }
 
@@ -146,7 +150,7 @@ class BarcodeService
     public function printMultipleBarcodes(array $barcodeIds, int $userId): string
     {
         $barcodes = Barcode::whereIn('id', $barcodeIds)->get();
-        
+
         foreach ($barcodes as $barcode) {
             $barcode->markAsPrinted($userId);
         }
@@ -160,7 +164,7 @@ class BarcodeService
     public function printForProduct(Product $product, int $quantity, int $userId): string
     {
         $barcodes = $this->generateMultipleForProduct($product, $quantity);
-        
+
         foreach ($barcodes as $barcode) {
             $barcode->markAsPrinted($userId);
         }
@@ -174,7 +178,7 @@ class BarcodeService
     public function printForBatch(Stock $batch, int $quantity, int $userId): string
     {
         $barcodes = $this->generateMultipleForBatch($batch, $quantity);
-        
+
         foreach ($barcodes as $barcode) {
             $barcode->markAsPrinted($userId);
         }
@@ -194,12 +198,13 @@ class BarcodeService
         ];
 
         $pdf = PDF::loadView('barcodes.single', $data);
-        
-        $filename = "barcodes/barcode_{$barcode->id}_{$barcode->barcode_number}.pdf";
-        $path = storage_path('app/public/' . $filename);
-        
+
+        $directory = $this->barcodeDirectory((int) $barcode->business_id);
+        $filename = "{$directory}/barcode_{$barcode->id}_{$barcode->barcode_number}.pdf";
+        $path = storage_path('app/public/'.$filename);
+
         $pdf->save($path);
-        
+
         return $filename;
     }
 
@@ -213,13 +218,24 @@ class BarcodeService
         ];
 
         $pdf = PDF::loadView('barcodes.multiple', $data);
-        
-        $filename = "barcodes/barcodes_" . time() . ".pdf";
-        $path = storage_path('app/public/' . $filename);
-        
+
+        $firstBarcode = is_array($barcodes) ? reset($barcodes) : $barcodes->first();
+        $businessId = (int) $firstBarcode->business_id;
+        $directory = $this->barcodeDirectory($businessId);
+        $filename = "{$directory}/barcodes_".time().'_'.Str::random(12).'.pdf';
+        $path = storage_path('app/public/'.$filename);
+
         $pdf->save($path);
-        
+
         return $filename;
+    }
+
+    private function barcodeDirectory(int $businessId): string
+    {
+        $directory = "barcodes/{$businessId}";
+        File::ensureDirectoryExists(storage_path('app/public/'.$directory));
+
+        return $directory;
     }
 
     /**
@@ -255,7 +271,7 @@ class BarcodeService
      */
     public function validateBarcodeNumber(string $number, string $type): bool
     {
-        return match($type) {
+        return match ($type) {
             Barcode::TYPE_EAN13 => $this->validateEAN13($number),
             Barcode::TYPE_UPC => $this->validateUPC($number),
             default => true, // CODE128 and QR don't have checksums
@@ -267,7 +283,7 @@ class BarcodeService
      */
     private function validateEAN13(string $number): bool
     {
-        if (strlen($number) !== 13 || !ctype_digit($number)) {
+        if (strlen($number) !== 13 || ! ctype_digit($number)) {
             return false;
         }
 
@@ -277,7 +293,7 @@ class BarcodeService
             $sum += ($i % 2 === 0) ? $digit : $digit * 3;
         }
         $checksum = (10 - ($sum % 10)) % 10;
-        
+
         return $checksum === (int) $number[12];
     }
 
@@ -286,7 +302,7 @@ class BarcodeService
      */
     private function validateUPC(string $number): bool
     {
-        if (strlen($number) !== 12 || !ctype_digit($number)) {
+        if (strlen($number) !== 12 || ! ctype_digit($number)) {
             return false;
         }
 
@@ -296,7 +312,7 @@ class BarcodeService
             $sum += ($i % 2 === 0) ? $digit * 3 : $digit;
         }
         $checksum = (10 - ($sum % 10)) % 10;
-        
+
         return $checksum === (int) $number[11];
     }
 
@@ -314,7 +330,7 @@ class BarcodeService
     /**
      * Get barcodes by product.
      */
-    public function getByProduct(int $productId, int $businessId): \Illuminate\Database\Eloquent\Collection
+    public function getByProduct(int $productId, int $businessId): Collection
     {
         return Barcode::where('product_id', $productId)
             ->where('business_id', $businessId)
@@ -325,7 +341,7 @@ class BarcodeService
     /**
      * Get barcodes by batch.
      */
-    public function getByBatch(int $batchId, int $businessId): \Illuminate\Database\Eloquent\Collection
+    public function getByBatch(int $batchId, int $businessId): Collection
     {
         return Barcode::where('batch_id', $batchId)
             ->where('business_id', $businessId)
@@ -336,7 +352,7 @@ class BarcodeService
     /**
      * Get not printed barcodes.
      */
-    public function getNotPrinted(int $businessId): \Illuminate\Database\Eloquent\Collection
+    public function getNotPrinted(int $businessId): Collection
     {
         return Barcode::where('business_id', $businessId)
             ->notPrinted()
