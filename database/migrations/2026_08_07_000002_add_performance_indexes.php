@@ -76,9 +76,11 @@ return new class extends Migration
         });
 
         // Warehouses table indexes
-        Schema::table('warehouses', function (Blueprint $table) {
-            $table->index(['business_id', 'is_active']);
-        });
+        if (! Schema::hasIndex('warehouses', 'warehouses_business_id_is_active_index')) {
+            Schema::table('warehouses', function (Blueprint $table) {
+                $table->index(['business_id', 'is_active']);
+            });
+        }
 
         // Warehouse stocks table indexes
         Schema::table('warehouse_stocks', function (Blueprint $table) {

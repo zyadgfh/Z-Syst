@@ -80,6 +80,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -98,7 +100,13 @@ jobs:
           fi
 
       - name: Run Pint
-        run: vendor/bin/pint --test
+        run: |
+          changed_php_files=$(git diff --name-only "origin/${GITHUB_BASE_REF}"...HEAD -- '*.php')
+          if [ -n "$changed_php_files" ]; then
+            vendor/bin/pint --test $changed_php_files
+          else
+            echo 'No PHP files changed; skipping Pint.'
+          fi
 
   deploy-staging:
     name: Deploy to Staging
