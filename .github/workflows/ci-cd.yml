@@ -13,6 +13,10 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    env:
+      CACHE_DRIVER: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
     
     steps:
       - name: Checkout code
