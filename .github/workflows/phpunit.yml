@@ -52,4 +52,4 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
-        run: php artisan test --verbosity=normal --colors=never
+        run: vendor/bin/phpunit --colors=never

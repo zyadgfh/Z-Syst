@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\TenantResolver;
 use Closure;
 use Illuminate\Http\Request;
-use App\Services\TenantResolver;
 use Symfony\Component\HttpFoundation\Response;
 
 class TenantAccessCheck
@@ -16,14 +16,13 @@ class TenantAccessCheck
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure(\Illuminate\Http\Request): mixed  $next
+     * @param  Closure(Request): mixed  $next
      * @return mixed
      */
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        
+
         // Skip check for super admin
         if ($user && $user->role === 'superadmin') {
             return $next($request);
@@ -32,7 +31,7 @@ class TenantAccessCheck
         // Check if user is trying to access another tenant's data
         if ($request->has('business_id') && $user) {
             $requestedTenantId = (int) $request->input('business_id');
-            if (!$this->resolver->canAccessTenant($requestedTenantId)) {
+            if (! $this->resolver->canAccessTenant($requestedTenantId)) {
                 abort(403, 'You do not have permission to access this tenant data.');
             }
         }

@@ -8,6 +8,13 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // SQLite rebuilds tables when adding constraints and cannot preserve
+        // the existing performance indexes reliably. The base migrations
+        // already define the required relations for the SQLite test database.
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         // Ensure foreign keys are properly set up
         Schema::table('products', function (Blueprint $table) {
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
