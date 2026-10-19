@@ -49,6 +49,11 @@ class Sale extends Model
         return $this->belongsTo(Party::class);
     }
 
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -84,6 +89,7 @@ class Sale extends Model
         'vat_percent' => 'double',
         'paidAmount' => 'double',
         'totalAmount' => 'double',
+        'saleDate' => 'datetime',
         'meta' => 'json',
         'sale_data' => 'json',
     ];

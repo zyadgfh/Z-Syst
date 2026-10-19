@@ -68,9 +68,23 @@ class TraceabilityService
     /**
      * Log traceability event
      */
-    public function logTraceability(array $data): TraceabilityLog
+    public function logTraceability(array|int $data, int $productId = 0, string $type = 'adjustment', int $quantity = 0, array $metadata = []): TraceabilityLog
     {
+        if (is_int($data)) {
+            $data = array_merge($metadata, [
+                'business_id' => $data,
+                'product_id' => $productId,
+                'type' => $type,
+                'quantity' => $quantity,
+                'user_id' => auth()->id(),
+            ]);
+        }
         return TraceabilityLog::create($data);
+    }
+
+    public function getBatchLots(int $businessId, int $productId): array
+    {
+        return BatchLot::forBusiness($businessId)->where('product_id', $productId)->orderBy('expiry_date')->get()->all();
     }
 
     /**
@@ -224,54 +238,29 @@ class TraceabilityService
      */
     public function getExpiringBatches(int $businessId, int $days = 30): array
     {
-        $batches = BatchLot::forBusiness($businessId)
-            ->with('product')
-            ->expiringSoon()
-            ->orderBy('expiry_date')
-            ->get();
-
-        return [
-            'total_expiring_soon' => $batches->count(),
-            'batches' => $batches->map(function ($batch) {
-                return [
-                    'id' => $batch->id,
-                    'identifier' => $batch->identifier,
-                    'product_name' => $batch->product?->name,
-                    'expiry_date' => $batch->expiry_date?->toIso8601String(),
-                    'days_until_expiry' => $batch->days_until_expiry,
-                    'batch_number' => $batch->batch_number,
-                    'lot_number' => $batch->lot_number,
-                ];
-            })->toArray(),
-        ];
+        return BatchLot::forBusiness($businessId)->with('product')
+            ->where('expiry_date', '>', now())
+            ->where('expiry_date', '<=', now()->addDays($days))
+            ->orderBy('expiry_date')->get()->map(fn ($batch) => [
+                'id' => $batch->id, 'identifier' => $batch->identifier,
+                'product_name' => $batch->product?->name,
+                'expiry_date' => $batch->expiry_date?->toIso8601String(),
+                'days_until_expiry' => $batch->days_until_expiry,
+                'batch_number' => $batch->batch_number, 'lot_number' => $batch->lot_number,
+            ])->toArray();
     }
 
-    /**
-     * Get expired batches
-     */
     public function getExpiredBatches(int $businessId): array
     {
-        $batches = BatchLot::forBusiness($businessId)
-            ->with('product')
-            ->expired()
-            ->orderBy('expiry_date', 'desc')
-            ->get();
-
-        return [
-            'total_expired' => $batches->count(),
-            'batches' => $batches->map(function ($batch) {
-                return [
-                    'id' => $batch->id,
-                    'identifier' => $batch->identifier,
-                    'product_name' => $batch->product?->name,
-                    'expiry_date' => $batch->expiry_date?->toIso8601String(),
-                    'days_since_expiry' => abs($batch->days_until_expiry),
-                    'batch_number' => $batch->batch_number,
-                    'lot_number' => $batch->lot_number,
-                    'is_recalled' => $batch->isRecalled(),
-                ];
-            })->toArray(),
-        ];
+        return BatchLot::forBusiness($businessId)->with('product')->expired()
+            ->whereNull('recall_date')->orderBy('expiry_date', 'desc')->get()->map(fn ($batch) => [
+                'id' => $batch->id, 'identifier' => $batch->identifier,
+                'product_name' => $batch->product?->name,
+                'expiry_date' => $batch->expiry_date?->toIso8601String(),
+                'days_since_expiry' => abs($batch->days_until_expiry),
+                'batch_number' => $batch->batch_number, 'lot_number' => $batch->lot_number,
+                'is_recalled' => $batch->isRecalled(),
+            ])->toArray();
     }
 
     /**

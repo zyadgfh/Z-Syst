@@ -30,7 +30,7 @@ class XSSProtectionService
         $html = preg_replace('/on\w+\s*=/i', '', $html);
         
         // Remove data: protocol with base64
-        $html = preg_replace('/data:[^;]*;base64,[a-z0-9+/=]+/i', '', $html);
+        $html = preg_replace('/data:[^;]*;base64,[a-z0-9+\/=]+/i', '', $html);
         
         // Remove vbscript: protocol
         $html = preg_replace('/vbscript:/i', '', $html);
@@ -85,6 +85,11 @@ class XSSProtectionService
         }
 
         return true;
+    }
+
+    public function checkXSS(string $html): bool
+    {
+        return ! $this->validateHTML($html);
     }
 
     /**

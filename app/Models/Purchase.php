@@ -43,6 +43,11 @@ class Purchase extends Model
         return $this->belongsTo(Party::class);
     }
 
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class);
+    }
+
     public function tax(): BelongsTo
     {
         return $this->belongsTo(Tax::class);
