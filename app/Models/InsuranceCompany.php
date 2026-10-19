@@ -69,6 +69,11 @@ class InsuranceCompany extends Model
         return $query->where('business_id', $businessId);
     }
 
+    public function scopeByBusiness($query, $businessId)
+    {
+        return $this->scopeForBusiness($query, $businessId);
+    }
+
     /**
      * Calculate default coverage for a given amount
      */

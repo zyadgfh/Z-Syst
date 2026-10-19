@@ -91,6 +91,11 @@ class InsurancePolicy extends Model
         return $query->where('business_id', $businessId);
     }
 
+    public function scopeByBusiness($query, $businessId)
+    {
+        return $this->scopeForBusiness($query, $businessId);
+    }
+
     public function scopeExpired($query)
     {
         return $query->where('end_date', '<', now());
@@ -99,6 +104,14 @@ class InsurancePolicy extends Model
     public function isExpired(): bool
     {
         return $this->end_date < now();
+    }
+
+    public function isValid($at = null): bool
+    {
+        $date = $at ? \Carbon\Carbon::parse($at) : now();
+        return $this->status === 'active'
+            && $this->start_date <= $date
+            && $this->end_date >= $date;
     }
 
     public function getRemainingLimitAttribute(): float

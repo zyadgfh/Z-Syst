@@ -45,14 +45,14 @@ Route::prefix('v1')->group(function () {
 
             // Barcode API endpoints
             Route::apiResource('barcodes', Api\BarcodeController::class)->except('show');
-            Route::get('barcodes/{barcode}', [Api\BarcodeController::class, 'show'])->name('barcodes.show');
+            Route::get('barcodes/{barcode}', [Api\BarcodeController::class, 'show'])->whereNumber('barcode')->name('barcodes.show');
             Route::post('barcodes/generate-multiple', [Api\BarcodeController::class, 'generateMultiple'])->name('barcodes.generate-multiple');
             Route::post('barcodes/generate-for-batch', [Api\BarcodeController::class, 'generateForBatch'])->name('barcodes.generate-for-batch');
-            Route::post('barcodes/{barcode}/print', [Api\BarcodeController::class, 'print'])->name('barcodes.print');
+            Route::post('barcodes/{barcode}/print', [Api\BarcodeController::class, 'print'])->whereNumber('barcode')->name('barcodes.print');
             Route::post('barcodes/print-multiple', [Api\BarcodeController::class, 'printMultiple'])->name('barcodes.print-multiple');
             Route::post('barcodes/print-for-product', [Api\BarcodeController::class, 'printForProduct'])->name('barcodes.print-for-product');
             Route::post('barcodes/print-for-batch', [Api\BarcodeController::class, 'printForBatch'])->name('barcodes.print-for-batch');
-            Route::post('barcodes/{barcode}/reprint', [Api\BarcodeController::class, 'reprint'])->name('barcodes.reprint');
+            Route::post('barcodes/{barcode}/reprint', [Api\BarcodeController::class, 'reprint'])->whereNumber('barcode')->name('barcodes.reprint');
             Route::get('barcodes/download/{filename}', [Api\BarcodeController::class, 'download'])
                 ->where('filename', '.*')
                 ->name('barcodes.download');

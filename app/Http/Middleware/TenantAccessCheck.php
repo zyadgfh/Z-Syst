@@ -43,7 +43,7 @@ class TenantAccessCheck
             foreach ($request->route()->parameters() as $value) {
                 if (is_object($value) && isset($value->business_id)
                     && (int) $value->business_id !== (int) $user->business_id) {
-                    abort(404);
+                    abort(403, 'You do not have permission to access this tenant data.');
                 }
             }
         }

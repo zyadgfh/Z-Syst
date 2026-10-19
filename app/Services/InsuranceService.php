@@ -13,6 +13,58 @@ use Illuminate\Support\Str;
 
 class InsuranceService
 {
+    public function generatePolicyNumber(int $businessId = 0): string
+    {
+        return $this->generateUniquePolicyNumber();
+    }
+
+    public function generateClaimNumber(int $businessId = 0): string
+    {
+        return $this->generateUniqueClaimNumber();
+    }
+
+    public function resolveCoverage(InsurancePolicy $policy, float $amount, ?int $productId = null, ?int $categoryId = null): float
+    {
+        $rules = $this->getApplicableCoverageRules($policy, array_filter(['total_amount' => $amount, 'product_id' => $productId, 'category_id' => $categoryId]));
+        return (float) ($rules->first()?->coverage_percent ?? $policy->coverage_percent ?? $policy->company?->default_coverage_percent ?? 0);
+    }
+
+    public function recordApproval(InsuranceClaim $claim, float $approvedAmount, ?string $externalReference = null): InsuranceClaim
+    {
+        return $this->processClaim($claim, [
+            'status' => $approvedAmount >= $claim->covered_amount ? 'approved' : 'partially_approved',
+            'approved_amount' => $approvedAmount,
+            'rejected_amount' => max(0, $claim->covered_amount - $approvedAmount),
+            'external_reference' => $externalReference,
+        ]);
+    }
+
+    public function recordPayment(InsuranceClaim $claim, float $amount, $settlementDate = null): InsuranceClaim
+    {
+        return DB::transaction(function () use ($claim, $amount, $settlementDate) {
+            $claim->update(['status' => 'paid', 'paid_amount' => $claim->paid_amount + $amount, 'settlement_date' => $settlementDate ?? now()]);
+            return $claim->fresh();
+        });
+    }
+
+    public function rejectClaim(InsuranceClaim $claim, string $reason): InsuranceClaim
+    {
+        return $this->processClaim($claim, ['status' => 'rejected', 'rejection_reason' => $reason]);
+    }
+
+    public function getSummary(int $businessId): array
+    {
+        $claims = InsuranceClaim::forBusiness($businessId)->get();
+        return [
+            'companies' => ['total' => InsuranceCompany::forBusiness($businessId)->count()],
+            'policies' => ['total' => InsurancePolicy::forBusiness($businessId)->count()],
+            'claims' => [
+                'total' => $claims->count(),
+                'paid_amount' => (float) $claims->sum('paid_amount'),
+            ],
+        ];
+    }
+
     /**
      * Create new insurance company
      */
@@ -118,8 +170,7 @@ class InsuranceService
 
             // Update policy used amount based on approval
             if ($claim->policy && $claim->isApproved()) {
-                $difference = $claim->approved_amount - $claim->covered_amount;
-                $claim->policy->increment('used_amount', $difference);
+                $claim->policy->increment('used_amount', $claim->approved_amount);
             }
 
             return $claim->fresh();
