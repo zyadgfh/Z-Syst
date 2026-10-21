@@ -11,6 +11,8 @@ class GRNItem extends Model
 {
     use HasFactory;
 
+    protected $table = 'grn_items';
+
     /**
      * The attributes that are mass assignable.
      *

@@ -346,3 +346,11 @@ Route::prefix('v1')->group(function () {
         });
     });
 });
+
+// Backward-compatible admin barcode endpoints (without the /v1 prefix).
+Route::middleware('auth:sanctum')
+    ->prefix('admin')
+    ->group(function () {
+        Route::get('barcodes/search', [Api\BarcodeController::class, 'search'])->name('admin.barcodes.search');
+        Route::apiResource('barcodes', Api\BarcodeController::class)->except('show');
+    });
