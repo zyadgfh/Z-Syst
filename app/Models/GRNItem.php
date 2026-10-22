@@ -46,7 +46,7 @@ class GRNItem extends Model
      */
     public function grn(): BelongsTo
     {
-        return $this->belongsTo(GoodsReceivedNote::class);
+        return $this->belongsTo(GoodsReceivedNote::class, 'grn_id');
     }
 
     /**

@@ -6,7 +6,6 @@ use App\Models\GoodsReceivedNote;
 use App\Models\GRNItem;
 use App\Models\Product;
 use App\Models\Stock;
-use App\Models\ProductStock;
 use Illuminate\Support\Facades\DB;
 
 class GRNService
@@ -124,23 +123,9 @@ class GRNService
         $stock = Stock::firstOrCreate([
             'product_id' => $item->product_id,
             'business_id' => $grn->business_id,
-            'branch_id' => $grn->branch_id,
         ]);
 
-        $stock->increment('quantity', $item->accepted_quantity);
-
-        // Add product stock entry with batch/expiry
-        ProductStock::create([
-            'stock_id' => $stock->id,
-            'product_id' => $item->product_id,
-            'business_id' => $grn->business_id,
-            'branch_id' => $grn->branch_id,
-            'quantity' => $item->accepted_quantity,
-            'batch_no' => $item->batch_number,
-            'expire_date' => $item->expiry_date,
-            'purchase_price' => $item->purchase_price,
-            'grn_id' => $grn->id,
-        ]);
+        $stock->increment('productStock', $item->accepted_quantity);
     }
 
     /**
@@ -212,20 +197,11 @@ class GRNService
         $stock = Stock::where([
             'product_id' => $item->product_id,
             'business_id' => $grn->business_id,
-            'branch_id' => $grn->branch_id,
         ])->first();
 
         if ($stock) {
-            $stock->decrement('quantity', $item->accepted_quantity);
+            $stock->decrement('productStock', $item->accepted_quantity);
         }
-
-        // Delete product stock entries
-        ProductStock::where([
-            'product_id' => $item->product_id,
-            'business_id' => $grn->business_id,
-            'branch_id' => $grn->branch_id,
-            'grn_id' => $grn->id,
-        ])->delete();
     }
 
     /**

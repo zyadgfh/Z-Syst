@@ -104,12 +104,12 @@ Route::prefix('v1')->group(function () {
 
             // GRN API endpoints
             Route::apiResource('grn', Api\GRNController::class)->except('show');
+            Route::get('grn/pending', [Api\GRNController::class, 'pending'])->name('grn.pending');
+            Route::get('grn/statistics', [Api\GRNController::class, 'statistics'])->name('grn.statistics');
             Route::get('grn/{grn}', [Api\GRNController::class, 'show'])->name('grn.show');
             Route::post('grn/{grn}/verify', [Api\GRNController::class, 'verify'])->name('grn.verify');
             Route::post('grn/{grn}/accept', [Api\GRNController::class, 'accept'])->name('grn.accept');
             Route::post('grn/{grn}/reject', [Api\GRNController::class, 'reject'])->name('grn.reject');
-            Route::get('grn/pending', [Api\GRNController::class, 'pending'])->name('grn.pending');
-            Route::get('grn/statistics', [Api\GRNController::class, 'statistics'])->name('grn.statistics');
 
             // Supplier API endpoints
             Route::apiResource('suppliers', Api\SupplierController::class)->except('show');
