@@ -151,6 +151,8 @@ Full write-up: `zsyst-fix/09-rls-audit-qa.md` · runnable harness: `zs-repo/tool
 
 | Date | Operation | Result |
 |---|---|---|
+| 2026-10-31 | Pushed `6405f6e` — Path B breakage fixes (auth models/controllers, UserManagementService, seeds, framework tables + plans compat view in Supabase) | COMPLETED |
+| 2026-10-31 | Pushed to GitHub `zyadgfh/Z-Syst` main: commit `3c05a52` (120 files, Path B) | COMPLETED |
 | 2026-10-31 | hCaptcha secret verified with hcaptcha siteverify; full client-side CAPTCHA wiring added to Laravel (config, auth client, user provider, LoginRequest, login view, i18n, env examples) - ships disabled | COMPLETED (pending site key) |
 | 2026-10-31 | Security decisions: `disable_signup=true` (verified 422) · password policy + CAPTCHA blocked by connector schema · `research-control` confirmed absent, `z-syst-api` already `verify_jwt=true` | 2 DONE / 2 BLOCKED |
 | 2026-10-31 | **CRITICAL** privilege escalation via `app_users` found with real JWTs, fixed (dropped self-INSERT policy + guard trigger), re-tested | COMPLETED |
