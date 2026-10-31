@@ -305,7 +305,7 @@ class ZSystSaleController extends Controller
             SaleDetails::insert($saleDetails);
 
             if (isset($party) && $party->phone) {
-                if (env('MESSAGE_ENABLED')) {
+                if (config('services.message.enabled')) {
                     sendMessage($party->phone, saleMessage($sale, $party, $business_name));
                 }
             }

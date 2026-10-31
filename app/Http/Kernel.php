@@ -113,6 +113,7 @@ class Kernel extends HttpKernel
         'admin' => AdminMiddleware::class,
         'business.context' => EnsureBusinessContext::class,
         'tenant.check' => \App\Http\Middleware\TenantAccessCheck::class,
+        'supabase.context' => SetSupabaseContext::class,
         'subscription.limit' => CheckSubscriptionLimits::class,
         // 'token_expired' => \App\Http\Middleware\TokenExpired::class,
     ];

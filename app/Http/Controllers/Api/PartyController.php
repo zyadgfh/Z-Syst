@@ -51,7 +51,7 @@ class PartyController extends Controller
         abort_unless(auth()->user()->role === 'superadmin'
             || (int) $party->business_id === (int) auth()->user()->business_id, 404);
 
-        if (env('MESSAGE_ENABLED')) {
+        if (config('services.message.enabled')) {
             if ($party->due) {
                 $business = Business::findOrFail($party->business_id);
                 $response = sendMessage($party->phone, dueMessage($party, $business->companyName));

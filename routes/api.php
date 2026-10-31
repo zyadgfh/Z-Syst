@@ -18,7 +18,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/password-reset', [Api\Auth\ZSystForgotPasswordController::class, 'resetPassword']);
     });
 
-    Route::group(['middleware' => ['auth:sanctum', 'tenant.check']], function () {
+    Route::group(['middleware' => ['auth:sanctum', 'tenant.check', 'supabase.context']], function () {
 
         Route::get('summary', [Api\StatisticsController::class, 'summary']);
         Route::get('dashboard', [Api\StatisticsController::class, 'dashboard']);
@@ -348,7 +348,7 @@ Route::prefix('v1')->group(function () {
 });
 
 // Backward-compatible admin barcode endpoints (without the /v1 prefix).
-Route::middleware('auth:sanctum')
+Route::middleware(['auth:sanctum', 'supabase.context'])
     ->prefix('admin')
     ->group(function () {
         Route::get('barcodes/search', [Api\BarcodeController::class, 'search'])->name('admin.barcodes.search');
