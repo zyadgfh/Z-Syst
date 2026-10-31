@@ -4,43 +4,45 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
 
+/**
+ * Seeds public.app_users profiles only.
+ *
+ * Path B: passwords and e-mail addresses live in Supabase auth.users. A seeder
+ * cannot create them without the Admin API (service_role), and app_users.id is
+ * a foreign key to auth.users.id — so this seeder is a no-op unless the caller
+ * supplies existing auth user ids.
+ *
+ * Create the identities first:
+ *   Supabase dashboard -> Authentication -> Users -> Add user
+ *   or POST /auth/v1/admin/users with the service_role key.
+ */
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create Super Admin
-        $superAdmin = User::create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@z-syst.com',
-            'password' => Hash::make('SuperAdmin123!'),
-            'role' => 'superadmin',
-            'status' => 'active',
-            'email_verified_at' => now(),
-        ]);
+        $ids = (array) config('supabase.seed_auth_user_ids', []);
 
-        // Create Test Admin User
-        $admin = User::create([
-            'name' => 'Test Admin',
-            'email' => 'admin@test.com',
-            'password' => Hash::make('Admin123!'),
-            'role' => 'admin',
-            'status' => 'active',
-            'email_verified_at' => now(),
-        ]);
+        if ($ids === []) {
+            $this->command?->warn(
+                'UserSeeder skipped: no app_users row can exist without a matching auth.users id. '.
+                'Create users in Supabase Authentication first.'
+            );
 
-        // Create Test Staff User
-        $staff = User::create([
-            'name' => 'Test Staff',
-            'email' => 'staff@test.com',
-            'password' => Hash::make('Staff123!'),
-            'role' => 'staff',
-            'status' => 'active',
-            'email_verified_at' => now(),
-        ]);
+            return;
+        }
 
-        $this->command->info('Users seeded successfully');
+        foreach ($ids as $index => $id) {
+            User::query()->updateOrCreate(
+                ['id' => $id],
+                [
+                    'name' => 'Seeded User '.($index + 1),
+                    'role' => $index === 0 ? 'superadmin' : 'staff',
+                    'status' => 'active',
+                ]
+            );
+        }
+
+        $this->command?->info('User profiles seeded.');
     }
 }

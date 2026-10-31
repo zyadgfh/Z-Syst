@@ -29,17 +29,19 @@ class ZSystUserController extends Controller
     {
         $request->validate([
             'name' => 'required|max:30',
-            'password' => 'required|min:4|max:15',
-            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:10|max:72',
+            'email' => 'required|email',
         ]);
 
-        $data = User::create([
-            'role' => 'staff',
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'business_id' => auth()->user()->business_id,
-            'visibility' => [
+        try {
+            $data = app(\App\Services\UserManagementService::class)->createUserWithRole([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => $request->password,
+                'business_id' => auth()->user()->business_id,
+                'role' => 'staff',
+                'status' => 'active',
+                'visibility' => [
                 'dashboardPermission' => $request->dashboardPermission == 'true' ? true : false,
                 'addExpensePermission' => $request->addExpensePermission == 'true' ? true : false,
                 'dueListPermission' => $request->dueListPermission == 'true' ? true : false,
@@ -54,8 +56,15 @@ class ZSystUserController extends Controller
                 'salesListPermission' => $request->salesListPermission == 'true' ? true : false,
                 'stockPermission' => $request->stockPermission == 'true' ? true : false,
                 'addIncomePermission' => $request->addIncomePermission == 'true' ? true : false,
-            ],
-        ]);
+                ],
+            ], 'staff');
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 422);
+        }
 
         return response()->json([
             'message' => __('Data saved successfully.'),
@@ -70,16 +79,17 @@ class ZSystUserController extends Controller
     {
         $request->validate([
             'name' => 'required|max:30',
-            'password' => 'nullable|min:4|max:15',
-            'email' => 'required|email|unique:users,email,'.$user->id,
+            'password' => 'nullable|min:10|max:72',
+            'email' => 'required|email',
         ]);
 
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'business_id' => auth()->user()->business_id,
-            'visibility' => [
+        try {
+            $user = app(\App\Services\UserManagementService::class)->updateUserWithRole($user, [
+                'name' => $request->name,
+                'business_id' => auth()->user()->business_id,
+                'status' => $user->status,
+                'password' => $request->password,
+                'visibility' => [
                 'dashboardPermission' => $request->dashboardPermission == 'true' ? true : false,
                 'addExpensePermission' => $request->addExpensePermission == 'true' ? true : false,
                 'dueListPermission' => $request->dueListPermission == 'true' ? true : false,
@@ -94,8 +104,13 @@ class ZSystUserController extends Controller
                 'salesListPermission' => $request->salesListPermission == 'true' ? true : false,
                 'stockPermission' => $request->stockPermission == 'true' ? true : false,
                 'addIncomePermission' => $request->addIncomePermission == 'true' ? true : false,
-            ],
-        ]);
+                ],
+            ], (string) $user->role);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
 
         return response()->json([
             'message' => __('Data saved successfully.'),

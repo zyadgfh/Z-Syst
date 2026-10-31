@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Models\Concerns\HasSupabaseRoles;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class AppUser extends Authenticatable
 {
+    use HasApiTokens;
     use HasSupabaseRoles;
     use Notifiable;
 

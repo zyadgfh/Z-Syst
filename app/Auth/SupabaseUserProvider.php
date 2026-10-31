@@ -22,7 +22,7 @@ class SupabaseUserProvider implements UserProvider
 
     public function __construct(
         protected SupabaseAuthClient $client,
-        protected string $model = \App\Models\AppUser::class,
+        protected string $model = \App\Models\User::class,
     ) {
     }
 

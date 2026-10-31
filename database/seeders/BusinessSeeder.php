@@ -12,7 +12,7 @@ class BusinessSeeder extends Seeder
     public function run(): void
     {
         // Get the test admin user
-        $admin = User::where('email', 'admin@test.com')->first();
+        $admin = User::query()->where('role', 'admin')->first();
         
         if (!$admin) {
             $this->command->error('Admin user not found. Run UserSeeder first.');

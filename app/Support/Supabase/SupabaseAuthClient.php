@@ -73,6 +73,32 @@ class SupabaseAuthClient
         return $this->normalise($response->json());
     }
 
+    /**
+     * Trigger a password-recovery email. GoTrue owns the token; the link lands
+     * on SITE_URL with the recovery token, which NewPasswordController then
+     * exchanges for a new password.
+     */
+    public function recover(string $email): bool
+    {
+        $response = $this->request()->post($this->endpoint('recover'), [
+            'email' => $email,
+        ]);
+
+        return $response->successful();
+    }
+
+    /**
+     * Set a new password using a recovery access token.
+     */
+    public function updatePassword(string $accessToken, #[\SensitiveParameter] string $password): bool
+    {
+        $response = $this->request($accessToken)->put($this->endpoint('user'), [
+            'password' => $password,
+        ]);
+
+        return $response->successful();
+    }
+
     public function signOut(string $accessToken): bool
     {
         return $this->request($accessToken)->post($this->endpoint('logout'))->successful();

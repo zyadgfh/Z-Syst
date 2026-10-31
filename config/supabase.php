@@ -21,6 +21,7 @@ return [
         'token_path' => '/auth/v1/token',
         'user_path' => '/auth/v1/user',
         'logout_path' => '/auth/v1/logout',
+        'recover_path' => '/auth/v1/recover',
         'timeout' => (int) env('SUPABASE_HTTP_TIMEOUT', 10),
     ],
 

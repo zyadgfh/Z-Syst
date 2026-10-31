@@ -74,16 +74,23 @@ class ZSystProfileController extends Controller
         ]);
 
         $user = auth()->user();
+        $service = app(\App\Services\UserManagementService::class);
 
-        if (! Hash::check($request->current_password, $user->password)) {
+        // PATH B: there is no local hash to compare against. Ask GoTrue to
+        // verify the current password, then let the Admin API set the new one.
+        $email = (string) $user->email;
+
+        if ($email === '' || ! $service->verifyPassword($email, (string) $request->current_password)) {
             return response()->json([
                 'error' => __('Current password does not match with old password.'),
             ], 422);
         }
 
-        $user->update([
-            'password' => Hash::make($request->password),
-        ]);
+        if (! $service->changePassword($user, (string) $request->password)) {
+            return response()->json([
+                'error' => __('Password change is not available right now. Please contact support.'),
+            ], 503);
+        }
 
         AuditLogger::log('password.changed', 'User password changed.', [
             'user_id' => $user->id,
