@@ -1,1 +1,4 @@
 *.sqlite*
+/database_export.sql
+/export_*.php
+/supabase_schema.txt.bak
