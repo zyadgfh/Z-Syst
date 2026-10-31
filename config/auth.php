@@ -67,8 +67,10 @@ return [
 
     'providers' => [
         'users' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_USER_MODEL', App\Models\User::class),
+            // Credentials are verified by Supabase GoTrue; the model is the
+            // public.app_users row (uuid = auth.users.id) provisioned per business.
+            'driver' => 'supabase',
+            'model' => env('AUTH_USER_MODEL', App\Models\AppUser::class),
         ],
 
         // 'users' => [

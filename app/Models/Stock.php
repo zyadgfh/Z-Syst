@@ -2,56 +2,39 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Stock - table `stocks` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class Stock extends Model
 {
-    use HasFactory;
+    protected $table = 'stocks';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
         'business_id',
         'product_id',
-        'productStock',
+        'product_stock',
         'batch_no',
         'expire_date',
         'barcode',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
     protected $casts = [
+        'product_id' => 'integer',
+        'product_stock' => 'integer',
         'expire_date' => 'date',
     ];
 
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class, 'business_id');
+    }
+
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
-    }
-
-    /**
-     * Get barcodes for the stock batch.
-     */
-    public function barcodes(): HasMany
-    {
-        return $this->hasMany(Barcode::class, 'batch_id');
-    }
-
-    /**
-     * Get active barcodes for the stock batch.
-     */
-    public function activeBarcodes(): HasMany
-    {
-        return $this->hasMany(Barcode::class, 'batch_id')->where('is_active', true);
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

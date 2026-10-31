@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * FinancialAuditLog - table `financial_audit_logs` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class FinancialAuditLog extends Model
 {
-    use HasFactory;
+    protected $table = 'financial_audit_logs';
 
     protected $fillable = [
         'business_id',
@@ -31,40 +34,22 @@ class FinancialAuditLog extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'opening_balance' => 'decimal:2',
+        'total_revenue' => 'decimal:2',
+        'total_expenses' => 'decimal:2',
+        'closing_balance' => 'decimal:2',
+        'variance' => 'decimal:4',
+        'metadata' => 'array',
         'completed_at' => 'datetime',
-        'metadata' => 'json',
     ];
 
     public function business(): BelongsTo
     {
-        return $this->belongsTo(Business::class);
+        return $this->belongsTo(Business::class, 'business_id');
     }
 
-    public function user(): BelongsTo
+    public function appUser(): BelongsTo
     {
-        return $this->belongsTo(User::class);
-    }
-
-    public function scopeByBusiness($query, $businessId)
-    {
-        return $query->where('business_id', $businessId);
-    }
-
-    public function scopeByStatus($query, $status)
-    {
-        return $query->where('status', $status);
-    }
-
-    public function scopeByType($query, $type)
-    {
-        return $query->where('audit_type', $type);
-    }
-
-    public function calculateVariance()
-    {
-        $expectedClosingBalance = $this->opening_balance + $this->total_revenue - $this->total_expenses;
-        $this->variance = $this->closing_balance - $expectedClosingBalance;
-
-        return $this;
+        return $this->belongsTo(AppUser::class, 'user_id');
     }
 }

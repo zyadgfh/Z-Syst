@@ -2,23 +2,21 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Product - table `products` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class Product extends Model
 {
-    use HasFactory;
+    protected $table = 'products';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
-        'productName',
         'business_id',
+        'product_name',
         'category_id',
         'unit_id',
         'type_id',
@@ -30,135 +28,176 @@ class Product extends Model
         'sales_price',
         'alert_qty',
         'wholesale_price',
-        'productCode',
+        'product_code',
         'images',
-        'meta',
         'tax_id',
         'tax_type',
+        'meta',
+        'barcode',
     ];
 
-    /**
-     * Display-name accessor.
-     *
-     * A lot of the codebase (receipts, reports, traceability, notifications)
-     * reads $product->name, but the physical column is productName. Expose a
-     * name attribute so those references resolve instead of returning null.
-     */
-    public function getNameAttribute(): ?string
-    {
-        return $this->productName;
-    }
+    protected $casts = [
+        'category_id' => 'integer',
+        'unit_id' => 'integer',
+        'type_id' => 'integer',
+        'manufacturer_id' => 'integer',
+        'box_size_id' => 'integer',
+        'purchase_without_tax' => 'decimal:2',
+        'purchase_with_tax' => 'decimal:2',
+        'profit_percent' => 'decimal:2',
+        'sales_price' => 'decimal:2',
+        'alert_qty' => 'integer',
+        'wholesale_price' => 'decimal:2',
+        'tax_id' => 'integer',
+    ];
 
-    public function stocks(): HasMany
+    public function business(): BelongsTo
     {
-        return $this->hasMany(Stock::class)->where('productStock', '>', 0);
-    }
-
-    /**
-     * Get stocks ordered by FEFO (nearest expiry first).
-     */
-    public function fefoStocks(): HasMany
-    {
-        return $this->hasMany(Stock::class)
-            ->where('productStock', '>', 0)
-            ->orderByRaw('CASE WHEN expire_date IS NULL THEN 1 ELSE 0 END')
-            ->orderBy('expire_date', 'asc')
-            ->orderBy('id', 'asc');
-    }
-
-    /**
-     * Get only expiring stocks (within grace days).
-     */
-    public function expiringStocks(int $graceDays = 30): HasMany
-    {
-        $threshold = now()->startOfDay()->addDays($graceDays);
-
-        return $this->hasMany(Stock::class)
-            ->where('productStock', '>', 0)
-            ->whereNotNull('expire_date')
-            ->where('expire_date', '<=', $threshold)
-            ->where('expire_date', '>=', now()->startOfDay())
-            ->orderBy('expire_date', 'asc');
-    }
-
-    public function expiring_item()
-    {
-        return $this->hasOne(Stock::class, 'product_id');
-    }
-
-    public function tax(): BelongsTo
-    {
-        return $this->belongsTo(Tax::class);
-    }
-
-    public function unit(): BelongsTo
-    {
-        return $this->belongsTo(Unit::class);
+        return $this->belongsTo(Business::class, 'business_id');
     }
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
-    public function manufacterer(): BelongsTo
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class, 'unit_id');
+    }
+
+    public function manufacturer(): BelongsTo
     {
         return $this->belongsTo(Manufacturer::class, 'manufacturer_id');
     }
 
-    public function medicine_type(): BelongsTo
+    public function boxSize(): BelongsTo
     {
-        return $this->belongsTo(MedicineType::class, 'type_id');
+        return $this->belongsTo(BoxSize::class, 'box_size_id');
     }
 
-    public function box_size(): BelongsTo
+    public function tax(): BelongsTo
     {
-        return $this->belongsTo(BoxSize::class);
+        return $this->belongsTo(Tax::class, 'tax_id');
     }
 
-    /**
-     * Get barcodes for the product.
-     */
+    public function autoOrderRules(): HasMany
+    {
+        return $this->hasMany(AutoOrderRule::class, 'product_id');
+    }
+
+    public function autoOrderSuggestions(): HasMany
+    {
+        return $this->hasMany(AutoOrderSuggestion::class, 'product_id');
+    }
+
     public function barcodes(): HasMany
     {
-        return $this->hasMany(Barcode::class);
+        return $this->hasMany(Barcode::class, 'product_id');
     }
 
-    /**
-     * Get active barcodes for the product.
-     */
-    public function activeBarcodes(): HasMany
+    public function batchLots(): HasMany
     {
-        return $this->hasMany(Barcode::class)->where('is_active', true);
+        return $this->hasMany(BatchLot::class, 'product_id');
     }
 
-    /**
-     * Scope: Products that have batches expiring within a given number of days.
-     */
-    public function scopeExpiringSoon($query, int $days = 30)
+    public function controlledSubstancesLogs(): HasMany
     {
-        return $query->whereHas('stocks', function ($q) use ($days) {
-            $q->whereNotNull('expire_date')
-                ->where('expire_date', '<=', now()->startOfDay()->addDays($days))
-                ->where('expire_date', '>=', now()->startOfDay())
-                ->where('productStock', '>', 0);
-        });
+        return $this->hasMany(ControlledSubstancesLog::class, 'product_id');
     }
 
-    /**
-     * Scope: Products that have expired stock.
-     */
-    public function scopeHasExpired($query)
+    public function fefoLogs(): HasMany
     {
-        return $query->whereHas('stocks', function ($q) {
-            $q->whereNotNull('expire_date')
-                ->where('expire_date', '<', now()->startOfDay())
-                ->where('productStock', '>', 0);
-        });
+        return $this->hasMany(FefoLog::class, 'product_id');
     }
 
-    protected $casts = [
-        'meta' => 'json',
-        'images' => 'json',
-    ];
+    public function grnItems(): HasMany
+    {
+        return $this->hasMany(GrnItem::class, 'product_id');
+    }
+
+    public function prescriptionItems(): HasMany
+    {
+        return $this->hasMany(PrescriptionItem::class, 'product_id');
+    }
+
+    public function purchaseDetails(): HasMany
+    {
+        return $this->hasMany(PurchaseDetail::class, 'product_id');
+    }
+
+    public function purchaseItems(): HasMany
+    {
+        return $this->hasMany(PurchaseItem::class, 'product_id');
+    }
+
+    public function purchaseOrderItems(): HasMany
+    {
+        return $this->hasMany(PurchaseOrderItem::class, 'product_id');
+    }
+
+    public function purchaseReturnItems(): HasMany
+    {
+        return $this->hasMany(PurchaseReturnItem::class, 'product_id');
+    }
+
+    public function recallEvents(): HasMany
+    {
+        return $this->hasMany(RecallEvent::class, 'product_id');
+    }
+
+    public function saleDetails(): HasMany
+    {
+        return $this->hasMany(SaleDetail::class, 'product_id');
+    }
+
+    public function saleItems(): HasMany
+    {
+        return $this->hasMany(SaleItem::class, 'product_id');
+    }
+
+    public function saleReturnItems(): HasMany
+    {
+        return $this->hasMany(SaleReturnItem::class, 'product_id');
+    }
+
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class, 'product_id');
+    }
+
+    public function stockTakeItems(): HasMany
+    {
+        return $this->hasMany(StockTakeItem::class, 'product_id');
+    }
+
+    public function stockTransfers(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class, 'product_id');
+    }
+
+    public function stocks(): HasMany
+    {
+        return $this->hasMany(Stock::class, 'product_id');
+    }
+
+    public function supplierInvoiceItems(): HasMany
+    {
+        return $this->hasMany(SupplierInvoiceItem::class, 'product_id');
+    }
+
+    public function traceabilityLogs(): HasMany
+    {
+        return $this->hasMany(TraceabilityLog::class, 'product_id');
+    }
+
+    public function warehouseStockBatchs(): HasMany
+    {
+        return $this->hasMany(WarehouseStockBatch::class, 'product_id');
+    }
+
+    public function warehouseStocks(): HasMany
+    {
+        return $this->hasMany(WarehouseStock::class, 'product_id');
+    }
 }

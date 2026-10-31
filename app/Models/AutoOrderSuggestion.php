@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * AutoOrderSuggestion - table `auto_order_suggestions` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class AutoOrderSuggestion extends Model
 {
-    use HasFactory;
+    protected $table = 'auto_order_suggestions';
 
     protected $fillable = [
         'business_id',
@@ -30,53 +33,26 @@ class AutoOrderSuggestion extends Model
     ];
 
     protected $casts = [
+        'product_id' => 'integer',
+        'preferred_supplier_id' => 'integer',
         'predicted_demand' => 'decimal:2',
-        'current_stock' => 'decimal:2',
-        'pending_purchases' => 'decimal:2',
-        'suggested_order_qty' => 'decimal:2',
+        'current_stock' => 'decimal:4',
+        'pending_purchases' => 'decimal:4',
+        'suggested_order_qty' => 'decimal:4',
         'confidence_score' => 'decimal:2',
         'approved_at' => 'datetime',
+        'converted_purchase_id' => 'integer',
         'converted_at' => 'datetime',
-        'reasoning' => 'json',
+        'reasoning' => 'array',
     ];
 
     public function business(): BelongsTo
     {
-        return $this->belongsTo(Business::class);
+        return $this->belongsTo(Business::class, 'business_id');
     }
 
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
-    }
-
-    public function preferredSupplier(): BelongsTo
-    {
-        return $this->belongsTo(Party::class, 'preferred_supplier_id');
-    }
-
-    public function approvedBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'approved_by');
-    }
-
-    public function convertedPurchase(): BelongsTo
-    {
-        return $this->belongsTo(Purchase::class, 'converted_purchase_id');
-    }
-
-    public function scopePending($query)
-    {
-        return $query->where('status', 'pending');
-    }
-
-    public function scopeApproved($query)
-    {
-        return $query->where('status', 'approved');
-    }
-
-    public function scopeByPriority($query, string $priority)
-    {
-        return $query->where('priority', $priority);
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

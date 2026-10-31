@@ -2,13 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * TraceabilityLog - table `traceability_logs` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class TraceabilityLog extends Model
 {
-    use HasFactory;
+    protected $table = 'traceability_logs';
+
+    const UPDATED_AT = null;
 
     protected $fillable = [
         'business_id',
@@ -18,110 +23,23 @@ class TraceabilityLog extends Model
         'to_warehouse_id',
         'type',
         'quantity',
-        'user_id',
         'notes',
     ];
 
     protected $casts = [
+        'product_id' => 'integer',
+        'from_warehouse_id' => 'integer',
+        'to_warehouse_id' => 'integer',
         'quantity' => 'integer',
     ];
 
     public function business(): BelongsTo
     {
-        return $this->belongsTo(Business::class);
+        return $this->belongsTo(Business::class, 'business_id');
     }
 
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
-    }
-
-    public function fromWarehouse(): BelongsTo
-    {
-        return $this->belongsTo(Warehouse::class, 'from_warehouse_id');
-    }
-
-    public function toWarehouse(): BelongsTo
-    {
-        return $this->belongsTo(Warehouse::class, 'to_warehouse_id');
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Scope for business
-     */
-    public function scopeForBusiness($query, $businessId)
-    {
-        return $query->where('business_id', $businessId);
-    }
-
-    /**
-     * Scope for transfers
-     */
-    public function scopeTransfers($query)
-    {
-        return $query->where('type', 'transfer');
-    }
-
-    /**
-     * Scope for sales
-     */
-    public function scopeSales($query)
-    {
-        return $query->where('type', 'sale');
-    }
-
-    /**
-     * Scope for purchases
-     */
-    public function scopePurchases($query)
-    {
-        return $query->where('type', 'purchase');
-    }
-
-    /**
-     * Scope for specific product
-     */
-    public function scopeForProduct($query, $productId)
-    {
-        return $query->where('product_id', $productId);
-    }
-
-    /**
-     * Scope for specific batch/lot
-     */
-    public function scopeForBatchLot($query, $batchLotNumber)
-    {
-        return $query->where('batch_lot_number', $batchLotNumber);
-    }
-
-    /**
-     * Get movement path as readable string
-     */
-    public function getMovementPathAttribute(): string
-    {
-        $from = $this->fromWarehouse ? $this->fromWarehouse->name : 'External';
-        $to = $this->toWarehouse ? $this->toWarehouse->name : 'External';
-        
-        return "{$from} → {$to}";
-    }
-
-    /**
-     * Get type label
-     */
-    public function getTypeLabelAttribute(): string
-    {
-        return match($this->type) {
-            'transfer' => __('Transfer'),
-            'sale' => __('Sale'),
-            'purchase' => __('Purchase'),
-            'adjustment' => __('Adjustment'),
-            'recall' => __('Recall'),
-            default => ucfirst($this->type),
-        };
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

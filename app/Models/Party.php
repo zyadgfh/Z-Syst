@@ -2,68 +2,69 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Party - table `parties` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class Party extends Model
 {
-    use HasFactory;
+    protected $table = 'parties';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
-        'type',
+        'business_id',
         'name',
         'email',
+        'type',
         'phone',
         'due',
+        'opening_balance',
+        'address',
         'image',
         'status',
-        'address',
-        'business_id',
-        'opening_balance',
     ];
 
-    public function sales_dues(): HasMany
-    {
-        return $this->hasMany(Sale::class)->where('dueAmount', '>', 0);
-    }
-
-    public function purchases_dues(): HasMany
-    {
-        return $this->hasMany(Purchase::class)->where('dueAmount', '>', 0);
-    }
-
-    public function activities()
-    {
-        return $this->hasMany(DoctorActivity::class, 'doctor_id');
-    }
-
-    public function attentionScores()
-    {
-        return $this->hasMany(DoctorAttentionScore::class, 'doctor_id');
-    }
-
-    public function attentionAlerts()
-    {
-        return $this->hasMany(DoctorAttentionAlert::class, 'doctor_id');
-    }
-
-    public function latestAttentionScore()
-    {
-        return $this->hasOne(DoctorAttentionScore::class, 'doctor_id')->latest('calculated_date');
-    }
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
     protected $casts = [
-        'due' => 'double',
+        'due' => 'decimal:2',
+        'opening_balance' => 'decimal:2',
+        'status' => 'boolean',
     ];
+
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class, 'business_id');
+    }
+
+    public function couponRedemptions(): HasMany
+    {
+        return $this->hasMany(CouponRedemption::class, 'party_id');
+    }
+
+    public function customerInteractions(): HasMany
+    {
+        return $this->hasMany(CustomerInteraction::class, 'party_id');
+    }
+
+    public function loyaltyTransactions(): HasMany
+    {
+        return $this->hasMany(LoyaltyTransaction::class, 'party_id');
+    }
+
+    public function prescriptions(): HasMany
+    {
+        return $this->hasMany(Prescription::class, 'party_id');
+    }
+
+    public function purchases(): HasMany
+    {
+        return $this->hasMany(Purchase::class, 'party_id');
+    }
+
+    public function sales(): HasMany
+    {
+        return $this->hasMany(Sale::class, 'party_id');
+    }
 }

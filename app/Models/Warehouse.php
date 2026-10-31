@@ -2,19 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Warehouse - table `warehouses` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class Warehouse extends Model
 {
-    use HasFactory;
-
-    protected static function newFactory()
-    {
-        return \Database\Factories\WarehouseFactory::new();
-    }
+    protected $table = 'warehouses';
 
     protected $fillable = [
         'business_id',
@@ -32,61 +30,21 @@ class Warehouse extends Model
 
     public function business(): BelongsTo
     {
-        return $this->belongsTo(Business::class);
+        return $this->belongsTo(Business::class, 'business_id');
     }
 
-    public function stocks(): HasMany
+    public function stockMovements(): HasMany
     {
-        return $this->hasMany(WarehouseStock::class);
+        return $this->hasMany(StockMovement::class, 'warehouse_id');
     }
 
-    public function transfersFrom(): HasMany
+    public function warehouseStockBatchs(): HasMany
     {
-        return $this->hasMany(StockTransfer::class, 'from_warehouse_id');
+        return $this->hasMany(WarehouseStockBatch::class, 'warehouse_id');
     }
 
-    public function transfersTo(): HasMany
+    public function warehouseStocks(): HasMany
     {
-        return $this->hasMany(StockTransfer::class, 'to_warehouse_id');
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
-    }
-
-    public function scopeDefault($query)
-    {
-        return $query->where('is_default', true);
-    }
-
-    public function scopeForBusiness($query, $businessId)
-    {
-        return $query->where('business_id', $businessId);
-    }
-
-    /**
-     * Get total products count in this warehouse
-     */
-    public function getTotalProductsAttribute(): int
-    {
-        return $this->stocks()->sum('quantity');
-    }
-
-    /**
-     * Get stock for a specific product
-     */
-    public function getStockForProduct(int $productId): ?WarehouseStock
-    {
-        return $this->stocks()->where('product_id', $productId)->first();
-    }
-
-    /**
-     * Check if warehouse has sufficient stock for a product
-     */
-    public function hasSufficientStock(int $productId, int $quantity): bool
-    {
-        $stock = $this->getStockForProduct($productId);
-        return $stock && $stock->quantity >= $quantity;
+        return $this->hasMany(WarehouseStock::class, 'warehouse_id');
     }
 }

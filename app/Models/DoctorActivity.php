@@ -2,20 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * DoctorActivity - table `doctor_activities` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class DoctorActivity extends Model
 {
-    use HasFactory;
+    protected $table = 'doctor_activities';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'doctor_id',
         'business_id',
@@ -28,12 +25,8 @@ class DoctorActivity extends Model
         'details',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
+        'doctor_id' => 'integer',
         'activity_date' => 'date',
         'referral_count' => 'integer',
         'referral_amount' => 'decimal:2',
@@ -41,75 +34,18 @@ class DoctorActivity extends Model
         'details' => 'array',
     ];
 
-    /**
-     * Get the doctor that owns the activity.
-     */
-    public function doctor(): BelongsTo
-    {
-        return $this->belongsTo(Party::class, 'doctor_id');
-    }
-
-    /**
-     * Get the business that owns the activity.
-     */
     public function business(): BelongsTo
     {
-        return $this->belongsTo(Business::class);
+        return $this->belongsTo(Business::class, 'business_id');
     }
 
-    /**
-     * Get the branch that owns the activity.
-     */
     public function branch(): BelongsTo
     {
-        return $this->belongsTo(Branch::class);
+        return $this->belongsTo(Branch::class, 'branch_id');
     }
 
-    /**
-     * Get the medical rep that owns the activity.
-     */
-    public function medicalRep(): BelongsTo
+    public function appUser(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'medical_rep_id');
-    }
-
-    /**
-     * Scope to filter by business.
-     */
-    public function scopeForBusiness($query, $businessId)
-    {
-        return $query->where('business_id', $businessId);
-    }
-
-    /**
-     * Scope to filter by branch.
-     */
-    public function scopeForBranch($query, $branchId)
-    {
-        return $query->where('branch_id', $branchId);
-    }
-
-    /**
-     * Scope to filter by doctor.
-     */
-    public function scopeForDoctor($query, $doctorId)
-    {
-        return $query->where('doctor_id', $doctorId);
-    }
-
-    /**
-     * Scope to filter by date range.
-     */
-    public function scopeInPeriod($query, $startDate, $endDate)
-    {
-        return $query->whereBetween('activity_date', [$startDate, $endDate]);
-    }
-
-    /**
-     * Scope to get recent activities.
-     */
-    public function scopeRecent($query, $days = 30)
-    {
-        return $query->where('activity_date', '>=', now()->subDays($days));
+        return $this->belongsTo(AppUser::class, 'medical_rep_id');
     }
 }

@@ -2,95 +2,91 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Purchase - table `purchases` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class Purchase extends Model
 {
-    use HasFactory;
+    protected $table = 'purchases';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
-        'party_id',
         'business_id',
+        'party_id',
         'user_id',
         'tax_id',
-        'discountAmount',
+        'discount_amount',
         'tax_amount',
-        'dueAmount',
-        'paidAmount',
-        'totalAmount',
-        'invoiceNumber',
-        'isPaid',
-        'paymentType',
-        'purchaseDate',
+        'due_amount',
+        'paid_amount',
+        'total_amount',
+        'invoice_number',
+        'is_paid',
+        'payment_type',
+        'purchase_date',
         'purchase_data',
         'note',
     ];
 
-    public function details()
+    protected $casts = [
+        'party_id' => 'integer',
+        'tax_id' => 'integer',
+        'discount_amount' => 'decimal:2',
+        'tax_amount' => 'decimal:2',
+        'due_amount' => 'decimal:2',
+        'paid_amount' => 'decimal:2',
+        'total_amount' => 'decimal:2',
+        'is_paid' => 'boolean',
+        'purchase_date' => 'datetime',
+        'purchase_data' => 'array',
+    ];
+
+    public function business(): BelongsTo
     {
-        return $this->hasMany(PurchaseDetails::class);
+        return $this->belongsTo(Business::class, 'business_id');
     }
 
     public function party(): BelongsTo
     {
-        return $this->belongsTo(Party::class);
+        return $this->belongsTo(Party::class, 'party_id');
     }
 
-    public function business(): BelongsTo
+    public function appUser(): BelongsTo
     {
-        return $this->belongsTo(Business::class);
+        return $this->belongsTo(AppUser::class, 'user_id');
     }
 
     public function tax(): BelongsTo
     {
-        return $this->belongsTo(Tax::class);
+        return $this->belongsTo(Tax::class, 'tax_id');
     }
 
-    public function user(): BelongsTo
+    public function budgetTransactions(): HasMany
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(BudgetTransaction::class, 'purchase_id');
     }
 
-    public function purchaseReturns()
+    public function purchaseDetails(): HasMany
+    {
+        return $this->hasMany(PurchaseDetail::class, 'purchase_id');
+    }
+
+    public function purchaseItems(): HasMany
+    {
+        return $this->hasMany(PurchaseItem::class, 'purchase_id');
+    }
+
+    public function purchaseReturns(): HasMany
     {
         return $this->hasMany(PurchaseReturn::class, 'purchase_id');
     }
 
-    public function supplierInvoice()
+    public function supplierInvoices(): HasMany
     {
-        return $this->hasOne(SupplierInvoice::class);
+        return $this->hasMany(SupplierInvoice::class, 'purchase_id');
     }
-
-    public static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            if (! $model->invoiceNumber && auth()->check()) {
-                $id = Purchase::where('business_id', auth()->user()->business_id)->count() + 1;
-                $model->invoiceNumber = 'P-'.str_pad($id, 5, '0', STR_PAD_LEFT);
-            }
-        });
-    }
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'isPaid' => 'boolean',
-        'discountAmount' => 'double',
-        'dueAmount' => 'double',
-        'paidAmount' => 'double',
-        'totalAmount' => 'double',
-        'purchase_data' => 'json',
-    ];
 }
