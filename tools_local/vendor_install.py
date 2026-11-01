@@ -228,6 +228,7 @@ namespace Composer\Autoload;
  */
 class ClassLoader
 {
+    private static $registeredLoaders = array();
     private $legacyRoots = array();
     private $prefixDirsPsr4 = array();
     private $fallbackDirsPsr0 = array();
@@ -236,6 +237,7 @@ class ClassLoader
     public function register($prepend = false)
     {
         spl_autoload_register(array($this, 'loadClass'), true, $prepend);
+        self::$registeredLoaders[dirname(__DIR__)] = $this;
     }
 
     public function setPsr4($prefix, $paths) { $this->prefixDirsPsr4[rtrim($prefix, '\\') . '\\'] = $paths; }
@@ -245,6 +247,24 @@ class ClassLoader
         else { $this->fallbackDirsPsr0 = $paths; }
     }
     public function addClassMap($classmap) { $this->classMap = array_merge($this->classMap, $classmap); }
+
+    /**
+     * Composer 2.x API: map of vendor directory => loader instance.
+     * Used by Laravel's exception renderer (and other tooling).
+     */
+    public static function getRegisteredLoaders(): array
+    {
+        return self::$registeredLoaders;
+    }
+
+    public function getClassMap(): array { return $this->classMap; }
+    public function getClassMapAuthoritative(): bool { return false; }
+    public function isClassMapAuthoritative(): bool { return false; }
+    public function getPrefixes(): array { return $this->legacyRoots; }
+    public function getPrefixesPsr4(): array { return $this->prefixDirsPsr4; }
+    public function getFallbackDirs(): array { return $this->fallbackDirsPsr0; }
+    public function getFallbackDirsPsr4(): array { return array(); }
+    public function getApcuPrefix(): string { return 'zsyst-apcu-' . php_sapi_name(); }
 
     public function loadClass($class)
     {

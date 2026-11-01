@@ -13,7 +13,7 @@ class BusinessSeeder extends Seeder
     public function run(): void
     {
         // Get the test admin user
-        $admin = User::where('email', 'admin@test.com')->first();
+        $admin = User::whereEmail('admin@test.com')->first();
 
         if (!$admin) {
             $this->command->error('Admin user not found. Run UserSeeder first.');
@@ -57,6 +57,24 @@ class BusinessSeeder extends Seeder
             'payment_status' => 'paid',
             'notes' => 'Seeded test subscription',
         ]);
+
+        // Local fallback mode: attach test staff and a second business so
+        // cross-tenant isolation can be exercised end to end.
+        if (config('supabase.fallback_eloquent')) {
+            $staff = User::whereEmail('staff@test.com')->first();
+            $staff?->update(['business_id' => $business->id]);
+
+            $businessB = Business::firstOrCreate(
+                ['companyName' => 'Pharmacy B'],
+                [
+                    'business_category_id' => $category->id,
+                    'subscriptionDate' => now(),
+                    'will_expire' => now()->addDays(30),
+                    'status' => true,
+                ]
+            );
+            User::whereEmail('staff-b@test.com')->first()?->update(['business_id' => $businessB->id]);
+        }
 
         $this->command->info('Business seeded successfully');
     }
