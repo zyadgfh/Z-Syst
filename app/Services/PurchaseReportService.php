@@ -65,7 +65,7 @@ class PurchaseReportService
         $query = PurchaseOrder::forBusiness($businessId);
 
         if ($period === 'monthly') {
-            $query->selectRaw('DATE_FORMAT(order_date, "%Y-%m") as period, COUNT(*) as total, SUM(total_amount) as amount')
+            $query->selectRaw(\App\Support\SqlDate::format('order_date', '%Y-%m') . ' as period, COUNT(*) as total, SUM(total_amount) as amount')
                 ->groupBy('period')
                 ->orderBy('period');
         } elseif ($period === 'yearly') {
