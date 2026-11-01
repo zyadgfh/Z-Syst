@@ -165,6 +165,24 @@ phpunit.xml is PHPUnit 11-valid, sqlite connection exists. The real causes were 
 - Edge function `z-syst-api`: verify_jwt=true (only deployed function).
 - Vercel `z-syst-site`: production READY/PROMOTED, SSO-protected — no changes required.
 
+## 5e. Live infra closure: realtime + storage + policy scope check (2026-11-01)
+
+Executed through the Supabase connector (no runtime keys needed):
+
+- **Realtime enabled** (P1-4 ✅): `supabase_realtime` publication now carries the six
+  POS-critical tables — `sales`, `sale_details`, `sale_items`, `products`, `stocks`,
+  `goods_received_notes`. All are RLS-protected, so tenants only ever stream their own rows.
+- **Storage foundation** (P1-5 ✅): private bucket `uploads` (5 MB limit; png/jpeg/webp/svg/pdf)
+  + 4 tenant-scoped policies on `storage.objects` (`zsyst_tenant_{read,insert,update,delete}_uploads`)
+  using folder layout `{business_id}/…` gated by `private.current_business_id()`. Old
+  `public/uploads` files migrate here (P1 follow-up: upload script + Laravel disk config).
+- **Password policy**: connector schema definitively does NOT expose `password_min_length` /
+  `password_hibp_enabled` (live validation error listing the exact allowed keys) — remains
+  dashboard/`sbp_`-only as recorded in §5c.
+- **Post-change audit**: `zsyst_qa.rls_audit()` re-run → **7/7 PASSED** (unchanged; storage
+  policies are additive and tenant-scoped, realtime publication inherits table RLS).
+- Full write-up: `docs/zsyst/17-live-infra-closure.md`.
+
 ## 6. Roadmap
 
 **P0 — Security**
@@ -191,6 +209,10 @@ phpunit.xml is PHPUnit 11-valid, sqlite connection exists. The real causes were 
 
 | Date | Operation | Result |
 |---|---|---|
+| 2026-11-01 | Realtime: 6 POS tables added to `supabase_realtime` (sales, sale_details, sale_items, products, stocks, goods_received_notes) | COMPLETED |
+| 2026-11-01 | Storage: private `uploads` bucket (5MB, image/pdf MIME) + 4 tenant-scoped policies on storage.objects (`{business_id}/` folders via current_business_id) | COMPLETED |
+| 2026-11-01 | password_min_length/HIBP confirmed NOT exposed by connector schema (live validation) — dashboard-only stands | VERIFIED BLOCKED (dashboard) |
+| 2026-11-01 | Post-change `rls_audit()` re-run → 7/7 PASSED | COMPLETED |
 | 2026-11-01 | CI pipeline diagnosed & restored (root causes: missing app_users migration, tripled workflows, starter flutter test, audit gate) — blocking gates + informational tests | COMPLETED |
 | 2026-11-01 | `app_users` local replica migration + changePassword min:10 + flutter smoke test | COMPLETED |
 | 2026-11-01 | Live audit via connector: revoked anon/authenticated grants on 7 Laravel infra tables, refined `zsyst_qa.rls_audit()` check 2, re-run → **7/7 PASSED** | COMPLETED |
