@@ -35,7 +35,9 @@ return [
     |
     */
 
-    'guard' => ['web', 'api'],
+    // NEVER include the 'api' guard here: the api guard IS the sanctum guard,
+// so resolving user() would re-enter SanctumGuard infinitely (stack overflow).
+    'guard' => 'web',
 
     /*
     |--------------------------------------------------------------------------

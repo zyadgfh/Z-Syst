@@ -8,6 +8,34 @@ use Illuminate\Support\Facades\Log;
 
 class Logger
 {
+    /**
+     * Auth context that can never break logging: during early boot (or when
+     * the auth system itself is misconfigured) auth() throws, and since the
+     * exception handler logs through this class, that would mask the real
+     * error. Everything auth-related degrades to null here.
+     */
+    private static function authContext(): array
+    {
+        try {
+            if (! app()->bound('auth') || ! app()->isBooted()) {
+                return [];
+            }
+
+            $user = auth()->user();
+
+            if (! $user) {
+                return [];
+            }
+
+            return [
+                'user_id' => $user->getAuthIdentifier(),
+                'role' => $user->role ?? null,
+            ];
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
     public static function business(string $operation, string $status, array $data = []): void
     {
         Log::channel('business')->log(
@@ -16,8 +44,7 @@ class Logger
             array_merge([
                 'operation' => $operation,
                 'status' => $status,
-                'user_id' => auth()->id(),
-                'business_id' => auth()->user()?->business_id,
+                ...self::authContext(),
                 'timestamp' => now()->toIso8601String(),
             ], $data)
         );
@@ -30,8 +57,7 @@ class Logger
             'file' => $e->getFile(),
             'line' => $e->getLine(),
             'message' => $e->getMessage(),
-            'user_id' => auth()->id(),
-            'business_id' => auth()->user()?->business_id,
+            ...self::authContext(),
             'url' => request()?->fullUrl(),
             'method' => request()?->method(),
         ], $context);
