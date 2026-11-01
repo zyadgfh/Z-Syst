@@ -2,75 +2,104 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Builder;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
+use RuntimeException;
 
-class User extends Authenticatable
+/**
+ * Canonical user model.
+ *
+ * Historically App\Models\User mapped the MySQL `users` table and carried
+ * email, password and remember_token. After the cutover there is no `users`
+ * table: identity is auth.users (GoTrue) and the application profile is
+ * public.app_users. This class therefore extends AppUser so that the ~30
+ * existing call sites keep working, and bridges the two:
+ *
+ *   - $user->email            -> read-through to auth.users (cached per request)
+ *   - User::whereEmail($e)    -> resolves through auth.users, then app_users
+ *   - $user->password = ...   -> throws; passwords are set via GoTrue only
+ *
+ * The class is NOT removed on purpose: renaming it everywhere would be a
+ * large, risky change with no functional gain.
+ */
+class User extends AppUser
 {
-    use HasApiTokens, HasFactory, HasRoles, Notifiable;
+    use HasApiTokens;
+
+    protected $table = 'app_users';
 
     /**
-     * The attributes that are mass assignable.
+     * Request-scoped cache so a table of 50 users runs one auth.users query,
+     * not fifty.
      *
-     * @var array<int, string>
+     * @var array<string, string|null>
      */
-    protected $fillable = [
-        'business_id',
-        'name',
-        'role',
-        'email',
-        'phone',
-        'image',
-        'lang',
-        'status',
-        'password',
-        'visibility',
-        'remember_token',
-        'email_verified_at',
-    ];
+    protected static array $emailCache = [];
 
     /**
-     * The "booted" method of the model.
+     * Email lives in auth.users; expose it as a normal attribute.
      */
-    protected static function booted()
+    public function getEmailAttribute(): ?string
     {
-        // Only apply tenant scope in non-admin contexts
-        static::addGlobalScope('tenant', function ($query) {
-            if (auth()->check() && 
-                auth()->user()->role !== 'superadmin' && 
-                !request()->is('admin/*')) {
-                $query->where('business_id', auth()->user()->business_id);
-            }
-        });
+        $id = $this->getKey();
+
+        if (! $id) {
+            return null;
+        }
+
+        $id = (string) $id;
+
+        if (! array_key_exists($id, static::$emailCache)) {
+            static::$emailCache[$id] = AuthUser::emailFor($id);
+        }
+
+        return static::$emailCache[$id];
+    }
+
+    public function hasAttribute($key): bool
+    {
+        if ($key === 'email') {
+            return true;
+        }
+
+        return parent::hasAttribute($key);
     }
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
+     * Constrain a query to the users whose auth.users email matches.
      */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    public function scopeWhereEmail(Builder $query, string $email): Builder
+    {
+        return $query->whereIn($this->getQualifiedKeyName(), AuthUser::idsForEmail($email));
+    }
+
+    public static function firstByEmail(string $email): ?self
+    {
+        return static::query()->whereEmail($email)->first();
+    }
 
     /**
-     * The attributes that should be cast.
+     * Password resets are handled by Supabase; never store a hash locally.
      *
-     * @var array<string, string>
+     * @throws RuntimeException always
      */
-    protected $casts = [
-        'password' => 'hashed',
-        'visibility' => 'json',
-        'email_verified_at' => 'datetime',
-    ];
-
-    public function business(): BelongsTo
+    public function setPasswordAttribute($value): void
     {
-        return $this->belongsTo(Business::class);
+        throw new RuntimeException(
+            'Passwords are managed by Supabase Auth. Use SupabaseAuthClient::recover() / updatePassword().'
+        );
+    }
+
+    public function getEmailForPasswordReset(): ?string
+    {
+        return $this->getEmailAttribute();
+    }
+
+    /**
+     * Forget the per-request email cache (used by tests).
+     */
+    public static function flushEmailCache(): void
+    {
+        static::$emailCache = [];
     }
 }

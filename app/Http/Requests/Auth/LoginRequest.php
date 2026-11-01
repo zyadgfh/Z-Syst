@@ -27,11 +27,21 @@ class LoginRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
             'remember' => ['nullable', 'in:on'],
         ];
+
+        // Only enforced when the Supabase project has CAPTCHA protection on;
+        // otherwise the field is optional and simply not forwarded.
+        if (config('supabase.captcha.enabled')) {
+            $rules['captcha_token'] = ['required', 'string'];
+        } else {
+            $rules['captcha_token'] = ['nullable', 'string'];
+        }
+
+        return $rules;
     }
 
     /**
@@ -52,15 +62,40 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $credentials = [
+            'email' => (string) $this->input('email'),
+            'password' => (string) $this->input('password'),
+        ];
+
+        if (config('supabase.captcha.enabled')) {
+            $credentials['captcha_token'] = (string) $this->input('captcha_token');
+        }
+
+        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'email' => $this->failureMessage(),
             ]);
         }
 
         RateLimiter::clear($this->throttleKey());
+    }
+
+    /**
+     * Distinguish a rejected CAPTCHA from bad credentials so the user is not
+     * told their password is wrong when it is not.
+     */
+    protected function failureMessage(): string
+    {
+        $provider = Auth::getProvider();
+
+        if ($provider instanceof \App\Auth\SupabaseUserProvider
+            && $provider->lastError() === 'captcha_failed') {
+            return trans('auth.captcha_failed');
+        }
+
+        return trans('auth.failed');
     }
 
     /**

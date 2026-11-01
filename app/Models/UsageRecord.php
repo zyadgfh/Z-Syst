@@ -2,40 +2,38 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * UsageRecord - table `usage_records` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class UsageRecord extends Model
 {
-    use HasFactory;
+    protected $table = 'usage_records';
 
     protected $fillable = [
-        'business_id', 'subscription_id', 'metric_name', 'quantity', 'recorded_at',
+        'business_id',
+        'subscription_id',
+        'metric_name',
+        'quantity',
+        'recorded_at',
     ];
 
     protected $casts = [
+        'subscription_id' => 'integer',
         'quantity' => 'integer',
-        'recorded_at' => 'datetime',
+        'recorded_at' => 'date',
     ];
 
     public function business(): BelongsTo
     {
-        return $this->belongsTo(Business::class);
+        return $this->belongsTo(Business::class, 'business_id');
     }
 
     public function subscription(): BelongsTo
     {
-        return $this->belongsTo(Subscription::class);
-    }
-
-    public function scopeForMetric($query, string $metric)
-    {
-        return $query->where('metric_name', $metric);
-    }
-
-    public function scopeForPeriod($query, string $startDate, string $endDate)
-    {
-        return $query->whereBetween('recorded_at', [$startDate, $endDate]);
+        return $this->belongsTo(Subscription::class, 'subscription_id');
     }
 }

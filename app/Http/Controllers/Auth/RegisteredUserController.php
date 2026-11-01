@@ -3,200 +3,51 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Mail\RegistrationMail;
-use App\Mail\WelcomeMail;
-use App\Models\Business;
-use App\Models\Plan;
-use App\Models\PlanSubscribe;
-use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Laravel\Sanctum\NewAccessToken;
 
+/**
+ * Public registration is CLOSED.
+ *
+ * Path B moved identity to Supabase GoTrue and the project runs with
+ * disable_signup = true: pharmacies are provisioned after payment (dashboard
+ * or Admin API), not from a public form. The previous implementation wrote
+ * email/password/remember_token columns that no longer exist in app_users and
+ * minted its own OTP, so keeping it would have been a second, weaker auth path.
+ */
 class RegisteredUserController extends Controller
 {
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
-        $request->validate([
-            'address' => 'nullable|max:250',
-            'password' => 'required|max:25',
-            'phoneNumber' => 'required|max:15',
-            'companyName' => 'required|max:250',
-            'email' => 'required|email|max:255',
-            'shopOpeningBalance' => 'nullable|numeric',
-            'business_category_id' => 'required|exists:business_categories,id',
-        ]);
+        $message = __('Self-service registration is disabled. Contact support to activate your pharmacy.');
 
-        DB::beginTransaction();
-        try {
-            // Find free plan
-            $free_plan = Plan::where('subscriptionPrice', '<=', 0)
-                ->orWhere('offerPrice', '<=', 0)
-                ->first();
-
-            // Create business
-            $business = Business::create([
-                'address' => $request->address,
-                'companyName' => $request->companyName,
-                'phoneNumber' => $request->phoneNumber,
-                'subscriptionDate' => $free_plan ? now() : null,
-                'shopOpeningBalance' => $request->shopOpeningBalance ?? 0,
-                'business_category_id' => $request->business_category_id,
-                'will_expire' => $free_plan ? now()->addDays($free_plan->duration) : null,
-            ]);
-
-            // Check email association
-            $user = User::where('email', $request->email)->first();
-            if ($user) {
-                return response()->json([
-                    'message' => 'This email is already associated with a business.',
-                ], 406);
-            }
-
-            // Create user
-            $user = User::create([
-                'business_id' => $business->id,
-                'phone' => $request->phoneNumber,
-                'name' => $business->companyName,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-            ]);
-
-            // Assign free plan if available
-            if ($free_plan) {
-                $subscribe = PlanSubscribe::create([
-                    'plan_id' => $free_plan->id,
-                    'business_id' => $business->id,
-                    'duration' => $free_plan->duration,
-                ]);
-
-                $business->update([
-                    'plan_subscribe_id' => $subscribe->id,
-                ]);
-            }
-
-            // Generate OTP
-            $code = random_int(100000, 999999);
-            $visibility_time = env('OTP_VISIBILITY_TIME', 3);
-            $expire = now()->addSeconds($visibility_time * 60);
-
-            $data = [
-                'code' => $code,
-                'name' => $request->companyName,
-            ];
-
-            $user->update([
-                'remember_token' => $code,
-                'email_verified_at' => $expire,
-            ]);
-
-            if (env('MAIL_USERNAME')) {
-                if (env('QUEUE_MAIL')) {
-                    Mail::to($request->email)->queue(new RegistrationMail($data));
-                } else {
-                    Mail::to($request->email)->send(new RegistrationMail($data));
-                }
-            } else {
-                return response()->json([
-                    'message' => 'Mail service is not configured. Please contact your administrator.',
-                ], 406);
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'message' => 'An OTP code has been sent to your email. Please check and confirm.',
-                'openModal' => true,
-                'email' => $request->email,
-                'otp_expiration' => now()->diffInSeconds($expire),
-            ]);
-
-        } catch (\Throwable $th) {
-            DB::rollBack();
-
-            return response()->json([
-                'message' => 'Something went wrong. Please contact the admin.',
-            ], 403);
+        if ($request->wantsJson()) {
+            return response()->json(['message' => $message], 403);
         }
+
+        return back()->withErrors(['email' => $message]);
     }
 
-    public function otpResend(Request $request)
+    public function otpResend(Request $request): RedirectResponse|JsonResponse
     {
-        $request->validate([
-            'email' => 'required|email|exists:users,email',
-        ]);
+        $message = __('E-mail confirmation is handled by Supabase. Please use the link sent to your inbox.');
 
-        $code = random_int(100000, 999999);
-        $visibility_time = env('OTP_VISIBILITY_TIME', 3);
-        $expire = now()->addSeconds($visibility_time * 60);
-
-        $data = [
-            'code' => $code,
-            'name' => $request->name,
-        ];
-
-        if (env('MAIL_USERNAME')) {
-            if (env('QUEUE_MAIL')) {
-                Mail::to($request->email)->queue(new WelcomeMail($data));
-            } else {
-                Mail::to($request->email)->send(new WelcomeMail($data));
-            }
-        } else {
-            return response()->json([
-                'message' => __('Mail service is not configured. Please contact your administrator.'),
-            ], 406);
+        if ($request->wantsJson()) {
+            return response()->json(['message' => $message], 410);
         }
 
-        User::where('email', $request->email)->first()->update(['remember_token' => $code, 'email_verified_at' => $expire]);
-
-        return response()->json([
-            'message' => 'An otp code has been sent to your email. Please check and confirm.',
-            'otp_expiration' => now()->diffInSeconds($expire),
-        ]);
+        return back()->withErrors(['email' => $message]);
     }
 
-    public function otpSubmit(Request $request)
+    public function otpSubmit(Request $request): RedirectResponse|JsonResponse
     {
-        $request->validate([
-            'email' => 'required|email',
-            'otp' => 'required|min:4|max:15',
-        ]);
+        $message = __('E-mail confirmation is handled by Supabase. Please use the link sent to your inbox.');
 
-        $user = User::where('email', $request->email)->first();
-
-        if (! $user) {
-            return response()->json(['message' => __('User not found.')], 400);
+        if ($request->wantsJson()) {
+            return response()->json(['message' => $message], 410);
         }
 
-        if ($user->remember_token == $request->otp) {
-            if ($user->email_verified_at > now()) {
-                $user->update([
-                    'remember_token' => null,
-                    'email_verified_at' => now(),
-                ]);
-
-                return response()->json([
-                    'message' => 'OTP verified successfully. Please confirm your action in the modal.',
-                    'openModal' => true,
-                    'email' => $request->email,
-                ]);
-            } else {
-                return response()->json(['message' => __('The verification otp has been expired.')], 400);
-            }
-        } else {
-            return response()->json(['message' => __('Invalid otp.')], 400);
-        }
-    }
-
-    protected function setAccessTokenExpiration(NewAccessToken $accessToken)
-    {
-        $expiration = now()->addMinutes(Config::get('sanctum.expiration'));
-
-        DB::table('personal_access_tokens')
-            ->where('id', $accessToken->accessToken->id)
-            ->update(['expires_at' => $expiration]);
+        return back()->withErrors(['email' => $message]);
     }
 }

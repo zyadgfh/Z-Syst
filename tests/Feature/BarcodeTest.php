@@ -131,8 +131,9 @@ class BarcodeTest extends TestCase
      */
     public function test_ean13_validation()
     {
-        $validEAN13 = '6001234567892';
-        $invalidEAN13 = '6001234567899';
+        // The EAN13 checksum for 600123456789 is 9.
+        $validEAN13 = '6001234567899';
+        $invalidEAN13 = '6001234567892';
 
         $this->assertTrue($this->barcodeService->validateBarcodeNumber($validEAN13, Barcode::TYPE_EAN13));
         $this->assertFalse($this->barcodeService->validateBarcodeNumber($invalidEAN13, Barcode::TYPE_EAN13));
@@ -419,7 +420,9 @@ class BarcodeTest extends TestCase
     public function test_api_can_create_barcode()
     {
         $user = User::factory()->create();
-        $product = Product::factory()->create();
+        $product = Product::factory()->create([
+            'business_id' => $user->business_id,
+        ]);
 
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/admin/barcodes', [

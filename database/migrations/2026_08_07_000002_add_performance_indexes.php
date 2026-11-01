@@ -76,8 +76,11 @@ return new class extends Migration
         });
 
         // Warehouses table indexes
-        // NOTE: ['business_id','is_active'] is already created inline by
-        // 2026_08_04_000001_create_warehouses_table — do not duplicate it here.
+        if (! Schema::hasIndex('warehouses', 'warehouses_business_id_is_active_index')) {
+            Schema::table('warehouses', function (Blueprint $table) {
+                $table->index(['business_id', 'is_active']);
+            });
+        }
 
         // Warehouse stocks table indexes
         Schema::table('warehouse_stocks', function (Blueprint $table) {

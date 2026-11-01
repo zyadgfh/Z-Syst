@@ -48,7 +48,10 @@ class PartyController extends Controller
 
     public function show(Party $party)
     {
-        if (env('MESSAGE_ENABLED')) {
+        abort_unless(auth()->user()->role === 'superadmin'
+            || (int) $party->business_id === (int) auth()->user()->business_id, 404);
+
+        if (config('services.message.enabled')) {
             if ($party->due) {
                 $business = Business::findOrFail($party->business_id);
                 $response = sendMessage($party->phone, dueMessage($party, $business->companyName));
@@ -79,6 +82,9 @@ class PartyController extends Controller
      */
     public function update(Request $request, Party $party)
     {
+        abort_unless(auth()->user()->role === 'superadmin'
+            || (int) $party->business_id === (int) auth()->user()->business_id, 404);
+
         $request->validate([
             'phone' => 'required|max:20|unique:parties,phone,'.$party->id,
         ]);
@@ -99,6 +105,9 @@ class PartyController extends Controller
      */
     public function destroy(Party $party)
     {
+        abort_unless(auth()->user()->role === 'superadmin'
+            || (int) $party->business_id === (int) auth()->user()->business_id, 404);
+
         $party->delete();
 
         return response()->json([

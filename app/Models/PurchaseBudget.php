@@ -2,43 +2,56 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * PurchaseBudget - table `purchase_budgets` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class PurchaseBudget extends Model
 {
-    use HasFactory, SoftDeletes;
+    use SoftDeletes;
+
+    protected $table = 'purchase_budgets';
 
     protected $fillable = [
-        'business_id', 'branch_id', 'category_id', 'period',
-        'budget_amount', 'spent_amount', 'remaining_amount',
-        'start_date', 'end_date', 'status', 'created_by', 'approved_by',
+        'business_id',
+        'branch_id',
+        'category_id',
+        'period',
+        'budget_amount',
+        'spent_amount',
+        'remaining_amount',
+        'start_date',
+        'end_date',
+        'status',
+        'created_by',
+        'approved_by',
     ];
 
     protected $casts = [
+        'category_id' => 'integer',
         'budget_amount' => 'decimal:2',
         'spent_amount' => 'decimal:2',
         'remaining_amount' => 'decimal:2',
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
+        'start_date' => 'date',
+        'end_date' => 'date',
     ];
 
-    public function business(): BelongsTo { return $this->belongsTo(Business::class); }
-    public function branch(): BelongsTo { return $this->belongsTo(Branch::class); }
-    public function category(): BelongsTo { return $this->belongsTo(Category::class); }
-    public function createdBy(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
-    public function approvedBy(): BelongsTo { return $this->belongsTo(User::class, 'approved_by'); }
-    public function alerts(): HasMany { return $this->hasMany(BudgetAlert::class); }
-    public function transactions(): HasMany { return $this->hasMany(BudgetTransaction::class); }
-
-    public function scopeForBusiness($query, $businessId) { return $query->where('business_id', $businessId); }
-    public function scopeActive($query) { return $query->where('status', 'active'); }
-
-    public function getSpentPercentageAttribute(): float
+    public function business(): BelongsTo
     {
-        return $this->budget_amount > 0 ? ($this->spent_amount / $this->budget_amount) * 100 : 0;
+        return $this->belongsTo(Business::class, 'business_id');
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class, 'branch_id');
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category_id');
     }
 }

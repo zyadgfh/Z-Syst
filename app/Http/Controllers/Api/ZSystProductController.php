@@ -84,12 +84,17 @@ class ZSystProductController extends Controller
         DB::beginTransaction();
         try {
 
-            $product = Product::create($request->except('images') + [
+            $product = Product::create($request->only([
+                'productName', 'category_id', 'unit_id', 'type_id', 'manufacturer_id',
+                'box_size_id', 'purchase_without_tax', 'purchase_with_tax',
+                'profit_percent', 'sales_price', 'alert_qty', 'wholesale_price',
+                'productCode', 'meta', 'tax_id', 'tax_type',
+            ]) + [
                 'business_id' => $business_id,
                 'images' => $request->images ? $this->multipleUpload($request, 'images') : null,
             ]);
 
-            Stock::create($request->all() + [
+            Stock::create($request->only(['batch_no', 'expire_date', 'productStock']) + [
                 'product_id' => $product->id,
                 'business_id' => $business_id,
             ]);
@@ -115,6 +120,7 @@ class ZSystProductController extends Controller
         $data = Product::query()
             ->with('unit:id,unitName', 'medicine_type:id,name', 'manufacterer:id,name', 'box_size:id,name', 'category:id,categoryName', 'stocks:id,expire_date,product_id,batch_no,productStock', 'tax:id,rate')
             ->withSum('stocks', 'productStock')
+            ->when(auth()->user()->role !== 'superadmin', fn ($query) => $query->where('business_id', auth()->user()->business_id))
             ->findOrFail($id);
 
         return response()->json([
@@ -126,7 +132,11 @@ class ZSystProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $business_id = auth()->user()->business_id;
-        $stock = Stock::where('product_id', $product->id)->first();
+        abort_unless(auth()->user()->role === 'superadmin'
+            || (int) $product->business_id === (int) $business_id, 404);
+        $stock = Stock::where('product_id', $product->id)
+            ->when(auth()->user()->role !== 'superadmin', fn ($query) => $query->where('business_id', $business_id))
+            ->first();
 
         $request->validate([
             'productName' => 'required|string',
@@ -165,7 +175,9 @@ class ZSystProductController extends Controller
             $new_images = $request->images ? $this->multipleUpload($request, 'images') : [];
             $merged_images = array_merge($prev_images, $new_images);
 
-            $stock = Stock::where('product_id', $product->id)->first();
+            $stock = Stock::where('product_id', $product->id)
+                ->when(auth()->user()->role !== 'superadmin', fn ($query) => $query->where('business_id', $business_id))
+                ->first();
 
             if ($stock) {
                 $stock->update([
@@ -174,16 +186,23 @@ class ZSystProductController extends Controller
                     'productStock' => $stock->productStock + $request->qty,
                 ]);
             } else {
-                Stock::create($request->all() + [
+                Stock::create($request->only(['batch_no', 'expire_date']) + [
                     'product_id' => $product->id,
-                    'business_id' => $business_id,
+                    'business_id' => auth()->user()->role === 'superadmin'
+                        ? $product->business_id
+                        : $business_id,
                     'productStock' => $request->qty,
                     'batch_no' => $request->batch_no,
                     'expire_date' => $request->expire_date,
                 ]);
             }
 
-            $product->update($request->except('images') + [
+            $product->update($request->only([
+                'productName', 'category_id', 'type_id', 'unit_id', 'manufacturer_id',
+                'box_size_id', 'purchase_without_tax', 'purchase_with_tax',
+                'profit_percent', 'sales_price', 'alert_qty', 'wholesale_price',
+                'productCode', 'meta', 'tax_id', 'tax_type',
+            ]) + [
                 'images' => $merged_images,
             ]);
 
@@ -221,10 +240,19 @@ class ZSystProductController extends Controller
         DB::beginTransaction();
         try {
 
-            $product = Product::findOrFail($id);
-            $product->update($request->all());
+            $business_id = auth()->user()->business_id;
+            $product = Product::query()
+                ->when(auth()->user()->role !== 'superadmin', fn ($query) => $query->where('business_id', $business_id))
+                ->findOrFail($id);
+            $product->update($request->only([
+                'purchase_without_tax', 'purchase_with_tax', 'profit_percent',
+                'sales_price', 'wholesale_price', 'tax_type', 'tax_id',
+            ]));
 
-            $stock = Stock::where('product_id', $product->id)->where('batch_no', $request->batch_no)->first();
+            $stock = Stock::where('product_id', $product->id)
+                ->where('batch_no', $request->batch_no)
+                ->when(auth()->user()->role !== 'superadmin', fn ($query) => $query->where('business_id', $business_id))
+                ->first();
 
             if ($stock) {
                 $stock->update([
@@ -233,11 +261,13 @@ class ZSystProductController extends Controller
                     'productStock' => $stock->productStock + $request->qty,
                 ]);
             } else {
-                Stock::create($request->all() + [
+                Stock::create($request->only(['batch_no', 'expire_date']) + [
                     'product_id' => $product->id,
                     'productStock' => $request->qty,
                     'expire_date' => $request->expire_date,
-                    'business_id' => auth()->user()->business_id,
+                    'business_id' => auth()->user()->role === 'superadmin'
+                        ? $product->business_id
+                        : $business_id,
                 ]);
             }
 

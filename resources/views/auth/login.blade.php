@@ -60,6 +60,42 @@
                         </a>
                     </div>
 
+                    @if (config('supabase.captcha.enabled'))
+                        <div class="form-group mb-3">
+                            <input type="hidden" name="captcha_token" id="captcha_token" value="{{ old('captcha_token') }}">
+                            <div class="h-captcha"
+                                 data-sitekey="{{ config('supabase.captcha.site_key') }}"
+                                 data-callback="zsystCaptchaDone"
+                                 data-expired-callback="zsystCaptchaExpired"></div>
+                            @error('captcha_token')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
+                            <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+                            <script>
+                                function zsystCaptchaDone(token) {
+                                    document.getElementById('captcha_token').value = token;
+                                }
+
+                                function zsystCaptchaExpired() {
+                                    document.getElementById('captcha_token').value = '';
+                                }
+
+                                // Tokens are single-use: after a failed attempt the
+                                // widget must be reset or the next submit is refused.
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    var form = document.querySelector('.auth-form');
+                                    if (form && window.hcaptcha) {
+                                        form.addEventListener('submit', function () {
+                                            setTimeout(function () {
+                                                try { hcaptcha.reset(); } catch (e) {}
+                                            }, 0);
+                                        });
+                                    }
+                                });
+                            </script>
+                        </div>
+                    @endif
+
                     <button type="submit" class="btn btn-primary w-100 py-3">
                         {{ __('Log In') }}
                     </button>

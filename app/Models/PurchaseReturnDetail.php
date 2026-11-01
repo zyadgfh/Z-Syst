@@ -2,18 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * PurchaseReturnDetail - table `purchase_return_details` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class PurchaseReturnDetail extends Model
 {
-    use HasFactory;
+    protected $table = 'purchase_return_details';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
+    public $timestamps = false;
+
     protected $fillable = [
         'business_id',
         'purchase_return_id',
@@ -22,20 +23,25 @@ class PurchaseReturnDetail extends Model
         'return_qty',
     ];
 
-    /**
-     * Indicates if the model should be timestamped.
-     *
-     * @var bool
-     */
-    public $timestamps = false;
+    protected $casts = [
+        'purchase_return_id' => 'integer',
+        'purchase_detail_id' => 'integer',
+        'return_amount' => 'decimal:2',
+        'return_qty' => 'integer',
+    ];
 
-    public function purchaseReturn()
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class, 'business_id');
+    }
+
+    public function purchaseReturn(): BelongsTo
     {
         return $this->belongsTo(PurchaseReturn::class, 'purchase_return_id');
     }
 
-    public function purchaseDetail()
+    public function purchaseDetail(): BelongsTo
     {
-        return $this->belongsTo(PurchaseDetails::class, 'purchase_detail_id');
+        return $this->belongsTo(PurchaseDetail::class, 'purchase_detail_id');
     }
 }

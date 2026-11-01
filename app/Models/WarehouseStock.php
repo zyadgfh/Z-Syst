@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * WarehouseStock - table `warehouse_stocks` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class WarehouseStock extends Model
 {
-    use HasFactory;
+    protected $table = 'warehouse_stocks';
 
     protected $fillable = [
         'business_id',
@@ -18,72 +21,23 @@ class WarehouseStock extends Model
     ];
 
     protected $casts = [
+        'warehouse_id' => 'integer',
+        'product_id' => 'integer',
         'quantity' => 'integer',
     ];
 
     public function business(): BelongsTo
     {
-        return $this->belongsTo(Business::class);
+        return $this->belongsTo(Business::class, 'business_id');
     }
 
     public function warehouse(): BelongsTo
     {
-        return $this->belongsTo(Warehouse::class);
+        return $this->belongsTo(Warehouse::class, 'warehouse_id');
     }
 
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
-    }
-
-    /**
-     * Increase stock quantity
-     */
-    public function increase(int $amount): bool
-    {
-        return $this->increment('quantity', $amount);
-    }
-
-    /**
-     * Decrease stock quantity
-     */
-    public function decrease(int $amount): bool
-    {
-        if ($this->quantity < $amount) {
-            return false;
-        }
-        return $this->decrement('quantity', $amount);
-    }
-
-    /**
-     * Scope for business
-     */
-    public function scopeForBusiness($query, $businessId)
-    {
-        return $query->where('business_id', $businessId);
-    }
-
-    /**
-     * Scope for warehouse
-     */
-    public function scopeForWarehouse($query, $warehouseId)
-    {
-        return $query->where('warehouse_id', $warehouseId);
-    }
-
-    /**
-     * Scope for low stock (less than 10)
-     */
-    public function scopeLowStock($query)
-    {
-        return $query->where('quantity', '<', 10);
-    }
-
-    /**
-     * Scope for out of stock
-     */
-    public function scopeOutOfStock($query)
-    {
-        return $query->where('quantity', '<=', 0);
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

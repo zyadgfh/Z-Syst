@@ -7,14 +7,9 @@
          failOnRisky="true"
          failOnWarning="true"
          beStrictAboutOutputDuringTests="true"
-         beStrictAboutTodoAnnotatedTests="true"
-         convertErrorsToExceptions="true"
-         convertNoticesToExceptions="true"
-         convertWarningsToExceptions="true"
          stopOnFailure="false"
          cacheDirectory=".phpunit.cache"
          backupGlobals="false"
-         backupStaticAttributes="false"
 >
     <testsuites>
         <testsuite name="Unit">
@@ -24,23 +19,6 @@
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
-
-    <coverage processUncoveredFiles="true">
-        <include>
-            <directory suffix=".php">app</directory>
-        </include>
-        <exclude>
-            <directory suffix=".php">app/Console</directory>
-            <directory suffix=".php">app/Exceptions</directory>
-            <directory suffix=".php">app/Providers</directory>
-            <file>app/Http/Kernel.php</file>
-            <file>app/Http/Middleware/TrustProxies.php</file>
-        </exclude>
-        <report>
-            <html outputDirectory="coverage/html"/>
-            <text outputFile="php://stdout" showUncoveredFiles="true"/>
-        </report>
-    </coverage>
 
     <php>
         <env name="APP_ENV" value="testing"/>
