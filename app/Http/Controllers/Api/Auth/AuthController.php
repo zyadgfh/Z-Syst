@@ -3,164 +3,241 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\WelcomeMail;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Throwable;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Laravel\Sanctum\NewAccessToken;
 
-/**
- * Mobile / SPA authentication.
- *
- * PATH B: credentials are verified by Supabase GoTrue through the `supabase`
- * user provider (see App\Auth\SupabaseUserProvider). This controller no
- * longer stores password hashes, no longer keeps OTP codes in remember_token
- * and no longer writes to columns that do not exist in public.app_users.
- *
- * Account creation and e-mail confirmation are handled by Supabase:
- *  - self-service signup is disabled on the project (disable_signup = true)
- *  - users are provisioned after payment from the dashboard / Admin API
- */
 class AuthController extends Controller
 {
-    /**
-     * POST /api/v1/sign-in
-     */
-    public function login(Request $request): JsonResponse
+    public function signUp(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'password' => 'required|min:6|max:100',
+            'email' => 'required|email',
+        ]);
+
+        $code = random_int(100000, 999999);
+        $expire = now()->addMinutes(env('OTP_VISIBILITY_TIME') ?? 3);
+        $data = [
+            'code' => $code,
+            'name' => $request->name,
+        ];
+
+        $user = User::where('email', $request->email)->first();
+        if ($user && $user->business_id) {
+            return response()->json([
+                'message' => 'This email is already exists.',
+            ], 406);
+        }
+
+        if (env('MAIL_USERNAME')) {
+            if (env('QUEUE_MAIL')) {
+                Mail::to($request->email)->queue(new WelcomeMail($data));
+            } else {
+                Mail::to($request->email)->send(new WelcomeMail($data));
+            }
+        } else {
+            return response()->json([
+                'message' => __('Mail service is not configured. Please contact your administrator.'),
+            ], 406);
+        }
+
+        $user = User::updateOrCreate(['email' => $request->email], $request->except('password') + [
+            'remember_token' => $code,
+            'email_verified_at' => $expire,
+            'password' => Hash::make($request->password),
+        ]);
+
+        return response()->json([
+            'message' => 'An otp code has been sent to your email. Please check and confirm.',
+            'data' => $user,
+        ]);
+    }
+
+    public function submitOtp(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required|string',
-            'device_name' => 'nullable|string|max:100',
+            'otp' => 'required|min:4|max:15',
         ]);
 
-        $credentials = [
-            'email' => (string) $request->input('email'),
-            'password' => (string) $request->input('password'),
-        ];
+        $user = User::where('email', $request->email)->first();
 
-        if (config('supabase.captcha.enabled')) {
-            $credentials['captcha_token'] = (string) $request->input('captcha_token');
+        if (! $user) {
+            return response()->json([
+                'status' => 404,
+                'message' => __('User not found'),
+            ], 404);
         }
 
-        if (! Auth::attempt($credentials)) {
+        if ($user->remember_token == $request->otp) {
+            if ($user->email_verified_at > now()) {
+
+                Auth::login($user);
+                $is_setup = $user->business_id ? true : false;
+                $token = $user->createToken('createToken')->plainTextToken;
+                $accessToken = $user->createToken('createToken');
+                $this->setAccessTokenExpiration($accessToken);
+
+                $user->update([
+                    'remember_token' => null,
+                    'email_verified_at' => now(),
+                ]);
+
+                return response()->json([
+                    'message' => 'Logged In successfully!',
+                    'is_setup' => $is_setup,
+                    'token' => $token,
+                ]);
+
+            } else {
+                return response()->json([
+                    'error' => __('The verification otp has been expired.'),
+                ], 400);
+            }
+        } else {
             return response()->json([
-                'message' => __('Invalid email or password!'),
+                'error' => __('Invalid otp.'),
+            ], 404);
+        }
+    }
+
+    public function login(Request $request)
+    {
+        $request->validate([
+            'password' => 'required',
+            'email' => 'required|email',
+        ]);
+
+        if (auth()->attempt($request->only('email', 'password'))) {
+            $user = auth()->user();
+
+            if ($user->role != 'staff' && $user->role != 'shop-owner') {
+                return response()->json([
+                    'message' => 'You can not login as '.$user->role.' from the app!',
+                ], 406);
+            }
+
+            if ($user->remember_token && ! $user->business_id) { // If user didn't verify email
+
+                $code = random_int(100000, 999999);
+                $expire = now()->addMinutes(env('OTP_VISIBILITY_TIME') ?? 3);
+                $data = [
+                    'code' => $code,
+                    'name' => $request->name,
+                ];
+
+                if (env('MAIL_USERNAME')) {
+                    if (env('QUEUE_MAIL')) {
+                        Mail::to($request->email)->queue(new WelcomeMail($data));
+                    } else {
+                        Mail::to($request->email)->send(new WelcomeMail($data));
+                    }
+                } else {
+                    return response()->json([
+                        'message' => __('Mail service is not configured. Please contact your administrator.'),
+                    ], 406);
+                }
+
+                User::where('email', $request->email)->first()->update(['remember_token' => $code, 'email_verified_at' => $expire]);
+
+                return response()->json([
+                    'message' => 'An otp code has been sent to your email. Please check and confirm.',
+                ], 201);
+            }
+
+            return response()->json([
+                'message' => 'User login successfully!',
+                'data' => [
+                    'message' => 'Logged In successfully!',
+                    'is_setup' => $user->business_id ? true : false,
+                    'token' => $user->createToken('createToken')->plainTextToken,
+                ],
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'Invalid email or password!',
+            ], 404);
+        }
+    }
+
+    protected function setAccessTokenExpiration(NewAccessToken $accessToken)
+    {
+        $expiration = now()->addMinutes(Config::get('sanctum.expiration'));
+
+        DB::table('personal_access_tokens')
+            ->where('id', $accessToken->accessToken->id)
+            ->update(['expires_at' => $expiration]);
+    }
+
+    public function signOut(): JsonResponse
+    {
+        if (auth()->user()->tokens()) {
+            auth()->user()->tokens()->delete();
+
+            return response()->json([
+                'message' => __('Sign out successfully'),
+            ]);
+        } else {
+            return response()->json([
+                'message' => __('Unauthorized'),
             ], 401);
         }
+    }
 
-        /** @var User $user */
-        $user = Auth::user();
+    public function refreshToken()
+    {
+        if (auth()->user()->tokens()) {
 
-        if (! in_array($user->role, ['staff', 'shop-owner', 'pharmacist', 'cashier', 'manager'], true)) {
-            Auth::logout();
+            auth()->user()->currentAccessToken()->delete();
+            $data['token'] = auth()->user()->createToken('createToken')->plainTextToken;
 
+            return response()->json($data);
+
+        } else {
             return response()->json([
-                'message' => __('You cannot sign in as :role from the app.', ['role' => $user->role]),
-            ], 403);
+                'message' => __('Unauthorized'),
+            ], 401);
         }
+    }
 
-        if (($user->status ?? 'active') !== 'active') {
-            Auth::logout();
-
-            return response()->json(['message' => __('This account is disabled.')], 403);
-        }
-
-        $device = (string) ($request->input('device_name') ?: 'api');
-
-        return response()->json([
-            'message' => __('Signed in successfully.'),
-            'data' => [
-                'is_setup' => (bool) $user->business_id,
-                'token' => $user->createToken($device)->plainTextToken,
-                'user' => [
-                    'id' => $user->getKey(),
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'role' => $user->role,
-                    'business_id' => $user->business_id,
-                ],
-            ],
+    public function resendOtp(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
         ]);
-    }
 
-    /**
-     * POST /api/v1/sign-up
-     *
-     * Signup is closed: a pharmacy is provisioned after payment, never from a
-     * public endpoint. GoTrue rejects the request anyway (disable_signup).
-     */
-    public function signUp(Request $request): JsonResponse
-    {
-        return response()->json([
-            'message' => __('Self-service signup is disabled. Contact support to activate your pharmacy.'),
-        ], 403);
-    }
+        $code = random_int(100000, 999999);
+        $expire = now()->addMinutes(env('OTP_VISIBILITY_TIME') ?? 3);
+        $data = [
+            'code' => $code,
+            'name' => $request->name,
+        ];
 
-    /**
-     * POST /api/v1/submit-otp
-     *
-     * E-mail confirmation is a GoTrue concern (confirmation link), so the OTP
-     * round-trip that used to live in remember_token is gone.
-     */
-    public function submitOtp(Request $request): JsonResponse
-    {
-        return response()->json([
-            'message' => __('E-mail confirmation is handled by Supabase. Please use the link sent to your inbox.'),
-        ], 410);
-    }
-
-    /**
-     * POST /api/v1/resend-otp
-     */
-    public function resendOtp(Request $request): JsonResponse
-    {
-        return response()->json([
-            'message' => __('E-mail confirmation is handled by Supabase. Please use the link sent to your inbox.'),
-        ], 410);
-    }
-
-    /**
-     * POST /api/v1/sign-out
-     */
-    public function signOut(Request $request): JsonResponse
-    {
-        $user = $request->user();
-
-        if (! $user) {
-            return response()->json(['message' => __('Unauthorized')], 401);
-        }
-
-        $user->currentAccessToken()?->delete();
-        Auth::guard('web')->logout();
-
-        try {
-            $token = (string) $request->bearerToken();
-            if ($token !== '') {
-                app(\App\Support\Supabase\SupabaseAuthClient::class)->signOut($token);
+        if (env('MAIL_USERNAME')) {
+            if (env('QUEUE_MAIL')) {
+                Mail::to($request->email)->queue(new WelcomeMail($data));
+            } else {
+                Mail::to($request->email)->send(new WelcomeMail($data));
             }
-        } catch (Throwable) {
-            // GoTrue being unreachable must not block a local sign-out.
+        } else {
+            return response()->json([
+                'message' => __('Mail service is not configured. Please contact your administrator.'),
+            ], 406);
         }
 
-        return response()->json(['message' => __('Signed out successfully.')]);
-    }
-
-    /**
-     * POST /api/v1/refresh-token
-     */
-    public function refreshToken(Request $request): JsonResponse
-    {
-        $user = $request->user();
-
-        if (! $user) {
-            return response()->json(['message' => __('Unauthorized')], 401);
-        }
-
-        $user->currentAccessToken()?->delete();
+        User::where('email', $request->email)->first()->update(['remember_token' => $code, 'email_verified_at' => $expire]);
 
         return response()->json([
-            'token' => $user->createToken('api')->plainTextToken,
+            'message' => 'An otp code has been sent to your email. Please check and confirm.',
         ]);
     }
 }

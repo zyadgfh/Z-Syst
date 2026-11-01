@@ -2,115 +2,91 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/**
- * Sale - table `sales` (Supabase Postgres).
- * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
- */
 class Sale extends Model
 {
-    protected $table = 'sales';
+    use TenantScoped;
+    use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
         'business_id',
         'party_id',
         'user_id',
         'tax_id',
-        'discount_amount',
-        'due_amount',
-        'is_paid',
+        'discountAmount',
+        'dueAmount',
+        'isPaid',
         'tax_amount',
-        'paid_amount',
-        'total_amount',
-        'loss_profit',
-        'payment_type',
-        'invoice_number',
-        'sale_date',
+        'paidAmount',
+        'totalAmount',
+        'lossProfit',
+        'paymentType',
+        'invoiceNumber',
+        'saleDate',
         'sale_data',
         'meta',
-        'idempotency_key',
     ];
 
-    protected $casts = [
-        'party_id' => 'integer',
-        'tax_id' => 'integer',
-        'discount_amount' => 'decimal:2',
-        'due_amount' => 'decimal:2',
-        'is_paid' => 'boolean',
-        'tax_amount' => 'decimal:2',
-        'paid_amount' => 'decimal:2',
-        'total_amount' => 'decimal:2',
-        'loss_profit' => 'decimal:2',
-        'sale_date' => 'datetime',
-        'sale_data' => 'array',
-        'meta' => 'array',
-    ];
-
-    public function business(): BelongsTo
+    public function details()
     {
-        return $this->belongsTo(Business::class, 'business_id');
-    }
-
-    public function party(): BelongsTo
-    {
-        return $this->belongsTo(Party::class, 'party_id');
-    }
-
-    public function appUser(): BelongsTo
-    {
-        return $this->belongsTo(AppUser::class, 'user_id');
+        return $this->hasMany(SaleDetails::class);
     }
 
     public function tax(): BelongsTo
     {
-        return $this->belongsTo(Tax::class, 'tax_id');
+        return $this->belongsTo(Tax::class);
     }
 
-    public function controlledSubstancesLogs(): HasMany
+    public function party(): BelongsTo
     {
-        return $this->hasMany(ControlledSubstancesLog::class, 'sale_id');
+        return $this->belongsTo(Party::class);
     }
 
-    public function couponRedemptions(): HasMany
+    public function user(): BelongsTo
     {
-        return $this->hasMany(CouponRedemption::class, 'sale_id');
+        return $this->belongsTo(User::class);
     }
 
-    public function fefoLogs(): HasMany
-    {
-        return $this->hasMany(FefoLog::class, 'sale_id');
-    }
-
-    public function insuranceClaims(): HasMany
-    {
-        return $this->hasMany(InsuranceClaim::class, 'sale_id');
-    }
-
-    public function prescriptionRefills(): HasMany
-    {
-        return $this->hasMany(PrescriptionRefill::class, 'sale_id');
-    }
-
-    public function prescriptions(): HasMany
-    {
-        return $this->hasMany(Prescription::class, 'sale_id');
-    }
-
-    public function saleDetails(): HasMany
-    {
-        return $this->hasMany(SaleDetail::class, 'sale_id');
-    }
-
-    public function saleItems(): HasMany
-    {
-        return $this->hasMany(SaleItem::class, 'sale_id');
-    }
-
-    public function saleReturns(): HasMany
+    public function saleReturns()
     {
         return $this->hasMany(SaleReturn::class, 'sale_id');
     }
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (! $model->invoiceNumber && auth()->check()) {
+                $id = Sale::where('business_id', auth()->user()->business_id)->count() + 1;
+                $model->invoiceNumber = 'S-'.str_pad($id, 5, '0', STR_PAD_LEFT);
+            }
+        });
+    }
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'discountAmount' => 'double',
+        'dueAmount' => 'double',
+        'isPaid' => 'boolean',
+        'vat_amount' => 'double',
+        'vat_percent' => 'double',
+        'paidAmount' => 'double',
+        'totalAmount' => 'double',
+        'meta' => 'json',
+        'sale_data' => 'json',
+    ];
 }

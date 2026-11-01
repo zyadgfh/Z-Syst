@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جسر Supabase — اتصال مباشر</title>
+<style>
+  :root {
+    --bg: #0b0f17; --panel: #121826; --panel2: #0e1420; --border: #24304a;
+    --text: #dbe2ef; --muted: #8b97ad; --accent: #3ecf8e; --accent2: #1db980;
+    --danger: #f0616d; --warn: #e8b93e; --mono: 'Consolas','Menlo',monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',Tahoma,Arial,sans-serif; }
+  header { display:flex; align-items:center; gap:12px; padding:14px 22px; border-bottom:1px solid var(--border); background:var(--panel2); }
+  header h1 { font-size:18px; margin:0; }
+  .dot { width:11px; height:11px; border-radius:50%; background:var(--danger); display:inline-block; }
+  .dot.on { background:var(--accent); box-shadow:0 0 8px var(--accent); }
+  main { padding:18px 22px; max-width:1200px; margin:0 auto; }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px; margin-bottom:16px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; }
+  label { display:block; font-size:12px; color:var(--muted); margin-bottom:4px; }
+  input, select, textarea { width:100%; background:var(--panel2); border:1px solid var(--border); color:var(--text); border-radius:6px; padding:8px 10px; font-size:13px; }
+  textarea { font-family:var(--mono); direction:ltr; text-align:left; min-height:140px; resize:vertical; }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:var(--accent2); }
+  button { background:var(--accent2); border:none; color:#04150d; font-weight:700; padding:9px 18px; border-radius:6px; cursor:pointer; font-size:13px; }
+  button.secondary { background:var(--panel2); color:var(--text); border:1px solid var(--border); font-weight:400; }
+  button.danger { background:var(--danger); color:#fff; }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:12px; }
+  .msg { padding:10px 12px; border-radius:6px; font-size:13px; margin-top:12px; white-space:pre-wrap; direction:ltr; text-align:left; font-family:var(--mono); }
+  .msg.err { background:#2a1216; border:1px solid var(--danger); color:#ffb3ba; }
+  .msg.ok { background:#0f2a1e; border:1px solid var(--accent2); color:#b8f5dc; }
+  .msg.info { background:#101d33; border:1px solid #35598f; color:#bcd3f5; }
+  .tabs { display:flex; gap:6px; margin-bottom:12px; }
+  .tabs button { background:var(--panel2); color:var(--muted); border:1px solid var(--border); font-weight:600; }
+  .tabs button.active { background:var(--accent2); color:#04150d; border-color:var(--accent2); }
+  table { width:100%; border-collapse:collapse; font-size:12px; direction:ltr; text-align:left; }
+  th, td { border-bottom:1px solid var(--border); padding:6px 9px; max-width:320px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:var(--mono); }
+  th { color:var(--accent); font-size:11px; text-transform:uppercase; position:sticky; top:0; background:var(--panel); }
+  tr.clickable:hover { background:#1a2438; cursor:pointer; }
+  .tablewrap { max-height:420px; overflow:auto; border:1px solid var(--border); border-radius:8px; }
+  .small { font-size:12px; color:var(--muted); }
+  .badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; background:#1c2b45; color:#9fc1f2; margin-inline-start:6px; }
+  .badge.g { background:#0f2a1e; color:#7fe3b4; }
+  .hint { font-size:12px; color:var(--muted); margin-top:8px; line-height:1.8; }
+  .hidden { display:none; }
+  code { font-family:var(--mono); color:#9fe8c5; }
+</style>
+</head>
+<body>
+<header>
+  <span class="dot" id="connDot"></span>
+  <h1>جسر الاتصال بـ Supabase</h1>
+  <span class="small" id="connLabel">غير متصل</span>
+</header>
+
+<main>
+  <!-- ================= CONNECTION ================= -->
+  <div class="card" id="connectCard">
+    <h3 style="margin-top:0">بيانات الاتصال <span class="badge">تُحفظ في الذاكرة فقط — لا تُسجَّل في أي ملف</span></h3>
+    <div class="grid">
+      <div>
+        <label>طريقة الاتصال</label>
+        <select id="mode">
+          <option value="txn">Transaction Pooler (منفذ 6543 — موصى به)</option>
+          <option value="session">Session Pooler (منفذ 5432)</option>
+          <option value="direct">اتصال مباشر db.REF (منفذ 5432)</option>
+        </select>
+      </div>
+      <div>
+        <label>مرجع المشروع (Project Ref)</label>
+        <input id="ref" placeholder="مثال: abcdefghijklmnop" dir="ltr">
+      </div>
+      <div>
+        <label>المنطقة (للوصلات عبر الـ Pooler)</label>
+        <select id="region">
+          <option value="eu-central-1">eu-central-1 (Frankfurt)</option>
+          <option value="eu-west-1">eu-west-1 (Ireland)</option>
+          <option value="eu-west-2">eu-west-2 (London)</option>
+          <option value="us-east-1">us-east-1 (N. Virginia)</option>
+          <option value="us-west-1">us-west-1 (N. California)</option>
+          <option value="ap-southeast-1">ap-southeast-1 (Singapore)</option>
+          <option value="ap-south-1">ap-south-1 (Mumbai)</option>
+          <option value="me-south-1">me-south-1 (Bahrain)</option>
+          <option value="me-central-1">me-central-1 (UAE)</option>
+          <option value="ca-central-1">ca-central-1 (Canada)</option>
+          <option value="af-south-1">af-south-1 (Cape Town)</option>
+        </select>
+      </div>
+      <div>
+        <label>اسم المستخدم (يُعبّأ تلقائيًا)</label>
+        <input id="user" dir="ltr" placeholder="postgres.xxxxx">
+      </div>
+      <div>
+        <label>كلمة مرور قاعدة البيانات</label>
+        <input id="password" type="password" dir="ltr" placeholder="••••••••••••">
+      </div>
+      <div>
+        <label>قاعدة البيانات</label>
+        <input id="database" dir="ltr" value="postgres">
+      </div>
+    </div>
+    <div class="row">
+      <label style="margin:0;display:flex;gap:6px;align-items:center;color:var(--text);font-size:13px">
+        <input type="checkbox" id="readonly" style="width:auto"> وضع القراءة فقط (يمنع أي تعديل)
+      </label>
+    </div>
+    <div class="row">
+      <button id="btnConnect">اتصال</button>
+      <button id="btnDisconnect" class="danger hidden">قطع الاتصال</button>
+    </div>
+    <div class="hint">
+      المرجع تجده في رابط لوحة مشروعك: <code>supabase.com/dashboard/project/&lt;REF&gt;</code> —
+      وكلمة المرور هي التي حددتها عند إنشاء المشروع (أو من: Project Settings → Database → Reset database password).
+      المنفذ والمنطقة يظهران أيضًا في نفس الصفحة ضمن <code>Connection string</code>.
+    </div>
+    <div id="connMsg"></div>
+  </div>
+
+  <!-- ================= WORKSPACE ================= -->
+  <div id="workspace" class="hidden">
+    <div class="card">
+      <div class="tabs">
+        <button data-tab="tables" class="active">الجداول</button>
+        <button data-tab="query">استعلام SQL</button>
+        <button data-tab="update">تحديث 2026-10-01</button>
+      </div>
+
+      <div id="tab-tables">
+        <div class="row" style="margin:0 0 10px">
+          <button class="secondary" onclick="loadTables()">تحديث القائمة</button>
+          <span class="small" id="tablesCount"></span>
+        </div>
+        <div class="tablewrap"><table id="tablesTable"></table></div>
+        <div id="describeArea" style="margin-top:14px"></div>
+      </div>
+
+      <div id="tab-query" class="hidden">
+        <textarea id="sql" placeholder="SELECT * FROM public.businesses LIMIT 20;"></textarea>
+        <div class="row">
+          <button onclick="runQuery()">تنفيذ</button>
+          <span class="small" id="queryInfo"></span>
+        </div>
+        <div id="queryResult" style="margin-top:10px"></div>
+      </div>
+
+      <div id="tab-update" class="hidden">
+        <p class="small">
+          هذا السكربت يضيف <code>businesses.status</code> و<code>testimonials.status</code>
+          (تغييرات جلسة 2026-10-01) وهو آمن وقابل لإعادة التشغيل. يمكن تصفحه قبل التطبيق:
+        </p>
+        <div class="row">
+          <button onclick="loadScript()" class="secondary">عرض السكربت</button>
+          <button onclick="applyUpdate()">تطبيق التحديث الآن</button>
+        </div>
+        <pre id="scriptView" class="hidden" style="direction:ltr;text-align:left;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:12px;overflow:auto;max-height:300px;font-size:11px"></pre>
+        <div id="updateResult" style="margin-top:10px"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function msg(el, text, cls) {
+  el.innerHTML = '';
+  if (!text) return;
+  const d = document.createElement('div');
+  d.className = 'msg ' + cls;
+  d.textContent = text;
+  el.appendChild(d);
+}
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, opts);
+  return res.json();
+}
+
+// ---- connection form auto-fill ----
+function fillFromMode() {
+  const mode = $('mode').value, ref = $('ref').value.trim();
+  if (!ref) return;
+  if (mode === 'direct') { $('user').value = 'postgres'; }
+  else { $('user').value = 'postgres.' + ref; }
+}
+$('mode').addEventListener('change', fillFromMode);
+$('ref').addEventListener('input', fillFromMode);
+
+function buildHostPort() {
+  const mode = $('mode').value, ref = $('ref').value.trim(), region = $('region').value;
+  if (mode === 'direct') return { host: 'db.' + ref + '.supabase.co', port: 5432 };
+  if (mode === 'session') return { host: 'aws-0-' + region + '.pooler.supabase.com', port: 5432 };
+  return { host: 'aws-0-' + region + '.pooler.supabase.com', port: 6543 };
+}
+
+$('btnConnect').onclick = async () => {
+  const { host, port } = buildHostPort();
+  const payload = {
+    host, port,
+    user: $('user').value.trim(),
+    password: $('password').value,
+    database: $('database').value.trim() || 'postgres',
+    readonly: $('readonly').checked
+  };
+  if (!payload.user || !payload.password) { msg($('connMsg'), 'أدخل اسم المستخدم وكلمة المرور', 'err'); return; }
+  $('btnConnect').disabled = true;
+  msg($('connMsg'), 'جارٍ الاتصال بـ ' + host + ':' + port + ' ...', 'info');
+  try {
+    const r = await api('/api/connect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    if (r.ok) { setConnected(r.info); msg($('connMsg'), 'تم الاتصال ✔ ' + r.info.version.split(',')[0], 'ok'); loadTables(); }
+    else msg($('connMsg'), r.error, 'err');
+  } catch (e) { msg($('connMsg'), String(e), 'err'); }
+  $('btnConnect').disabled = false;
+};
+
+$('btnDisconnect').onclick = async () => {
+  await api('/api/disconnect', { method: 'POST' });
+  setDisconnected();
+};
+
+function setConnected(info) {
+  $('connDot').classList.add('on');
+  $('connLabel').textContent = info.user + ' @ ' + info.host + ':' + info.port + ' / ' + info.database + (info.readonly ? ' (قراءة فقط)' : '');
+  $('btnDisconnect').classList.remove('hidden');
+  $('workspace').classList.remove('hidden');
+}
+function setDisconnected() {
+  $('connDot').classList.remove('on');
+  $('connLabel').textContent = 'غير متصل';
+  $('btnDisconnect').classList.add('hidden');
+  $('workspace').classList.add('hidden');
+}
+
+// ---- tabs ----
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  ['tables', 'query', 'update'].forEach(t => $('tab-' + t).classList.toggle('hidden', t !== b.dataset.tab));
+});
+
+// ---- tables ----
+async function loadTables() {
+  const r = await api('/api/tables');
+  const tbl = $('tablesTable');
+  tbl.innerHTML = '';
+  if (!r.ok) { msg($('describeArea'), r.error, 'err'); return; }
+  const rows = r.result;
+  $('tablesCount').textContent = rows.length + ' جدولًا (الأعداد تقديرية)';
+  const thead = '<tr><th>Table</th><th>≈ Rows</th></tr>';
+  tbl.innerHTML = thead + rows.map(t =>
+    `<tr class="clickable" onclick="describeTable('${t.table}')"><td>${t.table}</td><td>${t.approx_rows}</td></tr>`).join('');
+}
+
+async function describeTable(name) {
+  const area = $('describeArea');
+  area.innerHTML = '<p class="small">جارٍ تحميل ' + name + ' ...</p>';
+  const r = await api('/api/describe?table=' + encodeURIComponent(name));
+  if (!r.ok) { area.innerHTML = ''; msg(area, r.error, 'err'); return; }
+  const d = r.result;
+  let html = '<h4 style="direction:ltr;text-align:left;margin:6px 0">public.' + name + '</h4>';
+  html += '<div class="tablewrap" style="max-height:180px"><table><tr>' +
+    d.columns.map(c => `<th>${c.column_name}<br><span style="color:var(--muted);font-weight:400">${c.data_type}</span></th>`).join('') +
+    '</tr><tr>' + d.columns.map(c => `<td>${c.is_nullable === 'YES' ? 'NULL' : 'NOT NULL'}${c.column_default ? '<br>=' + c.column_default : ''}</td>`).join('') + '</tr></table></div>';
+  html += '<div class="tablewrap" style="margin-top:10px"><table><tr>' +
+    d.data_columns.map(c => `<th>${c}</th>`).join('') + '</tr>' +
+    d.data_rows.map(row => '<tr>' + row.map(v => `<td>${v === null ? '<span style="color:var(--muted)">NULL</span>' : escapeHtml(String(v))}</td>`).join('') + '</tr>').join('') +
+    '</table></div>';
+  area.innerHTML = html;
+}
+
+function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ---- query ----
+async function runQuery() {
+  const sql = $('sql').value.trim();
+  if (!sql) return;
+  $('queryInfo').textContent = 'جارٍ التنفيذ...';
+  const r = await api('/api/query', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sql }) });
+  const out = $('queryResult');
+  if (!r.ok) { $('queryInfo').textContent = ''; msg(out, r.error, 'err'); return; }
+  const res = r.result;
+  if (res.kind === 'rows') {
+    $('queryInfo').textContent = res.rows.length + ' صف' + (res.truncated ? ' (مقتطع عند الحد الأقصى)' : '');
+    out.innerHTML = '<div class="tablewrap"><table><tr>' + res.columns.map(c => `<th>${c}</th>`).join('') + '</tr>' +
+      res.rows.map(row => '<tr>' + row.map(v => `<td>${v === null ? '<span style="color:var(--muted)">NULL</span>' : escapeHtml(String(v))}</td>`).join('') + '</tr>').join('') +
+      '</table></div>';
+  } else {
+    $('queryInfo').textContent = '';
+    msg(out, 'تم التنفيذ — الصفوف المتأثرة: ' + res.rowcount, 'ok');
+  }
+}
+
+// ---- update script ----
+async function loadScript() {
+  const r = await api('/api/update-script');
+  const v = $('scriptView');
+  if (r.ok) { v.textContent = r.script; v.classList.remove('hidden'); }
+}
+async function applyUpdate() {
+  const out = $('updateResult');
+  msg(out, 'جارٍ تطبيق سكربت التحديث...', 'info');
+  const r = await api('/api/apply-update', { method: 'POST' });
+  if (!r.ok) { msg(out, r.error, 'err'); return; }
+  let html = '<div class="msg ok">' + escapeHtml((r.result.notices || []).join('\n') || 'تم التنفيذ بدون ملاحظات') + '</div>';
+  if (r.result.last_result) {
+    const lr = r.result.last_result;
+    html += '<p class="small">نتيجة فحص سياسات RLS الحالية:</p><div class="tablewrap"><table><tr>' +
+      lr.columns.map(c => `<th>${c}</th>`).join('') + '</tr>' +
+      lr.rows.map(row => '<tr>' + row.map(v => `<td>${v === null ? 'NULL' : escapeHtml(String(v))}</td>`).join('') + '</tr>').join('') +
+      '</table></div>';
+  }
+  out.innerHTML = html;
+}
+
+// restore state on load
+(async () => {
+  const r = await api('/api/status');
+  if (r.connected) setConnected(r.info);
+})();
+</script>
+</body>
+</html>
