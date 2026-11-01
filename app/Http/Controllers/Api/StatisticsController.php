@@ -85,7 +85,7 @@ class StatisticsController extends Controller
         });
 
         $sales_data = DB::table('sales')
-            ->select(DB::raw("DATE_FORMAT(saleDate, '%Y-%m-%d') as date"), DB::raw('SUM(totalAmount) as amount'))
+            ->select(DB::raw(\App\Support\SqlDate::format('saleDate', '%Y-%m-%d') . ' as date'), DB::raw('SUM(totalAmount) as amount'))
             ->where('business_id', $business_id)
             ->whereBetween('saleDate', [$start, $end])
             ->groupBy('date')
@@ -94,7 +94,7 @@ class StatisticsController extends Controller
             ->keyBy('date');
 
         $purchase_data = DB::table('purchases')
-            ->select(DB::raw("DATE_FORMAT(purchaseDate, '%Y-%m-%d') as date"), DB::raw('SUM(totalAmount) as amount'))
+            ->select(DB::raw(\App\Support\SqlDate::format('purchaseDate', '%Y-%m-%d') . ' as date'), DB::raw('SUM(totalAmount) as amount'))
             ->where('business_id', $business_id)
             ->whereBetween('purchaseDate', [$start, $end])
             ->groupBy('date')
@@ -103,7 +103,7 @@ class StatisticsController extends Controller
             ->keyBy('date');
 
         $loss_data = DB::table('sales')
-            ->select(DB::raw("DATE_FORMAT(saleDate, '%Y-%m-%d') as date"), DB::raw('SUM(lossProfit) as amount'))
+            ->select(DB::raw(\App\Support\SqlDate::format('saleDate', '%Y-%m-%d') . ' as date'), DB::raw('SUM(lossProfit) as amount'))
             ->where('business_id', $business_id)
             ->where('lossProfit', '<=', 0)
             ->whereBetween('saleDate', [$start, $end])
@@ -113,7 +113,7 @@ class StatisticsController extends Controller
             ->keyBy('date');
 
         $profit_data = DB::table('sales')
-            ->select(DB::raw("DATE_FORMAT(saleDate, '%Y-%m-%d') as date"), DB::raw('SUM(lossProfit) as amount'))
+            ->select(DB::raw(\App\Support\SqlDate::format('saleDate', '%Y-%m-%d') . ' as date'), DB::raw('SUM(lossProfit) as amount'))
             ->where('business_id', $business_id)
             ->where('lossProfit', '>', 0)
             ->whereBetween('saleDate', [$start, $end])
