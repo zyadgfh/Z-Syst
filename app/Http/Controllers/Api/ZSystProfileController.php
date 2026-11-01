@@ -69,7 +69,7 @@ class ZSystProfileController extends Controller
     {
         $request->validate([
             'current_password' => 'required',
-            'password' => 'required|confirmed|string|min:6',
+            'password' => 'required|confirmed|string|min:10',
             'password_confirmation' => 'required',
         ]);
 
