@@ -79,6 +79,17 @@ trait HasSupabaseRoles
         return false;
     }
 
+    /**
+     * Spatie's PermissionRegistrar Gate::before hook calls exactly this
+     * method (method_exists check) to let a user bypass gate abilities.
+     * Without it every spatie permission:* middleware denies users whose
+     * abilities come from config/supabase.php.
+     */
+    public function checkPermissionTo(string $permission, $guard = null): bool
+    {
+        return $this->hasPermission($permission);
+    }
+
     public function hasAllPermissions(array $permissions): bool
     {
         foreach ($permissions as $permission) {

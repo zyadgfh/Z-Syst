@@ -56,6 +56,12 @@ class SupabaseUserProvider implements UserProvider
             return null;
         }
 
+        // Local dev / CI mode: plain Eloquent lookup; validateCredentials()
+        // checks the local bcrypt hash. See config('supabase.fallback_eloquent').
+        if (config('supabase.fallback_eloquent')) {
+            return $this->newModelQuery()->where('email', $email)->first();
+        }
+
         $captchaToken = $credentials['captcha_token'] ?? null;
 
         try {
@@ -101,11 +107,31 @@ class SupabaseUserProvider implements UserProvider
 
     public function validateCredentials(UserContract $user, #[\SensitiveParameter] array $credentials): bool
     {
+        if (config('supabase.fallback_eloquent')) {
+            return \Illuminate\Support\Facades\Hash::check(
+                (string) ($credentials['password'] ?? ''),
+                (string) $user->getAuthPassword(),
+            );
+        }
+
         if (! $this->session) {
             return false;
         }
 
         return ($this->session['user']['id'] ?? null) === $user->getAuthIdentifier();
+    }
+
+    /**
+     * Laravel 12 added rehashPasswordIfRequired() to the UserProvider
+     * contract. Path B owns passwords in GoTrue; nothing to re-hash here.
+     * In local fallback mode passwords are bcrypt'd at write time already.
+     */
+    public function rehashPasswordIfRequired(UserContract $user, #[\SensitiveParameter] array $credentials, bool $force = false): UserContract
+    {
+        // Intentionally a no-op: credential re-hashing is handled by
+        // Supabase (GoTrue) or the fallback seeder, never at sign-in time.
+
+        return $user;
     }
 
     /**

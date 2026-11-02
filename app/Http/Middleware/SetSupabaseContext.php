@@ -19,7 +19,9 @@ class SetSupabaseContext
 {
     public function handle(Request $request, Closure $next)
     {
-        if (! config('supabase.enforce_rls')) {
+        // RLS context is a Postgres feature (SET LOCAL / set_config). On other
+        // drivers (local dev / CI on sqlite) there is nothing to publish.
+        if (! config('supabase.enforce_rls') || DB::connection()->getDriverName() !== 'pgsql') {
             return $next($request);
         }
 

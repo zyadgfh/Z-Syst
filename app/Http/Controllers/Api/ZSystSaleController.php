@@ -211,12 +211,17 @@ class ZSystSaleController extends Controller
             $lossProfit = collect($request->products)->pluck('lossProfit')->toArray();
 
             $sale = Sale::create($request->all() + [
-                'user_id' => auth()->id(),
                 'business_id' => $business_id,
                 'lossProfit' => array_sum($lossProfit) - ($request->discountAmount ?? 0),
                 'meta' => [
                     'notes' => $request->notes,
                     'customer_phone' => $request->customer_phone,
+                    // Path B: identity lives in app_users (uuid) while
+                    // sales.user_id still carries a FK to the legacy integer
+                    // users table — writing the uuid there violates the
+                    // constraint on every backend. Attribute the actor in
+                    // meta until the schema FKs are retargeted to app_users.
+                    'user_id' => auth()->id(),
                 ],
             ]);
 
@@ -473,12 +478,12 @@ class ZSystSaleController extends Controller
             $lossProfit = collect($request->products)->pluck('lossProfit')->toArray();
 
             $sale->update($request->all() + [
-                'user_id' => auth()->id(),
                 'business_id' => $business_id,
                 'lossProfit' => array_sum($lossProfit) - ($request->discountAmount ?? 0),
                 'meta' => [
                     'notes' => $request->notes,
                     'customer_phone' => $request->customer_phone,
+                    'user_id' => auth()->id(), // see store(): uuid must not hit the legacy users FK
                 ],
             ]);
         }, 'sale:update', ['sale_id' => $sale->id]);

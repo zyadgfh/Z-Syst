@@ -7,7 +7,7 @@
 @section('main_content')
     <div class="auth-container">
         <div class="auth-wrapper">
-            <div class="auth-card">
+            <div class="auth-card ap-reveal">
                 <div class="auth-header text-center">
                     <div class="auth-logo mb-4">
                         <img src="{{ asset('assets/images/logo/logo.png') }}" alt="Z-Syst Logo">

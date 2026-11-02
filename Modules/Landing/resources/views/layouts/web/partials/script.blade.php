@@ -46,3 +46,6 @@
     once: false
     });
   </script>
+
+<!-- Apple motion layer -->
+<script src="{{ asset('assets/js/apple-motion.js') }}" defer></script>

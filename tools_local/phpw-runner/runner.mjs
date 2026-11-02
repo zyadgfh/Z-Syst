@@ -69,7 +69,7 @@ const runtimeId = await loadNodeRuntime('8.3', { emscriptenOptions: { processId:
 let php = new PHP();
 await php.initializeRuntime(runtimeId);
 await setPhpIniEntries(php, {
-  memory_limit: '128M',
+  memory_limit: '512M',
   disable_functions: 'shell_exec,exec,proc_open,system,passthru,proc_get_status,proc_nice',
   max_execution_time: '120',
   display_errors: '1',
@@ -169,6 +169,13 @@ if (MODE === 'serve') {
       if (!handler) throw new Error('runtime not ready');
       const headers = { ...req.headers };
       delete headers.host; delete headers.connection;
+      // php-wasm's cookie parser does NOT url-decode cookie values (real PHP
+      // does), so Laravel's urlencoded base64 cookies (%3D padding, %2B…)
+      // fail MAC/payload validation -> every session gets a fresh id and
+      // CSRF always 419s. Decode the base64-significant escapes in transit.
+      if (headers.cookie) {
+        headers.cookie = headers.cookie.replace(/%3D/gi, '=').replace(/%2B/gi, '+').replace(/%2F/gi, '/');
+      }
       let url = req.url.startsWith('/') ? req.url : '/' + req.url;
       // Front-controller rewrite: extension-less paths go through Laravel's
       // index.php; real files (assets) are served as-is by the handler.
@@ -193,7 +200,13 @@ if (MODE === 'serve') {
         res.end(JSON.stringify({ message: 'Runtime rebooted. Please retry.' }));
         return;
       }
-      res.writeHead(codes, Object.fromEntries(Object.entries(resp.headers ?? {}).map(([k, v]) => [k, Array.isArray(v) ? v.join(', ') : v])));
+      // set-cookie must stay a list: joining with ', ' corrupts cookies whose
+// Expires date contains a comma (curl/browsers then drop the second cookie).
+      const outHeaders = {};
+      for (const [k, v] of Object.entries(resp.headers ?? {})) {
+        outHeaders[k] = (k.toLowerCase() === 'set-cookie' && Array.isArray(v)) ? v : (Array.isArray(v) ? v.join(', ') : v);
+      }
+      res.writeHead(codes, outHeaders);
       res.end(out);
     } catch (e) {
       const msg = String(e?.message ?? e);

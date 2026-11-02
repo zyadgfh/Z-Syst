@@ -14,6 +14,11 @@ return [
     'url' => env('SUPABASE_URL', 'https://atvttthrqsybjjwrbiyl.supabase.co'),
     'anon_key' => env('SUPABASE_ANON_KEY'),
     'service_role_key' => env('SUPABASE_SERVICE_ROLE_KEY'),
+
+    // Local dev / CI fallback: verify credentials against the local users
+    // table (bcrypt) instead of GoTrue, so the app runs without Supabase
+    // credentials. Production must keep this disabled.
+    'fallback_eloquent' => env('SUPABASE_FALLBACK_ELOQUENT', false),
     'jwt_secret' => env('SUPABASE_JWT_SECRET'),
 
     'auth' => [

@@ -35,4 +35,23 @@ class FefoSetting extends Model
     {
         return $this->belongsTo(Business::class, 'business_id');
     }
+
+    /**
+     * Per-business FEFO settings, created on first access with defaults
+     * (mirrors PredictionSetting::getForBusiness()).
+     */
+    public static function getForBusiness(int $businessId): self
+    {
+        return static::firstOrCreate(
+            ['business_id' => $businessId],
+            [
+                'fefo_enabled' => true,
+                'deduction_mode' => 'automatic',
+                'expiry_grace_days' => 30,
+                'auto_deduct_expired_stock' => false,
+                'notify_on_fefo_deduction' => true,
+                'min_stock_for_fefo' => 0,
+            ]
+        );
+    }
 }

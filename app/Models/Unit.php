@@ -15,7 +15,7 @@ class Unit extends Model
 
     protected $fillable = [
         'business_id',
-        'unit_name',
+        'unitName',
         'status',
     ];
 

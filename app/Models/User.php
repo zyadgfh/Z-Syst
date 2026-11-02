@@ -41,6 +41,11 @@ class User extends AppUser
      */
     public function getEmailAttribute(): ?string
     {
+        // Local fallback mode stores the email on the row itself.
+        if (config('supabase.fallback_eloquent')) {
+            return $this->attributes['email'] ?? null;
+        }
+
         $id = $this->getKey();
 
         if (! $id) {
@@ -70,6 +75,10 @@ class User extends AppUser
      */
     public function scopeWhereEmail(Builder $query, string $email): Builder
     {
+        if (config('supabase.fallback_eloquent')) {
+            return $query->where('email', $email);
+        }
+
         return $query->whereIn($this->getQualifiedKeyName(), AuthUser::idsForEmail($email));
     }
 
@@ -83,8 +92,27 @@ class User extends AppUser
      *
      * @throws RuntimeException always
      */
+    public function setEmailAttribute($value): void
+    {
+        if (config('supabase.fallback_eloquent')) {
+            $this->attributes['email'] = $value;
+
+            return;
+        }
+
+        throw new RuntimeException(
+            'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+        );
+    }
+
     public function setPasswordAttribute($value): void
     {
+        if (config('supabase.fallback_eloquent')) {
+            $this->attributes['password'] = \Illuminate\Support\Facades\Hash::make((string) $value);
+
+            return;
+        }
+
         throw new RuntimeException(
             'Passwords are managed by Supabase Auth. Use SupabaseAuthClient::recover() / updatePassword().'
         );
