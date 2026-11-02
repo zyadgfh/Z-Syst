@@ -29,10 +29,10 @@ class SecurityCheck
         // Check for XSS patterns in input
         $this->checkForXSS($request);
 
-        // Validate CSRF token for POST requests
-        if ($request->isMethod('POST') || $request->isMethod('PUT') || $request->isMethod('DELETE')) {
-            $this->validateCSRF($request);
-        }
+        // CSRF verification is owned by VerifyCsrfToken (the framework
+        // middleware that also sets/validates the encrypted XSRF cookie).
+        // This duplicate check resolved the session through a separate store
+        // path and aborted valid logins with 419 — do not re-add it.
 
         return $next($request);
     }

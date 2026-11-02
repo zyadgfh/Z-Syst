@@ -16,13 +16,13 @@
 
     <section class="hero-modern-section">
         <div class="container">
-            <div class="hero-modern-card" data-aos="fade-up">
+            <div class="hero-modern-card ap-reveal">
                 <div class="hero-copy">
-                    <span class="hero-pill">{{ __('Pharmacy OS • Secure • Scalable') }}</span>
+                    <span class="hero-pill ap-reveal">{{ __('Pharmacy OS • Secure • Scalable') }}</span>
                     <h1>{{ $heroTitle }}</h1>
                     <p>{{ $heroDescription }}</p>
 
-                    <div class="hero-actions">
+                    <div class="hero-actions ap-reveal">
                         <a class="btn btn-hero-primary" href="#plans">
                             {{ Str::words($heroPrimaryText, 3, '...') }}
                         </a>
@@ -32,15 +32,16 @@
                     </div>
 
                     <div class="hero-metrics">
-                        <div class="metric-card">
+                        <!-- ap-reveal choreography -->
+                        <div class="metric-card ap-reveal">
                             <strong>24/7</strong>
                             <span>{{ __('Operations') }}</span>
                         </div>
-                        <div class="metric-card">
+                        <div class="metric-card ap-reveal">
                             <strong>100%</strong>
                             <span>{{ __('Control') }}</span>
                         </div>
-                        <div class="metric-card">
+                        <div class="metric-card ap-reveal">
                             <strong>Fast</strong>
                             <span>{{ __('Reporting') }}</span>
                         </div>
@@ -48,7 +49,7 @@
                 </div>
 
                 <div class="hero-visual">
-                    <div class="hero-visual-card">
+                    <div class="hero-visual-card ap-reveal">
                         <div class="hero-visual-header">
                             <span></span><span></span><span></span>
                         </div>
@@ -87,7 +88,7 @@
         <div class="container">
             <div class="row g-4 align-items-center">
                 <div class="col-lg-6" data-aos="fade-right">
-                    <div class="section-heading">
+                    <div class="section-heading ap-reveal">
                         <span class="hero-pill">{{ __('Why pharmacies choose us') }}</span>
                         <h2>{{ Str::words($headings['feature_title_start'] ?? __('Built for reliable daily operations'), 8, '...') }}</h2>
                         <p>{{ Str::words($headings['feature_title_end'] ?? __('From stock control to customer service, every module is designed to help your pharmacy run smoothly, safely, and efficiently.'), 28, '...') }}</p>
@@ -117,7 +118,7 @@
                     </div>
                 </div>
                 <div class="col-lg-6" data-aos="fade-left">
-                    <div class="highlight-card">
+                    <div class="highlight-card ap-reveal">
                         <div class="highlight-card-header">
                             <span>{{ __('Operational insight') }}</span>
                             <span>{{ __('Live overview') }}</span>
@@ -157,7 +158,7 @@
         <div class="container">
             <div class="row g-5 align-items-center">
                 <div class="col-lg-6" data-aos="fade-right">
-                    <div class="section-heading">
+                    <div class="section-heading ap-reveal">
                         <span class="hero-pill">{{ __('Streamlined experience') }}</span>
                         <h2>{{ Str::words($headings['interface_title_start'] ?? __('A clean interface for daily pharmacy work'), 8, '...') }}</h2>
                         <p>{{ Str::words($headings['interface_description'] ?? __('Every screen is thoughtfully designed to make stock tracking, invoicing, and customer service faster and easier.'), 28, '...') }}</p>

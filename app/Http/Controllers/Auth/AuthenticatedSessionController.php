@@ -43,10 +43,18 @@ class AuthenticatedSessionController extends Controller
                 'message' => __('You can not login as an business account right now.'),
             ]);
         } else {
+            // Defensive: a seeded/synced user may not have a matching spatie
+            // Role row (e.g. local fallback superadmin). Fall back to the
+            // admin dashboard instead of 500ing on null->permissions.
             $role = Role::where('name', $user->role)->first();
-            $first_role = $role->permissions->pluck('name')->all()[0];
-            $page = explode('-', $first_role);
-            $redirect_url = route('admin.'.$page[0].'.index');
+            $first_role = $role?->permissions->pluck('name')->all()[0] ?? null;
+
+            if ($first_role) {
+                $page = explode('-', $first_role);
+                $redirect_url = route('admin.'.$page[0].'.index');
+            } else {
+                $redirect_url = route('admin.dashboard.index');
+            }
         }
 
         return response()->json([
