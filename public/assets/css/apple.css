@@ -255,3 +255,94 @@ body.ap-theme {
 }
 .ap-theme footer.ap-footer a { color: var(--ap-text-2); }
 .ap-theme footer.ap-footer a:hover { color: var(--ap-text); }
+
+/* ==========================================================================
+   Dark mode — [data-ap-theme="dark"] on <html>, driven by ap-theme.js.
+   Materials get heavier in dark (Apple guidance): surfaces rise, blur
+   stays, shadows give way to hairlines. Accent lifts to the iOS dark
+   palette (#0a84ff) to hold contrast on near-black.
+   ========================================================================== */
+
+[data-ap-theme="dark"] {
+    --ap-bg: #1c1c1e;
+    --ap-surface: #2c2c2e;
+    --ap-surface-2: #3a3a3c;
+    --ap-text: #f5f5f7;
+    --ap-text-2: rgba(235, 235, 245, 0.6);
+    --ap-text-3: rgba(235, 235, 245, 0.38);
+    --ap-hairline: rgba(255, 255, 255, 0.12);
+    --ap-accent: #0a84ff;
+    --ap-accent-press: #0060df;
+    --ap-green: #30d158;
+    --ap-red: #ff453a;
+
+    --ap-shadow-card: 0 4px 24px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.4);
+    --ap-shadow-float: 0 12px 40px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+[data-ap-theme="dark"] body.ap-theme { background: var(--ap-bg); color: var(--ap-text); }
+[data-ap-theme="dark"] .ap-card,
+[data-ap-theme="dark"] .card { background: var(--ap-surface); color: var(--ap-text); }
+[data-ap-theme="dark"] .ap-theme footer.ap-footer {
+    background: #161617; border-top-color: var(--ap-hairline);
+}
+
+/* Theme toggle pill (mounted by ap-theme.js) */
+.ap-theme-toggle {
+    position: fixed; bottom: 22px; inset-inline-start: 22px; z-index: 9990;
+    width: 42px; height: 42px; border-radius: 50%;
+    display: grid; place-items: center; cursor: pointer;
+    border: 1px solid var(--ap-hairline);
+    background: color-mix(in srgb, var(--ap-surface) 78%, transparent);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: var(--ap-shadow-card);
+    color: var(--ap-text);
+    transition: transform .2s var(--ap-spring), background .2s linear;
+}
+.ap-theme-toggle:hover { transform: scale(1.06); }
+.ap-theme-toggle:active { transform: scale(.94); }
+
+/* One-time POS keyboard hint chip */
+.ap-pos-hint {
+    position: fixed; top: 18px; inset-inline-start: 50%; translate: 50% 0;
+    z-index: 9991; pointer-events: none;
+    background: color-mix(in srgb, var(--ap-surface) 82%, transparent);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--ap-hairline);
+    color: var(--ap-text); font-family: var(--ap-font); font-size: 13px; font-weight: 600;
+    padding: 9px 18px; border-radius: 999px; box-shadow: var(--ap-shadow-float);
+    opacity: 0; transform: translateY(-8px);
+    transition: opacity .3s var(--ap-spring), transform .3s var(--ap-spring);
+}
+.ap-pos-hint.show { opacity: 1; transform: translateY(0); }
+
+/* Live "today" strip */
+.ap-live-strip {
+    display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: center;
+    background: color-mix(in srgb, var(--ap-surface) 82%, transparent);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--ap-hairline);
+    border-radius: var(--ap-radius-md);
+    box-shadow: var(--ap-shadow-card);
+    padding: 14px 22px; margin: 0 0 22px;
+    font-family: var(--ap-font);
+}
+.ap-live-item { display: flex; align-items: baseline; gap: 8px; }
+.ap-live-item .label { font-size: 13px; color: var(--ap-text-2); }
+.ap-live-item .value {
+    font-size: 21px; font-weight: 700; color: var(--ap-text);
+    letter-spacing: var(--ap-display-track);
+    font-variant-numeric: tabular-nums;
+}
+.ap-live-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--ap-text-3); margin-inline-start: 4px;
+    transition: background .3s linear, box-shadow .3s linear;
+}
+.ap-live-dot.on {
+    background: var(--ap-green);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ap-green) 22%, transparent);
+}

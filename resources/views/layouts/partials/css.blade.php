@@ -26,3 +26,5 @@
 <link rel="stylesheet" href="{{ asset('assets/css/arabic.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.rtl.min.css') }}">
 @endif
+<!-- Apple design layer (admin) -->
+<link rel="stylesheet" href="{{ asset('assets/css/apple.css') }}">

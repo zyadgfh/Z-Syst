@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Z-Syst — غير متصل</title>
+<link rel="stylesheet" href="/assets/css/apple.css">
+<style>
+    body.ap-theme {
+        min-height: 100vh; margin: 0;
+        display: grid; place-items: center;
+        background: var(--ap-bg); color: var(--ap-text);
+        font-family: var(--ap-font); text-align: center; padding: 24px;
+    }
+    .card {
+        background: var(--ap-surface); border-radius: var(--ap-radius-lg);
+        box-shadow: var(--ap-shadow-card); padding: 48px 40px; max-width: 420px;
+        border: 1px solid var(--ap-hairline);
+    }
+    .glyph { font-size: 56px; line-height: 1; margin-bottom: 18px; }
+    h1 { font-size: 24px; font-weight: 700; letter-spacing: var(--ap-title-track); margin: 0 0 10px; }
+    p { color: var(--ap-text-2); font-size: 15px; line-height: 1.6; margin: 0 0 22px; }
+    .queued { font-size: 14px; color: var(--ap-text-2); background: var(--ap-bg);
+              border-radius: 999px; padding: 8px 16px; display: inline-block; }
+    .queued b { color: var(--ap-green); }
+    .retry {
+        margin-top: 22px; display: inline-block; border: 0; cursor: pointer;
+        background: var(--ap-accent); color: #fff; font: inherit; font-weight: 600;
+        padding: 12px 28px; border-radius: 999px; transition: background .15s var(--ap-spring);
+    }
+    .retry:active { background: var(--ap-accent-press); transform: scale(.98); }
+</style>
+</head>
+<body class="ap-theme">
+    <main class="card">
+        <div class="glyph">📡</div>
+        <h1>لا يوجد اتصال بالإنترنت</h1>
+        <p>لا تقلق — مبيعاتك الآجلة محفوظة على هذا الجهاز وستُرسل تلقائيًا فور عودة الشبكة. يمكنك مواصلة البيع كالمعتاد.</p>
+        <span class="queued">فواتير في قائمة الانتظار: <b id="queued-count">0</b></span>
+        <br>
+        <button class="retry" onclick="location.reload()">إعادة المحاولة</button>
+    </main>
+    <script src="/assets/js/pos-offline.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.PosOffline) {
+                window.PosOffline.count().then((n) => {
+                    document.getElementById('queued-count').textContent = n;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
