@@ -93,7 +93,7 @@ function render() {
   document.title = lang === 'ar' ? 'Z-Syst — إيقاع واحد لإدارة صيدليتك' : 'Z-Syst — One rhythm for your pharmacy';
   app.innerHTML = `
     <header class="site-header">
-      <a class="brand" href="#top" aria-label="Z-Syst home"><img src="/assets/images/logo/logo.svg" alt="Z-Syst" onerror="this.style.display='none'" /><span>Z-Syst</span></a>
+      <a class="brand" href="#top" aria-label="Z-Syst home"><span class="brand-symbol">Z</span><span>Z-Syst</span></a>
       <nav class="desktop-nav" aria-label="Primary navigation">${t.nav.map((item, i) => `<a href="#${['platform','capabilities','how','faq'][i]}">${item}</a>`).join('')}</nav>
       <div class="header-actions"><button class="language-switch" data-lang aria-label="Change language">${t.switch}</button><a class="login-link" href="#contact">${t.login}</a><button class="menu-button" data-menu aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span></button></div>
     </header>
