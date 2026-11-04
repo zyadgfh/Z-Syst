@@ -331,4 +331,80 @@ class ZSystProductController extends Controller
             'data' => $data,
         ]);
     }
+
+    /**
+     * In-stock substitutes for a product — the "smart alternative" feature.
+     * Ranking (no generics table in the legacy schema, so heuristics):
+     *   +3  same active-ingredient word (first token of productName,
+     *       e.g. "Paracetamol" matches "Paracetamol Extra")
+     *   +2  same category
+     *   +1  same manufacturer
+     * Only in-stock items from the caller's business are returned, with
+     * known drug-interaction warnings for the original product appended.
+     */
+    public function alternatives(Product $product): \Illuminate\Http\JsonResponse
+    {
+        $businessId = auth()->user()->business_id;
+        abort_unless($product->business_id === $businessId, 404);
+
+        $root = trim(mb_strtolower(explode(' ', trim($product->productName))[0] ?? ''));
+
+        $candidates = Product::query()
+            ->where('products.business_id', $businessId)
+            ->where('products.id', '!=', $product->id)
+            ->whereHas('stocks', function ($q) use ($businessId) {
+                $q->where('business_id', $businessId)->where('productStock', '>', 0);
+            })
+            ->get()
+            ->map(function (Product $candidate) use ($businessId) {
+                $candidate->available_stock_total = (int) Stock::where('business_id', $businessId)
+                    ->where('product_id', $candidate->id)
+                    ->where('productStock', '>', 0)
+                    ->sum('productStock');
+                return $candidate;
+            });
+
+        $scored = $candidates->map(function (Product $candidate) use ($product, $root) {
+            $first = trim(mb_strtolower(explode(' ', trim($candidate->productName))[0] ?? ''));
+            $score = 0;
+            if ($root !== '' && $first === $root) {
+                $score += 3;
+            }
+            if ($candidate->category_id && $candidate->category_id === $product->category_id) {
+                $score += 2;
+            }
+            if ($candidate->manufacturer_id && $candidate->manufacturer_id === $product->manufacturer_id) {
+                $score += 1;
+            }
+
+            return [
+                'id' => $candidate->id,
+                'productName' => $candidate->productName,
+                'productCode' => $candidate->productCode,
+                'available_stock' => (int) ($candidate->available_stock_total ?? 0),
+                'match_score' => $score,
+            ];
+        })
+            ->filter(fn ($row) => $row['match_score'] > 0)
+            ->sortByDesc('match_score')
+            ->take(6)
+            ->values();
+
+        $warnings = \App\Models\DrugInteraction::where('business_id', $businessId)
+            ->where(function ($q) use ($product) {
+                $q->where('drug_a_name', 'like', '%' . $product->productName . '%')
+                    ->orWhere('drug_b_name', 'like', '%' . $product->productName . '%');
+            })
+            ->limit(5)
+            ->get(['drug_a_name', 'drug_b_name', 'description', 'recommendation']);
+
+        return response()->json([
+            'message' => __('Data fetched successfully.'),
+            'data' => [
+                'product' => ['id' => $product->id, 'productName' => $product->productName],
+                'alternatives' => $scored,
+                'interaction_warnings' => $warnings,
+            ],
+        ]);
+    }
 }

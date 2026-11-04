@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Z-Syst app icon: pill + cross mark, Apple-style continuous geometry -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a84ff"/>
+      <stop offset="1" stop-color="#0055d4"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#g)"/>
+  <g fill="#ffffff">
+    <rect x="96" y="212" width="320" height="88" rx="44" transform="rotate(-45 256 256)"/>
+    <rect x="96" y="212" width="320" height="88" rx="44" transform="rotate(45 256 256)" opacity="0.55"/>
+  </g>
+  <rect x="228" y="118" width="56" height="276" rx="28" fill="url(#g)" transform="rotate(45 256 256)"/>
+  <circle cx="256" cy="256" r="30" fill="#ffffff"/>
+</svg>

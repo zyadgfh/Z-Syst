@@ -47,6 +47,19 @@
 | D4 | مصمم إيصال حراري (شعار/تذييل/QR) | `ReceiptSetting` موجود | ص |
 | D5 | لوحة كشف "اليوم في سطر": مبيعات/ربح/آجل/منتهي قريب | `StatisticsController` + `ExpiryAlertController` | ص |
 
+## منفَّذ حيًا (2026-11-04 — جولة التنفيذ)
+
+| البند | ما نُفّذ | تحقق حي |
+|---|---|---|
+| B4 PWA/Offline | manifest + sw.js (cache-first/nav-first) + offline.html + pos-offline.js (IndexedDB queue + auto-sync) | كل الأصول 200 ✓ |
+| D2 الوضع الداكن | tokens معكوسة في apple.css + ap-theme.js (زر عائم، يحفظ الاختيار، يتبع النظام) | 200 + مُحقن في اللوحتين ✓ |
+| D3 POS بلوحة المفاتيح | pos-keys.js: F2/F8/F9/Ctrl+Enter // Ctrl+K + مسح باركود تلقائي | 200 ✓ |
+| B5/D5 الشريط الحي | LiveController + live/summary + ap-live.js + partial جاهز | مبيعات 1 / إيراد 16.5 EGP ✓ |
+| C1 البديل الذكي | products/{id}/alternatives (تسجيل نقاط + تحذيرات تعارض) | بديل score 5/مخزون 24 ✓ |
+| C2 قبول الاقتراح | موجود مسبقًا — أُصلح: Path-B (approved_by/purchase_data) + جسر suppliers→parties | دورة كاملة → P-00001 بـ96 EGP ✓ |
+| A2 نسخ سحابي | SupabaseStorage + ربط BackupController خلف BACKUP_CLOUD_ENABLED | كود جاهز (يلزم مفاتيح) |
+| B1/B2/B3 | scaffolds: EtaService + PaymobService (+HMAC) + WhatsAppService + config/integrations.php | كود جاهز (يلزم مفاتيح) |
+
 ## توصيتي بالتنفيذ (أعلى قيمة تسلسلية)
 
 1. **A1** (ينفذ اليوم بأي جهاز غير مقيد) → **A2** (نفس التقنية، نصف يوم)

@@ -9,6 +9,7 @@ use App\Models\Party;
 use App\Models\PredictionSetting;
 use App\Models\Product;
 use App\Models\Purchase;
+use App\Models\Supplier;
 use App\Models\PurchaseDetails;
 use App\Models\SalesForecast;
 use App\Models\Stock;
@@ -246,14 +247,20 @@ class AutoOrderService
     /**
      * Approve a suggestion.
      */
-    public function approveSuggestion(int $suggestionId, int $userId): array
+    public function approveSuggestion(int $suggestionId, int|string $userId): array
     {
         $suggestion = AutoOrderSuggestion::findOrFail($suggestionId);
 
+        // Path B: identity lives in app_users (uuid) while approved_by still
+        // carries a FK to the legacy integer users table. Keep the column
+        // NULL for uuid actors and record the approver in reasoning instead.
+        $numericId = is_int($userId) ? $userId : (ctype_digit((string) $userId) ? (int) $userId : null);
+
         $suggestion->update([
             'status' => 'approved',
-            'approved_by' => $userId,
+            'approved_by' => $numericId,
             'approved_at' => now(),
+            'reasoning' => trim(($suggestion->reasoning ? $suggestion->reasoning . ' | ' : '') . 'approved_by:' . $userId),
         ]);
 
         return [
@@ -315,10 +322,27 @@ class AutoOrderService
                 ->first();
 
             if (! $supplier) {
-                return [
-                    'success' => false,
-                    'message' => 'لا يوجد مورد متاح. يرجى إضافة مورد أولاً.',
-                ];
+                // Modern suppliers live in the dedicated suppliers table while
+                // Purchase.party_id still FKs the legacy parties table —
+                // bridge by provisioning a party mirror on first use.
+                $modern = \App\Models\Supplier::where('business_id', $businessId)
+                    ->orderBy('id')
+                    ->first();
+
+                if (! $modern) {
+                    return [
+                        'success' => false,
+                        'message' => 'لا يوجد مورد متاح. يرجى إضافة مورد أولاً.',
+                    ];
+                }
+
+                $supplier = Party::create([
+                    'business_id' => $businessId,
+                    'name' => $modern->company_name ?? $modern->name ?? 'Supplier #' . $modern->id,
+                    'phone' => $modern->phone,
+                    'email' => $modern->email,
+                    'type' => 'supplier',
+                ]);
             }
             $supplierId = $supplier->id;
         }
@@ -327,10 +351,14 @@ class AutoOrderService
 
         // Use TransactionHelper to create purchase
         $purchase = TransactionHelper::run(function () use ($suggestion, $product, $supplierId, $businessId, $totalAmount) {
+            // Path B: purchases.user_id is a legacy integer FK; attribute the
+            // actor in purchase_data for uuid identities (same as sales.meta).
+            $actorId = auth()->id();
             $purchase = Purchase::create([
                 'party_id' => $supplierId,
                 'business_id' => $businessId,
-                'user_id' => auth()->id(),
+                'user_id' => is_int($actorId) ? $actorId : (ctype_digit((string) $actorId) ? (int) $actorId : null),
+                'purchase_data' => ['user_id' => $actorId],
                 'purchaseDate' => now()->format('Y-m-d'),
                 'totalAmount' => $totalAmount,
                 'paidAmount' => 0,

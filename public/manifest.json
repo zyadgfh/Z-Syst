@@ -1,0 +1,31 @@
+{
+    "name": "Z-Syst — نظام إدارة الصيدليات",
+    "short_name": "Z-Syst",
+    "description": "نظام إدارة الصيدليات: مبيعات POS، مخزون FEFO، فواتير، وتقارير — يعمل حتى بلا إنترنت",
+    "lang": "ar",
+    "dir": "rtl",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "any",
+    "background_color": "#f5f5f7",
+    "theme_color": "#f5f5f7",
+    "icons": [
+        {
+            "src": "assets/img/ap-icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        },
+        {
+            "src": "assets/img/ap-icon-maskable.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        { "name": "نقطة البيع", "url": "/pos", "description": "شاشة البيع السريع" },
+        { "name": "المخزون", "url": "/stocks", "description": "جرد وتنبيهات المخزون" }
+    ]
+}

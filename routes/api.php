@@ -146,6 +146,10 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('manufacturer', Api\ZSystManufacturerController::class)->except('show');
         Route::apiResource('products', Api\ZSystProductController::class);
         Route::apiResource('stocks', Api\StockController::class)->only('index');
+
+        // Live "today" strip (dashboard polling) + smart alternatives
+        Route::middleware('throttle:30,1')->get('live/summary', [Api\LiveController::class, 'summary']);
+        Route::get('products/{product}/alternatives', [Api\ZSystProductController::class, 'alternatives']);
         Route::apiResource('business-categories', Api\BusinessCategoryController::class)->only('index');
         Route::apiResource('business', Api\BusinessController::class)->only('index', 'store', 'update');
         Route::apiResource('purchase', Api\PurchaseController::class);

@@ -37,3 +37,18 @@
     toastr.warning('Error some occurs!');
 </script>
 @endif
+{{-- Apple design layer (admin): theme, live strip, POS keys, offline queue --}}
+<script src="{{ asset('assets/js/ap-theme.js') }}" defer></script>
+<script src="{{ asset('assets/js/ap-live.js') }}" defer></script>
+<script src="{{ asset('assets/js/pos-keys.js') }}" defer></script>
+<script src="{{ asset('assets/js/pos-offline.js') }}" defer></script>
+@if (auth()->check() && auth()->user()?->business_id)
+<meta name="api-token" content="{{ request()->session()->get('api_token') ?? '' }}">
+@endif
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('{{ asset("sw.js") }}').catch(function () {});
+        });
+    }
+</script>
