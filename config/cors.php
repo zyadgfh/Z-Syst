@@ -15,9 +15,9 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['api/*'],
 
-    'allowed_methods' => ['*'],
+    'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 
     // Never ship '*' to production: list explicit origins in CORS_ALLOWED_ORIGINS
     // (comma-separated). The default below matches the known deployment targets.
@@ -26,15 +26,20 @@ return [
         explode(',', (string) env('CORS_ALLOWED_ORIGINS', 'https://app.z-syst.com,http://localhost:3000'))
     ))),
 
-    // Vercel preview deployments of the dashboard get in via pattern.
-    'allowed_origins_patterns' => ['#^https://[a-z0-9-]+\.vercel\.app$#'],
+    // Keep this empty in production. Add a narrowly-scoped pattern only when
+    // preview deployments are explicitly needed.
+    'allowed_origins_patterns' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('CORS_ALLOWED_ORIGINS_PATTERNS', ''))
+    ))),
 
-    'allowed_headers' => ['*'],
+    'allowed_headers' => ['Accept', 'Authorization', 'Content-Type', 'Origin', 'X-Requested-With'],
 
     'exposed_headers' => [],
 
     'max_age' => 3600,
 
-    'supports_credentials' => true,
+    // Supabase JWTs are sent in Authorization; cookies are not required.
+    'supports_credentials' => (bool) env('CORS_SUPPORTS_CREDENTIALS', false),
 
 ];

@@ -21,6 +21,15 @@ return [
     'fallback_eloquent' => env('SUPABASE_FALLBACK_ELOQUENT', false),
     'jwt_secret' => env('SUPABASE_JWT_SECRET'),
 
+    // Access-token verification for Laravel API requests. The JWT secret is
+    // the Supabase legacy HS256 signing secret, never the service-role key.
+    'jwt' => [
+        'secret' => env('SUPABASE_JWT_SECRET'),
+        'issuer' => env('SUPABASE_JWT_ISSUER', rtrim(env('SUPABASE_URL', ''), '/').'/auth/v1'),
+        'audience' => env('SUPABASE_JWT_AUDIENCE', 'authenticated'),
+        'leeway' => (int) env('SUPABASE_JWT_LEEWAY', 10),
+    ],
+
     'auth' => [
         // GoTrue endpoints used instead of storing passwords in Postgres.
         'token_path' => '/auth/v1/token',

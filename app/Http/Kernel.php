@@ -19,6 +19,7 @@ use App\Http\Middleware\TrimStrings;
 use App\Http\Middleware\TrustProxies;
 use App\Http\Middleware\ValidateSignature;
 use App\Http\Middleware\VerifyCsrfToken;
+use App\Http\Middleware\VerifySupabaseJwt;
 use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
 use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
@@ -114,6 +115,7 @@ class Kernel extends HttpKernel
         'business.context' => EnsureBusinessContext::class,
         'tenant.check' => \App\Http\Middleware\TenantAccessCheck::class,
         'supabase.context' => SetSupabaseContext::class,
+        'supabase.jwt' => VerifySupabaseJwt::class,
         'subscription.limit' => CheckSubscriptionLimits::class,
         // 'token_expired' => \App\Http\Middleware\TokenExpired::class,
     ];
