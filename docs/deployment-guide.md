@@ -11,7 +11,7 @@
 ### Software Requirements
 - **PHP:** 8.2 or higher
 - **MySQL:** 8.0 or higher
-- **Redis:** 6.0 or higher
+- **Valkey:** 8.x/9.x (recommended — free BSD-licensed drop-in Redis replacement; see `docs/valkey-setup-ar.md`) or **Redis:** 6.0+
 - **Nginx:** 1.18 or higher
 - **Composer:** 2.0 or higher
 - **Node.js:** 18 or higher (for Vite)
@@ -30,7 +30,20 @@ sudo apt update && sudo apt upgrade -y
 
 #### Install Required Packages
 ```bash
-sudo apt install -y nginx mysql-server redis-server supervisor git curl unzip
+sudo apt install -y nginx mysql-server supervisor git curl unzip
+```
+
+#### Install the Cache/Queue Server — Valkey (recommended) or Redis
+```bash
+# Option A (recommended): Valkey — free, BSD-licensed, drop-in Redis replacement
+# On Debian 13 / Ubuntu 25.04+:
+sudo apt install -y valkey-server && sudo systemctl enable --now valkey-server
+# Or via Docker (any distro): set REDIS_PASSWORD in .env, then
+docker compose -f docker-compose.valkey.yml up -d
+# Full guide: docs/valkey-setup-ar.md
+
+# Option B: classic Redis
+sudo apt install -y redis-server
 ```
 
 #### Install PHP Extensions
@@ -109,6 +122,7 @@ CACHE_DRIVER=redis
 QUEUE_CONNECTION=redis
 SESSION_DRIVER=redis
 
+# These REDIS_* values point at Valkey (recommended) or Redis — same protocol
 REDIS_HOST=127.0.0.1
 REDIS_PASSWORD=your_redis_password
 REDIS_PORT=6379

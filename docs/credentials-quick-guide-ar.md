@@ -62,15 +62,17 @@
 | `MAIL_USERNAME` | من Mailtrap | من حساب Mailtrap |
 | `MAIL_PASSWORD` | من Mailtrap | من حساب Mailtrap |
 
-### 5. 🗃️ Redis (اختياري)
+### 5. 🗃️ Valkey أو Redis (اختياري)
 
 | المتغير | القيمة | من أين الحصول عليه |
 |---------|--------|-------------------|
-| `REDIS_HOST` | `127.0.0.1` | محلي أو سيرفر Redis |
+| `REDIS_HOST` | `127.0.0.1` | محلي أو سيرفر Valkey/Redis |
 | `REDIS_PORT` | `6379` | ثابت |
 | `REDIS_PASSWORD` | كلمة المرور | (اختياري) |
 
 **ملاحظة:** إذا كنت تستخدم Laragon، Redis مثبت تلقائياً.
+
+**الموصى به:** Valkey — بديل مجاني بالكامل (BSD) ومتوافق تمامًا مع Redis بنفس المتغيرات. راجع `docs/valkey-setup-ar.md` (تشغيل سريع: `docker compose -f docker-compose.valkey.yml up -d`).
 
 ### 6. 📁 AWS S3 (اختياري للإنتاج)
 
