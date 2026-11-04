@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Z-Syst × Apple Design — عرض المزايا والواجهات</title>
+<link rel="stylesheet" href="../img/../../assets/css/apple.css">
+<style>
+    :root { --spring: cubic-bezier(0.32, 0.72, 0, 1); }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body.ap-theme {
+        margin: 0; overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Tahoma, Arial, sans-serif;
+        background: var(--ap-bg); color: var(--ap-text);
+        letter-spacing: 0;
+    }
+    /* ---------- slides ---------- */
+    .deck { position: relative; width: 100vw; height: 100vh; }
+    .slide {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 4vh 6vw; text-align: center;
+        opacity: 0; pointer-events: none; transform: scale(.985);
+        transition: opacity .42s var(--spring), transform .42s var(--spring);
+    }
+    .slide.active { opacity: 1; pointer-events: auto; transform: none; }
+    .slide img.shot {
+        width: min(78vw, 1080px); height: auto; display: block;
+        border-radius: 18px; border: 1px solid var(--ap-hairline);
+        box-shadow: 0 24px 80px rgba(0,0,0,.18), 0 4px 18px rgba(0,0,0,.10);
+        margin: 3vh auto 0;
+    }
+    .kicker {
+        display: inline-block; font-size: 14px; font-weight: 700; letter-spacing: .06em;
+        color: var(--ap-accent); background: color-mix(in srgb, var(--ap-accent) 10%, transparent);
+        border-radius: 999px; padding: 7px 16px; margin-bottom: 14px;
+    }
+    h1 { font-size: clamp(38px, 6.4vw, 84px); font-weight: 800; letter-spacing: -.025em; line-height: 1.08; margin: 0 0 16px; }
+    h2 { font-size: clamp(26px, 3.6vw, 46px); font-weight: 800; letter-spacing: -.02em; margin: 0 0 10px; }
+    p.lead { font-size: clamp(16px, 1.9vw, 22px); color: var(--ap-text-2); line-height: 1.65; max-width: 62ch; margin: 0 auto; }
+    ul.points { text-align: right; display: inline-block; margin: 18px auto 0; padding: 0; list-style: none; font-size: clamp(15px, 1.7vw, 19px); line-height: 2; color: var(--ap-text-2); }
+    ul.points b { color: var(--ap-text); font-weight: 700; }
+    ul.points li::before { content: "•"; color: var(--ap-accent); font-weight: 900; margin-inline-end: 10px; }
+    .pill-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 26px; }
+    .pill {
+        font-size: 13.5px; font-weight: 700; color: var(--ap-text);
+        background: var(--ap-surface); border: 1px solid var(--ap-hairline);
+        border-radius: 999px; padding: 9px 16px; box-shadow: 0 1px 2px rgba(0,0,0,.04);
+    }
+    .pill.ok::before { content: "✓ "; color: var(--ap-green); }
+    /* cover mark */
+    .mark { width: 96px; height: 96px; border-radius: 24px; margin-bottom: 26px;
+        background: linear-gradient(135deg, #0a84ff, #0055d4); box-shadow: 0 16px 40px rgba(10,132,255,.35);
+        display: grid; place-items: center; }
+    .mark svg { width: 54px; height: 54px; }
+    /* stat chips on live slide */
+    .stats { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 22px; }
+    .stat { background: var(--ap-surface); border: 1px solid var(--ap-hairline); border-radius: 16px;
+        box-shadow: 0 4px 18px rgba(0,0,0,.06); padding: 18px 26px; min-width: 150px; }
+    .stat .v { font-size: 30px; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+    .stat .l { font-size: 13px; color: var(--ap-text-2); margin-top: 4px; }
+    .stat .v .g { color: var(--ap-green); }
+    /* chrome */
+    .progress { position: fixed; top: 0; inset-inline: 0; height: 3px; background: transparent; z-index: 50; }
+    .progress .bar { height: 100%; width: 0; background: var(--ap-accent); transition: width .4s var(--spring); }
+    .hud {
+        position: fixed; bottom: 18px; inset-inline-start: 50%; translate: 50% 0;
+        display: flex; gap: 14px; align-items: center;
+        font-size: 13px; color: var(--ap-text-2);
+        background: color-mix(in srgb, var(--ap-surface) 80%, transparent);
+        backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid var(--ap-hairline); border-radius: 999px; padding: 8px 18px;
+        box-shadow: 0 6px 24px rgba(0,0,0,.10); z-index: 50; user-select: none;
+    }
+    .hud b { color: var(--ap-text); font-variant-numeric: tabular-nums; }
+    .navbtn {
+        position: fixed; top: 50%; translate: 0 -50%; z-index: 50;
+        width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--ap-hairline);
+        background: color-mix(in srgb, var(--ap-surface) 80%, transparent);
+        backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+        color: var(--ap-text); font-size: 18px; cursor: pointer; display: grid; place-items: center;
+        box-shadow: 0 4px 16px rgba(0,0,0,.10); transition: transform .2s var(--spring);
+    }
+    .navbtn:hover { transform: scale(1.08); }
+    .navbtn.prev { inset-inline-start: 18px; }
+    .navbtn.next { inset-inline-end: 18px; }
+    [data-ap-theme="dark"] .slide img.shot { box-shadow: 0 24px 80px rgba(0,0,0,.6), 0 4px 18px rgba(0,0,0,.5); }
+    @media (prefers-reduced-motion: reduce) {
+        .slide { transition: opacity .25s linear; transform: none; }
+    }
+</style>
+</head>
+<body class="ap-theme">
+<div class="progress"><div class="bar" id="bar"></div></div>
+
+<div class="deck" id="deck">
+
+    <!-- 1 · غلاف -->
+    <section class="slide active">
+        <div class="mark">
+            <svg viewBox="0 0 512 512" fill="none"><g fill="#fff"><rect x="96" y="212" width="320" height="88" rx="44" transform="rotate(-45 256 256)"/><circle cx="256" cy="256" r="58" fill="#0a84ff"/><path d="M236 256h40M256 236v40" stroke="#fff" stroke-width="20" stroke-linecap="round"/></g></svg>
+        </div>
+        <h1>Z-Syst <span style="color:var(--ap-text-3);font-weight:600;">×</span> Apple Design</h1>
+        <p class="lead">جولة في المزايا المنفَّذة والواجهات المصمَّمة — بحركة نابضة، مواد زجاجية، وطباعة دقيقة. الأسهم أو المسافة للتنقل.</p>
+        <div class="pill-row">
+            <span class="pill ok">PWA + بيع أوفلاين</span>
+            <span class="pill ok">وضع داكن</span>
+            <span class="pill ok">POS بلوحة المفاتيح</span>
+            <span class="pill ok">شريط حي</span>
+            <span class="pill ok">بدائل دوائية ذكية</span>
+        </div>
+    </section>
+
+    <!-- 2 · لغة التصميم -->
+    <section class="slide">
+        <span class="kicker">لغة التصميم</span>
+        <h2>نظام واحد… يوحّد كل شاشة</h2>
+        <p class="lead">كل شيء مبني على طبقة <b>apple.css</b> (tokens متغيرة) + <b>apple-motion.js</b> (نوابض مُخمَّدة حرِجًا) — في الوضعين الفاتح والداكن.</p>
+        <div class="stats">
+            <div class="stat"><div class="v">0.35s</div><div class="l">نابض damping 1.0</div></div>
+            <div class="stat"><div class="v">20px</div><div class="l">مواد blur+saturate</div></div>
+            <div class="stat"><div class="v">−.022em</div><div class="l">تتبع العناوين الكبيرة</div></div>
+            <div class="stat"><div class="v">1px</div><div class="l">فواصل hairline</div></div>
+        </div>
+    </section>
+
+    <!-- 3 · تسجيل الدخول -->
+    <section class="slide">
+        <span class="kicker">الدخول</span>
+        <h2>بطاقة زجاجية… وصمت قبل التركيز</h2>
+        <img class="shot" src="img/login-light.png" alt="شاشة تسجيل الدخول بالوضع الفاتح">
+    </section>
+
+    <!-- 4 · لوحة التحكم -->
+    <section class="slide">
+        <span class="kicker">اللوحة</span>
+        <h2>لوحة تتنفس: whitespace + بطاقات عائمة</h2>
+        <img class="shot" src="img/dashboard-light.png" alt="لوحة تحكم الصيدلية بالوضع الفاتح">
+    </section>
+
+    <!-- 5 · الشريط الحي -->
+    <section class="slide">
+        <span class="kicker">الشريط الحي — منفَّذ فعليًا</span>
+        <h2>«يومك في سطر»… يتحدث كل 30 ثانية</h2>
+        <p class="lead">نقطة نهاية <b>GET /api/v1/live/summary</b> (كاش 30 ثانية لكل عمل) يغذي الشريط بأرقام حية بعدّ تصاعدي ناعم — ويتوقف تلقائيًا حين تكون التبويبة مخفية.</p>
+        <div class="stats" id="live-stats">
+            <div class="stat"><div class="v g">●</div><div class="l">مباشر</div></div>
+            <div class="stat"><div class="v">1</div><div class="l">مبيعات اليوم</div></div>
+            <div class="stat"><div class="v">16.5</div><div class="l">الإيراد EGP</div></div>
+            <div class="stat"><div class="v">0</div><div class="l">الآجل</div></div>
+        </div>
+        <p class="lead" style="margin-top:18px;font-size:14px;color:var(--ap-text-3);">أرقام من التحقق الحي الفعلي على المعاينة (2026-11-04)</p>
+    </section>
+
+    <!-- 6 · POS داكن -->
+    <section class="slide">
+        <span class="kicker">نقطة البيع — الوضع الداكن</span>
+        <h2>يدير الكاشير اليوم كله بلا فأرة</h2>
+        <img class="shot" src="img/pos-dark.png" alt="شاشة نقطة البيع بالوضع الداكن">
+        <div class="pill-row">
+            <span class="pill ok">F2 فاتورة جديدة</span>
+            <span class="pill ok">F8 تعليق</span>
+            <span class="pill ok">F9 دفع</span>
+            <span class="pill ok">/ بحث</span>
+            <span class="pill ok">مسح باركود تلقائي</span>
+        </div>
+    </section>
+
+    <!-- 7 · أوفلاين -->
+    <section class="slide">
+        <span class="kicker">PWA — البيع بلا إنترنت</span>
+        <h2>الشبكة تقطع… البيع لا يتوقف</h2>
+        <img class="shot" src="img/pwa-offline.png" alt="تطبيق الجوال في وضعي متصل وغير متصل">
+        <div class="pill-row">
+            <span class="pill">Service Worker — كاش الصدفة</span>
+            <span class="pill">IndexedDB — طابور فواتير</span>
+            <span class="pill">مزامنة تلقائية عند العودة</span>
+            <span class="pill">installable — manifest كامل</span>
+        </div>
+    </section>
+
+    <!-- 8 · المنفَّذ -->
+    <section class="slide">
+        <span class="kicker">حالة التنفيذ</span>
+        <h2>الذي صار حقيقة اليوم</h2>
+        <ul class="points">
+            <li><b>PWA كاملة</b> — manifest + SW + صف أوفلاين + طابور مزامنة (كل الأصول 200 حيًا)</li>
+            <li><b>الوضع الداكن</b> — tokens معكوسة + زر عائم يتبع النظام ويحفظ اختيارك</li>
+            <li><b>POS بلوحة المفاتيح</b> — F2/F8/F9/Ctrl+Enter// + autoscan للباركود</li>
+            <li><b>الشريط الحي</b> — API + جافاسكربت + partial جاهز للإدراج</li>
+            <li><b>البدائل الذكية</b> — بديل متاح المخزون بتسجيل نقاط + تحذيرات تعارض (score 5 حيًا)</li>
+            <li><b>دورة الشراء الآلي</b> — توليد → موافقة → تحويل أمر شراء P-00001 بـ96 EGP (حية)</li>
+            <li><b>سقالات التكامل</b> — Paymob + WhatsApp + ETA + نسخ سحابي: جاهزة لمفاتيحك</li>
+        </ul>
+    </section>
+
+    <!-- 9 · الخطوة التالية -->
+    <section class="slide">
+        <span class="kicker">الخطوة التالية</span>
+        <h2>بقيت مفاتيح… لا كود</h2>
+        <ul class="points">
+            <li><b>رفع ملفات uploads</b> — عدّة جاهزة، أمر واحد من أي جهاز غير مقيد</li>
+            <li><b>Paymob</b> — PAYMOB_ENABLED=true + المفاتيح → الدفع يعمل</li>
+            <li><b>WhatsApp</b> — WHATSAPP_ENABLED=true + قوالب معتمدة → الإشعارات تعمل</li>
+            <li><b>الفاتورة الإلكترونية ETA</b> — المُنشئ جاهز؛ يتطلب تسجيل الشركة لدى ETA</li>
+            <li><b>النسخ السحابي</b> — BACKUP_CLOUD_ENABLED=true → نسخ يومي لـSupabase</li>
+        </ul>
+        <p class="lead" style="margin-top:26px;font-weight:700;color:var(--ap-text);">Z-Syst — نظام صيدليات يليق بـ٢٠٢٦ 🌿</p>
+    </section>
+
+</div>
+
+<button class="navbtn prev" aria-label="السابق" onclick="go(-1)">‹</button>
+<button class="navbtn next" aria-label="التالي" onclick="go(1)">›</button>
+<div class="hud"><span><b id="cur">1</b> / <b id="total">9</b></span><span>·</span><span>الأسهم / المسافة / نقر</span></div>
+
+<script>
+(function () {
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    let i = 0;
+    document.getElementById('total').textContent = slides.length;
+
+    function show(n) {
+        i = Math.max(0, Math.min(slides.length - 1, n));
+        slides.forEach((s, k) => s.classList.toggle('active', k === i));
+        document.getElementById('cur').textContent = i + 1;
+        document.getElementById('bar').style.width = ((i + 1) / slides.length * 100) + '%';
+    }
+    window.go = (d) => show(i + d);
+
+    document.addEventListener('keydown', (e) => {
+        if (['ArrowLeft', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(1); }
+        if (['ArrowRight', 'PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+        if (e.key === 'Home') show(0);
+        if (e.key === 'End') show(slides.length - 1);
+    });
+    document.getElementById('deck').addEventListener('click', (e) => {
+        if (e.target.closest('a, button')) return;
+        go(e.clientX > innerWidth / 2 ? 1 : -1); // في RTL: يمين = التالي
+    });
+    show(0);
+})();
+</script>
+</body>
+</html>
