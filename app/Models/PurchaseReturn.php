@@ -2,18 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * PurchaseReturn - table `purchase_returns` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class PurchaseReturn extends Model
 {
-    use HasFactory;
+    protected $table = 'purchase_returns';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
         'business_id',
         'purchase_id',
@@ -21,23 +20,18 @@ class PurchaseReturn extends Model
         'return_date',
     ];
 
-    public static function boot()
-    {
-        parent::boot();
+    protected $casts = [
+        'purchase_id' => 'integer',
+        'return_date' => 'datetime',
+    ];
 
-        static::creating(function ($model) {
-            $id = PurchaseReturn::where('business_id', auth()->user()->business_id)->count() + 1;
-            $model->invoice_no = 'PR-'.str_pad($id, 5, '0', STR_PAD_LEFT);
-        });
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class, 'business_id');
     }
 
-    public function purchase()
+    public function purchase(): BelongsTo
     {
-        return $this->belongsTo(Purchase::class);
-    }
-
-    public function details()
-    {
-        return $this->hasMany(PurchaseReturnDetail::class);
+        return $this->belongsTo(Purchase::class, 'purchase_id');
     }
 }

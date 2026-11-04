@@ -2,21 +2,32 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * AgingReport - table `aging_reports` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class AgingReport extends Model
 {
-    use HasFactory;
+    protected $table = 'aging_reports';
 
     protected $fillable = [
-        'supplier_id', 'business_id', 'report_date', 'period_30',
-        'period_60', 'period_90', 'period_90_plus', 'total', 'generated_at',
+        'business_id',
+        'supplier_id',
+        'report_date',
+        'period_30',
+        'period_60',
+        'period_90',
+        'period_90_plus',
+        'total',
+        'generated_at',
     ];
 
     protected $casts = [
-        'report_date' => 'datetime',
+        'supplier_id' => 'integer',
+        'report_date' => 'date',
         'period_30' => 'decimal:2',
         'period_60' => 'decimal:2',
         'period_90' => 'decimal:2',
@@ -25,8 +36,8 @@ class AgingReport extends Model
         'generated_at' => 'datetime',
     ];
 
-    public function supplier(): BelongsTo { return $this->belongsTo(Supplier::class); }
-    public function business(): BelongsTo { return $this->belongsTo(Business::class); }
-
-    public function scopeForBusiness($query, $businessId) { return $query->where('business_id', $businessId); }
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class, 'business_id');
+    }
 }

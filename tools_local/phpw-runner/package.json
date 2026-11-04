@@ -1,0 +1,9 @@
+{
+  "name": "phpw",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@php-wasm/node": "3.1.54",
+    "@php-wasm/universal": "3.1.54"
+  }
+}

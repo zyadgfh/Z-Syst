@@ -2,19 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * SupplierInvoiceItem - table `supplier_invoice_items` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class SupplierInvoiceItem extends Model
 {
-    use HasFactory;
+    protected $table = 'supplier_invoice_items';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'supplier_invoice_id',
         'product_id',
@@ -30,12 +28,10 @@ class SupplierInvoiceItem extends Model
         'notes',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
+        'supplier_invoice_id' => 'integer',
+        'product_id' => 'integer',
+        'purchase_detail_id' => 'integer',
         'quantity' => 'integer',
         'unit_price' => 'decimal:2',
         'discount' => 'decimal:2',
@@ -44,54 +40,18 @@ class SupplierInvoiceItem extends Model
         'expiry_date' => 'date',
     ];
 
-    /**
-     * Get the invoice that owns the item.
-     */
-    public function invoice(): BelongsTo
+    public function supplierInvoice(): BelongsTo
     {
         return $this->belongsTo(SupplierInvoice::class, 'supplier_invoice_id');
     }
 
-    /**
-     * Get the product that owns the item.
-     */
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
-    /**
-     * Get the purchase detail that owns the item.
-     */
     public function purchaseDetail(): BelongsTo
     {
-        return $this->belongsTo(PurchaseDetails::class);
-    }
-
-    /**
-     * Calculate total.
-     */
-    public function calculateTotal(): void
-    {
-        $this->total = ($this->unit_price * $this->quantity) - $this->discount + $this->tax;
-        $this->save();
-    }
-
-    /**
-     * Boot the model.
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($item) {
-            $item->calculateTotal();
-        });
-
-        static::updating(function ($item) {
-            if ($item->isDirty('quantity') || $item->isDirty('unit_price') || $item->isDirty('discount') || $item->isDirty('tax')) {
-                $item->calculateTotal();
-            }
-        });
+        return $this->belongsTo(PurchaseDetail::class, 'purchase_detail_id');
     }
 }

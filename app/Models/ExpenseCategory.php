@@ -2,31 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * ExpenseCategory - table `expense_categories` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class ExpenseCategory extends Model
 {
-    use HasFactory;
+    protected $table = 'expense_categories';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
-        'categoryName',
         'business_id',
+        'categoryName',
         'categoryDescription',
         'status',
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
     protected $casts = [
         'status' => 'boolean',
     ];
+
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class, 'business_id');
+    }
 }

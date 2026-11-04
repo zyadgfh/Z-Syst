@@ -19,16 +19,22 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    // Never ship '*' to production: list explicit origins in CORS_ALLOWED_ORIGINS
+    // (comma-separated). The default below matches the known deployment targets.
+    'allowed_origins' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('CORS_ALLOWED_ORIGINS', 'https://app.z-syst.com,http://localhost:3000'))
+    ))),
 
-    'allowed_origins_patterns' => [],
+    // Vercel preview deployments of the dashboard get in via pattern.
+    'allowed_origins_patterns' => ['#^https://[a-z0-9-]+\.vercel\.app$#'],
 
     'allowed_headers' => ['*'],
 
     'exposed_headers' => [],
 
-    'max_age' => 0,
+    'max_age' => 3600,
 
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 
 ];

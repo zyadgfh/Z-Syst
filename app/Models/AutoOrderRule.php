@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * AutoOrderRule - table `auto_order_rules` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class AutoOrderRule extends Model
 {
-    use HasFactory;
+    protected $table = 'auto_order_rules';
 
     protected $fillable = [
         'business_id',
@@ -28,23 +31,28 @@ class AutoOrderRule extends Model
     ];
 
     protected $casts = [
+        'product_id' => 'integer',
         'enabled' => 'boolean',
+        'min_stock_level' => 'decimal:2',
+        'max_stock_level' => 'decimal:2',
+        'reorder_point' => 'decimal:4',
+        'safety_stock' => 'decimal:4',
+        'lead_time_days' => 'integer',
+        'min_order_qty' => 'decimal:4',
+        'max_order_qty' => 'decimal:4',
+        'order_multiple' => 'decimal:4',
+        'preferred_supplier_id' => 'integer',
         'auto_approve' => 'boolean',
-        'meta' => 'json',
+        'meta' => 'array',
     ];
 
     public function business(): BelongsTo
     {
-        return $this->belongsTo(Business::class);
+        return $this->belongsTo(Business::class, 'business_id');
     }
 
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
-    }
-
-    public function preferredSupplier(): BelongsTo
-    {
-        return $this->belongsTo(Party::class, 'preferred_supplier_id');
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

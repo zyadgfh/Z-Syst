@@ -114,20 +114,32 @@ class FeatureStatusService
             [
                 'key' => 'insurance',
                 'label' => 'Insurance',
-                'status' => 'in_progress',
-                'details' => 'Module scaffold pending. Tables, models, service, controller, and tests are in progress.',
+                'status' => 'completed',
+                'details' => 'Insurance companies, policies, coverages, claims, API controllers, and feature tests are implemented.',
             ],
             [
                 'key' => 'multi_warehouse',
                 'label' => 'Multi-Warehouse',
-                'status' => 'pending',
-                'details' => 'Not started. Needs warehouses, warehouse_stocks, and stock_transfers tables.',
+                'status' => 'completed',
+                'details' => 'Warehouses, warehouse stock, transfers, services, API controllers, and feature tests are implemented.',
             ],
             [
                 'key' => 'traceability',
                 'label' => 'Drug Recall & Traceability',
-                'status' => 'pending',
-                'details' => 'Not started. Needs batch serial tracking and recall event workflow.',
+                'status' => 'completed',
+                'details' => 'Recall events, traceability logs, service workflows, API controllers, and feature tests are implemented.',
+            ],
+            [
+                'key' => 'loyalty_crm',
+                'label' => 'Loyalty and CRM',
+                'status' => 'completed',
+                'details' => 'Loyalty programs, transactions, service logic, API coverage, and unit tests are implemented.',
+            ],
+            [
+                'key' => 'receipts',
+                'label' => 'Receipts and Printing',
+                'status' => 'completed',
+                'details' => 'Receipt settings, receipt generation service, API endpoints, and unit tests are implemented.',
             ],
         ];
     }

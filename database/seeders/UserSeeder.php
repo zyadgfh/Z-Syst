@@ -5,42 +5,71 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
 
+/**
+ * Seeds user profiles.
+ *
+ * Path B (default): passwords and emails live in Supabase auth.users, so this
+ * seeder is a no-op unless SUPABASE_SEED_AUTH_USER_IDS supplies existing
+ * auth.users ids (app_users.id is a foreign key to auth.users.id).
+ *
+ * Local dev / CI fallback (SUPABASE_FALLBACK_ELOQUENT=true): seeds classic
+ * accounts with emails + bcrypt hashes stored locally (see the
+ * add_local_auth_columns_to_app_users migration).
+ */
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create Super Admin
-        $superAdmin = User::create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@z-syst.com',
-            'password' => Hash::make('SuperAdmin123!'),
-            'role' => 'superadmin',
-            'status' => 'active',
-            'email_verified_at' => now(),
-        ]);
+        if (config('supabase.fallback_eloquent')) {
+            $locals = [
+                ['email' => 'superadmin@z-syst.com', 'password' => 'SuperAdmin123!', 'role' => 'superadmin', 'name' => 'Super Admin'],
+                ['email' => 'admin@test.com', 'password' => 'Admin123!', 'role' => 'admin', 'name' => 'Admin'],
+                ['email' => 'staff@test.com', 'password' => 'Staff123!', 'role' => 'staff', 'name' => 'Staff'],
+                ['email' => 'staff-b@test.com', 'password' => 'StaffB123!', 'role' => 'staff', 'name' => 'Staff B'],
+            ];
+            foreach ($locals as $u) {
+                // app_users.id is a uuid (Path B: references auth.users.id);
+                // in fallback mode we generate one locally.
+                User::query()->updateOrCreate(
+                    ['email' => $u['email']],
+                    [
+                        'id' => (string) \Illuminate\Support\Str::uuid(),
+                        'name' => $u['name'],
+                        'role' => $u['role'],
+                        'password' => $u['password'],
+                        'status' => 'active',
+                        'lang' => 'en',
+                    ]
+                );
+            }
+            $this->command?->info('Local fallback users seeded.');
 
-        // Create Test Admin User
-        $admin = User::create([
-            'name' => 'Test Admin',
-            'email' => 'admin@test.com',
-            'password' => Hash::make('Admin123!'),
-            'role' => 'admin',
-            'status' => 'active',
-            'email_verified_at' => now(),
-        ]);
+            return;
+        }
 
-        // Create Test Staff User
-        $staff = User::create([
-            'name' => 'Test Staff',
-            'email' => 'staff@test.com',
-            'password' => Hash::make('Staff123!'),
-            'role' => 'staff',
-            'status' => 'active',
-            'email_verified_at' => now(),
-        ]);
+        $ids = (array) config('supabase.seed_auth_user_ids', []);
 
-        $this->command->info('Users seeded successfully');
+        if ($ids === []) {
+            $this->command?->warn(
+                'UserSeeder skipped: no app_users row can exist without a matching auth.users id. '.
+                'Create users in Supabase Authentication first.'
+            );
+
+            return;
+        }
+
+        foreach ($ids as $index => $id) {
+            User::query()->updateOrCreate(
+                ['id' => $id],
+                [
+                    'name' => 'Seeded User '.($index + 1),
+                    'role' => $index === 0 ? 'superadmin' : 'staff',
+                    'status' => 'active',
+                ]
+            );
+        }
+
+        $this->command?->info('User profiles seeded.');
     }
 }

@@ -10,6 +10,19 @@ use Illuminate\Support\Facades\DB;
 
 class LoyaltyService
 {
+    public function getOrCreateProgram(int $businessId): LoyaltyProgram
+    {
+        return LoyaltyProgram::firstOrCreate(
+            ['business_id' => $businessId],
+            ['name' => 'Default Loyalty Program', 'points_per_currency' => 1, 'min_points_for_reward' => 100, 'is_active' => true]
+        );
+    }
+
+    private function resolveProgram(int $businessOrProgramId): ?LoyaltyProgram
+    {
+        return LoyaltyProgram::find($businessOrProgramId) ?? $this->getOrCreateProgram($businessOrProgramId);
+    }
+
     /**
      * Create loyalty program
      */
@@ -27,23 +40,45 @@ class LoyaltyService
         return $program->fresh();
     }
 
+    public function getBalance(int $businessId, int $partyId): int
+    {
+        $program = $this->resolveProgram($businessId);
+        return $program ? $this->getCustomerBalance($partyId, $program->id) : 0;
+    }
+
+    public function getHistory(int $businessId, int $partyId): array
+    {
+        $program = $this->resolveProgram($businessId);
+        return $program ? LoyaltyTransaction::where('loyalty_program_id', $program->id)->where('party_id', $partyId)->latest()->get()->all() : [];
+    }
+
+    public function logInteraction(int $businessId, int $partyId, string $type, ?string $notes = null): CustomerInteraction
+    {
+        return $this->createInteraction(['business_id' => $businessId, 'party_id' => $partyId, 'type' => $type, 'notes' => $notes, 'user_id' => auth()->id()]);
+    }
+
     /**
      * Earn points for a customer
      */
-    public function earnPoints(int $programId, int $partyId, float $amount, string $referenceType = null, int $referenceId = null): LoyaltyTransaction
+    public function earnPoints(int $businessOrProgramId, int $partyId, float $amount, $reference = null, ?int $referenceId = null): ?LoyaltyTransaction
     {
-        return DB::transaction(function () use ($programId, $partyId, $amount, $referenceType, $referenceId) {
-            $program = LoyaltyProgram::findOrFail($programId);
+        return DB::transaction(function () use ($businessOrProgramId, $partyId, $amount, $reference, $referenceId) {
+            $program = $this->resolveProgram($businessOrProgramId);
+            if (! $program || ! $program->is_active) {
+                return null;
+            }
             $points = $program->calculatePoints($amount);
+            $referenceType = is_object($reference) ? $reference::class : $reference;
+            $resolvedReferenceId = is_object($reference) ? $reference->getKey() : $referenceId;
 
             return LoyaltyTransaction::create([
                 'business_id' => $program->business_id,
-                'loyalty_program_id' => $programId,
+                'loyalty_program_id' => $program->id,
                 'party_id' => $partyId,
                 'points' => $points,
                 'type' => 'earned',
                 'reference_type' => $referenceType,
-                'reference_id' => $referenceId,
+                'reference_id' => $resolvedReferenceId,
                 'notes' => "Earned {$points} points from purchase of {$amount}",
             ]);
         });
@@ -52,23 +87,23 @@ class LoyaltyService
     /**
      * Redeem points for a customer
      */
-    public function redeemPoints(int $programId, int $partyId, int $points, string $notes = null): LoyaltyTransaction
+    public function redeemPoints(int $businessOrProgramId, int $partyId, int $points, ?string $notes = null): LoyaltyTransaction
     {
-        return DB::transaction(function () use ($programId, $partyId, $points, $notes) {
-            $program = LoyaltyProgram::findOrFail($programId);
-            $currentBalance = $this->getCustomerBalance($partyId, $programId);
+        return DB::transaction(function () use ($businessOrProgramId, $partyId, $points, $notes) {
+            if ($points <= 0) {
+                throw new \Exception('Points must be greater than zero.');
+            }
+            $program = $this->resolveProgram($businessOrProgramId);
+            $currentBalance = $program ? $this->getCustomerBalance($partyId, $program->id) : 0;
 
             if ($currentBalance < $points) {
-                throw new \Exception('Insufficient points balance');
+                throw new \Exception('Insufficient loyalty points.');
             }
 
-            if (!$program->canRedeemReward($points)) {
-                throw new \Exception('Minimum points requirement not met');
-            }
 
             return LoyaltyTransaction::create([
                 'business_id' => $program->business_id,
-                'loyalty_program_id' => $programId,
+                'loyalty_program_id' => $program->id,
                 'party_id' => $partyId,
                 'points' => -$points, // Negative for redemption
                 'type' => 'redeemed',

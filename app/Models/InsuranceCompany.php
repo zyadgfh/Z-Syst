@@ -2,18 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * InsuranceCompany - table `insurance_companies` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class InsuranceCompany extends Model
 {
-    use HasFactory;
-
-    protected static function newFactory()
-    {
-        return \Database\Factories\InsuranceCompanyFactory::new();
-    }
+    protected $table = 'insurance_companies';
 
     protected $fillable = [
         'business_id',
@@ -38,51 +36,21 @@ class InsuranceCompany extends Model
     ];
 
     protected $casts = [
-        'api_credentials' => 'encrypted',
-        'default_coverage_percent' => 'decimal:2',
-        'default_copay_percent' => 'decimal:2',
-        'metadata' => 'json',
+        'default_coverage_percent' => 'decimal:4',
+        'default_copay_percent' => 'decimal:4',
+        'settlement_days' => 'integer',
+        'metadata' => 'array',
     ];
 
-    public function policies(): HasMany
+    protected $hidden = ['api_credentials'];
+
+    public function business(): BelongsTo
     {
-        return $this->hasMany(InsurancePolicy::class);
+        return $this->belongsTo(Business::class, 'business_id');
     }
 
-    public function claims(): HasMany
+    public function tax(): BelongsTo
     {
-        return $this->hasMany(InsuranceClaim::class);
-    }
-
-    public function business()
-    {
-        return $this->belongsTo(Business::class);
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where('status', 'active');
-    }
-
-    public function scopeForBusiness($query, $businessId)
-    {
-        return $query->where('business_id', $businessId);
-    }
-
-    /**
-     * Calculate default coverage for a given amount
-     */
-    public function calculateDefaultCoverage(float $amount): array
-    {
-        $coveredAmount = ($amount * $this->default_coverage_percent) / 100;
-        $copayAmount = ($amount * $this->default_copay_percent) / 100;
-        $patientResponsibility = $amount - $coveredAmount + $copayAmount;
-
-        return [
-            'covered_amount' => $coveredAmount,
-            'patient_responsibility' => $patientResponsibility,
-            'coverage_percent' => $this->default_coverage_percent,
-            'copay_percent' => $this->default_copay_percent,
-        ];
+        return $this->belongsTo(Tax::class, 'tax_id');
     }
 }

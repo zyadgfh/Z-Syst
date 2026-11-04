@@ -7,12 +7,14 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@hasSection('title') @yield('title') | @endif Z-Syst</title>
     @include('layouts.partials.css')
+    <link rel="stylesheet" href="{{ asset('assets/css/apple.css') }}">
 </head>
 
-<body>
+<body class="ap-theme">
 @yield('main_content')
 @stack('modal')
 @include('layouts.auth.partials.scripts')
+<script src="{{ asset('assets/js/apple-motion.js') }}" defer></script>
 </body>
 
 </html>

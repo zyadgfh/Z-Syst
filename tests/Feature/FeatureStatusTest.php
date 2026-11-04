@@ -20,5 +20,12 @@ class FeatureStatusTest extends TestCase
         $this->assertContains('backup_automation', $keys);
         $this->assertContains('sales_invoices', $keys);
         $this->assertContains('reports_statistics', $keys);
+
+        $statuses = array_column($features, 'status', 'key');
+        $this->assertSame('completed', $statuses['insurance']);
+        $this->assertSame('completed', $statuses['multi_warehouse']);
+        $this->assertSame('completed', $statuses['traceability']);
+        $this->assertSame('completed', $statuses['loyalty_crm']);
+        $this->assertSame('completed', $statuses['receipts']);
     }
 }

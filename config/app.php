@@ -70,6 +70,9 @@ return [
 
     'debug' => (bool) env('APP_DEBUG', false),
 
+    // Disables destructive admin actions (bulk deletes, settings writes) — see DemoMode middleware.
+    'demo_mode' => (bool) env('DEMO_MODE', false),
+
     /*
     |--------------------------------------------------------------------------
     | Application URL

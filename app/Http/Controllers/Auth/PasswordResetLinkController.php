@@ -3,62 +3,46 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Support\Supabase\SupabaseAuthClient;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Throwable;
 
+/**
+ * Path B: Laravel owns no password hashes, so Laravel's Password broker (which
+ * needs a password_reset_tokens table) is out of the picture. The reset link is
+ * issued by Supabase GoTrue and lands on SITE_URL.
+ */
 class PasswordResetLinkController extends Controller
 {
-    /**
-     * Display the password reset link request view.
-     */
+    public function __construct(protected SupabaseAuthClient $supabase)
+    {
+    }
+
     public function create(): View
     {
         return view('auth.forgot-password');
     }
 
-    /**
-     * Handle an incoming password reset link request.
-     *
-     * @throws ValidationException
-     */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse|\Illuminate\Http\RedirectResponse
     {
         $request->validate([
             'email' => ['required', 'email'],
         ]);
 
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
-        $response = Password::sendResetLink(
-            $request->only('email')
-        );
-
-        return $response == Password::RESET_LINK_SENT
-                    ? $this->sendResetLinkResponse($request, $response)
-                    : $this->sendResetLinkFailedResponse($request, $response);
-    }
-
-    protected function sendResetLinkResponse(Request $request, $response)
-    {
-        return $request->wantsJson()
-                    ? new JsonResponse(trans($response))
-                    : back()->with('status', trans($response));
-    }
-
-    protected function sendResetLinkFailedResponse(Request $request, $response)
-    {
-        if ($request->wantsJson()) {
-            throw ValidationException::withMessages([
-                'email' => [trans($response)],
-            ]);
+        try {
+            $this->supabase->recover((string) $request->input('email'));
+        } catch (Throwable $e) {
+            // Never reveal whether the address exists, and never fail loudly
+            // on a mail-side error.
+            report($e);
         }
 
-        return back()
-            ->withInput($request->only('email'))
-            ->withErrors(['email' => trans($response)]);
+        $status = __('If that address exists, a password reset link is on its way.');
+
+        return $request->wantsJson()
+            ? new JsonResponse(['status' => $status])
+            : back()->with('status', $status);
     }
 }

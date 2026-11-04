@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-Z-Syst is a comprehensive SaaS Multi-Tenant Pharmacy Management Platform built with Laravel 10 and PHP 8.1+. It provides advanced features for pharmacy operations including inventory management, sales, purchases, insurance, loyalty programs, and more.
+Z-Syst is a comprehensive SaaS Multi-Tenant Pharmacy Management Platform built with Laravel 12 (PHP 8.2+), running as a façade over **Supabase PostgreSQL** — identity via Supabase Auth (GoTrue), tenant isolation enforced by Row Level Security, and the companion Flutter POS app lives in `pharmacy-store-app-codecanyon-main/`. It provides advanced features for pharmacy operations including inventory management, sales, purchases, insurance, loyalty programs, and more.
 
 ## 🚀 Features
 
@@ -27,7 +27,7 @@ Z-Syst is a comprehensive SaaS Multi-Tenant Pharmacy Management Platform built w
 ### Advanced Features
 - 🤖 AI-powered stock prediction (planned)
 - 💳 E-invoicing integration (planned)
-- 📱 Mobile app (planned)
+- 📱 Mobile POS app (Flutter — `pharmacy-store-app-codecanyon-main/`)
 - 📊 Real-time analytics
 - 🏥 Hospital integration
 - 📦 Supplier portal
@@ -59,10 +59,7 @@ z-syst/
 │   ├── migrations/
 │   └── seeders/
 ├── Modules/
-│   ├── Landing/
-│   ├── Product/
-│   ├── Sale/
-│   └── ...
+│   └── Landing/          # only active module (modules_statuses.json)
 ├── design-system/
 │   └── MASTER.md
 ├── automation.sh
@@ -107,7 +104,7 @@ z-syst/
 ## 🔧 Installation
 
 ### Prerequisites
-- PHP 8.1+
+- PHP 8.2+
 - PostgreSQL 15+ (Supabase PostgreSQL 17.x recommended)
 - Redis 6.0+ (optional for local development)
 - Composer 2.0+
@@ -385,8 +382,8 @@ This project is proprietary software owned by Z-Syst Pharmacy Management System.
 - ✅ UI/UX enhancements
 - ✅ Testing framework
 
-### Phase 2 (Planned)
-- 🔄 Mobile app development
+### Phase 2 (In progress)
+- ✅ Mobile POS app (Flutter companion app in-repo)
 - 🔄 AI stock prediction
 - 🔄 E-invoicing integration
 - 🔄 Advanced POS

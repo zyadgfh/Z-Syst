@@ -50,22 +50,4 @@ Route::get('/cache-clear', function () {
     return back()->with('success', __('Cache has been cleared.'));
 });
 
-Route::get('/update', function () {
-    if (file_exists(base_path('storage/installed'))) {
-        touch(base_path('vendor/autoload1.php'));
-    }
-
-    Artisan::call('module:publish Landing');
-    Artisan::call('module:migrate Landing');
-    Artisan::call('module:seed Landing');
-
-    Artisan::call('migrate');
-    Artisan::call('cache:clear');
-    Artisan::call('config:clear');
-    Artisan::call('route:clear');
-    Artisan::call('view:clear');
-
-    return redirect('/')->with('message', __('System updated successfully.'));
-});
-
 require __DIR__.'/auth.php';

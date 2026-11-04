@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * LoyaltyTransaction - table `loyalty_transactions` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class LoyaltyTransaction extends Model
 {
-    use HasFactory;
+    protected $table = 'loyalty_transactions';
 
     protected $fillable = [
         'business_id',
@@ -22,67 +25,24 @@ class LoyaltyTransaction extends Model
     ];
 
     protected $casts = [
+        'loyalty_program_id' => 'integer',
+        'party_id' => 'integer',
         'points' => 'integer',
+        'reference_id' => 'integer',
     ];
 
     public function business(): BelongsTo
     {
-        return $this->belongsTo(Business::class);
+        return $this->belongsTo(Business::class, 'business_id');
     }
 
     public function loyaltyProgram(): BelongsTo
     {
-        return $this->belongsTo(LoyaltyProgram::class);
+        return $this->belongsTo(LoyaltyProgram::class, 'loyalty_program_id');
     }
 
     public function party(): BelongsTo
     {
-        return $this->belongsTo(Party::class);
-    }
-
-    /**
-     * Scope for business
-     */
-    public function scopeForBusiness($query, $businessId)
-    {
-        return $query->where('business_id', $businessId);
-    }
-
-    /**
-     * Scope for earned points
-     */
-    public function scopeEarned($query)
-    {
-        return $query->where('type', 'earned');
-    }
-
-    /**
-     * Scope for redeemed points
-     */
-    public function scopeRedeemed($query)
-    {
-        return $query->where('type', 'redeemed');
-    }
-
-    /**
-     * Scope for specific party
-     */
-    public function scopeForParty($query, $partyId)
-    {
-        return $query->where('party_id', $partyId);
-    }
-
-    /**
-     * Get type label
-     */
-    public function getTypeLabelAttribute(): string
-    {
-        return match($this->type) {
-            'earned' => __('Earned'),
-            'redeemed' => __('Redeemed'),
-            'adjusted' => __('Adjusted'),
-            'bonus' => __('Bonus'),
-            default => ucfirst($this->type),
-        };
+        return $this->belongsTo(Party::class, 'party_id');
     }
 }

@@ -2,24 +2,38 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * SubscriptionInvoice - table `subscription_invoices` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class SubscriptionInvoice extends Model
 {
-    use HasFactory;
+    protected $table = 'subscription_invoices';
 
     protected $fillable = [
-        'subscription_id', 'business_id', 'invoice_number', 'invoice_date',
-        'due_date', 'subtotal', 'tax', 'total', 'amount_paid', 'status',
-        'payment_method', 'stripe_invoice_id', 'stripe_payment_intent_id', 'notes',
+        'subscription_id',
+        'business_id',
+        'invoice_number',
+        'invoice_date',
+        'due_date',
+        'subtotal',
+        'tax',
+        'total',
+        'amount_paid',
+        'status',
+        'payment_method',
+        'stripe_invoice_id',
+        'stripe_payment_intent_id',
+        'notes',
     ];
 
     protected $casts = [
-        'invoice_date' => 'datetime',
-        'due_date' => 'datetime',
+        'subscription_id' => 'integer',
+        'invoice_date' => 'date',
+        'due_date' => 'date',
         'subtotal' => 'decimal:2',
         'tax' => 'decimal:2',
         'total' => 'decimal:2',
@@ -28,46 +42,11 @@ class SubscriptionInvoice extends Model
 
     public function subscription(): BelongsTo
     {
-        return $this->belongsTo(Subscription::class);
+        return $this->belongsTo(Subscription::class, 'subscription_id');
     }
 
     public function business(): BelongsTo
     {
-        return $this->belongsTo(Business::class);
-    }
-
-    public function payments(): HasMany
-    {
-        return $this->hasMany(SubscriptionPayment::class);
-    }
-
-    public function scopePending($query)
-    {
-        return $query->where('status', 'pending');
-    }
-
-    public function scopePaid($query)
-    {
-        return $query->where('status', 'paid');
-    }
-
-    public function scopeOverdue($query)
-    {
-        return $query->where('status', 'pending')->where('due_date', '<', now());
-    }
-
-    public function isPaid(): bool
-    {
-        return $this->status === 'paid' || $this->amount_paid >= $this->total;
-    }
-
-    public function isOverdue(): bool
-    {
-        return $this->status === 'pending' && $this->due_date && $this->due_date->isPast();
-    }
-
-    public function getBalanceAttribute(): float
-    {
-        return $this->total - $this->amount_paid;
+        return $this->belongsTo(Business::class, 'business_id');
     }
 }

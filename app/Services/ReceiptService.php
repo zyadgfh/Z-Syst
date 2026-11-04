@@ -12,13 +12,70 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReceiptService
 {
+    public function getOrCreateSettings(int $businessId): ReceiptSetting
+    {
+        return ReceiptSetting::firstOrCreate(
+            ['business_id' => $businessId],
+            ['receipt_footer' => 'Thank you for your business!', 'show_barcode' => true, 'show_qr_code' => false, 'is_active' => true]
+        );
+    }
+
+    public function generateForSale(Sale $sale, string $format = 'pdf'): Receipt
+    {
+        $receipt = $this->generateSaleReceipt($sale->id, $format);
+        $number = $this->generateReceiptNumber('RCPT');
+        $receipt->update([
+            'receipt_number' => $number,
+            'data' => array_merge($receipt->data ?? [], ['receipt_number' => $number,
+                'paid_amount' => $sale->paidAmount,
+                'due_amount' => $sale->dueAmount,
+                'payment_type' => $sale->paymentType,
+            ]),
+        ]);
+        return $receipt->fresh();
+    }
+
+    public function generateForPurchase(Purchase $purchase, string $format = 'pdf'): Receipt
+    {
+        $receipt = $this->generatePurchaseReceipt($purchase->id, $format);
+        $number = $this->generateReceiptNumber('RCPT');
+        $receipt->update([
+            'receipt_number' => $number,
+            'data' => array_merge($receipt->data ?? [], ['receipt_number' => $number,
+                'paid_amount' => $purchase->paidAmount,
+                'due_amount' => $purchase->dueAmount,
+                'payment_type' => $purchase->paymentType,
+            ]),
+        ]);
+        return $receipt->fresh();
+    }
+
+    public function getBySale(Sale $sale): ?Receipt
+    {
+        return Receipt::where('sale_id', $sale->id)->latest()->first();
+    }
+
+    public function renderPdf(Receipt $receipt): string
+    {
+        $data = $receipt->data;
+        if ($receipt->type === 'sale') {
+            $data['sale'] = Sale::with(['business', 'party'])->findOrFail($receipt->sale_id);
+            $data['customer'] = $data['sale']->party;
+        } elseif ($receipt->purchase_id) {
+            $data['purchase'] = Purchase::with(['business', 'party'])->findOrFail($receipt->purchase_id);
+            $data['supplier'] = $data['purchase']->party;
+        }
+        $view = $data['type'] === 'sale' ? 'receipts.sale-receipt' : 'receipts.purchase-receipt';
+        return Pdf::loadView($view, ['data' => $data, 'receipt' => $receipt])->output();
+    }
+
     /**
      * Generate receipt for sale
      */
     public function generateSaleReceipt(int $saleId, string $format = 'pdf'): Receipt
     {
         return DB::transaction(function () use ($saleId, $format) {
-            $sale = Sale::with(['details.product', 'party', 'business'])->findOrFail($saleId);
+            $sale = Sale::with(['details.product', 'party'])->findOrFail($saleId);
             $setting = ReceiptSetting::forBusiness($sale->business_id)->active()->first();
 
             $receiptNumber = $this->generateReceiptNumber('SALE');
@@ -29,9 +86,9 @@ class ReceiptService
                 'items' => $sale->details->map(function ($detail) {
                     return [
                         'product_name' => $detail->product?->name ?? 'Unknown',
-                        'quantity' => $detail->quantity,
-                        'price' => $detail->price,
-                        'total' => $detail->total,
+                        'quantity' => $detail->quantities,
+                        'price' => $detail->price ?? $detail->purchase_without_tax,
+                        'total' => ($detail->price ?? $detail->purchase_without_tax ?? 0) * ($detail->quantities ?? 0),
                         'discount' => $detail->discount ?? 0,
                     ];
                 }),
@@ -70,7 +127,7 @@ class ReceiptService
     public function generatePurchaseReceipt(int $purchaseId, string $format = 'pdf'): Receipt
     {
         return DB::transaction(function () use ($purchaseId, $format) {
-            $purchase = Purchase::with(['purchaseDetails.product', 'party', 'business'])->findOrFail($purchaseId);
+            $purchase = Purchase::with(['details.product', 'party'])->findOrFail($purchaseId);
             $setting = ReceiptSetting::forBusiness($purchase->business_id)->active()->first();
 
             $receiptNumber = $this->generateReceiptNumber('PURCHASE');
@@ -78,12 +135,12 @@ class ReceiptService
             $receiptData = [
                 'type' => 'purchase',
                 'purchase' => $purchase,
-                'items' => $purchase->purchaseDetails->map(function ($detail) {
+                'items' => $purchase->details->map(function ($detail) {
                     return [
                         'product_name' => $detail->product?->name ?? 'Unknown',
-                        'quantity' => $detail->quantity,
-                        'price' => $detail->price,
-                        'total' => $detail->total,
+                        'quantity' => $detail->quantities,
+                        'price' => $detail->price ?? $detail->purchase_without_tax,
+                        'total' => ($detail->price ?? $detail->purchase_without_tax ?? 0) * ($detail->quantities ?? 0),
                         'discount' => $detail->discount ?? 0,
                     ];
                 }),

@@ -28,7 +28,7 @@
 | `tools/valkey-compat-test.py` | سكربت تحقق يفحص توافق أي خادم Valkey/Redis مع عمليات Laravel الفعلية |
 | هذا الدليل `docs/valkey-setup-ar.md` | التثبيت والترحيل والتحقق |
 
-> ملفات `.env.example` و`.env.production` وأدلة النشر تحتفظ بمتغيرات `REDIS_*` كما هي — وهي نفسها التي يستخدمها Valkey.
+> ملفات `.env.example` و`.env.production.example` وأدلة النشر تحتفظ بمتغيرات `REDIS_*` كما هي — وهي نفسها التي يستخدمها Valkey.
 
 ---
 

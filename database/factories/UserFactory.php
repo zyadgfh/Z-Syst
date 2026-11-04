@@ -5,37 +5,42 @@ namespace Database\Factories;
 use App\Models\Business;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
+ * Builds public.app_users rows.
+ *
+ * Path B removed the local credential columns: there is no email / password /
+ * remember_token in app_users (identity lives in auth.users). A factory row is
+ * therefore a *profile*; authentication for it must exist in GoTrue, which is
+ * why tests should stub the provider rather than rely on a password here.
+ *
  * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
+    protected $model = User::class;
+
     /**
-     * Define the model's default state.
-     *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
         return [
+            'id' => (string) \Illuminate\Support\Str::uuid(),
             'business_id' => Business::factory(),
             'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => bcrypt('password'),
-            'remember_token' => Str::random(10),
+            'role' => 'staff',
+            'status' => 'active',
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
+    public function superAdmin(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
+        return $this->state(fn () => ['role' => 'superadmin', 'business_id' => null]);
+    }
+
+    public function disabled(): static
+    {
+        return $this->state(fn () => ['status' => 'inactive']);
     }
 }

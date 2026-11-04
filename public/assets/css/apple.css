@@ -1,0 +1,257 @@
+/* ==========================================================================
+   apple.css — Apple-design layer for Z-Syst public surfaces (auth + landing)
+   Loads last; layers over bootstrap without touching framework internals.
+
+   Principles applied (apple-design skill):
+   - Materials carry hierarchy: heavier blur = higher layer. Never stack
+     translucent on translucent without a separator.
+   - Typography: system font stack; tracking tightens as size grows
+     (display -0.022em, body ~0); leading shortens as size grows.
+   - Motion: critically-damped springs (response ~0.35s), momentum
+     projection, hysteresis on press; reduced-motion -> crossfade only.
+   - Hairline separators, 4/8pt spacing rhythm, continuous-feel radii.
+   ========================================================================== */
+
+:root {
+    --ap-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
+               Roboto, "Helvetica Neue", Arial, sans-serif;
+    --ap-display-track: -0.022em;
+    --ap-title-track: -0.014em;
+    --ap-body-track: 0;
+
+    --ap-bg: #f5f5f7;
+    --ap-surface: #ffffff;
+    --ap-text: #1d1d1f;
+    --ap-text-2: #6e6e73;
+    --ap-text-3: #86868b;
+    --ap-hairline: rgba(0, 0, 0, 0.08);
+    --ap-accent: #0071e3;
+    --ap-accent-press: #0060c2;
+    --ap-green: #34c759;
+    --ap-red: #ff3b30;
+
+    --ap-radius-lg: 20px;
+    --ap-radius-md: 14px;
+    --ap-radius-sm: 10px;
+
+    --ap-shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --ap-shadow-float: 0 12px 40px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
+
+    --ap-spring: cubic-bezier(0.32, 0.72, 0, 1); /* approx of response .35, damping 1 */
+}
+
+html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+body.ap-theme {
+    font-family: var(--ap-font);
+    letter-spacing: var(--ap-body-track);
+    background: var(--ap-bg);
+    color: var(--ap-text);
+}
+
+/* ---- Materials ---------------------------------------------------------- */
+
+.ap-glass {
+    background: rgba(255, 255, 255, 0.72);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--ap-hairline);
+    /* top edge light, per material spec */
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.ap-material-regular {
+    background: var(--ap-surface);
+    border: 1px solid var(--ap-hairline);
+    border-radius: var(--ap-radius-lg);
+    box-shadow: var(--ap-shadow-card);
+}
+
+/* ---- Typography --------------------------------------------------------- */
+
+.ap-theme h1, .ap-theme .h1 { letter-spacing: var(--ap-display-track); line-height: 1.06; font-weight: 700; }
+.ap-theme h2, .ap-theme .h2 { letter-spacing: var(--ap-title-track);  line-height: 1.12; font-weight: 700; }
+.ap-theme h3, .ap-theme .h3 { letter-spacing: var(--ap-title-track);  line-height: 1.18; font-weight: 600; }
+.ap-theme p, .ap-theme li   { letter-spacing: var(--ap-body-track); }
+.ap-theme .ap-muted { color: var(--ap-text-2); }
+
+/* ---- Buttons ------------------------------------------------------------ */
+
+.ap-theme .btn {
+    font-family: var(--ap-font);
+    border-radius: 980px;               /* Apple pill */
+    font-weight: 600;
+    letter-spacing: var(--ap-body-track);
+    padding: 0.6rem 1.35rem;
+    border: none;
+    will-change: transform;
+    transition: background-color 0.18s var(--ap-spring);
+}
+
+.ap-theme .btn-primary,
+.ap-theme .btn-ap {
+    background: var(--ap-accent);
+    color: #fff;
+}
+.ap-theme .btn-primary:hover,
+.ap-theme .btn-ap:hover { background: var(--ap-accent-press); }
+
+.ap-theme .btn-outline-secondary {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--ap-text);
+    border: 1px solid var(--ap-hairline);
+}
+.ap-theme .btn-outline-secondary:hover { background: rgba(0, 0, 0, 0.08); }
+
+.ap-theme .btn-light,
+.ap-theme .btn-white {
+    background: #fff;
+    color: var(--ap-text);
+    border: 1px solid var(--ap-hairline);
+}
+
+/* pressed state is animated by apple-motion.js springs; this is the fallback */
+.ap-theme .btn:active { transform: scale(0.97); }
+
+/* ---- Forms (auth) ------------------------------------------------------- */
+
+.ap-theme .form-control,
+.ap-theme .form-select {
+    font-family: var(--ap-font);
+    border-radius: var(--ap-radius-sm);
+    border: 1px solid var(--ap-hairline);
+    background: rgba(0, 0, 0, 0.03);
+    padding: 0.65rem 0.9rem;
+    transition: border-color 0.18s var(--ap-spring), background-color 0.18s var(--ap-spring),
+                box-shadow 0.18s var(--ap-spring);
+}
+.ap-theme .form-control:focus {
+    border-color: var(--ap-accent);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.18);
+    outline: none;
+}
+.ap-theme .form-label {
+    font-weight: 600;
+    color: var(--ap-text);
+    margin-bottom: 0.35rem;
+}
+.ap-theme .input-group-text {
+    background: transparent;
+    border: none;
+    color: var(--ap-text-3);
+}
+
+/* ---- Auth scene --------------------------------------------------------- */
+
+.ap-theme .auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+    background:
+        radial-gradient(1200px 700px at 15% -10%, rgba(0, 113, 227, 0.10), transparent 60%),
+        radial-gradient(1000px 600px at 110% 15%, rgba(52, 199, 89, 0.08), transparent 55%),
+        var(--ap-bg);
+}
+
+.ap-theme .auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(255, 255, 255, 0.86);
+    -webkit-backdrop-filter: saturate(180%) blur(28px);
+    backdrop-filter: saturate(180%) blur(28px);
+    border: 1px solid var(--ap-hairline);
+    border-radius: var(--ap-radius-lg);
+    box-shadow: var(--ap-shadow-float);
+    padding: 2.25rem 2rem;
+    /* dim-to-focus: the scene dims, the card carries the light */
+}
+
+.ap-theme .auth-logo img { height: 56px; width: auto; }
+.ap-theme .auth-title {
+    font-size: 1.65rem;
+    font-weight: 700;
+    letter-spacing: var(--ap-title-track);
+    line-height: 1.15;
+    color: var(--ap-text);
+}
+.ap-theme .auth-subtitle {
+    color: var(--ap-text-2);
+    letter-spacing: var(--ap-body-track);
+    margin-top: 0.35rem;
+}
+.ap-theme .auth-card .btn-primary { width: 100%; padding: 0.75rem 1.35rem; }
+
+/* ---- Landing header ----------------------------------------------------- */
+
+.ap-theme .navbar.ap-nav {
+    background: rgba(255, 255, 255, 0.72);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.25s var(--ap-spring), background-color 0.25s var(--ap-spring);
+}
+.ap-theme .navbar.ap-nav.ap-scrolled {
+    border-bottom-color: var(--ap-hairline);
+}
+.ap-theme .navbar .nav-link {
+    color: var(--ap-text);
+    font-weight: 500;
+    letter-spacing: var(--ap-body-track);
+}
+.ap-theme .navbar .nav-link:hover { color: var(--ap-accent); }
+
+/* ---- Landing sections / cards ------------------------------------------ */
+
+.ap-theme .ap-section { padding: 72px 0; }
+.ap-theme .ap-eyebrow {
+    color: var(--ap-accent);
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+}
+
+.ap-theme .ap-card {
+    background: var(--ap-surface);
+    border: 1px solid var(--ap-hairline);
+    border-radius: var(--ap-radius-lg);
+    box-shadow: var(--ap-shadow-card);
+    padding: 1.6rem;
+    transition: transform 0.35s var(--ap-spring), box-shadow 0.35s var(--ap-spring);
+    will-change: transform;
+}
+.ap-theme .ap-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--ap-shadow-float);
+}
+
+/* ---- Reveal choreography (JS adds .ap-in) ------------------------------- */
+
+.ap-reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.5s var(--ap-spring), transform 0.5s var(--ap-spring);
+    transition-delay: var(--ap-delay, 0ms);
+}
+.ap-reveal.ap-in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    /* crossfade only, per reduced-motion rule */
+    .ap-reveal { transform: none; transition: opacity 0.25s linear; }
+    .ap-theme .btn:active { transform: none; }
+    .ap-theme .ap-card, .ap-theme .ap-card:hover { transform: none; }
+    * { scroll-behavior: auto !important; }
+}
+
+/* ---- Footer ------------------------------------------------------------- */
+
+.ap-theme footer.ap-footer {
+    background: #fbfbfd;
+    border-top: 1px solid var(--ap-hairline);
+    color: var(--ap-text-2);
+}
+.ap-theme footer.ap-footer a { color: var(--ap-text-2); }
+.ap-theme footer.ap-footer a:hover { color: var(--ap-text); }

@@ -54,6 +54,7 @@ class PageOptimizationService
         
         // Remove unnecessary whitespace
         $js = preg_replace('/\s+/', ' ', $js);
+        $js = preg_replace('/\s*([{}();,:=+])\s*/', '$1', $js);
         
         return trim($js);
     }

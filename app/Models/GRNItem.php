@@ -11,6 +11,8 @@ class GRNItem extends Model
 {
     use HasFactory;
 
+    protected $table = 'grn_items';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -44,7 +46,7 @@ class GRNItem extends Model
      */
     public function grn(): BelongsTo
     {
-        return $this->belongsTo(GoodsReceivedNote::class);
+        return $this->belongsTo(GoodsReceivedNote::class, 'grn_id');
     }
 
     /**

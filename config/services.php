@@ -42,6 +42,11 @@ return [
     |
     */
 
+    // SMS/WhatsApp style notifications toggle used by due-reminder flows.
+    'message' => [
+        'enabled' => env('MESSAGE_ENABLED', false),
+    ],
+
     'sms' => [
         'driver' => env('SMS_DRIVER', 'log'),
     ],

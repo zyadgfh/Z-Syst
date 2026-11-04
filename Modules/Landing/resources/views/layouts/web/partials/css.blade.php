@@ -11,4 +11,7 @@
 <link rel="stylesheet" href="{{ asset('assets/web/css/styles.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/web/css/responsive.css') }}" />
 
+<!-- Apple design layer (loads last) -->
+<link rel="stylesheet" href="{{ asset('assets/css/apple.css') }}">
+
 @stack('css')

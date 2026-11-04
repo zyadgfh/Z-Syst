@@ -2,19 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * FefoLog - table `fefo_logs` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class FefoLog extends Model
 {
-    use HasFactory;
+    protected $table = 'fefo_logs';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
         'business_id',
         'product_id',
@@ -30,55 +28,39 @@ class FefoLog extends Model
         'meta',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
     protected $casts = [
+        'product_id' => 'integer',
+        'stock_id' => 'integer',
+        'sale_id' => 'integer',
+        'sale_detail_id' => 'integer',
         'expire_date' => 'date',
-        'meta' => 'json',
         'quantity_deducted' => 'integer',
         'quantity_remaining_after' => 'integer',
+        'meta' => 'array',
     ];
 
-    /**
-     * Get the business that owns this log.
-     */
     public function business(): BelongsTo
     {
-        return $this->belongsTo(Business::class);
+        return $this->belongsTo(Business::class, 'business_id');
     }
 
-    /**
-     * Get the product associated with this log.
-     */
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
-    /**
-     * Get the stock batch associated with this log.
-     */
     public function stock(): BelongsTo
     {
-        return $this->belongsTo(Stock::class);
+        return $this->belongsTo(Stock::class, 'stock_id');
     }
 
-    /**
-     * Get the sale associated with this log.
-     */
     public function sale(): BelongsTo
     {
-        return $this->belongsTo(Sale::class);
+        return $this->belongsTo(Sale::class, 'sale_id');
     }
 
-    /**
-     * Get the sale detail associated with this log.
-     */
     public function saleDetail(): BelongsTo
     {
-        return $this->belongsTo(SaleDetails::class, 'sale_detail_id');
+        return $this->belongsTo(SaleDetail::class, 'sale_detail_id');
     }
 }

@@ -2,30 +2,32 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Tax - table `taxes` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class Tax extends Model
 {
-    use HasFactory;
+    protected $table = 'taxes';
 
     protected $fillable = [
+        'business_id',
         'name',
         'rate',
-        'status',
         'sub_tax',
-        'business_id',
+        'status',
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
     protected $casts = [
-        'rate' => 'double',
-        'sub_tax' => 'json',
+        'rate' => 'decimal:2',
         'status' => 'boolean',
-        'business_id' => 'integer',
     ];
+
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class, 'business_id');
+    }
 }

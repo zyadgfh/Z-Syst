@@ -17,4 +17,5 @@ class VerifyCsrfToken extends Middleware
         'phonepe/status',
         'paytm/status',
     ];
+
 }

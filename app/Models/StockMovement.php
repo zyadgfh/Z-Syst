@@ -2,81 +2,62 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * StockMovement - table `stock_movements` (Supabase Postgres).
+ * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ */
 class StockMovement extends Model
 {
-    use HasFactory;
+    protected $table = 'stock_movements';
+
+    const UPDATED_AT = null;
 
     protected $fillable = [
         'business_id',
         'product_id',
+        'warehouse_id',
         'stock_id',
-        'user_id',
         'movement_type',
         'quantity',
-        'before_quantity',
-        'after_quantity',
-        'batch_no',
-        'expire_date',
         'reference_type',
         'reference_id',
+        'batch_no',
+        'expire_date',
+        'unit_cost',
         'notes',
+        'created_by',
     ];
 
     protected $casts = [
+        'product_id' => 'integer',
+        'warehouse_id' => 'integer',
+        'stock_id' => 'integer',
+        'quantity' => 'integer',
+        'reference_id' => 'integer',
         'expire_date' => 'date',
+        'unit_cost' => 'decimal:2',
     ];
 
     public function business(): BelongsTo
     {
-        return $this->belongsTo(Business::class);
+        return $this->belongsTo(Business::class, 'business_id');
     }
 
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class, 'warehouse_id');
     }
 
     public function stock(): BelongsTo
     {
-        return $this->belongsTo(Stock::class);
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function scopeByBusiness($query, $businessId)
-    {
-        return $query->where('business_id', $businessId);
-    }
-
-    public function scopeByProduct($query, $productId)
-    {
-        return $query->where('product_id', $productId);
-    }
-
-    public function scopeByType($query, $type)
-    {
-        return $query->where('movement_type', $type);
-    }
-
-    public function scopeIn($query)
-    {
-        return $query->where('movement_type', 'in');
-    }
-
-    public function scopeOut($query)
-    {
-        return $query->where('movement_type', 'out');
-    }
-
-    public function scopeAdjustment($query)
-    {
-        return $query->where('movement_type', 'adjustment');
+        return $this->belongsTo(Stock::class, 'stock_id');
     }
 }
