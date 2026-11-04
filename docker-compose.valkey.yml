@@ -1,0 +1,42 @@
+# =============================================================================
+# Z-Syst — Valkey service (drop-in Redis replacement)
+# =============================================================================
+# Valkey (https://valkey.io) is the BSD-licensed, Linux Foundation-backed fork
+# of Redis. It speaks the Redis protocol, so the app keeps using
+# CACHE_DRIVER=redis / QUEUE_CONNECTION=redis / SESSION_DRIVER=redis and the
+# REDIS_* variables in .env — nothing in the Laravel code changes.
+#
+# Usage:
+#   1. Set a real password in .env:  REDIS_PASSWORD=your-strong-password
+#      (it must NOT stay "null" when using this compose file)
+#   2. docker compose -f docker-compose.valkey.yml up -d
+#   3. docker compose -f docker-compose.valkey.yml logs -f valkey
+#
+# Image: official multi-arch image (amd64/arm64). Pinned to a stable release;
+# check https://hub.docker.com/r/valkey/valkey for newer patch versions.
+# =============================================================================
+
+services:
+  valkey:
+    image: valkey/valkey:9.1.3
+    container_name: z-syst-valkey
+    restart: unless-stopped
+    command: valkey-server /etc/valkey/valkey.conf --requirepass "${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env before starting Valkey}"
+    ports:
+      # Local-only binding. If the app runs on another machine, attach both to
+      # a private network instead of publishing the port publicly.
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - ./docker/valkey/valkey.conf:/etc/valkey/valkey.conf:ro
+      - valkey-data:/data
+    environment:
+      VALKEY_PASSWORD: ${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli --no-auth-warning -a \"$$VALKEY_PASSWORD\" ping | grep -q PONG"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  valkey-data:

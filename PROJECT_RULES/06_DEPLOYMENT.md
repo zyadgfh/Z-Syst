@@ -43,6 +43,8 @@ FILESYSTEM_DISK=s3
 QUEUE_CONNECTION=redis
 SESSION_DRIVER=redis
 
+# Works with Valkey (recommended, free drop-in Redis replacement) or Redis.
+# See docs/valkey-setup-ar.md — the REDIS_* variable names stay the same.
 REDIS_HOST=127.0.0.1
 REDIS_PASSWORD=null
 REDIS_PORT=6379

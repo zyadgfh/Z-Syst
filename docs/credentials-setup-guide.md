@@ -184,7 +184,10 @@ MAIL_ENCRYPTION=null
 
 ## 🗃️ 5. Cache and Queue
 
-### Redis (موصى به):
+### Valkey أو Redis (موصى به):
+
+> **Valkey** بديل مجاني بالكامل (BSD) لـ Redis برعاية Linux Foundation ومتوافق معه تمامًا — نفس المتغيرات ونفس السائق `redis` دون أي تعديل في الكود. راجع `docs/valkey-setup-ar.md` للتثبيت عبر Docker.
+
 ```env
 CACHE_DRIVER=redis
 QUEUE_CONNECTION=redis
@@ -195,11 +198,14 @@ REDIS_PORT=6379
 ```
 
 #### من أين الحصول على القيم:
-- **Localhost:** تأكد من تثبيت Redis على جهازك
+- **Valkey (موصى به — مجاني بالكامل):**
+  - Docker: `docker compose -f docker-compose.valkey.yml up -d` (بعد ضبط `REDIS_PASSWORD`)
+  - خادم مُدار مجانًا: Aiven (خطة مجانية دائمة) — التفاصيل في `docs/valkey-setup-ar.md`
+- **Localhost (Redis):** تأكد من تثبيت Redis على جهازك
   - Windows: استخدم Laragon (يتضمن Redis)
   - Mac: `brew install redis`
   - Linux: `sudo apt install redis-server`
-- **Production:** من مزود الاستضافة أو سيرفر Redis
+- **Production:** من مزود الاستضافة أو سيرفر Valkey/Redis
 
 ### Database (بدون Redis):
 ```env
@@ -359,9 +365,9 @@ php artisan db:seed
 - احصل على API keys
 - أضفها إلى `.env`
 
-### 6. إعداد Redis (اختياري):
-- قم بتثبيت Redis
-- اضبط `CACHE_DRIVER=redis` في `.env`
+### 6. إعداد Valkey أو Redis (اختياري):
+- قم بتثبيت Valkey (موصى به — `docs/valkey-setup-ar.md`) أو Redis
+- اضبط `CACHE_DRIVER=redis` في `.env` (يعمل مع كليهما)
 
 ### 7. اختبار الإعدادات:
 ```bash
@@ -413,6 +419,11 @@ php artisan test
 ### Redis:
 - Redis.io: https://redis.io/documentation
 - Redis Cloud: https://redis.com/try-free
+
+### Valkey (بديل Redis المجاني الموصى به):
+- الموقع الرسمي: https://valkey.io
+- المستودع: https://github.com/valkey-io/valkey
+- دليل الإعداد في المشروع: `docs/valkey-setup-ar.md`
 
 ---
 

@@ -196,6 +196,7 @@ php artisan test
 - Real `DB_PASSWORD` (no empty root)
 - Set `CACHE_DRIVER=redis` and `SESSION_DRIVER=redis` for multi-instance
 - Set `QUEUE_CONNECTION=redis` (or `sqs`/`beanstalkd`)
+- The `redis` driver works unchanged with **Valkey** (recommended free drop-in Redis replacement) — see `docs/valkey-setup-ar.md` and `docker-compose.valkey.yml`
 - Run `php artisan config:cache && php artisan route:cache && php artisan view:cache`
 - Run `php artisan migrate --force` from CI, not from a manual SSH session
 - Schedule `php artisan schedule:run` via cron every minute, or use Laravel Cloud
