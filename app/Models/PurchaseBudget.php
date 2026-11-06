@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\BudgetAlert;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * PurchaseBudget - table `purchase_budgets` (Supabase Postgres).
@@ -39,6 +41,11 @@ class PurchaseBudget extends Model
         'start_date' => 'date',
         'end_date' => 'date',
     ];
+
+    public function alerts(): HasMany
+    {
+        return $this->hasMany(BudgetAlert::class, 'budget_id');
+    }
 
     public function business(): BelongsTo
     {

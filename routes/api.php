@@ -150,6 +150,19 @@ Route::prefix('v1')->group(function () {
         // Live "today" strip (dashboard polling) + smart alternatives
         Route::middleware('throttle:30,1')->get('live/summary', [Api\LiveController::class, 'summary']);
         Route::get('products/{product}/alternatives', [Api\ZSystProductController::class, 'alternatives']);
+
+        // Operations: inter-warehouse transfers (C3)
+        Route::apiResource('stock-transfers', Api\StockTransferController::class)->only('index', 'store', 'show');
+        Route::post('stock-transfers/{transfer}/transition', [Api\StockTransferController::class, 'transition']);
+
+        // Purchase budgets with live usage + threshold alerts (C5)
+        Route::apiResource('budgets', Api\BudgetController::class)->only('index', 'store');
+        Route::post('budgets/{budget}/spend', [Api\BudgetController::class, 'recordSpend']);
+        Route::get('budget-alerts', [Api\BudgetController::class, 'alerts']);
+
+        // Supplier scorecards (C6)
+        Route::get('supplier-performance', [Api\SupplierPerformanceController::class, 'index']);
+        Route::post('suppliers/{supplier}/rate', [Api\SupplierPerformanceController::class, 'rate']);
         Route::apiResource('business-categories', Api\BusinessCategoryController::class)->only('index');
         Route::apiResource('business', Api\BusinessController::class)->only('index', 'store', 'update');
         Route::apiResource('purchase', Api\PurchaseController::class);
