@@ -50,6 +50,14 @@ return [
         'activity_code' => env('ETA_ACTIVITY_CODE', '4772'),
     ],
 
+    'uploads' => [
+        // Ship NEW user uploads to the Supabase Storage 'uploads' bucket via
+        // HasUploader (requires SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY).
+        // Local disk stays the automatic fallback on any failure.
+        'cloud_enabled' => env('UPLOADS_CLOUD_ENABLED', false),
+        'bucket' => env('UPLOADS_CLOUD_BUCKET', 'uploads'),
+    ],
+
     'backups' => [
         // Ship backup:database artifacts to the Supabase Storage 'backups'
         // bucket (requires SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY).

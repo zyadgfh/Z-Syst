@@ -65,6 +65,33 @@ class SupabaseStorage
     }
 
     /**
+     * Delete an object. Returns true when the storage confirmed deletion
+     * (or the object was already gone); false on configuration/connection
+     * problems so callers can keep their local fallback file.
+     */
+    public function delete(string $bucket, string $path): bool
+    {
+        if (! $this->enabled()) {
+            return false;
+        }
+
+        $url = rtrim(config('supabase.url'), '/') . '/storage/v1/object/' . rawurlencode($bucket) . '/' . implode('/', array_map('rawurlencode', explode('/', $path)));
+
+        try {
+            return Http::withHeaders([
+                    'Authorization' => 'Bearer ' . config('supabase.service_role_key'),
+                ])
+                ->timeout(config('supabase.http.timeout', 10))
+                ->delete($url)
+                ->successful();
+        } catch (\Throwable $e) {
+            Log::warning('SupabaseStorage delete failed', ['path' => $path, 'error' => $e->getMessage()]);
+
+            return false;
+        }
+    }
+
+    /**
      * Create a short-lived signed URL for a private object (share/read link).
      */
     public function signedUrl(string $bucket, string $path, int $expiresInSeconds = 600): ?string

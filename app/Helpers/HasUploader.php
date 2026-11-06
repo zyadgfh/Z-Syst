@@ -9,6 +9,63 @@ use Illuminate\Support\Facades\Storage;
 trait HasUploader
 {
     /**
+     * Write upload bytes with optional cloud shipping (Supabase Storage).
+     *
+     * When integrations.uploads.cloud_enabled is on and Supabase is
+     * configured, the object is stored in the cloud bucket FIRST and the
+     * local disk write is skipped on success (the DB still records the same
+     * relative path, e.g. uploads/26/11/…, so rendering is unchanged).
+     * ANY cloud failure falls back to the local disk write, so uploads
+     * never break in previews/offline environments.
+     */
+    private function zsStore(string $filePath, string $contents, ?string $mimeType = null): bool
+    {
+        if (! config('integrations.uploads.cloud_enabled')) {
+            return false;
+        }
+
+        $result = app(\App\Services\SupabaseStorage::class)->upload(
+            config('integrations.uploads.bucket', 'uploads'),
+            $filePath,
+            $contents,
+            $mimeType
+        );
+
+        if ($result['ok']) {
+            return true;
+        }
+
+        \Illuminate\Support\Facades\Log::warning('Upload cloud ship failed — local fallback used', [
+            'path' => $filePath,
+            'error' => $result['error'] ?? 'unknown',
+        ]);
+
+        return false;
+    }
+
+    /**
+     * Remove an old upload honoring the cloud-first setting (best effort —
+     * local cleanup always runs so the disk never accumulates orphans).
+     */
+    private function zsDelete(?string $oldFile): void
+    {
+        if (! $oldFile) {
+            return;
+        }
+
+        if (config('integrations.uploads.cloud_enabled')) {
+            app(\App\Services\SupabaseStorage::class)->delete(
+                config('integrations.uploads.bucket', 'uploads'),
+                $oldFile
+            );
+        }
+
+        if (Storage::exists($oldFile)) {
+            Storage::delete($oldFile);
+        }
+    }
+
+    /**
      * Upload a single file with validation and error handling.
      *
      * @throws UploadException
@@ -37,16 +94,14 @@ trait HasUploader
             $path = 'uploads/'.date('y').'/'.date('m').'/';
             $filePath = $path.$filename;
 
-            // Delete old file if exists
-            if ($oldFile) {
-                if (Storage::exists($oldFile)) {
-                    Storage::delete($oldFile);
-                }
-            }
+            $this->zsDelete($oldFile);
 
-            // Store the file
-            Storage::disk($disk ?? config('filesystems.default'))
-                ->put($filePath, file_get_contents($file));
+            // Store the file (cloud-first, local fallback)
+            $contents = file_get_contents($file);
+            if (! $this->zsStore($filePath, $contents, $file->getMimeType())) {
+                Storage::disk($disk ?? config('filesystems.default'))
+                    ->put($filePath, $contents);
+            }
 
             return $filePath;
 
@@ -88,14 +143,13 @@ trait HasUploader
             $path = 'files/';
             $filePath = $path.$filename;
 
-            if ($oldFile) {
-                if (Storage::exists($oldFile)) {
-                    Storage::delete($oldFile);
-                }
-            }
+            $this->zsDelete($oldFile);
 
-            Storage::disk($disk ?? config('filesystems.default'))
-                ->put($filePath, file_get_contents($file));
+            $contents = file_get_contents($file);
+            if (! $this->zsStore($filePath, $contents, $file->getMimeType())) {
+                Storage::disk($disk ?? config('filesystems.default'))
+                    ->put($filePath, $contents);
+            }
 
             return $filePath;
 
@@ -140,15 +194,15 @@ trait HasUploader
                 $path = 'uploads/'.date('y').'/'.date('m').'/';
                 $filePath = $path.$filename;
 
-                // Delete old files
                 foreach ($oldFiles as $oldFile) {
-                    if (Storage::exists($oldFile)) {
-                        Storage::delete($oldFile);
-                    }
+                    $this->zsDelete($oldFile);
                 }
 
-                Storage::disk($disk ?? config('filesystems.default'))
-                    ->put($filePath, file_get_contents($file));
+                $contents = file_get_contents($file);
+                if (! $this->zsStore($filePath, $contents, $file->getMimeType())) {
+                    Storage::disk($disk ?? config('filesystems.default'))
+                        ->put($filePath, $contents);
+                }
 
                 $uploadedFiles[] = $filePath;
             }

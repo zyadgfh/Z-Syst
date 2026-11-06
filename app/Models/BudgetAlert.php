@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\PurchaseBudget;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -29,6 +30,11 @@ class BudgetAlert extends Model
         'alert_sent_at' => 'datetime',
         'resolved_at' => 'datetime',
     ];
+
+    public function budget(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseBudget::class, 'budget_id');
+    }
 
     public function business(): BelongsTo
     {
