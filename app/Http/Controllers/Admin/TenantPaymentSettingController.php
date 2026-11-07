@@ -66,7 +66,21 @@ class TenantPaymentSettingController extends Controller
             ], 400);
         }
 
-        TenantPaymentSetting::create($request->all());
+        TenantPaymentSetting::create($request->only([
+        'tenant_id',
+        'branch_id',
+        'gateway_id',
+        'settings',
+        'is_active',
+        'merchant_phone',
+        'merchant_name',
+        'merchant_code',
+        'merchant_key',
+        'merchant_instapay_id',
+        'bank_name',
+        'account_number',
+        'branch_name'
+    ]));
 
         return response()->json([
             'status' => 'success',
@@ -107,7 +121,21 @@ class TenantPaymentSettingController extends Controller
         ]);
 
         $setting = TenantPaymentSetting::findOrFail($id);
-        $setting->update($request->all());
+        $setting->update($request->only([
+        'tenant_id',
+        'branch_id',
+        'gateway_id',
+        'settings',
+        'is_active',
+        'merchant_phone',
+        'merchant_name',
+        'merchant_code',
+        'merchant_key',
+        'merchant_instapay_id',
+        'bank_name',
+        'account_number',
+        'branch_name'
+    ]));
 
         return response()->json([
             'status' => 'success',

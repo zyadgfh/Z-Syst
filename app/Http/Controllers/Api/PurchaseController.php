@@ -89,7 +89,13 @@ class PurchaseController extends Controller
                 'remainingShopBalance' => $business->remainingShopBalance - $request->paidAmount,
             ]);
 
-            $purchase = Purchase::create($request->all() + [
+            // M-02: explicit whitelist — financial state (isPaid/paidAmount/
+            // dueAmount/invoiceNumber/user_id) is server-computed, never
+            // client-supplied mass assignment.
+            $purchase = Purchase::create($request->only([
+                'party_id', 'tax_id', 'discountAmount', 'tax_amount',
+                'paymentType', 'purchaseDate', 'purchase_data', 'note',
+            ]) + [
                 'user_id' => auth()->id(),
                 'business_id' => $business_id,
             ]);
@@ -135,7 +141,7 @@ class PurchaseController extends Controller
                         'productStock' => $stock->productStock + $item['quantities'],
                     ]);
                 } else {
-                    Stock::create($request->all() + [
+                    Stock::create($request->only(['unit_cost']) + [
                         'business_id' => $business_id,
                         'batch_no' => $item['batch_no'],
                         'product_id' => $item['product_id'],
@@ -279,7 +285,7 @@ class PurchaseController extends Controller
                         'productStock' => $stock->productStock + $item['quantities'],
                     ]);
                 } else {
-                    Stock::create($request->all() + [
+                    Stock::create($request->only(['unit_cost']) + [
                         'business_id' => $business_id,
                         'batch_no' => $item['batch_no'],
                         'product_id' => $item['product_id'],
@@ -308,8 +314,11 @@ class PurchaseController extends Controller
                 'remainingShopBalance' => ($business->remainingShopBalance + $purchase->paidAmount) - $request->paidAmount,
             ]);
 
-            $purchase->update($request->all() + [
-                'user_id' => auth()->id(),
+            $purchase->update($request->only([
+                'party_id', 'tax_id', 'discountAmount', 'tax_amount',
+                'paymentType', 'purchaseDate', 'note',
+            ]) + [
+                'user_id' => null, // Path B: uuid never hits the legacy users FK
             ]);
 
             $empty_qty_items = array_filter($purchaseDetails, function ($item) {

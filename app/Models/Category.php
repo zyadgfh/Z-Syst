@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Traits\TenantScoped;
 
 /**
  * Category - table `categories` (Supabase Postgres).
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Category extends Model
 {
+    use TenantScoped;
+
     protected $table = 'categories';
 
     protected $fillable = [

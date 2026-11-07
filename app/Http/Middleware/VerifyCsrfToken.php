@@ -11,11 +11,10 @@ class VerifyCsrfToken extends Middleware
      *
      * @var array<int, string>
      */
+    // L-01: previously listed ssl-commerz/phonepe/paytm exemptions for routes
+    // that do not exist in this codebase — removed (dead attack surface).
     protected $except = [
-        '/ssl-commerz/payment/success',
-        '/ssl-commerz/payment/failed',
-        'phonepe/status',
-        'paytm/status',
+        //
     ];
 
 }

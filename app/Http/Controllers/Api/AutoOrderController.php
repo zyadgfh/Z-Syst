@@ -190,7 +190,22 @@ class AutoOrderController extends Controller
         $suggestion = AutoOrderSuggestion::where('business_id', $businessId)
             ->findOrFail($id);
 
-        $result = $this->autoOrderService->convertToPurchase($id, $request->all());
+        $result = $this->autoOrderService->convertToPurchase($id, $request->only([
+        'business_id',
+        'product_id',
+        'enabled',
+        'min_stock_level',
+        'max_stock_level',
+        'reorder_point',
+        'safety_stock',
+        'lead_time_days',
+        'min_order_qty',
+        'max_order_qty',
+        'order_multiple',
+        'preferred_supplier_id',
+        'auto_approve',
+        'meta'
+    ]));
 
         return response()->json([
             'message' => $result['message'],

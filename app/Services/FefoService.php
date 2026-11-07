@@ -74,24 +74,44 @@ class FefoService
      */
     public function deductFefo(int $productId, int $totalQuantity, int $businessId, array $context = []): array
     {
+        // M-01 (TOCTOU): the FEFO selection read earlier is advisory only.
+        // The authoritative read happens below inside the transaction with
+        // pessimistic row locks, so two concurrent cashiers cannot both pass
+        // the availability check and drive stock negative.
         $batches = $this->getBestBatches($productId, $totalQuantity, $businessId);
-        $totalAvailable = $batches->sum('productStock');
-
-        if ($totalAvailable < $totalQuantity) {
-            throw new \RuntimeException("Insufficient stock for product ID {$productId}. Available: {$totalAvailable}, Requested: {$totalQuantity}");
-        }
 
         $deductions = [];
         $remainingToDeduct = $totalQuantity;
 
-        DB::transaction(function () use ($batches, &$remainingToDeduct, $businessId, $productId, $context, &$deductions) {
+        DB::transaction(function () use (&$batches, &$remainingToDeduct, $businessId, $productId, $context, &$deductions, $totalQuantity) {
+            // Lock the candidate rows for this business/product, FEFO order.
+            $batches = Stock::where('business_id', $businessId)
+                ->where('product_id', $productId)
+                ->where('productStock', '>', 0)
+                ->orderBy('expire_date')
+                ->lockForUpdate()
+                ->get();
+
+            $totalAvailable = (int) $batches->sum('productStock');
+            if ($totalAvailable < $totalQuantity) {
+                throw new \RuntimeException("Insufficient stock for product ID {$productId}. Available: {$totalAvailable}, Requested: {$totalQuantity}");
+            }
+
             foreach ($batches as $batch) {
                 if ($remainingToDeduct <= 0) {
                     break;
                 }
 
                 $deductQty = min($batch->productStock, $remainingToDeduct);
-                $batch->decrement('productStock', $deductQty);
+
+                // Guarded decrement: fails loudly if a concurrent writer
+                // slipped past the lock (belt-and-braces).
+                $affected = Stock::where('id', $batch->id)
+                    ->where('productStock', '>=', $deductQty)
+                    ->decrement('productStock', $deductQty);
+                if ($affected !== 1) {
+                    throw new \RuntimeException("Concurrent stock change on batch {$batch->batch_no}; retry the sale.");
+                }
                 $batch->refresh();
 
                 $deductionRecord = [

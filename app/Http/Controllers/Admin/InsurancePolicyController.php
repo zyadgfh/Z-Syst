@@ -69,7 +69,30 @@ class InsurancePolicyController extends Controller
         ]);
 
         try {
-            $policy = $this->insuranceService->createPolicy($request->all());
+            $policy = $this->insuranceService->createPolicy($request->only([
+        'insurance_company_id',
+        'customer_id',
+        'policy_number',
+        'member_id',
+        'card_number',
+        'holder_name',
+        'holder_dob',
+        'holder_gender',
+        'holder_phone',
+        'holder_email',
+        'holder_address',
+        'plan_type',
+        'status',
+        'start_date',
+        'end_date',
+        'annual_limit',
+        'used_amount',
+        'remaining_limit',
+        'coverage_percent',
+        'copay_percent',
+        'notes',
+        'metadata'
+    ]));
 
             return response()->json([
                 'message' => __('Insurance policy created successfully'),
@@ -118,7 +141,30 @@ class InsurancePolicyController extends Controller
         ]);
 
         try {
-            $policy = $this->insuranceService->updatePolicy($policy, $request->all());
+            $policy = $this->insuranceService->updatePolicy($policy, $request->only([
+        'insurance_company_id',
+        'customer_id',
+        'policy_number',
+        'member_id',
+        'card_number',
+        'holder_name',
+        'holder_dob',
+        'holder_gender',
+        'holder_phone',
+        'holder_email',
+        'holder_address',
+        'plan_type',
+        'status',
+        'start_date',
+        'end_date',
+        'annual_limit',
+        'used_amount',
+        'remaining_limit',
+        'coverage_percent',
+        'copay_percent',
+        'notes',
+        'metadata'
+    ]));
 
             return response()->json([
                 'message' => __('Insurance policy updated successfully'),

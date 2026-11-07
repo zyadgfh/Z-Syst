@@ -63,7 +63,29 @@ class InsuranceClaimController extends Controller
         ]);
 
         try {
-            $claim = $this->insuranceService->createClaim($request->all());
+            $claim = $this->insuranceService->createClaim($request->only([
+        'insurance_company_id',
+        'insurance_policy_id',
+        'sale_id',
+        'prescription_id',
+        'customer_id',
+        'claim_number',
+        'service_date',
+        'submission_date',
+        'total_amount',
+        'covered_amount',
+        'patient_responsibility',
+        'approved_amount',
+        'paid_amount',
+        'rejected_amount',
+        'status',
+        'rejection_reason',
+        'external_reference',
+        'settlement_date',
+        'notes',
+        'line_items',
+        'metadata'
+    ]));
 
             return response()->json([
                 'message' => __('Insurance claim created successfully'),
@@ -112,7 +134,29 @@ class InsuranceClaimController extends Controller
         ]);
 
         try {
-            $claim->update($request->all());
+            $claim->update($request->only([
+        'insurance_company_id',
+        'insurance_policy_id',
+        'sale_id',
+        'prescription_id',
+        'customer_id',
+        'claim_number',
+        'service_date',
+        'submission_date',
+        'total_amount',
+        'covered_amount',
+        'patient_responsibility',
+        'approved_amount',
+        'paid_amount',
+        'rejected_amount',
+        'status',
+        'rejection_reason',
+        'external_reference',
+        'settlement_date',
+        'notes',
+        'line_items',
+        'metadata'
+    ]));
 
             return response()->json([
                 'message' => __('Insurance claim updated successfully'),
@@ -180,7 +224,29 @@ class InsuranceClaimController extends Controller
         ]);
 
         try {
-            $claim = $this->insuranceService->processClaim($claim, $request->all());
+            $claim = $this->insuranceService->processClaim($claim, $request->only([
+        'insurance_company_id',
+        'insurance_policy_id',
+        'sale_id',
+        'prescription_id',
+        'customer_id',
+        'claim_number',
+        'service_date',
+        'submission_date',
+        'total_amount',
+        'covered_amount',
+        'patient_responsibility',
+        'approved_amount',
+        'paid_amount',
+        'rejected_amount',
+        'status',
+        'rejection_reason',
+        'external_reference',
+        'settlement_date',
+        'notes',
+        'line_items',
+        'metadata'
+    ]));
 
             return response()->json([
                 'message' => __('Insurance claim processed successfully'),

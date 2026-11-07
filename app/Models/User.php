@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Laravel\Sanctum\HasApiTokens;
 use RuntimeException;
+use App\Traits\TenantScoped;
 
 /**
  * Canonical user model.
@@ -24,6 +25,8 @@ use RuntimeException;
  */
 class User extends AppUser
 {
+    use TenantScoped;
+
     use HasApiTokens;
 
     protected $table = 'app_users';

@@ -368,7 +368,24 @@ class BarcodeController extends Controller
      */
     public function settings(Request $request): JsonResponse
     {
-        $settings = $this->barcodeService->getBarcodeSettings($request->all());
+        $settings = $this->barcodeService->getBarcodeSettings($request->only([
+        'product_id',
+        'batch_id',
+        'barcode_number',
+        'barcode_type',
+        'barcode_image',
+        'print_status',
+        'printed_at',
+        'printed_by',
+        'print_count',
+        'size',
+        'print_settings',
+        'is_active',
+        'business_id',
+        'branch_id',
+        'created_by',
+        'updated_by'
+    ]));
 
         return response()->json([
             'success' => true,

@@ -39,7 +39,12 @@ class ZSystTaxController extends Controller
 
         if ($request->rate && ! $request->tax_ids) {
 
-            $tax = Tax::create($request->all() + [
+            $tax = Tax::create($request->only([
+        'name',
+        'rate',
+        'sub_tax',
+        'status'
+    ]) + [
                 'business_id' => auth()->user()->business_id,
             ]);
 
@@ -88,7 +93,12 @@ class ZSystTaxController extends Controller
 
         if ($request->rate && ! $request->tax_ids) {
 
-            $tax = $tax->update($request->all());
+            $tax = $tax->update($request->only([
+        'name',
+        'rate',
+        'sub_tax',
+        'status'
+    ]));
 
         } elseif (! $request->rate && $request->tax_ids) {
 

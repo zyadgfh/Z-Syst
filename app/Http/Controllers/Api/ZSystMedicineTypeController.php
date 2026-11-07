@@ -24,7 +24,10 @@ class ZSystMedicineTypeController extends Controller
             'name' => 'required|unique:medicine_types,name,NULL,id,business_id,'.auth()->user()->business_id,
         ]);
 
-        $data = MedicineType::create($request->all() + [
+        $data = MedicineType::create($request->only([
+        'name',
+        'status'
+    ]) + [
             'business_id' => auth()->user()->business_id,
         ]);
 
@@ -43,7 +46,10 @@ class ZSystMedicineTypeController extends Controller
             ],
         ]);
 
-        $medicineType = $medicineType->update($request->all());
+        $medicineType = $medicineType->update($request->only([
+        'name',
+        'status'
+    ]));
 
         return response()->json([
             'message' => __('Data saved successfully.'),

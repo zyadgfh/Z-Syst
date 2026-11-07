@@ -93,7 +93,16 @@ class TraceabilityController extends Controller
         ]);
 
         try {
-            $batchLot = $this->traceabilityService->createBatchLot($request->all());
+            $batchLot = $this->traceabilityService->createBatchLot($request->only([
+        'business_id',
+        'product_id',
+        'batch_lot_number',
+        'from_warehouse_id',
+        'to_warehouse_id',
+        'type',
+        'quantity',
+        'notes'
+    ]));
 
             return response()->json([
                 'message' => __('Batch lot created successfully'),
@@ -122,7 +131,16 @@ class TraceabilityController extends Controller
         ]);
 
         try {
-            $batchLot = $this->traceabilityService->updateBatchLot($batchLot, $request->all());
+            $batchLot = $this->traceabilityService->updateBatchLot($batchLot, $request->only([
+        'business_id',
+        'product_id',
+        'batch_lot_number',
+        'from_warehouse_id',
+        'to_warehouse_id',
+        'type',
+        'quantity',
+        'notes'
+    ]));
 
             return response()->json([
                 'message' => __('Batch lot updated successfully'),
@@ -168,7 +186,16 @@ class TraceabilityController extends Controller
         ]);
 
         try {
-            $recall = $this->traceabilityService->initiateRecall($request->all());
+            $recall = $this->traceabilityService->initiateRecall($request->only([
+        'business_id',
+        'product_id',
+        'batch_lot_number',
+        'from_warehouse_id',
+        'to_warehouse_id',
+        'type',
+        'quantity',
+        'notes'
+    ]));
 
             return response()->json([
                 'message' => __('Recall initiated successfully'),
