@@ -53,4 +53,10 @@ class InsuranceCompany extends Model
     {
         return $this->belongsTo(Tax::class, 'tax_id');
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
 }
+

@@ -1,6 +1,6 @@
-@extends('layouts.admin')
+@extends('layouts.master')
 
-@section('content')
+@section('main_content')
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-12">
@@ -124,12 +124,12 @@
     }
 
     function viewSupplier(id) {
-        window.location.href = `{{ route('admin.suppliers.show') }}`.replace('{supplier}', id);
+        window.location.href = `{{ route('admin.suppliers.show', '__id__') }}`.replace('{supplier}', id);
     }
 
     function calculatePerformance(id) {
         if (confirm('Calculate performance for this supplier?')) {
-            $.post(`{{ route('admin.suppliers.calculate-performance') }}`.replace('{supplier}', id), function(data) {
+            $.post(`{{ route('admin.suppliers.calculate-performance', '__id__') }}`.replace('{supplier}', id), function(data) {
                 alert('Performance calculated successfully');
                 loadSuppliers();
             });

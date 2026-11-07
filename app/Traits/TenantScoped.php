@@ -20,10 +20,28 @@ use Illuminate\Database\Eloquent\Builder;
  */
 trait TenantScoped
 {
+    /**
+     * Re-entrancy guard for the auth principal lookup below. Session auth
+     * resolves the current user via User::find() — which runs this scope —
+     * and the scope calls auth()->user() again. Without the guard that is
+     * infinite recursion (OOM); with it, the innermost fetch runs unscoped,
+     * which is correct: the auth principal itself must not be tenant-scoped.
+     */
+    protected static bool $tenantScopeAuthBusy = false;
+
     public static function bootTenantScoped(): void
     {
         static::addGlobalScope('tenant', function (Builder $builder) {
-            $user = auth()->user();
+            if (static::$tenantScopeAuthBusy) {
+                return;
+            }
+
+            static::$tenantScopeAuthBusy = true;
+            try {
+                $user = auth()->user();
+            } finally {
+                static::$tenantScopeAuthBusy = false;
+            }
 
             if (!$user || $user->role === 'superadmin' || !$user->business_id) {
                 return;

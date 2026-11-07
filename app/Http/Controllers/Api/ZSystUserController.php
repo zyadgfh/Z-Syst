@@ -27,6 +27,8 @@ class ZSystUserController extends Controller
      */
     public function store(Request $request)
     {
+        abort_unless(auth()->user()?->can('users-create'), 403, __('Forbidden.'));
+
         $request->validate([
             'name' => 'required|max:30',
             'password' => 'required|min:10|max:72',
@@ -77,6 +79,8 @@ class ZSystUserController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        abort_unless(auth()->user()?->can('users-update'), 403, __('Forbidden.'));
+
         $request->validate([
             'name' => 'required|max:30',
             'password' => 'nullable|min:10|max:72',
@@ -122,6 +126,8 @@ class ZSystUserController extends Controller
      */
     public function destroy(User $user)
     {
+        abort_unless(auth()->user()?->can('users-delete'), 403, __('Forbidden.'));
+
         $user->delete();
 
         return response()->json([

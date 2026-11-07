@@ -88,7 +88,56 @@ return [
 
     'permissions' => [
         'superadmin' => ['*'],
-        'admin' => ['*'],
+
+        /*
+         * Admin = full business CRUD, minus platform-level management
+         * (roles.*, permissions.*, plans.*, business.*, currencies.*),
+         * destructive audit tools (audit-logs-delete) and user deletion.
+         * The vocabulary MUST mirror the `permission:<resource>-<action>`
+         * middleware declared in app/Http/Controllers/Admin/*.php, and
+         * stay in sync with database/seeders/PermissionSeeder.php.
+         */
+        'admin' => [
+            // day-to-day visibility
+            'dashboard-read', 'reports-read', 'notifications-read',
+            'settings-read', 'settings-update', 'audit-logs-read',
+
+            // team & locations
+            'users-read', 'users-create', 'users-update',
+            'warehouses-create', 'warehouses-read', 'warehouses-update', 'warehouses-delete',
+
+            // operations
+            'stock-transfers-create', 'stock-transfers-read', 'stock-transfers-update', 'stock-transfers-delete',
+            'traceability-create', 'traceability-read', 'traceability-update', 'traceability-delete',
+            'prescriptions-create', 'prescriptions-read', 'prescriptions-update', 'prescriptions-delete',
+            'receipts-create', 'receipts-read', 'receipts-update', 'receipts-delete',
+
+            // finance & insurance
+            'insurance-companies-create', 'insurance-companies-read', 'insurance-companies-update', 'insurance-companies-delete',
+            'insurance-policies-create', 'insurance-policies-read', 'insurance-policies-update', 'insurance-policies-delete',
+            'insurance-claims-create', 'insurance-claims-read', 'insurance-claims-update', 'insurance-claims-delete',
+            'loyalty-create', 'loyalty-read', 'loyalty-update', 'loyalty-delete',
+            'banners-create', 'banners-read', 'banners-update', 'banners-delete',
+        ],
+
+        // Staff (app_users.role = 'staff', API/POS): read-only + file claims.
+        'staff' => [
+            'dashboard-read', 'reports-read', 'notifications-read',
+            'warehouses-read', 'stock-transfers-read', 'traceability-read',
+            'prescriptions-read', 'prescriptions-create',
+            'receipts-read', 'loyalty-read',
+            'insurance-claims-read', 'insurance-claims-create',
+        ],
+
+        // Legacy alias kept for old records — same abilities as staff.
+        'shop-owner' => [
+            'dashboard-read', 'reports-read', 'notifications-read',
+            'warehouses-read', 'stock-transfers-read', 'traceability-read',
+            'prescriptions-read', 'prescriptions-create',
+            'receipts-read', 'loyalty-read',
+            'insurance-claims-read', 'insurance-claims-create',
+        ],
+
         'manager' => [
             'products.view', 'products.create', 'products.update', 'products.delete',
             'inventory.view', 'inventory.adjust', 'purchases.view', 'purchases.create',

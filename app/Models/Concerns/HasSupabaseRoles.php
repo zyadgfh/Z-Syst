@@ -103,7 +103,7 @@ trait HasSupabaseRoles
 
     public function getRoleNames(): array
     {
-        return collect($this->roles());
+        return $this->roles();
     }
 
     public function getAllPermissions(): array

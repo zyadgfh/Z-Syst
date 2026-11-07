@@ -69,7 +69,7 @@ const runtimeId = await loadNodeRuntime('8.3', { emscriptenOptions: { processId:
 let php = new PHP();
 await php.initializeRuntime(runtimeId);
 await setPhpIniEntries(php, {
-  memory_limit: '512M',
+  memory_limit: '1536M',
   disable_functions: 'shell_exec,exec,proc_open,system,passthru,proc_get_status,proc_nice',
   max_execution_time: '120',
   display_errors: '1',

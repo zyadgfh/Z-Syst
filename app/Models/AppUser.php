@@ -14,6 +14,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class AppUser extends Authenticatable
 {
+    // Authorisation comes from HasSupabaseRoles (app_users.role column +
+    // config/supabase.php permissions map) — spatie's Gate::before hooks
+    // into checkPermissionTo() on this trait. No assignRole() here: this
+    // model intentionally does not use spatie's HasRoles trait.
     use HasApiTokens;
     use HasSupabaseRoles;
     use Notifiable;

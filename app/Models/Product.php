@@ -163,4 +163,16 @@ class Product extends Model
         'meta' => 'json',
         'images' => 'json',
     ];
+
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $businessId ? $query->where('business_id', $businessId) : $query;
+    }
+
+    /** products table has no is_active/status column — kept for API parity. */
+    public function scopeActive($query)
+    {
+        return $query;
+    }
 }
+

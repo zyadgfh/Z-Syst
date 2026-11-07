@@ -41,4 +41,45 @@ class AuditLog extends Model
     {
         return $this->belongsTo(AppUser::class, 'actor_user_id');
     }
+
+    /** User behind the log entry (controller views load user:id,name,email). */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(AppUser::class, 'actor_user_id');
+    }
+
+    /*
+     * Query scopes consumed by AuditService::getLogsForBusiness() and
+     * getLogStatistics() (local fallback for the Supabase RPC views).
+     */
+    public function scopeForBusiness($query, ?int $businessId)
+    {
+        return $businessId ? $query->where('business_id', $businessId) : $query;
+    }
+
+    public function scopeForAction($query, ?string $action)
+    {
+        return $action ? $query->where('action', $action) : $query;
+    }
+
+    public function scopeForUser($query, $userId)
+    {
+        return $userId ? $query->where('actor_user_id', $userId) : $query;
+    }
+
+    public function scopeForModel($query, ?string $modelType, $modelId = null)
+    {
+        if (! $modelType) {
+            return $query;
+        }
+
+        return $query->where('model_type', $modelType)
+            ->when($modelId, fn ($q) => $q->where('model_id', $modelId));
+    }
+
+    public function scopeDateRange($query, $from, $to)
+    {
+        return $query->when($from, fn ($q) => $q->whereDate('created_at', '>=', $from))
+            ->when($to, fn ($q) => $q->whereDate('created_at', '<=', $to));
+    }
 }

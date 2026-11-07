@@ -71,5 +71,6 @@ class UserSeeder extends Seeder
         }
 
         $this->command?->info('User profiles seeded.');
+
     }
 }
