@@ -28,7 +28,11 @@ jobs:
             ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: composer install --no-progress --no-suggest --prefer-dist
+        run: |
+          composer install --no-progress --no-suggest --prefer-dist 2>&1 | tee install.log
+          EXIT=${PIPESTATUS[0]}
+          [ "$EXIT" -ne 0 ] && php .github/scripts/emit_log_annotations.php install.log "composer install"
+          exit $EXIT
 
       - name: Prepare environment
         run: |
@@ -48,7 +52,11 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
-        run: php artisan test --verbosity=normal --colors=never --log-junit junit.xml
+        run: |
+          php artisan test --verbosity=normal --colors=never --log-junit junit.xml 2>&1 | tee test.log
+          EXIT=${PIPESTATUS[0]}
+          [ ! -f junit.xml ] && php .github/scripts/emit_log_annotations.php test.log "artisan test"
+          exit $EXIT
 
       - name: Surface failures as annotations
         if: failure()
