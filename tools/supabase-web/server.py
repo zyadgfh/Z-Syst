@@ -14,6 +14,7 @@ Credentials are kept in memory only — never written to disk or logged.
 import json
 import threading
 import os
+import re
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import psycopg2
@@ -24,6 +25,8 @@ REPO_ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
 UPDATE_SQL_PATH = os.path.join(REPO_ROOT, 'supabase', 'update_2026_10_01.sql')
 
 PORT = int(os.environ.get('BRIDGE_PORT', '8000'))
+# Bind loopback by default; opt into 0.0.0.0 explicitly (dev-only tool).
+HOST = os.environ.get('BRIDGE_HOST', '127.0.0.1')
 
 # ---------------------------------------------------------------------------
 # In-memory connection holder (single shared connection, guarded by a lock)
@@ -108,7 +111,18 @@ def op_tables(conn):
     return [{'table': r[0], 'approx_rows': int(r[1])} for r in rows]
 
 
+_IDENT_RE = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*$')
+
+
+def _safe_ident(name: str) -> str:
+    """Allow only plain SQL identifiers (no quoting games) for interpolation."""
+    if not _IDENT_RE.match(name or ''):
+        raise ValueError('invalid identifier: %r' % (name,))
+    return name
+
+
 def op_describe(conn, table):
+    table = _safe_ident(table)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute(
         """
@@ -121,7 +135,8 @@ def op_describe(conn, table):
     )
     cols = [dict(r) for r in cur.fetchall()]
     cur.execute(
-        'SELECT * FROM public."{}" LIMIT 50'.format(table.replace('"', '""'))
+        # nosec B608 - table passed _safe_ident() (strict ^[A-Za-z_][A-Za-z0-9_]*$)
+        'SELECT * FROM public."{}" LIMIT 50'.format(table)
     )
     data_cols = [d[0] for d in cur.description] if cur.description else []
     data_rows = [list(r) for r in cur.fetchall()]
@@ -283,8 +298,8 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
-    server = ThreadingHTTPServer(('0.0.0.0', PORT), Handler)
-    print(f'Supabase Web Bridge listening on 0.0.0.0:{PORT}', flush=True)
+    server = ThreadingHTTPServer((HOST, PORT), Handler)
+    print(f'Supabase Web Bridge listening on {HOST}:{PORT}', flush=True)
     server.serve_forever()
 
 

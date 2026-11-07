@@ -56,6 +56,12 @@ return [
         // Local disk stays the automatic fallback on any failure.
         'cloud_enabled' => env('UPLOADS_CLOUD_ENABLED', false),
         'bucket' => env('UPLOADS_CLOUD_BUCKET', 'uploads'),
+
+        // H-02: upload allowlist — SVG intentionally excluded (stored-XSS
+        // when served inline same-origin). Extend only with attachment/CDN
+        // isolation in place.
+        'allowed_extensions' => explode(',', env('UPLOADS_ALLOWED_EXTENSIONS', 'png,jpg,jpeg,webp,gif,pdf')),
+        'allowed_mimes' => explode(',', env('UPLOADS_ALLOWED_MIMES', 'image/png,image/jpeg,image/webp,image/gif,application/pdf')),
     ],
 
     'backups' => [
