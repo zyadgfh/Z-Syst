@@ -52,22 +52,4 @@ jobs:
 
       - name: Surface failures as annotations
         if: failure()
-        run: |
-          php -r '
-          $xml = @simplexml_load_file("junit.xml");
-          if (!$xml) { echo "::error::no junit produced
-"; exit(0); }
-          foreach ($xml->xpath("//testcase") as $case) {
-              foreach ($case->children() as $child) {
-                  if (in_array($child->getName(), ["failure", "error"])) {
-                      $msg = (string)($child["message"] ?? "");
-                      $name = (string)$case["name"];
-                      $class = (string)$case["class"];
-                      echo "::error::{$class}::{$name} — " . substr(str_replace(["
-", ""], " ", $msg), 0, 380) . "
-";
-                  }
-              }
-          }
-          '
-          grep -c "" junit.xml || true
+        run: php .github/scripts/emit_test_annotations.php junit.xml
