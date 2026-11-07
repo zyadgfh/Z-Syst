@@ -121,7 +121,19 @@ class ZSystDueController extends Controller
             }
         }
 
-        $data = DueCollect::create($request->all() + [
+        $data = DueCollect::create($request->only([
+        'business_id',
+        'party_id',
+        'user_id',
+        'sale_id',
+        'purchase_id',
+        'invoiceNumber',
+        'totalDue',
+        'dueAmountAfterPay',
+        'payDueAmount',
+        'paymentType',
+        'paymentDate'
+    ]) + [
             'user_id' => auth()->id(),
             'business_id' => auth()->user()->business_id,
             'sale_id' => $party->type != 'Supplier' && isset($invoice) ? $invoice->id : null,

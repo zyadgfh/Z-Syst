@@ -30,7 +30,10 @@ class UnitController extends Controller
             'unitName' => 'required|unique:units,unitName,NULL,id,business_id,'.auth()->user()->business_id,
         ]);
 
-        $data = Unit::create($request->all() + [
+        $data = Unit::create($request->only([
+        'unitName',
+        'status'
+    ]) + [
             'business_id' => auth()->user()->business_id,
         ]);
 
@@ -52,7 +55,10 @@ class UnitController extends Controller
             ],
         ]);
 
-        $unit = $unit->update($request->all());
+        $unit = $unit->update($request->only([
+        'unitName',
+        'status'
+    ]));
 
         return response()->json([
             'message' => __('Data saved successfully.'),

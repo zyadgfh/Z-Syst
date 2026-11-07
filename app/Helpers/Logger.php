@@ -58,8 +58,10 @@ class Logger
             'line' => $e->getLine(),
             'message' => $e->getMessage(),
             ...self::authContext(),
-            'url' => request()?->fullUrl(),
-            'method' => request()?->method(),
+            // CLI/console boots have no bound 'request' — guard the lookup
+            // so error reporting itself can never crash inside the handler.
+            'url' => app()->bound('request') ? request()?->fullUrl() : 'cli',
+            'method' => app()->bound('request') ? request()?->method() : 'CLI',
         ], $context);
 
         $level = 'error';

@@ -54,7 +54,11 @@ class PurchaseReturnController extends Controller
             $business_id = auth()->user()->business_id;
 
             // Create Purchase Return record
-            $purchase_return = PurchaseReturn::create($request->all() + [
+            $purchase_return = PurchaseReturn::create($request->only([
+        'purchase_id',
+        'invoice_no',
+        'return_date'
+    ]) + [
                 'business_id' => $business_id,
             ]);
 

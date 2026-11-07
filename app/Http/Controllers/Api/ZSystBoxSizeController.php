@@ -24,7 +24,10 @@ class ZSystBoxSizeController extends Controller
             'name' => 'required|unique:box_sizes,name,NULL,id,business_id,'.auth()->user()->business_id,
         ]);
 
-        $data = BoxSize::create($request->all() + [
+        $data = BoxSize::create($request->only([
+        'name',
+        'status'
+    ]) + [
             'business_id' => auth()->user()->business_id,
         ]);
 
@@ -43,7 +46,10 @@ class ZSystBoxSizeController extends Controller
             ],
         ]);
 
-        $boxSize = $boxSize->update($request->all());
+        $boxSize = $boxSize->update($request->only([
+        'name',
+        'status'
+    ]));
 
         return response()->json([
             'message' => __('Data saved successfully.'),

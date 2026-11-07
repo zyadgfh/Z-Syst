@@ -69,7 +69,17 @@ class StockTransferController extends Controller
         ]);
 
         try {
-            $transfer = $this->warehouseService->createTransfer($request->all());
+            $transfer = $this->warehouseService->createTransfer($request->only([
+        'from_warehouse_id',
+        'to_warehouse_id',
+        'product_id',
+        'quantity',
+        'status',
+        'notes',
+        'user_id',
+        'idempotency_key',
+        'completed_at'
+    ]));
 
             return response()->json([
                 'message' => __('Stock transfer created successfully'),

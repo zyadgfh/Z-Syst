@@ -98,8 +98,14 @@ class Handler extends ExceptionHandler
             return;
         }
 
-        // Log all unhandled exceptions to errors channel
-        Logger::error($e);
+        // Log all unhandled exceptions to errors channel — but never let the
+        // logger itself crash during a half-booted console (facades/container
+        // unbound): fall back to error_log so the original failure surfaces.
+        try {
+            Logger::error($e);
+        } catch (\Throwable $loggingFailure) {
+            error_log('[handler-logger failed] ' . $e->getMessage());
+        }
 
         parent::report($e);
     }

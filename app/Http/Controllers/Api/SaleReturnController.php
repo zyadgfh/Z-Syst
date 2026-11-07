@@ -49,7 +49,11 @@ class SaleReturnController extends Controller
         $sale_return = TransactionHelper::run(function () use ($request) {
             $business_id = auth()->user()->business_id;
 
-            $sale_return = SaleReturn::create($request->all() + [
+            $sale_return = SaleReturn::create($request->only([
+        'sale_id',
+        'invoice_no',
+        'return_date'
+    ]) + [
                 'business_id' => $business_id,
             ]);
 

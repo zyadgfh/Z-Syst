@@ -53,7 +53,13 @@ class LoyaltyController extends Controller
         ]);
 
         try {
-            $program = $this->loyaltyService->createProgram($request->all());
+            $program = $this->loyaltyService->createProgram($request->only([
+        'business_id',
+        'name',
+        'points_per_currency',
+        'min_points_for_reward',
+        'is_active'
+    ]));
 
             return response()->json([
                 'message' => __('Loyalty program created successfully'),
@@ -81,7 +87,13 @@ class LoyaltyController extends Controller
         ]);
 
         try {
-            $program = $this->loyaltyService->updateProgram($program, $request->all());
+            $program = $this->loyaltyService->updateProgram($program, $request->only([
+        'business_id',
+        'name',
+        'points_per_currency',
+        'min_points_for_reward',
+        'is_active'
+    ]));
 
             return response()->json([
                 'message' => __('Loyalty program updated successfully'),
@@ -144,7 +156,13 @@ class LoyaltyController extends Controller
         ]);
 
         try {
-            $interaction = $this->loyaltyService->createInteraction($request->all());
+            $interaction = $this->loyaltyService->createInteraction($request->only([
+        'business_id',
+        'name',
+        'points_per_currency',
+        'min_points_for_reward',
+        'is_active'
+    ]));
 
             return response()->json([
                 'message' => __('Customer interaction created successfully'),

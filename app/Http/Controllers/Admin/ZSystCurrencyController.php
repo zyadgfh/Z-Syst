@@ -68,7 +68,16 @@ class ZSystCurrencyController extends Controller
             'is_default' => 'nullable|boolean',
         ]);
 
-        Currency::create($request->all());
+        Currency::create($request->only([
+        'name',
+        'country_name',
+        'code',
+        'rate',
+        'symbol',
+        'position',
+        'status',
+        'is_default'
+    ]));
 
         return response()->json([
             'message' => __('Currency Created successfully'),
@@ -97,7 +106,16 @@ class ZSystCurrencyController extends Controller
             'is_default' => 'nullable|boolean',
         ]);
 
-        $currency->update($request->all());
+        $currency->update($request->only([
+        'name',
+        'country_name',
+        'code',
+        'rate',
+        'symbol',
+        'position',
+        'status',
+        'is_default'
+    ]));
 
         return response()->json([
             'message' => __('Currency updated successfully'),

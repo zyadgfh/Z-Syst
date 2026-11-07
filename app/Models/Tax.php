@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Traits\TenantScoped;
 
 /**
  * Tax - table `taxes` (Supabase Postgres).
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Tax extends Model
 {
+    use TenantScoped;
+
     protected $table = 'taxes';
 
     protected $fillable = [

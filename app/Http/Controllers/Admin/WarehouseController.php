@@ -50,7 +50,13 @@ class WarehouseController extends Controller
         ]);
 
         try {
-            $warehouse = $this->warehouseService->createWarehouse($request->all());
+            $warehouse = $this->warehouseService->createWarehouse($request->only([
+        'name',
+        'code',
+        'location',
+        'is_default',
+        'is_active'
+    ]));
 
             return response()->json([
                 'message' => __('Warehouse created successfully'),
@@ -86,7 +92,13 @@ class WarehouseController extends Controller
         ]);
 
         try {
-            $warehouse = $this->warehouseService->updateWarehouse($warehouse, $request->all());
+            $warehouse = $this->warehouseService->updateWarehouse($warehouse, $request->only([
+        'name',
+        'code',
+        'location',
+        'is_default',
+        'is_active'
+    ]));
 
             return response()->json([
                 'message' => __('Warehouse updated successfully'),

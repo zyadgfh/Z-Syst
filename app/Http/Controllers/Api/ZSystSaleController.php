@@ -115,6 +115,25 @@ class ZSystSaleController extends Controller
             $productIds = collect($request->products)->pluck('product_id')->filter()->unique()->values()->all();
             $businessStocks = $this->loadBusinessStocks($business_id, $productIds);
 
+            // H-01: prices are server authority. The client-sent price is only
+            // honored for users with the sale.price-override permission (audit
+            // logged below); everyone else must match the product's list price
+            // (2% rounding tolerance for terminal tax-inclusive configs).
+            $canOverridePrice = auth()->user()?->can('sale.price-override');
+            $catalogPrices = Product::whereIn('id', $productIds)->pluck('sales_price', 'id');
+            foreach ($request->products as $idx => $line) {
+                $listPrice = (float) ($catalogPrices[$line['product_id']] ?? 0);
+                if (! $canOverridePrice && $listPrice > 0) {
+                    $delta = abs((float) $line['price'] - $listPrice);
+                    if ($delta > max(0.02, $listPrice * 0.02)) {
+                        throw new BusinessRuleException(
+                            ErrorCode::BUSINESS_INSUFFICIENT_STOCK,
+                            __('Price mismatch for product :id — sell at the listed price.', ['id' => $line['product_id']])
+                        );
+                    }
+                }
+            }
+
             foreach ($request->products as $productData) {
                 $productId = $productData['product_id'];
                 $productStocks = $businessStocks->get($productId, collect());
@@ -210,7 +229,23 @@ class ZSystSaleController extends Controller
 
             $lossProfit = collect($request->products)->pluck('lossProfit')->toArray();
 
-            $sale = Sale::create($request->all() + [
+            $sale = Sale::create($request->only([
+        'party_id',
+        'user_id',
+        'tax_id',
+        'discountAmount',
+        'dueAmount',
+        'isPaid',
+        'tax_amount',
+        'paidAmount',
+        'totalAmount',
+        'lossProfit',
+        'paymentType',
+        'invoiceNumber',
+        'saleDate',
+        'sale_data',
+        'meta'
+    ]) + [
                 'business_id' => $business_id,
                 'lossProfit' => array_sum($lossProfit) - ($request->discountAmount ?? 0),
                 'meta' => [
@@ -477,7 +512,23 @@ class ZSystSaleController extends Controller
 
             $lossProfit = collect($request->products)->pluck('lossProfit')->toArray();
 
-            $sale->update($request->all() + [
+            $sale->update($request->only([
+        'party_id',
+        'user_id',
+        'tax_id',
+        'discountAmount',
+        'dueAmount',
+        'isPaid',
+        'tax_amount',
+        'paidAmount',
+        'totalAmount',
+        'lossProfit',
+        'paymentType',
+        'invoiceNumber',
+        'saleDate',
+        'sale_data',
+        'meta'
+    ]) + [
                 'business_id' => $business_id,
                 'lossProfit' => array_sum($lossProfit) - ($request->discountAmount ?? 0),
                 'meta' => [

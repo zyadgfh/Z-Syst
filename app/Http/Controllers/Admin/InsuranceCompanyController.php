@@ -62,7 +62,26 @@ class InsuranceCompanyController extends Controller
         ]);
 
         try {
-            $company = $this->insuranceService->createCompany($request->all());
+            $company = $this->insuranceService->createCompany($request->only([
+        'name',
+        'code',
+        'contact_person',
+        'phone',
+        'email',
+        'address',
+        'city',
+        'country',
+        'tax_id',
+        'status',
+        'integration_type',
+        'api_endpoint',
+        'api_credentials',
+        'default_coverage_percent',
+        'default_copay_percent',
+        'settlement_days',
+        'notes',
+        'metadata'
+    ]));
 
             return response()->json([
                 'message' => __('Insurance company created successfully'),
@@ -108,7 +127,26 @@ class InsuranceCompanyController extends Controller
         ]);
 
         try {
-            $company = $this->insuranceService->updateCompany($company, $request->all());
+            $company = $this->insuranceService->updateCompany($company, $request->only([
+        'name',
+        'code',
+        'contact_person',
+        'phone',
+        'email',
+        'address',
+        'city',
+        'country',
+        'tax_id',
+        'status',
+        'integration_type',
+        'api_endpoint',
+        'api_credentials',
+        'default_coverage_percent',
+        'default_copay_percent',
+        'settlement_days',
+        'notes',
+        'metadata'
+    ]));
 
             return response()->json([
                 'message' => __('Insurance company updated successfully'),
