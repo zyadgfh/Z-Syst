@@ -1,0 +1,57 @@
+name: Runtime Bundle (vendor + debug logs)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: curl, bcmath, gd, zip, mbstring, xml, intl, sqlite, pdo_sqlite
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Prepare env + collect boot diagnostics
+        if: always()
+        run: |
+          cp .env.example .env
+          php artisan key:generate > key.log 2>&1 || true
+          {
+            echo "== artisan route:list =="
+            DB_CONNECTION=sqlite DB_DATABASE=':memory:' php artisan route:list 2>&1 | tail -40
+            echo "== artisan migrate:fresh =="
+            DB_CONNECTION=sqlite DB_DATABASE=':memory:' php artisan migrate:fresh --force 2>&1 | tail -30
+            echo "== phpunit (info) =="
+            DB_CONNECTION=sqlite DB_DATABASE=':memory:' php artisan test --colors=never 2>&1 | tail -60
+          } > boot-debug.log 2>&1 || true
+          tar czf vendor.tar.gz vendor
+          echo "bundle ready"
+
+      - name: Push runtime bundle to orphan branch ci-runtime
+        if: always()
+        run: |
+          git config user.email ci@z-syst.local
+          git config user.name ci
+          git fetch origin ci-runtime || true
+          git checkout --orphan ci-runtime-tmp
+          git rm -rf --cached . -q || true
+          git add -f vendor.tar.gz boot-debug.log key.log 2>/dev/null || true
+          git commit -q -m "runtime bundle $(date -u +%FT%TZ)"
+          git branch -M ci-runtime
+          git push -q --force origin ci-runtime
+          echo "pushed ci-runtime"
