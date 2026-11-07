@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Api\ZSystSaleController;
+use App\Http\Controllers\Controller;
 use App\Models\StoreOrder;
 use App\Services\DeviceSettings;
 use Illuminate\Http\Request;
