@@ -42,6 +42,9 @@
 
     async function enqueue(payload, headers) {
         const db = await openDb();
+        // Idempotency key: a replay that already landed server-side is
+        // deduped by sales.client_uuid instead of double-selling.
+        payload.client_uuid = payload.client_uuid || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + '-' + Math.random());
         await tx(db, 'readwrite', (s) => s.add({
             payload, headers, created_at: Date.now(), tries: 0,
         }));

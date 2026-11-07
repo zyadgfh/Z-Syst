@@ -37,4 +37,25 @@ class BusinessSetting extends Model
     {
         return static::forBusiness($businessId)->where('key', 'like', $prefix.'%');
     }
+
+    /** Generic scalar getter for feature settings (eta_*, paymob_*, …). */
+    public static function get(int $businessId, string $key, mixed $default = null): mixed
+    {
+        $row = static::forBusiness($businessId)->where('key', $key)->first();
+        if (!$row) {
+            return $default;
+        }
+
+        $value = $row->value;
+
+        return is_array($value) ? ($value['v'] ?? $default) : $value;
+    }
+
+    public static function put(int $businessId, string $key, mixed $value): self
+    {
+        return static::updateOrCreate(
+            ['business_id' => $businessId, 'key' => $key],
+            ['value' => is_array($value) ? ['v' => $value] : $value]
+        );
+    }
 }

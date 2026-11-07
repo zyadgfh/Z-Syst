@@ -38,6 +38,7 @@ class AppUser extends Authenticatable
         'status',
         'visibility',
         'branch_id',
+        'two_factor_secret',
     ];
 
     protected $casts = [

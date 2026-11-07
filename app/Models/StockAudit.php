@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -23,6 +24,8 @@ class StockAudit extends Model
         'notes',
         'metadata',
     ];
+
+    public function scopeForBusiness(Builder $q, int $businessId): Builder { return $q->where('business_id', $businessId); }
 
     protected $casts = [
         'audit_date' => 'datetime',

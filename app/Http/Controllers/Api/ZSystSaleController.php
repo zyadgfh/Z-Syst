@@ -91,6 +91,7 @@ class ZSystSaleController extends Controller
         $request->validate([
             'products' => 'required|array',
             'saleDate' => 'required|string',
+            'client_uuid' => 'nullable|uuid',
             'party_id' => 'nullable|exists:parties,id',
             'tax_id' => 'nullable|exists:taxes,id',
             'discountAmount' => 'nullable|numeric',
@@ -244,7 +245,8 @@ class ZSystSaleController extends Controller
         'invoiceNumber',
         'saleDate',
         'sale_data',
-        'meta'
+        'meta',
+        'client_uuid',
     ]) + [
                 'business_id' => $business_id,
                 'lossProfit' => array_sum($lossProfit) - ($request->discountAmount ?? 0),
@@ -398,6 +400,7 @@ class ZSystSaleController extends Controller
         $request->validate([
             'products' => 'required|array',
             'saleDate' => 'required|string',
+            'client_uuid' => 'nullable|uuid',
             'party_id' => 'nullable|exists:parties,id',
             'tax_id' => 'nullable|exists:taxes,id',
             'discountAmount' => 'nullable|numeric',
@@ -527,7 +530,8 @@ class ZSystSaleController extends Controller
         'invoiceNumber',
         'saleDate',
         'sale_data',
-        'meta'
+        'meta',
+        'client_uuid',
     ]) + [
                 'business_id' => $business_id,
                 'lossProfit' => array_sum($lossProfit) - ($request->discountAmount ?? 0),

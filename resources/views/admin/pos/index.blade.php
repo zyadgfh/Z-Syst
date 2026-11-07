@@ -8,6 +8,19 @@
 <div class="container-fluid">
     <div class="row g-3">
 
+        {{-- Shift / connection strip --}}
+        <div class="col-12">
+            <div class="card"><div class="card-body py-2 d-flex flex-wrap align-items-center gap-3">
+                <span class="badge {{ $shiftOpen ? 'bg-success' : 'bg-secondary' }} p-2" id="shiftBadge">
+                    {{ $shiftOpen ? '💰 '.__('وردية مفتوحة: ').$shiftNumber : '💰 '.__('لا وردية مفتوحة — افتحها من الورديات') }}
+                </span>
+                <span class="badge bg-secondary p-2" id="netBadge">…</span>
+                <input id="couponCode" class="form-control form-control-sm d-inline-block" style="width: 160px" placeholder="{{ __('كوبون خصم (اختياري)') }}">
+                <span id="promoInfo" class="small text-success"></span>
+                <span id="interactionWarnings" class="small text-danger flex-grow-1"></span>
+            </div></div>
+        </div>
+
         {{-- Status strip --}}
         <div class="col-12">
             <div class="card"><div class="card-body py-2 d-flex flex-wrap align-items-center gap-3">
@@ -123,6 +136,27 @@
         if (!CFG.scanner.auto_add) { flash('info', res.data.name + ' — ' + res.data.price); return; }
         addToCart(res.data);
         if (CFG.scanner.beep) beep();
+        checkInteractions();
+    }
+
+    // Drug–drug interaction screening for the whole cart (pharmacist net)
+    let interactionsTimer = null;
+    function checkInteractions() {
+        clearTimeout(interactionsTimer);
+        interactionsTimer = setTimeout(async () => {
+            const ids = [...cart.values()].map(l => l.product_id);
+            const box = document.getElementById('interactionWarnings');
+            if (ids.length < 2) { box.textContent = ''; return; }
+            const res = await fetch('{{ route('admin.pos.interactions') }}', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+                body: JSON.stringify({ product_ids: [...new Set(ids)] }),
+            }).then(r => r.json()).catch(() => null);
+            if (!res || !res.success) return;
+            box.textContent = res.data.length
+                ? '⚠️ ' + res.data.map(w => w.severity.toUpperCase() + ': ' + w.between.join(' + ') + ' — ' + w.description).join(' | ')
+                : '';
+            if (res.data.length) beep(320);
+        }, 400);
     }
 
     // ---------- cart ----------
@@ -178,18 +212,33 @@
         }));
         const payload = { products, paidAmount: +document.getElementById('paidAmount').value,
                           paymentType: document.getElementById('paymentType').value,
+                          coupon_code: document.getElementById('couponCode').value.trim() || null,
                           isPaid: +document.getElementById('paidAmount').value >= totals0() };
 
         function totals0() { let t = 0; for (const l of cart.values()) t += l.qty * l.price; return t; }
         payload.dueAmount = Math.max(0, totals0() - payload.paidAmount);
 
-        const res = await fetch('{{ route("admin.pos.checkout") }}', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
-            body: JSON.stringify(payload),
-        }).then(r => r.json()).catch(e => ({ success: false, message: String(e) }));
+        let res;
+        try {
+            const r = await fetch('{{ route("admin.pos.checkout") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            res = await r.json();
+        } catch (e) {
+            res = null;  // network failed → offline path below
+        }
+
+        if (!res) {
+            queueOffline(payload);
+            return;
+        }
 
         if (!res.success) { flash('danger', res.message || '{{ __('فشل البيع') }}'); return; }
+        if (res.promotion && res.promotion.discount > 0) {
+            flash('success', '{{ __('خصم مطبّق') }}: ' + res.promotion.discount + ' EGP' + (res.promotion.bonus_units ? ' +' + res.promotion.bonus_units + ' {{ __('وحدة مجانية') }}' : ''));
+        }
 
         cart.clear(); renderCart();
         document.getElementById('paidAmount').value = 0;
@@ -206,11 +255,49 @@
         setTimeout(() => msg.classList.add('d-none'), 4000);
     }
 
-    function beep() {
+    // ---------- offline PWA queue ----------
+    function queueOffline(payload) {
+        payload.client_uuid = crypto.randomUUID();
+        payload.saleDate = new Date().toISOString().slice(0, 10);
+        const q = JSON.parse(localStorage.getItem('zsyst_offline_sales') || '[]');
+        q.push(payload);
+        localStorage.setItem('zsyst_offline_sales', JSON.stringify(q));
+        cart.clear(); renderCart();
+        document.getElementById('paidAmount').value = 0;
+        flash('warning', '📡 {{ __('لا اتصال — حُفظ الفاتورة وستتزامن تلقائيًا عند عودة الشبكة') }} (' + q.length + ')');
+    }
+
+    async function replayQueue() {
+        const q = JSON.parse(localStorage.getItem('zsyst_offline_sales') || '[]');
+        if (!q.length) return;
+        const res = await fetch('{{ route('admin.pos.sync') }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+            body: JSON.stringify({ sales: q.map(p => ({ client_uuid: p.client_uuid, products: p.products, paidAmount: p.paidAmount, dueAmount: p.dueAmount, isPaid: p.isPaid, paymentType: p.paymentType, saleDate: p.saleDate })) }),
+        }).then(r => r.json()).catch(() => null);
+        if (res && res.success) {
+            const remain = res.data.failed || [];
+            localStorage.setItem('zsyst_offline_sales', JSON.stringify(q.filter(p => remain.some(f => f.client_uuid === p.client_uuid))));
+            flash('success', '✅ {{ __('تمت مزامنة فواتير الأوفلاين') }}: ' + res.data.accepted.length + ' ✓, ' + res.data.duplicates.length + ' {{ __('مكررة تم تجاهلها') }}');
+        }
+    }
+
+    const netBadge = document.getElementById('netBadge');
+    function paintNet() {
+        netBadge.className = 'badge p-2 ' + (navigator.onLine ? 'bg-success' : 'bg-danger');
+        netBadge.textContent = navigator.onLine ? '🌐 {{ __('متصل') }}' : '📡 {{ __('أوفلاين — يُخزن محليًا') }}';
+        if (navigator.onLine) replayQueue();
+    }
+    window.addEventListener('online', paintNet);
+    window.addEventListener('offline', paintNet);
+    paintNet();
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+
+    function beep(freq) { beep.frequency = freq;
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator(), gain = ctx.createGain();
-            osc.frequency.value = 880; gain.gain.value = 0.08;
+            osc.frequency.value = beep.frequency || 880; gain.gain.value = 0.08;
             osc.connect(gain); gain.connect(ctx.destination);
             osc.start(); osc.stop(ctx.currentTime + 0.09);
         } catch (e) {}
