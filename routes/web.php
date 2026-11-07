@@ -54,7 +54,7 @@ require __DIR__.'/auth.php';
 
 // ═══ Storefront (per-tenant public shop) + payment gateway callbacks ═══
 Route::prefix('store/{slug}')->name('store.')->group(function () {
-    Route::get('/', [Web\StorefrontController::class, 'show'])->name('show');
-    Route::post('/checkout', [Web\StorefrontController::class, 'checkout'])->name('checkout');
+    Route::get('/', [\App\Http\Controllers\Web\StorefrontController::class, 'show'])->name('show');
+    Route::post('/checkout', [\App\Http\Controllers\Web\StorefrontController::class, 'checkout'])->name('checkout');
 });
-Route::get('/gateway/{gateway}/callback/{transaction}', Web\GatewayWebhookController::class)->name('web.gateway.callback');
+Route::get('/gateway/{gateway}/callback/{transaction}', \App\Http\Controllers\Web\GatewayWebhookController::class)->name('web.gateway.callback');
