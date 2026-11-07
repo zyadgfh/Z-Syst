@@ -22,8 +22,22 @@ class PaymentController extends Controller
      */
     public function index($id, $business_id)
     {
+        // M-03: the route is public, so authorization is enforced here —
+        // only the owning business user (or a superadmin) may open checkout,
+        // and the session business id is written from the verified identity,
+        // never from the URL (session poisoning / cross-tenant checkout).
+        $actor = auth()->user();
+        if (! $actor) {
+            abort(401, 'Authentication required.');
+        }
+
+        $isSuper = method_exists($actor, 'hasRole') && $actor->hasRole('superadmin');
+        if ($actor->business_id != $business_id && ! $isSuper) {
+            abort(403, 'This checkout does not belong to your business.');
+        }
+
         $plan = Plan::findOrFail($id);
-        session()->put('business_id', $business_id);
+        session()->put('business_id', $isSuper ? (int) $business_id : $actor->business_id);
         $gateways = Gateway::with('currency:id,code,rate,symbol,position')->where('status', 1)->get();
 
         return view('payments.index', compact('gateways', 'plan'));
@@ -39,9 +53,23 @@ class PaymentController extends Controller
             'phone' => 'max:15|min:5',
         ]);
 
+        // M-03: same ownership gate before any subscription write — the
+        // session business id is only trusted for the verified owner
+        // (or superadmin); provider webhooks/callbacks stay public.
+        $actor = auth()->user();
+        if (! $actor) {
+            abort(401, 'Authentication required.');
+        }
+
         $plan = Plan::findOrFail($plan_id);
         $gateway = Gateway::findOrFail($gateway_id);
         $business = Business::findOrFail(session('business_id'));
+
+        $isSuper = method_exists($actor, 'hasRole') && $actor->hasRole('superadmin');
+        if ($actor->business_id != $business->id && ! $isSuper) {
+            abort(403, 'This checkout does not belong to your business.');
+        }
+
         $user = User::where('business_id', $business->id)->firstOrFail();
 
         // Get tenant-specific payment settings

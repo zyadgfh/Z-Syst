@@ -28,11 +28,11 @@ class BackupService
         // Build mysqldump command
         $command = sprintf(
             'mysqldump -h%s -u%s -p%s %s > %s',
-            $dbConfig['host'],
-            $dbConfig['username'],
-            $dbConfig['password'],
-            $dbConfig['database'],
-            $path
+            escapeshellarg($dbConfig['host']),
+            escapeshellarg($dbConfig['username']),
+            escapeshellarg($dbConfig['password']),
+            escapeshellarg($dbConfig['database']),
+            escapeshellarg($path)
         );
 
         // Execute backup
@@ -110,11 +110,11 @@ class BackupService
         
         $command = sprintf(
             'mysql -h%s -u%s -p%s %s < %s',
-            $dbConfig['host'],
-            $dbConfig['username'],
-            $dbConfig['password'],
-            $dbConfig['database'],
-            $backupPath
+            escapeshellarg($dbConfig['host']),
+            escapeshellarg($dbConfig['username']),
+            escapeshellarg($dbConfig['password']),
+            escapeshellarg($dbConfig['database']),
+            escapeshellarg($backupPath)
         );
 
         exec($command, $output, $returnCode);

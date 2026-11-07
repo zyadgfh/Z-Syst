@@ -9,6 +9,33 @@ use Illuminate\Support\Facades\Storage;
 trait HasUploader
 {
     /**
+     * Upload allowlist (H-02): extension AND guessed MIME must both pass.
+     * SVG is excluded by default — served inline from a same-origin path it
+     * is a stored-XSS vector. Override via integrations.uploads.allowed_*
+     * if a deployment truly needs more (and serve them with
+     * Content-Disposition: attachment / a separate origin).
+     */
+    private function zsValidateUpload($file): void
+    {
+        $allowedExt = (array) config('integrations.uploads.allowed_extensions', [
+            'png', 'jpg', 'jpeg', 'webp', 'gif', 'pdf',
+        ]);
+        $allowedMime = (array) config('integrations.uploads.allowed_mimes', [
+            'image/png', 'image/jpeg', 'image/webp', 'image/gif', 'application/pdf',
+        ]);
+
+        $ext = strtolower($file->getClientOriginalExtension());
+        $mime = strtolower((string) $file->getMimeType());
+
+        if (! in_array($ext, $allowedExt, true) || ! in_array($mime, $allowedMime, true)) {
+            throw new \App\Exceptions\UploadException(
+                'Upload type not allowed',
+                ['extension' => $ext, 'mime' => $mime]
+            );
+        }
+    }
+
+    /**
      * Write upload bytes with optional cloud shipping (Supabase Storage).
      *
      * When integrations.uploads.cloud_enabled is on and Supabase is
@@ -87,6 +114,8 @@ trait HasUploader
             );
         }
 
+        $this->zsValidateUpload($file);
+
         try {
             $ext = $file->getClientOriginalExtension();
             $filename = now()->timestamp.'-'.rand(1, 1000).'.'.$ext;
@@ -138,6 +167,8 @@ trait HasUploader
             );
         }
 
+        $this->zsValidateUpload($file);
+
         try {
             $filename = $file->getClientOriginalName();
             $path = 'files/';
@@ -187,6 +218,8 @@ trait HasUploader
                         ['input' => $input, 'original_name' => $file->getClientOriginalName()]
                     );
                 }
+
+                $this->zsValidateUpload($file);
 
                 $ext = $file->getClientOriginalExtension();
                 $filename = now()->timestamp.'_'.uniqid().'.'.$ext;
