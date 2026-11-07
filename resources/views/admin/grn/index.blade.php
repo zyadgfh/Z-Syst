@@ -185,6 +185,11 @@
         if (confirm('Accept this GRN?')) {
             $.post(`{{ route('admin.grn.accept', '__id__') }}`.replace('__id__', id), function(data) {
                 alert('GRN accepted successfully');
+                if (data && data.print_barcodes_url) {
+                    if (confirm('إغلاق فاتورة الشراء — طباعة باركود للأصناف المستلمة؟ (' + (data.print_barcodes_count || 0) + ' ملصق)')) {
+                        window.open(data.print_barcodes_url, '_blank');
+                    }
+                }
                 loadGRNs();
             });
         }

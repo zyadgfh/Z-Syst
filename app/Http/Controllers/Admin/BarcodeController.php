@@ -21,7 +21,161 @@ class BarcodeController extends Controller
     public function __construct(BarcodeService $barcodeService)
     {
         $this->barcodeService = $barcodeService;
+        $this->middleware('permission:barcodes-read')->only('page', 'pageShow', 'labels', 'image');
+        $this->middleware('permission:barcodes-create')->only('pageCreate', 'pageStore');
     }
+
+    /*
+     * ---------------------------------------------------------------------
+     * Admin web pages (Blade) — the JSON API surface lives in Api\BarcodeController.
+     * ---------------------------------------------------------------------
+     */
+
+    /** Barcode list page. */
+    public function page(Request $request)
+    {
+        $businessId = $request->user()->business_id;
+
+        $barcodes = Barcode::query()
+            ->with(['product', 'batch'])
+            ->forBusiness($businessId)
+            ->byType($request->type)
+            ->byPrintStatus($request->print_status)
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('admin.barcodes.index', [
+            'barcodes' => $barcodes,
+            'types' => [Barcode::TYPE_CODE128, Barcode::TYPE_EAN13, Barcode::TYPE_UPC, Barcode::TYPE_QR],
+            'statuses' => [Barcode::STATUS_NOT_PRINTED, Barcode::STATUS_PRINTED, Barcode::STATUS_REPRINTED],
+        ]);
+    }
+
+    /** Generate form. */
+    public function pageCreate(Request $request)
+    {
+        $products = Product::query()
+            ->forBusiness($request->user()->business_id)
+            ->orderBy('productName')
+            ->get(['id', 'productName', 'productCode', 'sales_price']);
+
+        return view('admin.barcodes.create', ['products' => $products]);
+    }
+
+    /** Handle the generate form. */
+    public function pageStore(Request $request)
+    {
+        $validated = $request->validate([
+            'product_id' => 'required|integer',
+            'batch_id' => 'nullable|integer',
+            'type' => 'required|in:CODE128,EAN13,UPC,QR',
+            'size' => 'nullable|in:small,standard,large',
+            'quantity' => 'required|integer|min:1|max:100',
+        ]);
+
+        $businessId = (int) $request->user()->business_id;
+
+        $product = Product::forBusiness($businessId)->findOrFail($validated['product_id']);
+        $options = [
+            'barcode_type' => $validated['type'],
+            'size' => $validated['size'] ?? Barcode::SIZE_STANDARD,
+        ];
+
+        if (! empty($validated['batch_id'])) {
+            $batch = Stock::where('business_id', $businessId)
+                ->where('product_id', $product->id)
+                ->findOrFail($validated['batch_id']);
+            $created = $this->barcodeService->generateMultipleForBatch($batch, $validated['quantity'], $options);
+        } else {
+            $created = $this->barcodeService->generateMultipleForProduct($product, $validated['quantity'], $options);
+        }
+
+        return redirect()
+            ->route('admin.barcodes.labels', ['ids' => implode(',', array_map(fn ($b) => $b->id, $created))])
+            ->with('success', __('تم توليد :n باركود بنجاح.', ['n' => count($created)]));
+    }
+
+    /** Single barcode page (label preview). */
+    public function pageShow(Request $request, Barcode $barcode)
+    {
+        abort_unless((int) $barcode->business_id === (int) $request->user()->business_id, 404);
+        $barcode->load(['product', 'batch']);
+
+        return view('admin.barcodes.show', ['barcode' => $barcode]);
+    }
+
+    /** Printable label sheet (?ids=1,2,3 or product_id + quantity). */
+    public function labels(Request $request)
+    {
+        $businessId = (int) $request->user()->business_id;
+
+        if ($request->filled('ids')) {
+            // Duplicates are intentional: each occurrence = one printed copy.
+            $ids = collect(explode(',', (string) $request->input('ids')))
+                ->map(fn ($v) => (int) trim($v))
+                ->filter()
+                ->take(200)
+                ->all();
+
+            $unique = Barcode::with(['product', 'batch'])
+                ->forBusiness($businessId)
+                ->whereIn('id', array_unique($ids))
+                ->get()
+                ->keyBy('id');
+
+            // Repetitions in $ids are intentional copies; rebuild in order.
+            $barcodes = collect($ids)
+                ->map(fn ($id) => $unique->get($id))
+                ->filter();
+        } else {
+            $request->validate([
+                'product_id' => 'required|integer',
+                'quantity' => 'required|integer|min:1|max:100',
+            ]);
+
+            $product = Product::forBusiness($businessId)->findOrFail($request->input('product_id'));
+            $barcodes = collect($this->barcodeService->generateMultipleForProduct(
+                $product,
+                (int) $request->input('quantity'),
+                ['barcode_type' => $request->input('type', Barcode::TYPE_CODE128)]
+            ));
+            $barcodes->each->load(['product', 'batch']);
+        }
+
+        abort_if($barcodes->isEmpty(), 404);
+
+        return view('admin.barcodes.labels', ['barcodes' => $barcodes]);
+    }
+
+    /** Stream the stored label image (PNG or SVG); lazily re-renders when
+     *  the artifact was pruned from disk (e.g. snapshot refresh). */
+    public function image(Request $request, Barcode $barcode)
+    {
+        abort_unless((int) $barcode->business_id === (int) $request->user()->business_id, 404);
+
+        $path = (string) $barcode->barcode_image;
+        if ($path !== '' && ! str_contains($path, '..') && str_starts_with($path, 'barcodes/')
+            && Storage::disk('public')->exists($path)) {
+            $mime = str_ends_with($path, '.svg') ? 'image/svg+xml' : 'image/png';
+
+            return response(Storage::disk('public')->get($path), 200)
+                ->header('Content-Type', $mime)
+                ->header('Cache-Control', 'public, max-age=3600');
+        }
+
+        // Lazy render: the stored artifact is gone — draw it from the number.
+        $renderer = new \App\Support\Barcode\BarcodeRenderer();
+        $png = $renderer->png($barcode->barcode_type, $barcode->barcode_number, $barcode->size ?? 'standard');
+        if ($png !== null) {
+            return response($png, 200)->header('Content-Type', 'image/png')->header('Cache-Control', 'public, max-age=3600');
+        }
+
+        return response($renderer->svg($barcode->barcode_type, $barcode->barcode_number, $barcode->size ?? 'standard'), 200)
+            ->header('Content-Type', 'image/svg+xml')
+            ->header('Cache-Control', 'public, max-age=3600');
+    }
+
 
     /**
      * Display a listing of barcodes.

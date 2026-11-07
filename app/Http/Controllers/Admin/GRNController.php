@@ -7,7 +7,10 @@ use App\Http\Requests\GRNRequest;
 use App\Http\Resources\GRNResource;
 use App\Http\Resources\GRNItemResource;
 use App\Models\GoodsReceivedNote;
+use App\Models\Barcode;
+use App\Models\Product;
 use App\Services\GRNService;
+use App\Services\DeviceSettings;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -16,8 +19,10 @@ class GRNController extends Controller
 {
     protected GRNService $grnService;
 
-    public function __construct(GRNService $grnService)
-    {
+    public function __construct(
+        GRNService $grnService,
+        protected \App\Services\BarcodeService $barcodeService,
+    ) {
         $this->grnService = $grnService;
     }
 
@@ -177,11 +182,55 @@ class GRNController extends Controller
     {
         $grn = $this->grnService->accept($grn);
 
+        // Owner workflow: finishing a purchase asks to print barcode labels
+        // (toggle: print.barcode_on_purchase_complete). Mint one product-level
+        // barcode per received item (reusing an active one when present) and
+        // hand back a ready label sheet URL for the client to open.
+        $labelsUrl = null;
+        $labelsCount = 0;
+        if (DeviceSettings::get((int) $request->user()->business_id, 'print.barcode_on_purchase_complete', true)) {
+            $labelsUrl = $this->mintLabelsForGrn($grn, $request->user()->business_id, $labelsCount);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'GRN accepted successfully',
             'data' => new GRNResource($grn),
+            'print_barcodes_url' => $labelsUrl,
+            'print_barcodes_count' => $labelsCount,
         ]);
+    }
+
+    /** Mint/reuse product barcodes for GRN items → printable sheet URL. */
+    protected function mintLabelsForGrn(GoodsReceivedNote $grn, int $businessId, int &$count): ?string
+    {
+        $cap = (int) DeviceSettings::get($businessId, 'print.max_labels_per_item', 10);
+        $ids = [];
+        $type = DeviceSettings::get($businessId, 'print.default_symbology', 'EAN13');
+
+        foreach ($grn->items as $item) {
+            if (! $item->product_id) {
+                continue;
+            }
+
+            $barcode = Barcode::forBusiness($businessId)->active()
+                ->whereNull('batch_id')
+                ->where('barcode_type', $type)
+                ->where('product_id', $item->product_id)
+                ->first()
+                ?? $this->barcodeService->generateForProduct(
+                    Product::findOrFail($item->product_id),
+                    ['barcode_type' => $type]
+                );
+
+            $copies = min(max(1, (int) $item->accepted_quantity), $cap);
+            for ($i = 0; $i < $copies; $i++) {
+                $ids[] = $barcode->id;
+            }
+            $count += $copies;
+        }
+
+        return $ids ? route('admin.barcodes.labels', ['ids' => implode(',', $ids)]) : null;
     }
 
     /**
