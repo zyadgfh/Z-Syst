@@ -141,23 +141,6 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::post('stock-transfers/{transfer}/complete', [ADMIN\StockTransferController::class, 'complete'])->name('stock-transfers.complete');
     Route::post('stock-transfers/{transfer}/cancel', [ADMIN\StockTransferController::class, 'cancel'])->name('stock-transfers.cancel');
 
-    // Barcodes
-    Route::resource('barcodes', ADMIN\BarcodeController::class)->except('show');
-    Route::get('barcodes/{barcode}', [ADMIN\BarcodeController::class, 'show'])->name('barcodes.show');
-    Route::post('barcodes/generate-multiple', [ADMIN\BarcodeController::class, 'generateMultiple'])->name('barcodes.generate-multiple');
-    Route::post('barcodes/generate-for-batch', [ADMIN\BarcodeController::class, 'generateForBatch'])->name('barcodes.generate-for-batch');
-    Route::post('barcodes/{barcode}/print', [ADMIN\BarcodeController::class, 'print'])->name('barcodes.print');
-    Route::post('barcodes/print-multiple', [ADMIN\BarcodeController::class, 'printMultiple'])->name('barcodes.print-multiple');
-    Route::post('barcodes/print-for-product', [ADMIN\BarcodeController::class, 'printForProduct'])->name('barcodes.print-for-product');
-    Route::post('barcodes/print-for-batch', [ADMIN\BarcodeController::class, 'printForBatch'])->name('barcodes.print-for-batch');
-    Route::post('barcodes/{barcode}/reprint', [ADMIN\BarcodeController::class, 'reprint'])->name('barcodes.reprint');
-    Route::get('barcodes/download/{filename}', [ADMIN\BarcodeController::class, 'download'])->name('barcodes.download');
-    Route::get('barcodes/search', [ADMIN\BarcodeController::class, 'search'])->name('barcodes.search');
-    Route::get('barcodes/settings', [ADMIN\BarcodeController::class, 'settings'])->name('barcodes.settings');
-    Route::get('barcodes/not-printed', [ADMIN\BarcodeController::class, 'notPrinted'])->name('barcodes.not-printed');
-    Route::get('barcodes/by-product/{productId}', [ADMIN\BarcodeController::class, 'byProduct'])->name('barcodes.by-product');
-    Route::get('barcodes/by-batch/{batchId}', [ADMIN\BarcodeController::class, 'byBatch'])->name('barcodes.by-batch');
-    Route::post('barcodes/{barcodeId}/restore', [ADMIN\BarcodeController::class, 'restore'])->name('barcodes.restore');
 
     // Traceability & Recall
     Route::get('traceability', [ADMIN\TraceabilityController::class, 'index'])->name('traceability.index');
@@ -303,6 +286,16 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('audit-logs/user-logs', [ADMIN\AuditLogController::class, 'userLogs'])->name('audit-logs.user-logs');
     Route::delete('audit-logs/{auditLog}', [ADMIN\AuditLogController::class, 'destroy'])->name('audit-logs.destroy');
     Route::post('audit-logs/clean-old', [ADMIN\AuditLogController::class, 'cleanOldLogs'])->name('audit-logs.clean-old');
+
+    // Barcode System
+    Route::prefix('barcodes')->name('barcodes.')->group(function () {
+        Route::get('/', [ADMIN\BarcodeController::class, 'page'])->name('index');
+        Route::get('create', [ADMIN\BarcodeController::class, 'pageCreate'])->name('create');
+        Route::post('generate', [ADMIN\BarcodeController::class, 'pageStore'])->name('store');
+        Route::get('labels', [ADMIN\BarcodeController::class, 'labels'])->name('labels');
+        Route::get('{barcode}/image', [ADMIN\BarcodeController::class, 'image'])->name('image');
+        Route::get('{barcode}', [ADMIN\BarcodeController::class, 'pageShow'])->name('show');
+    });
 
     // Insurance Module
     Route::prefix('insurance')->name('insurance.')->group(function () {

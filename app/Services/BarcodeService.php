@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Barcode;
 use App\Models\Product;
 use App\Models\Stock;
+use App\Support\Barcode\BarcodeRenderer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -18,7 +19,7 @@ class BarcodeService
      */
     public function generateForProduct(Product $product, array $options = []): Barcode
     {
-        $barcodeType = $options['type'] ?? Barcode::TYPE_CODE128;
+        $barcodeType = $options['barcode_type'] ?? $options['type'] ?? Barcode::TYPE_CODE128;
         $size = $options['size'] ?? Barcode::SIZE_STANDARD;
         $businessId = $options['business_id'] ?? $product->business_id;
         $branchId = $options['branch_id'] ?? $product->branch_id;
@@ -52,7 +53,7 @@ class BarcodeService
      */
     public function generateForBatch(Stock $batch, array $options = []): Barcode
     {
-        $barcodeType = $options['type'] ?? Barcode::TYPE_CODE128;
+        $barcodeType = $options['barcode_type'] ?? $options['type'] ?? Barcode::TYPE_CODE128;
         $size = $options['size'] ?? Barcode::SIZE_STANDARD;
         $businessId = $options['business_id'] ?? $batch->business_id;
         $branchId = $options['branch_id'] ?? null;
@@ -120,24 +121,31 @@ class BarcodeService
      */
     private function generateBarcodeImage(Barcode $barcode): string
     {
-        // This is a placeholder for barcode image generation
-        // In production, you would use a library like picqer/php-barcode-generator
-        // For now, we'll return a placeholder path
+        $renderer = new BarcodeRenderer();
+        $directory = $this->barcodeDirectory((int) $barcode->business_id);
+        $base = "{$directory}/{$barcode->id}_{$barcode->barcode_number}";
 
-        $filename = "barcodes/{$barcode->id}_{$barcode->barcode_number}.png";
+        // GD renders crisp PNG labels for thermal printers when available;
+        // otherwise we persist an SVG (browsers and dompdf 3 both render it).
+        $png = $renderer->png($barcode->barcode_type, $barcode->barcode_number, $barcode->size ?? 'standard');
+        if ($png !== null) {
+            Storage::disk('public')->put($base.'.png', $png);
 
-        // Placeholder - in production, generate actual barcode image
-        // $barcodeGenerator = new \Picqer\Barcode\BarcodeGenerator();
-        // $barcodeImage = $barcodeGenerator->getBarcode($barcode->barcode_number, $barcode->barcode_type);
-        // Storage::disk('public')->put($filename, $barcodeImage);
+            return $base.'.png';
+        }
 
-        return $filename;
+        Storage::disk('public')->put(
+            $base.'.svg',
+            $renderer->svg($barcode->barcode_type, $barcode->barcode_number, $barcode->size ?? 'standard')
+        );
+
+        return $base.'.svg';
     }
 
     /**
      * Print single barcode.
      */
-    public function printBarcode(Barcode $barcode, int $userId): string
+    public function printBarcode(Barcode $barcode, int|string|null $userId): string
     {
         $barcode->markAsPrinted($userId);
 
@@ -147,7 +155,7 @@ class BarcodeService
     /**
      * Print multiple barcodes.
      */
-    public function printMultipleBarcodes(array $barcodeIds, int $userId): string
+    public function printMultipleBarcodes(array $barcodeIds, int|string|null $userId): string
     {
         $barcodes = Barcode::whereIn('id', $barcodeIds)->get();
 
@@ -161,7 +169,7 @@ class BarcodeService
     /**
      * Print barcodes for a product.
      */
-    public function printForProduct(Product $product, int $quantity, int $userId): string
+    public function printForProduct(Product $product, int $quantity, int|string|null $userId): string
     {
         $barcodes = $this->generateMultipleForProduct($product, $quantity);
 
@@ -175,7 +183,7 @@ class BarcodeService
     /**
      * Print barcodes for a batch.
      */
-    public function printForBatch(Stock $batch, int $quantity, int $userId): string
+    public function printForBatch(Stock $batch, int $quantity, int|string|null $userId): string
     {
         $barcodes = $this->generateMultipleForBatch($batch, $quantity);
 
@@ -191,10 +199,13 @@ class BarcodeService
      */
     private function generateBarcodePDF(Barcode $barcode): string
     {
+        $renderer = new BarcodeRenderer();
+
         $data = [
             'barcode' => $barcode,
             'product' => $barcode->product,
             'batch' => $barcode->batch,
+            'barcodeSvg' => $renderer->svg($barcode->barcode_type, $barcode->barcode_number, $barcode->size ?? 'standard'),
         ];
 
         $pdf = PDF::loadView('barcodes.single', $data);
@@ -213,8 +224,19 @@ class BarcodeService
      */
     private function generateMultipleBarcodePDF($barcodes): string
     {
+        $renderer = new BarcodeRenderer();
+        $barcodeSvgs = [];
+        foreach ($barcodes as $barcode) {
+            $barcodeSvgs[$barcode->id] = $renderer->svg(
+                $barcode->barcode_type,
+                $barcode->barcode_number,
+                $barcode->size ?? 'standard'
+            );
+        }
+
         $data = [
             'barcodes' => $barcodes,
+            'barcodeSvgs' => $barcodeSvgs,
         ];
 
         $pdf = PDF::loadView('barcodes.multiple', $data);

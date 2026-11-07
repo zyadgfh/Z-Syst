@@ -111,6 +111,7 @@ return [
             'traceability-create', 'traceability-read', 'traceability-update', 'traceability-delete',
             'prescriptions-create', 'prescriptions-read', 'prescriptions-update', 'prescriptions-delete',
             'receipts-create', 'receipts-read', 'receipts-update', 'receipts-delete',
+            'barcodes-create', 'barcodes-read', 'barcodes-update', 'barcodes-delete',
 
             // finance & insurance
             'insurance-companies-create', 'insurance-companies-read', 'insurance-companies-update', 'insurance-companies-delete',
@@ -123,6 +124,7 @@ return [
         // Staff (app_users.role = 'staff', API/POS): read-only + file claims.
         'staff' => [
             'dashboard-read', 'reports-read', 'notifications-read',
+            'barcodes-read',
             'warehouses-read', 'stock-transfers-read', 'traceability-read',
             'prescriptions-read', 'prescriptions-create',
             'receipts-read', 'loyalty-read',
@@ -132,6 +134,7 @@ return [
         // Legacy alias kept for old records — same abilities as staff.
         'shop-owner' => [
             'dashboard-read', 'reports-read', 'notifications-read',
+            'barcodes-read',
             'warehouses-read', 'stock-transfers-read', 'traceability-read',
             'prescriptions-read', 'prescriptions-create',
             'receipts-read', 'loyalty-read',

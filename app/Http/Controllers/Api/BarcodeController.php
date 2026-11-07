@@ -337,6 +337,85 @@ class BarcodeController extends Controller
     /**
      * Search barcode by number.
      */
+    /**
+     * POS scanner endpoint: resolve a scanned code to sellable data.
+     *
+     * Resolution order:
+     *  1. Minted barcode row (barcodes.barcode_number) — product + batch (FEFO data on the label).
+     *  2. Fallback: the product's own printed code (products.productCode / products.barcode).
+     * Returns 404 when the code belongs to another business or is unknown.
+     */
+    public function lookup(Request $request): JsonResponse
+    {
+        $request->validate(['code' => 'required|string|max:64']);
+
+        $code = trim((string) $request->input('code'));
+        $user = $request->user();
+        $businessId = (int) $user->business_id;
+
+        $barcode = $this->barcodeService->searchByNumber($code, $businessId);
+
+        if ($barcode) {
+            $product = $barcode->product;
+            $batch = $barcode->batch;
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'source' => 'barcode',
+                    'barcode_number' => $barcode->barcode_number,
+                    'barcode_type' => $barcode->barcode_type,
+                    'product_id' => $product?->id,
+                    'product_name' => $product?->name,
+                    'price' => $product?->sales_price,
+                    'batch' => $batch ? [
+                        'id' => $batch->id,
+                        'batch_no' => $batch->batch_no,
+                        'expiry_date' => $batch->expire_date?->toDateString(),
+                        'quantity' => (int) $batch->productStock,
+                    ] : null,
+                    'stock' => $product ? (int) $product->stocks()->sum('productStock') : 0,
+                ],
+            ]);
+        }
+
+        // Fallback: the code printed on the product itself.
+        $product = Product::query()
+            ->where('business_id', $businessId)
+            ->where(fn ($query) => $query->where('productCode', $code)->orWhere('barcode', $code))
+            ->first();
+
+        if (! $product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Barcode not found',
+            ], 404);
+        }
+
+        $batch = $product->stocks()
+            ->orderByRaw('expire_date IS NULL, expire_date ASC')
+            ->first();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'source' => 'product_code',
+                'barcode_number' => $code,
+                'barcode_type' => 'PRODUCT_CODE',
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'price' => $product->sales_price,
+                'batch' => $batch ? [
+                    'id' => $batch->id,
+                    'batch_no' => $batch->batch_no,
+                    'expiry_date' => $batch->expire_date?->toDateString(),
+                    'quantity' => (int) $batch->productStock,
+                ] : null,
+                'stock' => (int) $product->stocks()->sum('productStock'),
+            ],
+        ]);
+    }
+
     public function search(Request $request): JsonResponse
     {
         $request->validate([

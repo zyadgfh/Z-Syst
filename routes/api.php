@@ -44,6 +44,7 @@ Route::prefix('v1')->group(function () {
             Route::get('financial-audit-report', [Api\ReportsController::class, 'financialAuditReport']);
 
             // Barcode API endpoints
+            Route::get('barcodes/lookup', [Api\BarcodeController::class, 'lookup'])->name('barcodes.lookup');
             Route::apiResource('barcodes', Api\BarcodeController::class)->except('show');
             Route::get('barcodes/{barcode}', [Api\BarcodeController::class, 'show'])->whereNumber('barcode')->name('barcodes.show');
             Route::post('barcodes/generate-multiple', [Api\BarcodeController::class, 'generateMultiple'])->name('barcodes.generate-multiple');

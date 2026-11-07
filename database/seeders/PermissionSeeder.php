@@ -22,7 +22,7 @@ class PermissionSeeder extends Seeder
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $resourcesCrud = [
-            'users', 'warehouses', 'stock-transfers', 'traceability',
+            'users', 'warehouses', 'stock-transfers', 'traceability', 'barcodes',
             'prescriptions', 'receipts',
             'insurance-companies', 'insurance-policies', 'insurance-claims',
             'loyalty', 'banners',
@@ -67,6 +67,7 @@ class PermissionSeeder extends Seeder
             'traceability-read', 'traceability-create', 'traceability-update', 'traceability-delete',
             'prescriptions-read', 'prescriptions-create', 'prescriptions-update', 'prescriptions-delete',
             'receipts-read', 'receipts-create', 'receipts-update', 'receipts-delete',
+            'barcodes-read', 'barcodes-create', 'barcodes-update', 'barcodes-delete',
             'insurance-companies-read', 'insurance-companies-create', 'insurance-companies-update', 'insurance-companies-delete',
             'insurance-policies-read', 'insurance-policies-create', 'insurance-policies-update', 'insurance-policies-delete',
             'insurance-claims-read', 'insurance-claims-create', 'insurance-claims-update', 'insurance-claims-delete',
@@ -77,6 +78,7 @@ class PermissionSeeder extends Seeder
         // Staff: read-only + file insurance claims + raise prescriptions.
         $staffRole->givePermissionTo([
             'dashboard-read', 'reports-read', 'notifications-read',
+            'barcodes-read',
             'warehouses-read', 'stock-transfers-read', 'traceability-read',
             'prescriptions-read', 'prescriptions-create',
             'receipts-read', 'loyalty-read',

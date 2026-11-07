@@ -114,11 +114,12 @@
             </div>
             @endif
             
-            {{-- Barcode image placeholder --}}
             <div class="barcode-image">
-                <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                @if(isset($barcodeSvgs[$barcode->id]))
+                    {!! $barcodeSvgs[$barcode->id] !!}
+                @else
                     <div style="font-size: 8px; color: #999;">[BARCODE]</div>
-                </div>
+                @endif
             </div>
             
             <div class="barcode-number">{{ $barcode->barcode_number }}</div>
@@ -127,18 +128,16 @@
             <div class="price">{{ number_format($barcode->product->selling_price, 2) }}</div>
             @endif
             
-            @if($barcode->batch && ($barcode->print_settings['show_expiry'] ?? true))
-            @if($barcode->batch->expiry_date)
-            <div class="expiry">Exp: {{ $barcode->batch->expiry_date->format('Y-m-d') }}</div>
-            @endif
+            @if($barcode->batch && ($barcode->print_settings['show_expiry'] ?? true) && $barcode->batch->expire_date)
+            <div class="expiry">Exp: {{ $barcode->batch->expire_date->format('Y-m-d') }}</div>
             @endif
             
             @if($barcode->batch && ($barcode->print_settings['show_batch'] ?? true))
-            <div class="batch-info">Batch: {{ $barcode->batch->batch_number }}</div>
+            <div class="batch-info">Batch: {{ $barcode->batch->batch_no }}</div>
             @endif
             
             <div class="barcode-footer">
-                {{ $barcode->printed_at->format('Y-m-d') }}
+                {{ $barcode->printed_at?->format('Y-m-d') }}
             </div>
         </div>
         @endforeach

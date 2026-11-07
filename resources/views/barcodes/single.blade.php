@@ -93,11 +93,12 @@
         </div>
         @endif
         
-        {{-- Barcode image placeholder - in production, use actual barcode image --}}
         <div class="barcode-image">
-            <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+            @isset($barcodeSvg)
+                {!! $barcodeSvg !!}
+            @else
                 <div style="font-size: 10px; color: #999;">[BARCODE IMAGE]</div>
-            </div>
+            @endisset
         </div>
         
         <div class="barcode-number">{{ $barcode->barcode_number }}</div>
@@ -106,18 +107,16 @@
         <div class="price">{{ number_format($barcode->product->selling_price, 2) }}</div>
         @endif
         
-        @if($barcode->batch && ($barcode->print_settings['show_expiry'] ?? true))
-        @if($barcode->batch->expiry_date)
-        <div class="expiry">Exp: {{ $barcode->batch->expiry_date->format('Y-m-d') }}</div>
-        @endif
+        @if($barcode->batch && ($barcode->print_settings['show_expiry'] ?? true) && $barcode->batch->expire_date)
+        <div class="expiry">Exp: {{ $barcode->batch->expire_date->format('Y-m-d') }}</div>
         @endif
         
         @if($barcode->batch && ($barcode->print_settings['show_batch'] ?? true))
-        <div class="batch-info">Batch: {{ $barcode->batch->batch_number }}</div>
+        <div class="batch-info">Batch: {{ $barcode->batch->batch_no }}</div>
         @endif
         
         <div class="barcode-footer">
-            Printed: {{ $barcode->printed_at->format('Y-m-d H:i') }}
+            Printed: {{ $barcode->printed_at?->format('Y-m-d H:i') }}
         </div>
     </div>
 </body>
