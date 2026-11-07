@@ -50,7 +50,7 @@ jobs:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
         run: |
-          php artisan route:list > /dev/null 2> boot.log || { php .github/scripts/emit_log_annotations.php boot.log "route:list boot"; exit 1; }
+          php artisan route:list > boot.log 2>&1 || { php .github/scripts/emit_log_annotations.php boot.log "route:list boot"; exit 1; }
 
   # ------------------------------------------------------------------
   # Test suite — informational while the Path B runtime is being

@@ -55,7 +55,13 @@ jobs:
         run: |
           php artisan test --verbosity=normal --colors=never --log-junit junit.xml 2>&1 | tee test.log
           EXIT=${PIPESTATUS[0]}
-          [ ! -f junit.xml ] && php .github/scripts/emit_log_annotations.php test.log "artisan test"
+          if [ "$EXIT" -ne 0 ]; then
+            if [ -f junit.xml ]; then
+              php .github/scripts/emit_test_annotations.php junit.xml
+            else
+              php .github/scripts/emit_log_annotations.php test.log "artisan test"
+            fi
+          fi
           exit $EXIT
 
       - name: Surface failures as annotations
