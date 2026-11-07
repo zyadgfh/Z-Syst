@@ -16,8 +16,8 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
-          extensions: curl, bcmath, gd, mbstring, xml, sqlite, pdo_sqlite
+          php-version: '8.3'
+          extensions: curl, bcmath, gd, mbstring, xml, sqlite, pdo_sqlite, zip, intl
 
       - name: Get composer cache
         uses: actions/cache@v4
