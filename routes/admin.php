@@ -287,6 +287,28 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::delete('audit-logs/{auditLog}', [ADMIN\AuditLogController::class, 'destroy'])->name('audit-logs.destroy');
     Route::post('audit-logs/clean-old', [ADMIN\AuditLogController::class, 'cleanOldLogs'])->name('audit-logs.clean-old');
 
+    // Device & Print Setup (settings hub) + Web POS
+    Route::prefix('device-setup')->name('device-setup.')->group(function () {
+        Route::get('/', [ADMIN\DeviceSetupController::class, 'index'])->name('index');
+        Route::get('current', [ADMIN\DeviceSetupController::class, 'current'])->name('current');
+        Route::post('enroll', [ADMIN\DeviceSetupController::class, 'enroll'])->name('enroll');
+        Route::post('scan', [ADMIN\DeviceSetupController::class, 'networkScan'])->name('scan');
+        Route::put('preferences', [ADMIN\DeviceSetupController::class, 'updatePreferences'])->name('preferences');
+        Route::put('devices/{device}', [ADMIN\DeviceSetupController::class, 'updateDevice'])->name('devices.update');
+        Route::post('devices/{device}/approve', [ADMIN\DeviceSetupController::class, 'approve'])->name('devices.approve');
+        Route::delete('devices/{device}', [ADMIN\DeviceSetupController::class, 'destroyDevice'])->name('devices.destroy');
+        Route::post('printers', [ADMIN\DeviceSetupController::class, 'storePrinter'])->name('printers.store');
+        Route::put('printers/{printer}', [ADMIN\DeviceSetupController::class, 'updatePrinter'])->name('printers.update');
+        Route::get('printers/{printer}/test', [ADMIN\DeviceSetupController::class, 'testPrinter'])->name('printers.test');
+        Route::delete('printers/{printer}', [ADMIN\DeviceSetupController::class, 'destroyPrinter'])->name('printers.destroy');
+    });
+
+    Route::prefix('pos')->name('pos.')->group(function () {
+        Route::get('/', [ADMIN\PosController::class, 'page'])->name('index');
+        Route::get('lookup', [ADMIN\PosController::class, 'lookup'])->name('lookup');
+        Route::post('checkout', [ADMIN\PosController::class, 'checkout'])->name('checkout');
+    });
+
     // Barcode System
     Route::prefix('barcodes')->name('barcodes.')->group(function () {
         Route::get('/', [ADMIN\BarcodeController::class, 'page'])->name('index');

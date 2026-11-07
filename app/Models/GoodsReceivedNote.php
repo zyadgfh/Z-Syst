@@ -85,4 +85,53 @@ class GoodsReceivedNote extends Model
     {
         return $query->where('status', 'pending');
     }
+
+    /*
+     * GRN workflow helpers consumed by GRNService (verify → accept/reject)
+     * and quantity aggregations used for partial-accept decisions.
+     */
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->status === 'verified';
+    }
+
+    public function isAccepted(): bool
+    {
+        return in_array($this->status, ['accepted', 'partially_accepted'], true);
+    }
+
+    public function markAsVerified(): void
+    {
+        $this->forceFill(['status' => 'verified', 'verified_at' => now()])->save();
+    }
+
+    public function markAsAccepted(): void
+    {
+        $this->forceFill(['status' => 'accepted'])->save();
+    }
+
+    public function markAsPartiallyAccepted(): void
+    {
+        $this->forceFill(['status' => 'partially_accepted'])->save();
+    }
+
+    public function markAsRejected(): void
+    {
+        $this->forceFill(['status' => 'rejected'])->save();
+    }
+
+    public function getTotalReceivedQuantityAttribute(): int
+    {
+        return (int) $this->items()->sum('received_quantity');
+    }
+
+    public function getTotalRejectedQuantityAttribute(): int
+    {
+        return (int) $this->items()->sum('rejected_quantity');
+    }
 }

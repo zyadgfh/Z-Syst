@@ -44,6 +44,13 @@ Route::prefix('v1')->group(function () {
             Route::get('financial-audit-report', [Api\ReportsController::class, 'financialAuditReport']);
 
             // Barcode API endpoints
+            // Devices & printers (POS/Flutter enrollment + management)
+            Route::post('devices/enroll', [Api\DeviceController::class, 'enroll'])->name('devices.enroll');
+            Route::get('devices/me', [Api\DeviceController::class, 'me'])->name('devices.me');
+            Route::get('devices', [Api\DeviceController::class, 'index'])->name('devices.index');
+            Route::post('devices/{uuid}/heartbeat', [Api\DeviceController::class, 'heartbeat'])->whereUlid('uuid')->name('devices.heartbeat');
+            Route::apiResource('printers', Api\PrinterController::class);
+            Route::post('printers/{printer}/test', [Api\PrinterController::class, 'test'])->name('printers.test');
             Route::get('barcodes/lookup', [Api\BarcodeController::class, 'lookup'])->name('barcodes.lookup');
             Route::apiResource('barcodes', Api\BarcodeController::class)->except('show');
             Route::get('barcodes/{barcode}', [Api\BarcodeController::class, 'show'])->whereNumber('barcode')->name('barcodes.show');

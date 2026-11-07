@@ -111,17 +111,23 @@ class BarcodeController extends Controller
         $businessId = (int) $request->user()->business_id;
 
         if ($request->filled('ids')) {
+            // Duplicates are intentional: each occurrence = one printed copy.
             $ids = collect(explode(',', (string) $request->input('ids')))
                 ->map(fn ($v) => (int) trim($v))
                 ->filter()
-                ->unique()
                 ->take(200)
                 ->all();
 
-            $barcodes = Barcode::with(['product', 'batch'])
+            $unique = Barcode::with(['product', 'batch'])
                 ->forBusiness($businessId)
-                ->whereIn('id', $ids)
-                ->get();
+                ->whereIn('id', array_unique($ids))
+                ->get()
+                ->keyBy('id');
+
+            // Repetitions in $ids are intentional copies; rebuild in order.
+            $barcodes = collect($ids)
+                ->map(fn ($id) => $unique->get($id))
+                ->filter();
         } else {
             $request->validate([
                 'product_id' => 'required|integer',
