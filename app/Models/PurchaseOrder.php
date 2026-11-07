@@ -58,4 +58,10 @@ class PurchaseOrder extends Model
     {
         return $this->belongsTo(Business::class, 'business_id');
     }
+
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $businessId ? $query->where('business_id', $businessId) : $query;
+    }
 }
+

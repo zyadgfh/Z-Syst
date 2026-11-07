@@ -127,19 +127,19 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
 
     // Warehouses
     Route::resource('warehouses', ADMIN\WarehouseController::class)->except('show');
+    Route::get('warehouses/statistics', [ADMIN\WarehouseController::class, 'statistics'])->name('warehouses.statistics');
     Route::get('warehouses/{warehouse}', [ADMIN\WarehouseController::class, 'show'])->name('warehouses.show');
     Route::post('warehouses/{warehouse}/set-default', [ADMIN\WarehouseController::class, 'setDefault'])->name('warehouses.set-default');
     Route::post('warehouses/{warehouse}/add-stock', [ADMIN\WarehouseController::class, 'addStock'])->name('warehouses.add-stock');
     Route::post('warehouses/{warehouse}/remove-stock', [ADMIN\WarehouseController::class, 'removeStock'])->name('warehouses.remove-stock');
-    Route::get('warehouses/statistics', [ADMIN\WarehouseController::class, 'statistics'])->name('warehouses.statistics');
 
     // Stock Transfers
     Route::resource('stock-transfers', ADMIN\StockTransferController::class)->except('show');
+    Route::get('stock-transfers/statistics', [ADMIN\StockTransferController::class, 'statistics'])->name('stock-transfers.statistics');
+    Route::get('stock-transfers/stock-distribution', [ADMIN\StockTransferController::class, 'stockDistribution'])->name('stock-transfers.stock-distribution');
     Route::get('stock-transfers/{transfer}', [ADMIN\StockTransferController::class, 'show'])->name('stock-transfers.show');
     Route::post('stock-transfers/{transfer}/complete', [ADMIN\StockTransferController::class, 'complete'])->name('stock-transfers.complete');
     Route::post('stock-transfers/{transfer}/cancel', [ADMIN\StockTransferController::class, 'cancel'])->name('stock-transfers.cancel');
-    Route::get('stock-transfers/statistics', [ADMIN\StockTransferController::class, 'statistics'])->name('stock-transfers.statistics');
-    Route::get('stock-transfers/stock-distribution', [ADMIN\StockTransferController::class, 'stockDistribution'])->name('stock-transfers.stock-distribution');
 
     // Barcodes
     Route::resource('barcodes', ADMIN\BarcodeController::class)->except('show');
@@ -250,12 +250,12 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
 
     // GRN (Goods Received Notes)
     Route::resource('grn', ADMIN\GRNController::class)->except('show');
+    Route::get('grn/pending', [ADMIN\GRNController::class, 'pending'])->name('grn.pending');
+    Route::get('grn/statistics', [ADMIN\GRNController::class, 'statistics'])->name('grn.statistics');
     Route::get('grn/{grn}', [ADMIN\GRNController::class, 'show'])->name('grn.show');
     Route::post('grn/{grn}/verify', [ADMIN\GRNController::class, 'verify'])->name('grn.verify');
     Route::post('grn/{grn}/accept', [ADMIN\GRNController::class, 'accept'])->name('grn.accept');
     Route::post('grn/{grn}/reject', [ADMIN\GRNController::class, 'reject'])->name('grn.reject');
-    Route::get('grn/pending', [ADMIN\GRNController::class, 'pending'])->name('grn.pending');
-    Route::get('grn/statistics', [ADMIN\GRNController::class, 'statistics'])->name('grn.statistics');
 
     // Advanced Supplier Management
     Route::resource('suppliers', ADMIN\SupplierController::class)->except('show');
@@ -265,20 +265,20 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
 
     // Supplier Payment Tracking
     Route::resource('supplier-payments', ADMIN\SupplierPaymentController::class)->except('show');
+    Route::get('supplier-payments/generate-aging-report', [ADMIN\SupplierPaymentController::class, 'generateAgingReport'])->name('supplier-payments.generate-aging-report');
     Route::get('supplier-payments/{supplierPayment}', [ADMIN\SupplierPaymentController::class, 'show'])->name('supplier-payments.show');
     Route::post('supplier-payments/{supplierPayment}/approve', [ADMIN\SupplierPaymentController::class, 'approve'])->name('supplier-payments.approve');
-    Route::get('supplier-payments/generate-aging-report', [ADMIN\SupplierPaymentController::class, 'generateAgingReport'])->name('supplier-payments.generate-aging-report');
 
     // Subscription Management
     Route::resource('subscriptions', ADMIN\SubscriptionController::class)->except('show');
+    Route::get('subscriptions/expiring', [ADMIN\SubscriptionController::class, 'expiring'])->name('subscriptions.expiring');
+    Route::get('subscriptions/trial-ending', [ADMIN\SubscriptionController::class, 'trialEnding'])->name('subscriptions.trial-ending');
     Route::get('subscriptions/{subscription}', [ADMIN\SubscriptionController::class, 'show'])->name('subscriptions.show');
     Route::post('subscriptions/{subscription}/upgrade', [ADMIN\SubscriptionController::class, 'upgrade'])->name('subscriptions.upgrade');
     Route::post('subscriptions/{subscription}/downgrade', [ADMIN\SubscriptionController::class, 'downgrade'])->name('subscriptions.downgrade');
     Route::post('subscriptions/{subscription}/cancel', [ADMIN\SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
     Route::post('subscriptions/{subscription}/renew', [ADMIN\SubscriptionController::class, 'renew'])->name('subscriptions.renew');
     Route::post('subscriptions/{subscription}/generate-invoice', [ADMIN\SubscriptionController::class, 'generateInvoice'])->name('subscriptions.generate-invoice');
-    Route::get('subscriptions/expiring', [ADMIN\SubscriptionController::class, 'expiring'])->name('subscriptions.expiring');
-    Route::get('subscriptions/trial-ending', [ADMIN\SubscriptionController::class, 'trialEnding'])->name('subscriptions.trial-ending');
 
     // Dashboard Reports
     Route::get('dashboard-reports', [ADMIN\DashboardReportController::class, 'index'])->name('dashboard-reports.index');
@@ -297,9 +297,9 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
 
     // Audit Logs
     Route::get('audit-logs', [ADMIN\AuditLogController::class, 'index'])->name('audit-logs.index');
-    Route::get('audit-logs/{auditLog}', [ADMIN\AuditLogController::class, 'show'])->name('audit-logs.show');
     Route::get('audit-logs/statistics', [ADMIN\AuditLogController::class, 'statistics'])->name('audit-logs.statistics');
     Route::get('audit-logs/model-logs', [ADMIN\AuditLogController::class, 'modelLogs'])->name('audit-logs.model-logs');
+    Route::get('audit-logs/{auditLog}', [ADMIN\AuditLogController::class, 'show'])->name('audit-logs.show');
     Route::get('audit-logs/user-logs', [ADMIN\AuditLogController::class, 'userLogs'])->name('audit-logs.user-logs');
     Route::delete('audit-logs/{auditLog}', [ADMIN\AuditLogController::class, 'destroy'])->name('audit-logs.destroy');
     Route::post('audit-logs/clean-old', [ADMIN\AuditLogController::class, 'cleanOldLogs'])->name('audit-logs.clean-old');
@@ -317,10 +317,10 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
 
         // Insurance Claims
         Route::resource('claims', ADMIN\InsuranceClaimController::class)->except('show');
-        Route::get('claims/{claim}', [ADMIN\InsuranceClaimController::class, 'show'])->name('claims.show');
+        Route::get('claims/statistics', [ADMIN\InsuranceClaimController::class, 'statistics'])->name('claims.statistics');
+    Route::get('claims/{claim}', [ADMIN\InsuranceClaimController::class, 'show'])->name('claims.show');
         Route::post('claims/{claim}/submit', [ADMIN\InsuranceClaimController::class, 'submit'])->name('claims.submit');
         Route::post('claims/{claim}/process', [ADMIN\InsuranceClaimController::class, 'process'])->name('claims.process');
         Route::post('claims/{claim}/payment', [ADMIN\InsuranceClaimController::class, 'processPayment'])->name('claims.payment');
-        Route::get('claims/statistics', [ADMIN\InsuranceClaimController::class, 'statistics'])->name('claims.statistics');
-    });
+        });
 });

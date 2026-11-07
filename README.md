@@ -1,401 +1,111 @@
 # Z-Syst Pharmacy Management System
 
-## 📋 Overview
-
-Z-Syst is a comprehensive SaaS Multi-Tenant Pharmacy Management Platform built with Laravel 12 (PHP 8.2+), running as a façade over **Supabase PostgreSQL** — identity via Supabase Auth (GoTrue), tenant isolation enforced by Row Level Security, and the companion Flutter POS app lives in `pharmacy-store-app-codecanyon-main/`. It provides advanced features for pharmacy operations including inventory management, sales, purchases, insurance, loyalty programs, and more.
-
-## 🚀 Features
-
-### Core Features
-- ✅ Multi-tenant SaaS architecture
-- ✅ Inventory management with FEFO
-- ✅ Sales and POS system
-- ✅ Purchase management
-- ✅ Warehouse management
-- ✅ Multi-warehouse support
-- ✅ Stock transfers
-- ✅ Drug traceability
-- ✅ Recall management
-- ✅ Insurance integration
-- ✅ Loyalty & CRM
-- ✅ Receipt printing
-- ✅ Advanced reporting
-- ✅ User management
-- ✅ Role-based access control
-- ✅ Audit logging
-
-### Advanced Features
-- 🤖 AI-powered stock prediction (planned)
-- 💳 E-invoicing integration (planned)
-- 📱 Mobile POS app (Flutter — `pharmacy-store-app-codecanyon-main/`)
-- 📊 Real-time analytics
-- 🏥 Hospital integration
-- 📦 Supplier portal
-- 🎨 White-labeling
-- 📧 Marketing automation
-- 🔄 Workflow automation
-- 🌐 Multi-language support
-
-## 📁 Project Structure
-
-```
-z-syst/
-├── app/
-│   ├── Http/
-│   │   ├── Controllers/
-│   │   ├── Middleware/
-│   │   └── Kernel.php
-│   ├── Models/
-│   ├── Services/
-│   │   ├── SecurityService.php
-│   │   ├── XSSProtectionService.php
-│   │   ├── CSRFProtectionService.php
-│   │   ├── QueryOptimizationService.php
-│   │   ├── CacheService.php
-│   │   ├── BackupService.php
-│   │   └── PageOptimizationService.php
-│   └── Providers/
-├── database/
-│   ├── migrations/
-│   └── seeders/
-├── Modules/
-│   └── Landing/          # only active module (modules_statuses.json)
-├── design-system/
-│   └── MASTER.md
-├── automation.sh
-├── public/
-│   ├── css/
-│   │   ├── design-system.css
-│   │   ├── dashboard.css
-│   │   ├── forms.css
-│   │   ├── navigation.css
-│   │   ├── responsive.css
-│   │   ├── mobile.css
-│   │   └── accessibility.css
-│   └── ...
-├── resources/
-│   ├── views/
-│   └── ...
-├── routes/
-│   ├── web.php
-│   ├── api.php
-│   └── admin.php
-├── tests/
-│   ├── Feature/
-│   └── Unit/
-├── docs/
-│   ├── deployment-guide.md
-│   ├── queue-workers.md
-│   └── error-tracking.md
-├── PROJECT_RULES/
-│   ├── README.md
-│   ├── 01_PROJECT_OVERVIEW.md
-│   ├── 02_ARCHITECTURE.md
-│   ├── 03_CODING_STANDARDS.md
-│   ├── 04_SECURITY_RULES.md
-│   ├── 05_API_GUIDELINES.md
-│   ├── 06_DEPLOYMENT.md
-│   ├── 07_TESTING_GUIDELINES.md
-│   ├── 08_MODULE_GUIDES.md
-│   └── 09_IMPROVEMENT_SUGGESTIONS.md
-└── ...
-```
-
-## 🔧 Installation
-
-### Prerequisites
-- PHP 8.2+
-- PostgreSQL 15+ (Supabase PostgreSQL 17.x recommended)
-- Redis 6.0+ (optional for local development)
-- Composer 2.0+
-- Node.js 18+
-
-### Installation Steps
-
-1. **Clone the repository**
-```bash
-git clone <repository-url>
-cd z-syst
-```
-
-2. **Install dependencies**
-```bash
-composer install
-npm install
-```
-
-3. **Configure environment**
-```bash
-cp .env.example .env
-php artisan key:generate
-```
-
-4. **Configure database**
-```env
-DB_CONNECTION=pgsql
-DB_HOST=your-supabase-host
-DB_PORT=5432
-DB_DATABASE=postgres
-DB_USERNAME=postgres
-DB_PASSWORD=your-database-password
-
-# For Supabase, use the connection settings from Project Settings → Database.
-# Keep all secrets in .env; never commit them.
-```
-
-5. **Run migrations**
-```bash
-php artisan migrate
-php artisan db:seed
-```
-
-6. **Build assets**
-```bash
-npm run build
-```
-
-7. **Create storage link**
-```bash
-php artisan storage:link
-```
-
-8. **Start development server**
-```bash
-php artisan serve
-```
-
-## 🧪 Testing
-
-### Run All Tests
-```bash
-php artisan test
-```
-
-### Run Unit Tests
-```bash
-php artisan test --testsuite=Unit
-```
-
-### Run Feature Tests
-```bash
-php artisan test --testsuite=Feature
-```
-
-### Run Security Tests
-```bash
-php artisan test --filter=Security
-```
-
-### Test Coverage
-```bash
-./run-coverage.sh  # Linux/Mac
-run-coverage.bat  # Windows
-```
-
-## 🤖 Automation
-
-### Automation Script
-Use the automation script for common development tasks:
-
-```bash
-./automation.sh install         # Install dependencies
-./automation.sh test            # Run tests
-./automation.sh coverage        # Run tests with coverage
-./automation.sh security        # Run security checks
-./automation.sh quality         # Run code quality checks
-./automation.sh cache-clear     # Clear cache
-./automation.sh cache-optimize  # Optimize cache
-./automation.sh migrate         # Run migrations
-./automation.sh seed            # Seed database
-./automation.sh backup          # Create backup
-./automation.sh deploy-staging  # Deploy to staging
-./automation.sh deploy-prod     # Deploy to production
-./automation.sh changelog       # Generate changelog
-./automation.sh setup           # Setup project (first time)
-```
-
-See [docs/workflow-summary.md](docs/workflow-summary.md) for complete automation documentation.
-
-## 🔒 Security
-
-### Security Features
-- ✅ SQL Injection prevention
-- ✅ XSS protection
-- ✅ CSRF protection
-- ✅ Rate limiting
-- ✅ Input validation
-- ✅ Password hashing
-- ✅ Session security
-- ✅ Role-based access control
-- ✅ Audit logging
-- ✅ Tenant isolation
-
-### Security Services
-- `SecurityService` - Input sanitization and validation
-- `XSSProtectionService` - XSS prevention
-- `CSRFProtectionService` - CSRF token management
-- `SecurityCheck` middleware - Request security validation
-
-## ⚡ Performance
-
-### Performance Features
-- ✅ Query optimization (N+1 prevention)
-- ✅ Caching strategy (Redis)
-- ✅ Database indexing
-- ✅ Page optimization (minification)
-- ✅ Lazy loading
-- ✅ Queue workers
-- ✅ Asset optimization
-
-### Performance Services
-- `QueryOptimizationService` - Query analysis and optimization
-- `CacheService` - Caching management
-- `PageOptimizationService` - Page load optimization
-
-## 📱 UI/UX
-
-### UI/UX Features
-- ✅ Professional design system
-- ✅ Medical-grade color palette
-- ✅ Comprehensive component library
-- ✅ Responsive design
-- ✅ Mobile-first approach
-- ✅ Accessibility features (WCAG 2.1 AA)
-- ✅ Dark mode support
-- ✅ Touch-friendly interface
-- ✅ Keyboard navigation
-- ✅ Screen reader support
-- ✅ Design tokens and variables
-- ✅ Consistent spacing system
-- ✅ Typography scale
-
-### CSS Files
-- `design-system.css` - Core design system (colors, typography, spacing)
-- `dashboard.css` - Dashboard-specific components
-- `forms.css` - Form and input components
-- `navigation.css` - Navigation and menu components
-- `responsive.css` - Responsive design system
-- `mobile.css` - Mobile experience enhancements
-- `accessibility.css` - Accessibility features
-
-### Design System Documentation
-See [docs/ui-ux-design-system.md](docs/ui-ux-design-system.md) for complete design system documentation.
-
-## 🗄️ Database
-
-### Database Features
-- ✅ Foreign key constraints
-- ✅ Performance indexes
-- ✅ Automated backups
-- ✅ Migration system
-- ✅ Seeding system
-
-### Backup Service
-- `BackupService` - Database and file backups
-- Scheduled daily backups
-- Automated cleanup
-
-## 📊 Monitoring
-
-### Monitoring Features
-- ✅ Error tracking (Sentry integration)
-- ✅ Performance logging
-- ✅ Security logging
-- ✅ Audit trail
-- ✅ Health checks
-- ✅ Metrics endpoints
-
-### Log Channels
-- `stack` - Combined logging
-- `daily` - Daily rotation
-- `slack` - Slack alerts
-- `sentry` - Error tracking
-- `performance` - Performance metrics
-- `security` - Security events
-- `audit` - Audit trail
-
-## 🚀 Deployment
-
-### Deployment Guide
-See [docs/deployment-guide.md](docs/deployment-guide.md) for detailed deployment instructions.
-
-### Pre-Deployment Checklist
-- [ ] Environment configured
-- [ ] Database setup
-- [ ] Migrations run
-- [ ] Seeders run
-- [ ] Cache configured
-- [ ] Queue workers running
-- [ ] SSL installed
-- [ ] Monitoring set up
-- [ ] Security hardening applied
-
-## 📚 Documentation
-
-### Project Rules
-See [PROJECT_RULES/](PROJECT_RULES/) for comprehensive project documentation:
-- [01_PROJECT_OVERVIEW.md](PROJECT_RULES/01_PROJECT_OVERVIEW.md)
-- [02_ARCHITECTURE.md](PROJECT_RULES/02_ARCHITECTURE.md)
-- [03_CODING_STANDARDS.md](PROJECT_RULES/03_CODING_STANDARDS.md)
-- [04_SECURITY_RULES.md](PROJECT_RULES/04_SECURITY_RULES.md)
-- [05_API_GUIDELINES.md](PROJECT_RULES/05_API_GUIDELINES.md)
-- [06_DEPLOYMENT.md](PROJECT_RULES/06_DEPLOYMENT.md)
-- [07_TESTING_GUIDELINES.md](PROJECT_RULES/07_TESTING_GUIDELINES.md)
-- [08_MODULE_GUIDES.md](PROJECT_RULES/08_MODULE_GUIDES.md)
-- [09_IMPROVEMENT_SUGGESTIONS.md](PROJECT_RULES/09_IMPROVEMENT_SUGGESTIONS.md)
-
-### Additional Documentation
-- [docs/deployment-guide.md](docs/deployment-guide.md)
-- [docs/queue-workers.md](docs/queue-workers.md)
-- [docs/error-tracking.md](docs/error-tracking.md)
-- [docs/production-checklist.md](docs/production-checklist.md)
-- [docs/production-readiness-report.md](docs/production-readiness-report.md)
-- [docs/development-workflow.md](docs/development-workflow.md)
-- [docs/release-process.md](docs/release-process.md)
-- [docs/workflow-summary.md](docs/workflow-summary.md)
-- [docs/ui-ux-design-system.md](docs/ui-ux-design-system.md)
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## 📄 License
-
-This project is proprietary software owned by Z-Syst Pharmacy Management System. All rights reserved.
-
-## 📞 Support
-
-- Email: support@z-syst.com
-- Documentation: https://docs.z-syst.com
-- GitHub Issues: https://github.com/z-syst/pharmacy/issues
-
-## 🎯 Roadmap
-
-### Phase 1 (Completed)
-- ✅ Security enhancements
-- ✅ Performance optimizations
-- ✅ Database improvements
-- ✅ UI/UX enhancements
-- ✅ Testing framework
-
-### Phase 2 (In progress)
-- ✅ Mobile POS app (Flutter companion app in-repo)
-- 🔄 AI stock prediction
-- 🔄 E-invoicing integration
-- 🔄 Advanced POS
-
-### Phase 3 (Future)
-- 📋 Hospital integration
-- 📋 Supplier portal
-- 📋 White-labeling
-- 📋 Marketing automation
+نظام شامل متعدد المستأجرين (SaaS) لإدارة الصيدليات — Laravel 12 + Supabase، بواجهة بأسلوب Apple Design، دعم PWA والعمل بلا إنترنت.
 
 ---
 
-**Version:** 1.1.0  
-**Last Updated:** 2026-09-22  
-**Status:** Production Readiness Audit Active
+## 📋 نظرة عامة
+
+Z-Syst منصة SaaS متعددة المستأجرين لإدارة الصيدليات مبنية على **Laravel 12 (PHP 8.2+)** فوق **Supabase PostgreSQL**:
+- الهوية عبر Supabase Auth (GoTrue) مع Path B للمصادقة المحلية الاحتياطية (`app_users` UUID ↔ `auth.users`)
+- عزل المستأجرين بـ**Row Level Security** + `TenantScoped` global scope على مستوى Eloquent (26+ موديل أعمال)
+- تطبيق Flutter للـPOS في `pharmacy-store-app-codecanyon-main/`
+- واجهة ويب أدمن كاملة + REST API (267+ مسارًا) للـPOS
+
+## 🚀 المزايا
+
+### الأساسية
+- ✅ SaaS متعدد المستأجرين (عزل Eloquent + RLS)
+- ✅ نقطة بيع POS (FEFO تلقائي، بيع حتى أوفلاين مع مزامنة تلقائية)
+- ✅ مخزون متعدد المخازن + تحويلات بين المخازن بدورة موافقات
+- ✅ مشتريات وأوامر شراء آلية بالتنبؤ (AutoOrder)
+- ✅ فواتير، آجل، تحصيلات، مرتجعات
+- ✅ تأمين (شركات/وثائق/مطالبات) · ولاء وكوبونات · تذكير تفاعل الطبيب
+- ✅ تتبع الدفعات والاستدعاءات (من المورد للمريض)
+- ✅ تقارير شاملة + تقارير لوحة قابلة للتصدير
+- ✅ ميزانيات شراء بتنبيهات 80%/100%
+- ✅ بطاقات أداء الموردين وتقييماتهم
+- ✅ سجلات تدقيق شاملة (من/إلى/IP)
+- ✅ بدائل دوائية ذكية + تحذيرات تعارض دوائي
+- ✅ شريط حي «يومك في سطر» يتحدث كل 30 ثانية
+- ✅ PWA + وضع داكن + POS بلوحة المفاتيح (F2/F8/F9)
+
+### التكاملات (سقالات جاهزة — تُفعَّل بمفاتيح)
+| التكامل | متغير التفعيل | الوظيفة |
+|---|---|---|
+| Paymob (مصر) | `PAYMOB_ENABLED=true` | دفع بطاقات/محافظ + تحقق HMAC للويب هوك |
+| WhatsApp Cloud API | `WHATSAPP_ENABLED=true` | تأكيد بيع، تذكير آجل، استدعاء دفعة |
+| الفاتورة الإلكترونية ETA | `ETA_ENABLED=true` | مُنشئ مستند eInvoice كامل |
+| Supabase Storage | `UPLOADS_CLOUD_ENABLED=true` · `BACKUP_CLOUD_ENABLED=true` | رفع الملفات والنسخ الاحتياطي سحابيًا (fallback محلي تلقائي) |
+
+## 👥 الأدوار والصلاحيات
+
+### طبقة الدخول (عمود `role` في `app_users`)
+| الدور | لوحة `/admin` | API | النطاق |
+|---|---|---|---|
+| `superadmin` | ✅ كامل المنصة، يتخطى عزل المستأجرين | ❌ | كل الأعمال |
+| `admin` | ✅ لوحة عمله | ❌ | عمله فقط |
+| `staff` | ❌ | ✅ | عمله فقط |
+| `shop-owner` (legacy) | ❌ | ✅ | عمله فقط |
+
+### طبقة القدرات (spatie Permissions — مربوطة تلقائيًا بعمود role)
+| دور spatie | الصلاحيات (33) |
+|---|---|
+| **Super Admin** | الكل — يشمل `sale.price-override` (البيع بغير سعر القائمة) |
+| **Admin** | المستخدمون (بلا حذف) · المنتجات (الكل) · مبيعات/مشتريات/مخزون (بلا حذف) · تقارير+تصدير · إعدادات · ولاء (بلا حذف) · إيصالات (عرض/إنشاء) · تدقيق (عرض) |
+| **Staff** | قراءة فقط + `sales-create` (يبيع، لا يعدل/يحذف) |
+
+الربط تلقائي: كل مستخدم جديد يُربط بدور spatie الموافق لعمود `role` (hook في `AppUser::created` + البذور). نقاط الإنفاذ: `AdminMiddleware` · Gate `view-dashboard` · `TenantAccessCheck` · `EnsureBusinessContext` · بوابات `can()` في الكنترولرات الحساسة.
+
+## 🔢 حسابات التجربة (بعد `migrate:fresh --seed`)
+
+| الحساب | كلمة المرور | الدور |
+|---|---|---|
+| `superadmin@z-syst.com` | `SuperAdmin123!` | مالك المنصة |
+| `admin@test.com` | `Admin123!` | صاحب "Test Pharmacy #1" |
+| `staff@test.com` | `Staff123!` | موظف الصيدلية 1 (API) |
+| `staff-b@test.com` | `StaffB123!` | موظف "Pharmacy B" (عزل مستأجر) |
+
+## 🚀 التشغيل
+
+### المتطلبات
+PHP 8.2+ · Composer · Node 18+ · (اختياري) مشروع Supabase
+
+### خطوات
+```bash
+composer install && npm install && npm run build
+cp .env.example .env && php artisan key:generate
+# اضبط قاعدة البيانات (sqlite للتجربة أو Postgres/Supabase للإنتاج)
+php artisan migrate --seed
+npm run dev   # أو php artisan serve
+```
+
+### بيئة التشغيل الحية (php-wasm — للتطوير/المعاينة بدون PHP محلي)
+```bash
+cp -r tools_local/phpw-runner ../phpw && cd ../phpw && npm install
+python3 ../Z-Syst/tools_local/vendor_install.py   # يبني vendor من composer.lock
+mv ../Z-Syst/vendor ../zvendor
+node runner.mjs artisan migrate:fresh --seed
+node guardian.mjs    # يخدم على 0.0.0.0:8080
+```
+
+## 🧪 تجربة سريعة (بيع POS)
+```bash
+TOKEN=$(curl -s -X POST <HOST>/api/v1/sign-in -H "Content-Type: application/json" \
+  -d '{"email":"staff@test.com","password":"Staff123!"}' | jq -r .data.token)
+curl -X POST <HOST>/api/v1/sales -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -d '{"saleDate":"2026-11-07","products":[{"product_id":1,"price":5.5,"lossProfit":2.3,"quantities":2,"batch_no":"BATCH-A1"}],"paidAmount":11,"dueAmount":0,"isPaid":true,"paymentType":"cash"}'
+```
+
+## 🗂️ الوثائق
+- `docs/zsyst/` — 24 وثيقة: قرارات البنية، تدقيق RLS، تقارير الفحص الأمني (21/23)، خارطة المزايا (20)، جرد النواقص (24)
+- `PROJECT_KB.md` · `PROJECT_RULES/` — قاعدة معرفة المشروع
+- `tools_local/` — مثبّت vendor (بلا composer) + بيئة php-wasm + مولّد الواجهات
+
+## 🔐 الأمان
+- فحوص شاملة موثقة بتواريخها: `docs/zsyst/21` و`23` والإصلاحات في `22` و`24`
+- npm audit: 0 · bandit: 0 · أسرار الشجرة: 0 · عزل مستأجر مفحوص لكل موديل
+- قبل الإنتاج: دوّر مفاتيح Stripe القديمة، ونظّف تاريخ git، وفعّل gitleaks في CI (تفاصيل doc 22 §H-01)
+
+## 📄 الرخصة
+انظر [LICENSE](LICENSE).

@@ -47,4 +47,15 @@ class Warehouse extends Model
     {
         return $this->hasMany(WarehouseStock::class, 'warehouse_id');
     }
+
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $businessId ? $query->where('business_id', $businessId) : $query;
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 }
+

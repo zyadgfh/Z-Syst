@@ -68,4 +68,10 @@ class Party extends Model
     protected $casts = [
         'due' => 'double',
     ];
+
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $businessId ? $query->where('business_id', $businessId) : $query;
+    }
 }
+
