@@ -5,6 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ $business->companyName }} — {{ __('متجر') }}</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+<style>
+:root {
+    --ap-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --ap-bg: #f5f5f7; --ap-surface: #ffffff; --ap-text: #1d1d1f; --ap-text-2: #6e6e73;
+    --ap-hairline: rgba(0,0,0,.08); --ap-accent: #0071e3; --ap-green: #34c759;
+    --ap-spring: cubic-bezier(0.32, 0.72, 0, 1);
+}
+body { font-family: var(--ap-font); background: var(--ap-bg); color: var(--ap-text); letter-spacing: 0; }
+.navbar { background: rgba(255,255,255,.78) !important; -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid var(--ap-hairline); }
+.navbar-brand { font-weight: 700; letter-spacing: -0.022em; }
+.card { background: var(--ap-surface); border: 1px solid var(--ap-hairline); border-radius: 18px; box-shadow: 0 4px 24px rgba(0,0,0,.06); transition: transform .35s var(--ap-spring); }
+.card:hover { transform: translateY(-2px); }
+.btn { border-radius: 980px; font-weight: 600; transition: transform .25s var(--ap-spring); }
+.btn:active { transform: scale(.96); }
+.btn-success { background: var(--ap-green); border-color: var(--ap-green); }
+.btn-outline-success { color: var(--ap-green); border-color: var(--ap-green); }
+.position-fixed.bg-white { border-inline-start: 1px solid var(--ap-hairline); border-radius: 22px 0 0 22px; }
+.text-success { color: var(--ap-green) !important; }
+</style>
 </head>
 <body class="bg-light" x-data="cart()">
 <nav class="navbar bg-white shadow-sm mb-4">

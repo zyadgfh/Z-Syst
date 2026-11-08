@@ -28,3 +28,5 @@
 @endif
 <!-- Apple design layer (admin) -->
 <link rel="stylesheet" href="{{ asset('assets/css/apple.css') }}">
+<!-- Apple design layer (admin components: cards, tables, pills, sheets) -->
+<link rel="stylesheet" href="{{ asset('assets/css/apple-admin.css') }}">
