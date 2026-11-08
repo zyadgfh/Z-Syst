@@ -74,4 +74,19 @@ class InsurancePolicy extends Model
         if ($this->end_date !== null) { $inWindow = $inWindow && ! $this->end_date->isPast(); }
         return $active && $inWindow;
     }
+
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $businessId ? $query->where('business_id', $businessId) : $query;
+    }
+
+    public function scopeByBusiness($query, $businessId)
+    {
+        return $businessId ? $query->where('business_id', $businessId) : $query;
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->end_date !== null && $this->end_date->isPast();
+    }
 }

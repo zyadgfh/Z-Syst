@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -76,6 +79,21 @@ class PurchaseOrder extends Model
     public function scopeForBusiness($query, $businessId)
     {
         return $businessId ? $query->where('business_id', $businessId) : $query;
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(PurchaseOrderItem::class, 'purchase_order_id');
+    }
+
+    public function calculateTotal(): float
+    {
+        $total = (float) $this->items()->get()->sum(fn ($item) => ((float) $item->quantity) * ((float) $item->unit_price));
+        if ($total <= 0.0 && isset($this->attributes['total_amount'])) {
+            $total = (float) $this->attributes['total_amount'];
+        }
+
+        return round($total, 2);
     }
 }
 

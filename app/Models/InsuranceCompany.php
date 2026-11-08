@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -69,7 +71,12 @@ class InsuranceCompany extends Model
 
     public function scopeForBusiness($query, $businessId)
     {
-        return $businessId ? $query->where('business_id', $businessId) : $query;
+        return $businessId ? $quer
+    public function policies(): HasMany
+    {
+        return $this->hasMany(InsurancePolicy::class, 'insurance_company_id');
+    }
+y->where('business_id', $businessId) : $query;
     }
 }
 

@@ -31,6 +31,7 @@ class SupplierInvoiceService
     {
         return DB::transaction(function () use ($data) {
             $invoice = SupplierInvoice::create([
+                'invoice_number' => 'INV-'.str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT),
                 'supplier_id' => $data['supplier_id'] ?? null,
                 'business_id' => $data['business_id'],
                 'branch_id' => $data['branch_id'] ?? null,
@@ -71,6 +72,7 @@ class SupplierInvoiceService
     {
         return DB::transaction(function () use ($purchase) {
             $invoice = SupplierInvoice::create([
+                'invoice_number' => 'INV-'.str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT),
                 'supplier_id' => $purchase->party_id,
                 'business_id' => $purchase->business_id,
                 'branch_id' => $purchase->branch_id ?? null,
@@ -357,6 +359,7 @@ class SupplierInvoiceService
     {
         return DB::transaction(function () use ($invoice, $paymentData) {
             $payment = SupplierInvoicePayment::create([
+                'payment_number' => $data['payment_number'] ?? ('PAY-'.str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT)),
                 'supplier_invoice_id' => $invoice->id,
                 'business_id' => $invoice->business_id,
                 'branch_id' => $invoice->branch_id,

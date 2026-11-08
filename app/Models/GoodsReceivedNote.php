@@ -137,4 +137,13 @@ class GoodsReceivedNote extends Model
     {
         return (int) $this->items()->sum('rejected_quantity');
     }
+
+    public static function generateGRNNumber(): string
+    {
+        $prefix = 'GRN-';
+        $latest = static::query()->latest('id')->first();
+        $next = $latest ? ((int) filter_var($latest->getKey(), FILTER_SANITIZE_NUMBER_INT) + 1) : 1;
+
+        return $prefix.str_pad((string) $next, 6, '0', STR_PAD_LEFT);
+    }
 }
