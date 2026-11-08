@@ -89,7 +89,7 @@ class AssistantEngine
             ->first();
 
         if (!$product) {
-            return ['intent' => 'stock_of', 'answer' => "لم أجد صنفًا باسم «$name»."];
+            return ['intent' => 'stock_of', 'answer' => "لم أجد صنفًا باسم «{$name}»."];
         }
 
         $qty = (int) $product->stocks()->sum('productStock');

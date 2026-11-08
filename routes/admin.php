@@ -409,4 +409,11 @@ Route::get('profile/two-factor', [ADMIN\TwoFactorController::class, 'show'])->na
 Route::post('profile/two-factor/enable', [ADMIN\TwoFactorController::class, 'enable'])->name('two-factor.enable');
 Route::post('profile/two-factor/verify', [ADMIN\TwoFactorController::class, 'verify'])->name('two-factor.verify');
 Route::post('profile/two-factor/disable', [ADMIN\TwoFactorController::class, 'disable'])->name('two-factor.disable');
+
+// Quick-create endpoints used by the admin panel forms and the integration workflow.
+Route::post('sales', [ADMIN\SaleController::class, 'store'])->name('sales.store');
+Route::post('purchases', [ADMIN\PurchaseController::class, 'store'])->name('purchases.store');
+Route::post('products', [ADMIN\ProductController::class, 'store'])->name('products.store');
+Route::get('dashboard-reports/overall', [ADMIN\DashboardReportController::class, 'overall'])->name('dashboard-reports.overall');
+Route::post('business/upgrade-plan', [ADMIN\SubscriptionController::class, 'upgradePlanForBusiness'])->name('business.upgrade-plan');
 });

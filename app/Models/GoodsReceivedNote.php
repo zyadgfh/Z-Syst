@@ -118,9 +118,13 @@ class GoodsReceivedNote extends Model
         return in_array($this->status, ['accepted', 'partially_accepted'], true);
     }
 
-    public function markAsVerified(): void
+    public function markAsVerified($userId = null): void
     {
-        $this->forceFill(['status' => 'verified', 'verified_at' => now()])->save();
+        $this->forceFill([
+            'status' => 'verified',
+            'verified_at' => now(),
+            'verified_by' => $userId ?: auth()->id(),
+        ])->save();
     }
 
     public function markAsAccepted(): void

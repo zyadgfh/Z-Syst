@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\DB;
+
 use App\Models\AutoOrderSuggestion;
 use App\Models\Product;
 use App\Models\SaleDetails;
@@ -83,7 +85,9 @@ class ForecastService
             ->where('sales.business_id', $businessId)
             ->where('sales.saleDate', '>=', now()->subDays(56)->toDateString())
             ->groupBy('dow')
-            ->selectRaw('EXTRACT(DOW FROM sales.saleDate) dow, SUM(sale_details.quantities) qty')
+            ->selectRaw(DB::connection()->getDriverName() === 'sqlite'
+                ? "CAST(strftime('%w', sales.saleDate) AS INTEGER) dow, SUM(sale_details.quantities) qty"
+                : 'EXTRACT(DOW FROM sales.saleDate) dow, SUM(sale_details.quantities) qty')
             ->pluck('qty', 'dow');
 
         $avg = max(1, (float) $rows->avg());

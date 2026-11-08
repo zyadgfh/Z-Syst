@@ -136,6 +136,7 @@ class Barcode extends Model
     public static function generateBarcodeNumber(string $type): string
     {
         return match ($type) {
+            self::TYPE_CODE128 => self::uniqueNumber(fn () => 'BC'.strtoupper(Str::random(9))),
             self::TYPE_EAN13 => self::uniqueNumber(fn () => self::ean13(
                 '200'.str_pad((string) random_int(0, 999999999), 9, '0', STR_PAD_LEFT)
             )),

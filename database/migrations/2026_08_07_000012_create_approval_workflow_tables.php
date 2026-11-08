@@ -27,7 +27,7 @@ return new class extends Migration
             $table->foreignId('workflow_id')->constrained('approval_workflows')->cascadeOnDelete();
 
             $table->integer('step_number');
-            $table->foreignId('approver_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('approver_id')->nullable()->constrained('app_users')->nullOnDelete();
             $table->string('approver_role')->nullable();
             $table->string('status')->default('pending');
             $table->timestamp('approved_at')->nullable();

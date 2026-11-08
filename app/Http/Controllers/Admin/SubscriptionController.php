@@ -75,6 +75,30 @@ class SubscriptionController extends Controller
         return view('admin.subscriptions.show', compact('subscription'));
     }
 
+    /**
+     * Point-of-billing upgrade used by the admin business screen
+     * (route: admin.business.upgrade-plan) — writes a plan_subscribes row.
+     */
+    public function upgradePlanForBusiness(Request $request)
+    {
+        $request->validate([
+            'business_id' => 'required|integer|exists:businesses,id',
+            'plan_id' => 'required|integer|exists:plans,id',
+            'price' => 'nullable|numeric',
+            'duration' => 'nullable|integer|min:1',
+        ]);
+
+        \App\Models\PlanSubscribe::create([
+            'business_id' => (int) $request->business_id,
+            'plan_id' => (int) $request->plan_id,
+            'price' => (float) ($request->price ?? 0),
+            'duration' => (int) ($request->duration ?? 30),
+            'payment_status' => 'paid',
+        ]);
+
+        return redirect()->back()->with('success', __('Subscription upgraded successfully'));
+    }
+
     public function upgrade(Request $request, Subscription $subscription): JsonResponse
     {
         $subscription = $this->subscriptionService->upgradeSubscription(

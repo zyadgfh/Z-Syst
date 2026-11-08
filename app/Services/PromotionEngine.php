@@ -83,11 +83,29 @@ class PromotionEngine
         $bonusUnits = 0;
         $applied = [];
 
+        // Bonus units granted per line — price promos must not double-count
+        // units that a qty_bonus promotion already gives away.
+        $lineBonus = [];
+        foreach ($promotions as $promo) {
+            if ($promo->type !== 'qty_bonus') {
+                continue;
+            }
+            foreach ($lines as $i => $line) {
+                if (!$this->matches($promo, (int) $line['product_id'], $businessId)) {
+                    continue;
+                }
+                $qty = (int) ($line['quantities'] ?? 0);
+                if ($qty >= max(1, $promo->min_qty)) {
+                    $lineBonus[$i] = ($lineBonus[$i] ?? 0) + intdiv($qty, max(1, $promo->min_qty)) * $promo->bonus_qty;
+                }
+            }
+        }
+
         foreach ($promotions as $promo) {
             if ($promo->coupon_code && strcasecmp($promo->coupon_code, (string) $couponCode) !== 0) {
                 continue;
             }
-            foreach ($lines as $line) {
+            foreach ($lines as $i => $line) {
                 if (!$this->matches($promo, (int) $line['product_id'], $businessId)) {
                     continue;
                 }
@@ -96,12 +114,25 @@ class PromotionEngine
                 if ($qty < max(1, $promo->min_qty)) {
                     continue;
                 }
-                if ($promo->type === 'percent' || $promo->type === 'near_expiry') {
-                    $discount += $price * $qty * ($promo->value / 100);
-                } elseif ($promo->type === 'fixed') {
-                    $discount += min($promo->value, $price * $qty);
-                } elseif ($promo->type === 'qty_bonus') {
+                if ($promo->type === 'qty_bonus') {
                     $bonusUnits += intdiv($qty, max(1, $promo->min_qty)) * $promo->bonus_qty;
+                    continue;
+                }
+                // A line covered by a bonus group gives away (min_qty + bonus_qty)
+                // units; price promotions apply only to the units past the first
+                // benefit group so the two promotions do not stack on them.
+                $billable = $qty;
+                if (isset($lineBonus[$i]) && $lineBonus[$i] > 0) {
+                    $groupPromo = $promotions->firstWhere('type', 'qty_bonus');
+                    $billable = max(0, $qty - ($groupPromo->min_qty + $groupPromo->bonus_qty));
+                }
+                if ($billable <= 0) {
+                    continue;
+                }
+                if ($promo->type === 'percent' || $promo->type === 'near_expiry') {
+                    $discount += $price * $billable * ($promo->value / 100);
+                } elseif ($promo->type === 'fixed') {
+                    $discount += min($promo->value, $price * $billable);
                 }
             }
             $applied[] = ['promotion_id' => $promo->id, 'name' => $promo->name, 'type' => $promo->type, 'coupon' => $promo->coupon_code];

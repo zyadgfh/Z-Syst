@@ -20,6 +20,12 @@ class CustomerInteraction extends Model
         'notes',
     ];
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\User::class, 'user_id');
+    }
+
+
     protected $casts = [
         'party_id' => 'integer',
     ];

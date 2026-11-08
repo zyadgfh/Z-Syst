@@ -9,7 +9,7 @@ class AuditLogger
 {
     public static function log(string $action, string $description, array $meta = []): void
     {
-        $user = Auth::user();
+        $user = Auth::user() ?: auth('sanctum')->user();
 
         if (! $user) {
             return;

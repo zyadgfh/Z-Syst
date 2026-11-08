@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('doctor_id')->constrained('parties')->cascadeOnDelete();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('medical_rep_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('medical_rep_id')->nullable()->constrained('app_users')->nullOnDelete();
             
             $table->date('activity_date');
             $table->integer('referral_count')->default(0);
@@ -69,7 +69,7 @@ return new class extends Migration
             $table->foreignId('doctor_id')->constrained('parties')->cascadeOnDelete();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('medical_rep_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('medical_rep_id')->nullable()->constrained('app_users')->nullOnDelete();
             
             $table->string('alert_type'); // referral_drop, inactivity, critical
             $table->string('severity'); // low, medium, high, critical

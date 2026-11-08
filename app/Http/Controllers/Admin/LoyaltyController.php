@@ -64,7 +64,7 @@ class LoyaltyController extends Controller
             return response()->json([
                 'message' => __('Loyalty program created successfully'),
                 'redirect' => route('admin.loyalty.programs'),
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => __('Error creating loyalty program: ') . $e->getMessage(),

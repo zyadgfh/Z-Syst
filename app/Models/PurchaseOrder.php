@@ -78,6 +78,11 @@ class PurchaseOrder extends Model
         return $this->belongsTo(Business::class, 'business_id');
     }
 
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Party::class, 'supplier_id');
+    }
+
     public function scopeForBusiness($query, $businessId)
     {
         return $businessId ? $query->where('business_id', $businessId) : $query;

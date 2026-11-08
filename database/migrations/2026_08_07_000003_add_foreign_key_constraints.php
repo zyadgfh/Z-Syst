@@ -73,14 +73,12 @@ return new class extends Migration
         Schema::table('customer_interactions', function (Blueprint $table) {
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
             $table->foreign('party_id')->references('id')->on('parties')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
         });
 
         Schema::table('receipts', function (Blueprint $table) {
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
             $table->foreign('sale_id')->references('id')->on('sales')->onDelete('set null');
             $table->foreign('purchase_id')->references('id')->on('purchases')->onDelete('set null');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
         });
 
         Schema::table('insurance_companies', function (Blueprint $table) {

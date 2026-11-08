@@ -50,7 +50,7 @@ return new class extends Migration
         Schema::create('quality_checks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('grn_item_id')->constrained('grn_items')->cascadeOnDelete();
-            $table->foreignId('checker_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('checker_id')->nullable()->constrained('app_users')->nullOnDelete();
 
             $table->date('check_date');
             $table->string('quality_status')->default('pending');
