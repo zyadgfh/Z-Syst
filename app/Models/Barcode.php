@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,8 @@ use Illuminate\Support\Str;
  */
 class Barcode extends Model
 {
+    use HasFactory;
+
     use SoftDeletes;
 
     public const TYPE_CODE128 = 'CODE128';
