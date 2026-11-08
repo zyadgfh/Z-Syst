@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main, master ]
 
+permissions:
+  contents: write
+
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -61,8 +64,10 @@ jobs:
           CACHE_STORE: file
           SESSION_DRIVER: file
         run: |
-          php artisan test --colors=never --log-junit junit.xml 2>&1 | tee test.log
+          timeout -k 30 20m php artisan test --colors=never --log-junit junit.xml --log-events-text events.txt 2>&1 | tee test.log
           EXIT=${PIPESTATUS[0]}
+          echo "== last events before end ==" >> test.log
+          tail -5 events.txt >> test.log 2>/dev/null || true
           if [ "$EXIT" -ne 0 ]; then
             if [ -f junit.xml ]; then
               php .github/scripts/emit_test_annotations.php junit.xml
@@ -77,11 +82,25 @@ jobs:
         run: php .github/scripts/emit_test_annotations.php junit.xml
 
       - name: Upload test results
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: |
             test.log
+            events.txt
             junit.xml
           retention-days: 7
+
+      - name: Push diagnostics to ci-runtime orphan
+        if: always()
+        run: |
+          git config user.email ci@z-syst.local
+          git config user.name ci
+          git fetch origin ci-runtime || true
+          git checkout --orphan ci-runtime-phpunit-tmp
+          git rm -rf --cached . -q || true
+          git add -f test.log events.txt junit.xml 2>/dev/null || true
+          git commit -q -m "phpunit diagnostics $(date -u +%FT%TZ)" || echo nothing to commit
+          git branch -M ci-runtime-phpunit
+          git push -q --force origin ci-runtime-phpunit || echo push failed
