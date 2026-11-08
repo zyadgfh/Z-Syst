@@ -34,6 +34,7 @@ class DeviceSettings
             'print' => [
                 'barcode_on_purchase_complete' => true,  // GRN accept → propose barcode labels
                 'barcode_on_sale' => false,              // sale → no barcode prompt (per owner)
+                'dose_labels_on_sale' => true,           // sale with a captured schedule → print dose labels
                 'receipt_on_sale' => 'ask',              // auto|ask|never
                 'default_symbology' => 'EAN13',
                 'default_size' => 'standard',

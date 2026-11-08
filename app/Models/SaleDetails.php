@@ -22,6 +22,8 @@ class SaleDetails extends Model
         'lossProfit',
         'batch_no',
         'quantities',
+        'dose',
+        'dose_code',
         'purchase_price',
         'expire_date',
     ];

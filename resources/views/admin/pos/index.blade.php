@@ -97,6 +97,7 @@
 (function () {
     const CFG = @json($settings);
     const DEVICE = @json($devicePayload);
+    window.DOSE_SCHEDULES = @json($schedules);
     const CSRF = document.querySelector('meta[name="csrf-token"]').content;
     const cart = new Map();   // productId → line
 
@@ -179,17 +180,39 @@
         for (const [key, line] of cart) {
             const tr = document.createElement('tr');
             if (key === flashKey) tr.className = 'table-success fw-bold';
+            const doseOpts = (window.DOSE_SCHEDULES || []).map(s =>
+                '<option value="' + s.code + '"' + (line.dose_code === s.code ? ' selected' : '') + '>' + s.label + '</option>').join('');
             tr.innerHTML =
                 '<td>' + line.name + '</td>' +
                 '<td class="font-monospace small">' + (line.batch_no || '—') + '</td>' +
                 '<td><input type="number" min="1" class="form-control form-control-sm qty" value="' + line.qty + '" data-key="' + key + '"></td>' +
                 '<td><input type="number" min="0" step="0.01" class="form-control form-control-sm price" value="' + line.price + '" data-key="' + key + '"></td>' +
+                '<td>' +
+                    '<select class="form-select form-select-sm dose-code" data-key="' + key + '">' +
+                        '<option value="">{{ __('بدون جرعة') }}</option>' + doseOpts +
+                    '</select>' +
+                    '<input class="form-control form-control-sm dose-text mt-1" data-key="' + key + '" placeholder="{{ __('جرعة مخصصة — 1-0-1 بعد الأكل') }}" value="' + (line.dose || '').replace(/"/g, '&quot;') + '">' +
+                '</td>' +
                 '<td class="text-end line-total">' + (line.qty * line.price).toFixed(2) + '</td>' +
                 '<td><button class="btn btn-sm btn-light rm" data-key="' + key + '">✕</button></td>';
             cartBody.appendChild(tr);
         }
         cartBody.querySelectorAll('.qty').forEach(i => i.onchange = () => { cart.get(i.dataset.key).qty = Math.max(1, +i.value); renderCart(); });
         cartBody.querySelectorAll('.price').forEach(i => i.onchange = () => { cart.get(i.dataset.key).price = +i.value; renderCart(); });
+        cartBody.querySelectorAll('.dose-code').forEach(sel => sel.onchange = () => {
+            const l = cart.get(sel.dataset.key);
+            if (!l) return;
+            l.dose_code = sel.value;
+            l.dose = sel.value ? scheduleLabel(sel.value) : '';
+            const txt = cartBody.querySelector('.dose-text[data-key="' + CSS.escape(sel.dataset.key) + '"]');
+            if (txt) txt.value = l.dose;
+        });
+        cartBody.querySelectorAll('.dose-text').forEach(inp => inp.onchange = () => {
+            const l = cart.get(inp.dataset.key);
+            if (!l) return;
+            l.dose = inp.value;
+            if (!inp.value) l.dose_code = '';
+        });
         cartBody.querySelectorAll('.rm').forEach(b => b.onclick = () => { cart.delete(b.dataset.key); renderCart(); });
         totals();
     }
@@ -209,6 +232,7 @@
         const products = [...cart.values()].map(l => ({
             product_id: l.product_id, price: l.price, lossProfit: 0,
             quantities: l.qty, batch_no: l.batch_no || null,
+            dose: l.dose || null, dose_code: l.dose_code || null,
         }));
         const payload = { products, paidAmount: +document.getElementById('paidAmount').value,
                           paymentType: document.getElementById('paymentType').value,
@@ -247,12 +271,18 @@
         // Print rules — the server decides per business settings.
         if (res.print?.barcode_url) window.open(res.print.barcode_url, '_blank');
         if (res.print?.receipt_on_sale === 'auto' && res.print?.receipt_url) window.open(res.print.receipt_url, '_blank');
+        if (res.dose_labels_url) window.open(res.dose_labels_url, '_blank');
     };
 
     function flash(kind, text) {
         msg.className = 'alert alert-' + kind + ' mt-3 mb-0 py-2';
         msg.textContent = text;
         setTimeout(() => msg.classList.add('d-none'), 4000);
+    }
+
+    function scheduleLabel(code) {
+        const hit = (window.DOSE_SCHEDULES || []).find(s => s.code === code);
+        return hit ? hit.label : code;
     }
 
     // ---------- offline PWA queue ----------

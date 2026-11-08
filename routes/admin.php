@@ -397,6 +397,11 @@ Route::get('assistant', [ADMIN\AssistantController::class, 'index'])->name('assi
 Route::post('assistant/ask', [ADMIN\AssistantController::class, 'ask'])->name('assistant.ask')->middleware('permission:assistant-use');
 Route::post('pos/interactions', [ADMIN\PosController::class, 'interactions'])->name('pos.interactions');
 Route::post('pos/sync', [\App\Http\Controllers\Api\OfflineSyncController::class, 'store'])->name('pos.sync');
+
+// Dose labels — طباعة الجرعات كباركود عند البيع
+Route::get('pos/dose-labels/{sale}', [ADMIN\DoseLabelController::class, 'sheet'])->name('pos.dose-labels');
+Route::get('dose/{payload}', [ADMIN\DoseLabelController::class, 'lookup'])->name('pos.dose.lookup');
+Route::post('dose/lookup', [ADMIN\DoseLabelController::class, 'lookup'])->name('pos.dose.lookup.post');
 Route::get('live', [ADMIN\LiveController::class, 'index'])->name('live.index')->middleware('permission:live-view');
 Route::get('live/stream', [ADMIN\LiveController::class, 'stream'])->name('live.stream')->middleware('permission:live-view');
 

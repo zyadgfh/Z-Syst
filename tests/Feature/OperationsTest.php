@@ -401,6 +401,63 @@ class OperationsTest extends TestCase
         $this->assertStringContainsString('ملخص اليوم', $digest);
     }
 
+    // ── Dose labels (طباعة الجرعات كباركود) ─────────────────────────────
+
+    public function test_dose_persists_through_sale_and_sheet_renders_code128()
+    {
+        $this->actingAs($this->user);
+        $res = $this->postJson(route('admin.pos.checkout'), [
+            'products' => [[
+                'product_id' => $this->product->id, 'price' => 100, 'lossProfit' => 40,
+                'quantities' => 1, 'batch_no' => 'B1',
+                'dose' => 'قرص صباحًا ومساءً بعد الأكل', 'dose_code' => 'BID',
+            ]],
+            'paidAmount' => 100, 'isPaid' => true, 'paymentType' => 'cash',
+        ]);
+        $res->assertStatus(200);
+        $this->assertNotNull($res->json('dose_labels_url'), 'dose captured → labels url expected');
+
+        $detail = \App\Models\SaleDetails::where('sale_id', $res->json('sale.id'))->first();
+        $this->assertSame('BID', $detail->dose_code);
+
+        $sheet = $this->get($res->json('dose_labels_url'));
+        $sheet->assertOk();
+        $sheet->assertSee('DOSE:'.$detail->sale_id.':'.$detail->id, false);
+        $sheet->assertSee('<svg', false);
+
+        // no dose → no labels url
+        $res2 = $this->postJson(route('admin.pos.checkout'), [
+            'products' => [['product_id' => $this->product->id, 'price' => 100, 'lossProfit' => 40, 'quantities' => 1, 'batch_no' => 'B1']],
+            'paidAmount' => 100, 'isPaid' => true, 'paymentType' => 'cash',
+        ]);
+        $res2->assertStatus(200);
+        $this->assertNull($res2->json('dose_labels_url'));
+
+        // scan the sticker → instruction card JSON
+        $this->getJson('/admin/dose/DOSE:'.$detail->sale_id.':'.$detail->id)
+            ->assertOk()
+            ->assertJsonPath('data.dose_code', 'BID');
+    }
+
+    public function test_dose_lookup_by_scan_returns_instruction_data()
+    {
+        $sale = Sale::create(['business_id' => $this->businessId, 'totalAmount' => 100, 'paidAmount' => 100, 'saleDate' => now()->toDateString(), 'invoiceNumber' => 'INV-1']);
+        $detail = $sale->details()->create(['product_id' => $this->product->id, 'price' => 100, 'quantities' => 1, 'dose' => 'ثلاث مرات يوميًا', 'dose_code' => 'TID']);
+
+        $this->actingAs($this->user);
+        $this->getJson('/admin/dose/DOSE:'.$sale->id.':'.$detail->id)
+            ->assertOk()
+            ->assertJsonPath('data.dose_code', 'TID')
+            ->assertJsonPath('data.sale', 'INV-1');
+
+        // tenant isolation
+        $other = User::factory()->create();
+        $this->actingAs($other)->getJson('/admin/dose/DOSE:'.$sale->id.':'.$detail->id)->assertStatus(404);
+
+        // malformed payload
+        $this->actingAs($this->user)->getJson('/admin/dose/NOPE:1:2')->assertStatus(422);
+    }
+
     // ── API docs ────────────────────────────────────────────────────────
 
     public function test_openapi_spec_lists_api_routes()

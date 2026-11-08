@@ -53,6 +53,7 @@ class PosController extends Controller
             'shiftNumber' => $openShift?->shift_number,
             'devicePayload' => $device?->clientPayload() ?? ['device' => null, 'printers' => ['barcode' => null, 'receipt' => null]],
             'settings' => DeviceSettings::clientPayload($businessId),
+            'schedules' => \App\Http\Controllers\Admin\DoseLabelController::schedulesForClient(),
             'approved' => (bool) ($device?->is_approved ?? true),
         ]);
     }
@@ -177,6 +178,8 @@ class PosController extends Controller
             'products.*.quantities' => 'required|integer|min:1',
             'products.*.batch_no' => 'nullable|string',
             'products.*.expire_date' => 'nullable|string',
+            'products.*.dose' => 'nullable|string|max:160',
+            'products.*.dose_code' => 'nullable|string|max:24',
             'coupon_code' => 'nullable|string|max:40',
             'paidAmount' => 'nullable|numeric',
             'dueAmount' => 'nullable|numeric',
@@ -249,6 +252,12 @@ class PosController extends Controller
                     ? ($body['data']['id'] ?? null ? route('admin.receipts.generate-sale') : null)
                     : null,
             ],
+            // Dose labels — only when the pharmacist captured a schedule.
+            'dose_labels_url' => (isset($settings['print']['dose_labels_on_sale']) && $settings['print']['dose_labels_on_sale']
+                && collect($payload['products'])->contains(fn ($l) => filled($l['dose'] ?? null))
+                && ($body['data']['id'] ?? null))
+                ? route('admin.pos.dose-labels', ['sale' => $body['data']['id']])
+                : null,
         ], 200);
     }
 
