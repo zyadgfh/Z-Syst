@@ -57,6 +57,9 @@ jobs:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
           SUPABASE_FALLBACK_ELOQUENT: 'true'
+          CACHE_DRIVER: file
+          CACHE_STORE: file
+          SESSION_DRIVER: file
         run: |
           php artisan test --verbosity=normal --colors=never --log-junit junit.xml 2>&1 | tee test.log
           EXIT=${PIPESTATUS[0]}
