@@ -95,5 +95,33 @@ class PurchaseOrder extends Model
 
         return round($total, 2);
     }
+
+    public function isDraft(): bool { return $this->status === self::STATUS_DRAFT; }
+    public function isSent(): bool { return $this->status === self::STATUS_SENT; }
+    public function isAccepted(): bool { return $this->status === self::STATUS_ACCEPTED; }
+    public function isReceived(): bool { return $this->status === self::STATUS_RECEIVED; }
+    public function isCancelled(): bool { return $this->status === self::STATUS_CANCELLED; }
+
+    public function scopeByStatus($query, string $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    public function scopePending($query)
+    {
+        return $query->whereIn('status', [self::STATUS_DRAFT, self::STATUS_SENT, self::STATUS_ACCEPTED]);
+    }
+
+    public function scopeOverdue($query)
+    {
+        return $query->whereIn('status', [self::STATUS_SENT, self::STATUS_ACCEPTED])
+            ->whereNotNull('expected_delivery_date')
+            ->where('expected_delivery_date', '<', now());
+    }
+
+    public function scopeForSupplier($query, $supplierId)
+    {
+        return $supplierId ? $query->where('supplier_id', $supplierId) : $query;
+    }
 }
 

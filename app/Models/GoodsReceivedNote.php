@@ -156,4 +156,14 @@ class GoodsReceivedNote extends Model
 
         return $prefix.str_pad((string) $next, 6, '0', STR_PAD_LEFT);
     }
+
+    public function scopeByStatus($query, string $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    public function scopeVerified($query)
+    {
+        return $query->where('status', self::STATUS_VERIFIED);
+    }
 }

@@ -31,4 +31,9 @@ class LoyaltyProgram extends Model
     {
         return $this->belongsTo(Business::class, 'business_id');
     }
+
+    public function calculatePoints(float $amount): int
+    {
+        return (int) round($amount * (float) ($this->points_per_currency ?? 1));
+    }
 }

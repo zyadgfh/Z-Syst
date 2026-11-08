@@ -127,4 +127,9 @@ class SupplierInvoice extends Model
             && in_array($this->status, [self::STATUS_PENDING, self::STATUS_PARTIALLY_PAID], true)
             && $this->due_date->lt(now()->subDays($days));
     }
+
+    public function isPending(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
 }

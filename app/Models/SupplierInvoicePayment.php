@@ -17,6 +17,11 @@ class SupplierInvoicePayment extends Model
 
     use SoftDeletes;
 
+    public const METHOD_CASH = 'cash';
+    public const METHOD_BANK_TRANSFER = 'bank_transfer';
+    public const METHOD_CHEQUE = 'cheque';
+    public const METHOD_CARD = 'card';
+
     public const STATUS_PENDING = 'pending';
     public const STATUS_APPROVED = 'approved';
     public const STATUS_REJECTED = 'rejected';

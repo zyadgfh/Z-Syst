@@ -56,4 +56,13 @@ class Prescription extends Model
     {
         return $this->belongsTo(Party::class, 'party_id');
     }
+
+    public function canBeUsed(): bool
+    {
+        if (($this->review_status ?? 'pending') !== 'approved') {
+            return false;
+        }
+
+        return ! ($this->expires_at && $this->expires_at->isPast());
+    }
 }
