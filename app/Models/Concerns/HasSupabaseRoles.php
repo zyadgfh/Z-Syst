@@ -2,6 +2,9 @@
 
 namespace App\Models\Concerns;
 
+use App\Models\UserPermission;
+use BackedEnum;
+
 /**
  * Spatie-compatible role helpers backed by the single app_users.role column.
  *
@@ -52,7 +55,54 @@ trait HasSupabaseRoles
 
     public function abilities(): array
     {
-        return (array) config('supabase.permissions.'.$this->roleName(), []);
+        return array_values(array_unique(array_merge(
+            (array) config('supabase.permissions.'.$this->roleName(), []),
+            $this->grantedPermissions(),
+        )));
+    }
+
+    /**
+     * Runtime permission grants (user_permissions table) — written by
+     * givePermissionTo() on top of the static role map.
+     */
+    public function grantedPermissions(): array
+    {
+        static $cache = [];
+
+        $key = $this->getKey();
+        if (! array_key_exists($key, $cache)) {
+            $cache[$key] = ($key !== null)
+                ? UserPermission::query()->where('user_id', $key)->pluck('name')->all()
+                : [];
+        }
+
+        return $cache[$key];
+    }
+
+    /** Spatie-compatible API: grant extra abilities beyond the role map. */
+    public function givePermissionTo(...$permissions): static
+    {
+        $names = collect($permissions)
+            ->flatten()
+            ->map(fn ($p) => $p instanceof BackedEnum ? $p->value : (string) $p)
+            ->filter()
+            ->unique()
+            ->all();
+
+        foreach ($names as $name) {
+            UserPermission::firstOrCreate(['user_id' => $this->getKey(), 'name' => $name]);
+        }
+
+        return $this;
+    }
+
+    public function revokePermissionTo(...$permissions): static
+    {
+        $names = collect($permissions)->flatten()->map(fn ($p) => (string) $p)->all();
+
+        UserPermission::query()->where('user_id', $this->getKey())->whereIn('name', $names)->delete();
+
+        return $this;
     }
 
     public function hasPermission(string $ability): bool
