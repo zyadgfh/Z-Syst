@@ -92,6 +92,7 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
+          SUPABASE_FALLBACK_ELOQUENT: 'true'
         run: vendor/bin/phpunit --colors=never
 
   # ------------------------------------------------------------------
