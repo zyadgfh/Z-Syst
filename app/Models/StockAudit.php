@@ -44,5 +44,4 @@ class StockAudit extends Model
     {
         return $this->hasMany(StockAuditDetail::class, 'stock_audit_id');
     }
-    }
 }

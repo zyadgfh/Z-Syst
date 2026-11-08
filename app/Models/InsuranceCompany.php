@@ -71,12 +71,12 @@ class InsuranceCompany extends Model
 
     public function scopeForBusiness($query, $businessId)
     {
-        return $businessId ? $quer
+        return $businessId ? $query->where('business_id', $businessId) : $query;
+    }
+
     public function policies(): HasMany
     {
         return $this->hasMany(InsurancePolicy::class, 'insurance_company_id');
-    }
-y->where('business_id', $businessId) : $query;
     }
 }
 
