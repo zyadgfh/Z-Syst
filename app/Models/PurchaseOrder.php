@@ -108,9 +108,10 @@ class PurchaseOrder extends Model
      *  the items relation is mutated while lines are being added). */
     public function getSubtotalAttribute(): float
     {
-        return round((float) $this->items()->get()->sum(
+        // No rounding: callers compare against the same raw float reduction.
+        return (float) $this->items()->get()->sum(
             fn ($item) => ((float) $item->quantity) * ((float) $item->unit_price) * (1 - ((float) $item->discount) / 100)
-        ), 2);
+        );
     }
 
     public function getCompletionPercentageAttribute(): float

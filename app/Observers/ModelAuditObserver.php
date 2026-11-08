@@ -30,6 +30,7 @@ class ModelAuditObserver
     protected function record(Model $model, string $action): void
     {
         $user = auth()->user() ?: auth('sanctum')->user();
+        echo 'AUDIT-OBS: '.$action.' '.class_basename($model).' user='.($user?->id ?? 'null')."\n"; // TEMP-DIAG
         if (! $user) {
             return;
         }

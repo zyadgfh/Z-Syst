@@ -62,7 +62,9 @@ class OfflineSyncService
                 try {
                     $response = app(\App\Http\Controllers\Api\ZSystSaleController::class)->store($apiRequest);
                 } finally {
-                    auth()->setUser($previousUser);
+                    if ($previousUser) {
+                        auth()->setUser($previousUser);
+                    }
                 }
                 if ($response->getStatusCode() >= 300) {
                     echo 'OFFLINE-HTTP-'.$response->getStatusCode().'['.$uuid.']: '.mb_substr($response->getContent(), 0, 300)."\n"; // TEMP-DIAG
