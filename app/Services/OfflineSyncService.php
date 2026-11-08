@@ -38,7 +38,7 @@ class OfflineSyncService
 
             try {
                 $payload = [
-                    'products' => $entry['products'],
+                    'products' => collect($entry['products'])->map(fn ($p) => $p + ['lossProfit' => 0])->all(),
                     'saleDate' => $entry['saleDate'] ?? now()->toDateString(),
                     'paidAmount' => (float) ($entry['paidAmount'] ?? 0),
                     'dueAmount' => (float) ($entry['dueAmount'] ?? 0),

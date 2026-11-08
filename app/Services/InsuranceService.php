@@ -179,6 +179,9 @@ class InsuranceService
             // Update policy used amount based on approval
             if ($claim->policy && $claim->isApproved()) {
                 $claim->policy->increment('used_amount', $claim->approved_amount);
+                $claim->policy->update([
+                    'remaining_limit' => max(0, (float) $claim->policy->annual_limit - (float) $claim->policy->used_amount),
+                ]);
             }
 
             return $claim->fresh();
@@ -237,10 +240,13 @@ class InsuranceService
         $total = (float) $data['total_amount'];
 
         if ($coverageRules->isEmpty()) {
-            // Use default company coverage (policy may have no company linked)
-            $covered = $policy->company
-                ? (float) $policy->company->calculateDefaultCoverage($total)
-                : 0.0;
+            // No explicit rules: the policy's own coverage percent wins, then
+            // the company default, then nothing.
+            $percent = (float) ($policy->coverage_percent ?? 0);
+            if ($percent <= 0 && $policy->company) {
+                $percent = (float) ($policy->company->default_coverage_percent ?? 0);
+            }
+            $covered = round($total * $percent / 100, 2);
 
             return [
                 'covered_amount' => $covered,

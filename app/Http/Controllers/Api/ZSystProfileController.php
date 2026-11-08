@@ -76,20 +76,35 @@ class ZSystProfileController extends Controller
         $user = auth()->user();
         $service = app(\App\Services\UserManagementService::class);
 
-        // PATH B: there is no local hash to compare against. Ask GoTrue to
-        // verify the current password, then let the Admin API set the new one.
-        $email = (string) $user->email;
+        // PATH B: production verifies through GoTrue. In Supabase fallback
+        // mode (dev / CI) the bcrypt hash lives on app_users — verify and
+        // update it locally, no GoTrue round-trip.
+        if (config('supabase.fallback_eloquent')) {
+            $hash = \App\Models\AppUser::query()->whereKey($user->getKey())->value('password');
 
-        if ($email === '' || ! $service->verifyPassword($email, (string) $request->current_password)) {
-            return response()->json([
-                'error' => __('Current password does not match with old password.'),
-            ], 422);
-        }
+            if ($hash === null || ! \Illuminate\Support\Facades\Hash::check((string) $request->current_password, (string) $hash)) {
+                return response()->json([
+                    'error' => __('Current password does not match with old password.'),
+                ], 422);
+            }
 
-        if (! $service->changePassword($user, (string) $request->password)) {
-            return response()->json([
-                'error' => __('Password change is not available right now. Please contact support.'),
-            ], 503);
+            \App\Models\AppUser::whereKey($user->getKey())->update([
+                'password' => \Illuminate\Support\Facades\Hash::make((string) $request->password),
+            ]);
+        } else {
+            $email = (string) $user->email;
+
+            if ($email === '' || ! $service->verifyPassword($email, (string) $request->current_password)) {
+                return response()->json([
+                    'error' => __('Current password does not match with old password.'),
+                ], 422);
+            }
+
+            if (! $service->changePassword($user, (string) $request->password)) {
+                return response()->json([
+                    'error' => __('Password change is not available right now. Please contact support.'),
+                ], 503);
+            }
         }
 
         AuditLogger::log('password.changed', 'User password changed.', [

@@ -61,7 +61,7 @@ class AssistantEngine
     protected function salesSum(int $businessId, array $period): array
     {
         [$from, $to, $label] = $period;
-        $sum = (float) Sale::forBusiness($businessId)->whereBetween('saleDate', [$from->toDateString(), $to->toDateString()])->sum('totalAmount');
+        $sum = (float) Sale::forBusiness($businessId)->whereDate('saleDate', '>=', $from->toDateString())->whereDate('saleDate', '<=', $to->toDateString())->sum('totalAmount');
 
         return ['intent' => 'sales_sum', 'answer' => "إجمالي المبيعات $label: ".number_format($sum, 2).' جنيه'];
     }
@@ -69,7 +69,7 @@ class AssistantEngine
     protected function invoiceCount(int $businessId, array $period): array
     {
         [$from, $to, $label] = $period;
-        $count = (int) Sale::forBusiness($businessId)->whereBetween('saleDate', [$from->toDateString(), $to->toDateString()])->count();
+        $count = (int) Sale::forBusiness($businessId)->whereDate('saleDate', '>=', $from->toDateString())->whereDate('saleDate', '<=', $to->toDateString())->count();
 
         return ['intent' => 'invoice_count', 'answer' => "عدد الفواتير $label: $count فاتورة"];
     }
@@ -77,7 +77,7 @@ class AssistantEngine
     protected function profit(int $businessId, array $period): array
     {
         [$from, $to, $label] = $period;
-        $profit = (float) Sale::forBusiness($businessId)->whereBetween('saleDate', [$from->toDateString(), $to->toDateString()])->sum('lossProfit');
+        $profit = (float) Sale::forBusiness($businessId)->whereDate('saleDate', '>=', $from->toDateString())->whereDate('saleDate', '<=', $to->toDateString())->sum('lossProfit');
 
         return ['intent' => 'profit', 'answer' => "الربح التقديري $label: ".number_format($profit, 2).' جنيه'];
     }

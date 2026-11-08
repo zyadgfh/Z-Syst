@@ -35,7 +35,7 @@ class ModelAuditObserver
         }
 
         try {
-            AuditLog::create([
+            \Illuminate\Support\Facades\DB::table('audit_logs')->insert([
                 'business_id' => $model->business_id ?? $user->business_id ?? null,
                 'user_id' => $user->id,
                 'action' => $action,
@@ -43,8 +43,11 @@ class ModelAuditObserver
                 'model_id' => $model->getKey(),
                 'description' => class_basename($model).' '.$action.'.',
                 'ip_address' => request()?->ip(),
-                'user_agent' => request()?->userAgent(),
-                'meta' => null,
+                'user_agent' => (string) request()?->userAgent(),
+                'old_values' => null,
+                'new_values' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         } catch (\Throwable $e) {
             report($e); // audit must never break the business action

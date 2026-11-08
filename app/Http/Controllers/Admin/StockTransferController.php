@@ -87,7 +87,7 @@ class StockTransferController extends Controller
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error creating stock transfer: ') . $e->getMessage(),
+                'message' => __('Error creating stock transfer: ') . get_class($e) . ': ' . $e->getMessage(),
             ], 500);
         }
     }

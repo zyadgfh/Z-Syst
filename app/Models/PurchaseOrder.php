@@ -28,6 +28,7 @@ class PurchaseOrder extends Model
     public const STATUS_ACCEPTED = 'accepted';
     public const STATUS_RECEIVED = 'received';
     public const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_REJECTED = 'rejected';
 
     use HasFactory;
 
@@ -170,7 +171,14 @@ class PurchaseOrder extends Model
 
     public function reject($userId = null, string $reason = null): static
     {
-        app(PurchaseOrderService::class)->reject($this, $userId, (string) $reason);
+        // Direct state change — the service delegates here; delegating back
+        // would recurse forever.
+        $this->forceFill([
+            'status' => self::STATUS_REJECTED,
+            'rejection_reason' => $reason,
+            'rejected_by' => $userId ?: auth()->id(),
+            'rejected_at' => now(),
+        ])->save();
 
         return $this->refresh();
     }
@@ -179,6 +187,7 @@ class PurchaseOrder extends Model
     {
         $this->forceFill([
             'status' => self::STATUS_CANCELLED,
+            'cancelled_at' => now(),
             'internal_notes' => trim((string) $this->internal_notes . "
 " . 'Cancelled: ' . $reason),
         ])->save();
