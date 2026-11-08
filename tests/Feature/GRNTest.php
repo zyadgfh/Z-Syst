@@ -366,7 +366,7 @@ class GRNTest extends TestCase
             ],
         ];
 
-        $response = $this->actingAs($user, 'api')
+        $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/v1/grn', $data);
 
         $response->assertStatus(201)
@@ -384,7 +384,7 @@ class GRNTest extends TestCase
         $user = User::factory()->create();
         GoodsReceivedNote::factory()->count(5)->create(['business_id' => $user->business_id]);
 
-        $response = $this->actingAs($user, 'api')
+        $response = $this->actingAs($user, 'sanctum')
             ->getJson('/api/v1/grn');
 
         $response->assertStatus(200)
@@ -399,7 +399,7 @@ class GRNTest extends TestCase
         $user = User::factory()->create();
         $grn = GoodsReceivedNote::factory()->create(['business_id' => $user->business_id]);
 
-        $response = $this->actingAs($user, 'api')
+        $response = $this->actingAs($user, 'sanctum')
             ->getJson("/api/v1/grn/{$grn->id}");
 
         $response->assertStatus(200)
@@ -422,7 +422,7 @@ class GRNTest extends TestCase
             'location' => 'Warehouse B',
         ];
 
-        $response = $this->actingAs($user, 'api')
+        $response = $this->actingAs($user, 'sanctum')
             ->putJson("/api/v1/grn/{$grn->id}", $data);
 
         $response->assertStatus(200)
@@ -443,7 +443,7 @@ class GRNTest extends TestCase
             'status' => GoodsReceivedNote::STATUS_PENDING,
         ]);
 
-        $response = $this->actingAs($user, 'api')
+        $response = $this->actingAs($user, 'sanctum')
             ->deleteJson("/api/v1/grn/{$grn->id}");
 
         $response->assertStatus(200)
@@ -466,7 +466,7 @@ class GRNTest extends TestCase
             'status' => GoodsReceivedNote::STATUS_PENDING,
         ]);
 
-        $response = $this->actingAs($user, 'api')
+        $response = $this->actingAs($user, 'sanctum')
             ->postJson("/api/v1/grn/{$grn->id}/verify");
 
         $response->assertStatus(200)
@@ -487,7 +487,7 @@ class GRNTest extends TestCase
             'status' => GoodsReceivedNote::STATUS_VERIFIED,
         ]);
 
-        $response = $this->actingAs($user, 'api')
+        $response = $this->actingAs($user, 'sanctum')
             ->postJson("/api/v1/grn/{$grn->id}/accept");
 
         $response->assertStatus(200)
@@ -508,7 +508,7 @@ class GRNTest extends TestCase
             'status' => GoodsReceivedNote::STATUS_VERIFIED,
         ]);
 
-        $response = $this->actingAs($user, 'api')
+        $response = $this->actingAs($user, 'sanctum')
             ->postJson("/api/v1/grn/{$grn->id}/reject");
 
         $response->assertStatus(200)
@@ -529,7 +529,7 @@ class GRNTest extends TestCase
             'status' => GoodsReceivedNote::STATUS_PENDING,
         ]);
 
-        $response = $this->actingAs($user, 'api')
+        $response = $this->actingAs($user, 'sanctum')
             ->getJson('/api/v1/grn/pending');
 
         $response->assertStatus(200)
@@ -543,7 +543,7 @@ class GRNTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user, 'api')
+        $response = $this->actingAs($user, 'sanctum')
             ->getJson('/api/v1/grn/statistics');
 
         $response->assertStatus(200)

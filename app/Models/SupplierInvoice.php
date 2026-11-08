@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Services\SupplierInvoiceService;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -136,5 +138,30 @@ class SupplierInvoice extends Model
     public function getDaysUntilDue(): int
     {
         return $this->due_date ? max(0, now()->startOfDay()->diffInDays($this->due_date->copy()->startOfDay(), false)) : 0;
+    }
+
+    public function approve($userId = null): static
+    {
+        app(SupplierInvoiceService::class)->approve($this, (int) $userId ?: auth()->id());
+
+        return $this->refresh();
+    }
+
+    public function reject($userId = null, string $reason = null): static
+    {
+        app(SupplierInvoiceService::class)->reject($this, (int) $userId ?: auth()->id(), (string) $reason);
+
+        return $this->refresh();
+    }
+
+    public function cancel(string $reason = null): static
+    {
+        $this->forceFill([
+            'status' => self::STATUS_CANCELLED,
+            'cancellation_reason' => $reason,
+            'cancelled_at' => now(),
+        ])->save();
+
+        return $this->refresh();
     }
 }

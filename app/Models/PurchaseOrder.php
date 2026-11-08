@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Services\PurchaseOrderService;
+
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
@@ -129,6 +131,48 @@ class PurchaseOrder extends Model
         return $this->items()->get()->contains(fn ($item) =>
             (float) $item->received_quantity > 0.0
             && (float) $item->received_quantity < (float) $item->quantity);
+    }
+
+    public function scopeDraft($query)
+    {
+        return $query->where('status', self::STATUS_DRAFT);
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->status === self::STATUS_RECEIVED;
+    }
+
+    public function markAsSent(): static
+    {
+        $this->forceFill(['status' => self::STATUS_SENT])->save();
+
+        return $this;
+    }
+
+    public function approve($userId = null): static
+    {
+        app(PurchaseOrderService::class)->approve($this, $userId);
+
+        return $this->refresh();
+    }
+
+    public function reject($userId = null, string $reason = null): static
+    {
+        app(PurchaseOrderService::class)->reject($this, $userId, (string) $reason);
+
+        return $this->refresh();
+    }
+
+    public function cancel(string $reason = null): static
+    {
+        $this->forceFill([
+            'status' => self::STATUS_CANCELLED,
+            'internal_notes' => trim((string) $this->internal_notes . "
+" . 'Cancelled: ' . $reason),
+        ])->save();
+
+        return $this->refresh();
     }
 }
 
