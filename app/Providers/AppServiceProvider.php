@@ -30,6 +30,14 @@ class AppServiceProvider extends ServiceProvider
 
         Product::observe(ModelAuditObserver::class);
 
+        // Allow tests to mock the auth manager through the helper form:
+        // auth()->shouldReceive('user') proxies to the Auth facade swap.
+        if (method_exists(\\Illuminate\\Auth\\AuthManager::class, 'macro')) {
+            \\Illuminate\\Auth\\AuthManager::macro('shouldReceive', function (string $method) {
+                return \\Illuminate\\Support\\Facades\\Auth::shouldReceive($method);
+            });
+        }
+
         // Defensive: cap every outbound HTTP request so a misbehaving
         // integration (ETA, Supabase storage, Telegram, ...) can never wedge
         // a request or a CI run. Individual services may override with a

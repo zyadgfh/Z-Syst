@@ -28,7 +28,7 @@ class PurchaseOrderService
     {
         return DB::transaction(function () use ($data) {
             $po = PurchaseOrder::create([
-                'po_number' => $data['po_number'] ?? ('PO-'.str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT)),
+                'po_number' => $data['po_number'] ?? ('PO-'.date('Y').'-'.str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT)),
                 'supplier_id' => $data['supplier_id'] ?? null,
                 'business_id' => $data['business_id'],
                 'branch_id' => $data['branch_id'] ?? null,
@@ -69,6 +69,7 @@ class PurchaseOrderService
             'unit_price' => $itemData['unit_price'] ?? $product->purchase_without_tax ?? 0,
             'discount' => $itemData['discount'] ?? 0,
             'tax' => $itemData['tax'] ?? 0,
+            'total' => round((float) $itemData['quantity'] * (float) ($itemData['unit_price'] ?? 0) * (1 - ((float) ($itemData['discount'] ?? 0)) / 100), 2),
             'notes' => $itemData['notes'] ?? null,
         ]);
 
@@ -201,7 +202,7 @@ class PurchaseOrderService
      */
     public function convertToPurchase(PurchaseOrder $po): \App\Models\Purchase
     {
-        if (!$po->isApproved()) {
+        if (!($po->isApproved() || $po->status === PurchaseOrder::STATUS_ACCEPTED)) {
             throw new \Exception('Only approved orders can be converted to purchases');
         }
 

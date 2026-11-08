@@ -34,7 +34,7 @@ class InsurancePolicyFactory extends Factory
             'start_date' => $startDate,
             'end_date' => $endDate,
             'annual_limit' => fake()->randomFloat(2, 1000, 50000),
-            'used_amount' => fake()->randomFloat(2, 0, 5000),
+            'used_amount' => fake()->randomFloat(2, 0, 200),
             'coverage_percent' => fake()->numberBetween(70, 100),
             'copay_percent' => fake()->numberBetween(0, 30),
             'notes' => fake()->optional()->paragraph(),

@@ -70,6 +70,7 @@ class StockTransferController extends Controller
 
         try {
             $transfer = $this->warehouseService->createTransfer($request->only([
+        'business_id',
         'from_warehouse_id',
         'to_warehouse_id',
         'product_id',

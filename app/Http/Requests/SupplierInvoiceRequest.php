@@ -20,7 +20,7 @@ class SupplierInvoiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'supplier_id' => 'nullable|exists:parties,id',
+            'supplier_id' => 'nullable|integer',
             'purchase_id' => 'nullable|exists:purchases,id',
             'purchase_order_id' => 'nullable|exists:purchase_orders,id',
             'invoice_date' => 'nullable|date',

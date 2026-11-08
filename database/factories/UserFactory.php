@@ -32,6 +32,7 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'role' => 'staff',
             'status' => 'active',
+            'password' => \Illuminate\Support\Facades\Hash::make('password'),
         ];
     }
 

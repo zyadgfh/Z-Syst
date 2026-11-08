@@ -15,7 +15,7 @@ class PurchaseOrderFactory extends Factory
     {
         return [
             'supplier_id' => Party::factory()->state(['type' => 'supplier']),
-            'po_number' => 'PO-'.str_pad(fake()->unique()->numberBetween(1, 999999), 6, '0', STR_PAD_LEFT),
+            'po_number' => 'PO-'.date('Y').'-'.str_pad(fake()->unique()->numberBetween(1, 999999), 6, '0', STR_PAD_LEFT),
             'business_id' => Business::factory(),
             'status' => PurchaseOrder::STATUS_DRAFT,
             'priority' => PurchaseOrder::PRIORITY_NORMAL,

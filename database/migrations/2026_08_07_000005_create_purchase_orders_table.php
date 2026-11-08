@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignUuid('created_by')->nullable()->constrained('app_users')->nullOnDelete();
             $table->foreignUuid('approved_by')->nullable()->constrained('app_users')->nullOnDelete();
+            $table->foreignUuid('rejected_by')->nullable()->constrained('app_users')->nullOnDelete();
             
             $table->string('po_number')->unique();
             $table->string('status')->default('draft'); // draft, sent, accepted, partially_received, received, cancelled, rejected

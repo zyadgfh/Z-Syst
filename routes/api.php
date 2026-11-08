@@ -72,17 +72,17 @@ Route::prefix('v1')->group(function () {
 
             // Supplier Invoice API endpoints
             Route::apiResource('supplier-invoices', Api\SupplierInvoiceController::class)->except('show');
+            Route::get('supplier-invoices/pending', [Api\SupplierInvoiceController::class, 'pending'])->name('supplier-invoices.pending');
+            Route::get('supplier-invoices/overdue', [Api\SupplierInvoiceController::class, 'overdue'])->name('supplier-invoices.overdue');
+            Route::get('supplier-invoices/unpaid', [Api\SupplierInvoiceController::class, 'unpaid'])->name('supplier-invoices.unpaid');
+            Route::get('supplier-invoices/statistics', [Api\SupplierInvoiceController::class, 'statistics'])->name('supplier-invoices.statistics');
+            Route::get('supplier-invoices/aging-report', [Api\SupplierInvoiceController::class, 'agingReport'])->name('supplier-invoices.aging-report');
             Route::get('supplier-invoices/{supplierInvoice}', [Api\SupplierInvoiceController::class, 'show'])->name('supplier-invoices.show');
             Route::post('supplier-invoices/{supplierInvoice}/approve', [Api\SupplierInvoiceController::class, 'approve'])->name('supplier-invoices.approve');
             Route::post('supplier-invoices/{supplierInvoice}/reject', [Api\SupplierInvoiceController::class, 'reject'])->name('supplier-invoices.reject');
             Route::post('supplier-invoices/{supplierInvoice}/cancel', [Api\SupplierInvoiceController::class, 'cancel'])->name('supplier-invoices.cancel');
             Route::post('supplier-invoices/{supplierInvoice}/add-payment', [Api\SupplierInvoiceController::class, 'addPayment'])->name('supplier-invoices.add-payment');
             Route::post('supplier-invoices/payments/{paymentId}/approve', [Api\SupplierInvoiceController::class, 'approvePayment'])->name('supplier-invoices.approve-payment');
-            Route::get('supplier-invoices/pending', [Api\SupplierInvoiceController::class, 'pending'])->name('supplier-invoices.pending');
-            Route::get('supplier-invoices/overdue', [Api\SupplierInvoiceController::class, 'overdue'])->name('supplier-invoices.overdue');
-            Route::get('supplier-invoices/unpaid', [Api\SupplierInvoiceController::class, 'unpaid'])->name('supplier-invoices.unpaid');
-            Route::get('supplier-invoices/statistics', [Api\SupplierInvoiceController::class, 'statistics'])->name('supplier-invoices.statistics');
-            Route::get('supplier-invoices/aging-report', [Api\SupplierInvoiceController::class, 'agingReport'])->name('supplier-invoices.aging-report');
             Route::post('supplier-invoices/create-from-purchase', [Api\SupplierInvoiceController::class, 'createFromPurchase'])->name('supplier-invoices.create-from-purchase');
 
             // Doctor Attention API endpoints
@@ -100,15 +100,15 @@ Route::prefix('v1')->group(function () {
 
             // Purchase Orders API endpoints
             Route::apiResource('purchase-orders', Api\PurchaseOrderController::class)->except('show');
+            Route::get('purchase-orders/pending', [Api\PurchaseOrderController::class, 'pending'])->name('purchase-orders.pending');
+            Route::get('purchase-orders/overdue', [Api\PurchaseOrderController::class, 'overdue'])->name('purchase-orders.overdue');
+            Route::get('purchase-orders/statistics', [Api\PurchaseOrderController::class, 'statistics'])->name('purchase-orders.statistics');
             Route::get('purchase-orders/{purchaseOrder}', [Api\PurchaseOrderController::class, 'show'])->name('purchase-orders.show');
             Route::post('purchase-orders/{purchaseOrder}/send', [Api\PurchaseOrderController::class, 'send'])->name('purchase-orders.send');
             Route::post('purchase-orders/{purchaseOrder}/approve', [Api\PurchaseOrderController::class, 'approve'])->name('purchase-orders.approve');
             Route::post('purchase-orders/{purchaseOrder}/reject', [Api\PurchaseOrderController::class, 'reject'])->name('purchase-orders.reject');
             Route::post('purchase-orders/{purchaseOrder}/cancel', [Api\PurchaseOrderController::class, 'cancel'])->name('purchase-orders.cancel');
             Route::post('purchase-orders/{purchaseOrder}/convert', [Api\PurchaseOrderController::class, 'convertToPurchase'])->name('purchase-orders.convert');
-            Route::get('purchase-orders/pending', [Api\PurchaseOrderController::class, 'pending'])->name('purchase-orders.pending');
-            Route::get('purchase-orders/overdue', [Api\PurchaseOrderController::class, 'overdue'])->name('purchase-orders.overdue');
-            Route::get('purchase-orders/statistics', [Api\PurchaseOrderController::class, 'statistics'])->name('purchase-orders.statistics');
 
             // GRN API endpoints
             Route::apiResource('grn', Api\GRNController::class)->except('show');
@@ -121,6 +121,7 @@ Route::prefix('v1')->group(function () {
 
             // Supplier API endpoints
             Route::apiResource('suppliers', Api\SupplierController::class)->except('show');
+            Route::get('suppliers/top-performers', [Api\SupplierController::class, 'topPerformers'])->name('suppliers.top-performers');
             Route::get('suppliers/{supplier}', [Api\SupplierController::class, 'show'])->name('suppliers.show');
             Route::post('suppliers/{supplier}/calculate-performance', [Api\SupplierController::class, 'calculatePerformance'])->name('suppliers.calculate-performance');
             Route::get('suppliers/top-performers', [Api\SupplierController::class, 'topPerformers'])->name('suppliers.top-performers');
@@ -388,3 +389,19 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     Route::post('pos/sync', [Api\OfflineSyncController::class, 'store']);
 });
 Route::get('v1/docs', [Api\ApiDocController::class, 'spec'])->name('api.docs.spec');
+
+// Legacy version-less aliases — POS terminals and integrations registered
+// against /api/purchase-orders. Concrete GET paths are listed before the
+// {purchaseOrder} bind so they are not swallowed by it.
+Route::middleware(['auth:sanctum', 'tenant.check', 'supabase.context', 'business.context'])->group(function () {
+    Route::get('purchase-orders/pending', [Api\PurchaseOrderController::class, 'pending']);
+    Route::get('purchase-orders/overdue', [Api\PurchaseOrderController::class, 'overdue']);
+    Route::get('purchase-orders/statistics', [Api\PurchaseOrderController::class, 'statistics']);
+    Route::apiResource('purchase-orders', Api\PurchaseOrderController::class)->except('show')->names('legacy.purchase-orders');
+    Route::get('purchase-orders/{purchaseOrder}', [Api\PurchaseOrderController::class, 'show']);
+    Route::post('purchase-orders/{purchaseOrder}/send', [Api\PurchaseOrderController::class, 'send']);
+    Route::post('purchase-orders/{purchaseOrder}/approve', [Api\PurchaseOrderController::class, 'approve']);
+    Route::post('purchase-orders/{purchaseOrder}/reject', [Api\PurchaseOrderController::class, 'reject']);
+    Route::post('purchase-orders/{purchaseOrder}/cancel', [Api\PurchaseOrderController::class, 'cancel']);
+    Route::post('purchase-orders/{purchaseOrder}/convert', [Api\PurchaseOrderController::class, 'convertToPurchase']);
+});

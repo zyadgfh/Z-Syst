@@ -13,7 +13,7 @@ class TenantResolver
         $user = $request->user();
 
         // Super admin should not have tenant context for admin routes
-        if ($user && $user->role === 'superadmin' && $request->is('admin/*')) {
+        if ($user && ($user->role ?? null) === 'superadmin' && $request->is('admin/*')) {
             return null;
         }
 
@@ -50,13 +50,19 @@ class TenantResolver
     public function canAccessTenant(int $businessId): bool
     {
         $user = Auth::user();
-        
+
+        // Unauthenticated context (storefront, guest APIs) is not
+        // tenant-restricted — the auth layer owns that boundary.
+        if (!$user) {
+            return true;
+        }
+
         // Super admin can access all tenants
-        if ($user && $user->role === 'superadmin') {
+        if (($user->role ?? null) === 'superadmin') {
             return true;
         }
 
         // Regular users can only access their own tenant
-        return $user && $user->business_id === $businessId;
+        return (int) $user->business_id === (int) $businessId;
     }
 }

@@ -94,12 +94,33 @@ class PurchaseOrder extends Model
         return $this->hasMany(PurchaseOrderItem::class, 'purchase_order_id');
     }
 
+    /** Line total net of the item-level discount percentage. */
+    public function getSubtotalAttribute(): float
+    {
+        return round((float) $this->items->sum(
+            fn ($item) => ((float) $item->quantity) * ((float) $item->unit_price) * (1 - ((float) $item->discount) / 100)
+        ), 2);
+    }
+
+    public function getCompletionPercentageAttribute(): float
+    {
+        $qty = (float) $this->items->sum('quantity');
+        if ($qty <= 0.0) {
+            return 0.0;
+        }
+
+        return round(((float) $this->items->sum('received_quantity') / $qty) * 100, 2);
+    }
+
     public function calculateTotal(): float
     {
-        $total = (float) $this->items()->get()->sum(fn ($item) => ((float) $item->quantity) * ((float) $item->unit_price));
-        if ($total <= 0.0 && isset($this->attributes['total_amount'])) {
-            $total = (float) $this->attributes['total_amount'];
-        }
+        $subtotal = $this->getSubtotalAttribute();
+        $total = $subtotal + (float) $this->tax_amount - (float) $this->discount_amount;
+
+        $this->forceFill([
+            'subtotal' => $subtotal,
+            'total_amount' => round($total, 2),
+        ])->save();
 
         return round($total, 2);
     }
@@ -117,7 +138,12 @@ class PurchaseOrder extends Model
 
     public function scopePending($query)
     {
-        return $query->whereIn('status', [self::STATUS_DRAFT, self::STATUS_SENT, self::STATUS_ACCEPTED]);
+        return $query->whereIn('status', [self::STATUS_DRAFT, self::STATUS_SENT]);
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', self::STATUS_RECEIVED);
     }
 
     public function scopeOverdue($query)
