@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   # ------------------------------------------------------------------
@@ -36,15 +36,17 @@ jobs:
         run: |
           set +e
           FAIL=0; COUNT=0
+          : > lint-failures.txt
           while IFS= read -r -d '' f; do
             COUNT=$((COUNT+1))
             OUT=$(php -l "$f" 2>&1)
             if [ $? -ne 0 ]; then
               echo "SYNTAX ERROR: $f"; echo "$OUT" | tail -2; FAIL=$((FAIL+1))
+              { echo "== $f"; echo "$OUT"; } >> lint-failures.txt
               echo "- **$f**: $(echo "$OUT" | tail -1)" >> "$GITHUB_STEP_SUMMARY"
             fi
           done < <(find app Modules config database routes tests -name '*.php' -type f -print0)
-          echo "linted $COUNT files, failures=$FAIL" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "linted $COUNT files, failures=$FAIL" | tee -a lint-failures.txt "$GITHUB_STEP_SUMMARY"
           exit $((FAIL > 0 ? 1 : 0))
 
       - name: Prepare environment
@@ -53,11 +55,25 @@ jobs:
           php artisan key:generate
 
       - name: Boot gate — resolve routes, controllers, DI and providers
+        if: success() || failure()
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
         run: |
           php artisan route:list > boot.log 2>&1 || { php .github/scripts/emit_log_annotations.php boot.log "route:list boot"; exit 1; }
+
+      - name: Push lint/boot diagnostics to ci-runtime orphan
+        if: failure()
+        run: |
+          git config user.email ci@z-syst.local
+          git config user.name ci
+          git fetch origin ci-runtime || true
+          git checkout --orphan ci-runtime-lint-tmp
+          git rm -rf --cached . -q || true
+          git add -f lint-failures.txt boot.log 2>/dev/null || true
+          git commit -q -m "lint/boot diagnostics $(date -u +%FT%TZ)" || echo nothing to commit
+          git branch -M ci-runtime-lint
+          git push -q --force origin ci-runtime-lint || echo push failed
 
   # ------------------------------------------------------------------
   # Test suite — informational while the Path B runtime is being
@@ -145,3 +161,4 @@ jobs:
         run: flutter analyze --no-fatal-infos --no-fatal-warnings || echo "::warning::flutter analyze reported issues — see log"
       - name: Run smoke tests
         run: flutter test
+
