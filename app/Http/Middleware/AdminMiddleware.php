@@ -16,7 +16,8 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && (Auth::user()->role != 'shop-owner' && Auth::user()->role != 'staff')) {
+        $allowed = ['shop-owner', 'staff', 'superadmin', 'admin'];
+        if (Auth::check() && in_array(Auth::user()->role, $allowed, true)) {
             return $next($request);
         }
 

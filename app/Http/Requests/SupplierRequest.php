@@ -18,8 +18,8 @@ class SupplierRequest extends FormRequest
         return [
             'company_name' => 'required|string|max:255',
             'contact_person' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
             'tax_id' => 'nullable|string|max:50',
             'license_number' => 'nullable|string|max:50',

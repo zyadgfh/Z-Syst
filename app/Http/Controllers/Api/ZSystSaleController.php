@@ -145,6 +145,15 @@ class ZSystSaleController extends Controller
                 if (! empty($batchNo)) {
                     $stock = $productStocks->first(fn ($item) => $item->batch_no === $batchNo);
 
+                    if (! $stock && $productStocks->isNotEmpty()) {
+                        // Offline terminals may carry local batch labels that
+                        // never matched a warehouse batch; honour the sale as
+                        // long as the product has aggregate stock.
+                        if ($productStocks->sum('productStock') >= $productData['quantities']) {
+                            $stock = $productStocks->first(fn ($item) => $item->productStock >= $productData['quantities']);
+                        }
+                    }
+
                     if (! $stock) {
                         throw new BusinessRuleException(
                             ErrorCode::BUSINESS_INSUFFICIENT_STOCK,

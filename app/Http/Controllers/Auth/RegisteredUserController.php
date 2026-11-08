@@ -20,6 +20,40 @@ class RegisteredUserController extends Controller
 {
     public function store(Request $request): RedirectResponse|JsonResponse
     {
+        // Local fallback mode (dev / CI without Supabase GoTrue): provision the
+        // account directly from the form. Production keeps self-registration
+        // closed — GoTrue has disable_signup and pharmacies are provisioned
+        // after payment.
+        if (config('supabase.fallback_eloquent')) {
+            $data = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:190',
+                'password' => 'required|string|min:8|confirmed',
+                'business_id' => 'nullable|integer|exists:businesses,id',
+            ]);
+
+            $user = \App\Models\User::create([
+                'id' => (string) \Illuminate\Support\Str::uuid(),
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => \Illuminate\Support\Facades\Hash::make($data['password']),
+                'business_id' => $data['business_id'] ?? null,
+                'role' => 'admin',
+                'status' => 'active',
+            ]);
+
+            auth()->login($user);
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => __('Registered successfully.'),
+                    'user' => $user->only('id', 'name', 'email'),
+                ], 201);
+            }
+
+            return redirect('/dashboard');
+        }
+
         $message = __('Self-service registration is disabled. Contact support to activate your pharmacy.');
 
         if ($request->wantsJson()) {

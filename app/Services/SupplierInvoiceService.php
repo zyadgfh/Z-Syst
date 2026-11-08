@@ -30,10 +30,18 @@ class SupplierInvoiceService
     public function create(array $data): SupplierInvoice
     {
         return DB::transaction(function () use ($data) {
+            // Tolerate unknown supplier references (offline terminals send
+            // their local ids) — the column is nullable.
+            $supplierId = $data['supplier_id'] ?? null;
+            if ($supplierId !== null && !\App\Models\Party::whereKey($supplierId)->exists()) {
+                $supplierId = null;
+            }
+
             $invoice = SupplierInvoice::create([
                 'invoice_number' => 'INV-'.str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT),
-                'supplier_id' => $data['supplier_id'] ?? null,
+                'supplier_id' => $supplierId,
                 'business_id' => $data['business_id'],
+                'status' => SupplierInvoice::STATUS_PENDING,
                 'branch_id' => $data['branch_id'] ?? null,
                 'purchase_id' => $data['purchase_id'] ?? null,
                 'purchase_order_id' => $data['purchase_order_id'] ?? null,
@@ -77,6 +85,7 @@ class SupplierInvoiceService
                 'business_id' => $purchase->business_id,
                 'branch_id' => $purchase->branch_id ?? null,
                 'purchase_id' => $purchase->id,
+                'status' => SupplierInvoice::STATUS_PENDING,
                 'invoice_date' => now(),
                 'due_date' => now()->addDays(30),
                 'tax_amount' => $purchase->tax_amount ?? 0,
@@ -359,7 +368,7 @@ class SupplierInvoiceService
     {
         return DB::transaction(function () use ($invoice, $paymentData) {
             $payment = SupplierInvoicePayment::create([
-                'payment_number' => $data['payment_number'] ?? ('PAY-'.str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT)),
+                'payment_number' => $paymentData['payment_number'] ?? ('PAY-'.str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT)),
                 'supplier_invoice_id' => $invoice->id,
                 'business_id' => $invoice->business_id,
                 'branch_id' => $invoice->branch_id,
@@ -376,6 +385,18 @@ class SupplierInvoiceService
             if (isset($paymentData['file'])) {
                 $this->uploadPaymentFile($payment, $paymentData['file']);
             }
+
+            // The payment settles immediately (approval only completes the
+            // audit trail): advance paid_amount/balance and derive the status.
+            $paid = (float) $invoice->paid_amount + (float) $paymentData['amount'];
+            $total = (float) $invoice->total_amount;
+            $invoice->forceFill([
+                'paid_amount' => $paid,
+                'balance' => round(max(0, $total - $paid), 2),
+                'status' => $paid >= $total && $total > 0
+                    ? SupplierInvoice::STATUS_PAID
+                    : SupplierInvoice::STATUS_PARTIALLY_PAID,
+            ])->save();
 
             return $payment;
         });

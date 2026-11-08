@@ -22,8 +22,8 @@ return new class extends Migration
             $table->date('start_date');
             $table->date('end_date');
             $table->string('status')->default('active');
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('created_by')->nullable()->constrained('app_users')->nullOnDelete();
+            $table->foreignUuid('approved_by')->nullable()->constrained('app_users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });

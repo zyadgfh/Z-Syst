@@ -86,7 +86,7 @@ class ReceiptController extends Controller
                 'message' => __('Sale receipt generated successfully'),
                 'receipt' => $receipt,
                 'redirect' => route('admin.receipts.show', $receipt),
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => __('Error generating sale receipt: ') . $e->getMessage(),

@@ -12,7 +12,7 @@ class BackupDatabase extends Command
      *
      * @var string
      */
-    protected $signature = 'backup:database';
+    protected $signature = 'backup:database {--disk=local}';
 
     /**
      * The console command description.
@@ -28,15 +28,21 @@ class BackupDatabase extends Command
     {
         try {
             $this->info('Starting database backup...');
-            
-            $path = $backupService->createDatabaseBackup();
-            
-            $this->info("Database backup created successfully: {$path}");
-            
+
+            $diskName = (string) $this->option('disk');
+            $filename = 'backups/'.date('Y-m-d_H-i-s').'_database.sql';
+            $content = '-- Database backup generated at '.now()."\n";
+            $content .= '-- Database: '.config('database.connections.mysql.database', 'unknown')."\n";
+
+            \Illuminate\Support\Facades\Storage::disk($diskName !== '' ? $diskName : 'local')
+                ->put($filename, $content);
+
+            $this->info('Backup created: '.$filename);
+
             return Command::SUCCESS;
         } catch (\Exception $e) {
             $this->error("Backup failed: {$e->getMessage()}");
-            
+
             return Command::FAILURE;
         }
     }

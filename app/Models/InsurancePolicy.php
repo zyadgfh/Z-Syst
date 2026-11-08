@@ -66,13 +66,28 @@ class InsurancePolicy extends Model
         return $this->belongsTo(InsuranceCompany::class, 'insurance_company_id');
     }
 
-    public function isValid(): bool
+    public function company(): BelongsTo
     {
+        return $this->belongsTo(InsuranceCompany::class, 'insurance_company_id');
+    }
+
+    public function isValid($at = null): bool
+    {
+        $at = $at ?: now();
+        if (is_string($at)) { $at = \Illuminate\Support\Carbon::parse($at); }
         $active = ($this->status ?? 'active') === 'active';
         $inWindow = true;
-        if ($this->start_date !== null) { $inWindow = $inWindow && ! $this->start_date->isFuture(); }
-        if ($this->end_date !== null) { $inWindow = $inWindow && ! $this->end_date->isPast(); }
+        if ($this->start_date !== null) { $inWindow = $inWindow && $this->start_date->lte($at); }
+        if ($this->end_date !== null) { $inWindow = $inWindow && $this->end_date->gte($at); }
         return $active && $inWindow;
+    }
+
+    public function hasSufficientLimit(float $amount): bool
+    {
+        $limit = (float) ($this->annual_limit ?? 0);
+        if ($limit <= 0) { return true; }
+
+        return ($limit - (float) ($this->used_amount ?? 0)) >= $amount;
     }
 
     public function scopeForBusiness($query, $businessId)

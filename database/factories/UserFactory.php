@@ -28,9 +28,11 @@ class UserFactory extends Factory
         return [
             'id' => (string) \Illuminate\Support\Str::uuid(),
             'business_id' => Business::factory(),
+            'email' => fake()->unique()->safeEmail(),
             'name' => fake()->name(),
             'role' => 'staff',
             'status' => 'active',
+            'password' => \Illuminate\Support\Facades\Hash::make('password'),
         ];
     }
 

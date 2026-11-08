@@ -30,7 +30,7 @@ return new class extends Migration
             $table->string('type')->default('sale');
             $table->string('format')->default('pdf');
             $table->string('status')->default('generated');
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignUuid('user_id')->nullable()->constrained('app_users')->nullOnDelete();
             $table->json('data')->nullable();
             $table->timestamps();
 

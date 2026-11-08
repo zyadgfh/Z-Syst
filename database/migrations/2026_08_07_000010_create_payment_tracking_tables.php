@@ -24,8 +24,8 @@ return new class extends Migration
             $table->string('status')->default('pending');
             $table->text('notes')->nullable();
 
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('created_by')->nullable()->constrained('app_users')->nullOnDelete();
+            $table->foreignUuid('approved_by')->nullable()->constrained('app_users')->nullOnDelete();
             $table->timestamp('approved_at')->nullable();
             $table->string('file_path')->nullable();
             $table->timestamps();

@@ -27,6 +27,13 @@ class VerifySupabaseJwt
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // First-party flows (actingAs in tests, sanctum tokens issued by the
+        // app itself) are already authenticated — the JWT path is for
+        // Supabase GoTrue-issued tokens only.
+        if ($this->auth->guard('sanctum')->check()) {
+            return $next($request);
+        }
+
         $token = $this->bearerToken($request);
         $claims = $token ? $this->verify($token) : null;
 

@@ -184,7 +184,7 @@ class SupplierTest extends TestCase
             'phone' => '+1234567890',
         ];
 
-        $response = $this->actingAs($user, 'api')
+        $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/v1/suppliers', $data);
 
         $response->assertStatus(201)
@@ -202,7 +202,7 @@ class SupplierTest extends TestCase
         $user = User::factory()->create();
         Supplier::factory()->count(5)->create(['business_id' => $user->business_id]);
 
-        $response = $this->actingAs($user, 'api')
+        $response = $this->actingAs($user, 'sanctum')
             ->getJson('/api/v1/suppliers');
 
         $response->assertStatus(200)
@@ -217,7 +217,7 @@ class SupplierTest extends TestCase
         $user = User::factory()->create();
         $supplier = Supplier::factory()->create(['business_id' => $user->business_id]);
 
-        $response = $this->actingAs($user, 'api')
+        $response = $this->actingAs($user, 'sanctum')
             ->getJson("/api/v1/suppliers/{$supplier->id}");
 
         $response->assertStatus(200)
@@ -239,7 +239,7 @@ class SupplierTest extends TestCase
             'contact_person' => 'Updated Contact',
         ];
 
-        $response = $this->actingAs($user, 'api')
+        $response = $this->actingAs($user, 'sanctum')
             ->putJson("/api/v1/suppliers/{$supplier->id}", $data);
 
         $response->assertStatus(200)
@@ -257,7 +257,7 @@ class SupplierTest extends TestCase
         $user = User::factory()->create();
         $supplier = Supplier::factory()->create(['business_id' => $user->business_id]);
 
-        $response = $this->actingAs($user, 'api')
+        $response = $this->actingAs($user, 'sanctum')
             ->deleteJson("/api/v1/suppliers/{$supplier->id}");
 
         $response->assertStatus(200)
@@ -277,7 +277,7 @@ class SupplierTest extends TestCase
         $user = User::factory()->create();
         $supplier = Supplier::factory()->create(['business_id' => $user->business_id]);
 
-        $response = $this->actingAs($user, 'api')
+        $response = $this->actingAs($user, 'sanctum')
             ->postJson("/api/v1/suppliers/{$supplier->id}/calculate-performance");
 
         $response->assertStatus(200)
@@ -295,7 +295,7 @@ class SupplierTest extends TestCase
         $user = User::factory()->create();
         Supplier::factory()->count(10)->create(['business_id' => $user->business_id, 'performance_score' => 85]);
 
-        $response = $this->actingAs($user, 'api')
+        $response = $this->actingAs($user, 'sanctum')
             ->getJson('/api/v1/suppliers/top-performers');
 
         $response->assertStatus(200)

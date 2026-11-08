@@ -4,6 +4,11 @@ use App\Http\Controllers as Web;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
+// Legacy dashboard alias — the SPA and older links still point at /dashboard.
+Route::get('/dashboard', fn () => redirect()->route('admin.dashboard.index'))
+    ->middleware('auth')
+    ->name('dashboard.redirect');
+
 // Manual Payment Routes (kept for supplier payments)
 Route::get('/payments-gateways/{plan_id}/{business_id}', [Web\PaymentController::class, 'index'])->name('payments-gateways.index');
 Route::post('/payments/{plan_id}/{gateway_id}', [Web\PaymentController::class, 'payment'])->name('payments-gateways.payment');

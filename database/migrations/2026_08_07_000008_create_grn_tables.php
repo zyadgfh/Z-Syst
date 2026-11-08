@@ -17,8 +17,8 @@ return new class extends Migration
             $table->foreignId('supplier_id')->nullable()->constrained('parties')->nullOnDelete();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('received_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('received_by')->nullable()->constrained('app_users')->nullOnDelete();
+            $table->foreignUuid('verified_by')->nullable()->constrained('app_users')->nullOnDelete();
 
             $table->string('grn_number')->unique();
             $table->date('received_date');
@@ -50,7 +50,7 @@ return new class extends Migration
         Schema::create('quality_checks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('grn_item_id')->constrained('grn_items')->cascadeOnDelete();
-            $table->foreignId('checker_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('checker_id')->nullable()->constrained('app_users')->nullOnDelete();
 
             $table->date('check_date');
             $table->string('quality_status')->default('pending');

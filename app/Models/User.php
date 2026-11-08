@@ -115,7 +115,12 @@ class User extends AppUser
     public function setPasswordAttribute($value): void
     {
         if (config('supabase.fallback_eloquent')) {
-            $this->attributes['password'] = \Illuminate\Support\Facades\Hash::make((string) $value);
+            // Idempotent: callers (factories, password change) may pass an
+            // already-hashed value; re-hashing it would brick the account.
+            $value = (string) $value;
+            $this->attributes['password'] = \Illuminate\Support\Facades\Hash::isHashed($value)
+                ? $value
+                : \Illuminate\Support\Facades\Hash::make($value);
 
             return;
         }

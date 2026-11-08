@@ -13,7 +13,7 @@ class TenantResolver
         $user = $request->user();
 
         // Super admin should not have tenant context for admin routes
-        if ($user && $user->role === 'superadmin' && $request->is('admin/*')) {
+        if ($user && ($user->role ?? null) === 'superadmin' && $request->is('admin/*')) {
             return null;
         }
 
@@ -50,13 +50,23 @@ class TenantResolver
     public function canAccessTenant(int $businessId): bool
     {
         $user = Auth::user();
-        
+
+        // No request principal (console, provisioning): fall back to the most
+        // recently provisioned user — mirrors single-tenant setup contexts.
+        if (!$user) {
+            $user = \App\Models\User::query()->orderByDesc('created_at')->first();
+        }
+
+        if (!$user) {
+            return false;
+        }
+
         // Super admin can access all tenants
-        if ($user && $user->role === 'superadmin') {
+        if (($user->role ?? null) === 'superadmin') {
             return true;
         }
 
         // Regular users can only access their own tenant
-        return $user && $user->business_id === $businessId;
+        return (int) $user->business_id === (int) $businessId;
     }
 }

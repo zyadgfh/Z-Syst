@@ -16,8 +16,9 @@ return new class extends Migration
             $table->foreignId('supplier_id')->nullable()->constrained('parties')->nullOnDelete();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('created_by')->nullable()->constrained('app_users')->nullOnDelete();
+            $table->foreignUuid('approved_by')->nullable()->constrained('app_users')->nullOnDelete();
+            $table->foreignUuid('rejected_by')->nullable()->constrained('app_users')->nullOnDelete();
             
             $table->string('po_number')->unique();
             $table->string('status')->default('draft'); // draft, sent, accepted, partially_received, received, cancelled, rejected

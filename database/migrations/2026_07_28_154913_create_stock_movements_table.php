@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->foreignId('stock_id')->nullable()->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignUuid('user_id')->nullable()->constrained('app_users')->nullOnDelete();
             $table->enum('movement_type', ['in', 'out', 'adjustment', 'transfer', 'return'])->default('in');
             $table->integer('quantity')->default(0);
             $table->integer('before_quantity')->default(0);

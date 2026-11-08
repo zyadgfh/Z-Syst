@@ -20,15 +20,21 @@ return new class extends Migration
             $table->decimal('current_stock', 12, 2)->default(0);
             $table->decimal('pending_purchases', 12, 2)->default(0);
             $table->decimal('suggested_order_qty', 12, 2)->default(0);
+            $table->integer('lead_time_days')->default(7);
+            $table->decimal('reorder_point', 12, 2)->default(0);
+            $table->decimal('safety_stock', 12, 2)->default(0);
+            $table->decimal('min_stock_level', 12, 2)->default(0);
+            $table->decimal('max_stock_level', 12, 2)->default(0);
             $table->decimal('confidence_score', 5, 2)->nullable();
             $table->string('priority')->default('medium'); // high, medium, low
             $table->string('status')->default('pending'); // pending, approved, converted, rejected
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('approved_by')->nullable()->constrained('app_users')->nullOnDelete();
             $table->timestamp('approved_at')->nullable();
             $table->foreignId('converted_purchase_id')->nullable()->constrained('purchases')->nullOnDelete();
             $table->timestamp('converted_at')->nullable();
             $table->text('notes')->nullable();
             $table->json('reasoning')->nullable(); // AI reasoning for suggestion
+            $table->boolean('enabled')->default(true);
             $table->timestamps();
 
             $table->index(['business_id', 'status']);

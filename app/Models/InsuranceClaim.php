@@ -41,6 +41,16 @@ class InsuranceClaim extends Model
         'metadata',
     ];
 
+    public function policy(): BelongsTo
+    {
+        return $this->belongsTo(InsurancePolicy::class, 'insurance_policy_id');
+    }
+
+    public function isApproved(): bool
+    {
+        return in_array($this->status, ['approved', 'partially_approved'], true);
+    }
+
     protected $casts = [
         'insurance_company_id' => 'integer',
         'insurance_policy_id' => 'integer',
@@ -51,7 +61,7 @@ class InsuranceClaim extends Model
         'submission_date' => 'date',
         'total_amount' => 'decimal:2',
         'covered_amount' => 'decimal:2',
-        'patient_responsibility' => 'decimal:4',
+        'patient_responsibility' => 'decimal:2',
         'approved_amount' => 'decimal:2',
         'paid_amount' => 'decimal:2',
         'rejected_amount' => 'decimal:2',

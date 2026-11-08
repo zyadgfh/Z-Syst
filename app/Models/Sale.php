@@ -39,6 +39,11 @@ class Sale extends Model
         'client_uuid',
     ];
 
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class, 'business_id');
+    }
+
     public function details()
     {
         return $this->hasMany(SaleDetails::class);
@@ -84,6 +89,7 @@ class Sale extends Model
     public function scopeForBusiness(Builder $q, int $businessId): Builder { return $q->where('business_id', $businessId); }
 
     protected $casts = [
+        'saleDate' => 'datetime',
         'discountAmount' => 'double',
         'dueAmount' => 'double',
         'isPaid' => 'boolean',

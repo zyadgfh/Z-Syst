@@ -20,6 +20,8 @@ class Product extends Model
      */
     protected $fillable = [
         'productName',
+        'name',
+        'stock',
         'business_id',
         'category_id',
         'unit_id',
@@ -174,5 +176,16 @@ class Product extends Model
     {
         return $query;
     }
+    /**
+     * The public-facing name maps onto the physical productName column.
+     * Without this mutator mass assignments of `name` are silently dropped
+     * (column does not exist), which also suppresses the `updated` event —
+     * and with it the audit trail.
+     */
+    public function setNameAttribute($value): void
+    {
+        $this->attributes['productName'] = $value;
+    }
+
 }
 

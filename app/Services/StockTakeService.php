@@ -45,6 +45,10 @@ class StockTakeService
     }
 
     /** Register a scanned code (product code/barcode) into the session. */
+    /** Per-audit+product instance cache so repeated scans keep the same
+     *  detail instance in sync with the cumulative count. */
+    protected array $scanCache = [];
+
     public function scan(StockAudit $audit, string $code, int $qty = 1): ?StockAuditDetail
     {
         $businessId = (int) $audit->business_id;
@@ -53,9 +57,11 @@ class StockTakeService
             return null;
         }
 
-        $detail = StockAuditDetail::where('stock_audit_id', $audit->id)
-            ->where('product_id', $productId)
-            ->orderBy('id')->first();
+        $cacheKey = $audit->id.':'.$productId;
+        $detail = $this->scanCache[$cacheKey]
+            ?? StockAuditDetail::where('stock_audit_id', $audit->id)
+                ->where('product_id', $productId)
+                ->orderBy('id')->first();
 
         if (!$detail) {
             // Unlisted item found on shelf — add as a line.
@@ -69,9 +75,11 @@ class StockTakeService
             ]);
         }
 
-        $detail->increment('physical_quantity', max(1, $qty));
+        $detail->physical_quantity = (int) $detail->physical_quantity + max(1, $qty);
+        $detail->save();
 
         $this->recomputeLine($detail);
+        $this->scanCache[$cacheKey] = $detail;
 
         return $detail;
     }

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('sale_id')->nullable()->constrained('sales')->nullOnDelete();
             $table->foreignId('prescription_id')->nullable()->constrained('prescriptions')->nullOnDelete();
             $table->foreignId('customer_id')->nullable()->constrained('parties')->nullOnDelete();
-            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('user_id')->nullable()->constrained('app_users')->nullOnDelete();
             $table->string('claim_number')->unique();
             $table->date('service_date');
             $table->date('submission_date')->nullable();

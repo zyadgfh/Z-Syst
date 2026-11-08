@@ -118,9 +118,13 @@ class GoodsReceivedNote extends Model
         return in_array($this->status, ['accepted', 'partially_accepted'], true);
     }
 
-    public function markAsVerified(): void
+    public function markAsVerified($userId = null): void
     {
-        $this->forceFill(['status' => 'verified', 'verified_at' => now()])->save();
+        $this->forceFill([
+            'status' => 'verified',
+            'verified_at' => now(),
+            'verified_by' => $userId ?: auth()->id(),
+        ])->save();
     }
 
     public function markAsAccepted(): void
@@ -136,6 +140,26 @@ class GoodsReceivedNote extends Model
     public function markAsRejected(): void
     {
         $this->forceFill(['status' => 'rejected'])->save();
+    }
+
+    public function getTotalAcceptedQuantityAttribute(): int
+    {
+        return (int) $this->items()->sum('accepted_quantity');
+    }
+
+    public function getTotalValueAttribute(): float
+    {
+        return (float) $this->items()->get()->sum(fn ($i) => (float) $i->accepted_quantity * (float) $i->purchase_price);
+    }
+
+    public function getCompletionPercentageAttribute(): int
+    {
+        $ordered = (int) $this->items()->sum('ordered_quantity');
+        if ($ordered <= 0) {
+            return 0;
+        }
+
+        return (int) round(((int) $this->items()->sum('received_quantity') / $ordered) * 100);
     }
 
     public function getTotalReceivedQuantityAttribute(): int

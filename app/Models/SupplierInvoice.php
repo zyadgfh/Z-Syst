@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Services\SupplierInvoiceService;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * SupplierInvoice - table `supplier_invoices` (Supabase Postgres).
@@ -96,6 +99,61 @@ class SupplierInvoice extends Model
         return $this->belongsTo(PurchaseOrder::class, 'purchase_order_id');
     }
 
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Party::class, 'supplier_id');
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(\App\Models\SupplierInvoiceItem::class, 'supplier_invoice_id');
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(\App\Models\SupplierInvoicePayment::class, 'supplier_invoice_id');
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', self::STATUS_PENDING);
+    }
+
+    public function scopeOverdue($query)
+    {
+        return $query->where('due_date', '<', now())
+            ->whereNotIn('status', [self::STATUS_PAID, self::STATUS_CANCELLED, self::STATUS_REJECTED]);
+    }
+
+    public function scopeUnpaid($query)
+    {
+        return $query->whereNotIn('status', [self::STATUS_PAID, self::STATUS_CANCELLED, self::STATUS_REJECTED]);
+    }
+
+    public function scopeByStatus($query, string $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    /**
+     * Recalculate money columns from the line items. Unit prices are treated
+     * as tax-inclusive; the header discount reduces the total.
+     */
+    public function calculateTotal(): float
+    {
+        $subtotal = round((float) $this->items->sum(
+            fn ($item) => ((float) $item->quantity) * ((float) $item->unit_price) * (1 - ((float) $item->discount) / 100)
+        ), 2);
+
+        $this->forceFill([
+            'subtotal' => $subtotal,
+            'total_amount' => round($subtotal - (float) $this->discount_amount, 2),
+            'balance' => round(max(0, $subtotal - (float) $this->discount_amount - (float) $this->paid_amount), 2),
+        ])->save();
+
+        return (float) $this->total_amount;
+    }
+
     public function scopeForBusiness($query, $businessId)
     {
         return $businessId ? $query->where('business_id', $businessId) : $query;
@@ -116,7 +174,7 @@ class SupplierInvoice extends Model
     public function isDueSoon(int $days = 7): bool
     {
         return $this->due_date !== null
-            && $this->status === self::STATUS_PENDING
+            && in_array($this->status, [self::STATUS_PENDING, self::STATUS_APPROVED, self::STATUS_PARTIALLY_PAID], true)
             && $this->due_date->isFuture()
             && $this->due_date->lte(now()->addDays($days));
     }
@@ -124,12 +182,53 @@ class SupplierInvoice extends Model
     public function isCriticallyOverdue(int $days = 30): bool
     {
         return $this->due_date !== null
-            && in_array($this->status, [self::STATUS_PENDING, self::STATUS_PARTIALLY_PAID], true)
+            && in_array($this->status, [self::STATUS_PENDING, self::STATUS_APPROVED, self::STATUS_PARTIALLY_PAID], true)
             && $this->due_date->lt(now()->subDays($days));
     }
 
     public function isPending(): bool
     {
         return $this->status === self::STATUS_PENDING;
+    }
+
+    public function getDaysUntilDue(): int
+    {
+        return $this->due_date ? max(0, now()->startOfDay()->diffInDays($this->due_date->copy()->startOfDay(), false)) : 0;
+    }
+
+    public function approve($userId = null): static
+    {
+        // Direct state change — the service guards and notifies, then
+        // delegates here; delegating back would recurse forever.
+        $this->forceFill([
+            'status' => self::STATUS_APPROVED,
+            'approved_by' => $userId ?: auth()->id(),
+            'approved_at' => now(),
+        ])->save();
+
+        return $this->refresh();
+    }
+
+    public function reject($userId = null, string $reason = null): static
+    {
+        $this->forceFill([
+            'status' => self::STATUS_REJECTED,
+            'approved_by' => $userId ?: auth()->id(),
+            'approved_at' => now(),
+            'internal_notes' => trim((string) $this->internal_notes."\n".'Rejected: '.$reason),
+        ])->save();
+
+        return $this->refresh();
+    }
+
+    public function cancel(string $reason = null): static
+    {
+        $this->forceFill([
+            'status' => self::STATUS_CANCELLED,
+            'cancellation_reason' => $reason,
+            'cancelled_at' => now(),
+        ])->save();
+
+        return $this->refresh();
     }
 }

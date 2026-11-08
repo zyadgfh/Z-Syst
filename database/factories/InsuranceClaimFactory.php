@@ -34,9 +34,9 @@ class InsuranceClaimFactory extends Factory
             'total_amount' => $totalAmount,
             'covered_amount' => $coveredAmount,
             'patient_responsibility' => $patientResponsibility,
-            'approved_amount' => fake()->optional(0.7)->randomFloat(2, 0, $coveredAmount),
-            'paid_amount' => fake()->boolean(50) ? fake()->randomFloat(2, 0, $coveredAmount) : 0,
-            'rejected_amount' => fake()->boolean(10) ? fake()->randomFloat(2, 0, $coveredAmount) : 0,
+            'approved_amount' => fn (array $attrs) => fake()->optional(0.7)->randomFloat(2, 0, (float) ($attrs['covered_amount'] ?? $coveredAmount)),
+            'paid_amount' => fn (array $attrs) => fake()->boolean(50) ? fake()->randomFloat(2, 0, (float) ($attrs['covered_amount'] ?? $coveredAmount)) : 0,
+            'rejected_amount' => fn (array $attrs) => fake()->boolean(10) ? fake()->randomFloat(2, 0, (float) ($attrs['covered_amount'] ?? $coveredAmount)) : 0,
             'status' => fake()->randomElement(['draft', 'submitted', 'under_review', 'approved', 'partially_approved', 'rejected', 'paid', 'cancelled']),
             'rejection_reason' => fake()->optional()->sentence(),
             'external_reference' => fake()->optional()->numerify('EXT########'),
@@ -45,7 +45,7 @@ class InsuranceClaimFactory extends Factory
             'line_items' => fake()->optional()->randomElements([
                 ['product_id' => 1, 'amount' => 50, 'coverage' => 80],
                 ['product_id' => 2, 'amount' => 30, 'coverage' => 90],
-            ], rand(1, 3)),
+            ], rand(1, 2)),
         ];
     }
 }

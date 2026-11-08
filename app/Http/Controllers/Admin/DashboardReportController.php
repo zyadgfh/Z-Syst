@@ -29,7 +29,7 @@ class DashboardReportController extends Controller
 
         $statistics = $this->dashboardReportService->getOverallStatistics($filters);
 
-        return response()->json($statistics);
+        return response()->json(['data' => $statistics]);
     }
 
     /**

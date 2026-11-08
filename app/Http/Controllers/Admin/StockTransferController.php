@@ -70,6 +70,7 @@ class StockTransferController extends Controller
 
         try {
             $transfer = $this->warehouseService->createTransfer($request->only([
+        'business_id',
         'from_warehouse_id',
         'to_warehouse_id',
         'product_id',
@@ -84,10 +85,10 @@ class StockTransferController extends Controller
             return response()->json([
                 'message' => __('Stock transfer created successfully'),
                 'redirect' => route('admin.stock-transfers.index'),
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => __('Error creating stock transfer: ') . $e->getMessage(),
+                'message' => __('Error creating stock transfer: ') . get_class($e) . ': ' . $e->getMessage(),
             ], 500);
         }
     }

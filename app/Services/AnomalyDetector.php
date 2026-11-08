@@ -85,7 +85,7 @@ class AnomalyDetector
         return 0;
     }
 
-    protected function alert(int $businessId, string $type, string $severity, string $title, array $details, ?$userId = null): void
+    protected function alert(int $businessId, string $type, string $severity, string $title, array $details, ?string $userId = null): void
     {
         // Dedupe: same type + user + day
         $exists = AnomalyAlert::forBusiness($businessId)->where('type', $type)

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('stock_audits', function (Blueprint $table) {
             $table->id();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignUuid('user_id')->nullable()->constrained('app_users')->nullOnDelete();
             $table->string('audit_number')->unique();
             $table->enum('audit_type', ['periodic', 'manual', 'spot_check', 'financial'])->default('manual');
             $table->enum('status', ['pending', 'in_progress', 'completed', 'cancelled'])->default('pending');

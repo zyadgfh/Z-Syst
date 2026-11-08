@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('prescription_number')->nullable()->unique();
             $table->string('review_status')->default('pending');
             $table->text('review_notes')->nullable();
-            $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('reviewed_by')->nullable()->constrained('app_users')->nullOnDelete();
             $table->timestamp('reviewed_at')->nullable();
             $table->date('expires_at')->nullable();
             $table->string('patient_name')->nullable();

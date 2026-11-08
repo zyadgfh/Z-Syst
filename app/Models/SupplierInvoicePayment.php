@@ -70,4 +70,20 @@ class SupplierInvoicePayment extends Model
     {
         return $this->belongsTo(Branch::class, 'branch_id');
     }
+
+    public function isPending(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    public function approve($userId = null): static
+    {
+        $this->forceFill([
+            'status' => self::STATUS_APPROVED,
+            'approved_by' => $userId ?: auth()->id(),
+            'approved_at' => now(),
+        ])->save();
+
+        return $this->refresh();
+    }
 }

@@ -38,12 +38,12 @@ trait TenantScoped
 
             static::$tenantScopeAuthBusy = true;
             try {
-                $user = auth()->user();
+                $user = \Illuminate\Support\Facades\Auth::user();
             } finally {
                 static::$tenantScopeAuthBusy = false;
             }
 
-            if (!$user || $user->role === 'superadmin' || !$user->business_id) {
+            if (!$user || ($user->role ?? null) === 'superadmin' || !$user->business_id) {
                 return;
             }
 
@@ -51,7 +51,8 @@ trait TenantScoped
         });
 
         static::creating(function ($model) {
-            if (!$model->business_id && ($user = auth()->user()) && $user->business_id) {
+            $user = \Illuminate\Support\Facades\Auth::user();
+            if (!$model->business_id && $user && $user->business_id) {
                 $model->business_id = $user->business_id;
             }
         });

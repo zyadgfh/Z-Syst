@@ -50,4 +50,9 @@ class RecallEvent extends Model
             'resolved_at' => now(),
         ])->save();
     }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\User::class, 'user_id');
+    }
 }

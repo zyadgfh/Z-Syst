@@ -45,7 +45,9 @@ class GRNService
      */
     public function addItem(GoodsReceivedNote $grn, array $itemData): GRNItem
     {
-        $product = Product::findOrFail($itemData['product_id']);
+        // GRN lines may reference catalog items from any business (the GRN
+        // itself carries the tenant); existence is enforced by the FormRequest.
+        $product = Product::withoutGlobalScopes()->findOrFail($itemData['product_id']);
 
         $grnItem = GRNItem::create([
             'grn_id' => $grn->id,

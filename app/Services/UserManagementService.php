@@ -351,6 +351,16 @@ class UserManagementService
      */
     public function verifyPassword(string $email, string $password): bool
     {
+        // Supabase fallback mode (dev / CI): there is no GoTrue — verify the
+        // bcrypt hash stored on app_users directly.
+        if (config('supabase.fallback_eloquent')) {
+            $hash = \App\Models\AppUser::query()
+                ->whereRaw('lower(email) = ?', [mb_strtolower(trim($email))])
+                ->value('password');
+
+            return $hash !== null && \Illuminate\Support\Facades\Hash::check($password, (string) $hash);
+        }
+
         try {
             $this->auth->signInWithPassword($email, $password);
 

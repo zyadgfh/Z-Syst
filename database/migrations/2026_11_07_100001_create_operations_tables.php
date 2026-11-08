@@ -18,7 +18,7 @@ return new class extends Migration
         Schema::create('shifts', function (Blueprint $t) {
             $t->id();
             $t->foreignId('business_id')->constrained()->cascadeOnDelete();
-            $t->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $t->foreignUuid('user_id')->nullable()->constrained('app_users')->nullOnDelete();
             $t->string('shift_number')->unique();
             $t->decimal('opening_float', 12, 2)->default(0);
             $t->enum('status', ['open', 'closed'])->default('open');
@@ -37,7 +37,7 @@ return new class extends Migration
             $t->id();
             $t->foreignId('shift_id')->constrained()->cascadeOnDelete();
             $t->foreignId('business_id')->constrained()->cascadeOnDelete();
-            $t->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $t->foreignUuid('user_id')->nullable()->constrained('app_users')->nullOnDelete();
             $t->enum('type', ['cash_in', 'cash_out', 'sale_cash', 'refund']);
             $t->decimal('amount', 12, 2);
             $t->string('reason')->nullable();
@@ -93,7 +93,7 @@ return new class extends Migration
             $t->foreignId('business_id')->constrained()->cascadeOnDelete();
             $t->foreignId('sale_id')->nullable()->constrained()->nullOnDelete();
             $t->foreignId('store_order_id')->nullable()->constrained()->nullOnDelete();
-            $t->foreignId('courier_user_id')->nullable()->constrained('users')->nullOnDelete();
+            $t->foreignUuid('courier_user_id')->nullable()->constrained('app_users')->nullOnDelete();
             $t->string('courier_name')->nullable();
             $t->string('customer_name')->nullable();
             $t->string('customer_phone')->nullable();
@@ -162,7 +162,7 @@ return new class extends Migration
             $t->unsignedBigInteger('source_id')->nullable();
             $t->decimal('amount', 14, 2);
             $t->json('lines'); // [{account_code, debit, credit, memo}]
-            $t->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $t->foreignUuid('user_id')->nullable()->constrained('app_users')->nullOnDelete();
             $t->timestamps();
             $t->index(['business_id', 'entry_date']);
         });
@@ -175,7 +175,7 @@ return new class extends Migration
             $t->enum('severity', ['low', 'medium', 'high'])->default('medium');
             $t->string('title');
             $t->json('details')->nullable();
-            $t->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $t->foreignUuid('user_id')->nullable()->constrained('app_users')->nullOnDelete();
             $t->boolean('is_resolved')->default(false);
             $t->timestamps();
             $t->index(['business_id', 'is_resolved']);

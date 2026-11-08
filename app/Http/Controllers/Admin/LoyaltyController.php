@@ -64,7 +64,8 @@ class LoyaltyController extends Controller
             return response()->json([
                 'message' => __('Loyalty program created successfully'),
                 'redirect' => route('admin.loyalty.programs'),
-            ]);
+                'data' => $program->only(['id', 'business_id', 'name', 'points_per_currency', 'min_points_for_reward', 'is_active']),
+            ], 201);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => __('Error creating loyalty program: ') . $e->getMessage(),
@@ -150,30 +151,44 @@ class LoyaltyController extends Controller
         $request->validate([
             'business_id' => 'required|exists:businesses,id',
             'party_id' => 'required|exists:parties,id',
-            'type' => 'required|in:call,visit,email,meeting,support',
+            'type' => 'required|in:call,visit,email,meeting,support,earned,redeemed',
             'notes' => 'nullable|string',
-            'user_id' => 'nullable|exists:users,id',
+            'user_id' => 'nullable|exists:app_users,id',
+            'program_id' => 'nullable|exists:loyalty_programs,id',
+            'points' => 'nullable|integer',
         ]);
 
-        try {
-            $interaction = $this->loyaltyService->createInteraction($request->only([
-        'business_id',
-        'name',
-        'points_per_currency',
-        'min_points_for_reward',
-        'is_active'
-    ]));
+        // Loyalty movement (points ledger) — distinct from CRM interactions.
+        if (in_array($request->input('type'), ['earned', 'redeemed'], true) && $request->filled('program_id')) {
+            $transaction = \App\Models\LoyaltyTransaction::create([
+                'business_id' => (int) $request->business_id,
+                'loyalty_program_id' => (int) $request->program_id,
+                'party_id' => (int) $request->party_id,
+                'points' => (int) $request->points,
+                'type' => (string) $request->type,
+                'notes' => $request->notes,
+            ]);
 
             return response()->json([
-                'message' => __('Customer interaction created successfully'),
-                'redirect' => route('admin.loyalty.interactions'),
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => __('Error creating customer interaction: ') . $e->getMessage(),
-            ], 500);
+                'message' => __('Loyalty transaction recorded successfully'),
+                'data' => $transaction->only(['id', 'business_id', 'loyalty_program_id', 'party_id', 'points', 'type']),
+            ], 201);
         }
+
+        $interaction = $this->loyaltyService->createInteraction($request->only([
+            'business_id',
+            'party_id',
+            'type',
+            'notes',
+            'user_id',
+        ]));
+
+        return response()->json([
+            'message' => __('Interaction recorded successfully'),
+            'data' => $interaction->only(['id', 'business_id', 'party_id', 'type']),
+        ], 201);
     }
+
 
     /**
      * Get loyalty statistics

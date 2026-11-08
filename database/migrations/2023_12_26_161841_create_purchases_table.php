@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('party_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignUuid('user_id')->nullable()->constrained('app_users')->nullOnDelete();
             $table->foreignId('tax_id')->nullable()->constrained()->nullOnDelete();
             $table->double('discountAmount', 10, 2)->default(0);
             $table->double('tax_amount', 10, 2)->default(0);

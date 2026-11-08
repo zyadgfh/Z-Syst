@@ -2,7 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\Product;
+use App\Observers\ModelAuditObserver;
 use App\Services\TenantResolver;
+use Illuminate\Auth\SessionGuard;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,5 +29,29 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+
+        Product::observe(ModelAuditObserver::class);
+
+        // Allow tests to mock auth through the helper form: auth()->shouldReceive(...)
+        // falls through AuthManager to the guard, whose macro proxies the Auth
+        // facade swap.
+        if (method_exists(SessionGuard::class, 'macro')) {
+            SessionGuard::macro('shouldReceive', function (string $method) {
+                return Auth::shouldReceive($method);
+            });
+        }
+
+        // Defensive: cap every outbound HTTP request so a misbehaving
+        // integration (ETA, Supabase storage, Telegram, ...) can never wedge
+        // a request or a CI run. Individual services may override with a
+        // stricter ->timeout().
+        Http::globalMiddleware(function ($handler) {
+            return function ($request, array $options) use ($handler) {
+                return $handler($request, array_merge([
+                    'timeout' => 10,
+                    'connect_timeout' => 5,
+                ], $options));
+            };
+        });
     }
 }

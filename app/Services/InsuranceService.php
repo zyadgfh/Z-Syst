@@ -118,6 +118,14 @@ class InsuranceService
     {
         return DB::transaction(function () use ($data) {
             $data['claim_number'] = $this->generateUniqueClaimNumber();
+
+            // The claim lives on the policy's tenant — never trust a caller-supplied business_id.
+            $policyForTenant = isset($data['insurance_policy_id'])
+                ? InsurancePolicy::find($data['insurance_policy_id'])
+                : null;
+            if ($policyForTenant) {
+                $data['business_id'] = $policyForTenant->business_id;
+            }
             
             // Auto-calculate coverage if not provided
             if (!isset($data['covered_amount']) || !isset($data['patient_responsibility'])) {
@@ -171,6 +179,9 @@ class InsuranceService
             // Update policy used amount based on approval
             if ($claim->policy && $claim->isApproved()) {
                 $claim->policy->increment('used_amount', $claim->approved_amount);
+                $claim->policy->update([
+                    'remaining_limit' => max(0, (float) $claim->policy->annual_limit - (float) $claim->policy->used_amount),
+                ]);
             }
 
             return $claim->fresh();
@@ -226,16 +237,31 @@ class InsuranceService
         // Get applicable coverage rules
         $coverageRules = $this->getApplicableCoverageRules($policy, $data);
         
+        $total = (float) $data['total_amount'];
+
         if ($coverageRules->isEmpty()) {
-            // Use default company coverage (policy may have no company linked)
-            return $policy->company
-                ? $policy->company->calculateDefaultCoverage((float) $data['total_amount'])
-                : 0.0;
+            // No explicit rules: the policy's own coverage percent wins, then
+            // the company default, then nothing.
+            $percent = (float) ($policy->coverage_percent ?? 0);
+            if ($percent <= 0 && $policy->company) {
+                $percent = (float) ($policy->company->default_coverage_percent ?? 0);
+            }
+            $covered = round($total * $percent / 100, 2);
+
+            return [
+                'covered_amount' => $covered,
+                'patient_responsibility' => max(0, $total - $covered),
+            ];
         }
 
         // Apply best coverage rule
         $bestCoverage = $coverageRules->first();
-        return $bestCoverage->calculateCoverage($data['total_amount']);
+        $covered = (float) $bestCoverage->calculateCoverage($total);
+
+        return [
+            'covered_amount' => $covered,
+            'patient_responsibility' => max(0, $total - $covered),
+        ];
     }
 
     /**

@@ -20,15 +20,15 @@ return new class extends Migration
             $table->string('barcode_image')->nullable();
             $table->string('print_status', 20)->default('not_printed'); // not_printed, printed, reprinted
             $table->timestamp('printed_at')->nullable();
-            $table->foreignId('printed_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignUuid('printed_by')->nullable()->constrained('app_users')->onDelete('set null');
             $table->integer('print_count')->default(0);
             $table->string('size', 20)->default('standard'); // small, standard, large
             $table->json('print_settings')->nullable();
             $table->boolean('is_active')->default(true);
             $table->foreignId('business_id')->constrained()->onDelete('cascade');
             $table->foreignId('branch_id')->nullable()->constrained()->onDelete('set null');
-            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
-            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignUuid('created_by')->nullable()->constrained('app_users')->onDelete('set null');
+            $table->foreignUuid('updated_by')->nullable()->constrained('app_users')->onDelete('set null');
             $table->timestamps();
             $table->softDeletes();
 

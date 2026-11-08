@@ -491,7 +491,6 @@ class IntegrationTest extends TestCase
             ->get(route('dashboard-reports.overall'));
 
         $response->assertStatus(200);
-        $data = $response->json();
-        $this->assertArrayHasKey('data');
+        $this->assertArrayHasKey('data', $response->json());
     }
 }

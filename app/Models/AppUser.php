@@ -33,8 +33,11 @@ class AppUser extends Authenticatable
     public $incrementing = false;
 
     protected $fillable = [
+        'id',
         'business_id',
         'name',
+        'email',
+        'password',
         'role',
         'phone',
         'image',

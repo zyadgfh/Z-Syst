@@ -28,7 +28,7 @@ class PurchaseOrderService
     {
         return DB::transaction(function () use ($data) {
             $po = PurchaseOrder::create([
-                'po_number' => $data['po_number'] ?? ('PO-'.str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT)),
+                'po_number' => $data['po_number'] ?? ('PO-'.date('Y').'-'.str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT)),
                 'supplier_id' => $data['supplier_id'] ?? null,
                 'business_id' => $data['business_id'],
                 'branch_id' => $data['branch_id'] ?? null,
@@ -58,7 +58,7 @@ class PurchaseOrderService
      */
     public function addItem(PurchaseOrder $po, array $itemData): PurchaseOrderItem
     {
-        $product = Product::findOrFail($itemData['product_id']);
+        $product = Product::withoutGlobalScopes()->findOrFail($itemData['product_id']);
 
         $poItem = PurchaseOrderItem::create([
             'purchase_order_id' => $po->id,
@@ -69,6 +69,7 @@ class PurchaseOrderService
             'unit_price' => $itemData['unit_price'] ?? $product->purchase_without_tax ?? 0,
             'discount' => $itemData['discount'] ?? 0,
             'tax' => $itemData['tax'] ?? 0,
+            'total' => round((float) $itemData['quantity'] * (float) ($itemData['unit_price'] ?? 0) * (1 - ((float) ($itemData['discount'] ?? 0)) / 100), 2),
             'notes' => $itemData['notes'] ?? null,
         ]);
 
@@ -201,7 +202,7 @@ class PurchaseOrderService
      */
     public function convertToPurchase(PurchaseOrder $po): \App\Models\Purchase
     {
-        if (!$po->isApproved()) {
+        if (!($po->isApproved() || $po->status === PurchaseOrder::STATUS_ACCEPTED)) {
             throw new \Exception('Only approved orders can be converted to purchases');
         }
 
@@ -302,19 +303,22 @@ class PurchaseOrderService
      */
     public function getStatistics(int $businessId): array
     {
-        $total = PurchaseOrder::forBusiness($businessId)->count();
-        $draft = PurchaseOrder::forBusiness($businessId)->draft()->count();
-        $pending = PurchaseOrder::forBusiness($businessId)->pending()->count();
-        $approved = PurchaseOrder::forBusiness($businessId)->approved()->count();
-        $overdue = PurchaseOrder::forBusiness($businessId)->overdue()->count();
+        $base = PurchaseOrder::forBusiness($businessId);
 
         return [
-            'total' => $total,
-            'draft' => $draft,
-            'pending' => $pending,
-            'approved' => $approved,
-            'overdue' => $overdue,
+            'total' => (clone $base)->count(),
+            'draft' => (clone $base)->draft()->count(),
+            'sent' => (clone $base)->byStatus(self::statusSent())->count(),
+            'pending' => (clone $base)->pending()->count(),
+            'approved' => (clone $base)->approved()->count(),
+            'received' => (clone $base)->approved()->count(),
+            'overdue' => (clone $base)->overdue()->count(),
         ];
+    }
+
+    protected static function statusSent(): string
+    {
+        return \App\Models\PurchaseOrder::STATUS_SENT;
     }
 
     /**

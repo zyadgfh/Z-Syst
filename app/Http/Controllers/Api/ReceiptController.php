@@ -44,9 +44,12 @@ class ReceiptController extends Controller
         ]);
     }
 
-    public function generateForSale(Request $request, Sale $sale)
+    public function generateForSale(Request $request, $saleId)
     {
-        if ($sale->business_id !== $request->user()->business_id) {
+        // Resolve unscoped so a cross-tenant id yields 403 (not a scoped 404).
+        $sale = Sale::withoutGlobalScopes()->findOrFail($saleId);
+
+        if ((int) $sale->business_id !== (int) $request->user()->business_id) {
             abort(403, __('Forbidden.'));
         }
 
@@ -58,9 +61,12 @@ class ReceiptController extends Controller
         ], 201);
     }
 
-    public function generateForPurchase(Request $request, Purchase $purchase)
+    public function generateForPurchase(Request $request, $purchaseId)
     {
-        if ($purchase->business_id !== $request->user()->business_id) {
+        // Resolve unscoped so a cross-tenant id yields 403 (not a scoped 404).
+        $purchase = Purchase::withoutGlobalScopes()->findOrFail($purchaseId);
+
+        if ((int) $purchase->business_id !== (int) $request->user()->business_id) {
             abort(403, __('Forbidden.'));
         }
 
