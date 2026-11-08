@@ -217,12 +217,6 @@ class Barcode extends Model
     }
 
 
-    public static function calculateUPCChecksum(string $digits11): int
-    {
-        $odd = 0; $even = 0;
-        for ($i = 0; $i < 11; $i++) {
-            if ($i % 2 === 0) { $odd += (int) $digits11[$i]; }
-            else { $even += (int) $digits11[$i]; 
     /** Test/label contract: public checksum helpers over the GS1 internals. */
     public static function calculateEAN13Checksum(string $digits12): int
     {

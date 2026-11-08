@@ -37,11 +37,12 @@ class StockAudit extends Model
 
     public function business(): BelongsTo
     {
-        return $th
+        return $this->belongsTo(Business::class, 'business_id');
+    }
+
     public function details(): HasMany
     {
         return $this->hasMany(StockAuditDetail::class, 'stock_audit_id');
     }
-is->belongsTo(Business::class, 'business_id');
     }
 }
