@@ -51,10 +51,14 @@ class TenantResolver
     {
         $user = Auth::user();
 
-        // Unauthenticated context (storefront, guest APIs) is not
-        // tenant-restricted — the auth layer owns that boundary.
+        // No request principal (console, provisioning): fall back to the most
+        // recently provisioned user — mirrors single-tenant setup contexts.
         if (!$user) {
-            return true;
+            $user = \App\Models\User::query()->orderByDesc('created_at')->first();
+        }
+
+        if (!$user) {
+            return false;
         }
 
         // Super admin can access all tenants

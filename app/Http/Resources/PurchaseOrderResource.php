@@ -53,4 +53,29 @@ class PurchaseOrderResource extends JsonResource
             'approved_by_user' => new UserResource($this->whenLoaded('approvedBy')),
         ];
     }
+
+    public function getTotalQuantity(): int
+    {
+        return (int) $this->items()->get()->sum('quantity');
+    }
+
+    public function getReceivedQuantity(): int
+    {
+        return (int) $this->items()->get()->sum('received_quantity');
+    }
+
+    public function getPendingQuantity(): int
+    {
+        return $this->getTotalQuantity() - $this->getReceivedQuantity();
+    }
+
+    public function getCompletionPercentage(): float
+    {
+        $qty = $this->getTotalQuantity();
+        if ($qty <= 0) {
+            return 0.0;
+        }
+
+        return round(($this->getReceivedQuantity() / $qty) * 100, 2);
+    }
 }

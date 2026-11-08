@@ -65,6 +65,7 @@ class OfflineSyncService
                     auth()->setUser($previousUser);
                 }
                 if ($response->getStatusCode() >= 300) {
+                    echo 'OFFLINE-HTTP-'.$response->getStatusCode().'['.$uuid.']: '.mb_substr($response->getContent(), 0, 300)."\n"; // TEMP-DIAG
                     $result['failed'][] = ['client_uuid' => $uuid, 'reason' => mb_substr($response->getContent(), 0, 200)];
                     continue;
                 }
@@ -74,6 +75,7 @@ class OfflineSyncService
                 $sale?->update(['client_uuid' => $uuid]);
                 $result['accepted'][] = ['client_uuid' => $uuid, 'sale_id' => $sale?->id];
             } catch (\Throwable $e) {
+                echo 'OFFLINE-EXC['.$uuid.']: '.get_class($e).': '.$e->getMessage()."\n"; // TEMP-DIAG
                 $result['failed'][] = ['client_uuid' => $uuid, 'reason' => mb_substr($e->getMessage(), 0, 200)];
             }
         }

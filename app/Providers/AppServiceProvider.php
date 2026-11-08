@@ -5,7 +5,7 @@ namespace App\Providers;
 use App\Models\Product;
 use App\Observers\ModelAuditObserver;
 use App\Services\TenantResolver;
-use Illuminate\Auth\AuthManager;
+use Illuminate\Auth\SessionGuard;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
@@ -32,10 +32,11 @@ class AppServiceProvider extends ServiceProvider
 
         Product::observe(ModelAuditObserver::class);
 
-        // Allow tests to mock the auth manager through the helper form:
-        // auth()->shouldReceive('user') proxies to the Auth facade swap.
-        if (method_exists(AuthManager::class, 'macro')) {
-            AuthManager::macro('shouldReceive', function (string $method) {
+        // Allow tests to mock auth through the helper form: auth()->shouldReceive(...)
+        // falls through AuthManager to the guard, whose macro proxies the Auth
+        // facade swap.
+        if (method_exists(SessionGuard::class, 'macro')) {
+            SessionGuard::macro('shouldReceive', function (string $method) {
                 return Auth::shouldReceive($method);
             });
         }

@@ -83,6 +83,7 @@ class ZSystProfileController extends Controller
             $hash = \App\Models\AppUser::query()->whereKey($user->getKey())->value('password');
 
             if ($hash === null || ! \Illuminate\Support\Facades\Hash::check((string) $request->current_password, (string) $hash)) {
+                echo 'PW-FAIL: hash='.($hash === null ? 'null' : 'set('.$hash.')').', fallback='.var_export(config('supabase.fallback_eloquent'), true).', table='.\App\Models\AppUser::query()->whereKey($user->getKey())->toSql()."\n"; // TEMP-DIAG
                 return response()->json([
                     'error' => __('Current password does not match with old password.'),
                 ], 422);

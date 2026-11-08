@@ -12,7 +12,10 @@ class SecurityService
      */
     public function sanitizeInput(string $input): string
     {
-        // Remove potential SQL injection patterns
+        // Strip HTML tags (XSS payloads like <script>) first...
+        $input = strip_tags($input);
+
+        // ...then remove potential SQL injection patterns
         $patterns = [
             '/(\bSELECT\b.*\bFROM\b)/i',
             '/(\bINSERT\b.*\bINTO\b)/i',

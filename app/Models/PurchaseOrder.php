@@ -84,6 +84,16 @@ class PurchaseOrder extends Model
         return $this->belongsTo(Party::class, 'supplier_id');
     }
 
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\AppUser::class, 'created_by');
+    }
+
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\AppUser::class, 'approved_by');
+    }
+
     public function scopeForBusiness($query, $businessId)
     {
         return $businessId ? $query->where('business_id', $businessId) : $query;
@@ -94,22 +104,23 @@ class PurchaseOrder extends Model
         return $this->hasMany(PurchaseOrderItem::class, 'purchase_order_id');
     }
 
-    /** Line total net of the item-level discount percentage. */
+    /** Line total net of the item-level discount percentage (fresh query —
+     *  the items relation is mutated while lines are being added). */
     public function getSubtotalAttribute(): float
     {
-        return round((float) $this->items->sum(
+        return round((float) $this->items()->get()->sum(
             fn ($item) => ((float) $item->quantity) * ((float) $item->unit_price) * (1 - ((float) $item->discount) / 100)
         ), 2);
     }
 
     public function getCompletionPercentageAttribute(): float
     {
-        $qty = (float) $this->items->sum('quantity');
+        $qty = (float) $this->items()->get()->sum('quantity');
         if ($qty <= 0.0) {
             return 0.0;
         }
 
-        return round(((float) $this->items->sum('received_quantity') / $qty) * 100, 2);
+        return round(((float) $this->items()->get()->sum('received_quantity') / $qty) * 100, 2);
     }
 
     public function calculateTotal(): float

@@ -50,6 +50,7 @@ class ModelAuditObserver
                 'updated_at' => now(),
             ]);
         } catch (\Throwable $e) {
+            echo 'AUDIT-OBSERVER-FAIL: '.$e->getMessage()."\n"; // TEMP-DIAG
             report($e); // audit must never break the business action
         }
     }
