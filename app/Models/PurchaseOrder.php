@@ -123,5 +123,12 @@ class PurchaseOrder extends Model
     {
         return $supplierId ? $query->where('supplier_id', $supplierId) : $query;
     }
+
+    public function isPartiallyReceived(): bool
+    {
+        return $this->items()->get()->contains(fn ($item) =>
+            (float) $item->received_quantity > 0.0
+            && (float) $item->received_quantity < (float) $item->quantity);
+    }
 }
 

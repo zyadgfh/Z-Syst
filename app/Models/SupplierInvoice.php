@@ -132,4 +132,9 @@ class SupplierInvoice extends Model
     {
         return $this->status === self::STATUS_PENDING;
     }
+
+    public function getDaysUntilDue(): int
+    {
+        return $this->due_date ? max(0, now()->startOfDay()->diffInDays($this->due_date->copy()->startOfDay(), false)) : 0;
+    }
 }
