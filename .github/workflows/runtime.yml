@@ -39,6 +39,9 @@ jobs:
             echo "== phpunit (info) =="
             DB_CONNECTION=sqlite DB_DATABASE=':memory:' php artisan test --colors=never 2>&1 | tail -500
           } > boot-debug.log 2>&1 || true
+          echo "== phpunit full log (separate file) =="
+          { DB_CONNECTION=sqlite DB_DATABASE=':memory:' CACHE_DRIVER=file CACHE_STORE=file SESSION_DRIVER=file php artisan test --colors=never 2>&1; } > phpunit-full.log || true
+          tail -c 400000 phpunit-full.log > phpunit-full-capped.log || true
           tar czf vendor.tar.gz vendor
           echo "bundle ready"
 
@@ -50,7 +53,7 @@ jobs:
           git fetch origin ci-runtime || true
           git checkout --orphan ci-runtime-tmp
           git rm -rf --cached . -q || true
-          git add -f vendor.tar.gz boot-debug.log key.log 2>/dev/null || true
+          git add -f vendor.tar.gz boot-debug.log phpunit-full-capped.log key.log 2>/dev/null || true
           git commit -q -m "runtime bundle $(date -u +%FT%TZ)"
           git branch -M ci-runtime
           git push -q --force origin ci-runtime

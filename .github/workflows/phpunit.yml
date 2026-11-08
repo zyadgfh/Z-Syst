@@ -75,3 +75,13 @@ jobs:
       - name: Surface failures as annotations
         if: failure()
         run: php .github/scripts/emit_test_annotations.php junit.xml
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            test.log
+            junit.xml
+          retention-days: 7
