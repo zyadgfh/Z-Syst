@@ -84,7 +84,7 @@ class StockTransferController extends Controller
             return response()->json([
                 'message' => __('Stock transfer created successfully'),
                 'redirect' => route('admin.stock-transfers.index'),
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => __('Error creating stock transfer: ') . $e->getMessage(),

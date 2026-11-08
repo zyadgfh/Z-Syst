@@ -39,6 +39,11 @@ class Sale extends Model
         'client_uuid',
     ];
 
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class, 'business_id');
+    }
+
     public function details()
     {
         return $this->hasMany(SaleDetails::class);

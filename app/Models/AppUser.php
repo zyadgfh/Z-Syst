@@ -35,6 +35,8 @@ class AppUser extends Authenticatable
     protected $fillable = [
         'business_id',
         'name',
+        'email',
+        'password',
         'role',
         'phone',
         'image',

@@ -57,6 +57,12 @@ class AuthenticatedSessionController extends Controller
             }
         }
 
+        if (! $request->wantsJson()) {
+            // Classic web form: land on the dashboard (which routes into the
+            // admin panel). The SPA consumes the JSON payload above instead.
+            return redirect('/dashboard');
+        }
+
         return response()->json([
             'message' => __('Logged In Successfully'),
             'remember' => $remember,

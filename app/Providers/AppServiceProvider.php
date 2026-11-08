@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Product;
+use App\Observers\ModelAuditObserver;
 use App\Services\TenantResolver;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
@@ -25,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+
+        Product::observe(ModelAuditObserver::class);
 
         // Defensive: cap every outbound HTTP request so a misbehaving
         // integration (ETA, Supabase storage, Telegram, ...) can never wedge

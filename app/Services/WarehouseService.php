@@ -108,15 +108,18 @@ class WarehouseService
     public function createTransfer(array $data): StockTransfer
     {
         return DB::transaction(function () use ($data) {
-            // Validate source warehouse has sufficient stock
-            $fromWarehouse = Warehouse::find($data['from_warehouse_id']);
-            if (!$fromWarehouse->hasSufficientStock($data['product_id'], $data['quantity'])) {
-                throw new \Exception('Insufficient stock in source warehouse');
+            // Validate transfer is not to same warehouse
+            if (($data['from_warehouse_id'] ?? null) == ($data['to_warehouse_id'] ?? null)) {
+                throw new \Exception('Cannot transfer to same warehouse');
             }
 
-            // Validate transfer is not to same warehouse
-            if ($data['from_warehouse_id'] === $data['to_warehouse_id']) {
-                throw new \Exception('Cannot transfer to same warehouse');
+            // A pending transfer is a planning document — stock is only
+            // consumed when the transfer is completed immediately.
+            if (($data['status'] ?? 'pending') === 'completed') {
+                $fromWarehouse = Warehouse::find($data['from_warehouse_id']);
+                if (!$fromWarehouse || !$fromWarehouse->hasSufficientStock($data['product_id'], $data['quantity'])) {
+                    throw new \Exception('Insufficient stock in source warehouse');
+                }
             }
 
             return StockTransfer::create($data);

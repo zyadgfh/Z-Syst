@@ -16,6 +16,7 @@ class AuditLogger
         }
 
         AuditLog::create([
+            'business_id' => $user->business_id ?? null,
             'user_id' => $user->id,
             'action' => $action,
             'description' => $description,

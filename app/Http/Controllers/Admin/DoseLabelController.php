@@ -94,7 +94,9 @@ class DoseLabelController extends Controller
             ->with(['sale:id,business_id,invoiceNumber,saleDate', 'product:id,productName'])
             ->first();
 
-        if (!$detail || (int) $detail->sale->business_id !== (int) $request->user()->business_id) {
+        $actor = $request->user() ?: auth()->user();
+
+        if (!$detail || !$detail->sale || !$actor || (int) $detail->sale->business_id !== (int) $actor->business_id) {
             if ($request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => 'ملصق الجرعة غير موجود'], 404);
             }

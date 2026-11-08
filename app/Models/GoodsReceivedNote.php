@@ -142,6 +142,26 @@ class GoodsReceivedNote extends Model
         $this->forceFill(['status' => 'rejected'])->save();
     }
 
+    public function getTotalAcceptedQuantityAttribute(): int
+    {
+        return (int) $this->items()->sum('accepted_quantity');
+    }
+
+    public function getTotalValueAttribute(): float
+    {
+        return (float) $this->items()->get()->sum(fn ($i) => (float) $i->accepted_quantity * (float) $i->purchase_price);
+    }
+
+    public function getCompletionPercentageAttribute(): int
+    {
+        $ordered = (int) $this->items()->sum('ordered_quantity');
+        if ($ordered <= 0) {
+            return 0;
+        }
+
+        return (int) round(((int) $this->items()->sum('received_quantity') / $ordered) * 100);
+    }
+
     public function getTotalReceivedQuantityAttribute(): int
     {
         return (int) $this->items()->sum('received_quantity');

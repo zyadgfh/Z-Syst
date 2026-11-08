@@ -55,7 +55,15 @@ class OfflineSyncService
                 $apiRequest->headers->set('Accept', 'application/json');
                 $apiRequest->headers->set('X-Requested-With', 'XMLHttpRequest');
 
-                $response = app(\App\Http\Controllers\Api\ZSystSaleController::class)->store($apiRequest);
+                // The sale controller resolves the tenant via auth() — run the
+                // internal call under the syncing user's identity, then restore.
+                $previousUser = auth()->user();
+                auth()->setUser($user);
+                try {
+                    $response = app(\App\Http\Controllers\Api\ZSystSaleController::class)->store($apiRequest);
+                } finally {
+                    auth()->setUser($previousUser);
+                }
                 if ($response->getStatusCode() >= 300) {
                     $result['failed'][] = ['client_uuid' => $uuid, 'reason' => mb_substr($response->getContent(), 0, 200)];
                     continue;

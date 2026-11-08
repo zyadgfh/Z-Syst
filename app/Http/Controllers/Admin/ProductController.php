@@ -17,6 +17,19 @@ class ProductController extends Controller
         $this->middleware('permission:products-create')->only('store');
     }
 
+    public function index(Request $request)
+    {
+        $products = Product::query()
+            ->when($request->user()?->business_id, fn ($q, $b) => $q->where('business_id', $b))
+            ->orderBy('productName')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $products,
+        ]);
+    }
+
     public function store(Request $request)
     {
         $request->validate([

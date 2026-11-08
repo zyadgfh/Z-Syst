@@ -64,6 +64,7 @@ class LoyaltyController extends Controller
             return response()->json([
                 'message' => __('Loyalty program created successfully'),
                 'redirect' => route('admin.loyalty.programs'),
+                'data' => $program->only(['id', 'business_id', 'name', 'points_per_currency', 'min_points_for_reward', 'is_active']),
             ], 201);
         } catch (\Exception $e) {
             return response()->json([

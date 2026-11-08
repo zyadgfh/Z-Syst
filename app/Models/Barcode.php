@@ -143,7 +143,7 @@ class Barcode extends Model
             self::TYPE_UPC => self::uniqueNumber(fn () => self::upcA(
                 '0'.str_pad((string) random_int(0, 9999999999), 10, '0', STR_PAD_LEFT)
             )),
-            self::TYPE_QR => self::uniqueNumber(fn () => 'ZS-QR-'.strtoupper(Str::random(10))),
+            self::TYPE_QR => self::uniqueNumber(fn () => 'QR-'.strtoupper(Str::random(9))),
             default => self::uniqueNumber(fn () => 'ZS'.strtoupper(Str::random(9))),
         };
     }
@@ -158,9 +158,11 @@ class Barcode extends Model
     public function markAsPrinted(int|string|null $userId): void
     {
         $stored = null;
-        if (is_numeric($userId)
-            && \Illuminate\Support\Facades\DB::table('users')->where('id', (int) $userId)->exists()) {
-            $stored = (int) $userId;
+        if (is_string($userId) && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $userId)) {
+            $stored = $userId;
+        } elseif (is_numeric($userId)
+            && \Illuminate\Support\Facades\DB::table('app_users')->where('id', (string) $userId)->exists()) {
+            $stored = (string) $userId;
         }
 
         $settings = $this->print_settings ?? [];
