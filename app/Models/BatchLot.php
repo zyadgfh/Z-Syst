@@ -44,4 +44,14 @@ class BatchLot extends Model
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
+
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $businessId ? $query->where('business_id', $businessId) : $query;
+    }
+
+    public function isExpired(): bool
+    {
+        return filled($this->expiry_date) && $this->expiry_date->isPast();
+    }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,6 +37,11 @@ class StockAudit extends Model
 
     public function business(): BelongsTo
     {
-        return $this->belongsTo(Business::class, 'business_id');
+        return $th
+    public function details(): HasMany
+    {
+        return $this->hasMany(StockAuditDetail::class, 'stock_audit_id');
+    }
+is->belongsTo(Business::class, 'business_id');
     }
 }

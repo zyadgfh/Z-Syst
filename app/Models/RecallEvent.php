@@ -42,4 +42,12 @@ class RecallEvent extends Model
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
+
+    public function resolve(): void
+    {
+        $this->forceFill([
+            'status' => 'resolved',
+            'resolved_at' => now(),
+        ])->save();
+    }
 }

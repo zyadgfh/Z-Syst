@@ -84,4 +84,9 @@ class InsuranceClaim extends Model
     {
         return $this->belongsTo(Prescription::class, 'prescription_id');
     }
+
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $businessId ? $query->where('business_id', $businessId) : $query;
+    }
 }

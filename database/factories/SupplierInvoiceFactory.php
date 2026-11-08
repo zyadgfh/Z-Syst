@@ -14,8 +14,7 @@ class SupplierInvoiceFactory extends Factory
     public function definition(): array
     {
         return [
-            // invoice_number, invoice_date and due_date are filled by the
-            // model's creating hook when left empty.
+            'invoice_number' => 'SI-'.str_pad(fake()->unique()->numberBetween(1, 999999), 6, '0', STR_PAD_LEFT),
             'supplier_id' => Party::factory()->state(['type' => 'supplier']),
             'business_id' => Business::factory(),
             'invoice_date' => now(),
