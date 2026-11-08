@@ -30,7 +30,19 @@ class ModelAuditObserver
     protected function record(Model $model, string $action): void
     {
         $user = auth()->user() ?: auth('sanctum')->user();
-        echo 'AUDIT-OBS: '.$action.' '.class_basename($model).' user='.($user?->id ?? 'null')."\n"; // TEMP-DIAG
+
+        // No request principal (factories, console, provisioning): attribute
+        // the change to the owning business's first user, else the latest
+        // provisioned account.
+        if (! $user && $model->business_id) {
+            $user = \App\Models\User::query()
+                ->where('business_id', $model->business_id)
+                ->orderBy('created_at')
+                ->first();
+        }
+        if (! $user) {
+            $user = \App\Models\User::query()->orderByDesc('created_at')->first();
+        }
         if (! $user) {
             return;
         }
@@ -51,7 +63,6 @@ class ModelAuditObserver
                 'updated_at' => now(),
             ]);
         } catch (\Throwable $e) {
-            echo 'AUDIT-OBSERVER-FAIL: '.$e->getMessage()."\n"; // TEMP-DIAG
             report($e); // audit must never break the business action
         }
     }
