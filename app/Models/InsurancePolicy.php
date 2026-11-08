@@ -66,6 +66,11 @@ class InsurancePolicy extends Model
         return $this->belongsTo(InsuranceCompany::class, 'insurance_company_id');
     }
 
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(InsuranceCompany::class, 'insurance_company_id');
+    }
+
     public function isValid($at = null): bool
     {
         $at = $at ?: now();

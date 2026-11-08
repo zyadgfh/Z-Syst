@@ -364,8 +364,8 @@ Route::prefix('v1')->group(function () {
         Route::prefix('receipts')->group(function () {
             Route::get('settings', [Api\ReceiptController::class, 'settings']);
             Route::put('settings', [Api\ReceiptController::class, 'updateSettings']);
-            Route::post('sales/{sale}', [Api\ReceiptController::class, 'generateForSale']);
-            Route::post('purchases/{purchase}', [Api\ReceiptController::class, 'generateForPurchase']);
+            Route::post('sales/{saleId}', [Api\ReceiptController::class, 'generateForSale']);
+            Route::post('purchases/{purchaseId}', [Api\ReceiptController::class, 'generateForPurchase']);
             Route::get('/{receipt}', [Api\ReceiptController::class, 'show']);
             Route::get('/{receipt}/download', [Api\ReceiptController::class, 'download']);
         });

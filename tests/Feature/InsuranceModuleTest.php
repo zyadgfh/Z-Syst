@@ -20,6 +20,10 @@ class InsuranceModuleTest extends TestCase
     {
         parent::setUp();
         $this->insuranceService = app(InsuranceService::class);
+
+        // Several specs address the tenant by the literal id 1 — seed it so
+        // the business_id foreign key is satisfiable.
+        \App\Models\Business::factory()->create(['id' => 1]);
     }
 
     /**

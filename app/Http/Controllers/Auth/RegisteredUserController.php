@@ -33,6 +33,7 @@ class RegisteredUserController extends Controller
             ]);
 
             $user = \App\Models\User::create([
+                'id' => (string) \Illuminate\Support\Str::uuid(),
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => \Illuminate\Support\Facades\Hash::make($data['password']),

@@ -98,7 +98,9 @@ class AccountingService
     public function vatReport(int $businessId, string $from, string $to): array
     {
         $entries = JournalEntry::forBusiness($businessId)
-            ->whereBetween('entry_date', [$from, $to])->get();
+            ->whereDate('entry_date', '>=', $from)
+            ->whereDate('entry_date', '<=', $to)
+            ->get();
 
         // VAT here is approximated at the statutory 14% on revenue lines, and
         // on purchase cost lines — replace with tax_id-linked rates when the

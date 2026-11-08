@@ -85,7 +85,7 @@ class AssistantEngine
     protected function stockOf(int $businessId, string $name): array
     {
         $product = Product::where('business_id', $businessId)
-            ->where(fn ($w) => $w->where('name', 'like', '%'.$name.'%')->orWhere('productCode', 'like', '%'.$name.'%'))
+            ->where(fn ($w) => $w->where('productName', 'like', '%'.$name.'%')->orWhere('name', 'like', '%'.$name.'%')->orWhere('productCode', 'like', '%'.$name.'%'))
             ->first();
 
         if (!$product) {

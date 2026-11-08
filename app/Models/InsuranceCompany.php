@@ -78,5 +78,17 @@ class InsuranceCompany extends Model
     {
         return $this->hasMany(InsurancePolicy::class, 'insurance_company_id');
     }
+
+    public function claims(): HasMany
+    {
+        return $this->hasMany(\App\Models\InsuranceClaim::class, 'insurance_company_id');
+    }
+
+    public function calculateDefaultCoverage(float $totalAmount): float
+    {
+        $percent = (float) ($this->default_coverage_percent ?? 0);
+
+        return round($totalAmount * $percent / 100, 2);
+    }
 }
 

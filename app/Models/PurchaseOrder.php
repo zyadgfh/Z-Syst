@@ -150,14 +150,20 @@ class PurchaseOrder extends Model
 
     public function markAsSent(): static
     {
-        $this->forceFill(['status' => self::STATUS_SENT])->save();
+        $this->forceFill(['status' => self::STATUS_SENT, 'sent_at' => now()])->save();
 
         return $this;
     }
 
     public function approve($userId = null): static
     {
-        app(PurchaseOrderService::class)->approve($this, $userId);
+        // Direct state change — PurchaseOrderService::approve() calls this
+        // method, so delegating back to the service would recurse forever.
+        $this->forceFill([
+            'status' => self::STATUS_ACCEPTED,
+            'approved_by' => $userId ?: auth()->id(),
+            'approved_at' => now(),
+        ])->save();
 
         return $this->refresh();
     }

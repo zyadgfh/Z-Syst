@@ -29,6 +29,7 @@ return new class extends Migration
             $table->timestamp('converted_at')->nullable();
             $table->text('notes')->nullable();
             $table->json('reasoning')->nullable(); // AI reasoning for suggestion
+            $table->boolean('enabled')->default(true);
             $table->timestamps();
 
             $table->index(['business_id', 'status']);

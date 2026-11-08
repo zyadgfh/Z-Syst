@@ -19,7 +19,7 @@ class ShiftService
         $businessId = (int) $user->business_id;
 
         if (Shift::where('business_id', $businessId)->where('status', 'open')->exists()) {
-            throw new BusinessRuleException('general', __('توجد وردية مفتوحة بالفعل — أغلقها أولًا.'));
+            throw new BusinessRuleException(\App\Exceptions\Errors\ErrorCode::BUSINESS_DUPLICATE_ENTRY, __('توجد وردية مفتوحة بالفعل — أغلقها أولًا.'));
         }
 
         return Shift::create([
@@ -36,7 +36,7 @@ class ShiftService
     public function addCash(Shift $shift, string $type, float $amount, ?string $reason = null, ?int $saleId = null): ShiftCashMovement
     {
         if ($shift->status !== 'open') {
-            throw new BusinessRuleException('general', __('الوردية مقفلة.'));
+            throw new BusinessRuleException(\App\Exceptions\Errors\ErrorCode::BUSINESS_DUPLICATE_ENTRY, __('الوردية مقفلة.'));
         }
 
         return $shift->movements()->create([
@@ -55,7 +55,7 @@ class ShiftService
     public function close(Shift $shift, float $countedCash, ?string $notes = null): array
     {
         if ($shift->status !== 'open') {
-            throw new BusinessRuleException('general', __('الوردية مقفلة مسبقًا.'));
+            throw new BusinessRuleException(\App\Exceptions\Errors\ErrorCode::BUSINESS_DUPLICATE_ENTRY, __('الوردية مقفلة مسبقًا.'));
         }
 
         $expected = $shift->recomputeExpected();

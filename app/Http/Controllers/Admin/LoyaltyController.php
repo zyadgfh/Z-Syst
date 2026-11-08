@@ -151,7 +151,7 @@ class LoyaltyController extends Controller
         $request->validate([
             'business_id' => 'required|exists:businesses,id',
             'party_id' => 'required|exists:parties,id',
-            'type' => 'required|in:call,visit,email,meeting,support',
+            'type' => 'required|in:call,visit,email,meeting,support,earned,redeemed',
             'notes' => 'nullable|string',
             'user_id' => 'nullable|exists:users,id',
         ]);

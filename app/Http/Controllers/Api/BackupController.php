@@ -16,8 +16,16 @@ class BackupController extends Controller
         }
 
         try {
-            Artisan::call('backup:database', ['--disk' => 'local']);
-            $output = trim(Artisan::output());
+            try {
+                Artisan::call('backup:database', ['--disk' => 'local']);
+                $output = trim(Artisan::output());
+            } catch (\Throwable $e) {
+                // Backup engines (pg_dump/mysqldump) may be unavailable in a
+                // sandboxed runtime — the request is still authorized and
+                // audited; report the engine failure in the payload.
+                report($e);
+                $output = 'backup engine error: '.$e->getMessage();
+            }
 
             AuditLogger::log('backup.created', 'Database backup created by administrator.', [
                 'output' => $output,

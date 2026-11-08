@@ -89,6 +89,7 @@ class Sale extends Model
     public function scopeForBusiness(Builder $q, int $businessId): Builder { return $q->where('business_id', $businessId); }
 
     protected $casts = [
+        'saleDate' => 'datetime',
         'discountAmount' => 'double',
         'dueAmount' => 'double',
         'isPaid' => 'boolean',
