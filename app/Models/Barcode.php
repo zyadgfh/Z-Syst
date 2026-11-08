@@ -215,4 +215,38 @@ class Barcode extends Model
 
         return $factory(); // last resort: uniqueness constraint guards
     }
+
+    public static function calculateEAN13Checksum(string $digits12): int
+    {
+        $sum = 0;
+        for ($i = 0; $i < 12; $i++) {
+            $sum += ((int) $digits12[$i]) * ($i % 2 === 0 ? 1 : 3);
+        }
+
+        return (10 - ($sum % 10)) % 10;
+    }
+
+    public static function calculateUPCChecksum(string $digits11): int
+    {
+        $odd = 0; $even = 0;
+        for ($i = 0; $i < 11; $i++) {
+            if ($i % 2 === 0) { $odd += (int) $digits11[$i]; }
+            else { $even += (int) $digits11[$i]; }
+        }
+
+        return (10 - (($odd * 3 + $even) % 10)) % 10;
+    }
+
+    public static function generateBarcodeNumber(string $type = self::TYPE_EAN): string
+    {
+        if ($type === self::TYPE_UPC) {
+            $body = '0'.str_pad((string) random_int(0, 99999999999), 11, '0', STR_PAD_LEFT);
+
+            return $body.static::calculateUPCChecksum($body);
+        }
+
+        $body = str_pad((string) random_int(0, 999999999999), 12, '0', STR_PAD_LEFT);
+
+        return $body.static::calculateEAN13Checksum($body);
+    }
 }

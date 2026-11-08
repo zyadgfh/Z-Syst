@@ -79,6 +79,22 @@ trait HasSupabaseRoles
         return $cache[$key];
     }
 
+    /** Spatie-compatible: the role column IS the single role store. */
+    public function assignRole(...$roles): static
+    {
+        $name = collect($roles)->flatten()->filter()->first();
+        if (is_string($name) && filled($name)) {
+            $this->forceFill(['role' => $name])->save();
+        }
+
+        return $this;
+    }
+
+    public function syncRoles(...$roles): static
+    {
+        return $this->assignRole(...$roles);
+    }
+
     /** Spatie-compatible API: grant extra abilities beyond the role map. */
     public function givePermissionTo(...$permissions): static
     {

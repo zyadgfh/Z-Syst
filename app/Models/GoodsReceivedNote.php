@@ -14,6 +14,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class GoodsReceivedNote extends Model
 {
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_RECEIVED = 'received';
+    public const STATUS_VERIFIED = 'verified';
+    public const STATUS_PARTIAL = 'partial';
+    public const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_PARTIALLY_ACCEPTED = 'partially_accepted';
+    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_ACCEPTED = 'accepted';
+
     use HasFactory;
 
     use SoftDeletes;
