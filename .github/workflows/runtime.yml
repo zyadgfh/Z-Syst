@@ -37,7 +37,7 @@ jobs:
             echo "== artisan migrate:fresh =="
             DB_CONNECTION=sqlite DB_DATABASE=':memory:' php artisan migrate:fresh --force 2>&1 | tail -30
             echo "== phpunit (info) =="
-            DB_CONNECTION=sqlite DB_DATABASE=':memory:' php artisan test --colors=never 2>&1 | tail -60
+            DB_CONNECTION=sqlite DB_DATABASE=':memory:' php artisan test --colors=never 2>&1 | tail -500
           } > boot-debug.log 2>&1 || true
           tar czf vendor.tar.gz vendor
           echo "bundle ready"

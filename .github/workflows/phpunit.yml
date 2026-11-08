@@ -46,7 +46,11 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
-        run: php artisan migrate --no-interaction --force
+        run: |
+          php artisan migrate:fresh --no-interaction --force 2>&1 | tee migrate.log
+          EXIT=${PIPESTATUS[0]}
+          [ "$EXIT" -ne 0 ] && php .github/scripts/emit_log_annotations.php migrate.log "migrate:fresh"
+          exit $EXIT
 
       - name: Run tests
         env:
