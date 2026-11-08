@@ -54,4 +54,14 @@ class BatchLot extends Model
     {
         return filled($this->expiry_date) && $this->expiry_date->isPast();
     }
+
+    public function isRecalled(): bool
+    {
+        return filled($this->recall_date) && $this->recall_date->isPast();
+    }
+
+    public function scopeExpired($query)
+    {
+        return $query->whereNotNull('expiry_date')->where('expiry_date', '<', now());
+    }
 }

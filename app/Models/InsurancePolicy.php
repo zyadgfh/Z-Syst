@@ -65,4 +65,13 @@ class InsurancePolicy extends Model
     {
         return $this->belongsTo(InsuranceCompany::class, 'insurance_company_id');
     }
+
+    public function isValid(): bool
+    {
+        $active = ($this->status ?? 'active') === 'active';
+        $inWindow = true;
+        if ($this->start_date !== null) { $inWindow = $inWindow && ! $this->start_date->isFuture(); }
+        if ($this->end_date !== null) { $inWindow = $inWindow && ! $this->end_date->isPast(); }
+        return $active && $inWindow;
+    }
 }

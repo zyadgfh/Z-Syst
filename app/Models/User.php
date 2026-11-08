@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 use Illuminate\Database\Eloquent\Builder;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 use RuntimeException;
 use App\Traits\TenantScoped;
 
@@ -27,7 +28,7 @@ use App\Traits\TenantScoped;
  */
 class User extends AppUser
 {
-    use HasFactory;
+    use HasApiTokens, HasRoles, HasFactory;
 
     use TenantScoped;
 

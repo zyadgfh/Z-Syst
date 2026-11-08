@@ -61,5 +61,15 @@ class InsuranceCompany extends Model
     {
         return $query->where('status', 'active');
     }
+
+    public function scopeByBusiness($query, $businessId)
+    {
+        return $businessId ? $query->where('business_id', $businessId) : $query;
+    }
+
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $businessId ? $query->where('business_id', $businessId) : $query;
+    }
 }
 
