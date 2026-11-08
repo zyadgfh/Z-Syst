@@ -62,7 +62,7 @@ class CacheService
     /**
      * Generate cache key for user data
      */
-    public function userKey(int $userId, string $suffix): string
+    public function userKey($userId, string $suffix): string
     {
         return "{$this->config['user_prefix']}:{$userId}:{$suffix}";
     }
@@ -96,7 +96,7 @@ class CacheService
     /**
      * Cache user permissions
      */
-    public function cacheUserPermissions(int $userId, array $permissions): void
+    public function cacheUserPermissions($userId, array $permissions): void
     {
         $key = $this->userKey($userId, 'permissions');
         Cache::put($key, $permissions, $this->config['default_ttl']);
@@ -105,7 +105,7 @@ class CacheService
     /**
      * Get cached user permissions
      */
-    public function getUserPermissions(int $userId): ?array
+    public function getUserPermissions($userId): ?array
     {
         $key = $this->userKey($userId, 'permissions');
         return Cache::get($key);
@@ -141,7 +141,7 @@ class CacheService
     /**
      * Invalidate user cache
      */
-    public function invalidateUserCache(int $userId): void
+    public function invalidateUserCache($userId): void
     {
         $pattern = "{$this->config['user_prefix']}:{$userId}:*";
         $this->invalidatePattern($pattern);

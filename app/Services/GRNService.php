@@ -90,7 +90,7 @@ class GRNService
     /**
      * Verify GRN.
      */
-    public function verify(GoodsReceivedNote $grn, int $userId): GoodsReceivedNote
+    public function verify(GoodsReceivedNote $grn, $userId): GoodsReceivedNote
     {
         if (!$grn->isPending()) {
             throw new \Exception('Only pending GRNs can be verified');

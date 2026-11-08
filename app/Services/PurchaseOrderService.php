@@ -126,7 +126,7 @@ class PurchaseOrderService
     /**
      * Approve purchase order.
      */
-    public function approve(PurchaseOrder $po, int $userId): PurchaseOrder
+    public function approve(PurchaseOrder $po, $userId): PurchaseOrder
     {
         if (!$po->isSent()) {
             throw new \Exception('Only sent orders can be approved');
@@ -143,7 +143,7 @@ class PurchaseOrderService
     /**
      * Reject purchase order.
      */
-    public function reject(PurchaseOrder $po, int $userId, string $reason): PurchaseOrder
+    public function reject(PurchaseOrder $po, $userId, string $reason): PurchaseOrder
     {
         if (!$po->isSent()) {
             throw new \Exception('Only sent orders can be rejected');

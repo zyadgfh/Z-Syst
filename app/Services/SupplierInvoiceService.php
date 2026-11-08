@@ -174,7 +174,7 @@ class SupplierInvoiceService
     /**
      * Approve invoice.
      */
-    public function approve(SupplierInvoice $invoice, int $userId): SupplierInvoice
+    public function approve(SupplierInvoice $invoice, $userId): SupplierInvoice
     {
         if (!$invoice->isPending()) {
             throw new \Exception('Only pending invoices can be approved');
@@ -194,7 +194,7 @@ class SupplierInvoiceService
     /**
      * Reject invoice.
      */
-    public function reject(SupplierInvoice $invoice, int $userId, string $reason): SupplierInvoice
+    public function reject(SupplierInvoice $invoice, $userId, string $reason): SupplierInvoice
     {
         if (!$invoice->isPending()) {
             throw new \Exception('Only pending invoices can be rejected');
@@ -384,7 +384,7 @@ class SupplierInvoiceService
     /**
      * Approve payment.
      */
-    public function approvePayment(SupplierInvoicePayment $payment, int $userId): SupplierInvoicePayment
+    public function approvePayment(SupplierInvoicePayment $payment, $userId): SupplierInvoicePayment
     {
         if (!$payment->isPending()) {
             throw new \Exception('Only pending payments can be approved');

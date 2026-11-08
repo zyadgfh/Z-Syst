@@ -354,7 +354,7 @@ class DoctorAttentionService
     /**
      * Get unread alerts for user.
      */
-    public function getUnreadAlerts(int $userId, int $businessId)
+    public function getUnreadAlerts($userId, int $businessId)
     {
         return DoctorAttentionAlert::forBusiness($businessId)
             ->unread()

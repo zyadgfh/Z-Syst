@@ -152,7 +152,7 @@ class AuditService
     /**
      * Get audit logs for user
      */
-    public function getLogsForUser(int $userId, int $limit = 100): \Illuminate\Database\Eloquent\Collection
+    public function getLogsForUser($userId, int $limit = 100): \Illuminate\Database\Eloquent\Collection
     {
         return AuditLog::forUser($userId)
             ->with(['user:id,name,email'])
