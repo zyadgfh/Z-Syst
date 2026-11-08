@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class SupplierInvoice extends Model
 {
+    use HasFactory;
+
     use SoftDeletes;
+
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_PARTIALLY_PAID = 'partially_paid';
+    public const STATUS_PAID = 'paid';
+    public const STATUS_CANCELLED = 'cancelled';
 
     protected $table = 'supplier_invoices';
 
@@ -84,5 +94,42 @@ class SupplierInvoice extends Model
     public function purchaseOrder(): BelongsTo
     {
         return $this->belongsTo(PurchaseOrder::class, 'purchase_order_id');
+    }
+
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $businessId ? $query->where('business_id', $businessId) : $query;
+    }
+
+    public function isPaid(): bool
+    {
+        return $this->status === self::STATUS_PAID
+            || (float) $this->balance <= 0.0;
+    }
+
+    public function getPaymentPercentage(): float
+    {
+        $total = (float) $this->total_amount;
+        return $total > 0 ? round(((float) $this->paid_amount / $total) * 100, 2) : 0.0;
+    }
+
+    public function isDueSoon(int $days = 7): bool
+    {
+        return $this->due_date !== null
+            && $this->status === self::STATUS_PENDING
+            && $this->due_date->isFuture()
+            && $this->due_date->lte(now()->addDays($days));
+    }
+
+    public function isCriticallyOverdue(int $days = 30): bool
+    {
+        return $this->due_date !== null
+            && in_array($this->status, [self::STATUS_PENDING, self::STATUS_PARTIALLY_PAID], true)
+            && $this->due_date->lt(now()->subDays($days));
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
     }
 }

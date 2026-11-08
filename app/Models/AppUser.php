@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Models\Concerns\HasSupabaseRoles;
+use Illuminate\Foundation\Auth\Access\Authorizable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class AppUser extends Authenticatable
 {
+    use HasFactory;
+
     // Authorisation comes from HasSupabaseRoles (app_users.role column +
     // config/supabase.php permissions map) — spatie's Gate::before hooks
     // into checkPermissionTo() on this trait. No assignRole() here: this
@@ -38,6 +42,7 @@ class AppUser extends Authenticatable
         'status',
         'visibility',
         'branch_id',
+        'two_factor_secret',
     ];
 
     protected $casts = [

@@ -26,6 +26,7 @@ class Business extends Model
         'remainingShopBalance',
         'shopOpeningBalance',
         'status',
+        'store_slug',
     ];
 
     /**

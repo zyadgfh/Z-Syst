@@ -91,6 +91,7 @@ class ZSystSaleController extends Controller
         $request->validate([
             'products' => 'required|array',
             'saleDate' => 'required|string',
+            'client_uuid' => 'nullable|uuid',
             'party_id' => 'nullable|exists:parties,id',
             'tax_id' => 'nullable|exists:taxes,id',
             'discountAmount' => 'nullable|numeric',
@@ -105,6 +106,8 @@ class ZSystSaleController extends Controller
             'products.*.lossProfit' => 'required|numeric',
             'products.*.batch_no' => 'nullable|string',
             'products.*.quantities' => 'required|integer',
+            'products.*.dose' => 'nullable|string|max:160',
+            'products.*.dose_code' => 'nullable|string|max:24',
         ]);
 
         $sale = TransactionHelper::run(function () use ($request) {
@@ -244,7 +247,8 @@ class ZSystSaleController extends Controller
         'invoiceNumber',
         'saleDate',
         'sale_data',
-        'meta'
+        'meta',
+        'client_uuid',
     ]) + [
                 'business_id' => $business_id,
                 'lossProfit' => array_sum($lossProfit) - ($request->discountAmount ?? 0),
@@ -287,6 +291,8 @@ class ZSystSaleController extends Controller
                             'product_id' => $productId,
                             'lossProfit' => $productData['lossProfit'] / count($request->products) ?? 0,
                             'quantities' => $deductQty,
+                            'dose' => $productData['dose'] ?? null,
+                            'dose_code' => $productData['dose_code'] ?? null,
                             'expire_date' => $batch->expire_date,
                             'purchase_price' => $productData['purchase_price'] ?? 0,
                         ];
@@ -317,6 +323,8 @@ class ZSystSaleController extends Controller
                         'product_id' => $productId,
                         'lossProfit' => $productData['lossProfit'],
                         'quantities' => $quantity,
+                        'dose' => $productData['dose'] ?? null,
+                        'dose_code' => $productData['dose_code'] ?? null,
                         'expire_date' => $productData['expire_date'] ?? null,
                         'purchase_price' => $productData['purchase_price'] ?? 0,
                     ];
@@ -398,6 +406,7 @@ class ZSystSaleController extends Controller
         $request->validate([
             'products' => 'required|array',
             'saleDate' => 'required|string',
+            'client_uuid' => 'nullable|uuid',
             'party_id' => 'nullable|exists:parties,id',
             'tax_id' => 'nullable|exists:taxes,id',
             'discountAmount' => 'nullable|numeric',
@@ -411,6 +420,8 @@ class ZSystSaleController extends Controller
             'products.*.lossProfit' => 'required|numeric',
             'products.*.batch_no' => 'nullable|string',
             'products.*.quantities' => 'required|integer',
+            'products.*.dose' => 'nullable|string|max:160',
+            'products.*.dose_code' => 'nullable|string|max:24',
             'products.*.product_id' => 'required|exists:products,id',
         ]);
 
@@ -527,7 +538,8 @@ class ZSystSaleController extends Controller
         'invoiceNumber',
         'saleDate',
         'sale_data',
-        'meta'
+        'meta',
+        'client_uuid',
     ]) + [
                 'business_id' => $business_id,
                 'lossProfit' => array_sum($lossProfit) - ($request->discountAmount ?? 0),

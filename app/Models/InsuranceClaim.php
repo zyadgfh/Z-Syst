@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class InsuranceClaim extends Model
 {
+    use HasFactory;
+
     protected $table = 'insurance_claims';
 
     protected $fillable = [
@@ -80,5 +83,10 @@ class InsuranceClaim extends Model
     public function prescription(): BelongsTo
     {
         return $this->belongsTo(Prescription::class, 'prescription_id');
+    }
+
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $businessId ? $query->where('business_id', $businessId) : $query;
     }
 }

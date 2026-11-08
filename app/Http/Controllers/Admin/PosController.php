@@ -5,11 +5,15 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Api\ZSystSaleController;
 use App\Http\Controllers\Controller;
 use App\Models\Barcode;
+use App\Models\DrugInteraction;
 use App\Models\Product;
 use App\Models\Stock;
+use App\Services\AccountingService;
 use App\Services\BarcodeService;
 use App\Services\DeviceRegistryService;
 use App\Services\DeviceSettings;
+use App\Services\PromotionEngine;
+use App\Services\ShiftService;
 use Illuminate\Http\Request;
 
 /**
@@ -26,6 +30,9 @@ class PosController extends Controller
     public function __construct(
         protected DeviceRegistryService $registry,
         protected BarcodeService $barcodeService,
+        protected PromotionEngine $promotions,
+        protected ShiftService $shifts,
+        protected AccountingService $accounting,
     ) {
         $this->middleware('permission:dashboard-read')->only('page');
         $this->middleware('permission:sales-create')->only('checkout');
@@ -38,10 +45,15 @@ class PosController extends Controller
         $device = $this->registry->resolve($request);
         $device?->load(['barcodePrinter', 'receiptPrinter']);
 
+        $openShift = $this->shifts->currentOpen($businessId);
+
         return view('admin.pos.index', [
             'device' => $device,
+            'shiftOpen' => (bool) $openShift,
+            'shiftNumber' => $openShift?->shift_number,
             'devicePayload' => $device?->clientPayload() ?? ['device' => null, 'printers' => ['barcode' => null, 'receipt' => null]],
             'settings' => DeviceSettings::clientPayload($businessId),
+            'schedules' => \App\Http\Controllers\Admin\DoseLabelController::schedulesForClient(),
             'approved' => (bool) ($device?->is_approved ?? true),
         ]);
     }
@@ -105,8 +117,56 @@ class PosController extends Controller
     }
 
     /**
+     * Drug–drug interaction screening for the current cart
+     * (pharmacist safety net; returns warnings, never blocks — the
+     * pharmacist decides, but every warning is shown loudly).
+     */
+    public function interactions(Request $request)
+    {
+        $data = $request->validate(['product_ids' => 'required|array|max:50']);
+        $ids = array_map('intval', $data['product_ids']);
+        $products = Product::whereIn('id', $ids)->get(['id', 'name']);
+        $names = $products->pluck('name', 'id');
+
+        $warnings = [];
+        $seen = [];
+        foreach ($products as $a) {
+            foreach ($products as $b) {
+                if ($a->id >= $b->id) {
+                    continue;
+                }
+                $key = $a->id.':'.$b->id;
+                if (isset($seen[$key])) {
+                    continue;
+                }
+                $seen[$key] = true;
+
+                $hit = DrugInteraction::where(fn ($q) => $q
+                    ->where('drug_a_name', 'like', '%'.$a->name.'%')->where('drug_b_name', 'like', '%'.$b->name.'%'))
+                    ->orWhere(fn ($q) => $q
+                    ->where('drug_a_name', 'like', '%'.$b->name.'%')->where('drug_b_name', 'like', '%'.$a->name.'%'))
+                    ->first();
+
+                if ($hit) {
+                    $warnings[] = [
+                        'severity' => $hit->severity,
+                        'between' => [$a->name, $b->name],
+                        'description' => $hit->description,
+                        'recommendation' => $hit->recommendation,
+                    ];
+                }
+            }
+        }
+
+        return response()->json(['success' => true, 'data' => $warnings]);
+    }
+
+    /**
      * Complete the sale through the hardened API store (server-side pricing
      * H-01, FEFO stock burn, transactional) — same code path as the POS app.
+     * Promotions are evaluated SERVER-SIDE and applied as sale-level
+     * discount (line prices stay at list price), then the sale is posted to
+     * the open shift drawer + the light ledger.
      */
     public function checkout(Request $request)
     {
@@ -117,6 +177,10 @@ class PosController extends Controller
             'products.*.lossProfit' => 'required|numeric',
             'products.*.quantities' => 'required|integer|min:1',
             'products.*.batch_no' => 'nullable|string',
+            'products.*.expire_date' => 'nullable|string',
+            'products.*.dose' => 'nullable|string|max:160',
+            'products.*.dose_code' => 'nullable|string|max:24',
+            'coupon_code' => 'nullable|string|max:40',
             'paidAmount' => 'nullable|numeric',
             'dueAmount' => 'nullable|numeric',
             'isPaid' => 'nullable|boolean',
@@ -126,6 +190,16 @@ class PosController extends Controller
         $payload['saleDate'] = now()->toDateString();
         $payload['paidAmount'] ??= 0;
         $payload['dueAmount'] ??= 0;
+        $businessId0 = (int) $request->user()->business_id;
+
+        // Server-side promotion evaluation (client never dictates discounts).
+        $quote = $this->promotions->evaluate($businessId0, $payload['products'], $payload['coupon_code'] ?? null);
+        if ($quote['discount'] > 0) {
+            $payload['discountAmount'] = min(
+                $quote['discount'],
+                collect($payload['products'])->sum(fn ($l) => (float) $l['price'] * (int) $l['quantities'])
+            );
+        }
 
         $apiRequest = Request::create('/api/v1/sales', 'POST', $payload);
         $apiRequest->setUserResolver(fn () => $request->user());
@@ -144,10 +218,29 @@ class PosController extends Controller
         $businessId = (int) $request->user()->business_id;
         $settings = DeviceSettings::all($businessId);
 
+        // Cash drawer: attribute the sale + cash to the open shift.
+        $shift = $this->shifts->currentOpen($businessId);
+        $saleId = $body['data']['id'] ?? null;
+        if ($shift && $saleId) {
+            $this->shifts->addCash($shift, 'sale_cash', (float) ($payload['paidAmount'] ?? 0), 'POS sale', (int) $saleId);
+            \App\Models\Sale::whereKey($saleId)->update(['shift_id' => $shift->id]);
+        }
+
+        // Light accounting: auto journal entry for the sale.
+        if ($saleId) {
+            try {
+                $this->accounting->postSale(\App\Models\Sale::with('details')->find($saleId));
+            } catch (\Throwable $e) {
+                report($e); // ledger failure must not fail the sale
+            }
+        }
+
         return response()->json([
             'success' => true,
             'message' => __('تم إتمام البيع بنجاح.'),
             'sale' => $body['data'] ?? null,
+            'promotion' => $quote,
+            'shift' => ['number' => $shift?->shift_number, 'open' => (bool) $shift],
             'print' => [
                 // Per owner preference: sales never prompt for barcode labels
                 // unless explicitly enabled; receipt follows its own rule.
@@ -159,6 +252,12 @@ class PosController extends Controller
                     ? ($body['data']['id'] ?? null ? route('admin.receipts.generate-sale') : null)
                     : null,
             ],
+            // Dose labels — only when the pharmacist captured a schedule.
+            'dose_labels_url' => (isset($settings['print']['dose_labels_on_sale']) && $settings['print']['dose_labels_on_sale']
+                && collect($payload['products'])->contains(fn ($l) => filled($l['dose'] ?? null))
+                && ($body['data']['id'] ?? null))
+                ? route('admin.pos.dose-labels', ['sale' => $body['data']['id']])
+                : null,
         ], 200);
     }
 

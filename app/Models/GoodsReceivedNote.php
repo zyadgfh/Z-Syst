@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class GoodsReceivedNote extends Model
 {
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_RECEIVED = 'received';
+    public const STATUS_VERIFIED = 'verified';
+    public const STATUS_PARTIAL = 'partial';
+    public const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_PARTIALLY_ACCEPTED = 'partially_accepted';
+    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_ACCEPTED = 'accepted';
+
+    use HasFactory;
+
     use SoftDeletes;
 
     protected $table = 'goods_received_notes';
@@ -133,5 +146,24 @@ class GoodsReceivedNote extends Model
     public function getTotalRejectedQuantityAttribute(): int
     {
         return (int) $this->items()->sum('rejected_quantity');
+    }
+
+    public static function generateGRNNumber(): string
+    {
+        $prefix = 'GRN-';
+        $latest = static::query()->latest('id')->first();
+        $next = $latest ? ((int) filter_var($latest->getKey(), FILTER_SANITIZE_NUMBER_INT) + 1) : 1;
+
+        return $prefix.str_pad((string) $next, 6, '0', STR_PAD_LEFT);
+    }
+
+    public function scopeByStatus($query, string $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    public function scopeVerified($query)
+    {
+        return $query->where('status', self::STATUS_VERIFIED);
     }
 }

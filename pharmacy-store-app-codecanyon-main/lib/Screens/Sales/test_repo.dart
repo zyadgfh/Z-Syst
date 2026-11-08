@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'package:mobile_pos/app_config/api_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_pos/Repository/constant_functions.dart';
 
 class SalesRepository {
-  final String baseUrl = "https://acnoopharmacy.acnoo.com/api/v1";
+  // Z-Syst: route through the configured tenant domain.
+  final String baseUrl = APIConfig.url;
 
   Future<http.Response> postSale(Map<String, dynamic> saleData) async {
     final url = Uri.parse("$baseUrl/purchase");

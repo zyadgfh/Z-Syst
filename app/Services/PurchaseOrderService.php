@@ -28,6 +28,7 @@ class PurchaseOrderService
     {
         return DB::transaction(function () use ($data) {
             $po = PurchaseOrder::create([
+                'po_number' => $data['po_number'] ?? ('PO-'.str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT)),
                 'supplier_id' => $data['supplier_id'] ?? null,
                 'business_id' => $data['business_id'],
                 'branch_id' => $data['branch_id'] ?? null,
@@ -125,7 +126,7 @@ class PurchaseOrderService
     /**
      * Approve purchase order.
      */
-    public function approve(PurchaseOrder $po, int $userId): PurchaseOrder
+    public function approve(PurchaseOrder $po, $userId): PurchaseOrder
     {
         if (!$po->isSent()) {
             throw new \Exception('Only sent orders can be approved');
@@ -142,7 +143,7 @@ class PurchaseOrderService
     /**
      * Reject purchase order.
      */
-    public function reject(PurchaseOrder $po, int $userId, string $reason): PurchaseOrder
+    public function reject(PurchaseOrder $po, $userId, string $reason): PurchaseOrder
     {
         if (!$po->isSent()) {
             throw new \Exception('Only sent orders can be rejected');

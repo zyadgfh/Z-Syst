@@ -338,4 +338,75 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
         Route::post('claims/{claim}/process', [ADMIN\InsuranceClaimController::class, 'process'])->name('claims.process');
         Route::post('claims/{claim}/payment', [ADMIN\InsuranceClaimController::class, 'processPayment'])->name('claims.payment');
         });
+
+// ═══ Sales Operations Unit (shifts, stock take, promotions, storefront
+// orders, deliveries, ETA, gateways, accounting, analytics, assistant,
+// live board, 2FA) ═══
+Route::prefix('shifts')->name('shifts.')->middleware('permission:shifts-read')->group(function () {
+    Route::get('/', [ADMIN\ShiftController::class, 'index'])->name('index');
+    Route::post('open', [ADMIN\ShiftController::class, 'open'])->name('open');
+    Route::post('{shift}/cash', [ADMIN\ShiftController::class, 'cash'])->name('cash');
+    Route::post('{shift}/close', [ADMIN\ShiftController::class, 'close'])->name('close');
+    Route::get('{shift}/report', [ADMIN\ShiftController::class, 'report'])->name('report');
+});
+
+Route::prefix('stock-take')->name('stocktake.')->middleware('permission:stocktake-read')->group(function () {
+    Route::get('/', [ADMIN\StockTakeController::class, 'index'])->name('index');
+    Route::post('/', [ADMIN\StockTakeController::class, 'store'])->name('store');
+    Route::get('{audit}', [ADMIN\StockTakeController::class, 'show'])->name('show');
+    Route::post('{audit}/apply', [ADMIN\StockTakeController::class, 'apply'])->name('apply');
+    Route::post('scan', [ADMIN\StockTakeController::class, 'webScan'])->name('scan');
+});
+
+Route::prefix('promotions')->name('promotions.')->middleware('permission:promotions-read')->group(function () {
+    Route::get('/', [ADMIN\PromotionController::class, 'index'])->name('index');
+    Route::post('/', [ADMIN\PromotionController::class, 'store'])->name('store');
+    Route::put('{promotion}', [ADMIN\PromotionController::class, 'update'])->name('update');
+    Route::post('{promotion}/toggle', [ADMIN\PromotionController::class, 'toggle'])->name('toggle');
+    Route::delete('{promotion}', [ADMIN\PromotionController::class, 'destroy'])->name('destroy');
+});
+
+Route::get('store-orders', [ADMIN\StoreOrderController::class, 'index'])->name('store-orders.index')->middleware('permission:store-orders-read');
+Route::post('store-orders/{order}/status', [ADMIN\StoreOrderController::class, 'status'])->name('store-orders.status')->middleware('permission:store-orders-update');
+Route::post('store-orders/{order}/sell', [ADMIN\StoreOrderController::class, 'sell'])->name('store-orders.sell')->middleware('permission:store-orders-update');
+
+Route::get('deliveries', [ADMIN\DeliveryController::class, 'index'])->name('deliveries.index')->middleware('permission:deliveries-read');
+Route::post('deliveries', [ADMIN\DeliveryController::class, 'store'])->name('deliveries.store')->middleware('permission:deliveries-create');
+Route::post('deliveries/{delivery}/assign', [ADMIN\DeliveryController::class, 'assign'])->name('deliveries.assign')->middleware('permission:deliveries-update');
+Route::post('deliveries/{delivery}/status', [ADMIN\DeliveryController::class, 'status'])->name('deliveries.status')->middleware('permission:deliveries-update');
+
+Route::prefix('eta')->name('eta.')->middleware('permission:eta-read')->group(function () {
+    Route::get('/', [ADMIN\EtaInvoiceController::class, 'index'])->name('index');
+    Route::get('settings', [ADMIN\EtaInvoiceController::class, 'settings'])->name('settings');
+    Route::put('settings', [ADMIN\EtaInvoiceController::class, 'saveSettings'])->name('settings.save');
+    Route::post('sales/{sale}/submit', [ADMIN\EtaInvoiceController::class, 'submit'])->name('submit');
+});
+
+Route::post('subscription-pay', [ADMIN\GatewayPaymentController::class, 'checkoutSubscription'])->name('subscription.pay')->middleware('permission:settings-update');
+Route::get('gateway-transactions', [ADMIN\GatewayPaymentController::class, 'index'])->name('gateway.transactions')->middleware('permission:settings-update');
+
+Route::prefix('accounting')->name('accounting.')->middleware('permission:accounting-read')->group(function () {
+    Route::get('/', [ADMIN\AccountingController::class, 'index'])->name('index');
+    Route::get('vat', [ADMIN\AccountingController::class, 'vat'])->name('vat');
+    Route::get('trial-balance', [ADMIN\AccountingController::class, 'trialBalance'])->name('trial-balance');
+    Route::post('entries', [ADMIN\AccountingController::class, 'storeEntry'])->name('entries.store')->middleware('permission:accounting-create');
+});
+
+Route::get('analytics', [ADMIN\AnalyticsController::class, 'index'])->name('analytics.index')->middleware('permission:analytics-read');
+Route::get('assistant', [ADMIN\AssistantController::class, 'index'])->name('assistant.index')->middleware('permission:assistant-use');
+Route::post('assistant/ask', [ADMIN\AssistantController::class, 'ask'])->name('assistant.ask')->middleware('permission:assistant-use');
+Route::post('pos/interactions', [ADMIN\PosController::class, 'interactions'])->name('pos.interactions');
+Route::post('pos/sync', [\App\Http\Controllers\Api\OfflineSyncController::class, 'store'])->name('pos.sync');
+
+// Dose labels — طباعة الجرعات كباركود عند البيع
+Route::get('pos/dose-labels/{sale}', [ADMIN\DoseLabelController::class, 'sheet'])->name('pos.dose-labels');
+Route::get('dose/{payload}', [ADMIN\DoseLabelController::class, 'lookup'])->name('pos.dose.lookup');
+Route::post('dose/lookup', [ADMIN\DoseLabelController::class, 'lookup'])->name('pos.dose.lookup.post');
+Route::get('live', [ADMIN\LiveController::class, 'index'])->name('live.index')->middleware('permission:live-view');
+Route::get('live/stream', [ADMIN\LiveController::class, 'stream'])->name('live.stream')->middleware('permission:live-view');
+
+Route::get('profile/two-factor', [ADMIN\TwoFactorController::class, 'show'])->name('two-factor.show');
+Route::post('profile/two-factor/enable', [ADMIN\TwoFactorController::class, 'enable'])->name('two-factor.enable');
+Route::post('profile/two-factor/verify', [ADMIN\TwoFactorController::class, 'verify'])->name('two-factor.verify');
+Route::post('profile/two-factor/disable', [ADMIN\TwoFactorController::class, 'disable'])->name('two-factor.disable');
 });

@@ -116,6 +116,16 @@ return [
             'devices-create', 'devices-read', 'devices-update', 'devices-delete',
             'printers-create', 'printers-read', 'printers-update', 'printers-delete',
 
+            // sales operations unit
+            'shifts-read', 'shifts-create', 'shifts-update',
+            'stocktake-read', 'stocktake-create',
+            'promotions-create', 'promotions-read', 'promotions-update', 'promotions-delete',
+            'store-orders-read', 'store-orders-update',
+            'deliveries-read', 'deliveries-create', 'deliveries-update',
+            'eta-read', 'eta-create', 'eta-update',
+            'accounting-read', 'accounting-create',
+            'analytics-read', 'assistant-use', 'live-view',
+
             // finance & insurance
             'insurance-companies-create', 'insurance-companies-read', 'insurance-companies-update', 'insurance-companies-delete',
             'insurance-policies-create', 'insurance-policies-read', 'insurance-policies-update', 'insurance-policies-delete',
@@ -128,6 +138,9 @@ return [
         'staff' => [
             'dashboard-read', 'reports-read', 'notifications-read',
             'barcodes-read', 'printers-read', 'sales-create',
+            'shifts-read', 'shifts-create', 'shifts-update',
+            'stocktake-read', 'stocktake-create',
+            'deliveries-read', 'deliveries-update',
             'warehouses-read', 'stock-transfers-read', 'traceability-read',
             'prescriptions-read', 'prescriptions-create',
             'receipts-read', 'loyalty-read',

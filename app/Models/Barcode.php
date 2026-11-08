@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,8 @@ use Illuminate\Support\Str;
  */
 class Barcode extends Model
 {
+    use HasFactory;
+
     use SoftDeletes;
 
     public const TYPE_CODE128 = 'CODE128';
@@ -212,4 +215,32 @@ class Barcode extends Model
 
         return $factory(); // last resort: uniqueness constraint guards
     }
+
+
+    /** Test/label contract: public checksum helpers over the GS1 internals. */
+    public static function calculateEAN13Checksum(string $digits12): int
+    {
+        $sum = 0;
+        for ($i = 0; $i < 12; $i++) {
+            $sum += ((int) $digits12[$i]) * ($i % 2 === 0 ? 1 : 3);
+        }
+
+        return (10 - ($sum % 10)) % 10;
+    }
+
+    public static function calculateUPCChecksum(string $digits11): int
+    {
+        $odd = 0;
+        $even = 0;
+        for ($i = 0; $i < 11; $i++) {
+            if ($i % 2 === 0) {
+                $odd += (int) $digits11[$i];
+            } else {
+                $even += (int) $digits11[$i];
+            }
+        }
+
+        return (10 - (($odd * 3 + $even) % 10)) % 10;
+    }
 }
+  

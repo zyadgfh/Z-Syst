@@ -24,6 +24,7 @@ class PermissionSeeder extends Seeder
         $resourcesCrud = [
             'users', 'warehouses', 'stock-transfers', 'traceability', 'barcodes', 'devices', 'printers',
             'prescriptions', 'receipts',
+            'promotions',
             'insurance-companies', 'insurance-policies', 'insurance-claims',
             'loyalty', 'banners',
             // platform-level management (Super Admin only in practice)
@@ -41,6 +42,13 @@ class PermissionSeeder extends Seeder
             'audit-logs-read', 'audit-logs-delete',
             'permissions-read', 'permissions-create',
             'sales-create',
+            'shifts-read', 'shifts-create', 'shifts-update',
+            'stocktake-read', 'stocktake-create',
+            'store-orders-read', 'store-orders-update',
+            'deliveries-read', 'deliveries-create', 'deliveries-update',
+            'eta-read', 'eta-create', 'eta-update',
+            'accounting-read', 'accounting-create',
+            'analytics-read', 'assistant-use', 'live-view',
             // POS overrides (H-01): allow trusted roles to sell off list price
             'sale.price-override',
         ]);

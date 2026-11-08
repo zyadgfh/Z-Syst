@@ -1,0 +1,87 @@
+name: Run PHPUnit
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    services: {}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: curl, bcmath, gd, mbstring, xml, sqlite, pdo_sqlite, zip, intl
+
+      - name: Get composer cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: |
+          composer install --no-progress --no-suggest --prefer-dist 2>&1 | tee install.log
+          EXIT=${PIPESTATUS[0]}
+          [ "$EXIT" -ne 0 ] && php .github/scripts/emit_log_annotations.php install.log "composer install"
+          exit $EXIT
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env || true
+          php -r "file_exists('.env') || copy('.env.example', '.env');"
+          php artisan key:generate --ansi
+        env:
+          APP_ENV: testing
+
+      - name: Run migrations
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: |
+          php artisan migrate:fresh --no-interaction --force 2>&1 | tee migrate.log
+          EXIT=${PIPESTATUS[0]}
+          [ "$EXIT" -ne 0 ] && php .github/scripts/emit_log_annotations.php migrate.log "migrate:fresh"
+          exit $EXIT
+
+      - name: Run tests
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+          SUPABASE_FALLBACK_ELOQUENT: 'true'
+          CACHE_DRIVER: file
+          CACHE_STORE: file
+          SESSION_DRIVER: file
+        run: |
+          php artisan test --colors=never --log-junit junit.xml 2>&1 | tee test.log
+          EXIT=${PIPESTATUS[0]}
+          if [ "$EXIT" -ne 0 ]; then
+            if [ -f junit.xml ]; then
+              php .github/scripts/emit_test_annotations.php junit.xml
+            else
+              php .github/scripts/emit_log_annotations.php test.log "artisan test"
+            fi
+          fi
+          exit $EXIT
+
+      - name: Surface failures as annotations
+        if: failure()
+        run: php .github/scripts/emit_test_annotations.php junit.xml
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            test.log
+            junit.xml
+          retention-days: 7

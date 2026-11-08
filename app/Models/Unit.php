@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Traits\TenantScoped;
@@ -12,6 +13,8 @@ use App\Traits\TenantScoped;
  */
 class Unit extends Model
 {
+    use HasFactory;
+
     use TenantScoped;
 
     protected $table = 'units';

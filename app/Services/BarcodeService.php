@@ -263,7 +263,7 @@ class BarcodeService
     /**
      * Reprint barcode.
      */
-    public function reprintBarcode(Barcode $barcode, int $userId): string
+    public function reprintBarcode(Barcode $barcode, $userId): string
     {
         return $this->printBarcode($barcode, $userId);
     }

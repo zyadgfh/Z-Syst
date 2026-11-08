@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -11,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class InsuranceCompany extends Model
 {
+    use HasFactory;
+
     protected $table = 'insurance_companies';
 
     protected $fillable = [
@@ -57,6 +62,21 @@ class InsuranceCompany extends Model
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
+    }
+
+    public function scopeByBusiness($query, $businessId)
+    {
+        return $businessId ? $query->where('business_id', $businessId) : $query;
+    }
+
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $businessId ? $quer
+    public function policies(): HasMany
+    {
+        return $this->hasMany(InsurancePolicy::class, 'insurance_company_id');
+    }
+y->where('business_id', $businessId) : $query;
     }
 }
 

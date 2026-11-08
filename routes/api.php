@@ -379,3 +379,12 @@ Route::middleware(['auth:sanctum', 'supabase.context'])
         Route::get('barcodes/search', [Api\BarcodeController::class, 'search'])->name('admin.barcodes.search');
         Route::apiResource('barcodes', Api\BarcodeController::class)->except('show');
     });
+
+// Device stock take + POS offline sync + API docs
+Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
+    Route::post('stock-takes', [Api\DeviceStockTakeController::class, 'store']);
+    Route::get('stock-takes/current', [Api\DeviceStockTakeController::class, 'current']);
+    Route::post('stock-takes/scan', [Api\DeviceStockTakeController::class, 'scan']);
+    Route::post('pos/sync', [Api\OfflineSyncController::class, 'store']);
+});
+Route::get('v1/docs', [Api\ApiDocController::class, 'spec'])->name('api.docs.spec');

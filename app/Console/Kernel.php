@@ -32,6 +32,14 @@ class Kernel extends ConsoleKernel
         $schedule->command('backup:database')->dailyAt('02:00');
         $schedule->command('doctor-attention:calculate')->dailyAt('00:00');
         $schedule->command('subscriptions:manage')->dailyAt('01:00');
+        // sales operations unit
+        $schedule->command('forecast:generate')->dailyAt('00:30');
+        $schedule->command('anomalies:scan')->dailyAt('23:30');
+        $schedule->command('telegram:daily')->dailyAt('22:00');
+        $schedule->command('patients:refill')->dailyAt('09:00');
+        $schedule->command('eta:retry')->everyFifteenMinutes();
+        // database queue runner (no redis needed)
+        $schedule->command('queue:work', ['--stop-when-empty', '--max-time=120'])->everyMinute()->withoutOverlapping();
     }
 
     /**

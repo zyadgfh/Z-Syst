@@ -66,6 +66,14 @@ class AuthUser extends Model
      */
     public static function idsForEmail(string $email): array
     {
+        // Local fallback mode: identities live on app_users.email directly.
+        if (config('supabase.fallback_eloquent')) {
+            return \App\Models\AppUser::query()
+                ->whereRaw('lower(email) = ?', [mb_strtolower(trim($email))])
+                ->pluck('id')
+                ->all();
+        }
+
         return static::query()
             ->whereRaw('lower(email) = ?', [mb_strtolower(trim($email))])
             ->pluck('id')
@@ -74,6 +82,12 @@ class AuthUser extends Model
 
     public static function emailFor(string $id): ?string
     {
+        if (config('supabase.fallback_eloquent')) {
+            $email = \App\Models\AppUser::query()->where('id', $id)->value('email');
+
+            return $email === null ? null : (string) $email;
+        }
+
         $email = static::query()->where('id', $id)->value('email');
 
         return $email === null ? null : (string) $email;

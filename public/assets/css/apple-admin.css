@@ -1,0 +1,241 @@
+/* ==========================================================================
+   apple-admin.css — Apple-design layer for the Z-Syst admin panel.
+   Loads after apple.css; maps Bootstrap admin components onto the ap-*
+   tokens so EVERY admin page (dashboards, POS, operations, finance…)
+   follows the apple-design skill without touching blade markup.
+
+   Principles (apple-design skill):
+   - Materials carry hierarchy; surfaces are flat + hairline, not shadowed.
+   - Continuous-feel radii, 4/8pt rhythm, pill controls, tight tracking.
+   - Springs over eases; reduced-motion gets crossfade only.
+   - Dark mode rides [data-ap-theme="dark"] from ap-theme.js.
+   ========================================================================== */
+
+/* ---- Surfaces: cards & panels ------------------------------------------- */
+.ap-theme .card {
+    background: var(--ap-surface);
+    border: 1px solid var(--ap-hairline);
+    border-radius: var(--ap-radius-lg);
+    box-shadow: none;
+}
+.ap-theme .card-header {
+    background: transparent;
+    border-bottom: 1px solid var(--ap-hairline);
+    font-weight: 600;
+    letter-spacing: var(--ap-title-track);
+    padding: 0.9rem 1.25rem;
+}
+.ap-theme .card-body { padding: 1.25rem; }
+.ap-theme .card-footer {
+    background: transparent;
+    border-top: 1px solid var(--ap-hairline);
+}
+
+/* ---- Typography inside panels ------------------------------------------- */
+.ap-theme .card h5, .ap-theme .card h6 { letter-spacing: var(--ap-title-track); font-weight: 700; }
+.ap-theme .text-muted { color: var(--ap-text-2) !important; }
+
+/* ---- Tables -------------------------------------------------------------- */
+.ap-theme .table {
+    --bs-table-bg: transparent;
+    color: var(--ap-text);
+    border-color: var(--ap-hairline);
+    margin-bottom: 0;
+}
+.ap-theme .table > thead th {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ap-text-2);
+    border-bottom: 1px solid var(--ap-hairline);
+    padding: 0.65rem 0.75rem;
+    white-space: nowrap;
+}
+.ap-theme .table > tbody td {
+    padding: 0.7rem 0.75rem;
+    border-bottom: 1px solid var(--ap-hairline);
+    vertical-align: middle;
+}
+.ap-theme .table > tbody tr:last-child td { border-bottom: none; }
+.ap-theme .table-hover > tbody > tr:hover > * {
+    --bs-table-accent-bg: rgba(0, 113, 227, 0.05);
+    color: var(--ap-text);
+}
+.ap-theme .table-success > * { --bs-table-bg: rgba(52, 199, 89, 0.10); }
+.ap-theme .table-danger > *  { --bs-table-bg: rgba(255, 59, 48, 0.08); }
+.ap-theme .table-warning > * { --bs-table-bg: rgba(245, 158, 11, 0.10); }
+
+/* ---- Buttons: success/warning/danger join the pill family ---------------- */
+.ap-theme .btn-success { background: var(--ap-green); color: #fff; }
+.ap-theme .btn-success:hover { background: #2db24e; color: #fff; }
+.ap-theme .btn-danger { background: var(--ap-red); color: #fff; }
+.ap-theme .btn-danger:hover { background: #e0342a; color: #fff; }
+.ap-theme .btn-warning {
+    background: #f59e0b; color: #1d1d1f;
+}
+.ap-theme .btn-outline-primary {
+    color: var(--ap-accent);
+    border: 1px solid var(--ap-accent);
+    background: transparent;
+}
+.ap-theme .btn-outline-primary:hover { background: var(--ap-accent); color: #fff; }
+.ap-theme .btn-outline-success {
+    color: var(--ap-green); border: 1px solid var(--ap-green); background: transparent;
+}
+.ap-theme .btn-outline-success:hover { background: var(--ap-green); color: #fff; }
+.ap-theme .btn-outline-danger {
+    color: var(--ap-red); border: 1px solid var(--ap-red); background: transparent;
+}
+.ap-theme .btn-outline-danger:hover { background: var(--ap-red); color: #fff; }
+.ap-theme .btn-outline-warning {
+    color: #d97706; border: 1px solid #f59e0b; background: transparent;
+}
+.ap-theme .btn-sm { padding: 0.35rem 0.85rem; border-radius: 980px; }
+
+/* ---- Forms ---------------------------------------------------------------- */
+.ap-theme .form-control,
+.ap-theme .form-select {
+    background: var(--ap-surface);
+    border: 1px solid var(--ap-hairline);
+    border-radius: 12px;
+    color: var(--ap-text);
+    padding: 0.55rem 0.9rem;
+    transition: border-color 0.18s var(--ap-spring), box-shadow 0.18s var(--ap-spring);
+}
+.ap-theme .form-control:focus,
+.ap-theme .form-select:focus {
+    border-color: var(--ap-accent);
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.14);
+    background: var(--ap-surface);
+    color: var(--ap-text);
+}
+.ap-theme .form-label { font-weight: 600; letter-spacing: var(--ap-body-track); }
+.ap-theme .form-check-input:checked { background-color: var(--ap-green); border-color: var(--ap-green); }
+.ap-theme .input-group-text {
+    background: var(--ap-bg);
+    border: 1px solid var(--ap-hairline);
+    border-radius: 12px;
+    color: var(--ap-text-2);
+}
+
+/* ---- Badges → tinted pills ------------------------------------------------ */
+.ap-theme .badge {
+    border-radius: 980px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 0.45em 0.85em;
+}
+.ap-theme .badge.bg-success { background: var(--ap-green) !important; }
+.ap-theme .badge.bg-danger  { background: var(--ap-red) !important; }
+.ap-theme .badge.bg-warning { background: #f59e0b !important; color: #1d1d1f !important; }
+.ap-theme .badge.bg-info    { background: rgba(0, 113, 227, 0.14) !important; color: var(--ap-accent) !important; }
+.ap-theme .badge.bg-secondary { background: var(--ap-bg) !important; color: var(--ap-text-2) !important; border: 1px solid var(--ap-hairline); }
+.ap-theme .badge.bg-primary { background: var(--ap-accent) !important; }
+
+/* ---- Alerts → tinted cards ------------------------------------------------ */
+.ap-theme .alert {
+    border-radius: var(--ap-radius-md);
+    border: 1px solid var(--ap-hairline);
+    box-shadow: none;
+}
+.ap-theme .alert-success { background: rgba(52, 199, 89, 0.10); color: #1f7a37; border-color: rgba(52, 199, 89, 0.25); }
+.ap-theme .alert-warning { background: rgba(245, 158, 11, 0.10); color: #92610a; border-color: rgba(245, 158, 11, 0.28); }
+.ap-theme .alert-danger  { background: rgba(255, 59, 48, 0.08);  color: #b3271f; border-color: rgba(255, 59, 48, 0.22); }
+.ap-theme .alert-info    { background: rgba(0, 113, 227, 0.08);  color: var(--ap-accent); border-color: rgba(0, 113, 227, 0.22); }
+
+/* ---- Modals → sheets ------------------------------------------------------- */
+.ap-theme .modal-content {
+    background: var(--ap-surface);
+    border: 1px solid var(--ap-hairline);
+    border-radius: 22px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+.ap-theme .modal-header { border-bottom: 1px solid var(--ap-hairline); }
+.ap-theme .modal-footer { border-top: 1px solid var(--ap-hairline); }
+.ap-theme .modal-backdrop.show { opacity: 0.32; }
+
+/* ---- Pagination → pills ----------------------------------------------------- */
+.ap-theme .pagination .page-link {
+    border: none;
+    border-radius: 980px !important;
+    margin: 0 3px;
+    color: var(--ap-accent);
+    font-weight: 600;
+    min-width: 34px;
+    text-align: center;
+}
+.ap-theme .pagination .page-item.active .page-link { background: var(--ap-accent); color: #fff; }
+.ap-theme .pagination .page-link:focus { box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.14); }
+.ap-theme .pagination .page-item.disabled .page-link { color: var(--ap-text-3); }
+
+/* ---- Sidebar / topbar chrome ------------------------------------------------- */
+.ap-theme .sidebar, .ap-theme .main-sidebar, .ap-theme .left-sidebar {
+    background: var(--ap-surface);
+    border-inline-end: 1px solid var(--ap-hairline);
+}
+.ap-theme .sidebar .nav-link, .ap-theme .main-sidebar .nav-link {
+    color: var(--ap-text-2);
+    border-radius: 10px;
+    margin: 1px 8px;
+    transition: background-color 0.18s var(--ap-spring), color 0.18s var(--ap-spring);
+}
+.ap-theme .sidebar .nav-link:hover { background: rgba(0, 113, 227, 0.07); color: var(--ap-text); }
+.ap-theme .sidebar .nav-link.active, .ap-theme .main-sidebar .nav-link.active {
+    background: rgba(0, 113, 227, 0.12);
+    color: var(--ap-accent);
+    font-weight: 600;
+}
+.ap-theme .navbar {
+    background: rgba(255, 255, 255, 0.78);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--ap-hairline);
+}
+
+/* ---- Dropdowns / menus -------------------------------------------------------- */
+.ap-theme .dropdown-menu {
+    background: var(--ap-surface);
+    border: 1px solid var(--ap-hairline);
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    padding: 6px;
+}
+.ap-theme .dropdown-item {
+    border-radius: 8px;
+    color: var(--ap-text);
+    padding: 0.5rem 0.8rem;
+}
+.ap-theme .dropdown-item:hover { background: rgba(0, 113, 227, 0.08); }
+
+/* ---- Progress / spinners -------------------------------------------------------- */
+.ap-theme .progress { background: var(--ap-bg); border-radius: 980px; }
+.ap-theme .progress-bar { background: var(--ap-accent); border-radius: 980px; }
+
+/* ---- DataTables / jq-confirm touch-ups ------------------------------------------- */
+.ap-theme .dataTables_wrapper .dataTables_filter input,
+.ap-theme .dataTables_wrapper .dataTables_length select {
+    border: 1px solid var(--ap-hairline);
+    border-radius: 10px;
+    padding: 0.3rem 0.6rem;
+}
+
+/* ---- Dark-mode deltas -------------------------------------------------------------- */
+[data-ap-theme="dark"] .ap-theme .btn-light,
+[data-ap-theme="dark"] .ap-theme .btn-white { background: var(--ap-surface-2, #3a3a3c); color: var(--ap-text); border-color: var(--ap-hairline); }
+[data-ap-theme="dark"] .ap-theme .alert-success { color: #63d97c; }
+[data-ap-theme="dark"] .ap-theme .alert-warning { color: #ffc76b; }
+[data-ap-theme="dark"] .ap-theme .alert-danger  { color: #ff8078; }
+[data-ap-theme="dark"] .ap-theme .badge.bg-warning { color: #1c1c1e !important; }
+[data-ap-theme="dark"] .ap-theme .table-hover > tbody > tr:hover > * { --bs-table-accent-bg: rgba(10, 132, 255, 0.10); }
+[data-ap-theme="dark"] .ap-theme .navbar { background: rgba(44, 44, 46, 0.78); }
+
+/* ---- Motion discipline ---------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    .ap-theme .card, .ap-theme .btn, .ap-theme .nav-link { transition: none; }
+}
+
+@media print {
+    .ap-theme .sidebar, .ap-theme .navbar, .ap-theme .btn { display: none !important; }
+    .ap-theme .card { box-shadow: none; border: 1px solid #ccc; }
+}

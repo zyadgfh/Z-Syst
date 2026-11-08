@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\TenantScoped;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -32,6 +33,8 @@ class Stock extends Model
      *
      * @var array
      */
+    public function scopeForBusiness(Builder $q, int $businessId): Builder { return $q->where('business_id', $businessId); }
+
     protected $casts = [
         'expire_date' => 'date',
     ];

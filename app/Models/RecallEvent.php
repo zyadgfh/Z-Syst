@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class RecallEvent extends Model
 {
+    use HasFactory;
+
     protected $table = 'recall_events';
 
     protected $fillable = [
@@ -38,5 +41,13 @@ class RecallEvent extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function resolve(): void
+    {
+        $this->forceFill([
+            'status' => 'resolved',
+            'resolved_at' => now(),
+        ])->save();
     }
 }

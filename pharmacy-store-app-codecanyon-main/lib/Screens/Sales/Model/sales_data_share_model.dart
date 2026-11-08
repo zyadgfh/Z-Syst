@@ -77,6 +77,8 @@ class ProductsOnCartSalesDataModel {
   num quantities;
   num stock;
   num purchasePrice;
+  String? dose;
+  String? doseCode;
 
   ProductsOnCartSalesDataModel({
     required this.price,
@@ -88,6 +90,8 @@ class ProductsOnCartSalesDataModel {
     required this.lossProfit,
     required this.batchNo,
     required this.quantities,
+    this.dose,
+    this.doseCode,
   });
 
   // To JSON method
@@ -100,6 +104,8 @@ class ProductsOnCartSalesDataModel {
       "quantities": quantities,
       "purchase_price": purchasePrice,
       "expire_date": expireDate,
+      "dose": dose,
+      "dose_code": doseCode,
     };
   }
 }

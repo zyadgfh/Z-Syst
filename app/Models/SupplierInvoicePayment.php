@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class SupplierInvoicePayment extends Model
 {
+    use HasFactory;
+
     use SoftDeletes;
+
+    public const METHOD_CASH = 'cash';
+    public const METHOD_BANK_TRANSFER = 'bank_transfer';
+    public const METHOD_CHEQUE = 'cheque';
+    public const METHOD_CARD = 'card';
+
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_CANCELLED = 'cancelled';
 
     protected $table = 'supplier_invoice_payments';
 

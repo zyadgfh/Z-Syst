@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class BatchLot extends Model
 {
+    use HasFactory;
+
     protected $table = 'batch_lots';
 
     protected $fillable = [
@@ -40,5 +43,25 @@ class BatchLot extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $businessId ? $query->where('business_id', $businessId) : $query;
+    }
+
+    public function isExpired(): bool
+    {
+        return filled($this->expiry_date) && $this->expiry_date->isPast();
+    }
+
+    public function isRecalled(): bool
+    {
+        return filled($this->recall_date) && $this->recall_date->isPast();
+    }
+
+    public function scopeExpired($query)
+    {
+        return $query->whereNotNull('expiry_date')->where('expiry_date', '<', now());
     }
 }

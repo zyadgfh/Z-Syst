@@ -227,8 +227,10 @@ class InsuranceService
         $coverageRules = $this->getApplicableCoverageRules($policy, $data);
         
         if ($coverageRules->isEmpty()) {
-            // Use default company coverage
-            return $policy->company->calculateDefaultCoverage($data['total_amount']);
+            // Use default company coverage (policy may have no company linked)
+            return $policy->company
+                ? $policy->company->calculateDefaultCoverage((float) $data['total_amount'])
+                : 0.0;
         }
 
         // Apply best coverage rule

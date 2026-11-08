@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -24,6 +27,8 @@ class StockAudit extends Model
         'metadata',
     ];
 
+    public function scopeForBusiness(Builder $q, int $businessId): Builder { return $q->where('business_id', $businessId); }
+
     protected $casts = [
         'audit_date' => 'datetime',
         'completed_at' => 'datetime',
@@ -33,5 +38,11 @@ class StockAudit extends Model
     public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class, 'business_id');
+    }
+
+    public function details(): HasMany
+    {
+        return $this->hasMany(StockAuditDetail::class, 'stock_audit_id');
+    }
     }
 }

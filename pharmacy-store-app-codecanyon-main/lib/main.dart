@@ -42,6 +42,7 @@ import 'package:mobile_pos/Screens/SplashScreen/on_board.dart';
 import 'package:mobile_pos/Screens/SplashScreen/splash_screen.dart';
 import 'package:mobile_pos/Screens/stock_list/stock_list.dart';
 import 'package:mobile_pos/Theme/theme.dart';
+import 'package:mobile_pos/Theme/apple_theme.dart';
 import 'package:provider/provider.dart' as pro;
 import 'Screens/Income/income_list.dart';
 import 'Screens/Loss_Profit/loss_profit_screen.dart';
@@ -98,8 +99,10 @@ class _MyAppState extends ConsumerState<MyApp> {
                     AppLocalizationDelegate(),
                   ],
                   supportedLocales: S.delegate.supportedLocales,
-                  title: 'Pharmacy',
-                  theme: AcnooTheme.kLightTheme(context),
+                  title: 'Z-Syst Pharmacy',
+                  theme: AppleDesign.light(),
+                  darkTheme: AppleDesign.dark(),
+                  themeMode: ThemeMode.system,
                   initialRoute: '/',
                   builder: EasyLoading.init(),
                   routes: {

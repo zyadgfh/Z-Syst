@@ -40,7 +40,7 @@ class FinancialAuditService
     /**
      * Start a financial audit.
      */
-    public function startAudit(FinancialAuditLog $audit, int $userId): FinancialAuditLog
+    public function startAudit(FinancialAuditLog $audit, $userId): FinancialAuditLog
     {
         $audit->update([
             'status' => 'in_progress',

@@ -43,7 +43,7 @@ class StockAuditService
     /**
      * Start a stock audit (change status to in_progress).
      */
-    public function startAudit(StockAudit $audit, int $userId): StockAudit
+    public function startAudit(StockAudit $audit, $userId): StockAudit
     {
         $audit->update([
             'status' => 'in_progress',
@@ -156,7 +156,7 @@ class StockAuditService
     /**
      * Create stock reconciliation from audit detail.
      */
-    public function createReconciliation(StockAuditDetail $detail, int $userId, ?string $reason = null): StockReconciliation
+    public function createReconciliation(StockAuditDetail $detail, $userId, ?string $reason = null): StockReconciliation
     {
         if ($detail->variance == 0) {
             throw new \Exception('No variance to reconcile for this product.');

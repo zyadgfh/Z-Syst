@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class InsurancePolicy extends Model
 {
+    use HasFactory;
+
     protected $table = 'insurance_policies';
 
     protected $fillable = [
@@ -61,5 +64,29 @@ class InsurancePolicy extends Model
     public function insuranceCompany(): BelongsTo
     {
         return $this->belongsTo(InsuranceCompany::class, 'insurance_company_id');
+    }
+
+    public function isValid(): bool
+    {
+        $active = ($this->status ?? 'active') === 'active';
+        $inWindow = true;
+        if ($this->start_date !== null) { $inWindow = $inWindow && ! $this->start_date->isFuture(); }
+        if ($this->end_date !== null) { $inWindow = $inWindow && ! $this->end_date->isPast(); }
+        return $active && $inWindow;
+    }
+
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $businessId ? $query->where('business_id', $businessId) : $query;
+    }
+
+    public function scopeByBusiness($query, $businessId)
+    {
+        return $businessId ? $query->where('business_id', $businessId) : $query;
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->end_date !== null && $this->end_date->isPast();
     }
 }

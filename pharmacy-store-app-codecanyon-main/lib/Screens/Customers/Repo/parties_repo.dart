@@ -123,7 +123,7 @@ class PartyRepository {
     required BuildContext context,
     required WidgetRef ref,
   }) async {
-    final String apiUrl = 'https://dokanadmin.acnoo.com/api/v1/parties/$id';
+    final String apiUrl = '\${APIConfig.url}/parties/\$id';
 
     try {
       final response = await http.delete(
