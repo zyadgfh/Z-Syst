@@ -17,6 +17,11 @@ class SupplierInvoicePayment extends Model
 
     use SoftDeletes;
 
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_CANCELLED = 'cancelled';
+
     protected $table = 'supplier_invoice_payments';
 
     protected $fillable = [
