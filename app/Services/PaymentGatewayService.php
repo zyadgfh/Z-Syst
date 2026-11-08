@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\BusinessSetting;
 use App\Models\GatewayTransaction;
 use Illuminate\Support\Facades\Http;
 

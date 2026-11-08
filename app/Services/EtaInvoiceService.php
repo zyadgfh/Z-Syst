@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\BusinessSetting;
 use App\Models\EtaInvoice;
 use App\Models\Sale;
 use Illuminate\Support\Arr;
