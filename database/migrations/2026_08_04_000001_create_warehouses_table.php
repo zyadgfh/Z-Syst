@@ -42,7 +42,7 @@ return new class extends Migration
             $table->integer('quantity');
             $table->string('status')->default('pending');
             $table->text('notes')->nullable();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignUuid('user_id')->nullable()->constrained('app_users')->nullOnDelete();
             $table->timestamps();
 
             $table->index(['business_id', 'status', 'created_at']);

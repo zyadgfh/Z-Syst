@@ -35,7 +35,7 @@ return new class extends Migration
             $table->integer('failed')->default(0);
             $table->decimal('pass_rate', 5, 2)->default(0);
             $table->text('notes')->nullable();
-            $table->foreignId('generated_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('generated_by')->nullable()->constrained('app_users')->nullOnDelete();
             $table->timestamps();
         });
     }

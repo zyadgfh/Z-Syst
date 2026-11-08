@@ -35,7 +35,7 @@ return new class extends Migration
             $table->date('resolved_at')->nullable();
             $table->string('status')->default('active');
             $table->text('description')->nullable();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignUuid('user_id')->nullable()->constrained('app_users')->nullOnDelete();
             $table->timestamps();
 
             $table->index(['business_id', 'status', 'initiated_at']);
@@ -50,7 +50,7 @@ return new class extends Migration
             $table->foreignId('to_warehouse_id')->nullable()->constrained('warehouses')->nullOnDelete();
             $table->string('type')->default('transfer');
             $table->integer('quantity')->default(0);
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignUuid('user_id')->nullable()->constrained('app_users')->nullOnDelete();
             $table->text('notes')->nullable();
             $table->timestamps();
 

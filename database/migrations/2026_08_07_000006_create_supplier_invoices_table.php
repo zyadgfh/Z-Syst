@@ -18,8 +18,8 @@ return new class extends Migration
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('purchase_id')->nullable()->constrained('purchases')->nullOnDelete();
             $table->foreignId('purchase_order_id')->nullable()->constrained('purchase_orders')->nullOnDelete();
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('created_by')->nullable()->constrained('app_users')->nullOnDelete();
+            $table->foreignUuid('approved_by')->nullable()->constrained('app_users')->nullOnDelete();
             
             $table->string('invoice_number')->unique();
             $table->date('invoice_date');
@@ -96,8 +96,8 @@ return new class extends Migration
             $table->foreignId('supplier_invoice_id')->constrained('supplier_invoices')->cascadeOnDelete();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('created_by')->nullable()->constrained('app_users')->nullOnDelete();
+            $table->foreignUuid('approved_by')->nullable()->constrained('app_users')->nullOnDelete();
             
             $table->string('payment_number')->unique();
             $table->date('payment_date');

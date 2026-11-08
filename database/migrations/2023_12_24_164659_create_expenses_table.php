@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->double('amount', 10, 2);
             $table->foreignId('expense_category_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignUuid('user_id')->nullable()->constrained('app_users')->nullOnDelete();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->string('expanseFor')->nullable();
             $table->string('paymentType')->default('Cash');

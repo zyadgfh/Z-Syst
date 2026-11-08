@@ -16,8 +16,8 @@ return new class extends Migration
 
             $table->integer('current_step')->default(1);
             $table->string('status')->default('pending');
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('created_by')->nullable()->constrained('app_users')->nullOnDelete();
+            $table->foreignUuid('updated_by')->nullable()->constrained('app_users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -45,8 +45,8 @@ return new class extends Migration
             $table->json('steps_config');
             $table->boolean('is_active')->default(true);
             $table->boolean('is_default')->default(false);
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('created_by')->nullable()->constrained('app_users')->nullOnDelete();
+            $table->foreignUuid('updated_by')->nullable()->constrained('app_users')->nullOnDelete();
             $table->timestamps();
         });
     }

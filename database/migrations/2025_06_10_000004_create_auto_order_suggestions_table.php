@@ -23,7 +23,7 @@ return new class extends Migration
             $table->decimal('confidence_score', 5, 2)->nullable();
             $table->string('priority')->default('medium'); // high, medium, low
             $table->string('status')->default('pending'); // pending, approved, converted, rejected
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('approved_by')->nullable()->constrained('app_users')->nullOnDelete();
             $table->timestamp('approved_at')->nullable();
             $table->foreignId('converted_purchase_id')->nullable()->constrained('purchases')->nullOnDelete();
             $table->timestamp('converted_at')->nullable();

@@ -94,7 +94,7 @@ return new class extends Migration
             $table->string('action'); // created, upgraded, downgraded, cancelled, renewed
             $table->json('old_data')->nullable();
             $table->json('new_data')->nullable();
-            $table->foreignId('performed_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('performed_by')->nullable()->constrained('app_users')->nullOnDelete();
             $table->text('notes')->nullable();
             $table->timestamps();
         });

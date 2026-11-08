@@ -17,8 +17,8 @@ return new class extends Migration
             $table->foreignId('supplier_id')->nullable()->constrained('parties')->nullOnDelete();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('received_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('received_by')->nullable()->constrained('app_users')->nullOnDelete();
+            $table->foreignUuid('verified_by')->nullable()->constrained('app_users')->nullOnDelete();
 
             $table->string('grn_number')->unique();
             $table->date('received_date');

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('reason');
             $table->string('reference')->nullable();
             $table->string('status')->default('pending');
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('approved_by')->nullable()->constrained('app_users')->nullOnDelete();
             $table->timestamp('approved_at')->nullable();
             $table->string('file_path')->nullable();
             $table->text('notes')->nullable();
@@ -40,7 +40,7 @@ return new class extends Migration
             $table->string('reason');
             $table->string('reference')->nullable();
             $table->string('status')->default('pending');
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('approved_by')->nullable()->constrained('app_users')->nullOnDelete();
             $table->timestamp('approved_at')->nullable();
             $table->string('file_path')->nullable();
             $table->text('notes')->nullable();

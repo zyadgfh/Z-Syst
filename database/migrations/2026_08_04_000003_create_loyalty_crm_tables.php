@@ -41,7 +41,7 @@ return new class extends Migration
             $table->foreignId('party_id')->constrained()->cascadeOnDelete();
             $table->string('type')->default('call');
             $table->text('notes')->nullable();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignUuid('user_id')->nullable()->constrained('app_users')->nullOnDelete();
             $table->timestamps();
 
             $table->index(['business_id', 'party_id', 'created_at']);

@@ -47,7 +47,7 @@ return new class extends Migration
             $table->decimal('rating', 2, 1);
             $table->string('category');
             $table->text('review')->nullable();
-            $table->foreignId('rated_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('rated_by')->nullable()->constrained('app_users')->nullOnDelete();
             $table->timestamp('rated_at')->nullable();
             $table->timestamps();
         });
@@ -64,7 +64,7 @@ return new class extends Migration
             $table->text('conditions')->nullable();
             $table->string('file_path')->nullable();
             $table->string('status')->default('active');
-            $table->foreignId('signed_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('signed_by')->nullable()->constrained('app_users')->nullOnDelete();
             $table->timestamp('signed_at')->nullable();
             $table->timestamps();
         });
