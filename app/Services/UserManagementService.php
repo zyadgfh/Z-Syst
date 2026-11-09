@@ -365,8 +365,7 @@ class UserManagementService
             $this->auth->signInWithPassword($email, $password);
 
             return true;
-        } catch (Throwable $e) {
-            echo 'VERIFY-PW-EXC: '.get_class($e).': '.$e->getMessage()."\n"; // TEMP-DIAG
+        } catch (Throwable) {
             return false;
         }
     }

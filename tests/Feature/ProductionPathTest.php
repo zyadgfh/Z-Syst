@@ -93,6 +93,10 @@ class ProductionPathTest extends TestCase
             ])
             ->assertStatus(200);
 
+        // The grant must hit the real GoTrue token path (regression guard for
+        // the endpoint() _path suffix bug that produced bare-host URLs).
+        Http::assertSent(fn ($request) => str_contains($request->url(), '/auth/v1/token'));
+
         $this->assertDatabaseHas('audit_logs', [
             'user_id' => $user->id,
             'action' => 'password.changed',

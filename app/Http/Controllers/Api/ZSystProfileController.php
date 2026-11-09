@@ -93,7 +93,6 @@ class ZSystProfileController extends Controller
             ]);
         } else {
             $email = (string) $user->email;
-            echo 'PW-B: email='.($email === '' ? 'EMPTY' : $email).', fallback='.var_export(config('supabase.fallback_eloquent'), true)."\n"; // TEMP-DIAG
 
             if ($email === '' || ! $service->verifyPassword($email, (string) $request->current_password)) {
                 return response()->json([
