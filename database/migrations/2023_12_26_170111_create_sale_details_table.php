@@ -22,8 +22,7 @@ return new class extends Migration
             $table->string('batch_no')->nullable();
             $table->date('expire_date')->nullable();
             $table->integer('quantities')->default(0);
-            $table->string('dose')->nullable();
-            $table->string('dose_code')->nullable();
+            // dose / dose_code are added by 2026_11_07_100002_add_dose_tracking_to_sale_details
         });
     }
 

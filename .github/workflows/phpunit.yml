@@ -117,7 +117,7 @@ jobs:
           git fetch origin ci-runtime || true
           git checkout --orphan ci-runtime-phpunit-tmp
           git rm -rf --cached . -q || true
-          git add -f test.log events.txt junit.xml 2>/dev/null || true
+          git add -f test.log events.txt junit.xml migrate.log install.log prodpath.log 2>/dev/null || true
           git commit -q -m "phpunit diagnostics $(date -u +%FT%TZ)" || echo nothing to commit
           git branch -M ci-runtime-phpunit
           git push -q --force origin ci-runtime-phpunit || echo push failed
