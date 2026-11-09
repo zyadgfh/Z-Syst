@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Z-Syst — Stage 0: Stabilization Report</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+/* ===== Design tokens (design-system skill: primitive → semantic → component) ===== */
+:root {
+  /* primitives */
+  --gray-50:#fafafa; --gray-100:#f4f4f5; --gray-300:#d4d4d8; --gray-500:#71717a;
+  --gray-700:#3f3f46; --gray-900:#18181b;
+  --green-500:#22c55e; --green-600:#16a34a;
+  --red-400:#f87171; --red-500:#ef4444;
+  --amber-400:#fbbf24;
+  --blue-500:#3b82f6;
+  /* semantic */
+  --bg:#0b0b0d; --surface:#141417; --surface-2:#1c1c21;
+  --text:#f4f4f5; --text-dim:#a1a1aa; --accent:var(--green-500);
+  --danger:var(--red-400); --warn:var(--amber-400);
+  --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.45);
+  /* type scale (1.25 modular) */
+  --fs-h1:clamp(1.9rem, 4.5vw, 3.4rem);
+  --fs-h2:clamp(1.3rem, 2.6vw, 2rem);
+  --fs-body:clamp(.95rem, 1.6vw, 1.12rem);
+  --fs-micro:.78rem;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  background:var(--bg); color:var(--text);
+  font-family:"SF Pro Display",-apple-system,"Segoe UI",Roboto,sans-serif;
+  line-height:1.55;
+}
+.deck { scroll-snap-type:y mandatory; overflow-y:scroll; height:100vh; }
+.slide {
+  scroll-snap-align:start; min-height:100vh; padding:clamp(24px,6vw,72px);
+  display:flex; flex-direction:column; justify-content:center; gap:20px;
+  max-width:1100px; margin:0 auto;
+}
+.kicker {
+  font-size:var(--fs-micro); letter-spacing:.22em; text-transform:uppercase;
+  color:var(--accent); font-weight:700;
+}
+h1 { font-size:var(--fs-h1); font-weight:800; letter-spacing:-.02em; }
+h2 { font-size:var(--fs-h2); font-weight:700; letter-spacing:-.01em; }
+p, li { font-size:var(--fs-body); color:var(--text-dim); }
+strong { color:var(--text); }
+.grid { display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+.card {
+  background:var(--surface); border:1px solid #26262c; border-radius:var(--radius);
+  padding:20px; box-shadow:var(--shadow);
+}
+.card h3 { font-size:1rem; margin-bottom:6px; color:var(--text); }
+.card .num { font-size:2rem; font-weight:800; }
+.pill {
+  display:inline-block; padding:4px 12px; border-radius:999px; font-size:var(--fs-micro);
+  font-weight:700; letter-spacing:.06em;
+}
+.pill.ok { background:rgba(34,197,94,.14); color:var(--green-500); }
+.pill.bad { background:rgba(239,68,68,.14); color:var(--danger); }
+.pill.warn { background:rgba(251,191,36,.14); color:var(--warn); }
+table { width:100%; border-collapse:collapse; font-size:var(--fs-body); }
+th, td { text-align:left; padding:9px 12px; border-bottom:1px solid #26262c; color:var(--text-dim); }
+th { color:var(--text); font-size:var(--fs-micro); text-transform:uppercase; letter-spacing:.1em; }
+td b { color:var(--text); }
+.chart-box { background:var(--surface); border:1px solid #26262c; border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+canvas { max-height:52vh; }
+.footer-note { font-size:var(--fs-micro); color:var(--gray-500); }
+.banner { /* banner-design skill: cover art direction */
+  position:relative; border-radius:var(--radius); overflow:hidden;
+  border:1px solid #26262c; box-shadow:var(--shadow); margin-bottom:8px;
+}
+.banner svg { display:block; width:100%; height:auto; }
+.ask { border-left:3px solid var(--accent); padding-left:18px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } }
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <!-- 1 · Cover -->
+  <section class="slide">
+    <div class="banner" aria-hidden="true">
+      <svg viewBox="0 0 1100 190" role="img">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#16a34a"/><stop offset="1" stop-color="#0b0b0d"/>
+        </linearGradient></defs>
+        <rect width="1100" height="190" fill="url(#g)"/>
+        <g fill="none" stroke="rgba(255,255,255,.22)" stroke-width="1.4">
+          <path d="M0 150 C 180 150 260 60 420 60 S 700 150 860 150 1040 60 1100 60"/>
+          <path d="M0 170 C 200 170 300 90 470 90 S 760 170 920 170 1060 100 1100 100" opacity=".55"/>
+          <path d="M0 120 C 160 120 240 40 400 40 S 680 120 840 120 1020 40 1100 40" opacity=".35"/>
+        </g>
+        <text x="42" y="86" fill="#fff" font-family="-apple-system,Segoe UI,sans-serif" font-size="44" font-weight="800">Z-SYST</text>
+        <text x="44" y="122" fill="rgba(255,255,255,.75)" font-family="-apple-system,Segoe UI,sans-serif" font-size="19">Pharmacy Management Platform — Stage 0</text>
+      </svg>
+    </div>
+    <span class="kicker">Stabilization · Contract §23-E</span>
+    <h1>From 144 red tests<br>to a fully green baseline.</h1>
+    <p>Stage 0 is delivered and merged (<strong>PR #22 → main @ 216820f</strong>).
+       Every claim in this deck is evidence-backed by CI artifacts.</p>
+    <div><span class="pill ok">385 passed · 0 failed</span> &nbsp;
+         <span class="pill ok">4/4 workflows green</span> &nbsp;
+         <span class="pill warn">RLS live check pending</span></div>
+  </section>
+
+  <!-- 2 · The problem -->
+  <section class="slide">
+    <span class="kicker">The starting point</span>
+    <h2>main was red at the root</h2>
+    <div class="grid">
+      <div class="card"><div class="num" style="color:var(--danger)">144</div><h3>failing tests at baseline</h3><p>after merge #21 — plus red parse/schema CI steps.</p></div>
+      <div class="card"><div class="num" style="color:var(--warn)">6</div><h3>root-cause classes</h3><p>silent mass-assignment, model↔service recursion, missing contracts, route shadowing, migration divergence, crypto double-apply.</p></div>
+      <div class="card"><div class="num" style="color:var(--blue-500)">1</div><h3>hard rule</h3><p>no claim without executed evidence — counts come from junit.xml, never from truncated logs.</p></div>
+    </div>
+  </section>
+
+  <!-- 3 · The chart -->
+  <section class="slide">
+    <span class="kicker">The burn-down</span>
+    <h2>144 → 0, wave by wave</h2>
+    <div class="chart-box"><canvas id="burndown" height="230"></canvas>
+      <p class="footer-note">Failure counts re-derived from each cycle's junit.xml on the ci-runtime-phpunit orphan. Wave-13's “13F” was a truncated-log artifact — the true count was 59.</p>
+    </div>
+  </section>
+
+  <!-- 4 · Root causes -->
+  <section class="slide">
+    <span class="kicker">What was actually broken</span>
+    <h2>Root-cause taxonomy — all fixed</h2>
+    <table>
+      <tr><th>Class</th><th>Example</th><th>Severity</th></tr>
+      <tr><td><b>Boot parse error</b></td><td>escaped FQCNs killed <b>php artisan</b> (CI red in 18 s)</td><td><span class="pill bad">Critical</span></td></tr>
+      <tr><td><b>Silent mass-assignment</b></td><td><b>Product.name</b> unmapped → updated event never fired → audit trail empty</td><td><span class="pill bad">High</span></td></tr>
+      <tr><td><b>Recursion pairs</b></td><td>PO / SupplierInvoice approve+reject looped model↔service → stack overflow</td><td><span class="pill bad">High</span></td></tr>
+      <tr><td><b>Missing contracts</b></td><td>calculateTotal(), isPending(), Builder::approved() — called, never defined</td><td><span class="pill bad">High</span></td></tr>
+      <tr><td><b>Route shadowing</b></td><td>{id} binds swallowed concrete GETs; /api/purchase-orders didn't exist</td><td><span class="pill bad">High</span></td></tr>
+      <tr><td><b>Crypto double-apply</b></td><td>password mutator re-hashed bcrypt → login/password change always failed</td><td><span class="pill bad">High</span></td></tr>
+    </table>
+  </section>
+
+  <!-- 5 · Production path -->
+  <section class="slide">
+    <span class="kicker">Owner directive: “fix it”</span>
+    <h2>The production-mode gap is closed</h2>
+    <p>CI previously proved only the local fallback posture
+       (<strong>SUPABASE_FALLBACK_ELOQUENT=true</strong>). A new contract suite now pins
+       the <strong>real production posture</strong> — and CI re-runs it with the env var unset:</p>
+    <div class="grid">
+      <div class="card"><h3>Registration closed</h3><p>403 + no identity row when signup is disabled.</p></div>
+      <div class="card"><h3>Identities locked</h3><p>email/password mutators throw outside fallback.</p></div>
+      <div class="card"><h3>GoTrue delegation</h3><p>password change verifies via Supabase Auth (faked HTTP), writes the audit record.</p></div>
+      <div class="card"><h3>Fail-closed provider</h3><p>credentials validation requires a GoTrue session; RLS context is a no-op on non-pgsql.</p></div>
+    </div>
+  </section>
+
+  <!-- 6 · Skills applied -->
+  <section class="slide">
+    <span class="kicker">Owner directive: apply every skill in its domain</span>
+    <h2>15 repo skills → 15 concrete applications</h2>
+    <div class="grid">
+      <div class="card"><h3>Engineering</h3><p><strong>supabase</strong> + <strong>postgres best-practices</strong>: migration/GoTrue conformance review · <strong>clean-code-ddd</strong>: recursion &amp; readability review · <strong>z-syst-pharmacy</strong>(+<strong>refactor</strong>): FEFO/dose invariants green; StockAllocationService gap recorded.</p></div>
+      <div class="card"><h3>SaaS &amp; meta</h3><p><strong>developer-saas</strong>: tenancy checklist vs suite · <strong>find-skills</strong>: inventory (15, 1 out-of-scope) · <strong>omniroute</strong>: correctly skipped by its own rule.</p></div>
+      <div class="card"><h3>Design family</h3><p><strong>design-system / ui-ux-pro-max / ui-styling / slides / brand / banner-design</strong>: this very deck — explicit token layer, priority-1 UX rules, strategic chart, platform voice, cover art.</p></div>
+    </div>
+    <p class="footer-note">Full matrix with observed/inferred/unverified labels: docs/reports/stage-0-completion-audit-23E.md — Appendix A.</p>
+  </section>
+
+  <!-- 7 · Risks -->
+  <section class="slide">
+    <span class="kicker">Nothing hidden</span>
+    <h2>What stays honestly red</h2>
+    <div class="grid">
+      <div class="card"><h3>R1 · RLS unexercised <span class="pill bad">High · P1</span></h3><p>Role-switching (SET LOCAL, request.jwt.claims) never ran against real Postgres in CI.</p></div>
+      <div class="card"><h3>R2 · Supabase drift <span class="pill bad">High · P1</span></h3><p>Live project (110 tables) hasn't received this repo's diverged migrations.</p></div>
+      <div class="card"><h3>R3 · Stock centralization <span class="pill warn">Medium · P2</span></h3><p>8+ controllers mutate stock directly; no StockAllocationService.</p></div>
+      <div class="card"><h3>R4–R6 <span class="pill warn">Low–Medium</span></h3><p>No design-token layer · no echo-guard lint gate · Reverb/Meilisearch/Horizon/Scribe unscheduled.</p></div>
+    </div>
+  </section>
+
+  <!-- 8 · Roadmap -->
+  <section class="slide">
+    <span class="kicker">Gated by your sign-off — per the contract</span>
+    <h2>Roadmap: the recommended pair first</h2>
+    <table>
+      <tr><th>#</th><th>Item</th><th>Priority</th></tr>
+      <tr><td><b>1</b></td><td><b>Phase A–E full audit</b> (read-only) → findings register</td><td><span class="pill ok">P1</span></td></tr>
+      <tr><td><b>2</b></td><td><b>Postgres RLS CI job</b> — service container, real migrations, rls-audit.sql, role-switch tests</td><td><span class="pill ok">P1</span></td></tr>
+      <tr><td>3</td><td>Supabase drift reconciliation (needs a write window)</td><td><span class="pill ok">P1</span></td></tr>
+      <tr><td>4</td><td>StockAllocationService consolidation (feature-flagged + golden tests)</td><td><span class="pill warn">P2</span></td></tr>
+      <tr><td>5–7</td><td>Token layer · echo-guard lint · Reverb/Meili/Horizon/Scribe batches</td><td><span class="pill warn">P2–P3</span></td></tr>
+    </table>
+  </section>
+
+  <!-- 9 · The ask -->
+  <section class="slide">
+    <span class="kicker">§26 · Approval required for the next action</span>
+    <h2>The ask</h2>
+    <div class="ask">
+      <p style="font-size:var(--fs-h2); color:var(--text)"><strong>Approve items 1 + 2</strong> —
+      the Phase A–E audit and the RLS CI job.</p>
+      <p>Both are read-only / CI-scoped. Together they de-risk every other item
+         on the roadmap before any write-phase work begins.</p>
+    </div>
+    <p class="footer-note">Evidence: run 42492571832 (385/0) · orphan branch ci-runtime-phpunit · docs/reports/stage-0-completion-audit-23E.md</p>
+  </section>
+
+</div>
+
+<script>
+// slides skill: one strategic chart — the burn-down (Chart.js, graceful fallback)
+window.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('burndown');
+  if (!el || typeof Chart === 'undefined') return;
+  const labels = ['base','#21','w11','w12','w13','w14','w15','w16','w17','w18','w19'];
+  const data = [144,144,45,23,59,52,23,4,1,1,0];
+  new Chart(el, {
+    type: 'line',
+    data: { labels,
+      datasets: [{
+        label: 'failing tests', data,
+        borderColor:'#22c55e', backgroundColor:'rgba(34,197,94,.12)',
+        fill:true, tension:.35, pointRadius:4, pointBackgroundColor:'#22c55e'
+      }]},
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{ color:'#a1a1aa' } } },
+      scales:{
+        x:{ ticks:{ color:'#a1a1aa' }, grid:{ color:'#26262c' } },
+        y:{ beginAtZero:true, ticks:{ color:'#a1a1aa' }, grid:{ color:'#26262c' } }
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>
