@@ -27,7 +27,9 @@ class ZSystIncomeCategoryController extends Controller
             'categoryName' => 'required|unique:income_categories,categoryName,NULL,id,business_id,'.auth()->user()->business_id,
         ]);
 
-        $data = IncomeCategory::create($request->except('status') + [
+        $data = IncomeCategory::create([
+            'categoryName' => $request->categoryName,
+            'categoryDescription' => $request->categoryDescription ?? null,
             'business_id' => auth()->user()->business_id,
             'status' => $request->status == 'true' ? 1 : 0,
         ]);
@@ -52,8 +54,9 @@ class ZSystIncomeCategoryController extends Controller
             ],
         ]);
 
-        $category->update($request->except('status') + [
-            'business_id' => auth()->user()->business_id,
+        $category->update([
+            'categoryName' => $request->categoryName,
+            'categoryDescription' => $request->categoryDescription ?? $category->categoryDescription,
             'status' => $request->status == 'true' ? 1 : 0,
         ]);
 

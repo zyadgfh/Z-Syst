@@ -55,7 +55,9 @@ class ZSystBusinessCategoryController extends Controller
             'name' => 'required|string|unique:business_categories|max:255',
         ]);
 
-        BusinessCategory::create($request->except('status') + [
+        BusinessCategory::create([
+            'name' => $request->name,
+            'description' => $request->description,
             'status' => $request->status ? 1 : 0,
         ]);
 
@@ -82,7 +84,9 @@ class ZSystBusinessCategoryController extends Controller
 
         $category = BusinessCategory::find($id);
 
-        $category->update($request->except('status') + [
+        $category->update([
+            'name' => $request->name,
+            'description' => $request->description,
             'status' => $request->status ? 1 : 0,
         ]);
 

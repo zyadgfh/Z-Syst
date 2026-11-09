@@ -115,5 +115,9 @@ return [
     */
 
     'password_timeout' => 10800,
+    // OTP visibility for email verification / password reset (minutes)
+    'otp_visibility_minutes' => (int) env('OTP_VISIBILITY_TIME', 10),
+
+
 
 ];

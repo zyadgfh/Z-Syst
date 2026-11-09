@@ -46,7 +46,7 @@ class AuthController extends Controller
 
         if (! config('mail.from.address') || ! config('mail.mailers.smtp.host')) {
             // Fallback to env check for backwards compat
-            if (! config('mail.from.address') && ! env('MAIL_USERNAME')) {
+            if (! config('mail.from.address')) {
                 return response()->json([
                     'message' => __('Mail service is not configured. Please contact your administrator.'),
                 ], 406);
