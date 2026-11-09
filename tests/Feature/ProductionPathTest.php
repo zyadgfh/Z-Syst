@@ -25,6 +25,19 @@ class ProductionPathTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * In production mode the email accessor reads auth.users through
+     * AuthUser::emailFor (request-cached). sqlite has no auth schema, so the
+     * tests pre-seed that request cache with the locally known address —
+     * the GoTrue HTTP layer under test stays fully faked/real.
+     */
+    protected function seedEmailCache(User $user): void
+    {
+        $cache = new \ReflectionProperty(User::class, 'emailCache');
+        $cache->setAccessible(true);
+        $cache->setValue(null, [$user->id => $user->getRawOriginal('email')]);
+    }
+
     protected function productionMode(): void
     {
         Config::set('supabase.fallback_eloquent', false);
@@ -66,6 +79,7 @@ class ProductionPathTest extends TestCase
             'password' => \Illuminate\Support\Facades\Hash::make('password'),
         ]);
         $this->productionMode();
+        $this->seedEmailCache($user);
 
         Http::fake([
             '*/auth/v1/*' => Http::response(['access_token' => 'at', 'user' => ['id' => $user->id]], 200),
@@ -92,6 +106,7 @@ class ProductionPathTest extends TestCase
             'password' => \Illuminate\Support\Facades\Hash::make('password'),
         ]);
         $this->productionMode();
+        $this->seedEmailCache($user);
 
         Http::fake([
             '*/auth/v1/*' => Http::response(['msg' => 'Invalid login credentials'], 400),
@@ -108,9 +123,9 @@ class ProductionPathTest extends TestCase
 
     public function test_supabase_user_provider_requires_a_session_in_production_mode(): void
     {
-        $this->productionMode();
-
+        // Factories write identities locally; flip to production afterwards.
         $user = User::factory()->create();
+        $this->productionMode();
 
         $provider = new \App\Auth\SupabaseUserProvider(
             app(SupabaseAuthClient::class),
