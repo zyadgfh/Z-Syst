@@ -103,6 +103,7 @@ class PurchaseController extends Controller
             $purchaseDetails = [];
             foreach ($request->products as $key => $product_data) {
                 $purchaseDetails[$key] = [
+                    'business_id' => $business_id,
                     'purchase_id' => $purchase->id,
                     'batch_no' => $product_data['batch_no'],
                     'product_id' => $product_data['product_id'],
@@ -249,6 +250,7 @@ class PurchaseController extends Controller
             $purchaseDetails = [];
             foreach ($request->products as $key => $product_data) {
                 $purchaseDetails[$key] = [
+                    'business_id' => $business_id,
                     'purchase_id' => $purchase->id,
                     'batch_no' => $product_data['batch_no'],
                     'product_id' => $product_data['product_id'],

@@ -161,7 +161,7 @@ class PurchaseOrderTest extends TestCase
 
         $this->assertNotNull($purchase);
         $this->assertEquals($po->supplier_id, $purchase->party_id);
-        $this->assertEquals($po->total_amount, $purchase->totalAmount);
+        $this->assertEquals($po->total_amount, $purchase->total_amount);
         $this->assertEquals(PurchaseOrder::STATUS_RECEIVED, $po->fresh()->status);
     }
 

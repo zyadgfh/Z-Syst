@@ -53,7 +53,7 @@ class PartyModelTest extends TestCase
         $party = Party::factory()->create();
         $sale = Sale::factory()->create([
             'party_id' => $party->id,
-            'dueAmount' => 100,
+            'due_amount' => 100,
         ]);
 
         $this->assertCount(1, $party->sales_dues);
@@ -65,7 +65,7 @@ class PartyModelTest extends TestCase
         $party = Party::factory()->create();
         $purchase = Purchase::factory()->create([
             'party_id' => $party->id,
-            'dueAmount' => 200,
+            'due_amount' => 200,
         ]);
 
         $this->assertCount(1, $party->purchases_dues);
@@ -77,8 +77,8 @@ class PartyModelTest extends TestCase
         $party = Party::factory()->create();
         Sale::factory()->create([
             'party_id' => $party->id,
-            'dueAmount' => 0,
-            'isPaid' => true,
+            'due_amount' => 0,
+            'is_paid' => true,
         ]);
 
         $this->assertCount(0, $party->sales_dues);

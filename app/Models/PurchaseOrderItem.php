@@ -13,11 +13,27 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class PurchaseOrderItem extends Model
 {
-    
     use TenantScoped;
-use HasFactory;
+    use HasFactory;
+
 
     protected $table = 'purchase_order_items';
+
+    /**
+     * `PurchaseOrder`-derived tenant key: this table's business_id is NOT NULL
+     * in the live Supabase schema, but bulk inserts and queue jobs run without an
+     * authenticated user (TenantScoped only fills from auth()). Derive it from the
+     * parent row so the constraint can never be hit.
+     * NOTE: hand-added — tools/generate-models.py must preserve this method.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (self $model) {
+            if (empty($model->business_id) && $model->purchase_order_id) {
+                $model->business_id = PurchaseOrder::where('id', $model->purchase_order_id)->value('business_id');
+            }
+        });
+    }
 
     protected $fillable = [
         'business_id',

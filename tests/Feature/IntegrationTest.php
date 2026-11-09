@@ -45,11 +45,11 @@ class IntegrationTest extends TestCase
         $saleData = [
             'business_id' => $business->id,
             'party_id' => $customer->id,
-            'saleDate' => now()->toDateTimeString(),
-            'totalAmount' => 100.00,
-            'paidAmount' => 100.00,
-            'dueAmount' => 0,
-            'paymentType' => 'cash',
+            'sale_date' => now()->toDateTimeString(),
+            'total_amount' => 100.00,
+            'paid_amount' => 100.00,
+            'due_amount' => 0,
+            'payment_type' => 'cash',
             'items' => [
                 [
                     'product_id' => $product->id,
@@ -67,7 +67,7 @@ class IntegrationTest extends TestCase
         $this->assertDatabaseHas('sales', [
             'business_id' => $business->id,
             'party_id' => $customer->id,
-            'totalAmount' => 100.00,
+            'total_amount' => 100.00,
         ]);
 
         // Verify stock was deducted
@@ -106,11 +106,11 @@ class IntegrationTest extends TestCase
         $purchaseData = [
             'business_id' => $business->id,
             'party_id' => $supplier->id,
-            'purchaseDate' => now()->toDateTimeString(),
-            'totalAmount' => 50.00,
-            'paidAmount' => 50.00,
-            'dueAmount' => 0,
-            'paymentType' => 'cash',
+            'purchase_date' => now()->toDateTimeString(),
+            'total_amount' => 50.00,
+            'paid_amount' => 50.00,
+            'due_amount' => 0,
+            'payment_type' => 'cash',
             'items' => [
                 [
                     'product_id' => $product->id,
@@ -128,7 +128,7 @@ class IntegrationTest extends TestCase
         $this->assertDatabaseHas('purchases', [
             'business_id' => $business->id,
             'party_id' => $supplier->id,
-            'totalAmount' => 50.00,
+            'total_amount' => 50.00,
         ]);
 
         // Verify stock was added
@@ -246,7 +246,7 @@ class IntegrationTest extends TestCase
         $sale = Sale::factory()->create([
             'business_id' => $business->id,
             'party_id' => $customer->id,
-            'totalAmount' => 100.00,
+            'total_amount' => 100.00,
         ]);
 
         // Generate receipt

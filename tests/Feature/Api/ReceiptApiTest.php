@@ -68,12 +68,12 @@ class ReceiptApiTest extends TestCase
             'business_id' => $this->business->id,
             'party_id' => null,
             'user_id' => $this->user->id,
-            'totalAmount' => 150.0,
-            'paidAmount' => 150.0,
-            'dueAmount' => 0.0,
-            'isPaid' => true,
-            'paymentType' => 'cash',
-            'saleDate' => now()->toDateString(),
+            'total_amount' => 150.0,
+            'paid_amount' => 150.0,
+            'due_amount' => 0.0,
+            'is_paid' => true,
+            'payment_type' => 'cash',
+            'sale_date' => now()->toDateString(),
         ]);
 
         SaleDetails::create([
@@ -124,12 +124,12 @@ class ReceiptApiTest extends TestCase
         $sale = Sale::create([
             'business_id' => $otherBusiness->id,
             'user_id' => $this->user->id,
-            'totalAmount' => 100.0,
-            'paidAmount' => 100.0,
-            'dueAmount' => 0.0,
-            'isPaid' => true,
-            'paymentType' => 'cash',
-            'saleDate' => now()->toDateString(),
+            'total_amount' => 100.0,
+            'paid_amount' => 100.0,
+            'due_amount' => 0.0,
+            'is_paid' => true,
+            'payment_type' => 'cash',
+            'sale_date' => now()->toDateString(),
         ]);
 
         $response = $this->actingAs($this->user)

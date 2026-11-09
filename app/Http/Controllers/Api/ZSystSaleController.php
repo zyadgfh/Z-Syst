@@ -327,6 +327,7 @@ class ZSystSaleController extends Controller
                     // Manual batch selection (original behavior with FEFO logging)
                     $saleDetails[$key] = [
                         'sale_id' => $sale->id,
+                        'business_id' => $business_id,
                         'price' => $productData['price'],
                         'batch_no' => $productData['batch_no'],
                         'product_id' => $productId,
@@ -491,6 +492,7 @@ class ZSystSaleController extends Controller
             $saleDetails = [];
             foreach ($request->products as $key => $productData) {
                 $saleDetails[$key] = [
+                    'business_id' => $sale->business_id,
                     'sale_id' => $sale->id,
                     'price' => $productData['price'],
                     'batch_no' => $productData['batch_no'],

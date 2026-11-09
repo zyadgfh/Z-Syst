@@ -33,7 +33,7 @@ class PredictionServiceTest extends TestCase
         // Create some historical sales data
         $sale = Sale::factory()->create([
             'business_id' => $business->id,
-            'saleDate' => now()->subDays(5)->format('Y-m-d'),
+            'sale_date' => now()->subDays(5)->format('Y-m-d'),
         ]);
         SaleDetails::factory()->create([
             'sale_id' => $sale->id,
