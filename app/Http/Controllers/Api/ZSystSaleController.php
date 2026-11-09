@@ -294,6 +294,11 @@ class ZSystSaleController extends Controller
                         $deductQty = min($batch->product_stock, $quantity - $totalAllocated);
 
                         $saleDetails[] = [
+                            // Bulk insert() bypasses model events, so neither
+                            // TenantScoped nor the parent-derived fallback can
+                            // fill this: sale_details.business_id is NOT NULL and
+                            // every FEFO-allocated line used to violate it.
+                            'business_id' => $business_id,
                             'sale_id' => $sale->id,
                             'price' => $productData['price'],
                             'batch_no' => $batch->batch_no,
