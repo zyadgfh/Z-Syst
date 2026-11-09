@@ -16,6 +16,7 @@ class SupplierPaymentController extends Controller
 
     public function __construct(SupplierPaymentService $paymentService)
     {
+        $this->middleware('permission:supplier-payments-read')->only(['index','show','statistics','pending','overdue']);
         $this->paymentService = $paymentService;
     }
 

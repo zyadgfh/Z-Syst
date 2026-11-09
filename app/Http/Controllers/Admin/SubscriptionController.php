@@ -17,6 +17,7 @@ class SubscriptionController extends Controller
 
     public function __construct(SubscriptionService $subscriptionService)
     {
+        $this->middleware('permission:subscriptions-read')->only(['index','show','statistics','pending','overdue']);
         $this->subscriptionService = $subscriptionService;
     }
 

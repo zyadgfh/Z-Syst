@@ -42,8 +42,11 @@ class ZSystProfileController extends Controller
             return response()->json(['message' => __('Forbidden.')], 403);
         }
 
-        $user->update($request->except('image') + [
-            'image' => $request->image ? $this->upload($request, 'image', $user->image) : $user->image,
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone ?? $user->phone,
+            'image' => $request->hasFile('image') ? $this->upload($request, 'image', $user->image) : $user->image,
         ]);
 
         $user = User::findOrFail(auth()->id());

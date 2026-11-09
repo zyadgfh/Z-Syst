@@ -11,6 +11,11 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class SubscriptionReport extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:reports-read')->only(['index','show']);
+    }
+
     public function index(Request $request)
     {
         $subscribers = PlanSubscribe::with(['plan:id,subscriptionName', 'business:id,companyName,pictureUrl,business_category_id', 'business.category:id,name'])->latest()->paginate(10);
@@ -93,7 +98,7 @@ class SubscriptionReport extends Controller
             $existingNotes = $subscribe->notes ?? [];
             $updatedNotes = array_merge($existingNotes, ['reason' => $request->notes]);
 
-            $subscribe->update($request->except('notes') + [
+            $subscribe->update([
                 'payment_status' => 'paid',
                 'notes' => $updatedNotes,
             ]);

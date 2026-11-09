@@ -39,12 +39,13 @@ class SettingController extends Controller
 
         $general = Option::findOrFail($id);
         Cache::forget($general->key);
+        $allowed = $request->only(['title','description','address','phone','email','copyright','currency','language']);
         $general->update([
-            'value' => $request->except('_token', '_method', 'logo', 'favicon', 'common_header_logo', 'footer_logo', 'admin_logo', 'frontend_logo') + [
-                'favicon' => $request->favicon ? $this->upload($request, 'favicon', $general->favicon) : $general->value['favicon'],
-                'admin_logo' => $request->admin_logo ? $this->upload($request, 'admin_logo', $general->admin_logo) : $general->value['admin_logo'],
-                'frontend_logo' => $request->frontend_logo ? $this->upload($request, 'frontend_logo', $general->frontend_logo) : $general->value['frontend_logo'],
-            ],
+            'value' => array_merge((array) $general->value, $allowed, [
+                'favicon' => $request->hasFile('favicon') ? $this->upload($request, 'favicon', $general->value['favicon'] ?? null) : ($general->value['favicon'] ?? null),
+                'admin_logo' => $request->hasFile('admin_logo') ? $this->upload($request, 'admin_logo', $general->value['admin_logo'] ?? null) : ($general->value['admin_logo'] ?? null),
+                'frontend_logo' => $request->hasFile('frontend_logo') ? $this->upload($request, 'frontend_logo', $general->value['frontend_logo'] ?? null) : ($general->value['frontend_logo'] ?? null),
+            ]),
         ]);
 
         return response()->json([

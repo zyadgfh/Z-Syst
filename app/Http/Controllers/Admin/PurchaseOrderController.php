@@ -17,6 +17,7 @@ class PurchaseOrderController extends Controller
 
     public function __construct(PurchaseOrderService $poService)
     {
+        $this->middleware('permission:purchase-orders-read')->only(['index','show','statistics','pending','overdue']);
         $this->poService = $poService;
     }
 

@@ -18,6 +18,7 @@ class DoctorAttentionController extends Controller
 
     public function __construct(DoctorAttentionService $attentionService)
     {
+        $this->middleware('permission:doctor-attention-read')->only(['index','show','statistics','pending','overdue']);
         $this->attentionService = $attentionService;
     }
 

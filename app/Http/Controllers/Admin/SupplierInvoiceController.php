@@ -20,6 +20,7 @@ class SupplierInvoiceController extends Controller
 
     public function __construct(SupplierInvoiceService $invoiceService)
     {
+        $this->middleware('permission:supplier-invoices-read')->only(['index','show','statistics','pending','overdue']);
         $this->invoiceService = $invoiceService;
     }
 

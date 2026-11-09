@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Storage;
 
 class ZSystLanguageController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:languages-read')->only(['index','show']);
+    }
+
     use HasUploader;
 
     public function index(Request $request)

@@ -15,6 +15,11 @@ use Illuminate\Support\Facades\DB;
  */
 class PurchaseController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:purchases-create')->only(['index','show']);
+    }
+
     public function store(Request $request)
     {
         $request->validate([

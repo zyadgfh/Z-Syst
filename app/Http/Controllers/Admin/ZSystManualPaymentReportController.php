@@ -11,6 +11,11 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ZSystManualPaymentReportController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:reports-read')->only(['index','show']);
+    }
+
     public function index()
     {
         $manual_payments = PlanSubscribe::with([
@@ -103,7 +108,7 @@ class ZSystManualPaymentReportController extends Controller
             $existingNotes = $subscribe->notes ?? [];
             $updatedNotes = array_merge($existingNotes, ['reason' => $request->notes]);
 
-            $subscribe->update($request->except('notes') + [
+            $subscribe->update([
                 'payment_status' => 'paid',
                 'notes' => $updatedNotes,
             ]);

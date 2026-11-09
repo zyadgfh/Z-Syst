@@ -17,6 +17,13 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class GRNController extends Controller
 {
+    public function __construct(){
+        $this->middleware('permission:grn-read')->only(['index','show','pending','statistics']);
+        $this->middleware('permission:grn-create')->only(['create','store']);
+        $this->middleware('permission:grn-update')->only(['update','edit','verify','accept','reject']);
+        $this->middleware('permission:grn-delete')->only(['destroy']);
+    }
+
     protected GRNService $grnService;
 
     public function __construct(

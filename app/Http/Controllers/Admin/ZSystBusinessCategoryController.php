@@ -10,6 +10,11 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ZSystBusinessCategoryController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:business-categories-read')->only(['index','show']);
+    }
+
     public function index()
     {
         $categories = BusinessCategory::latest()->paginate(10);

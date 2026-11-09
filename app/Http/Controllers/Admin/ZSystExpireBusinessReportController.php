@@ -10,6 +10,11 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ZSystExpireBusinessReportController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:reports-read')->only(['index','show']);
+    }
+
     public function index(Request $request)
     {
         $expired_businesses = Business::with('enrolled_plan:id,plan_id', 'enrolled_plan.plan:id,subscriptionName', 'category:id,name')->whereDate('will_expire', '<', now())->latest()->paginate(10);

@@ -10,6 +10,11 @@ use Illuminate\Http\Request;
 
 class TenantPaymentSettingController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:settings-read')->only(['index','show']);
+    }
+
     /**
      * Display a listing of the resource.
      */
