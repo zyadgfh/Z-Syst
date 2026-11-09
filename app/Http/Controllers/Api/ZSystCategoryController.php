@@ -27,13 +27,21 @@ class ZSystCategoryController extends Controller
     public function store(Request $request)
     {
         $business_id = auth()->user()->business_id;
+
+        // `categoryName` is still the real column on expense_categories /
+        // income_categories, so the global legacy-payload shim deliberately
+        // skips that name. Accept the old key for the categories contract here.
+        if ($request->filled('categoryName') && ! $request->has('category_name')) {
+            $request->merge(['category_name' => $request->input('categoryName')]);
+        }
+
         $request->validate([
-            'category_name' => 'required|unique:categories,categoryName,NULL,id,business_id,'.$business_id,
+            'category_name' => 'required|unique:categories,category_name,NULL,id,business_id,'.$business_id,
             'description' => 'nullable|string',
         ]);
 
         $data = Category::create([
-            'category_name' => $request->categoryName,
+            'category_name' => $request->input('category_name'),
             'description' => $request->description,
             'business_id' => $business_id,
         ]);
@@ -49,18 +57,21 @@ class ZSystCategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
+        if ($request->filled('categoryName') && ! $request->has('category_name')) {
+            $request->merge(['category_name' => $request->input('categoryName')]);
+        }
+
         $request->validate([
             'category_name' => [
                 'required',
-                'unique:categories,categoryName,'.$category->id.',id,business_id,'.auth()->user()->business_id,
+                'unique:categories,category_name,'.$category->id.',id,business_id,'.auth()->user()->business_id,
             ],
             'description' => 'nullable|string',
         ]);
 
-        $category = $category->update([
-            'category_name' => $request->categoryName,
+        $category->update([
+            'category_name' => $request->input('category_name'),
             'description' => $request->description,
-            'business_id' => auth()->user()->business_id,
         ]);
 
         return response()->json([

@@ -37,8 +37,8 @@ class StockReconciliationResource extends JsonResource
             'product' => $this->whenLoaded('product', function () {
                 return [
                     'id' => $this->product->id,
-                    'name' => $this->product->productName,
-                    'code' => $this->product->productCode,
+                    'name' => $this->product->product_name,
+                    'code' => $this->product->product_code,
                 ];
             }),
             'stock' => $this->whenLoaded('stock', function () {

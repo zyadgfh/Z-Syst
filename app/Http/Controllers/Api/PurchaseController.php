@@ -86,7 +86,7 @@ class PurchaseController extends Controller
 
             $business = Business::findOrFail($business_id);
             $business->update([
-                'remaining_shop_balance' => $business->remainingShopBalance - $request->paid_amount,
+                'remaining_shop_balance' => $business->remaining_shop_balance - $request->paid_amount,
             ]);
 
             // M-02: explicit whitelist — financial state (is_paid/paid_amount/
@@ -154,7 +154,7 @@ class PurchaseController extends Controller
             return $purchase->load([
                 'tax:id,name,rate',
                 'party:id,name,phone',
-                'details.product:id,productName',
+                'details.product:id,product_name',
                 'details:id,purchase_id,product_id,purchase_with_tax,quantities',
             ]);
         }, 'purchase:store', [
@@ -175,7 +175,7 @@ class PurchaseController extends Controller
             'user:id,name',
             'party:id,name,phone',
             'purchaseReturns.details',
-            'details.product:id,productName,tax_type',
+            'details.product:id,product_name,tax_type',
             'details:id,purchase_id,product_id,purchase_with_tax,quantities,batch_no,purchase_without_tax,profit_percent,sales_price,wholesale_price',
         ])
             ->findOrFail($id);
@@ -311,7 +311,7 @@ class PurchaseController extends Controller
 
             $business = Business::findOrFail(auth()->user()->business_id);
             $business->update([
-                'remaining_shop_balance' => ($business->remainingShopBalance + $purchase->paid_amount) - $request->paid_amount,
+                'remaining_shop_balance' => ($business->remaining_shop_balance + $purchase->paid_amount) - $request->paid_amount,
             ]);
 
             $purchase->update($request->only([
@@ -368,7 +368,7 @@ class PurchaseController extends Controller
 
             $business = Business::findOrFail(auth()->user()->business_id);
             $business->update([
-                'remaining_shop_balance' => $business->remainingShopBalance + $purchase->paid_amount,
+                'remaining_shop_balance' => $business->remaining_shop_balance + $purchase->paid_amount,
             ]);
 
             $purchase->delete();

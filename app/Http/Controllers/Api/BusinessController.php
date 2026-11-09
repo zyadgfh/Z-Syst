@@ -58,7 +58,7 @@ class BusinessController extends Controller
             $user->update([
                 'business_id' => $business->id,
                 'phone' => $request->phoneNumber,
-                'name' => $business->companyName,
+                'name' => $business->company_name,
             ]);
 
             if ($free_plan) {

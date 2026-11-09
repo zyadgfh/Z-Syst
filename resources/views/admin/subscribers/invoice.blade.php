@@ -26,7 +26,7 @@
             <div class="d-flex justify-content-between align-items-center gap-3 print-logo-container">
                 <div class="d-flex align-items-center gap-2 logo">
                     <div>
-                        <h3 class="mb-0">{{ $subscriber->business?->companyName ?? '' }}</h3>
+                        <h3 class="mb-0">{{ $subscriber->business?->company_name ?? '' }}</h3>
                     </div>
                 </div>
                 <h3 class="right-invoice mb-0 align-self-center">{{ __('INVOICE') }}</h3>
@@ -39,11 +39,11 @@
                         <tbody>
                         <tr class="in-table-row">
                             <td class="text-start">{{ __('Bill To') }}</td>
-                            <td class="text-start">: {{ $subscriber->business?->companyName ?? '' }}</td>
+                            <td class="text-start">: {{ $subscriber->business?->company_name ?? '' }}</td>
                         </tr>
                         <tr class="in-table-row">
                             <td class="text-start">{{ __('Mobile') }}</td>
-                            <td class="text-start">:  {{ $subscriber->business?->phoneNumber ?? '' }} </td>
+                            <td class="text-start">:  {{ $subscriber->business?->phone_number ?? '' }} </td>
                         </tr>
                         <tr class="in-table-row">
                             <td class="text-start">{{ __('Address') }}</td>
@@ -73,7 +73,7 @@
 
                         <tr class="in-table-body">
                             <td class="text-center">1</td>
-                            <td class="text-center">{{ $subscriber->business->companyName ?? 'N/A' }}</td>
+                            <td class="text-center">{{ $subscriber->business->company_name ?? 'N/A' }}</td>
                             <td class="text-center">{{  $subscriber->plan->subscriptionName ?? 'N/A' }}</td>
                             <td class="text-center">{{ formatted_date($subscriber->created_at) }}</td>
                             <td class="text-center">{{ $subscriber->created_at ? formatted_date($subscriber->created_at->addDays($subscriber->duration)) : '' }}</td>

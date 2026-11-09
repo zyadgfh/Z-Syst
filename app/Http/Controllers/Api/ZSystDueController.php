@@ -149,9 +149,9 @@ class ZSystDueController extends Controller
         }
 
         $business = Business::findOrFail(auth()->user()->business_id);
-        $business_name = $business->companyName;
+        $business_name = $business->company_name;
         $business->update([
-            'remaining_shop_balance' => $party->type == 'Supplier' ? ($business->remainingShopBalance - $request->payDueAmount) : ($business->remainingShopBalance + $request->payDueAmount),
+            'remaining_shop_balance' => $party->type == 'Supplier' ? ($business->remaining_shop_balance - $request->payDueAmount) : ($business->remaining_shop_balance + $request->payDueAmount),
         ]);
 
         $party->update([

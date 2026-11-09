@@ -185,7 +185,7 @@ class ReportsController extends Controller
                 $term = '%'.$request->input('search').'%';
                 $query->where(function ($subQuery) use ($term) {
                     $subQuery->where('amount', 'like', $term)
-                        ->orWhere('incomeFor', 'like', $term)
+                        ->orWhere('income_for', 'like', $term)
                         ->orWhere('payment_type', 'like', $term)
                         ->orWhere('reference_no', 'like', $term)
                         ->orWhere('note', 'like', $term)
@@ -195,7 +195,7 @@ class ReportsController extends Controller
                 });
             })
             ->when($request->filled('from_date') || $request->filled('to_date'), function ($query) use ($request) {
-                $query->whereBetween('incomeDate', [$request->input('from_date'), $request->input('to_date')]);
+                $query->whereBetween('income_date', [$request->input('from_date'), $request->input('to_date')]);
             })
             ->where('business_id', auth()->user()->business_id);
 

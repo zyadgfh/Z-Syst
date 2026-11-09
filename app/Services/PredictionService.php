@@ -124,7 +124,7 @@ class PredictionService
 
         return [
             'product_id' => $productId,
-            'product_name' => $product->productName,
+            'product_name' => $product->product_name,
             'forecasts' => $forecasts,
             'summary' => [
                 'total_predicted_qty' => round($totalPredictedQty, 2),
@@ -236,7 +236,7 @@ class PredictionService
             ->where('is_active', true)
             ->where('forecast_date', '>=', now()->startOfDay())
             ->where('forecast_date', '<=', now()->startOfDay()->addDays($forecastDays))
-            ->with('product:id,productName,sales_price')
+            ->with('product:id,product_name,sales_price')
             ->get()
             ->groupBy('product_id');
 
@@ -264,7 +264,7 @@ class PredictionService
 
             $report[] = [
                 'product_id' => $productId,
-                'product_name' => $product->productName,
+                'product_name' => $product->product_name,
                 'current_stock' => (float) $currentStock,
                 'total_predicted_demand' => round($totalPredicted, 2),
                 'average_confidence' => round($avgConfidence, 2),

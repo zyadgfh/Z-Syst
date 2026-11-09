@@ -351,7 +351,7 @@ class InsuranceController extends Controller
         $businessId = Auth::user()->business_id;
 
         $coverages = InsuranceCoverage::byBusiness($businessId)
-            ->with(['insuranceCompany:id,name', 'product:id,name', 'category:id,name'])
+            ->with(['insuranceCompany:id,name', 'product:id,product_name', 'category:id,name'])
             ->when($request->insurance_company_id, fn ($q, $id) => $q->where('insurance_company_id', $id))
             ->when($request->is_active !== null, fn ($q) => $q->where('is_active', $request->boolean('is_active')))
             ->when($request->scope, fn ($q, $s) => $q->where('scope', $s))

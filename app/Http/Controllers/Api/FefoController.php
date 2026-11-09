@@ -38,7 +38,7 @@ class FefoController extends Controller
             'message' => __('Data fetched successfully.'),
             'data' => [
                 'product_id' => $product->id,
-                'product_name' => $product->productName,
+                'product_name' => $product->product_name,
                 'requested_qty' => (int) $quantity,
                 'available_qty' => $totalAvailable,
                 'sufficient' => $totalAvailable >= (int) $quantity,
@@ -75,7 +75,7 @@ class FefoController extends Controller
             'message' => __('Data fetched successfully.'),
             'data' => [
                 'product_id' => $product->id,
-                'product_name' => $product->productName,
+                'product_name' => $product->product_name,
                 'batches' => $batches->map(function ($batch) {
                     return [
                         'stock_id' => $batch->id,
@@ -138,7 +138,7 @@ class FefoController extends Controller
     {
         $businessId = auth()->user()->business_id;
 
-        $logs = FefoLog::with(['product:id,productName', 'sale:id,invoice_number'])
+        $logs = FefoLog::with(['product:id,product_name', 'sale:id,invoice_number'])
             ->where('business_id', $businessId)
             ->when($request->input('product_id'), function ($q) use ($request) {
                 $q->where('product_id', $request->input('product_id'));

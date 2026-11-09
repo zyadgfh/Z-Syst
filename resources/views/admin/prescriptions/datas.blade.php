@@ -16,7 +16,7 @@
         <td class="table-single-content">{{ $prescription->party ? $prescription->party->name : __('Walk-in Customer') }}</td>
         <td class="table-single-content">
             @if ($prescription->sale)
-                <a href="#">{{ $prescription->sale->invoiceNumber }}</a>
+                <a href="#">{{ $prescription->sale->invoice_number }}</a>
             @else
                 <span class="text-muted">--</span>
             @endif

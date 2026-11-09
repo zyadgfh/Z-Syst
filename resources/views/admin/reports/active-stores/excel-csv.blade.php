@@ -15,9 +15,9 @@
         @foreach ($active_stores as $store)
         <tr>
             <td>{{ $loop->iteration }}</td>
-            <td>{{ $store->companyName }}</td>
+            <td>{{ $store->company_name }}</td>
             <td>{{ $store->category->name ?? '' }}</td>
-            <td>{{ $store->phoneNumber }}</td>
+            <td>{{ $store->phone_number }}</td>
             <td>
                 <div>
                     <div>
@@ -25,7 +25,7 @@
                     </div>
                 </div>
             </td>
-            <td>{{ formatted_date($store->subscriptionDate) }}</td>
+            <td>{{ formatted_date($store->subscription_date) }}</td>
             <td>{{ formatted_date($store->will_expire) }}</td>
         </tr>
         @endforeach

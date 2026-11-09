@@ -17,11 +17,11 @@ return new class extends Migration
             $table->foreignId('expense_category_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignUuid('user_id')->nullable()->constrained('app_users')->nullOnDelete();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
-            $table->string('expanseFor')->nullable();
+            $table->string('expanse_for')->nullable();
             $table->string('payment_type')->default('Cash');
-            $table->string('referenceNo')->nullable();
+            $table->string('reference_no')->nullable();
             $table->text('note')->nullable();
-            $table->timestamp('expenseDate')->nullable();
+            $table->timestamp('expense_date')->nullable();
             $table->timestamps();
         });
     }

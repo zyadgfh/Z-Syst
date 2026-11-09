@@ -30,7 +30,7 @@ class ExpiryAlertController extends Controller
             ->whereHas('product', function ($query) use ($businessId) {
                 $query->where('business_id', $businessId);
             })
-            ->with('product:id,productName,business_id')
+            ->with('product:id,product_name,business_id')
             ->get();
 
         $stats = [
@@ -99,8 +99,8 @@ class ExpiryAlertController extends Controller
                 $query->where('business_id', $businessId);
             })
             ->with([
-                'product:id,productName,productCode,sales_price,purchase_with_tax,business_id,category_id',
-                'product.category:id,categoryName',
+                'product:id,product_name,product_code,sales_price,purchase_with_tax,business_id,category_id',
+                'product.category:id,category_name',
             ]);
 
         // Apply threshold filter

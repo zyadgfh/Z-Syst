@@ -13,12 +13,12 @@ class UnitSeeder extends Seeder
     public function run(): void
     {
         $units = [
-            ['unitName' => 'Pack', 'business_id' => 1, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['unitName' => 'Anacin', 'business_id' => 1, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['unitName' => 'Pcs', 'business_id' => 1, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['unitName' => 'Box', 'business_id' => 1, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['unitName' => 'Strip', 'business_id' => 1, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['unitName' => 'Each', 'business_id' => 1, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['unit_name' => 'Pack', 'business_id' => 1, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['unit_name' => 'Anacin', 'business_id' => 1, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['unit_name' => 'Pcs', 'business_id' => 1, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['unit_name' => 'Box', 'business_id' => 1, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['unit_name' => 'Strip', 'business_id' => 1, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['unit_name' => 'Each', 'business_id' => 1, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
         ];
 
         Unit::insert($units);

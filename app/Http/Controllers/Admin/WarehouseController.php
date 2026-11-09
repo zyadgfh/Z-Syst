@@ -23,7 +23,7 @@ class WarehouseController extends Controller
 
     public function index(Request $request)
     {
-        $warehouses = Warehouse::with(['business:id,companyName'])
+        $warehouses = Warehouse::with(['business:id,company_name'])
             ->when($request->search, function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
                     ->orWhere('code', 'like', '%' . $request->search . '%');

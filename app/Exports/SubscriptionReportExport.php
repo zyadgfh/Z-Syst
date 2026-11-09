@@ -11,7 +11,7 @@ class SubscriptionReportExport implements FromView
     public function view(): View
     {
         return view('admin.subscribers.excel-csv', [
-            'subscribers' => PlanSubscribe::with(['plan:id,subscriptionName', 'business:id,companyName,pictureUrl,business_category_id', 'business.category:id,name'])->latest()->get(),
+            'subscribers' => PlanSubscribe::with(['plan:id,subscriptionName', 'business:id,company_name,picture_url,business_category_id', 'business.category:id,name'])->latest()->get(),
         ]);
     }
 }

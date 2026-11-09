@@ -32,6 +32,7 @@ return new class extends Migration
 
         Schema::create('grn_items', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('grn_id')->constrained('goods_received_notes')->cascadeOnDelete();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
 
@@ -49,6 +50,7 @@ return new class extends Migration
 
         Schema::create('quality_checks', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('grn_item_id')->constrained('grn_items')->cascadeOnDelete();
             $table->foreignUuid('checker_id')->nullable()->constrained('app_users')->nullOnDelete();
 

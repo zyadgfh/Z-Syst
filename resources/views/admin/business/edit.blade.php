@@ -27,7 +27,7 @@
 
                                     <div class="col-lg-6 mb-2">
                                         <label>{{ __('Business Name') }}</label>
-                                        <input type="text" name="companyName" value="{{ $business->companyName }}"
+                                        <input type="text" name="companyName" value="{{ $business->company_name }}"
                                             required class="form-control" placeholder="{{ __('Enter Company Name') }}">
                                     </div>
 
@@ -63,7 +63,7 @@
 
                                     <div class="col-lg-6 mb-2">
                                         <label>{{ __('Phone') }}</label>
-                                        <input type="text" name="phoneNumber" value="{{ $business->phoneNumber }}"
+                                        <input type="text" name="phoneNumber" value="{{ $business->phone_number }}"
                                             required class="form-control" placeholder="{{ __('Enter Phone Number') }}">
                                     </div>
 
@@ -76,7 +76,7 @@
                                     <div class="col-lg-6 mb-2">
                                         <label>{{ __('Shop Opening Balance') }}</label>
                                         <input type="number" name="shopOpeningBalance"
-                                            value="{{ $business->shopOpeningBalance }}" required class="form-control"
+                                            value="{{ $business->shop_opening_balance }}" required class="form-control"
                                             placeholder="{{ __('Enter Balance') }}">
                                     </div>
 
@@ -102,7 +102,7 @@
                                                     class="form-control file-input-change" data-id="image">
                                             </div>
                                             <div class="col-2 mt-4">
-                                                <img src="{{ asset($business->pictureUrl ?? 'assets/images/icons/upload.png') }}"
+                                                <img src="{{ asset($business->picture_url ?? 'assets/images/icons/upload.png') }}"
                                                     id="image" class="table-img">
                                             </div>
                                         </div>

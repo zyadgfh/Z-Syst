@@ -86,20 +86,20 @@
 
         <!-- Company Info -->
         <div class="company-info">
-            <h3>{{ $data['purchase']->business->companyName ?? 'Pharmacy' }}</h3>
+            <h3>{{ $data['purchase']->business->company_name ?? 'Pharmacy' }}</h3>
             @if($data['purchase']->business->address)
                 <p>{{ $data['purchase']->business->address }}</p>
             @endif
-            @if($data['purchase']->business->phoneNumber)
-                <p>{{ __('Phone') }}: {{ $data['purchase']->business->phoneNumber }}</p>
+            @if($data['purchase']->business->phone_number)
+                <p>{{ __('Phone') }}: {{ $data['purchase']->business->phone_number }}</p>
             @endif
         </div>
 
         <!-- Receipt Info -->
         <div class="receipt-info">
             <p><strong>{{ __('Receipt Number') }}:</strong> {{ $data['receipt_number'] }}</p>
-            <p><strong>{{ __('Date') }}:</strong> {{ $data['purchase']->purchaseDate->format('Y-m-d H:i') }}</p>
-            <p><strong>{{ __('Invoice Number') }}:</strong> {{ $data['purchase']->invoiceNumber }}</p>
+            <p><strong>{{ __('Date') }}:</strong> {{ $data['purchase']->purchase_date->format('Y-m-d H:i') }}</p>
+            <p><strong>{{ __('Invoice Number') }}:</strong> {{ $data['purchase']->invoice_number }}</p>
         </div>
 
         <!-- Supplier Info -->

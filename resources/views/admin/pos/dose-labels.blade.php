@@ -48,7 +48,7 @@
 <body>
     <div class="sheet-head">
         <h1>💊 {{ __('ملصقات الجرعات') }}</h1>
-        <span class="meta">{{ $sale->invoiceNumber ?? ('#'.$sale->id) }} · {{ optional($sale->saleDate)->format('Y-m-d') }}</span>
+        <span class="meta">{{ $sale->invoice_number ?? ('#'.$sale->id) }} · {{ optional($sale->sale_date)->format('Y-m-d') }}</span>
         <button onclick="window.print()">🖨 {{ __('طباعة') }}</button>
     </div>
 

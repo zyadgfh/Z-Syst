@@ -58,7 +58,7 @@ class SaleReturnController extends Controller
             ]);
 
             $sale = Sale::findOrFail($request->sale_id);
-            $prev_sale_data = $sale->sale_data ?? $sale->load('details.product:id,productName');
+            $prev_sale_data = $sale->sale_data ?? $sale->load('details.product:id,product_name');
 
             $party = Party::find($sale->party_id);
             $total_return_amount = array_sum($request->return_amount);

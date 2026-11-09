@@ -21,7 +21,7 @@ class StatisticsController extends Controller
         $business_id = auth()->user()->business_id;
         $date = $request->input('date', today());
 
-        $total_income = Income::where('business_id', $business_id)->whereDate('incomeDate', $date)->sum('amount');
+        $total_income = Income::where('business_id', $business_id)->whereDate('income_date', $date)->sum('amount');
         $total_expense = Expense::where('business_id', $business_id)->whereDate('expense_date', $date)->sum('amount');
 
         $sales = Sale::where('business_id', $business_id)->whereDate('created_at', $date)->sum('total_amount');

@@ -13,10 +13,10 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['categoryName' => 'Prescription medicine', 'business_id' => 1, 'status' => 0, 'created_at' => now(), 'updated_at' => now()],
-            ['categoryName' => 'Surgical Product', 'business_id' => 1, 'status' => 0, 'created_at' => now(), 'updated_at' => now()],
-            ['categoryName' => 'OTC Medicine', 'business_id' => 1, 'status' => 0, 'created_at' => now(), 'updated_at' => now()],
-            ['categoryName' => 'Baby Cate', 'business_id' => 1, 'status' => 0, 'created_at' => now(), 'updated_at' => now()],
+            ['category_name' => 'Prescription medicine', 'business_id' => 1, 'status' => 0, 'created_at' => now(), 'updated_at' => now()],
+            ['category_name' => 'Surgical Product', 'business_id' => 1, 'status' => 0, 'created_at' => now(), 'updated_at' => now()],
+            ['category_name' => 'OTC Medicine', 'business_id' => 1, 'status' => 0, 'created_at' => now(), 'updated_at' => now()],
+            ['category_name' => 'Baby Cate', 'business_id' => 1, 'status' => 0, 'created_at' => now(), 'updated_at' => now()],
         ];
 
         Category::insert($categories);

@@ -44,9 +44,9 @@ class EtaService
             $totalSales += $net;
 
             $items[] = [
-                'description' => $line->product->productName ?? ('item-' . $line->product_id),
+                'description' => $line->product->product_name ?? ('item-' . $line->product_id),
                 'itemType' => 'GS1',
-                'itemCode' => $line->product->productCode ?? ('P-' . $line->product_id),
+                'itemCode' => $line->product->product_code ?? ('P-' . $line->product_id),
                 'unitType' => 'LTR', // TODO: map units to ETA unit types (LTR/KGM/EA…)
                 'quantity' => $qty,
                 'unitPrice' => $unitPrice,

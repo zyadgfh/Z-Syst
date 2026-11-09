@@ -34,7 +34,7 @@ class TraceabilityController extends Controller
         $businessId = $request->business_id ?? auth()->user()->business_id;
         
         $batchLots = BatchLot::forBusiness($businessId)
-            ->with('product:id,name')
+            ->with('product:id,product_name')
             ->when($request->search, function ($q) use ($request) {
                 $q->where('batch_number', 'like', '%' . $request->search . '%')
                     ->orWhere('lot_number', 'like', '%' . $request->search . '%');
@@ -62,7 +62,7 @@ class TraceabilityController extends Controller
         $businessId = $request->business_id ?? auth()->user()->business_id;
         
         $recalls = RecallEvent::forBusiness($businessId)
-            ->with(['product:id,name', 'user:id,name'])
+            ->with(['product:id,product_name', 'user:id,name'])
             ->when($request->search, function ($q) use ($request) {
                 $q->where('reason', 'like', '%' . $request->search . '%')
                     ->orWhere('batch_lot_number', 'like', '%' . $request->search . '%');

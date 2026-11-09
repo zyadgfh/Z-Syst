@@ -115,7 +115,7 @@ class ZSystPrescriptionController extends Controller
             'party:id,name,phone,address',
             'sale:id,invoice_number,total_amount,sale_date',
             'sale.details:id,sale_id,product_id,price,quantities',
-            'sale.details.product:id,productName',
+            'sale.details.product:id,product_name',
         ])
             ->findOrFail($id);
 

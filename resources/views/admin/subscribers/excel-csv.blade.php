@@ -18,7 +18,7 @@
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ formatted_date($subscriber->created_at) }}</td>
-                <td>{{ $subscriber->business->companyName ?? 'N/A' }}</td>
+                <td>{{ $subscriber->business->company_name ?? 'N/A' }}</td>
                 <td>{{ optional($subscriber->business->category)->name ?? 'N/A' }}</td>
                 <td>{{ $subscriber->plan?->subscriptionName }}</td>
                 <td>{{ formatted_date($subscriber->created_at) }}</td>

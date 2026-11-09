@@ -25,8 +25,8 @@ class StockTransferController extends Controller
         $transfers = StockTransfer::with([
             'fromWarehouse:id,name,code',
             'toWarehouse:id,name,code',
-            'product:id,name',
-            'business:id,companyName',
+            'product:id,product_name',
+            'business:id,company_name',
             'user:id,name'
         ])
             ->when($request->search, function ($q) use ($request) {

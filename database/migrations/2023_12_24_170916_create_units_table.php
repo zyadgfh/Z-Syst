@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('units', function (Blueprint $table) {
             $table->id();
-            $table->string('unitName');
+            $table->string('unit_name');
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->boolean('status')->default(1);
             $table->timestamps();

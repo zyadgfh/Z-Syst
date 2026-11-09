@@ -13,7 +13,7 @@ class ManualPaymentExport implements FromView
         return view('admin.manual-payments.excel-csv', [
             'manual_payments' => PlanSubscribe::with([
                 'plan:id,subscriptionName',
-                'business:id,companyName,pictureUrl,business_category_id',
+                'business:id,company_name,picture_url,business_category_id',
                 'business.category:id,name',
                 'gateway:id,name',
             ])->whereHas('gateway', function ($query) {

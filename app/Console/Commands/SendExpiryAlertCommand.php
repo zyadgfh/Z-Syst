@@ -50,7 +50,7 @@ class SendExpiryAlertCommand extends Command
                 $query->where('expire_date', '<=', $today->copy()->addDays(365))
                     ->orWhere('expire_date', '<', $today);
             })
-            ->with(['product:id,productName,business_id'])
+            ->with(['product:id,product_name,business_id'])
             ->get()
             ->groupBy('product.business_id');
 
@@ -107,13 +107,13 @@ class SendExpiryAlertCommand extends Command
                 }
             }
 
-            $productName = $businessStocks->first()->product->productName ?? 'Unknown';
+            $productName = $businessStocks->first()->product->product_name ?? 'Unknown';
 
             // Build comprehensive notification message
             $message = "🔔 تنبيه انتهاء الصلاحية - Expiry Alert\n";
 
             if (! empty($expired)) {
-                $names = $expired->pluck('product.productName')->unique()->take(5)->join(', ');
+                $names = $expired->pluck('product.product_name')->unique()->take(5)->join(', ');
                 $message .= "🚫 منتهية الصلاحية (Expired): {$expired->count()} منتج\n";
                 if ($names) {
                     $message .= "   مثل: {$names}\n";
@@ -177,11 +177,11 @@ class SendExpiryAlertCommand extends Command
             $settings = $smsSettings->value;
             $business = Business::find($businessId);
 
-            if (! $business || ! $business->phoneNumber) {
+            if (! $business || ! $business->phone_number) {
                 return;
             }
 
-            $message = "🔔 Expiry Alert - {$business->companyName}\n";
+            $message = "🔔 Expiry Alert - {$business->company_name}\n";
 
             if (! empty($expired)) {
                 $message .= "🚫 Expired: {$expired->count()} products\n";
@@ -201,13 +201,13 @@ class SendExpiryAlertCommand extends Command
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
             ])->post($settings['api_url'], [
-                'recipient' => $business->phoneNumber,
+                'recipient' => $business->phone_number,
                 'sender_id' => $settings['sender_id'] ?? '',
                 'type' => $settings['type'] ?? '',
                 'message' => $message,
             ]);
 
-            Log::info("SMS expiry alert sent to {$business->phoneNumber}: ".$response->body());
+            Log::info("SMS expiry alert sent to {$business->phone_number}: ".$response->body());
         } catch (\Exception $e) {
             Log::error("Failed to send SMS expiry alert: {$e->getMessage()}");
         }

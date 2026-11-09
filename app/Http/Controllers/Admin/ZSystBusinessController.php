@@ -185,7 +185,7 @@ class ZSystBusinessController extends Controller
                 'phone_number' => $request->phoneNumber,
                 'shop_opening_balance' => $request->shopOpeningBalance,
                 'business_category_id' => $request->business_category_id,
-                'picture_url' => $request->pictureUrl ? $this->upload($request, 'picture_url', $business->pictureUrl) : $business->pictureUrl,
+                'picture_url' => $request->pictureUrl ? $this->upload($request, 'picture_url', $business->picture_url) : $business->picture_url,
             ]);
 
             $user = User::where('business_id', $business->id)->firstOrFail();

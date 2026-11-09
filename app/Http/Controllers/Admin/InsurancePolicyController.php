@@ -23,7 +23,7 @@ class InsurancePolicyController extends Controller
 
     public function index(Request $request)
     {
-        $policies = InsurancePolicy::with(['company:id,name', 'business:id,companyName', 'customer'])
+        $policies = InsurancePolicy::with(['company:id,name', 'business:id,company_name', 'customer'])
             ->when($request->search, function ($q) use ($request) {
                 $q->where('policy_number', 'like', '%' . $request->search . '%')
                     ->orWhere('holder_name', 'like', '%' . $request->search . '%')

@@ -22,7 +22,7 @@ class InsuranceClaimController extends Controller
 
     public function index(Request $request)
     {
-        $claims = InsuranceClaim::with(['company:id,name', 'policy:id,policy_number', 'business:id,companyName', 'customer'])
+        $claims = InsuranceClaim::with(['company:id,name', 'policy:id,policy_number', 'business:id,company_name', 'customer'])
             ->when($request->search, function ($q) use ($request) {
                 $q->where('claim_number', 'like', '%' . $request->search . '%')
                     ->orWhere('external_reference', 'like', '%' . $request->search . '%');

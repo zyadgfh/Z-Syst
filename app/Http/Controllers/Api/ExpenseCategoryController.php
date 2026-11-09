@@ -31,13 +31,10 @@ class ExpenseCategoryController extends Controller
         ]);
 
         $data = ExpenseCategory::create([
-                'categoryName' => $request->categoryName,
-                'categoryDescription' => $request->categoryDescription,
-                'business_id' => $request->user()->business_id,
-                'status' => 1,
-            ]); // patched
-            'business_id' => auth()->user()->business_id,
+            'categoryName' => $request->categoryName,
+            'categoryDescription' => $request->categoryDescription,
             'status' => $request->status == 'true' ? 1 : 0,
+            'business_id' => $request->user()->business_id,
         ]);
 
         return response()->json([
@@ -61,11 +58,9 @@ class ExpenseCategoryController extends Controller
         ]);
 
         $category->update([
-                'categoryName' => $request->categoryName,
-                'categoryDescription' => $request->categoryDescription,
-            ]); // patched
-            'business_id' => auth()->user()->business_id,
-            'status' => $request->status == 'true' ? 1 : 0,
+            'categoryName' => $request->categoryName,
+            'categoryDescription' => $request->categoryDescription,
+            'status' => $request->has('status') ? ($request->status == 'true' ? 1 : 0) : $category->status,
         ]);
 
         return response()->json([

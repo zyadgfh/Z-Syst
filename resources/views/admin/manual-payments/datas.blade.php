@@ -2,7 +2,7 @@
     <tr class="table-content">
         <td class="table-single-content">{{ ($manual_payments->perPage() * ($manual_payments->currentPage() - 1)) + $loop->iteration }} <i class="{{ request('id') == $payment->id ? 'fas fa-bell text-red' : '' }}"> </td>
         <td class="table-single-content">{{ formatted_date($payment->created_at) }}</td>
-        <td class="table-single-content">{{ $payment->business->companyName ?? 'N/A' }}</td>
+        <td class="table-single-content">{{ $payment->business->company_name ?? 'N/A' }}</td>
         <td class="table-single-content">{{ optional($payment->business->category)->name ?? 'N/A' }}</td>
         <td class="table-single-content">
             <div class="d-flex align-items-center justify-content-center ">
@@ -38,8 +38,8 @@
 
                     <li>
                         <a href="#manual-view-modal" class="manual-subscriber-view" data-bs-toggle="modal"
-                        data-name="{{ $payment->business->companyName ?? 'N/A' }}"
-                        data-image="{{ asset($payment->business->pictureUrl ?? 'assets/img/default-shop.svg') }}"
+                        data-name="{{ $payment->business->company_name ?? 'N/A' }}"
+                        data-image="{{ asset($payment->business->picture_url ?? 'assets/img/default-shop.svg') }}"
                         data-manul-attachment="{{ asset($payment->notes['attachment'] ?? '') }}"
                         data-category="{{ optional($payment->business->category)->name ?? 'N/A' }}"
                             data-package="{{ $payment->plan->subscriptionName ?? 'N/A' }}"

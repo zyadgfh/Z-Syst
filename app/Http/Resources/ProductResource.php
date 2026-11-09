@@ -11,8 +11,13 @@ class ProductResource extends JsonResource
         return [
             'id' => $this->id,
             'business_id' => $this->business_id,
-            'product_name' => $this->productName,
-            'product_code' => $this->productCode,
+            'product_name' => $this->product_name,
+            'product_code' => $this->product_code,
+            // Legacy aliases: the bundled Flutter app still reads the camelCase
+            // keys on some screens (expiry alerts, FEFO, auto-order). Drop these
+            // once the mobile build ships snake_case only.
+            'productName' => $this->product_name,
+            'productCode' => $this->product_code,
             'sales_price' => $this->sales_price,
             'purchase_without_tax' => $this->purchase_without_tax,
             'purchase_with_tax' => $this->purchase_with_tax,

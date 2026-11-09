@@ -27,7 +27,7 @@
             <h6>{{ __('إرسال فاتورة بيع') }}</h6>
             <form onsubmit="submitEta(this.sale_id.value); return false;">
                 <select name="sale_id" class="form-select mb-2">
-                    @foreach($recentSales as $sale)<option value="{{ $sale->id }}">{{ $sale->invoiceNumber ?? '#'.$sale->id }} — {{ number_format($sale->totalAmount, 2) }}</option>@endforeach
+                    @foreach($recentSales as $sale)<option value="{{ $sale->id }}">{{ $sale->invoice_number ?? '#'.$sale->id }} — {{ number_format($sale->total_amount, 2) }}</option>@endforeach
                 </select>
                 <button class="btn btn-primary w-100">{{ __('إرسال للضرائب') }}</button>
             </form>
@@ -41,7 +41,7 @@
                 @forelse($invoices as $inv)
                 <tr>
                     <td>{{ $inv->id }}</td>
-                    <td>{{ $inv->sale?->invoiceNumber ?? ('#'.$inv->sale_id) }}</td>
+                    <td>{{ $inv->sale?->invoice_number ?? ('#'.$inv->sale_id) }}</td>
                     <td><small>{{ \Illuminate\Support\Str::limit($inv->submission_uuid, 18) }}</small></td>
                     <td><span class="badge {{ $inv->status === 'accepted' ? 'bg-success' : ($inv->status === 'error' ? 'bg-danger' : 'bg-secondary') }}">{{ $inv->status }}</span></td>
                     <td><small class="text-danger">{{ \Illuminate\Support\Str::limit($inv->error_message, 60) }}</small></td>

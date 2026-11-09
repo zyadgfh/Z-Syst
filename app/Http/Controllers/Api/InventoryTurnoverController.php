@@ -222,8 +222,8 @@ class InventoryTurnoverController extends Controller
                     'data' => [
                         'product' => [
                             'id' => $product->id,
-                            'name' => $product->productName,
-                            'code' => $product->productCode,
+                            'name' => $product->product_name,
+                            'code' => $product->product_code,
                         ],
                         'analysis' => $analysis,
                         'report_period' => [
@@ -255,8 +255,8 @@ class InventoryTurnoverController extends Controller
             'data' => [
                 'product' => [
                     'id' => $product->id,
-                    'name' => $product->productName,
-                    'code' => $product->productCode,
+                    'name' => $product->product_name,
+                    'code' => $product->product_code,
                 ],
                 'analysis' => $analysis,
                 'report_period' => [

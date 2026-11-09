@@ -31,7 +31,7 @@ class StockTakeController extends Controller
 
     public function show(Request $request, StockAudit $audit)
     {
-        $details = $audit->details()->with('product:id,name,productCode')->orderBy('id')->paginate(25);
+        $details = $audit->details()->with('product:id,product_name,product_code')->orderBy('id')->paginate(25);
 
         return view('admin.stocktake.show', [
             'audit' => $audit,

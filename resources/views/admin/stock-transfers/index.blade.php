@@ -20,7 +20,7 @@
                         @foreach($transfers as $transfer)
                             <tr>
                                 <td>#{{ $transfer->id }}</td>
-                                <td>{{ $transfer->product?->productName ?? $transfer->product_id }}</td>
+                                <td>{{ $transfer->product?->product_name ?? $transfer->product_id }}</td>
                                 <td>{{ $transfer->quantity }}</td>
                                 <td><span class="badge bg-secondary">{{ $transfer->status }}</span></td>
                                 <td><a href="{{ route('admin.stock-transfers.show', $transfer) }}" class="btn btn-sm btn-light">{{ __('View') }}</a></td>

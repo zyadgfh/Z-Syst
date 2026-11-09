@@ -19,7 +19,7 @@
                     <tbody>
                         @foreach($subscriptions as $subscription)
                             <tr>
-                                <td>{{ $subscription->business?->companyName ?? $subscription->business_id }}</td>
+                                <td>{{ $subscription->business?->company_name ?? $subscription->business_id }}</td>
                                 <td>{{ $subscription->plan?->name ?? $subscription->plan_id }}</td>
                                 <td><span class="badge bg-secondary">{{ $subscription->status }}</span></td>
                                 <td>{{ $subscription->starts_at?->format('Y-m-d') }}</td>

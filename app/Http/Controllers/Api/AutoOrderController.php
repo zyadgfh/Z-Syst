@@ -25,7 +25,7 @@ class AutoOrderController extends Controller
         $businessId = auth()->user()->business_id;
 
         $rules = AutoOrderRule::where('business_id', $businessId)
-            ->with('product:id,productName,productCode', 'preferredSupplier:id,name')
+            ->with('product:id,product_name,product_code', 'preferredSupplier:id,name')
             ->paginate($request->input('per_page', 20));
 
         $stats = [
@@ -82,7 +82,7 @@ class AutoOrderController extends Controller
 
         return response()->json([
             'message' => __('Rule updated successfully.'),
-            'data' => $rule->load('product:id,productName', 'preferredSupplier:id,name'),
+            'data' => $rule->load('product:id,product_name', 'preferredSupplier:id,name'),
         ]);
     }
 
@@ -95,7 +95,7 @@ class AutoOrderController extends Controller
 
         $rule = AutoOrderRule::where('business_id', $businessId)
             ->where('product_id', $productId)
-            ->with('product:id,productName,productCode,sales_price', 'preferredSupplier:id,name,phone')
+            ->with('product:id,product_name,product_code,sales_price', 'preferredSupplier:id,name,phone')
             ->first();
 
         if (! $rule) {

@@ -13,7 +13,7 @@
             <span class="badge bg-secondary">{{ $transfer->status }}</span>
         </div>
         <div class="row g-3">
-            <div class="col-md-4"><strong>{{ __('Product') }}:</strong> {{ $transfer->product?->productName ?? $transfer->product_id }}</div>
+            <div class="col-md-4"><strong>{{ __('Product') }}:</strong> {{ $transfer->product?->product_name ?? $transfer->product_id }}</div>
             <div class="col-md-4"><strong>{{ __('Quantity') }}:</strong> {{ $transfer->quantity }}</div>
             <div class="col-md-4"><strong>{{ __('Notes') }}:</strong> {{ $transfer->notes }}</div>
         </div>

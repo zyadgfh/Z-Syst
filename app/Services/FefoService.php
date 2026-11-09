@@ -225,7 +225,7 @@ class FefoService
         $stocks = Stock::where('business_id', $businessId)
             ->where('product_stock', '>', 0)
             ->whereNotNull('expire_date')
-            ->with('product:id,productName')
+            ->with('product:id,product_name')
             ->get();
 
         $stats = [
@@ -279,7 +279,7 @@ class FefoService
 
                 return [
                     'product_id' => $product->id,
-                    'product_name' => $product->productName,
+                    'product_name' => $product->product_name,
                     'total_stock' => $productStocks->sum('product_stock'),
                     'near_expiry_qty' => $nearExpiryQty,
                 ];

@@ -86,20 +86,20 @@
 
         <!-- Company Info -->
         <div class="company-info">
-            <h3>{{ $data['sale']->business->companyName ?? 'Pharmacy' }}</h3>
+            <h3>{{ $data['sale']->business->company_name ?? 'Pharmacy' }}</h3>
             @if($data['sale']->business->address)
                 <p>{{ $data['sale']->business->address }}</p>
             @endif
-            @if($data['sale']->business->phoneNumber)
-                <p>{{ __('Phone') }}: {{ $data['sale']->business->phoneNumber }}</p>
+            @if($data['sale']->business->phone_number)
+                <p>{{ __('Phone') }}: {{ $data['sale']->business->phone_number }}</p>
             @endif
         </div>
 
         <!-- Receipt Info -->
         <div class="receipt-info">
             <p><strong>{{ __('Receipt Number') }}:</strong> {{ $data['receipt_number'] }}</p>
-            <p><strong>{{ __('Date') }}:</strong> {{ $data['sale']->saleDate->format('Y-m-d H:i') }}</p>
-            <p><strong>{{ __('Invoice Number') }}:</strong> {{ $data['sale']->invoiceNumber }}</p>
+            <p><strong>{{ __('Date') }}:</strong> {{ $data['sale']->sale_date->format('Y-m-d H:i') }}</p>
+            <p><strong>{{ __('Invoice Number') }}:</strong> {{ $data['sale']->invoice_number }}</p>
         </div>
 
         <!-- Customer Info -->

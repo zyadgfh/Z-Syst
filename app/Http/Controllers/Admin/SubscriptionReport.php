@@ -18,7 +18,7 @@ class SubscriptionReport extends Controller
 
     public function index(Request $request)
     {
-        $subscribers = PlanSubscribe::with(['plan:id,subscriptionName', 'business:id,companyName,pictureUrl,business_category_id', 'business.category:id,name'])->latest()->paginate(10);
+        $subscribers = PlanSubscribe::with(['plan:id,subscriptionName', 'business:id,company_name,picture_url,business_category_id', 'business.category:id,name'])->latest()->paginate(10);
 
         return view('admin.subscribers.index', compact('subscribers'));
     }
@@ -29,7 +29,7 @@ class SubscriptionReport extends Controller
 
         $subscribers = PlanSubscribe::with([
             'plan:id,subscriptionName',
-            'business:id,companyName,business_category_id',
+            'business:id,company_name,business_category_id',
             'business.category:id,name',
         ])
             ->when($search, function ($q) use ($search) {
@@ -124,7 +124,7 @@ class SubscriptionReport extends Controller
 
     public function getInvoice($invoice_id)
     {
-        $subscriber = PlanSubscribe::with(['plan:id,subscriptionName', 'business:id,companyName,business_category_id,phoneNumber,address', 'business.category:id,name', 'gateway:id,name'])->findOrFail($invoice_id);
+        $subscriber = PlanSubscribe::with(['plan:id,subscriptionName', 'business:id,company_name,business_category_id,phone_number,address', 'business.category:id,name', 'gateway:id,name'])->findOrFail($invoice_id);
 
         return view('admin.subscribers.invoice', compact('subscriber'));
     }

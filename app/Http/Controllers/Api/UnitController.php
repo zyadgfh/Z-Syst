@@ -26,8 +26,14 @@ class UnitController extends Controller
      */
     public function store(Request $request)
     {
+        // Same reasoning as ZSystCategoryController: the global shim skips
+        // camelCase names that are still real columns on other tables.
+        if ($request->filled('unitName') && ! $request->has('unit_name')) {
+            $request->merge(['unit_name' => $request->input('unitName')]);
+        }
+
         $request->validate([
-            'unit_name' => 'required|unique:units,unitName,NULL,id,business_id,'.auth()->user()->business_id,
+            'unit_name' => 'required|unique:units,unit_name,NULL,id,business_id,'.auth()->user()->business_id,
         ]);
 
         $data = Unit::create($request->only([
@@ -48,10 +54,14 @@ class UnitController extends Controller
      */
     public function update(Request $request, Unit $unit)
     {
+        if ($request->filled('unitName') && ! $request->has('unit_name')) {
+            $request->merge(['unit_name' => $request->input('unitName')]);
+        }
+
         $request->validate([
             'unit_name' => [
                 'required',
-                'unique:units,unitName,'.$unit->id.',id,business_id,'.auth()->user()->business_id,
+                'unique:units,unit_name,'.$unit->id.',id,business_id,'.auth()->user()->business_id,
             ],
         ]);
 

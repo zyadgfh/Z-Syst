@@ -12,12 +12,12 @@
                 <span style="font-size: 28px">💊</span>
                 <div>
                     <h4 class="mb-0" style="letter-spacing: -0.022em; font-weight: 700">{{ __('تعليمات الجرعة') }}</h4>
-                    <small class="text-muted">{{ $detail->sale?->invoiceNumber ?? ('#'.$detail->sale_id) }} · {{ optional($detail->sale?->saleDate)->format('Y-m-d') }}</small>
+                    <small class="text-muted">{{ $detail->sale?->invoice_number ?? ('#'.$detail->sale_id) }} · {{ optional($detail->sale?->sale_date)->format('Y-m-d') }}</small>
                 </div>
             </div>
 
             <div class="p-3 mb-3" style="background: #f5f5f7; border-radius: 14px">
-                <div class="fw-bold" style="font-size: 18px">{{ $detail->product?->name ?? $detail->product?->productName ?? ('#'.$detail->product_id) }}</div>
+                <div class="fw-bold" style="font-size: 18px">{{ $detail->product?->name ?? $detail->product?->product_name ?? ('#'.$detail->product_id) }}</div>
                 <div class="mt-2" style="font-size: 20px; font-weight: 700; color: #0071e3; letter-spacing: -0.014em">
                     ⏰ {{ $detail->dose }}
                 </div>
