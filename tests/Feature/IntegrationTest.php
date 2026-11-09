@@ -391,11 +391,14 @@ class IntegrationTest extends TestCase
         // Create product
         $product = Product::factory()->create([
             'business_id' => $business->id,
-            'name' => 'Test Product',
+            // `name` is not in Product::$fillable (the canonical column is
+            // product_name), so passing it is silently dropped: the model never
+            // becomes dirty and no `updated` audit row is ever written.
+            'product_name' => 'Test Product',
         ]);
 
         // Update product (should trigger audit log)
-        $product->update(['name' => 'Updated Product']);
+        $product->update(['product_name' => 'Updated Product']);
 
         // Verify audit log was created
         $this->assertDatabaseHas('audit_logs', [

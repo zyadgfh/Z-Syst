@@ -96,12 +96,16 @@ class PartyController extends Controller
             'phone' => 'required|max:20|unique:parties,phone,'.$party->id,
         ]);
 
+        // Partial updates must not erase columns that were not sent.
+        // `parties.type`, `due`, `opening_balance` and `status` are NOT NULL in
+        // the live schema, so writing a bare `$request->type` (null when the
+        // client omits it) aborts the whole update with a 500.
         $party->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'type' => $request->type,
-            'address' => $request->address,
+            'name' => $request->name ?? $party->name,
+            'email' => $request->email ?? $party->email,
+            'phone' => $request->phone ?? $party->phone,
+            'type' => $request->type ?? $party->type,
+            'address' => $request->address ?? $party->address,
             'opening_balance' => $request->opening_balance ?? $request->due ?? $party->opening_balance,
             'due' => $request->due ?? $party->due,
             'status' => $request->status ?? $party->status,
