@@ -11,6 +11,11 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class SubscriptionReport extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:reports-read')->only(['index','show']);
+    }
+
     public function index(Request $request)
     {
         $subscribers = PlanSubscribe::with(['plan:id,subscriptionName', 'business:id,companyName,pictureUrl,business_category_id', 'business.category:id,name'])->latest()->paginate(10);
@@ -37,7 +42,7 @@ class SubscriptionReport extends Controller
                             $q->where('name', 'like', '%'.$search.'%');
                         })
                         ->orWhereHas('business', function ($q) use ($search) {
-                            $q->where('companyName', 'like', '%'.$search.'%')
+                            $q->where('company_name', 'like', '%'.$search.'%')
                                 ->orWhereHas('category', function ($q) use ($search) {
                                     $q->where('name', 'like', '%'.$search.'%');
                                 });
@@ -93,13 +98,13 @@ class SubscriptionReport extends Controller
             $existingNotes = $subscribe->notes ?? [];
             $updatedNotes = array_merge($existingNotes, ['reason' => $request->notes]);
 
-            $subscribe->update($request->except('notes') + [
+            $subscribe->update([
                 'payment_status' => 'paid',
                 'notes' => $updatedNotes,
             ]);
 
             $subscribe->business->update([
-                'subscriptionDate' => now(),
+                'subscription_date' => now(),
                 'plan_subscribe_id' => $subscribe->id,
                 'will_expire' => now()->addDays($subscribe->plan->duration),
             ]);

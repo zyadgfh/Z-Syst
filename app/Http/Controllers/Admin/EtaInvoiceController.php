@@ -22,9 +22,9 @@ class EtaInvoiceController extends Controller
     {
         return view('admin.eta.index', [
             'invoices' => EtaInvoice::forBusiness((int) $request->user()->business_id)
-                ->with('sale:id,invoiceNumber,totalAmount,saleDate')->latest('id')->paginate(15),
+                ->with('sale:id,invoice_number,total_amount,sale_date')->latest('id')->paginate(15),
             'driver' => $this->eta->driver((int) $request->user()->business_id),
-            'recentSales' => Sale::forBusiness((int) $request->user()->business_id)->latest('id')->limit(20)->get(['id', 'invoiceNumber', 'totalAmount']),
+            'recentSales' => Sale::forBusiness((int) $request->user()->business_id)->latest('id')->limit(20)->get(['id', 'invoice_number', 'total_amount']),
         ]);
     }
 

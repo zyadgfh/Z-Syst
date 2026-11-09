@@ -43,8 +43,8 @@ class SendExpiryAlertCommand extends Command
             '7' => $today->copy()->addDays(7),
         ];
 
-        // Get all expiring/expired stocks with productStock > 0
-        $stocks = Stock::where('productStock', '>', 0)
+        // Get all expiring/expired stocks with product_stock > 0
+        $stocks = Stock::where('product_stock', '>', 0)
             ->whereNotNull('expire_date')
             ->where(function ($query) use ($today) {
                 $query->where('expire_date', '<=', $today->copy()->addDays(365))

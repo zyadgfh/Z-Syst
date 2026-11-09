@@ -7,6 +7,7 @@ use App\Http\Requests\SystemSettingRequest;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\File;
+use App\Services\AuditLogger;
 
 class SystemSettingController extends Controller
 {
@@ -23,6 +24,7 @@ class SystemSettingController extends Controller
 
     public function store(SystemSettingRequest $request)
     {
+        if (! $request->user()->hasRole('superadmin')) abort(403, 'Only platform superadmin may update system settings');
         $validated = $request->validated();
 
         if ($request->hasFile('service_account_credentials')) {
@@ -83,7 +85,7 @@ class SystemSettingController extends Controller
         ];
 
         foreach ($storeKeys as $k) {
-            $val = $validated[$k] ?? env($k);
+            $val = $validated[$k] ?? null;
             if (is_null($val)) {
                 continue;
             }
@@ -107,7 +109,12 @@ class SystemSettingController extends Controller
             }
         }
 
-        // If service account file saved above, persist filename
+        // Cleanup old service account files (keep only latest)
+        $oldFiles = Setting::where('key','FIREBASE_SERVICE_ACCOUNT')->value('value');
+        if (isset($name) && $oldFiles && $oldFiles !== $name) {
+            $oldPath = storage_path('app/private/firebase/'.$oldFiles);
+            if (File::exists($oldPath)) File::delete($oldPath);
+        }
         if (isset($name)) {
             Setting::updateOrCreate(
                 ['key' => 'FIREBASE_SERVICE_ACCOUNT'],
@@ -120,6 +127,7 @@ class SystemSettingController extends Controller
             ['value' => 'production', 'type' => 'string']
         );
 
+        AuditLogger::log('settings.updated', 'System settings updated', ['keys' => array_keys($validated)]);
         return response()->json(['message' => 'System Updated']);
     }
 }

@@ -32,12 +32,12 @@ class Party extends Model
 
     public function sales_dues(): HasMany
     {
-        return $this->hasMany(Sale::class)->where('dueAmount', '>', 0);
+        return $this->hasMany(Sale::class)->where('due_amount', '>', 0);
     }
 
     public function purchases_dues(): HasMany
     {
-        return $this->hasMany(Purchase::class)->where('dueAmount', '>', 0);
+        return $this->hasMany(Purchase::class)->where('due_amount', '>', 0);
     }
 
     public function activities()

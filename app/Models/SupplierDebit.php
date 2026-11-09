@@ -4,13 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SupplierDebit extends Model
 {
-    use HasFactory, SoftDeletes;
+    
+    use TenantScoped;
+use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'supplier_id', 'business_id', 'debit_number', 'debit_date',

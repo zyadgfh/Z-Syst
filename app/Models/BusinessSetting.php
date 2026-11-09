@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,7 +14,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class BusinessSetting extends Model
 {
-    protected $fillable = ['business_id', 'key', 'value'];
+    
+    use TenantScoped;
+protected $fillable = ['business_id', 'key', 'value'];
 
     protected $casts = ['value' => 'array'];
 

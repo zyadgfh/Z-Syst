@@ -4,10 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DoctorAttentionSettings extends Model
 {
+    
+    use TenantScoped;
+protected $table = 'doctor_attention_settings';
     use HasFactory;
 
     /**

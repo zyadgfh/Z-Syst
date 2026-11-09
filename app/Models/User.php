@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Laravel\Sanctum\HasApiTokens;
 use RuntimeException;
-use App\Traits\TenantScoped;
 
 /**
  * Canonical user model.
@@ -29,7 +28,6 @@ class User extends AppUser
 {
     use HasApiTokens, HasFactory;
 
-    use TenantScoped;
 
     use HasApiTokens;
 

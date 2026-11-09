@@ -12,7 +12,7 @@ class DashboardRepo {
 
     final response = await http.get(uri, headers: {
       'Accept': 'application/json',
-      'Authorization': 'Bearer $token', // Assuming Bearer token format
+      'Authorization': token, // Assuming Bearer token format
     });
     print(response.body);
     if (response.statusCode == 200) {

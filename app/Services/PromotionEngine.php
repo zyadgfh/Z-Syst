@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 
 /**
  * Server-side promotion evaluation (the client NEVER dictates discounts —
- * H-01 cousin rule). Promotions reduce the sale-level discountAmount so the
+ * H-01 cousin rule). Promotions reduce the sale-level discount_amount so the
  * hardened sale store keeps line prices at list price.
  */
 class PromotionEngine

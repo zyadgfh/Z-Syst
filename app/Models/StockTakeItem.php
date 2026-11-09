@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -11,7 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class StockTakeItem extends Model
 {
-    protected $table = 'stock_take_items';
+    
+    use TenantScoped;
+protected $table = 'stock_take_items';
 
     protected $fillable = [
         'business_id',

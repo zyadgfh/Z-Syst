@@ -10,6 +10,11 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ZSystActiveBusinessReportController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:reports-read')->only(['index','show']);
+    }
+
     public function index()
     {
         $active_stores = Business::with('enrolled_plan:id,plan_id', 'enrolled_plan.plan:id,subscriptionName', 'category:id,name')->whereDate('will_expire', '>', now())->latest()->paginate(10);
@@ -23,8 +28,8 @@ class ZSystActiveBusinessReportController extends Controller
 
         $active_stores = Business::with('enrolled_plan:id,plan_id', 'enrolled_plan.plan:id,subscriptionName', 'category:id,name')->whereDate('will_expire', '>', now())->when($search, function ($q) use ($search) {
             $q->where(function ($q) use ($search) {
-                $q->where('companyName', 'like', '%'.$search.'%')
-                    ->orWhere('phoneNumber', 'like', '%'.$search.'%')
+                $q->where('company_name', 'like', '%'.$search.'%')
+                    ->orWhere('phone_number', 'like', '%'.$search.'%')
                     ->orWhereHas('category', function ($q) use ($search) {
                         $q->where('name', 'like', '%'.$search.'%');
                     })

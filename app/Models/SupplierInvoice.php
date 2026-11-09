@@ -6,6 +6,7 @@ use App\Services\SupplierInvoiceService;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,7 +17,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class SupplierInvoice extends Model
 {
-    use HasFactory;
+    
+    use TenantScoped;
+use HasFactory;
 
     use SoftDeletes;
 
@@ -159,7 +162,7 @@ class SupplierInvoice extends Model
         return $businessId ? $query->where('business_id', $businessId) : $query;
     }
 
-    public function isPaid(): bool
+    public function is_paid(): bool
     {
         return $this->status === self::STATUS_PAID
             || (float) $this->balance <= 0.0;

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->double('price', 10, 2)->default(0);
             $table->double('purchase_price', 10, 2)->default(0);
-            $table->double('lossProfit', 10, 2)->default(0);
+            $table->double('loss_profit', 10, 2)->default(0);
             $table->string('batch_no')->nullable();
             $table->date('expire_date')->nullable();
             $table->integer('quantities')->default(0);

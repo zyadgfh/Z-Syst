@@ -19,9 +19,9 @@ class ZSystDueController extends Controller
         $search = $request->input('search');
         $data = DueCollect::with('user:id,name', 'party:id,name,email,phone,type')
             ->when($search, function ($query) use ($search) {
-                $query->where('invoiceNumber', 'like', '%'.$search.'%')
+                $query->where('invoice_number', 'like', '%'.$search.'%')
                     ->orWhere('totalDue', 'like', '%'.$search.'%')
-                    ->orWhere('paymentType', 'like', '%'.$search.'%');
+                    ->orWhere('payment_type', 'like', '%'.$search.'%');
             })
             ->where('business_id', auth()->user()->business_id)
             ->latest()
@@ -68,22 +68,22 @@ class ZSystDueController extends Controller
         $party = Party::find($request->party_id);
 
         $request->validate([
-            'paymentType' => 'required|string',
+            'payment_type' => 'required|string',
             'paymentDate' => 'required|string',
             'payDueAmount' => 'required|numeric',
             'party_id' => 'required|exists:parties,id',
-            'invoiceNumber' => 'nullable|exists:'.($party->type == 'Supplier' ? 'purchases' : 'sales').',invoiceNumber',
+            'invoice_number' => 'nullable|exists:'.($party->type == 'Supplier' ? 'purchases' : 'sales').',invoice_number',
         ]);
 
-        // Find invoice if invoiceNumber provided
+        // Find invoice if invoice_number provided
         $invoice = null;
-        if ($request->invoiceNumber) {
+        if ($request->invoice_number) {
             if ($party->type == 'Supplier') {
-                $invoice = Purchase::where('invoiceNumber', $request->invoiceNumber)
+                $invoice = Purchase::where('invoice_number', $request->invoice_number)
                     ->where('party_id', $request->party_id)
                     ->first();
             } else {
-                $invoice = Sale::where('invoiceNumber', $request->invoiceNumber)
+                $invoice = Sale::where('invoice_number', $request->invoice_number)
                     ->where('party_id', $request->party_id)
                     ->first();
             }
@@ -92,23 +92,23 @@ class ZSystDueController extends Controller
                 throw new BusinessRuleException(
                     ErrorCode::BUSINESS_INVOICE_NOT_FOUND,
                     __('errors.invoice_not_found'),
-                    ['invoiceNumber' => $request->invoiceNumber, 'party_id' => $request->party_id]
+                    ['invoice_number' => $request->invoice_number, 'party_id' => $request->party_id]
                 );
             }
 
-            if ($invoice->dueAmount < $request->payDueAmount) {
+            if ($invoice->due_amount < $request->payDueAmount) {
                 throw new BusinessRuleException(
                     ErrorCode::BUSINESS_INVOICE_DUE_EXCEEDED,
-                    __('errors.invoice_due_exceeded', ['due' => $invoice->dueAmount]),
+                    __('errors.invoice_due_exceeded', ['due' => $invoice->due_amount]),
                     [
-                        'invoice_due' => $invoice->dueAmount,
+                        'invoice_due' => $invoice->due_amount,
                         'payment_amount' => $request->payDueAmount,
                     ]
                 );
             }
         }
 
-        if (! $request->invoiceNumber) {
+        if (! $request->invoice_number) {
             if ($request->payDueAmount > $party->opening_balance) {
                 throw new BusinessRuleException(
                     ErrorCode::BUSINESS_OPENING_BALANCE_EXCEEDED,
@@ -127,40 +127,40 @@ class ZSystDueController extends Controller
         'user_id',
         'sale_id',
         'purchase_id',
-        'invoiceNumber',
+        'invoice_number',
         'totalDue',
         'dueAmountAfterPay',
         'payDueAmount',
-        'paymentType',
+        'payment_type',
         'paymentDate'
     ]) + [
             'user_id' => auth()->id(),
             'business_id' => auth()->user()->business_id,
             'sale_id' => $party->type != 'Supplier' && isset($invoice) ? $invoice->id : null,
             'purchase_id' => $party->type == 'Supplier' && isset($invoice) ? $invoice->id : null,
-            'totalDue' => isset($invoice) ? $invoice->dueAmount : $party->due,
-            'dueAmountAfterPay' => isset($invoice) ? ($invoice->dueAmount - $request->payDueAmount) : ($party->due - $request->payDueAmount),
+            'totalDue' => isset($invoice) ? $invoice->due_amount : $party->due,
+            'dueAmountAfterPay' => isset($invoice) ? ($invoice->due_amount - $request->payDueAmount) : ($party->due - $request->payDueAmount),
         ]);
 
         if (isset($invoice)) {
             $invoice->update([
-                'dueAmount' => $invoice->dueAmount - $request->payDueAmount,
+                'due_amount' => $invoice->due_amount - $request->payDueAmount,
             ]);
         }
 
         $business = Business::findOrFail(auth()->user()->business_id);
         $business_name = $business->companyName;
         $business->update([
-            'remainingShopBalance' => $party->type == 'Supplier' ? ($business->remainingShopBalance - $request->payDueAmount) : ($business->remainingShopBalance + $request->payDueAmount),
+            'remaining_shop_balance' => $party->type == 'Supplier' ? ($business->remainingShopBalance - $request->payDueAmount) : ($business->remainingShopBalance + $request->payDueAmount),
         ]);
 
         $party->update([
             'due' => $party->due - $request->payDueAmount,
-            'opening_balance' => $request->invoiceNumber ? $party->opening_balance : $party->opening_balance - $request->payDueAmount,
+            'opening_balance' => $request->invoice_number ? $party->opening_balance : $party->opening_balance - $request->payDueAmount,
         ]);
 
         if (config('services.message.enabled')) {
-            sendMessage($party->phone, dueCollectMessage($data, $party, $business_name, $request->invoiceNumber));
+            sendMessage($party->phone, dueCollectMessage($data, $party, $business_name, $request->invoice_number));
         }
 
         return response()->json([

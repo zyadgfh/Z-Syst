@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -11,7 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class FefoSetting extends Model
 {
-    protected $table = 'fefo_settings';
+    
+    use TenantScoped;
+protected $table = 'fefo_settings';
 
     protected $fillable = [
         'business_id',

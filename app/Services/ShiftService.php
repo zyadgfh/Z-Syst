@@ -69,9 +69,9 @@ class ShiftService
             'expected_cash' => $expected,
             'counted_cash' => $countedCash,
             'difference' => $difference,
-            'sales_total' => (float) $shift->sales()->sum('totalAmount'),
+            'sales_total' => (float) $shift->sales()->sum('total_amount'),
             'sales_count' => (int) $shift->sales()->count(),
-            'by_payment' => $shift->sales()->selectRaw('paymentType, SUM(totalAmount) t')->groupBy('paymentType')->pluck('t', 'paymentType'),
+            'by_payment' => $shift->sales()->selectRaw('payment_type, SUM(total_amount) t')->groupBy('payment_type')->pluck('t', 'payment_type'),
             'movements' => $shift->movements()->selectRaw('type, SUM(amount) t')->groupBy('type')->pluck('t', 'type'),
         ];
 

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use App\Models\PurchaseBudget;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -12,7 +13,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class BudgetAlert extends Model
 {
-    protected $table = 'budget_alerts';
+    
+    use TenantScoped;
+protected $table = 'budget_alerts';
 
     protected $fillable = [
         'budget_id',

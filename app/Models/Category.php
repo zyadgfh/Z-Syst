@@ -21,7 +21,7 @@ class Category extends Model
 
     protected $fillable = [
         'business_id',
-        'categoryName',
+        'category_name',
         'description',
         'status',
     ];

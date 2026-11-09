@@ -89,10 +89,10 @@ class SupplierInvoiceService
                 'invoice_date' => now(),
                 'due_date' => now()->addDays(30),
                 'tax_amount' => $purchase->tax_amount ?? 0,
-                'discount_amount' => $purchase->discountAmount ?? 0,
+                'discount_amount' => $purchase->discount_amount ?? 0,
                 'currency' => 'SAR',
                 'payment_terms' => 'net_30',
-                'notes' => "Created from Purchase: {$purchase->invoiceNumber}",
+                'notes' => "Created from Purchase: {$purchase->invoice_number}",
             ]);
 
             // Add items from purchase details
@@ -222,7 +222,7 @@ class SupplierInvoiceService
      */
     public function cancel(SupplierInvoice $invoice, string $reason): SupplierInvoice
     {
-        if ($invoice->isPaid()) {
+        if ($invoice->is_paid()) {
             throw new \Exception('Cannot cancel paid invoices');
         }
 
@@ -511,8 +511,8 @@ class SupplierInvoiceService
         $overdue = SupplierInvoice::forBusiness($businessId)->overdue()->count();
         $unpaid = SupplierInvoice::forBusiness($businessId)->unpaid()->count();
         
-        $totalAmount = SupplierInvoice::forBusiness($businessId)->sum('total_amount');
-        $paidAmount = SupplierInvoice::forBusiness($businessId)->sum('paid_amount');
+        $total_amount = SupplierInvoice::forBusiness($businessId)->sum('total_amount');
+        $paid_amount = SupplierInvoice::forBusiness($businessId)->sum('paid_amount');
         $balance = SupplierInvoice::forBusiness($businessId)->sum('balance');
 
         return [
@@ -520,8 +520,8 @@ class SupplierInvoiceService
             'pending' => $pending,
             'overdue' => $overdue,
             'unpaid' => $unpaid,
-            'total_amount' => $totalAmount,
-            'paid_amount' => $paidAmount,
+            'total_amount' => $total_amount,
+            'paid_amount' => $paid_amount,
             'balance' => $balance,
         ];
     }

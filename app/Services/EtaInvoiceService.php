@@ -117,11 +117,11 @@ class EtaInvoiceService
             'dateTimeIssued' => now()->format('Y-m-d\TH:i:s\Z'),
             'taxpayerActivityCode' => BusinessSetting::get($businessId, 'eta_activity_code', '4771'),
             'invoiceLines' => $items,
-            'totalDiscountAmount' => round((float) ($sale->discountAmount ?? 0), 5),
+            'totalDiscountAmount' => round((float) ($sale->discount_amount ?? 0), 5),
             'totalSalesAmount' => $salesTotal,
             'netAmount' => $salesTotal,
             'taxTotals' => [['taxType' => 'T1', 'amount' => $vatTotal]],
-            'totalAmount' => round($salesTotal + $vatTotal, 5),
+            'total_amount' => round($salesTotal + $vatTotal, 5),
             'extraDiscountAmount' => 0,
             'totalItemsDiscountAmount' => 0,
         ];

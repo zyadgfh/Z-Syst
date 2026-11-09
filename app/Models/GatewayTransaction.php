@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 
 class GatewayTransaction extends Model
 {
-    protected $fillable = [
+    
+    use TenantScoped;
+protected $fillable = [
         'business_id', 'gateway', 'purpose', 'payable_id', 'amount', 'currency',
         'status', 'reference', 'payload', 'paid_at',
     ];

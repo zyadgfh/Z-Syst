@@ -69,8 +69,11 @@ class ZSystPlanController extends Controller
             'status' => 'boolean',
         ]);
 
-        $plan = Plan::create($request->except(['offerPrice', 'status']) + [
+        $plan = Plan::create([
+            'subscriptionName' => $request->subscriptionName,
+            'subscriptionPrice' => $request->subscriptionPrice,
             'offerPrice' => $request->offerPrice ?? null,
+            'duration' => $request->duration,
             'status' => $request->status ? 1 : 0,
             'features' => $request->features ?? [],
         ]);
@@ -95,9 +98,13 @@ class ZSystPlanController extends Controller
             'subscriptionPrice' => 'required|numeric|min:0|max:9999999999999',
         ]);
 
-        $plan->update($request->except(['offerPrice', 'status']) + [
+        $plan->update([
+            'subscriptionName' => $request->subscriptionName,
+            'subscriptionPrice' => $request->subscriptionPrice,
             'offerPrice' => $request->offerPrice ?? null,
+            'duration' => $request->duration,
             'status' => $request->status ? 1 : 0,
+            'features' => $request->features ?? $plan->features,
         ]);
 
         return response()->json([

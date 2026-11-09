@@ -23,14 +23,14 @@ class ReportsController extends Controller
     {
         $request = ReportRequest::capture();
 
-        $query = Purchase::select('id', 'party_id', 'invoiceNumber', 'purchaseDate', 'totalAmount', 'dueAmount', 'paidAmount', 'paymentType', 'note')
+        $query = Purchase::select('id', 'party_id', 'invoice_number', 'purchase_date', 'total_amount', 'due_amount', 'paid_amount', 'payment_type', 'note')
             ->with('party:id,name,phone')
             ->withCount('purchaseReturns')
             ->when($request->filled('search'), function ($query) use ($request) {
                 $query->where(function ($subQuery) use ($request) {
                     $term = '%'.$request->input('search').'%';
-                    $subQuery->where('paymentType', 'like', $term)
-                        ->orWhere('invoiceNumber', 'like', $term)
+                    $subQuery->where('payment_type', 'like', $term)
+                        ->orWhere('invoice_number', 'like', $term)
                         ->orWhere('note', 'like', $term)
                         ->orWhereHas('party', function ($query) use ($term) {
                             $query->where('name', 'like', $term)
@@ -39,13 +39,13 @@ class ReportsController extends Controller
                 });
             })
             ->when($request->filled('from_date') || $request->filled('to_date'), function ($query) use ($request) {
-                $query->whereBetween('purchaseDate', [$request->input('from_date'), $request->input('to_date')]);
+                $query->whereBetween('purchase_date', [$request->input('from_date'), $request->input('to_date')]);
             })
             ->when($request->input('payment_status') == 'paid', function ($query) {
-                $query->where('dueAmount', '<=', 0);
+                $query->where('due_amount', '<=', 0);
             })
             ->when($request->input('payment_status') == 'unpaid', function ($query) {
-                $query->where('dueAmount', '>', 0);
+                $query->where('due_amount', '>', 0);
             })
             ->when($request->filled('party_id'), function ($query) use ($request) {
                 $query->where('party_id', $request->input('party_id'));
@@ -53,8 +53,8 @@ class ReportsController extends Controller
             ->where('business_id', auth()->user()->business_id);
 
         $data = (clone $query)->latest()->paginate($request->input('per_page', 10));
-        $total_paid = (clone $query)->sum('paidAmount');
-        $total_due = (clone $query)->sum('dueAmount');
+        $total_paid = (clone $query)->sum('paid_amount');
+        $total_due = (clone $query)->sum('due_amount');
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -66,14 +66,14 @@ class ReportsController extends Controller
 
     public function salesReport(ReportRequest $request)
     {
-        $query = Sale::select('id', 'party_id', 'invoiceNumber', 'saleDate', 'totalAmount', 'dueAmount', 'paidAmount', 'paymentType')
+        $query = Sale::select('id', 'party_id', 'invoice_number', 'sale_date', 'total_amount', 'due_amount', 'paid_amount', 'payment_type')
             ->with('party:id,name,phone')
             ->withCount('saleReturns')
             ->when($request->filled('search'), function ($query) use ($request) {
                 $term = '%'.$request->input('search').'%';
                 $query->where(function ($subQuery) use ($term) {
-                    $subQuery->where('paymentType', 'like', $term)
-                        ->orWhere('invoiceNumber', 'like', $term)
+                    $subQuery->where('payment_type', 'like', $term)
+                        ->orWhere('invoice_number', 'like', $term)
                         ->orWhere('meta', 'like', $term)
                         ->orWhereHas('party', function ($query) use ($term) {
                             $query->where('name', 'like', $term)
@@ -82,13 +82,13 @@ class ReportsController extends Controller
                 });
             })
             ->when($request->filled('from_date') || $request->filled('to_date'), function ($query) use ($request) {
-                $query->whereBetween('saleDate', [$request->input('from_date'), $request->input('to_date')]);
+                $query->whereBetween('sale_date', [$request->input('from_date'), $request->input('to_date')]);
             })
             ->when($request->input('payment_status') == 'paid', function ($query) {
-                $query->where('dueAmount', '<=', 0);
+                $query->where('due_amount', '<=', 0);
             })
             ->when($request->input('payment_status') == 'unpaid', function ($query) {
-                $query->where('dueAmount', '>', 0);
+                $query->where('due_amount', '>', 0);
             })
             ->when($request->filled('party_id'), function ($query) use ($request) {
                 $query->where('party_id', $request->input('party_id'));
@@ -96,8 +96,8 @@ class ReportsController extends Controller
             ->where('business_id', auth()->user()->business_id);
 
         $data = (clone $query)->latest()->paginate($request->input('per_page', 10));
-        $total_paid = (clone $query)->sum('paidAmount');
-        $total_due = (clone $query)->sum('dueAmount');
+        $total_paid = (clone $query)->sum('paid_amount');
+        $total_due = (clone $query)->sum('due_amount');
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -109,13 +109,13 @@ class ReportsController extends Controller
 
     public function dueCollectsReport(ReportRequest $request)
     {
-        $query = DueCollect::select('id', 'party_id', 'invoiceNumber', 'totalDue', 'dueAmountAfterPay', 'payDueAmount', 'paymentType', 'paymentDate')
+        $query = DueCollect::select('id', 'party_id', 'invoice_number', 'totalDue', 'dueAmountAfterPay', 'payDueAmount', 'payment_type', 'paymentDate')
             ->with('party:id,name,phone')
             ->when($request->filled('search'), function ($query) use ($request) {
                 $term = '%'.$request->input('search').'%';
                 $query->where(function ($subQuery) use ($term) {
-                    $subQuery->where('paymentType', 'like', $term)
-                        ->orWhere('invoiceNumber', 'like', $term)
+                    $subQuery->where('payment_type', 'like', $term)
+                        ->orWhere('invoice_number', 'like', $term)
                         ->orWhereHas('party', function ($query) use ($term) {
                             $query->where('name', 'like', $term)
                                 ->orWhere('phone', 'like', $term);
@@ -141,14 +141,14 @@ class ReportsController extends Controller
 
     public function lossProfitReport(ReportRequest $request)
     {
-        $query = Sale::select('id', 'party_id', 'invoiceNumber', 'saleDate', 'dueAmount', 'lossProfit', 'totalAmount')
+        $query = Sale::select('id', 'party_id', 'invoice_number', 'sale_date', 'due_amount', 'loss_profit', 'total_amount')
             ->where('business_id', auth()->user()->business_id)
             ->with('party:id,name,phone')
             ->when($request->filled('search'), function ($query) use ($request) {
                 $term = '%'.$request->input('search').'%';
                 $query->where(function ($subQuery) use ($term) {
-                    $subQuery->where('invoiceNumber', 'like', $term)
-                        ->orWhere('dueAmount', 'like', $term)
+                    $subQuery->where('invoice_number', 'like', $term)
+                        ->orWhere('due_amount', 'like', $term)
                         ->orWhere('meta', 'like', $term)
                         ->orWhereHas('party', function ($query) use ($term) {
                             $query->where('name', 'like', $term)
@@ -157,18 +157,18 @@ class ReportsController extends Controller
                 });
             })
             ->when($request->filled('from_date') || $request->filled('to_date'), function ($query) use ($request) {
-                $query->whereBetween('saleDate', [$request->input('from_date'), $request->input('to_date')]);
+                $query->whereBetween('sale_date', [$request->input('from_date'), $request->input('to_date')]);
             })
             ->when($request->input('payment_status') == 'paid', function ($query) {
-                $query->where('dueAmount', '<=', 0);
+                $query->where('due_amount', '<=', 0);
             })
             ->when($request->input('payment_status') == 'unpaid', function ($query) {
-                $query->where('dueAmount', '>', 0);
+                $query->where('due_amount', '>', 0);
             });
 
         $data = (clone $query)->latest()->paginate($request->input('per_page', 10));
-        $total_profit = (clone $query)->where('lossProfit', '>', 0)->sum('lossProfit');
-        $total_loss = (clone $query)->where('lossProfit', '<=', 0)->sum('lossProfit');
+        $total_profit = (clone $query)->where('loss_profit', '>', 0)->sum('loss_profit');
+        $total_loss = (clone $query)->where('loss_profit', '<=', 0)->sum('loss_profit');
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -186,11 +186,11 @@ class ReportsController extends Controller
                 $query->where(function ($subQuery) use ($term) {
                     $subQuery->where('amount', 'like', $term)
                         ->orWhere('incomeFor', 'like', $term)
-                        ->orWhere('paymentType', 'like', $term)
-                        ->orWhere('referenceNo', 'like', $term)
+                        ->orWhere('payment_type', 'like', $term)
+                        ->orWhere('reference_no', 'like', $term)
                         ->orWhere('note', 'like', $term)
                         ->orWhereHas('category', function ($query) use ($term) {
-                            $query->where('categoryName', 'like', $term);
+                            $query->where('category_name', 'like', $term);
                         });
                 });
             })
@@ -216,17 +216,17 @@ class ReportsController extends Controller
                 $term = '%'.$request->input('search').'%';
                 $query->where(function ($subQuery) use ($term) {
                     $subQuery->where('amount', 'like', $term)
-                        ->orWhere('expanseFor', 'like', $term)
-                        ->orWhere('paymentType', 'like', $term)
-                        ->orWhere('referenceNo', 'like', $term)
+                        ->orWhere('expanse_for', 'like', $term)
+                        ->orWhere('payment_type', 'like', $term)
+                        ->orWhere('reference_no', 'like', $term)
                         ->orWhere('note', 'like', $term)
                         ->orWhereHas('category', function ($query) use ($term) {
-                            $query->where('categoryName', 'like', $term);
+                            $query->where('category_name', 'like', $term);
                         });
                 });
             })
             ->when($request->filled('from_date') || $request->filled('to_date'), function ($query) use ($request) {
-                $query->whereBetween('expenseDate', [$request->input('from_date'), $request->input('to_date')]);
+                $query->whereBetween('expense_date', [$request->input('from_date'), $request->input('to_date')]);
             })
             ->where('business_id', auth()->user()->business_id);
 
@@ -245,13 +245,13 @@ class ReportsController extends Controller
         $query = DB::table('products')
             ->where('products.business_id', auth()->user()->business_id)
             ->join('stocks', 'products.id', '=', 'stocks.product_id')
-            ->select('products.id', 'products.productName', 'products.productCode', 'products.alert_qty', 'products.sales_price', DB::raw('SUM(stocks.productStock) as totalStock'))
-            ->groupBy('products.id', 'products.productName', 'products.productCode', 'products.alert_qty', 'products.sales_price')
+            ->select('products.id', 'products.product_name', 'products.product_code', 'products.alert_qty', 'products.sales_price', DB::raw('SUM(stocks.product_stock) as totalStock'))
+            ->groupBy('products.id', 'products.product_name', 'products.product_code', 'products.alert_qty', 'products.sales_price')
             ->havingRaw('totalStock < alert_qty')
             ->when($request->filled('search'), function ($query) use ($request) {
                 $term = '%'.$request->input('search').'%';
-                $query->where('productName', 'like', $term)
-                    ->orWhere('productCode', 'like', $term);
+                $query->where('product_name', 'like', $term)
+                    ->orWhere('product_code', 'like', $term);
             });
 
         $data = (clone $query)->paginate($request->input('per_page', 10));
@@ -266,13 +266,13 @@ class ReportsController extends Controller
 
     public function taxesReport(ReportRequest $request)
     {
-        $query = Sale::select('id', 'party_id', 'invoiceNumber', 'saleDate', 'totalAmount', 'dueAmount', 'paidAmount', 'paymentType')
+        $query = Sale::select('id', 'party_id', 'invoice_number', 'sale_date', 'total_amount', 'due_amount', 'paid_amount', 'payment_type')
             ->with('party:id,name,phone')
             ->when($request->filled('search'), function ($query) use ($request) {
                 $term = '%'.$request->input('search').'%';
                 $query->where(function ($subQuery) use ($term) {
-                    $subQuery->where('paymentType', 'like', $term)
-                        ->orWhere('invoiceNumber', 'like', $term)
+                    $subQuery->where('payment_type', 'like', $term)
+                        ->orWhere('invoice_number', 'like', $term)
                         ->orWhere('meta', 'like', $term)
                         ->orWhereHas('party', function ($query) use ($term) {
                             $query->where('name', 'like', $term)
@@ -281,13 +281,13 @@ class ReportsController extends Controller
                 });
             })
             ->when($request->filled('from_date') || $request->filled('to_date'), function ($query) use ($request) {
-                $query->whereBetween('saleDate', [$request->input('from_date'), $request->input('to_date')]);
+                $query->whereBetween('sale_date', [$request->input('from_date'), $request->input('to_date')]);
             })
             ->when($request->input('payment_status') == 'paid', function ($query) {
-                $query->where('dueAmount', '<=', 0);
+                $query->where('due_amount', '<=', 0);
             })
             ->when($request->input('payment_status') == 'unpaid', function ($query) {
-                $query->where('dueAmount', '>', 0);
+                $query->where('due_amount', '>', 0);
             })
             ->when($request->filled('party_id'), function ($query) use ($request) {
                 $query->where('party_id', $request->input('party_id'));
@@ -295,8 +295,8 @@ class ReportsController extends Controller
             ->where('business_id', auth()->user()->business_id);
 
         $data = (clone $query)->latest()->paginate($request->input('per_page', 10));
-        $total_paid = (clone $query)->sum('paidAmount');
-        $total_due = (clone $query)->sum('dueAmount');
+        $total_paid = (clone $query)->sum('paid_amount');
+        $total_due = (clone $query)->sum('due_amount');
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -316,7 +316,7 @@ class ReportsController extends Controller
         $filteredQuery = $baseQuery->select('id', 'sale_id', 'return_date', 'invoice_no')
             ->with([
                 'details:id,sale_return_id,return_qty,return_amount',
-                'sale:id,party_id,invoiceNumber,totalAmount',
+                'sale:id,party_id,invoice_number,total_amount',
                 'sale.party:id,name',
             ])
             ->when($request->filled('search'), function ($query) use ($request) {
@@ -358,7 +358,7 @@ class ReportsController extends Controller
         $filteredQuery = $baseQuery->select('id', 'purchase_id', 'return_date', 'invoice_no')
             ->with([
                 'details:id,purchase_return_id,return_qty,return_amount',
-                'purchase:id,party_id,invoiceNumber,totalAmount',
+                'purchase:id,party_id,invoice_number,total_amount',
                 'purchase.party:id,name',
             ])
             ->when($request->filled('search'), function ($query) use ($request) {

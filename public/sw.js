@@ -3,6 +3,7 @@
    Strategy:
    - Precache the static shell (offline page, design layer, core JS).
    - Navigations: network-first, fall back to cache, then /offline.html.
+     ADMIN pages and auth pages are NEVER cached.
    - Static assets (css/js/img/fonts): cache-first with background refresh.
    - Sales POSTs are queued client-side by pos-offline.js (IndexedDB);
      this worker only helps pages and assets survive a dead network.
@@ -37,20 +38,34 @@ self.addEventListener('activate', (event) => {
     );
 });
 
+// Clear all caches on logout — called from pos-offline.js / logout handler
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'CLEAR_CACHES') {
+        event.waitUntil(caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))));
+    }
+});
+
 self.addEventListener('fetch', (event) => {
     const { request } = event;
-    if (request.method !== 'GET') return; // mutations are handled by pos-offline.js
+    if (request.method !== 'GET') return;
 
     const url = new URL(request.url);
     if (url.origin !== self.location.origin) return;
+
+    // NEVER cache admin, auth, or sensitive pages
+    const noCachePrefixes = ['/admin', '/login', '/register', '/api/', '/storage/', '/live', '/dashboard'];
+    if (noCachePrefixes.some((p) => url.pathname.startsWith(p))) return;
 
     // Page navigations: network first, cache second, offline page last.
     if (request.mode === 'navigate') {
         event.respondWith(
             fetch(request)
                 .then((response) => {
-                    const copy = response.clone();
-                    caches.open(VERSION).then((cache) => cache.put(request, copy));
+                    // Only cache successful HTML navigations for public pages
+                    if (response && response.ok && response.headers.get('content-type')?.includes('text/html')) {
+                        const copy = response.clone();
+                        caches.open(VERSION).then((cache) => cache.put(request, copy));
+                    }
                     return response;
                 })
                 .catch(() =>

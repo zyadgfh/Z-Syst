@@ -18,15 +18,14 @@ class Expense extends Model
      * @var array
      */
     protected $fillable = [
-        'expense_category_id',
         'business_id',
-        'user_id',
         'amount',
-        'expanseFor',
-        'paymentType',
-        'referenceNo',
+        'expense_category_id',
+        'expanse_for',
+        'payment_type',
+        'reference_no',
         'note',
-        'expenseDate',
+        'expense_date',
     ];
 
     public function category(): BelongsTo

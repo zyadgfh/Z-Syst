@@ -10,8 +10,7 @@ import '../../../Repository/constant_functions.dart';
 
 class LogOutRepo {
   Future<void> signOut() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove("token");
+    await clearAuthToken();
     EasyLoading.showSuccess('Successfully Logged Out');
     Restart.restartApp();
   }

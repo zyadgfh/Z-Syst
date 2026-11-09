@@ -97,7 +97,7 @@ class EtaService
             'totalSalesAmount' => round($totalSales, 5),
             'netAmount' => round($totalSales - $discount, 5),
             'taxTotals' => [],
-            'totalAmount' => round((float) $sale->total_amount, 5),
+            'total_amount' => round((float) $sale->total_amount, 5),
             'extraDiscountAmount' => 0,
             'totalItemsDiscountAmount' => 0,
         ];

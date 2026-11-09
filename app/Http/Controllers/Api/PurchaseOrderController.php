@@ -178,7 +178,7 @@ class PurchaseOrderController extends Controller
             'message' => 'Purchase order converted to purchase successfully',
             'data' => [
                 'purchase_id' => $purchase->id,
-                'invoice_number' => $purchase->invoiceNumber,
+                'invoice_number' => $purchase->invoice_number,
             ],
         ]);
     }

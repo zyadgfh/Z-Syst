@@ -42,16 +42,16 @@ class StoreOrderController extends Controller
         $lines = collect($order->items)->map(fn ($i) => [
             'product_id' => (int) $i['product_id'],
             'price' => (float) $i['price'],
-            'lossProfit' => 0,
+            'loss_profit' => 0,
             'quantities' => (int) $i['qty'],
         ])->values()->all();
 
         $apiRequest = Request::create('/api/v1/sales', 'POST', [
             'products' => $lines,
-            'saleDate' => now()->toDateString(),
-            'paidAmount' => (float) $order->total,
-            'isPaid' => true,
-            'paymentType' => 'online',
+            'sale_date' => now()->toDateString(),
+            'paid_amount' => (float) $order->total,
+            'is_paid' => true,
+            'payment_type' => 'online',
         ]);
         $apiRequest->setUserResolver(fn () => $request->user());
         $apiRequest->setLaravelSession($request->session());

@@ -85,8 +85,8 @@ class InventoryTurnoverController extends Controller
             ->join('products', 'products.id', '=', 'product_inventory_analysis.product_id')
             ->select(
                 'product_inventory_analysis.*',
-                'products.productName',
-                'products.productCode',
+                'products.product_name',
+                'products.product_code',
                 'products.sales_price',
                 'products.purchase_with_tax'
             );
@@ -116,8 +116,8 @@ class InventoryTurnoverController extends Controller
         if ($request->search) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('products.productName', 'like', "%{$search}%")
-                    ->orWhere('products.productCode', 'like', "%{$search}%");
+                $q->where('products.product_name', 'like', "%{$search}%")
+                    ->orWhere('products.product_code', 'like', "%{$search}%");
             });
         }
 

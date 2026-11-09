@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignUuid('user_id')->nullable()->constrained('app_users')->nullOnDelete();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->string('incomeFor')->nullable();
-            $table->string('paymentType')->default('Cash');
+            $table->string('payment_type')->default('Cash');
             $table->string('referenceNo')->nullable();
             $table->text('note')->nullable();
             $table->timestamp('incomeDate')->nullable();

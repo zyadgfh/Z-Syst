@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -11,7 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class FinancialTransaction extends Model
 {
-    protected $table = 'financial_transactions';
+    
+    use TenantScoped;
+protected $table = 'financial_transactions';
 
     const UPDATED_AT = null;
 

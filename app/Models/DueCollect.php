@@ -24,11 +24,11 @@ class DueCollect extends Model
         'user_id',
         'sale_id',
         'purchase_id',
-        'invoiceNumber',
+        'invoice_number',
         'totalDue',
         'dueAmountAfterPay',
         'payDueAmount',
-        'paymentType',
+        'payment_type',
         'paymentDate',
     ];
 
@@ -38,7 +38,7 @@ class DueCollect extends Model
 
         static::creating(function ($model) {
             $id = DueCollect::where('business_id', auth()->user()->business_id)->count() + 1;
-            $model->invoiceNumber = 'D-'.str_pad($id, 5, '0', STR_PAD_LEFT);
+            $model->invoice_number = 'D-'.str_pad($id, 5, '0', STR_PAD_LEFT);
         });
     }
 

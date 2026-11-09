@@ -24,7 +24,7 @@ class LiveController extends Controller
         $businessId = (int) $request->user()->business_id;
 
         return view('admin.live.index', [
-            'today' => Sale::forBusiness($businessId)->whereDate('saleDate', now()->toDateString()),
+            'today' => Sale::forBusiness($businessId)->whereDate('sale_date', now()->toDateString()),
             'lastId' => (int) (Sale::forBusiness($businessId)->max('id') ?? 0),
         ]);
     }
@@ -41,14 +41,14 @@ class LiveController extends Controller
             echo "retry: 3000\n\n";
             while (time() < $deadline) {
                 $sales = Sale::forBusiness($businessId)->where('id', '>', $cursor)
-                    ->latest('id')->limit(20)->get(['id', 'invoiceNumber', 'totalAmount', 'paymentType', 'saleDate', 'created_at']);
+                    ->latest('id')->limit(20)->get(['id', 'invoice_number', 'total_amount', 'payment_type', 'sale_date', 'created_at']);
 
                 foreach ($sales as $sale) {
                     $cursor = max($cursor, $sale->id);
                     echo 'event: sale'. "\n";
                     echo 'data: '.json_encode([
-                        'id' => $sale->id, 'invoice' => $sale->invoiceNumber,
-                        'total' => (float) $sale->totalAmount, 'payment' => $sale->paymentType,
+                        'id' => $sale->id, 'invoice' => $sale->invoice_number,
+                        'total' => (float) $sale->total_amount, 'payment' => $sale->payment_type,
                         'at' => optional($sale->created_at)->format('H:i:s'),
                     ])."\n\n";
                 }
@@ -56,8 +56,8 @@ class LiveController extends Controller
                 if ($sales->isNotEmpty()) {
                     echo 'event: totals'. "\n";
                     echo 'data: '.json_encode([
-                        'today_total' => (float) Sale::forBusiness($businessId)->whereDate('saleDate', now()->toDateString())->sum('totalAmount'),
-                        'today_count' => (int) Sale::forBusiness($businessId)->whereDate('saleDate', now()->toDateString())->count(),
+                        'today_total' => (float) Sale::forBusiness($businessId)->whereDate('sale_date', now()->toDateString())->sum('total_amount'),
+                        'today_count' => (int) Sale::forBusiness($businessId)->whereDate('sale_date', now()->toDateString())->count(),
                         'last_id' => $cursor,
                     ])."\n\n";
                 } else {

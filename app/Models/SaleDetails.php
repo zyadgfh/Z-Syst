@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SaleDetails extends Model
 {
+    protected $table = 'sale_details';
     use HasFactory;
 
     /**
@@ -20,7 +21,7 @@ class SaleDetails extends Model
         'sale_id',
         'product_id',
         'price',
-        'lossProfit',
+        'loss_profit',
         'batch_no',
         'quantities',
         'dose',

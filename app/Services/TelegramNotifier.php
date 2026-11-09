@@ -49,13 +49,13 @@ class TelegramNotifier
     public function dailyDigest(int $businessId): string
     {
         $today = now()->toDateString();
-        $sales = \App\Models\Sale::forBusiness($businessId)->whereDate('saleDate', $today);
-        $total = (float) (clone $sales)->sum('totalAmount');
+        $sales = \App\Models\Sale::forBusiness($businessId)->whereDate('sale_date', $today);
+        $total = (float) (clone $sales)->sum('total_amount');
         $count = (int) (clone $sales)->count();
-        $profit = (float) (clone $sales)->sum('lossProfit');
+        $profit = (float) (clone $sales)->sum('loss_profit');
         $lowStock = \App\Models\Product::query()->where('business_id', $businessId)
             ->whereHas('stocks')->get()
-            ->filter(fn ($p) => (int) $p->stocks()->sum('productStock') <= 5)
+            ->filter(fn ($p) => (int) $p->stocks()->sum('product_stock') <= 5)
             ->take(5)->pluck('name');
 
         $lines = [

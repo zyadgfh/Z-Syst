@@ -43,8 +43,8 @@ class ZSystBusinessController extends Controller
 
         $businesses = Business::with('enrolled_plan:id,plan_id', 'enrolled_plan.plan:id,subscriptionName', 'category:id,name')->when($search, function ($q) use ($search) {
             $q->where(function ($q) use ($search) {
-                $q->where('companyName', 'like', '%'.$search.'%')
-                    ->orWhere('phoneNumber', 'like', '%'.$search.'%')
+                $q->where('company_name', 'like', '%'.$search.'%')
+                    ->orWhere('phone_number', 'like', '%'.$search.'%')
                     ->orWhereHas('category', function ($q) use ($search) {
                         $q->where('name', 'like', '%'.$search.'%');
                     })
@@ -77,12 +77,12 @@ class ZSystBusinessController extends Controller
     {
         $request->validate([
             'address' => 'nullable|max:250',
-            'companyName' => 'required|max:250',
+            'company_name' => 'required|max:250',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:6',
-            'pictureUrl' => 'nullable|image|max:2024',
-            'phoneNumber' => 'nullable',
-            'shopOpeningBalance' => 'nullable|numeric',
+            'picture_url' => 'nullable|image|max:2024',
+            'phone_number' => 'nullable',
+            'shop_opening_balance' => 'nullable|numeric',
             'business_category_id' => 'required|exists:business_categories,id',
             'plan_subscribe_id' => 'nullable|exists:plans,id',
         ]);
@@ -94,14 +94,14 @@ class ZSystBusinessController extends Controller
             $user = auth()->user();
 
             $business = Business::create([
-                'companyName' => $request->companyName,
+                'company_name' => $request->companyName,
                 'address' => $request->address,
                 'email' => $request->email,
                 'password' => $request->password,
-                'phoneNumber' => $request->phoneNumber,
-                'shopOpeningBalance' => $request->shopOpeningBalance,
+                'phone_number' => $request->phoneNumber,
+                'shop_opening_balance' => $request->shopOpeningBalance,
                 'business_category_id' => $request->business_category_id,
-                'pictureUrl' => $request->pictureUrl ? $this->upload($request, 'pictureUrl') : null,
+                'picture_url' => $request->pictureUrl ? $this->upload($request, 'picture_url') : null,
                 'user_id' => $user->id,
             ]);
 
@@ -110,7 +110,7 @@ class ZSystBusinessController extends Controller
                 'name' => $request->companyName,
                 'email' => $request->email,
                 'phone' => $request->phoneNumber,
-                'image' => $request->pictureUrl ? $this->upload($request, 'pictureUrl') : null,
+                'image' => $request->pictureUrl ? $this->upload($request, 'picture_url') : null,
                 'password' => Hash::make($request->password),
                 'user_id' => $user->id,
                 'lang' => 'en',
@@ -129,7 +129,7 @@ class ZSystBusinessController extends Controller
                 ]);
 
                 $business->update([
-                    'subscriptionDate' => now(),
+                    'subscription_date' => now(),
                     'plan_subscribe_id' => $subscribe->id,
                     'will_expire' => now()->addDays($plan->duration),
                 ]);
@@ -164,12 +164,12 @@ class ZSystBusinessController extends Controller
     {
         $request->validate([
             'address' => 'nullable|max:250',
-            'companyName' => 'required|max:250',
+            'company_name' => 'required|max:250',
             'email' => 'required|email',
             'password' => 'nullable|string|min:6',
-            'pictureUrl' => 'nullable|image|max:2024',
-            'phoneNumber' => 'nullable',
-            'shopOpeningBalance' => 'nullable|numeric',
+            'picture_url' => 'nullable|image|max:2024',
+            'phone_number' => 'nullable',
+            'shop_opening_balance' => 'nullable|numeric',
             'business_category_id' => 'required|exists:business_categories,id',
             'plan_subscribe_id' => 'nullable|exists:plans,id',
         ]);
@@ -180,12 +180,12 @@ class ZSystBusinessController extends Controller
             $business = Business::findOrFail($id);
 
             $business->update([
-                'companyName' => $request->companyName,
+                'company_name' => $request->companyName,
                 'address' => $request->address,
-                'phoneNumber' => $request->phoneNumber,
-                'shopOpeningBalance' => $request->shopOpeningBalance,
+                'phone_number' => $request->phoneNumber,
+                'shop_opening_balance' => $request->shopOpeningBalance,
                 'business_category_id' => $request->business_category_id,
-                'pictureUrl' => $request->pictureUrl ? $this->upload($request, 'pictureUrl', $business->pictureUrl) : $business->pictureUrl,
+                'picture_url' => $request->pictureUrl ? $this->upload($request, 'picture_url', $business->pictureUrl) : $business->pictureUrl,
             ]);
 
             $user = User::where('business_id', $business->id)->firstOrFail();
@@ -193,7 +193,7 @@ class ZSystBusinessController extends Controller
                 'name' => $request->companyName,
                 'email' => $request->email,
                 'phone' => $request->phoneNumber,
-                'image' => $request->pictureUrl ? $this->upload($request, 'pictureUrl') : $user->image,
+                'image' => $request->pictureUrl ? $this->upload($request, 'picture_url') : $user->image,
                 'password' => $request->password ? Hash::make($request->password) : $user->password,
             ]);
 
@@ -210,7 +210,7 @@ class ZSystBusinessController extends Controller
                 ]);
 
                 $business->update([
-                    'subscriptionDate' => now(),
+                    'subscription_date' => now(),
                     'plan_subscribe_id' => $subscribe->id,
                     'will_expire' => now()->addDays($plan->duration),
                 ]);
@@ -291,7 +291,7 @@ class ZSystBusinessController extends Controller
             ]);
 
             $business->update([
-                'subscriptionDate' => now(),
+                'subscription_date' => now(),
                 'plan_subscribe_id' => $subscribe->id,
                 'will_expire' => now()->addDays($plan->duration),
             ]);

@@ -245,7 +245,7 @@ class PredictionService
             $product = $productForecasts->first()->product;
             $currentStock = Stock::where('product_id', $productId)
                 ->where('business_id', $businessId)
-                ->sum('productStock');
+                ->sum('product_stock');
 
             $totalPredicted = $productForecasts->sum('predicted_quantity');
             $avgConfidence = $productForecasts->avg('confidence_score');
@@ -307,16 +307,16 @@ class PredictionService
             'sale_details.price',
             'sale_details.quantities',
             'sale_details.purchase_price',
-            'sales.saleDate'
+            'sales.sale_date'
         )
             ->join('sales', 'sales.id', '=', 'sale_details.sale_id')
             ->where('sale_details.product_id', $productId)
             ->where('sales.business_id', $businessId)
-            ->where('sales.saleDate', '>=', $startDate)
-            ->where('sales.saleDate', '<=', now())
+            ->where('sales.sale_date', '>=', $startDate)
+            ->where('sales.sale_date', '<=', now())
             ->get()
             ->map(function ($item) {
-                $item->sale_date = Carbon::parse($item->saleDate);
+                $item->sale_date = Carbon::parse($item->sale_date);
 
                 return $item;
             });

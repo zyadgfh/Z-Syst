@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -13,7 +14,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Device extends Model
 {
-    public const TYPE_POS = 'pos';
+    
+    use TenantScoped;
+public const TYPE_POS = 'pos';
     public const TYPE_TABLET = 'tablet';
     public const TYPE_PC = 'pc';
     public const TYPE_MOBILE = 'mobile';

@@ -199,7 +199,7 @@ return new class extends Migration
 
         // ── Tenant storefront slug ──────────────────────────────────────
         Schema::table('businesses', function (Blueprint $t) {
-            $t->string('store_slug')->nullable()->unique()->after('companyName');
+            $t->string('store_slug')->nullable()->unique()->after('company_name');
         });
 
         // ── TOTP 2FA secret on users ────────────────────────────────────

@@ -22,7 +22,7 @@ class PurchaseReturnController extends Controller
     public function index(Request $request)
     {
         $data = PurchaseReturn::with(
-            'purchase:id,party_id,isPaid,totalAmount,dueAmount,paidAmount,invoiceNumber',
+            'purchase:id,party_id,is_paid,total_amount,due_amount,paid_amount,invoice_number',
             'purchase.party:id,name',
             'details'
         )
@@ -77,10 +77,10 @@ class PurchaseReturnController extends Controller
             // Update Purchase record
             $purchase->update([
                 'purchase_data' => $purchase_data,
-                'dueAmount' => $request->dueAmount,
-                'paidAmount' => $request->paidAmount,
-                'totalAmount' => $request->totalAmount,
-                'discountAmount' => $request->discountAmount,
+                'due_amount' => $request->due_amount,
+                'paid_amount' => $request->paid_amount,
+                'total_amount' => $request->total_amount,
+                'discount_amount' => $request->discount_amount,
             ]);
 
             $data = [];
@@ -102,7 +102,7 @@ class PurchaseReturnController extends Controller
                     );
                 }
 
-                $batch->decrement('productStock', $request->return_qty[$key]);
+                $batch->decrement('product_stock', $request->return_qty[$key]);
 
                 // Update PurchaseDetail record
                 $purchase_detail->update([
@@ -135,7 +135,7 @@ class PurchaseReturnController extends Controller
     public function show($id)
     {
         $data = PurchaseReturn::with(
-            'purchase:id,party_id,isPaid,totalAmount,dueAmount,paidAmount,invoiceNumber',
+            'purchase:id,party_id,is_paid,total_amount,due_amount,paid_amount,invoice_number',
             'purchase.party:id,name',
             'details'
         )

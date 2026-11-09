@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -11,7 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class PurchaseDetail extends Model
 {
-    protected $table = 'purchase_details';
+    
+    use TenantScoped;
+protected $table = 'purchase_details';
 
     public $timestamps = false;
 

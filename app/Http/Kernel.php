@@ -76,10 +76,10 @@ class Kernel extends HttpKernel
             ShareErrorsFromSession::class,
             VerifyCsrfToken::class,
             SecurityCheck::class,
+            SetSupabaseContext::class,
             SubstituteBindings::class,
             SetLocale::class,
             DemoMode::class,
-            SetSupabaseContext::class,
         ],
 
         'api' => [

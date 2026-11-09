@@ -63,20 +63,20 @@ class AnomalyDetector
     protected function scanDiscounts(int $businessId): int
     {
         $avg = (float) Sale::forBusiness($businessId)
-            ->where('saleDate', '>=', now()->subDays(30)->toDateString())
-            ->avg('discountAmount');
+            ->where('sale_date', '>=', now()->subDays(30)->toDateString())
+            ->avg('discount_amount');
 
         if ($avg > 0) {
             $spiky = Sale::forBusiness($businessId)
-                ->where('saleDate', '>=', now()->subDays(7)->toDateString())
-                ->where('discountAmount', '>', $avg * 3)
-                ->where('discountAmount', '>', 20)
+                ->where('sale_date', '>=', now()->subDays(7)->toDateString())
+                ->where('discount_amount', '>', $avg * 3)
+                ->where('discount_amount', '>', 20)
                 ->get();
 
             foreach ($spiky as $sale) {
                 $this->alert($businessId, 'discount_spike', 'medium',
-                    'خصم مرتفع في فاتورة '.($sale->invoiceNumber ?? '#'.$sale->id),
-                    ['sale_id' => $sale->id, 'discount' => (float) $sale->discountAmount, 'avg30' => $avg], $sale->user_id);
+                    'خصم مرتفع في فاتورة '.($sale->invoice_number ?? '#'.$sale->id),
+                    ['sale_id' => $sale->id, 'discount' => (float) $sale->discount_amount, 'avg30' => $avg], $sale->user_id);
             }
 
             return $spiky->count();

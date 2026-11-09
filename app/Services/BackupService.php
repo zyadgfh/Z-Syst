@@ -10,48 +10,49 @@ use Carbon\Carbon;
 class BackupService
 {
     /**
-     * Create database backup
+     * Create database backup — Postgres (pg_dump) only. MySQL removed.
      */
     public function createDatabaseBackup(string $filename = null): string
     {
         $filename = $filename ?? 'backup_' . Carbon::now()->format('Y_m_d_His') . '.sql';
+        // Sanitize filename
+        $filename = basename($filename);
+        if (! str_ends_with($filename, '.sql')) $filename .= '.sql';
         $path = storage_path('app/backups/' . $filename);
 
-        // Ensure backup directory exists
         if (!File::exists(dirname($path))) {
             File::makeDirectory(dirname($path), 0755, true);
         }
 
-        // Get database configuration
-        $dbConfig = config('database.connections.mysql');
-        
-        // Build mysqldump command
+        $driver = DB::connection()->getDriverName();
+        if ($driver !== 'pgsql') {
+            throw new \Exception('Backup only supported on pgsql — current driver: '.$driver);
+        }
+
+        $dbConfig = config('database.connections.pgsql');
         $command = sprintf(
-            'mysqldump -h%s -u%s -p%s %s > %s',
+            'PGPASSWORD=%s pg_dump -h %s -p %s -U %s -d %s --no-owner --no-privileges > %s',
+            escapeshellarg($dbConfig['password'] ?? ''),
             escapeshellarg($dbConfig['host']),
+            escapeshellarg((string) ($dbConfig['port'] ?? 5432)),
             escapeshellarg($dbConfig['username']),
-            escapeshellarg($dbConfig['password']),
             escapeshellarg($dbConfig['database']),
             escapeshellarg($path)
         );
 
-        // Execute backup
         exec($command, $output, $returnCode);
 
         if ($returnCode !== 0) {
-            throw new \Exception('Database backup failed');
+            throw new \Exception('Database backup failed (pg_dump exit '.$returnCode.')');
         }
 
         return $path;
     }
 
-    /**
-     * Create full backup (database + files)
-     */
     public function createFullBackup(string $filename = null): array
     {
         $timestamp = Carbon::now()->format('Y_m_d_His');
-        $backupName = $filename ?? "full_backup_{$timestamp}";
+        $backupName = $filename ? basename($filename) : "full_backup_{$timestamp}";
         
         $databaseBackup = $this->createDatabaseBackup("{$backupName}_database.sql");
         $filesBackup = $this->createFilesBackup($backupName);
@@ -63,14 +64,11 @@ class BackupService
         ];
     }
 
-    /**
-     * Create files backup
-     */
     public function createFilesBackup(string $backupName): string
     {
+        $backupName = basename($backupName);
         $zipFile = storage_path('app/backups/' . $backupName . '_files.zip');
         
-        // Ensure backup directory exists
         if (!File::exists(dirname($zipFile))) {
             File::makeDirectory(dirname($zipFile), 0755, true);
         }
@@ -97,24 +95,29 @@ class BackupService
         return $zipFile;
     }
 
-    /**
-     * Restore database from backup
-     */
     public function restoreDatabase(string $backupPath): bool
     {
-        if (!File::exists($backupPath)) {
+        $backupPath = basename($backupPath);
+        $fullPath = storage_path('app/backups/' . $backupPath);
+        if (!File::exists($fullPath)) {
             throw new \Exception('Backup file not found');
         }
 
-        $dbConfig = config('database.connections.mysql');
+        $driver = DB::connection()->getDriverName();
+        if ($driver !== 'pgsql') {
+            throw new \Exception('Restore only supported on pgsql');
+        }
+
+        $dbConfig = config('database.connections.pgsql');
         
         $command = sprintf(
-            'mysql -h%s -u%s -p%s %s < %s',
+            'PGPASSWORD=%s psql -h %s -p %s -U %s -d %s < %s',
+            escapeshellarg($dbConfig['password'] ?? ''),
             escapeshellarg($dbConfig['host']),
+            escapeshellarg((string) ($dbConfig['port'] ?? 5432)),
             escapeshellarg($dbConfig['username']),
-            escapeshellarg($dbConfig['password']),
             escapeshellarg($dbConfig['database']),
-            escapeshellarg($backupPath)
+            escapeshellarg($fullPath)
         );
 
         exec($command, $output, $returnCode);
@@ -126,9 +129,6 @@ class BackupService
         return true;
     }
 
-    /**
-     * List all backups
-     */
     public function listBackups(): array
     {
         $backupDir = storage_path('app/backups');
@@ -149,12 +149,9 @@ class BackupService
             ];
         }
 
-        return array_reverse($backups); // Newest first
+        return array_reverse($backups);
     }
 
-    /**
-     * Delete old backups
-     */
     public function deleteOldBackups(int $daysToKeep = 30): int
     {
         $backupDir = storage_path('app/backups');
@@ -177,9 +174,6 @@ class BackupService
         return $deletedCount;
     }
 
-    /**
-     * Get backup size
-     */
     public function getBackupSize(): string
     {
         $backupDir = storage_path('app/backups');
@@ -188,13 +182,11 @@ class BackupService
             return '0 B';
         }
 
-        $size = File::size($backupDir);
+        $size = 0;
+        foreach (File::allFiles($backupDir) as $f) $size += $f->getSize();
         return $this->formatFileSize($size);
     }
 
-    /**
-     * Format file size
-     */
     protected function formatFileSize(int $bytes): string
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -206,29 +198,21 @@ class BackupService
         return round($bytes, 2) . ' ' . $units[$i];
     }
 
-    /**
-     * Schedule automatic backup
-     */
     public function scheduleBackup(): void
     {
-        // This should be called from a scheduled command
         try {
             $backup = $this->createFullBackup();
-            
-            // Clean old backups
             $this->deleteOldBackups(config('backup.retention_days', 30));
-            
             \Log::info('Backup created successfully', $backup);
         } catch (\Exception $e) {
             \Log::error('Backup failed', ['error' => $e->getMessage()]);
         }
     }
 
-    /**
-     * Download backup
-     */
     public function downloadBackup(string $filename)
     {
+        $filename = basename($filename);
+        if (str_contains($filename, '..') || str_contains($filename, '/')) abort(400, 'Invalid filename');
         $path = storage_path('app/backups/' . $filename);
         
         if (!File::exists($path)) {
@@ -238,11 +222,10 @@ class BackupService
         return response()->download($path);
     }
 
-    /**
-     * Delete specific backup
-     */
     public function deleteBackup(string $filename): bool
     {
+        $filename = basename($filename);
+        if (str_contains($filename, '..') || str_contains($filename, '/')) return false;
         $path = storage_path('app/backups/' . $filename);
         
         if (!File::exists($path)) {

@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 
 class PatientMed extends Model
 {
-    protected $fillable = [
+    
+    use TenantScoped;
+protected $fillable = [
         'business_id', 'party_id', 'product_id', 'chronic', 'days_supply',
         'last_filled_at', 'next_refill_at', 'active', 'notes',
     ];

@@ -21,13 +21,13 @@ class PurchaseController extends Controller
      */
     public function index(Request $request)
     {
-        $data = Purchase::select('id', 'party_id', 'invoiceNumber', 'purchaseDate', 'totalAmount', 'dueAmount', 'paidAmount', 'paymentType', 'note')
+        $data = Purchase::select('id', 'party_id', 'invoice_number', 'purchase_date', 'total_amount', 'due_amount', 'paid_amount', 'payment_type', 'note')
             ->with('party:id,name,phone')
             ->when($request->filled('search'), function ($query) use ($request) {
                 $term = '%'.$request->input('search').'%';
                 $query->where(function ($subQuery) use ($term) {
-                    $subQuery->where('paymentType', 'like', $term)
-                        ->orWhere('invoiceNumber', 'like', $term)
+                    $subQuery->where('payment_type', 'like', $term)
+                        ->orWhere('invoice_number', 'like', $term)
                         ->orWhere('note', 'like', $term)
                         ->orWhereHas('party', function ($query) use ($term) {
                             $query->where('name', 'like', $term)
@@ -53,16 +53,16 @@ class PurchaseController extends Controller
     {
         $request->validate([
             'products' => 'required|array',
-            'purchaseDate' => 'required|string',
+            'purchase_date' => 'required|string',
             'party_id' => 'required|exists:parties,id',
             'tax_id' => 'nullable|exists:taxes,id',
-            'discountAmount' => 'nullable|numeric',
+            'discount_amount' => 'nullable|numeric',
             'tax_amount' => 'nullable|numeric',
-            'totalAmount' => 'nullable|numeric',
-            'dueAmount' => 'nullable|numeric',
-            'paidAmount' => 'nullable|numeric',
-            'isPaid' => 'nullable|boolean',
-            'paymentType' => 'nullable|string',
+            'total_amount' => 'nullable|numeric',
+            'due_amount' => 'nullable|numeric',
+            'paid_amount' => 'nullable|numeric',
+            'is_paid' => 'nullable|boolean',
+            'payment_type' => 'nullable|string',
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.purchase_without_tax' => 'required|numeric',
             'products.*.purchase_with_tax' => 'required|numeric',
@@ -77,24 +77,24 @@ class PurchaseController extends Controller
         $purchase = TransactionHelper::run(function () use ($request) {
             $business_id = auth()->user()->business_id;
 
-            if ($request->dueAmount) {
+            if ($request->due_amount) {
                 $party = Party::findOrFail($request->party_id);
                 $party->update([
-                    'due' => $party->due + $request->dueAmount,
+                    'due' => $party->due + $request->due_amount,
                 ]);
             }
 
             $business = Business::findOrFail($business_id);
             $business->update([
-                'remainingShopBalance' => $business->remainingShopBalance - $request->paidAmount,
+                'remaining_shop_balance' => $business->remainingShopBalance - $request->paid_amount,
             ]);
 
-            // M-02: explicit whitelist — financial state (isPaid/paidAmount/
-            // dueAmount/invoiceNumber/user_id) is server-computed, never
+            // M-02: explicit whitelist — financial state (is_paid/paid_amount/
+            // due_amount/invoice_number/user_id) is server-computed, never
             // client-supplied mass assignment.
             $purchase = Purchase::create($request->only([
-                'party_id', 'tax_id', 'discountAmount', 'tax_amount',
-                'paymentType', 'purchaseDate', 'purchase_data', 'note',
+                'party_id', 'tax_id', 'discount_amount', 'tax_amount',
+                'payment_type', 'purchase_date', 'purchase_data', 'note',
             ]) + [
                 'user_id' => auth()->id(),
                 'business_id' => $business_id,
@@ -138,7 +138,7 @@ class PurchaseController extends Controller
                     $stock->update([
                         'batch_no' => $item['batch_no'],
                         'expire_date' => $item['expire_date'],
-                        'productStock' => $stock->productStock + $item['quantities'],
+                        'product_stock' => $stock->product_stock + $item['quantities'],
                     ]);
                 } else {
                     Stock::create($request->only(['unit_cost']) + [
@@ -146,7 +146,7 @@ class PurchaseController extends Controller
                         'batch_no' => $item['batch_no'],
                         'product_id' => $item['product_id'],
                         'expire_date' => $item['expire_date'],
-                        'productStock' => $item['quantities'],
+                        'product_stock' => $item['quantities'],
                     ]);
                 }
             }
@@ -193,16 +193,16 @@ class PurchaseController extends Controller
     {
         $request->validate([
             'products' => 'required|array',
-            'purchaseDate' => 'required|string',
+            'purchase_date' => 'required|string',
             'party_id' => 'required|exists:parties,id',
             'tax_id' => 'nullable|exists:taxes,id',
-            'discountAmount' => 'nullable|numeric',
+            'discount_amount' => 'nullable|numeric',
             'tax_amount' => 'nullable|numeric',
-            'totalAmount' => 'nullable|numeric',
-            'dueAmount' => 'nullable|numeric',
-            'paidAmount' => 'nullable|numeric',
-            'isPaid' => 'nullable|boolean',
-            'paymentType' => 'nullable|string',
+            'total_amount' => 'nullable|numeric',
+            'due_amount' => 'nullable|numeric',
+            'paid_amount' => 'nullable|numeric',
+            'is_paid' => 'nullable|boolean',
+            'payment_type' => 'nullable|string',
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.purchase_without_tax' => 'required|numeric',
             'products.*.purchase_with_tax' => 'required|numeric',
@@ -227,13 +227,13 @@ class PurchaseController extends Controller
                 $prev_purchase_detail = $prev_purchase_details->where('batch_no', $req_item['batch_no'])->first();
 
                 if (! empty($prev_purchase_detail) && $prev_purchase_detail->quantities > $req_item['quantities']) {
-                    if ($prev_stock && $prev_stock->productStock < $req_item['quantities']) {
+                    if ($prev_stock && $prev_stock->product_stock < $req_item['quantities']) {
                         throw new BusinessRuleException(
                             ErrorCode::BUSINESS_BATCH_QUANTITY_MISMATCH,
                             __('errors.batch_quantity_mismatch', ['batch_no' => $prev_stock->batch_no]),
                             [
                                 'batch_no' => $prev_stock->batch_no,
-                                'available_stock' => $prev_stock->productStock,
+                                'available_stock' => $prev_stock->product_stock,
                                 'requested_qty' => $req_item['quantities'],
                             ]
                         );
@@ -243,7 +243,7 @@ class PurchaseController extends Controller
 
             $prev_details = PurchaseDetails::where('purchase_id', $purchase->id)->get();
             foreach ($prev_details as $prev_detail) {
-                Stock::where('batch_no', $prev_detail->batch_no)->decrement('productStock', $prev_detail->quantities);
+                Stock::where('batch_no', $prev_detail->batch_no)->decrement('product_stock', $prev_detail->quantities);
             }
 
             $purchaseDetails = [];
@@ -282,7 +282,7 @@ class PurchaseController extends Controller
                     $stock->update([
                         'batch_no' => $item['batch_no'],
                         'expire_date' => $item['expire_date'],
-                        'productStock' => $stock->productStock + $item['quantities'],
+                        'product_stock' => $stock->product_stock + $item['quantities'],
                     ]);
                 } else {
                     Stock::create($request->only(['unit_cost']) + [
@@ -290,33 +290,33 @@ class PurchaseController extends Controller
                         'batch_no' => $item['batch_no'],
                         'product_id' => $item['product_id'],
                         'expire_date' => $item['expire_date'],
-                        'productStock' => $item['quantities'],
+                        'product_stock' => $item['quantities'],
                     ]);
                 }
             }
 
-            if ($purchase->dueAmount || $request->dueAmount) {
+            if ($purchase->due_amount || $request->due_amount) {
                 $party = Party::findOrFail($request->party_id);
                 $party->update([
-                    'due' => $request->party_id == $purchase->party_id ? (($party->due - $purchase->dueAmount) + $request->dueAmount) : ($party->due + $request->dueAmount),
+                    'due' => $request->party_id == $purchase->party_id ? (($party->due - $purchase->due_amount) + $request->due_amount) : ($party->due + $request->due_amount),
                 ]);
 
                 if ($request->party_id != $purchase->party_id) {
                     $prev_party = Party::findOrFail($purchase->party_id);
                     $prev_party->update([
-                        'due' => $prev_party->due - $purchase->dueAmount,
+                        'due' => $prev_party->due - $purchase->due_amount,
                     ]);
                 }
             }
 
             $business = Business::findOrFail(auth()->user()->business_id);
             $business->update([
-                'remainingShopBalance' => ($business->remainingShopBalance + $purchase->paidAmount) - $request->paidAmount,
+                'remaining_shop_balance' => ($business->remainingShopBalance + $purchase->paid_amount) - $request->paid_amount,
             ]);
 
             $purchase->update($request->only([
-                'party_id', 'tax_id', 'discountAmount', 'tax_amount',
-                'paymentType', 'purchaseDate', 'note',
+                'party_id', 'tax_id', 'discount_amount', 'tax_amount',
+                'payment_type', 'purchase_date', 'note',
             ]) + [
                 'user_id' => null, // Path B: uuid never hits the legacy users FK
             ]);
@@ -346,29 +346,29 @@ class PurchaseController extends Controller
             foreach ($purchase_details as $purchase_detail) {
                 $prev_stock = $prev_stocks->where('batch_no', $purchase_detail->batch_no)->first();
 
-                if ($prev_stock && $prev_stock->productStock < $purchase_detail->quantities) {
+                if ($prev_stock && $prev_stock->product_stock < $purchase_detail->quantities) {
                     throw new BusinessRuleException(
                         ErrorCode::BUSINESS_BATCH_QUANTITY_MISMATCH,
                         __('errors.batch_quantity_mismatch', ['batch_no' => $prev_stock->batch_no]),
                         [
                             'batch_no' => $prev_stock->batch_no,
-                            'available_stock' => $prev_stock->productStock,
+                            'available_stock' => $prev_stock->product_stock,
                             'requested_qty' => $purchase_detail->quantities,
                         ]
                     );
                 }
             }
 
-            if ($purchase->dueAmount) {
+            if ($purchase->due_amount) {
                 $party = Party::findOrFail($purchase->party_id);
                 $party->update([
-                    'due' => $party->due - $purchase->dueAmount,
+                    'due' => $party->due - $purchase->due_amount,
                 ]);
             }
 
             $business = Business::findOrFail(auth()->user()->business_id);
             $business->update([
-                'remainingShopBalance' => $business->remainingShopBalance + $purchase->paidAmount,
+                'remaining_shop_balance' => $business->remainingShopBalance + $purchase->paid_amount,
             ]);
 
             $purchase->delete();

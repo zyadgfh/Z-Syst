@@ -16,7 +16,7 @@ class StockResource extends JsonResource
             'id' => $this->id,
             'business_id' => $this->business_id,
             'product_id' => $this->product_id,
-            'productStock' => $this->productStock,
+            'product_stock' => $this->product_stock,
             'batch_no' => $this->batch_no,
             'expire_date' => $this->expire_date?->toIso8601String(),
             'barcode' => $this->barcode,

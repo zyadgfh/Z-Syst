@@ -34,7 +34,7 @@ class ZSystSaleController extends Controller
 
         return Stock::where('business_id', $businessId)
             ->whereIn('product_id', $productIds)
-            ->select('id', 'business_id', 'product_id', 'batch_no', 'expire_date', 'productStock')
+            ->select('id', 'business_id', 'product_id', 'batch_no', 'expire_date', 'product_stock')
             ->get()
             ->groupBy('product_id');
     }
@@ -58,13 +58,13 @@ class ZSystSaleController extends Controller
      */
     public function index(Request $request)
     {
-        $data = Sale::select('id', 'party_id', 'invoiceNumber', 'saleDate', 'totalAmount', 'dueAmount', 'paidAmount', 'paymentType')
+        $data = Sale::select('id', 'party_id', 'invoice_number', 'sale_date', 'total_amount', 'due_amount', 'paid_amount', 'payment_type')
             ->with('party:id,name,phone')
             ->when($request->filled('search'), function ($query) use ($request) {
                 $term = '%'.$request->input('search').'%';
                 $query->where(function ($subQuery) use ($term) {
-                    $subQuery->where('paymentType', 'like', $term)
-                        ->orWhere('invoiceNumber', 'like', $term)
+                    $subQuery->where('payment_type', 'like', $term)
+                        ->orWhere('invoice_number', 'like', $term)
                         ->orWhere('meta', 'like', $term)
                         ->orWhereHas('party', function ($query) use ($term) {
                             $query->where('name', 'like', $term)
@@ -90,20 +90,20 @@ class ZSystSaleController extends Controller
     {
         $request->validate([
             'products' => 'required|array',
-            'saleDate' => 'required|string',
+            'sale_date' => 'required|string',
             'client_uuid' => 'nullable|uuid',
             'party_id' => 'nullable|exists:parties,id',
             'tax_id' => 'nullable|exists:taxes,id',
-            'discountAmount' => 'nullable|numeric',
+            'discount_amount' => 'nullable|numeric',
             'tax_amount' => 'nullable|numeric',
-            'totalAmount' => 'nullable|numeric',
-            'dueAmount' => 'nullable|numeric',
-            'paidAmount' => 'nullable|numeric',
-            'isPaid' => 'nullable|boolean',
-            'paymentType' => 'nullable|string',
+            'total_amount' => 'nullable|numeric',
+            'due_amount' => 'nullable|numeric',
+            'paid_amount' => 'nullable|numeric',
+            'is_paid' => 'nullable|boolean',
+            'payment_type' => 'nullable|string',
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.price' => 'required|numeric',
-            'products.*.lossProfit' => 'required|numeric',
+            'products.*.loss_profit' => 'required|numeric',
             'products.*.batch_no' => 'nullable|string',
             'products.*.quantities' => 'required|integer',
             'products.*.dose' => 'nullable|string|max:160',
@@ -149,8 +149,8 @@ class ZSystSaleController extends Controller
                         // Offline terminals may carry local batch labels that
                         // never matched a warehouse batch; honour the sale as
                         // long as the product has aggregate stock.
-                        if ($productStocks->sum('productStock') >= $productData['quantities']) {
-                            $stock = $productStocks->first(fn ($item) => $item->productStock >= $productData['quantities']);
+                        if ($productStocks->sum('product_stock') >= $productData['quantities']) {
+                            $stock = $productStocks->first(fn ($item) => $item->product_stock >= $productData['quantities']);
                         }
                     }
 
@@ -172,27 +172,27 @@ class ZSystSaleController extends Controller
                         );
                     }
 
-                    if ($stock->productStock < $productData['quantities']) {
+                    if ($stock->product_stock < $productData['quantities']) {
                         throw new BusinessRuleException(
                             ErrorCode::BUSINESS_INSUFFICIENT_STOCK,
                             __('errors.insufficient_stock', [
                                 'product' => $productId,
                                 'batch' => $stock->batch_no,
-                                'available' => $stock->productStock,
+                                'available' => $stock->product_stock,
                                 'requested' => $productData['quantities'],
                             ]),
                             [
                                 'product_id' => $productId,
                                 'batch_no' => $stock->batch_no,
-                                'available_qty' => $stock->productStock,
+                                'available_qty' => $stock->product_stock,
                                 'requested_qty' => $productData['quantities'],
                             ]
                         );
                     }
                 } elseif ($fefoSettings->fefo_enabled) {
                     $totalStock = $productStocks->filter(function ($stock) {
-                        return $stock->productStock > 0 && (is_null($stock->expire_date) || $stock->expire_date >= now()->startOfDay());
-                    })->sum('productStock');
+                        return $stock->product_stock > 0 && (is_null($stock->expire_date) || $stock->expire_date >= now()->startOfDay());
+                    })->sum('product_stock');
 
                     if ($totalStock < $productData['quantities']) {
                         throw new BusinessRuleException(
@@ -215,11 +215,11 @@ class ZSystSaleController extends Controller
             }
 
             // Validate due sale for walking customers
-            if ($request->dueAmount && ! $request->party_id) {
+            if ($request->due_amount && ! $request->party_id) {
                 throw new BusinessRuleException(
                     ErrorCode::BUSINESS_DUE_SALE_WALKING_CUSTOMER,
                     __('errors.due_sale_walking_customer'),
-                    ['due_amount' => $request->dueAmount]
+                    ['due_amount' => $request->due_amount]
                 );
             }
 
@@ -227,40 +227,40 @@ class ZSystSaleController extends Controller
                 $party = Party::findOrFail($request->party_id);
             }
 
-            if ($request->dueAmount && isset($party)) {
+            if ($request->due_amount && isset($party)) {
                 $party->update([
-                    'due' => $party->due + $request->dueAmount,
+                    'due' => $party->due + $request->due_amount,
                 ]);
             }
 
             $business = Business::findOrFail($business_id);
             $business_name = $business->companyName;
             $business->update([
-                'remainingShopBalance' => $business->remainingShopBalance + $request->paidAmount,
+                'remaining_shop_balance' => $business->remainingShopBalance + $request->paid_amount,
             ]);
 
-            $lossProfit = collect($request->products)->pluck('lossProfit')->toArray();
+            $loss_profit = collect($request->products)->pluck('loss_profit')->toArray();
 
             $sale = Sale::create($request->only([
         'party_id',
         'user_id',
         'tax_id',
-        'discountAmount',
-        'dueAmount',
-        'isPaid',
+        'discount_amount',
+        'due_amount',
+        'is_paid',
         'tax_amount',
-        'paidAmount',
-        'totalAmount',
-        'lossProfit',
-        'paymentType',
-        'invoiceNumber',
-        'saleDate',
+        'paid_amount',
+        'total_amount',
+        'loss_profit',
+        'payment_type',
+        'invoice_number',
+        'sale_date',
         'sale_data',
         'meta',
         'client_uuid',
     ]) + [
                 'business_id' => $business_id,
-                'lossProfit' => array_sum($lossProfit) - ($request->discountAmount ?? 0),
+                'loss_profit' => array_sum($loss_profit) - ($request->discount_amount ?? 0),
                 'meta' => [
                     'notes' => $request->notes,
                     'customer_phone' => $request->customer_phone,
@@ -291,14 +291,14 @@ class ZSystSaleController extends Controller
                             break;
                         }
 
-                        $deductQty = min($batch->productStock, $quantity - $totalAllocated);
+                        $deductQty = min($batch->product_stock, $quantity - $totalAllocated);
 
                         $saleDetails[] = [
                             'sale_id' => $sale->id,
                             'price' => $productData['price'],
                             'batch_no' => $batch->batch_no,
                             'product_id' => $productId,
-                            'lossProfit' => $productData['lossProfit'] / count($request->products) ?? 0,
+                            'loss_profit' => $productData['loss_profit'] / count($request->products) ?? 0,
                             'quantities' => $deductQty,
                             'dose' => $productData['dose'] ?? null,
                             'dose_code' => $productData['dose_code'] ?? null,
@@ -306,7 +306,7 @@ class ZSystSaleController extends Controller
                             'purchase_price' => $productData['purchase_price'] ?? 0,
                         ];
 
-                        $batch->decrement('productStock', $deductQty);
+                        $batch->decrement('product_stock', $deductQty);
                         $totalAllocated += $deductQty;
 
                         // Log FEFO deduction
@@ -318,7 +318,7 @@ class ZSystSaleController extends Controller
                             batchNo: $batch->batch_no,
                             expireDate: $batch->expire_date,
                             quantityDeducted: $deductQty,
-                            quantityRemaining: $batch->productStock,
+                            quantityRemaining: $batch->product_stock,
                             saleId: $sale->id,
                             notes: 'FEFO auto-deduction during sale creation'
                         );
@@ -330,7 +330,7 @@ class ZSystSaleController extends Controller
                         'price' => $productData['price'],
                         'batch_no' => $productData['batch_no'],
                         'product_id' => $productId,
-                        'lossProfit' => $productData['lossProfit'],
+                        'loss_profit' => $productData['loss_profit'],
                         'quantities' => $quantity,
                         'dose' => $productData['dose'] ?? null,
                         'dose_code' => $productData['dose_code'] ?? null,
@@ -341,7 +341,7 @@ class ZSystSaleController extends Controller
                     $stock = $this->resolveStockForProduct($businessStocks, $productId, $productData['batch_no'] ?? null);
 
                     if ($stock) {
-                        $stock->decrement('productStock', $quantity);
+                        $stock->decrement('product_stock', $quantity);
 
                         // Log FEFO deduction for manual selection
                         $fefoService->logFefoDeduction(
@@ -351,7 +351,7 @@ class ZSystSaleController extends Controller
                             batchNo: $stock->batch_no,
                             expireDate: $stock->expire_date,
                             quantityDeducted: $quantity,
-                            quantityRemaining: $stock->productStock,
+                            quantityRemaining: $stock->product_stock,
                             saleId: $sale->id,
                             notes: 'Manual batch selection during sale'
                         );
@@ -394,8 +394,8 @@ class ZSystSaleController extends Controller
                 'saleReturns.details',
                 'details:id,sale_id,product_id,price,quantities,purchase_price,batch_no,expire_date',
                 'details.product' => function ($query) {
-                    $query->select('id', 'productName')
-                        ->withSum('stocks', 'productStock');
+                    $query->select('id', 'product_name')
+                        ->withSum('stocks', 'product_stock');
                 },
             ])
             ->findOrFail($id);
@@ -414,19 +414,19 @@ class ZSystSaleController extends Controller
 
         $request->validate([
             'products' => 'required|array',
-            'saleDate' => 'required|string',
+            'sale_date' => 'required|string',
             'client_uuid' => 'nullable|uuid',
             'party_id' => 'nullable|exists:parties,id',
             'tax_id' => 'nullable|exists:taxes,id',
-            'discountAmount' => 'nullable|numeric',
+            'discount_amount' => 'nullable|numeric',
             'tax_amount' => 'nullable|numeric',
-            'totalAmount' => 'nullable|numeric',
-            'dueAmount' => 'nullable|numeric',
-            'paidAmount' => 'nullable|numeric',
-            'isPaid' => 'nullable|boolean',
-            'paymentType' => 'nullable|string',
+            'total_amount' => 'nullable|numeric',
+            'due_amount' => 'nullable|numeric',
+            'paid_amount' => 'nullable|numeric',
+            'is_paid' => 'nullable|boolean',
+            'payment_type' => 'nullable|string',
             'products.*.price' => 'required|numeric',
-            'products.*.lossProfit' => 'required|numeric',
+            'products.*.loss_profit' => 'required|numeric',
             'products.*.batch_no' => 'nullable|string',
             'products.*.quantities' => 'required|integer',
             'products.*.dose' => 'nullable|string|max:160',
@@ -441,7 +441,7 @@ class ZSystSaleController extends Controller
             $productIds = collect($request->products)->pluck('product_id')->filter()->unique()->values()->all();
             $allProductIds = collect([...$productIds, $prevDetails->pluck('product_id')->all()])->filter()->unique()->values()->all();
             $businessStocks = $this->loadBusinessStocks($business_id, $allProductIds);
-            $products = Product::select('id', 'productName')->whereIn('id', $productIds)->get();
+            $products = Product::select('id', 'product_name')->whereIn('id', $productIds)->get();
 
             foreach ($products as $key => $product) {
                 $prevProduct = $prevDetails->first(function ($item) use ($product) {
@@ -450,26 +450,26 @@ class ZSystSaleController extends Controller
 
                 $stock = $this->resolveStockForProduct($businessStocks, $product->id, $request->products[$key]['batch_no'] ?? null);
 
-                $productStock = 0;
+                $product_stock = 0;
                 if ($prevProduct) {
-                    $productStock = $stock ? ($stock->productStock + $prevProduct->quantities) : 0;
+                    $product_stock = $stock ? ($stock->product_stock + $prevProduct->quantities) : 0;
                 } else {
-                    $productStock = $stock ? $stock->productStock : 0;
+                    $product_stock = $stock ? $stock->product_stock : 0;
                 }
 
-                if ($productStock < $request->products[$key]['quantities']) {
+                if ($product_stock < $request->products[$key]['quantities']) {
                     throw new BusinessRuleException(
                         ErrorCode::BUSINESS_INSUFFICIENT_STOCK,
                         __('errors.insufficient_stock', [
                             'product' => $product->productName,
                             'batch' => $request->products[$key]['batch_no'] ?? 'N/A',
-                            'available' => $productStock,
+                            'available' => $product_stock,
                             'requested' => $request->products[$key]['quantities'],
                         ]),
                         [
                             'product_id' => $product->id,
                             'batch_no' => $request->products[$key]['batch_no'] ?? null,
-                            'available_qty' => $productStock,
+                            'available_qty' => $product_stock,
                             'requested_qty' => $request->products[$key]['quantities'],
                         ]
                     );
@@ -481,7 +481,7 @@ class ZSystSaleController extends Controller
                 $stock = $this->resolveStockForProduct($businessStocks, $prevItem->product_id, $prevItem->batch_no);
 
                 if ($stock) {
-                    $stock->increment('productStock', $prevItem->quantities);
+                    $stock->increment('product_stock', $prevItem->quantities);
                 }
             }
 
@@ -495,7 +495,7 @@ class ZSystSaleController extends Controller
                     'price' => $productData['price'],
                     'batch_no' => $productData['batch_no'],
                     'product_id' => $productData['product_id'],
-                    'lossProfit' => $productData['lossProfit'],
+                    'loss_profit' => $productData['loss_profit'],
                     'quantities' => $productData['quantities'] ?? 0,
                     'expire_date' => $productData['expire_date'] ?? null,
                     'purchase_price' => $productData['purchase_price'] ?? 0,
@@ -504,54 +504,54 @@ class ZSystSaleController extends Controller
                 $stock = $this->resolveStockForProduct($businessStocks, $productData['product_id'], $productData['batch_no'] ?? null);
 
                 if ($stock) {
-                    $stock->decrement('productStock', $productData['quantities']);
+                    $stock->decrement('product_stock', $productData['quantities']);
                 }
             }
 
             SaleDetails::insert($saleDetails);
 
             // Update financial and business logic
-            if ($sale->dueAmount || $request->dueAmount) {
+            if ($sale->due_amount || $request->due_amount) {
                 $party = Party::findOrFail($request->party_id);
                 $party->update([
-                    'due' => $request->party_id == $sale->party_id ? (($party->due - $sale->dueAmount) + $request->dueAmount) : ($party->due + $request->dueAmount),
+                    'due' => $request->party_id == $sale->party_id ? (($party->due - $sale->due_amount) + $request->due_amount) : ($party->due + $request->due_amount),
                 ]);
 
                 if ($request->party_id != $sale->party_id) {
                     $prevParty = Party::findOrFail($sale->party_id);
                     $prevParty->update([
-                        'due' => $prevParty->due - $sale->dueAmount,
+                        'due' => $prevParty->due - $sale->due_amount,
                     ]);
                 }
             }
 
             $business = Business::findOrFail($business_id);
             $business->update([
-                'shopOpeningBalance' => ($business->shopOpeningBalance - $sale->paidAmount) + $request->paidAmount,
+                'shop_opening_balance' => ($business->shopOpeningBalance - $sale->paid_amount) + $request->paid_amount,
             ]);
 
-            $lossProfit = collect($request->products)->pluck('lossProfit')->toArray();
+            $loss_profit = collect($request->products)->pluck('loss_profit')->toArray();
 
             $sale->update($request->only([
         'party_id',
         'user_id',
         'tax_id',
-        'discountAmount',
-        'dueAmount',
-        'isPaid',
+        'discount_amount',
+        'due_amount',
+        'is_paid',
         'tax_amount',
-        'paidAmount',
-        'totalAmount',
-        'lossProfit',
-        'paymentType',
-        'invoiceNumber',
-        'saleDate',
+        'paid_amount',
+        'total_amount',
+        'loss_profit',
+        'payment_type',
+        'invoice_number',
+        'sale_date',
         'sale_data',
         'meta',
         'client_uuid',
     ]) + [
                 'business_id' => $business_id,
-                'lossProfit' => array_sum($lossProfit) - ($request->discountAmount ?? 0),
+                'loss_profit' => array_sum($loss_profit) - ($request->discount_amount ?? 0),
                 'meta' => [
                     'notes' => $request->notes,
                     'customer_phone' => $request->customer_phone,
@@ -581,7 +581,7 @@ class ZSystSaleController extends Controller
                 $stock = $this->resolveStockForProduct($businessStocks, $detail->product_id, $detail->batch_no);
 
                 if ($stock) {
-                    $stock->increment('productStock', $detail->quantities);
+                    $stock->increment('product_stock', $detail->quantities);
 
                     // Log FEFO return (stock restoration)
                     $fefoService->logFefoDeduction(
@@ -591,7 +591,7 @@ class ZSystSaleController extends Controller
                         batchNo: $stock->batch_no,
                         expireDate: $stock->expire_date,
                         quantityDeducted: -$detail->quantities, // negative = restored
-                        quantityRemaining: $stock->productStock,
+                        quantityRemaining: $stock->product_stock,
                         saleId: $sale->id,
                         saleDetailId: $detail->id,
                         notes: 'Stock restored due to sale deletion'
@@ -599,16 +599,16 @@ class ZSystSaleController extends Controller
                 }
             }
 
-            if ($sale->dueAmount) {
+            if ($sale->due_amount) {
                 $party = Party::findOrFail($sale->party_id);
                 $party->update([
-                    'due' => $party->due - $sale->dueAmount,
+                    'due' => $party->due - $sale->due_amount,
                 ]);
             }
 
             $business = Business::findOrFail(auth()->user()->business_id);
             $business->update([
-                'shopOpeningBalance' => $business->shopOpeningBalance - $sale->paidAmount,
+                'shop_opening_balance' => $business->shopOpeningBalance - $sale->paid_amount,
             ]);
 
             $sale->delete();

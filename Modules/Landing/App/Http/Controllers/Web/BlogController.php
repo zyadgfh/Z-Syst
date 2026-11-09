@@ -47,8 +47,12 @@ class BlogController extends Controller
             'comment' => 'required|string|max:255',
         ]);
 
-        Comment::create($request->except('blog_id') + [
+        Comment::create([
             'blog_id' => $request->blog_id,
+            'name' => $request->name,
+            'email' => $request->email,
+            'comment' => $request->comment,
+            'status' => 0,
         ]);
 
         return response()->json([

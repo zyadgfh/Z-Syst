@@ -19,10 +19,8 @@ class Product extends Model
      * @var array
      */
     protected $fillable = [
-        'productName',
-        'name',
-        'stock',
         'business_id',
+        'product_name',
         'category_id',
         'unit_id',
         'type_id',
@@ -34,11 +32,12 @@ class Product extends Model
         'sales_price',
         'alert_qty',
         'wholesale_price',
-        'productCode',
+        'product_code',
         'images',
         'meta',
         'tax_id',
         'tax_type',
+        'barcode',
     ];
 
     /**
@@ -55,7 +54,7 @@ class Product extends Model
 
     public function stocks(): HasMany
     {
-        return $this->hasMany(Stock::class)->where('productStock', '>', 0);
+        return $this->hasMany(Stock::class)->where('product_stock', '>', 0);
     }
 
     /**
@@ -64,7 +63,7 @@ class Product extends Model
     public function fefoStocks(): HasMany
     {
         return $this->hasMany(Stock::class)
-            ->where('productStock', '>', 0)
+            ->where('product_stock', '>', 0)
             ->orderByRaw('CASE WHEN expire_date IS NULL THEN 1 ELSE 0 END')
             ->orderBy('expire_date', 'asc')
             ->orderBy('id', 'asc');
@@ -78,7 +77,7 @@ class Product extends Model
         $threshold = now()->startOfDay()->addDays($graceDays);
 
         return $this->hasMany(Stock::class)
-            ->where('productStock', '>', 0)
+            ->where('product_stock', '>', 0)
             ->whereNotNull('expire_date')
             ->where('expire_date', '<=', $threshold)
             ->where('expire_date', '>=', now()->startOfDay())
@@ -145,7 +144,7 @@ class Product extends Model
             $q->whereNotNull('expire_date')
                 ->where('expire_date', '<=', now()->startOfDay()->addDays($days))
                 ->where('expire_date', '>=', now()->startOfDay())
-                ->where('productStock', '>', 0);
+                ->where('product_stock', '>', 0);
         });
     }
 
@@ -157,9 +156,18 @@ class Product extends Model
         return $query->whereHas('stocks', function ($q) {
             $q->whereNotNull('expire_date')
                 ->where('expire_date', '<', now()->startOfDay())
-                ->where('productStock', '>', 0);
+                ->where('product_stock', '>', 0);
         });
     }
+
+    
+    // Backward-compat accessors for old camelCase API
+    public function getProductNameAttribute(): ?string { return $this->attributes['product_name'] ?? null; }
+    public function setProductNameAttribute($v): void { $this->attributes['product_name'] = $v; }
+    public function getProductCodeAttribute(): ?string { return $this->attributes['product_code'] ?? null; }
+    public function setProductCodeAttribute($v): void { $this->attributes['product_code'] = $v; }
+    public function getProductStockAttribute(): ?int { return $this->attributes['product_stock'] ?? null; }
+    public function setProductStockAttribute($v): void { $this->attributes['product_stock'] = $v; }
 
     protected $casts = [
         'meta' => 'json',
@@ -184,7 +192,7 @@ class Product extends Model
      */
     public function setNameAttribute($value): void
     {
-        $this->attributes['productName'] = $value;
+        $this->attributes['product_name'] = $value;
     }
 
 }

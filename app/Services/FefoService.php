@@ -24,7 +24,7 @@ class FefoService
             // Fallback: just return any available stock
             return Stock::where('product_id', $productId)
                 ->where('business_id', $businessId)
-                ->where('productStock', '>', 0)
+                ->where('product_stock', '>', 0)
                 ->where(function ($q) {
                     $q->whereNull('expire_date')
                         ->orWhere('expire_date', '>=', now()->startOfDay());
@@ -37,7 +37,7 @@ class FefoService
         // Get all stock batches with quantity > 0, ordered by expire_date ASC (FEFO)
         $batches = Stock::where('product_id', $productId)
             ->where('business_id', $businessId)
-            ->where('productStock', '>', 0)
+            ->where('product_stock', '>', 0)
             ->where(function ($q) {
                 $q->whereNull('expire_date')
                     ->orWhere('expire_date', '>=', now()->startOfDay());
@@ -54,7 +54,7 @@ class FefoService
                 break;
             }
 
-            $takeFromBatch = min($batch->productStock, $remainingNeeded);
+            $takeFromBatch = min($batch->product_stock, $remainingNeeded);
             $batch->allocated_quantity = $takeFromBatch;
             $selectedBatches->push($batch);
 
@@ -87,12 +87,12 @@ class FefoService
             // Lock the candidate rows for this business/product, FEFO order.
             $batches = Stock::where('business_id', $businessId)
                 ->where('product_id', $productId)
-                ->where('productStock', '>', 0)
+                ->where('product_stock', '>', 0)
                 ->orderBy('expire_date')
                 ->lockForUpdate()
                 ->get();
 
-            $totalAvailable = (int) $batches->sum('productStock');
+            $totalAvailable = (int) $batches->sum('product_stock');
             if ($totalAvailable < $totalQuantity) {
                 throw new \RuntimeException("Insufficient stock for product ID {$productId}. Available: {$totalAvailable}, Requested: {$totalQuantity}");
             }
@@ -102,13 +102,13 @@ class FefoService
                     break;
                 }
 
-                $deductQty = min($batch->productStock, $remainingToDeduct);
+                $deductQty = min($batch->product_stock, $remainingToDeduct);
 
                 // Guarded decrement: fails loudly if a concurrent writer
                 // slipped past the lock (belt-and-braces).
                 $affected = Stock::where('id', $batch->id)
-                    ->where('productStock', '>=', $deductQty)
-                    ->decrement('productStock', $deductQty);
+                    ->where('product_stock', '>=', $deductQty)
+                    ->decrement('product_stock', $deductQty);
                 if ($affected !== 1) {
                     throw new \RuntimeException("Concurrent stock change on batch {$batch->batch_no}; retry the sale.");
                 }
@@ -119,7 +119,7 @@ class FefoService
                     'batch_no' => $batch->batch_no,
                     'expire_date' => $batch->expire_date,
                     'quantity_deducted' => $deductQty,
-                    'quantity_remaining_after' => $batch->productStock,
+                    'quantity_remaining_after' => $batch->product_stock,
                 ];
 
                 $deductions[] = $deductionRecord;
@@ -132,7 +132,7 @@ class FefoService
                     batchNo: $batch->batch_no,
                     expireDate: $batch->expire_date,
                     quantityDeducted: $deductQty,
-                    quantityRemaining: $batch->productStock,
+                    quantityRemaining: $batch->product_stock,
                     saleId: $context['sale_id'] ?? null,
                     saleDetailId: $context['sale_detail_id'] ?? null,
                     notes: $context['notes'] ?? 'FEFO automatic deduction during sale'
@@ -182,7 +182,7 @@ class FefoService
     {
         $query = Stock::where('product_id', $productId)
             ->where('business_id', $businessId)
-            ->where('productStock', '>', 0);
+            ->where('product_stock', '>', 0);
 
         if (! $includeExpired) {
             $query->where(function ($q) {
@@ -204,7 +204,7 @@ class FefoService
      */
     public function isBatchValidForSale(Stock $stock): bool
     {
-        if ($stock->productStock <= 0) {
+        if ($stock->product_stock <= 0) {
             return false;
         }
 
@@ -223,14 +223,14 @@ class FefoService
         $today = now()->startOfDay();
 
         $stocks = Stock::where('business_id', $businessId)
-            ->where('productStock', '>', 0)
+            ->where('product_stock', '>', 0)
             ->whereNotNull('expire_date')
             ->with('product:id,productName')
             ->get();
 
         $stats = [
             'total_batches' => $stocks->count(),
-            'total_stock_qty' => $stocks->sum('productStock'),
+            'total_stock_qty' => $stocks->sum('product_stock'),
             'expired_batches' => 0,
             'expired_qty' => 0,
             'expiring_within_30_days' => 0,
@@ -246,7 +246,7 @@ class FefoService
             $expireDate = $stock->expire_date ? Carbon::parse($stock->expire_date)->startOfDay() : null;
             if (! $expireDate) {
                 $stats['no_expiry_batches']++;
-                $stats['no_expiry_qty'] += $stock->productStock;
+                $stats['no_expiry_qty'] += $stock->product_stock;
 
                 continue;
             }
@@ -255,15 +255,15 @@ class FefoService
 
             if ($daysRemaining < 0) {
                 $stats['expired_batches']++;
-                $stats['expired_qty'] += $stock->productStock;
+                $stats['expired_qty'] += $stock->product_stock;
             } elseif ($daysRemaining <= 7) {
                 $stats['expiring_within_7_days']++;
-                $stats['expiring_7_qty'] += $stock->productStock;
+                $stats['expiring_7_qty'] += $stock->product_stock;
                 $stats['expiring_within_30_days']++;
-                $stats['expiring_30_qty'] += $stock->productStock;
+                $stats['expiring_30_qty'] += $stock->product_stock;
             } elseif ($daysRemaining <= 30) {
                 $stats['expiring_within_30_days']++;
-                $stats['expiring_30_qty'] += $stock->productStock;
+                $stats['expiring_30_qty'] += $stock->product_stock;
             }
         }
 
@@ -275,12 +275,12 @@ class FefoService
                     $expireDate = $s->expire_date ? Carbon::parse($s->expire_date)->startOfDay() : null;
 
                     return $expireDate && now()->startOfDay()->diffInDays($expireDate, false) <= 30;
-                })->sum('productStock');
+                })->sum('product_stock');
 
                 return [
                     'product_id' => $product->id,
                     'product_name' => $product->productName,
-                    'total_stock' => $productStocks->sum('productStock'),
+                    'total_stock' => $productStocks->sum('product_stock'),
                     'near_expiry_qty' => $nearExpiryQty,
                 ];
             })
@@ -366,7 +366,7 @@ class FefoService
             $quantity = $item['quantity'] ?? 1;
 
             $batches = $this->getBestBatches($productId, $quantity, $businessId);
-            $totalAvailable = $batches->sum('productStock');
+            $totalAvailable = $batches->sum('product_stock');
 
             $suggestions[] = [
                 'product_id' => $productId,
@@ -378,7 +378,7 @@ class FefoService
                         'stock_id' => $batch->id,
                         'batch_no' => $batch->batch_no,
                         'expire_date' => $batch->expire_date,
-                        'available_qty' => $batch->productStock,
+                        'available_qty' => $batch->product_stock,
                         'allocated_qty' => $batch->allocated_quantity ?? 0,
                         'fefo_priority' => $this->calculateFefoScore($batch),
                     ];
@@ -402,15 +402,15 @@ class FefoService
         }
 
         $expiredStocks = Stock::where('business_id', $businessId)
-            ->where('productStock', '>', 0)
+            ->where('product_stock', '>', 0)
             ->whereNotNull('expire_date')
             ->where('expire_date', '<', now()->startOfDay())
             ->get();
 
         $count = 0;
         foreach ($expiredStocks as $stock) {
-            $qty = $stock->productStock;
-            $stock->update(['productStock' => 0]);
+            $qty = $stock->product_stock;
+            $stock->update(['product_stock' => 0]);
 
             $this->logFefoDeduction(
                 businessId: $businessId,

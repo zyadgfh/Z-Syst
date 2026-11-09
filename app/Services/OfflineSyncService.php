@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 class OfflineSyncService
 {
     /**
-     * @param array $sales [{client_uuid, products[], paidAmount, dueAmount, isPaid, paymentType, saleDate}]
+     * @param array $sales [{client_uuid, products[], paid_amount, due_amount, is_paid, payment_type, sale_date}]
      * @return array {accepted: [], duplicates: [], failed: []}
      */
     public function sync(array $sales, $user, ?Device $device): array
@@ -38,12 +38,12 @@ class OfflineSyncService
 
             try {
                 $payload = [
-                    'products' => collect($entry['products'])->map(fn ($p) => $p + ['lossProfit' => 0])->all(),
-                    'saleDate' => $entry['saleDate'] ?? now()->toDateString(),
-                    'paidAmount' => (float) ($entry['paidAmount'] ?? 0),
-                    'dueAmount' => (float) ($entry['dueAmount'] ?? 0),
-                    'isPaid' => (bool) ($entry['isPaid'] ?? true),
-                    'paymentType' => $entry['paymentType'] ?? 'cash',
+                    'products' => collect($entry['products'])->map(fn ($p) => $p + ['loss_profit' => 0])->all(),
+                    'sale_date' => $entry['sale_date'] ?? now()->toDateString(),
+                    'paid_amount' => (float) ($entry['paid_amount'] ?? 0),
+                    'due_amount' => (float) ($entry['due_amount'] ?? 0),
+                    'is_paid' => (bool) ($entry['is_paid'] ?? true),
+                    'payment_type' => $entry['payment_type'] ?? 'cash',
                     'meta' => ['offline_synced_at' => now()->toIso8601String(), 'device_uuid' => $device?->uuid],
                 ];
 

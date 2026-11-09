@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Storage;
 
 class ZSystLanguageController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:languages-read')->only(['index','show']);
+    }
+
     use HasUploader;
 
     public function index(Request $request)
@@ -47,8 +52,11 @@ class ZSystLanguageController extends Controller
             'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        Language::create($request->except('icon') + [
-            'icon' => $request->icon ? $this->upload($request, 'icon') : null,
+        Language::create([
+            'name' => $request->name,
+            'code' => $request->code ?? strtolower(substr($request->name,0,2)),
+            'status' => $request->status ? 1 : 0,
+            'icon' => $request->hasFile('icon') ? $this->upload($request, 'icon') : null,
         ]);
 
         return response()->json([
@@ -70,8 +78,11 @@ class ZSystLanguageController extends Controller
             'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $language->update($request->except('icon') + [
-            'icon' => $request->icon ? $this->upload($request, 'icon', $language->icon) : $language->icon,
+        $language->update([
+            'name' => $request->name,
+            'code' => $request->code ?? $language->code,
+            'status' => $request->status ?? $language->status,
+            'icon' => $request->hasFile('icon') ? $this->upload($request, 'icon', $language->icon) : $language->icon,
         ]);
 
         return response()->json([

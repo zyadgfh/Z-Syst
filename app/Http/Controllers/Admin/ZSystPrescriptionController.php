@@ -33,7 +33,7 @@ class ZSystPrescriptionController extends Controller
 
     public function index(Request $request)
     {
-        $prescriptions = Prescription::with(['party:id,name,phone', 'sale:id,invoiceNumber'])
+        $prescriptions = Prescription::with(['party:id,name,phone', 'sale:id,invoice_number'])
             ->latest()
             ->paginate(10);
 
@@ -48,7 +48,7 @@ class ZSystPrescriptionController extends Controller
 
     public function zsystFilter(Request $request)
     {
-        $prescriptions = Prescription::with(['party:id,name,phone', 'sale:id,invoiceNumber'])
+        $prescriptions = Prescription::with(['party:id,name,phone', 'sale:id,invoice_number'])
             ->when(request('search'), function ($q) {
                 $q->where(function ($q) {
                     $q->where('notes', 'like', '%'.request('search').'%')
@@ -58,7 +58,7 @@ class ZSystPrescriptionController extends Controller
                                 ->orWhere('phone', 'like', '%'.request('search').'%');
                         })
                         ->orWhereHas('sale', function ($query) {
-                            $query->where('invoiceNumber', 'like', '%'.request('search').'%');
+                            $query->where('invoice_number', 'like', '%'.request('search').'%');
                         });
                 });
             })

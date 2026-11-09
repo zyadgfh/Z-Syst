@@ -30,7 +30,12 @@ class ExpenseCategoryController extends Controller
             'categoryName' => 'required|unique:expense_categories,categoryName,NULL,id,business_id,'.auth()->user()->business_id,
         ]);
 
-        $data = ExpenseCategory::create($request->except('status') + [
+        $data = ExpenseCategory::create([
+                'categoryName' => $request->categoryName,
+                'categoryDescription' => $request->categoryDescription,
+                'business_id' => $request->user()->business_id,
+                'status' => 1,
+            ]); // patched
             'business_id' => auth()->user()->business_id,
             'status' => $request->status == 'true' ? 1 : 0,
         ]);
@@ -55,7 +60,10 @@ class ExpenseCategoryController extends Controller
             ],
         ]);
 
-        $category->update($request->except('status') + [
+        $category->update([
+                'categoryName' => $request->categoryName,
+                'categoryDescription' => $request->categoryDescription,
+            ]); // patched
             'business_id' => auth()->user()->business_id,
             'status' => $request->status == 'true' ? 1 : 0,
         ]);

@@ -21,9 +21,9 @@ class ZSystInvoiceController extends Controller
         $party = Party::select('id', 'due', 'name', 'type', 'opening_balance')->find($request->input('party_id'));
 
         if ($party->type == 'Supplier') {
-            $data = $party->load('purchases_dues:id,party_id,dueAmount,paidAmount,totalAmount,invoiceNumber');
+            $data = $party->load('purchases_dues:id,party_id,due_amount,paid_amount,total_amount,invoice_number');
         } else {
-            $data = $party->load('sales_dues:id,party_id,dueAmount,paidAmount,totalAmount,invoiceNumber');
+            $data = $party->load('sales_dues:id,party_id,due_amount,paid_amount,total_amount,invoice_number');
         }
 
         return response()->json([

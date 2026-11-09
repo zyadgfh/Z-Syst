@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('productName');
+            $table->string('product_name');
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('category_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('unit_id')->nullable()->constrained()->cascadeOnDelete();
@@ -26,7 +26,7 @@ return new class extends Migration
             $table->double('sales_price')->default(0);
             $table->integer('alert_qty')->default(0);
             $table->double('wholesale_price')->default(0);
-            $table->string('productCode')->nullable();
+            $table->string('product_code')->nullable();
             $table->longText('images')->nullable();
             $table->foreignId('tax_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('tax_type')->default('exclusive');

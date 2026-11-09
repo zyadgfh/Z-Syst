@@ -15,16 +15,21 @@ use Illuminate\Support\Facades\DB;
  */
 class PurchaseController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:purchases-create')->only(['index','show']);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
             'business_id' => 'required|integer|exists:businesses,id',
             'party_id' => 'required|integer|exists:parties,id',
-            'purchaseDate' => 'required|string',
-            'totalAmount' => 'required|numeric',
-            'paidAmount' => 'nullable|numeric',
-            'dueAmount' => 'nullable|numeric',
-            'paymentType' => 'nullable|string|max:60',
+            'purchase_date' => 'required|string',
+            'total_amount' => 'required|numeric',
+            'paid_amount' => 'nullable|numeric',
+            'due_amount' => 'nullable|numeric',
+            'payment_type' => 'nullable|string|max:60',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|integer|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
@@ -36,12 +41,12 @@ class PurchaseController extends Controller
                 'business_id' => (int) $request->business_id,
                 'party_id' => (int) $request->party_id,
                 'user_id' => Auth::id(),
-                'purchaseDate' => $request->purchaseDate,
-                'totalAmount' => (float) $request->totalAmount,
-                'paidAmount' => (float) $request->paidAmount,
-                'dueAmount' => (float) $request->dueAmount,
-                'isPaid' => ((float) $request->dueAmount) <= 0,
-                'paymentType' => $request->paymentType ?? 'cash',
+                'purchase_date' => $request->purchase_date,
+                'total_amount' => (float) $request->total_amount,
+                'paid_amount' => (float) $request->paid_amount,
+                'due_amount' => (float) $request->due_amount,
+                'is_paid' => ((float) $request->due_amount) <= 0,
+                'payment_type' => $request->payment_type ?? 'cash',
             ]);
 
             foreach ($request->items as $item) {

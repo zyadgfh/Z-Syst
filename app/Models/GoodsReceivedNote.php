@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,7 +15,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class GoodsReceivedNote extends Model
 {
-    public const STATUS_PENDING = 'pending';
+    
+    use TenantScoped;
+public const STATUS_PENDING = 'pending';
     public const STATUS_APPROVED = 'approved';
     public const STATUS_RECEIVED = 'received';
     public const STATUS_VERIFIED = 'verified';

@@ -24,25 +24,30 @@ class ProfileController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email',
-            'image' => 'nullable|image',
+            'email' => 'required|email|max:255',
+            'image' => 'nullable|image|max:2048',
         ]);
         $user = User::findOrFail($id);
 
-        if ($request->password || $request->current_password) {
-            if (Hash::check($request->current_password, $user->password)) {
-                $request->validate([
-                    'current_password' => 'required|string',
-                    'password' => 'required|string|confirmed',
-                ]);
-            } else {
-                return response()->json(__('Current Password does not match with old password'), 404);
-            }
+        // IDOR: users may only update their own profile unless superadmin
+        if ((int) $request->user()->id !== (int) $user->id && ! $request->user()->hasRole('superadmin')) {
+            abort(403, 'Forbidden');
         }
-        $user->update($request->except('image', 'password') + [
-            'image' => $request->image ? $this->upload($request, 'image', $user->image) : $user->image,
-            'password' => Hash::make($request->password),
-        ]);
+
+        $updateData = $request->only(['name', 'email']);
+        $updateData['image'] = $request->hasFile('image') ? $this->upload($request, 'image', $user->image) : $user->image;
+
+        if ($request->filled('password') || $request->filled('current_password')) {
+            $request->validate([
+                'current_password' => 'required|string',
+                'password' => 'required|string|min:8|confirmed',
+            ]);
+            if (! Hash::check($request->current_password, $user->password)) {
+                return response()->json(__('Current Password does not match with old password'), 422);
+            }
+            $updateData['password'] = Hash::make($request->password);
+        }
+        $user->update($updateData);
 
         return response()->json([
             'message' => __('Profile updated successfully'),

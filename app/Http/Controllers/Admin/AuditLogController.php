@@ -14,7 +14,7 @@ class AuditLogController extends Controller
     public function __construct(AuditService $auditService)
     {
         $this->auditService = $auditService;
-        $this->middleware('permission:audit-logs-read')->only('index', 'show', 'statistics');
+        $this->middleware('permission:audit-logs-read')->only('index', 'show', 'statistics', 'modelLogs', 'userLogs');
         $this->middleware('permission:audit-logs-delete')->only('destroy', 'cleanOldLogs');
     }
 
@@ -67,16 +67,21 @@ class AuditLogController extends Controller
     }
 
     /**
-     * Get logs for specific model
+     * Get logs for specific model — allowlisted models only + business scope
      */
     public function modelLogs(Request $request)
     {
         $request->validate([
-            'model_type' => 'required|string',
+            'model_type' => 'required|string|in:App\Models\Product,App\Models\Sale,App\Models\Purchase,App\Models\Stock,App\Models\Business,App\Models\User,App\Models\Prescription',
             'model_id' => 'required|integer',
         ]);
 
-        $model = app($request->model_type)->findOrFail($request->model_id);
+        $modelClass = $request->model_type;
+        $model = $modelClass::where('business_id', $request->user()->business_id)->findOrFail($request->model_id);
+        // Superadmin bypass
+        if ($request->user()->hasRole('superadmin')) {
+            $model = app($request->model_type)->findOrFail($request->model_id);
+        }
         $logs = $this->auditService->getLogsForModel($model);
 
         return response()->json($logs);

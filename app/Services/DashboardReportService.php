@@ -53,7 +53,7 @@ class DashboardReportService
      */
     protected function getRevenueStatistics(?int $businessId, Carbon $dateFrom, Carbon $dateTo): array
     {
-        $query = Sale::whereBetween('saleDate', [$dateFrom, $dateTo]);
+        $query = Sale::whereBetween('sale_date', [$dateFrom, $dateTo]);
 
         if ($businessId) {
             $query->where('business_id', $businessId);
@@ -62,11 +62,11 @@ class DashboardReportService
         $sales = $query->get();
 
         return [
-            'total_revenue' => $sales->sum('netTotal') ?? $sales->sum('totalAmount'),
+            'total_revenue' => $sales->sum('netTotal') ?? $sales->sum('total_amount'),
             'total_sales' => $sales->count(),
-            'average_order_value' => $sales->count() > 0 ? ($sales->sum('netTotal') ?? $sales->sum('totalAmount')) / $sales->count() : 0,
-            'total_paid' => $sales->sum('paidAmount'),
-            'total_due' => $sales->sum('dueAmount'),
+            'average_order_value' => $sales->count() > 0 ? ($sales->sum('netTotal') ?? $sales->sum('total_amount')) / $sales->count() : 0,
+            'total_paid' => $sales->sum('paid_amount'),
+            'total_due' => $sales->sum('due_amount'),
         ];
     }
 
@@ -75,7 +75,7 @@ class DashboardReportService
      */
     protected function getSalesStatistics(?int $businessId, Carbon $dateFrom, Carbon $dateTo): array
     {
-        $query = Sale::whereBetween('saleDate', [$dateFrom, $dateTo]);
+        $query = Sale::whereBetween('sale_date', [$dateFrom, $dateTo]);
 
         if ($businessId) {
             $query->where('business_id', $businessId);
@@ -87,7 +87,7 @@ class DashboardReportService
             'total_sales' => $sales->count(),
             'total_quantity' => $sales->sum('totalQuantity'),
             'total_discount' => $sales->sum('discount'),
-            'sales_by_payment_type' => $sales->groupBy('paymentType')->map->count(),
+            'sales_by_payment_type' => $sales->groupBy('payment_type')->map->count(),
         ];
     }
 
@@ -96,7 +96,7 @@ class DashboardReportService
      */
     protected function getPurchaseStatistics(?int $businessId, Carbon $dateFrom, Carbon $dateTo): array
     {
-        $query = Purchase::whereBetween('purchaseDate', [$dateFrom, $dateTo]);
+        $query = Purchase::whereBetween('purchase_date', [$dateFrom, $dateTo]);
 
         if ($businessId) {
             $query->where('business_id', $businessId);
@@ -106,9 +106,9 @@ class DashboardReportService
 
         return [
             'total_purchases' => $purchases->count(),
-            'total_purchase_amount' => $purchases->sum('netTotal') ?? $purchases->sum('totalAmount'),
-            'total_paid' => $purchases->sum('paidAmount'),
-            'total_due' => $purchases->sum('dueAmount'),
+            'total_purchase_amount' => $purchases->sum('netTotal') ?? $purchases->sum('total_amount'),
+            'total_paid' => $purchases->sum('paid_amount'),
+            'total_due' => $purchases->sum('due_amount'),
         ];
     }
 
@@ -179,7 +179,7 @@ class DashboardReportService
         $dateTo = $filters['date_to'] ?? Carbon::now()->endOfMonth();
         $groupBy = $filters['group_by'] ?? 'day';
 
-        $query = Sale::whereBetween('saleDate', [$dateFrom, $dateTo]);
+        $query = Sale::whereBetween('sale_date', [$dateFrom, $dateTo]);
 
         if ($businessId) {
             $query->where('business_id', $businessId);
@@ -189,18 +189,18 @@ class DashboardReportService
 
         $grouped = $sales->groupBy(function ($sale) use ($groupBy) {
             return match($groupBy) {
-                'hour' => $sale->saleDate->format('Y-m-d H:00'),
-                'day' => $sale->saleDate->format('Y-m-d'),
-                'week' => $sale->saleDate->startOfWeek()->format('Y-m-d'),
-                'month' => $sale->saleDate->format('Y-m'),
-                default => $sale->saleDate->format('Y-m-d'),
+                'hour' => $sale->sale_date->format('Y-m-d H:00'),
+                'day' => $sale->sale_date->format('Y-m-d'),
+                'week' => $sale->sale_date->startOfWeek()->format('Y-m-d'),
+                'month' => $sale->sale_date->format('Y-m'),
+                default => $sale->sale_date->format('Y-m-d'),
             };
         });
 
         return $grouped->map(function ($group) {
             return [
                 'count' => $group->count(),
-                'revenue' => $group->sum('netTotal') ?? $group->sum('totalAmount'),
+                'revenue' => $group->sum('netTotal') ?? $group->sum('total_amount'),
             ];
         })->toArray();
     }
@@ -219,7 +219,7 @@ class DashboardReportService
             ->join('sales', 'sale_details.sale_id', '=', 'sales.id')
             ->join('products', 'sale_details.product_id', '=', 'products.id')
             ->select('products.name', DB::raw('SUM(sale_details.quantity) as total_quantity'), DB::raw('SUM(sale_details.total) as total_revenue'))
-            ->whereBetween('sales.saleDate', [$dateFrom, $dateTo])
+            ->whereBetween('sales.sale_date', [$dateFrom, $dateTo])
             ->groupBy('products.id', 'products.name')
             ->orderBy('total_quantity', 'desc')
             ->limit($limit);
@@ -241,7 +241,7 @@ class DashboardReportService
         $dateTo = $filters['date_to'] ?? Carbon::now()->endOfMonth();
         $limit = $filters['limit'] ?? 10;
 
-        $query = Sale::whereBetween('saleDate', [$dateFrom, $dateTo])
+        $query = Sale::whereBetween('sale_date', [$dateFrom, $dateTo])
             ->with('party')
             ->select('party_id', DB::raw('COUNT(*) as total_orders'), DB::raw('SUM(netTotal) as total_spent'));
 
@@ -273,16 +273,16 @@ class DashboardReportService
         $dateFrom = $filters['date_from'] ?? Carbon::now()->startOfMonth();
         $dateTo = $filters['date_to'] ?? Carbon::now()->endOfMonth();
 
-        $salesQuery = Sale::whereBetween('saleDate', [$dateFrom, $dateTo]);
-        $purchasesQuery = Purchase::whereBetween('purchaseDate', [$dateFrom, $dateTo]);
+        $salesQuery = Sale::whereBetween('sale_date', [$dateFrom, $dateTo]);
+        $purchasesQuery = Purchase::whereBetween('purchase_date', [$dateFrom, $dateTo]);
 
         if ($businessId) {
             $salesQuery->where('business_id', $businessId);
             $purchasesQuery->where('business_id', $businessId);
         }
 
-        $totalSales = $salesQuery->sum('netTotal') ?? $salesQuery->sum('totalAmount');
-        $totalPurchases = $purchasesQuery->sum('netTotal') ?? $purchasesQuery->sum('totalAmount');
+        $totalSales = $salesQuery->sum('netTotal') ?? $salesQuery->sum('total_amount');
+        $totalPurchases = $purchasesQuery->sum('netTotal') ?? $purchasesQuery->sum('total_amount');
         $grossProfit = $totalSales - $totalPurchases;
 
         return [

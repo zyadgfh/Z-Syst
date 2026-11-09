@@ -23,11 +23,29 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
-     * Handle an incoming authentication request.
+     * Handle an incoming authentication request — with TOTP 2FA if enabled.
      */
     public function store(LoginRequest $request)
     {
         $request->authenticate();
+
+        $user = auth()->user();
+        // Enforce TOTP if user has it enabled
+        if ($user && $user->two_factor_secret) {
+            $code = $request->input('code') ?? $request->input('otp') ?? $request->input('two_factor_code');
+            if (! $code) {
+                Auth::logout();
+                return $request->wantsJson()
+                    ? response()->json(['requires_2fa' => true, 'message' => __('رمز التحقق بخطوتين مطلوب')], 423)
+                    : back()->withErrors(['code' => __('رمز التحقق بخطوتين مطلوب')]);
+            }
+            if (! \App\Services\Totp::verify($user->two_factor_secret, (string) $code)) {
+                Auth::logout();
+                return $request->wantsJson()
+                    ? response()->json(['message' => __('رمز التحقق غير صحيح')], 422)
+                    : back()->withErrors(['code' => __('رمز التحقق غير صحيح')]);
+            }
+        }
 
         $request->session()->regenerate();
 

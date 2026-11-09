@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 
 class StoreOrder extends Model
 {
-    protected $fillable = [
+    
+    use TenantScoped;
+protected $fillable = [
         'business_id', 'order_number', 'customer_name', 'customer_phone', 'address',
         'fulfillment', 'status', 'total', 'items', 'sale_id', 'delivery_id', 'notes',
     ];

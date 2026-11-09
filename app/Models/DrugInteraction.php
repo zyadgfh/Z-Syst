@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -11,7 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class DrugInteraction extends Model
 {
-    protected $table = 'drug_interactions';
+    
+    use TenantScoped;
+protected $table = 'drug_interactions';
 
     protected $fillable = [
         'business_id',

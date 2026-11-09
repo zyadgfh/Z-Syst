@@ -4,11 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SupplierPerformance extends Model
 {
-    protected $table = 'supplier_performance';
+    
+    use TenantScoped;
+protected $table = 'supplier_performance';
 
     use HasFactory;
 

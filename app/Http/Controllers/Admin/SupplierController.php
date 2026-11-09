@@ -16,6 +16,7 @@ class SupplierController extends Controller
 
     public function __construct(SupplierService $supplierService)
     {
+        $this->middleware('permission:suppliers-read')->only(['index','show','statistics','pending','overdue']);
         $this->supplierService = $supplierService;
     }
 

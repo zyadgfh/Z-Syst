@@ -18,19 +18,19 @@ class Purchase extends Model
      * @var array
      */
     protected $fillable = [
-        'party_id',
         'business_id',
+        'party_id',
         'user_id',
         'tax_id',
-        'discountAmount',
+        'discount_amount',
         'tax_amount',
-        'dueAmount',
-        'paidAmount',
-        'totalAmount',
-        'invoiceNumber',
-        'isPaid',
-        'paymentType',
-        'purchaseDate',
+        'due_amount',
+        'paid_amount',
+        'total_amount',
+        'invoice_number',
+        'is_paid',
+        'payment_type',
+        'purchase_date',
         'purchase_data',
         'note',
     ];
@@ -70,9 +70,9 @@ class Purchase extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            if (! $model->invoiceNumber && auth()->check()) {
+            if (! $model->invoice_number && auth()->check()) {
                 $id = Purchase::where('business_id', auth()->user()->business_id)->count() + 1;
-                $model->invoiceNumber = 'P-'.str_pad($id, 5, '0', STR_PAD_LEFT);
+                $model->invoice_number = 'P-'.str_pad($id, 5, '0', STR_PAD_LEFT);
             }
         });
     }
@@ -83,11 +83,11 @@ class Purchase extends Model
      * @var array
      */
     protected $casts = [
-        'isPaid' => 'boolean',
-        'discountAmount' => 'double',
-        'dueAmount' => 'double',
-        'paidAmount' => 'double',
-        'totalAmount' => 'double',
+        'is_paid' => 'boolean',
+        'discount_amount' => 'double',
+        'due_amount' => 'double',
+        'paid_amount' => 'double',
+        'total_amount' => 'double',
         'purchase_data' => 'json',
     ];
 }

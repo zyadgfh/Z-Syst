@@ -29,9 +29,16 @@ class ZSystIncomeController extends Controller
             'income_category_id' => 'required|integer|exists:income_categories,id',
         ]);
 
-        Business::findOrFail(auth()->user()->business_id)->decrement('remainingShopBalance', $request->amount);
+        Business::findOrFail(auth()->user()->business_id)->decrement('remaining_shop_balance', $request->amount);
 
-        $data = Income::create($request->except('user_id', 'business_id') + [
+        $data = Income::create([
+            'amount' => $request->amount,
+            'income_category_id' => $request->income_category_id,
+            'income_for' => $request->income_for,
+            'payment_type' => $request->payment_type,
+            'reference_no' => $request->reference_no,
+            'note' => $request->note,
+            'income_date' => $request->income_date ?? now(),
             'user_id' => auth()->id(),
             'business_id' => auth()->user()->business_id,
         ]);
@@ -54,11 +61,16 @@ class ZSystIncomeController extends Controller
 
         $amountDifference = $request->amount - $income->amount;
 
-        $business->increment('remainingShopBalance', $amountDifference);
+        $business->increment('remaining_shop_balance', $amountDifference);
 
-        $income->update($request->except('user_id', 'business_id') + [
-            'user_id' => auth()->id(),
-            'business_id' => auth()->user()->business_id,
+        $income->update([
+            'amount' => $request->amount ?? $income->amount,
+            'income_category_id' => $request->income_category_id ?? $income->income_category_id,
+            'income_for' => $request->income_for ?? $income->income_for,
+            'payment_type' => $request->payment_type ?? $income->payment_type,
+            'reference_no' => $request->reference_no ?? $income->reference_no,
+            'note' => $request->note ?? $income->note,
+            'income_date' => $request->income_date ?? $income->income_date,
         ]);
 
         return response()->json([

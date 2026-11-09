@@ -22,7 +22,7 @@ class Stock extends Model
     protected $fillable = [
         'business_id',
         'product_id',
-        'productStock',
+        'product_stock',
         'batch_no',
         'expire_date',
         'barcode',

@@ -16,7 +16,7 @@ class SalesRepository {
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json",
-          "Authorization": "Bearer ${await getAuthToken()}",
+          "Authorization": await getAuthToken(),
         },
         body: json.encode(saleData),
       );

@@ -374,7 +374,7 @@ Route::prefix('v1')->group(function () {
 });
 
 // Backward-compatible admin barcode endpoints (without the /v1 prefix).
-Route::middleware(['auth:sanctum', 'supabase.context'])
+Route::middleware(['auth:sanctum', 'tenant.check', 'supabase.context', 'business.context', 'permission:barcodes-read'])
     ->prefix('admin')
     ->group(function () {
         Route::get('barcodes/search', [Api\BarcodeController::class, 'search'])->name('admin.barcodes.search');
@@ -382,11 +382,11 @@ Route::middleware(['auth:sanctum', 'supabase.context'])
     });
 
 // Device stock take + POS offline sync + API docs
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::post('stock-takes', [Api\DeviceStockTakeController::class, 'store']);
-    Route::get('stock-takes/current', [Api\DeviceStockTakeController::class, 'current']);
-    Route::post('stock-takes/scan', [Api\DeviceStockTakeController::class, 'scan']);
-    Route::post('pos/sync', [Api\OfflineSyncController::class, 'store']);
+Route::middleware(['auth:sanctum', 'tenant.check', 'supabase.context', 'business.context'])->prefix('v1')->group(function () {
+    Route::post('stock-takes', [Api\DeviceStockTakeController::class, 'store'])->middleware('permission:stocktake-create');
+    Route::get('stock-takes/current', [Api\DeviceStockTakeController::class, 'current'])->middleware('permission:stocktake-read');
+    Route::post('stock-takes/scan', [Api\DeviceStockTakeController::class, 'scan'])->middleware('permission:stocktake-read');
+    Route::post('pos/sync', [Api\OfflineSyncController::class, 'store'])->middleware('permission:sales-create');
 });
 Route::get('v1/docs', [Api\ApiDocController::class, 'spec'])->name('api.docs.spec');
 

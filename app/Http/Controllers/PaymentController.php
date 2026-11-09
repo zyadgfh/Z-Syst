@@ -168,65 +168,31 @@ class PaymentController extends Controller
     }
 
     /**
-     * Display order status (kept for manual payment flow)
+     * Display order status (kept for manual payment flow) — sanitized.
      */
     public function orderStatus()
     {
-        return request('status');
+        $allowed = ['success', 'failed', 'pending'];
+        $status = (string) request('status', 'pending');
+        if (! in_array($status, $allowed, true)) {
+            $status = 'pending';
+        }
+
+        return response()->view('payments.status', ['status' => e($status)]);
     }
 
     /**
-     * Handle successful payment from Egyptian gateways
+     * Handle successful payment — now requires verified callback, never session-only.
      */
-    public function success()
+    public function success(Request $request)
     {
-        DB::beginTransaction();
-        try {
+        // Session-only will_expire extension removed (was exploitable via GET).
+        // Real activation is performed only by GatewayWebhookController after
+        // HMAC verification. This endpoint now just renders a status page.
+        $status = $request->session()->get('payment_verified_status', 'pending');
 
-            $plan = session('plan');
-            $gateway_id = session('gateway_id');
-
-            if (! $plan) {
-                return redirect(route('order.status', ['status' => 'failed']))->with('error', __('Transaction failed, Please try again.'));
-            }
-
-            $business = Business::findOrFail(session('business_id'));
-            $has_free_subscriptions = Plan::where('subscriptionPrice', '<=', 0)->orWhere('offerPrice', '<=', 0)->first();
-
-            if ($plan->subscriptionPrice <= 0 && $has_free_subscriptions) {
-                return response()->json([
-                    'status' => 406,
-                    'message' => __('Sorry, you cannot subscribe to a free plan again.'),
-                ], 406);
-            }
-
-            $subscribe = PlanSubscribe::create([
-                'plan_id' => $plan->id,
-                'duration' => $plan->duration,
-                'business_id' => $business->id,
-                'price' => $plan->subscriptionPrice,
-                'gateway_id' => $gateway_id,
-                'payment_status' => 'pending', // Egyptian gateways are manual verification
-            ]);
-
-            $business->update([
-                'subscriptionDate' => now(),
-                'plan_subscribe_id' => $subscribe->id,
-                'will_expire' => now()->addDays($plan->duration),
-            ]);
-
-            session()->forget('gateway_id');
-            session()->forget('plan');
-
-            DB::commit();
-
-            return redirect(route('order.status', ['status' => 'success']))->with('message', __('Payment submitted for verification.'));
-
-        } catch (\Exception $e) {
-            DB::rollback();
-
-            return redirect(route('order.status', ['status' => 'failed']))->with('message', __('Something went wrong!'));
-        }
+        return redirect(route('order.status', ['status' => $status === 'paid' ? 'success' : 'pending']))
+            ->with('message', __('Payment is being verified. You will be notified once confirmed.'));
     }
 
     /**

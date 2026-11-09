@@ -21,7 +21,7 @@ class SaleReturnController extends Controller
      */
     public function index(Request $request)
     {
-        $data = SaleReturn::with('sale:id,party_id,isPaid,totalAmount,dueAmount,paidAmount,invoiceNumber', 'sale.party:id,name', 'details')
+        $data = SaleReturn::with('sale:id,party_id,is_paid,total_amount,due_amount,paid_amount,invoice_number', 'sale.party:id,name', 'details')
             ->whereBetween('return_date', [$request->input('start_date'), $request->input('end_date')])
             ->where('business_id', auth()->user()->business_id)
             ->latest()
@@ -72,11 +72,11 @@ class SaleReturnController extends Controller
             // Update Sale record
             $sale->update([
                 'sale_data' => $prev_sale_data,
-                'dueAmount' => $request->dueAmount,
-                'paidAmount' => $request->paidAmount,
-                'totalAmount' => $request->totalAmount,
-                'discountAmount' => $request->discountAmount,
-                'lossProfit' => array_sum($request->lossProfit ?? []) - ($request->discountAmount ?? 0),
+                'due_amount' => $request->due_amount,
+                'paid_amount' => $request->paid_amount,
+                'total_amount' => $request->total_amount,
+                'discount_amount' => $request->discount_amount,
+                'loss_profit' => array_sum($request->loss_profit ?? []) - ($request->discount_amount ?? 0),
             ]);
 
             $data = [];
@@ -101,11 +101,11 @@ class SaleReturnController extends Controller
                     );
                 }
 
-                $batch->increment('productStock', $request->return_qty[$key]);
+                $batch->increment('product_stock', $request->return_qty[$key]);
 
                 // Update SaleDetail record
                 $sale_detail->update([
-                    'lossProfit' => $request->lossProfit[$key] ?? $sale_detail->lossProfit,
+                    'loss_profit' => $request->loss_profit[$key] ?? $sale_detail->loss_profit,
                     'quantities' => $sale_detail->quantities - $request->return_qty[$key],
                 ]);
 
@@ -132,7 +132,7 @@ class SaleReturnController extends Controller
     public function show($id)
     {
         $data = SaleReturn::with(
-            'sale:id,party_id,isPaid,totalAmount,dueAmount,paidAmount,invoiceNumber',
+            'sale:id,party_id,is_paid,total_amount,due_amount,paid_amount,invoice_number',
             'sale.party:id,name',
             'details'
         )->findOrFail($id);

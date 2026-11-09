@@ -34,7 +34,7 @@ class AnalyticsController extends Controller
         $rows = SaleDetails::query()->join('sales', 'sales.id', '=', 'sale_details.sale_id')
             ->join('products', 'products.id', '=', 'sale_details.product_id')
             ->where('sales.business_id', $businessId)
-            ->where('sales.saleDate', '>=', now()->subDays(90)->toDateString())
+            ->where('sales.sale_date', '>=', now()->subDays(90)->toDateString())
             ->groupBy('products.id', 'products.name')
             ->selectRaw('products.id, products.name, SUM(sale_details.price * sale_details.quantities) revenue')
             ->orderByDesc('revenue')->get();
@@ -56,14 +56,14 @@ class AnalyticsController extends Controller
         return Product::where('business_id', $businessId)->with('stocks')->get()
             ->map(fn ($p) => [
                 'name' => $p->name,
-                'qty' => (int) $p->stocks->sum('productStock'),
-                'value' => round((float) $p->stocks->sum(fn ($s) => $s->productStock * ($p->purchase_price ?? 0)), 2),
+                'qty' => (int) $p->stocks->sum('product_stock'),
+                'value' => round((float) $p->stocks->sum(fn ($s) => $s->product_stock * ($p->purchase_price ?? 0)), 2),
             ])
             ->filter(fn ($r) => $r['qty'] > 0)
             ->reject(function ($r) use ($businessId) {
                 // has any sale in 60 days → not dead
                 $name = $r['name'];
-                return SaleDetails::whereHas('sale', fn ($q) => $q->where('business_id', $businessId)->where('saleDate', '>=', now()->subDays(60)))
+                return SaleDetails::whereHas('sale', fn ($q) => $q->where('business_id', $businessId)->where('sale_date', '>=', now()->subDays(60)))
                     ->whereHas('product', fn ($q) => $q->where('name', $name))->exists();
             })
             ->sortByDesc('value')->take(25)->values()->toArray();
@@ -74,9 +74,9 @@ class AnalyticsController extends Controller
         return SaleDetails::query()->join('sales', 'sales.id', '=', 'sale_details.sale_id')
             ->join('products', 'products.id', '=', 'sale_details.product_id')
             ->where('sales.business_id', $businessId)
-            ->where('sales.saleDate', '>=', now()->subDays(30)->toDateString())
+            ->where('sales.sale_date', '>=', now()->subDays(30)->toDateString())
             ->groupBy('products.id', 'products.name')
-            ->selectRaw("products.name, SUM(sale_details.quantities) qty, SUM(sale_details.lossProfit) profit, SUM(sale_details.price * sale_details.quantities) revenue")
+            ->selectRaw("products.name, SUM(sale_details.quantities) qty, SUM(sale_details.loss_profit) profit, SUM(sale_details.price * sale_details.quantities) revenue")
             ->orderByDesc('profit')->limit(25)->get()
             ->map(function ($r) {
                 $r->margin = $r->revenue > 0 ? round($r->profit / $r->revenue * 100, 1) : 0;

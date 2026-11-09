@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -11,7 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class AuditLog extends Model
 {
-    protected $table = 'audit_logs';
+    
+    use TenantScoped;
+protected $table = 'audit_logs';
 
     protected $fillable = [
         'business_id',

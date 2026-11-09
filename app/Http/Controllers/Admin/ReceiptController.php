@@ -25,7 +25,7 @@ class ReceiptController extends Controller
     {
         $businessId = auth()->user()->business_id;
         $receipts = Receipt::forBusiness($businessId)
-            ->with(['sale:id,receipt_number,totalAmount', 'purchase:id,receipt_number,totalAmount', 'user:id,name']) // Fix N+1 with selective loading
+            ->with(['sale:id,receipt_number,total_amount', 'purchase:id,receipt_number,total_amount', 'user:id,name']) // Fix N+1 with selective loading
             ->orderBy('created_at', 'desc')
             ->paginate(15);
         return view('admin.receipts.index', compact('receipts'));

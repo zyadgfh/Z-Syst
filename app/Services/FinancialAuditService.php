@@ -61,8 +61,8 @@ class FinancialAuditService
 
         // Calculate total revenue from sales
         $totalSales = Sale::where('business_id', $businessId)
-            ->whereBetween('saleDate', [$startDate, $endDate])
-            ->sum('totalAmount');
+            ->whereBetween('sale_date', [$startDate, $endDate])
+            ->sum('total_amount');
 
         // Calculate total revenue from income records
         $totalIncome = Income::where('business_id', $businessId)
@@ -78,8 +78,8 @@ class FinancialAuditService
 
         // Calculate purchases (should be considered in cost of goods, not expenses)
         $totalPurchases = Purchase::where('business_id', $businessId)
-            ->whereBetween('purchaseDate', [$startDate, $endDate])
-            ->sum('totalAmount');
+            ->whereBetween('purchase_date', [$startDate, $endDate])
+            ->sum('total_amount');
 
         return [
             'total_sales' => $totalSales,
@@ -187,33 +187,33 @@ class FinancialAuditService
         switch ($type) {
             case 'sales':
                 return Sale::where('business_id', $businessId)
-                    ->whereBetween('saleDate', [$startDate, $endDate])
+                    ->whereBetween('sale_date', [$startDate, $endDate])
                     ->with(['party:id,name'])
                     ->get()
                     ->map(function ($sale) {
                         return [
                             'id' => $sale->id,
-                            'invoice_number' => $sale->invoiceNumber,
-                            'date' => $sale->saleDate->format('Y-m-d'),
-                            'amount' => $sale->totalAmount,
+                            'invoice_number' => $sale->invoice_number,
+                            'date' => $sale->sale_date->format('Y-m-d'),
+                            'amount' => $sale->total_amount,
                             'customer' => $sale->party->name ?? 'Walk-in',
-                            'payment_status' => $sale->isPaid ? 'Paid' : 'Unpaid',
+                            'payment_status' => $sale->is_paid ? 'Paid' : 'Unpaid',
                         ];
                     })->toArray();
 
             case 'purchases':
                 return Purchase::where('business_id', $businessId)
-                    ->whereBetween('purchaseDate', [$startDate, $endDate])
+                    ->whereBetween('purchase_date', [$startDate, $endDate])
                     ->with(['party:id,name'])
                     ->get()
                     ->map(function ($purchase) {
                         return [
                             'id' => $purchase->id,
-                            'invoice_number' => $purchase->invoiceNumber,
-                            'date' => $purchase->purchaseDate->format('Y-m-d'),
-                            'amount' => $purchase->totalAmount,
+                            'invoice_number' => $purchase->invoice_number,
+                            'date' => $purchase->purchase_date->format('Y-m-d'),
+                            'amount' => $purchase->total_amount,
                             'supplier' => $purchase->party->name ?? 'Unknown',
-                            'payment_status' => $purchase->isPaid ? 'Paid' : 'Unpaid',
+                            'payment_status' => $purchase->is_paid ? 'Paid' : 'Unpaid',
                         ];
                     })->toArray();
 

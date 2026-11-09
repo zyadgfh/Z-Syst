@@ -12,7 +12,7 @@ class BusinessCategoryRepository {
       final response = await http.get(
         Uri.parse('${APIConfig.url}/business-categories'),
         headers: {
-          'Authorization': 'Bearer ${await getAuthToken()}',
+          'Authorization': await getAuthToken(),
           'Accept': 'application/json',
         },
       );

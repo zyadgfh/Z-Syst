@@ -32,9 +32,18 @@ class ZSystExpenseController extends Controller
             'expense_category_id' => 'required|exists:expense_categories,id',
         ]);
 
-        Business::findOrFail(auth()->user()->business_id)->decrement('remainingShopBalance', $request->amount);
+        Business::findOrFail(auth()->user()->business_id)->decrement('remaining_shop_balance', $request->amount);
 
-        $data = Expense::create($request->except('status') + [
+        $data = Expense::create([
+                'amount' => $request->amount,
+                'expense_category_id' => $request->expense_category_id,
+                'expanse_for' => $request->expanse_for ?? $request->expanseFor,
+                'payment_type' => $request->payment_type ?? $request->paymentType,
+                'reference_no' => $request->reference_no ?? $request->referenceNo,
+                'note' => $request->note,
+                'expense_date' => $request->expense_date ?? $request->expenseDate ?? now(),
+                'business_id' => $request->user()->business_id,
+            ]); // patched
             'user_id' => auth()->id(),
             'business_id' => auth()->user()->business_id,
         ]);
@@ -58,9 +67,17 @@ class ZSystExpenseController extends Controller
 
         $amountDifference = $request->amount - $expense->amount;
 
-        $business->increment('remainingShopBalance', $amountDifference);
+        $business->increment('remaining_shop_balance', $amountDifference);
 
-        $expense->update($request->except('user_id', 'business_id') + [
+        $expense->update([
+                'amount' => $request->amount ?? $expense->amount,
+                'expense_category_id' => $request->expense_category_id ?? $expense->expense_category_id,
+                'expanse_for' => $request->expanse_for ?? $request->expanseFor ?? $expense->expanse_for,
+                'payment_type' => $request->payment_type ?? $request->paymentType ?? $expense->payment_type,
+                'reference_no' => $request->reference_no ?? $request->referenceNo ?? $expense->reference_no,
+                'note' => $request->note ?? $expense->note,
+                'expense_date' => $request->expense_date ?? $request->expenseDate ?? $expense->expense_date,
+            ]); // patched
             'user_id' => auth()->id(),
             'business_id' => auth()->user()->business_id,
 

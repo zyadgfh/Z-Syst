@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -13,7 +14,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Printer extends Model
 {
-    public const TYPE_BARCODE = 'barcode';
+    
+    use TenantScoped;
+public const TYPE_BARCODE = 'barcode';
     public const TYPE_RECEIPT = 'receipt';
     public const TYPE_LABEL = 'label';
 

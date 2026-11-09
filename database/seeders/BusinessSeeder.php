@@ -36,11 +36,11 @@ class BusinessSeeder extends Seeder
 
         // Create test business (columns match create_businesses_table)
         $business = Business::create([
-            'companyName' => 'Test Pharmacy',
+            'company_name' => 'Test Pharmacy',
             'address' => '123 Test Street, Test City',
-            'phoneNumber' => '+1234567890',
+            'phone_number' => '+1234567890',
             'business_category_id' => $category->id,
-            'subscriptionDate' => now(),
+            'subscription_date' => now(),
             'will_expire' => now()->addDays(30),
             'status' => true,
         ]);
@@ -65,10 +65,10 @@ class BusinessSeeder extends Seeder
             $staff?->update(['business_id' => $business->id]);
 
             $businessB = Business::firstOrCreate(
-                ['companyName' => 'Pharmacy B'],
+                ['company_name' => 'Pharmacy B'],
                 [
                     'business_category_id' => $category->id,
-                    'subscriptionDate' => now(),
+                    'subscription_date' => now(),
                     'will_expire' => now()->addDays(30),
                     'status' => true,
                 ]

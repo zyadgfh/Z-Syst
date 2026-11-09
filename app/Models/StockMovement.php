@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -11,7 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class StockMovement extends Model
 {
-    protected $table = 'stock_movements';
+    
+    use TenantScoped;
+protected $table = 'stock_movements';
 
     const UPDATED_AT = null;
 
@@ -24,9 +27,6 @@ class StockMovement extends Model
         'quantity',
         'reference_type',
         'reference_id',
-        'user_id',
-        'before_quantity',
-        'after_quantity',
         'batch_no',
         'expire_date',
         'unit_cost',

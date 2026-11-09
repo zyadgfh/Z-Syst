@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -11,7 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class AutoOrderRule extends Model
 {
-    protected $table = 'auto_order_rules';
+    
+    use TenantScoped;
+protected $table = 'auto_order_rules';
 
     protected $fillable = [
         'business_id',

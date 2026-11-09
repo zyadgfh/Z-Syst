@@ -18,11 +18,11 @@ return new class extends Migration
             $table->foreignUuid('user_id')->nullable()->constrained('app_users')->nullOnDelete();
             $table->foreignId('sale_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('purchase_id')->nullable()->constrained()->cascadeOnDelete();
-            $table->string('invoiceNumber')->nullable();
+            $table->string('invoice_number')->nullable();
             $table->double('totalDue', 10, 2)->default(0);
             $table->double('dueAmountAfterPay', 10, 2)->default(0);
             $table->double('payDueAmount', 10, 2)->default(0);
-            $table->string('paymentType')->default('Cash');
+            $table->string('payment_type')->default('Cash');
             $table->timestamp('paymentDate')->nullable();
             $table->timestamps();
         });

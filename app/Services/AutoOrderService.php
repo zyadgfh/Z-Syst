@@ -93,7 +93,7 @@ class AutoOrderService
         // Get current stock
         $currentStock = (float) Stock::where('product_id', $product->id)
             ->where('business_id', $businessId)
-            ->sum('productStock');
+            ->sum('product_stock');
 
         // Get pending purchases (not yet received)
         $pendingPurchases = (float) PurchaseDetails::whereHas('purchase', function ($q) use ($businessId) {
@@ -347,10 +347,10 @@ class AutoOrderService
             $supplierId = $supplier->id;
         }
 
-        $totalAmount = $suggestion->suggested_order_qty * ($product->purchase_with_tax ?? 0);
+        $total_amount = $suggestion->suggested_order_qty * ($product->purchase_with_tax ?? 0);
 
         // Use TransactionHelper to create purchase
-        $purchase = TransactionHelper::run(function () use ($suggestion, $product, $supplierId, $businessId, $totalAmount) {
+        $purchase = TransactionHelper::run(function () use ($suggestion, $product, $supplierId, $businessId, $total_amount) {
             // Path B: purchases.user_id is a legacy integer FK; attribute the
             // actor in purchase_data for uuid identities (same as sales.meta).
             $actorId = auth()->id();
@@ -359,12 +359,12 @@ class AutoOrderService
                 'business_id' => $businessId,
                 'user_id' => is_int($actorId) ? $actorId : (ctype_digit((string) $actorId) ? (int) $actorId : null),
                 'purchase_data' => ['user_id' => $actorId],
-                'purchaseDate' => now()->format('Y-m-d'),
-                'totalAmount' => $totalAmount,
-                'paidAmount' => 0,
-                'dueAmount' => $totalAmount,
-                'isPaid' => false,
-                'paymentType' => 'credit',
+                'purchase_date' => now()->format('Y-m-d'),
+                'total_amount' => $total_amount,
+                'paid_amount' => 0,
+                'due_amount' => $total_amount,
+                'is_paid' => false,
+                'payment_type' => 'credit',
                 'note' => 'طلب تلقائي من نظام التنبؤ - '.($product->productName ?? ''),
             ]);
 
@@ -388,14 +388,14 @@ class AutoOrderService
                 ->first();
 
             if ($stock) {
-                $stock->increment('productStock', $suggestion->suggested_order_qty);
+                $stock->increment('product_stock', $suggestion->suggested_order_qty);
             } else {
                 Stock::create([
                     'business_id' => $businessId,
                     'product_id' => $product->id,
                     'batch_no' => 'AUTO-'.strtoupper(uniqid()),
                     'expire_date' => now()->addYears(2)->format('Y-m-d'),
-                    'productStock' => $suggestion->suggested_order_qty,
+                    'product_stock' => $suggestion->suggested_order_qty,
                 ]);
             }
 
@@ -416,7 +416,7 @@ class AutoOrderService
             'success' => true,
             'message' => 'تم تحويل الاقتراح إلى فاتورة شراء بنجاح.',
             'purchase_id' => $purchase->id,
-            'invoice_number' => $purchase->invoiceNumber,
+            'invoice_number' => $purchase->invoice_number,
             'purchase' => $purchase->load('details.product:id,productName'),
         ];
     }
@@ -442,8 +442,8 @@ class AutoOrderService
 
         if (! empty($filters['search'])) {
             $query->whereHas('product', function ($q) use ($filters) {
-                $q->where('productName', 'like', "%{$filters['search']}%")
-                    ->orWhere('productCode', 'like', "%{$filters['search']}%");
+                $q->where('product_name', 'like', "%{$filters['search']}%")
+                    ->orWhere('product_code', 'like', "%{$filters['search']}%");
             });
         }
 
@@ -531,7 +531,7 @@ class AutoOrderService
             ->join('sales', 'sales.id', '=', 'sale_details.sale_id')
             ->where('sale_details.product_id', $productId)
             ->where('sales.business_id', $businessId)
-            ->where('sales.saleDate', '>=', now()->subDays(90))
+            ->where('sales.sale_date', '>=', now()->subDays(90))
             ->sum('sale_details.quantities');
 
         return $salesData / 90 * 30; // Project for 30 days

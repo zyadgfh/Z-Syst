@@ -39,8 +39,12 @@ class PaymentGatewayService
 
     public function mode(int $businessId, string $gateway): string
     {
+        // Simulation is disabled in production — platform keys only
+        if (app()->environment('production')) {
+            $platformKey = config("services.{$gateway}.api_key") ?? config("integrations.{$gateway}.api_key");
+            return $platformKey ? 'live' : 'disabled';
+        }
         $apiKey = BusinessSetting::get($businessId, "{$gateway}_api_key");
-
         return $apiKey ? 'live' : 'simulation';
     }
 
@@ -57,7 +61,12 @@ class PaymentGatewayService
         }
 
         $businessId = (int) $tx->business_id;
-        $verified = $this->mode($businessId, $gateway) === 'simulation'
+        $mode = $this->mode($businessId, $gateway);
+        if ($mode === 'disabled') {
+            $tx->update(['status' => 'failed', 'payload' => array_merge($tx->payload ?? [], ['callback' => $params, 'verified' => false, 'reason' => 'gateway_disabled'])]);
+            return $tx;
+        }
+        $verified = $mode === 'simulation'
             || $this->verifySignature($gateway, $businessId, $tx, $params);
 
         if (!$verified) {
@@ -83,7 +92,10 @@ class PaymentGatewayService
 
     protected function verifySignature(string $gateway, int $businessId, GatewayTransaction $tx, array $params): bool
     {
-        $secret = BusinessSetting::get($businessId, "{$gateway}_hmac_secret");
+        // In production, HMAC secret comes from platform config, not tenant settings
+        $secret = app()->environment('production')
+            ? (config("services.{$gateway}.hmac_secret") ?? config("integrations.{$gateway}.hmac_secret") ?? BusinessSetting::get($businessId, "{$gateway}_hmac_secret"))
+            : BusinessSetting::get($businessId, "{$gateway}_hmac_secret");
         if (!$secret) {
             return false;
         }

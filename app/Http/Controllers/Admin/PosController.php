@@ -85,14 +85,14 @@ class PosController extends Controller
                     'batch_no' => $batch?->batch_no,
                     'batch_id' => $batch?->id,
                     'expiry' => $batch?->expire_date?->toDateString(),
-                    'stock' => $product ? (int) $product->stocks()->sum('productStock') : 0,
+                    'stock' => $product ? (int) $product->stocks()->sum('product_stock') : 0,
                 ],
             ]);
         }
 
         // 2. The product's own printed code.
         $product = Product::where('business_id', $businessId)
-            ->where(fn ($q) => $q->where('productCode', $code)->orWhere('barcode', $code))
+            ->where(fn ($q) => $q->where('product_code', $code)->orWhere('barcode', $code))
             ->first();
 
         if (! $product) {
@@ -111,7 +111,7 @@ class PosController extends Controller
                 'batch_no' => $batch?->batch_no,
                 'batch_id' => $batch?->id,
                 'expiry' => $batch?->expire_date?->toDateString(),
-                'stock' => (int) $product->stocks()->sum('productStock'),
+                'stock' => (int) $product->stocks()->sum('product_stock'),
             ],
         ]);
     }
@@ -174,28 +174,28 @@ class PosController extends Controller
             'products' => 'required|array|min:1',
             'products.*.product_id' => 'required|integer',
             'products.*.price' => 'required|numeric',
-            'products.*.lossProfit' => 'required|numeric',
+            'products.*.loss_profit' => 'required|numeric',
             'products.*.quantities' => 'required|integer|min:1',
             'products.*.batch_no' => 'nullable|string',
             'products.*.expire_date' => 'nullable|string',
             'products.*.dose' => 'nullable|string|max:160',
             'products.*.dose_code' => 'nullable|string|max:24',
             'coupon_code' => 'nullable|string|max:40',
-            'paidAmount' => 'nullable|numeric',
-            'dueAmount' => 'nullable|numeric',
-            'isPaid' => 'nullable|boolean',
-            'paymentType' => 'nullable|string',
+            'paid_amount' => 'nullable|numeric',
+            'due_amount' => 'nullable|numeric',
+            'is_paid' => 'nullable|boolean',
+            'payment_type' => 'nullable|string',
         ]);
 
-        $payload['saleDate'] = now()->toDateString();
-        $payload['paidAmount'] ??= 0;
-        $payload['dueAmount'] ??= 0;
+        $payload['sale_date'] = now()->toDateString();
+        $payload['paid_amount'] ??= 0;
+        $payload['due_amount'] ??= 0;
         $businessId0 = (int) $request->user()->business_id;
 
         // Server-side promotion evaluation (client never dictates discounts).
         $quote = $this->promotions->evaluate($businessId0, $payload['products'], $payload['coupon_code'] ?? null);
         if ($quote['discount'] > 0) {
-            $payload['discountAmount'] = min(
+            $payload['discount_amount'] = min(
                 $quote['discount'],
                 collect($payload['products'])->sum(fn ($l) => (float) $l['price'] * (int) $l['quantities'])
             );
@@ -222,7 +222,7 @@ class PosController extends Controller
         $shift = $this->shifts->currentOpen($businessId);
         $saleId = $body['data']['id'] ?? null;
         if ($shift && $saleId) {
-            $this->shifts->addCash($shift, 'sale_cash', (float) ($payload['paidAmount'] ?? 0), 'POS sale', (int) $saleId);
+            $this->shifts->addCash($shift, 'sale_cash', (float) ($payload['paid_amount'] ?? 0), 'POS sale', (int) $saleId);
             \App\Models\Sale::whereKey($saleId)->update(['shift_id' => $shift->id]);
         }
 

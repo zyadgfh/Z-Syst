@@ -34,7 +34,18 @@ class PartyController extends Controller
             'phone' => 'required|max:20|unique:parties,phone',
         ]);
 
-        $data = Party::create($request->except('image') + [
+        $data = Party::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'type' => $request->type,
+                'address' => $request->address,
+                'opening_balance' => $request->opening_balance ?? 0,
+                'business_id' => $request->user()->business_id,
+                'due' => 0,
+                'status' => $request->status ?? 1,
+                'image' => $request->hasFile('image') ? $this->upload($request,'image') : null,
+            ]); // patched
             'opening_balance' => $request->due,
             'business_id' => auth()->user()->business_id,
             'image' => $request->image ? $this->upload($request, 'image') : null,
@@ -89,7 +100,15 @@ class PartyController extends Controller
             'phone' => 'required|max:20|unique:parties,phone,'.$party->id,
         ]);
 
-        $party = $party->update($request->except('image') + [
+        $party->update([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'type' => $request->type,
+                'address' => $request->address,
+                'status' => $request->status ?? $party->status,
+                'image' => $request->hasFile('image') ? $this->upload($request,'image', $party->image) : $party->image,
+            ]); // patched
             'opening_balance' => $request->due,
             'image' => $request->image ? $this->upload($request, 'image', $party->image) : $party->image,
         ]);

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -13,7 +14,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Warehouse extends Model
 {
-    use HasFactory;
+    
+    use TenantScoped;
+use HasFactory;
 
     protected $table = 'warehouses';
 

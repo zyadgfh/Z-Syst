@@ -123,16 +123,16 @@ function default_currency($key = null, ?Currency $currency = null): object|int|s
     return $key ? $currency->$key : $currency;
 }
 
-function dueCollectMessage($data, $party, $business_name, $invoiceNumber)
+function dueCollectMessage($data, $party, $business_name, $invoice_number)
 {
-    if ($invoiceNumber) {
+    if ($invoice_number) {
         $message = 'Dear '.$party->name.'
 We have received a payment of: '.$data->payDueAmount.'
 Your Total Previous Due: '.$party->due.'
 Thanks, '.$business_name;
     } else {
         $message = 'Dear '.$party->name.'
-Your Invoice : '.$data->invoiceNumber.'
+Your Invoice : '.$data->invoice_number.'
 We have received a payment of: '.$data->payDueAmount.'
 Your Total Previous Due: '.$party->due.'
 Thanks, '.$business_name;
@@ -144,10 +144,10 @@ Thanks, '.$business_name;
 function saleMessage($sale, $party, $business_name)
 {
     $message = 'Dear '.$party->name.'
-Your Invoice No: '.$sale->invoiceNumber.'
-Total Bill: '.$sale->totalAmount.'
-Paid: '.$sale->paidAmount.'
-Due: '.$sale->dueAmount.'
+Your Invoice No: '.$sale->invoice_number.'
+Total Bill: '.$sale->total_amount.'
+Paid: '.$sale->paid_amount.'
+Due: '.$sale->due_amount.'
 Total Previous Due: '.$party->due.'
 Thanks, '.$business_name;
 

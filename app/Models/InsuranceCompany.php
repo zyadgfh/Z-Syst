@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -14,7 +15,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class InsuranceCompany extends Model
 {
-    use HasFactory;
+    
+    use TenantScoped;
+use HasFactory;
 
     protected $table = 'insurance_companies';
 
@@ -84,11 +87,11 @@ class InsuranceCompany extends Model
         return $this->hasMany(\App\Models\InsuranceClaim::class, 'insurance_company_id');
     }
 
-    public function calculateDefaultCoverage(float $totalAmount): float
+    public function calculateDefaultCoverage(float $total_amount): float
     {
         $percent = (float) ($this->default_coverage_percent ?? 0);
 
-        return round($totalAmount * $percent / 100, 2);
+        return round($total_amount * $percent / 100, 2);
     }
 }
 

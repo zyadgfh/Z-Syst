@@ -100,7 +100,7 @@ return [
         'admin' => [
             // day-to-day visibility
             'dashboard-read', 'reports-read', 'notifications-read',
-            'settings-read', 'settings-update', 'audit-logs-read',
+            'audit-logs-read',
 
             // team & locations
             'users-read', 'users-create', 'users-update',

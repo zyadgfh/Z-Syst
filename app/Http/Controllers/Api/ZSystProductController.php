@@ -20,12 +20,12 @@ class ZSystProductController extends Controller
      */
     public function index(Request $request)
     {
-        $data = Product::select('id', 'productName', 'productCode', 'purchase_with_tax', 'sales_price')
+        $data = Product::select('id', 'product_name', 'product_code', 'purchase_with_tax', 'sales_price')
             ->where('business_id', auth()->user()->business_id)
             ->when($request->filled('search'), function ($query) use ($request) {
                 $term = '%'.$request->input('search').'%';
-                $query->where('productName', 'like', $term)
-                    ->orWhere('productCode', 'like', $term);
+                $query->where('product_name', 'like', $term)
+                    ->orWhere('product_code', 'like', $term);
             })
             ->when($request->filled('expire_date'), function ($query) use ($request) {
                 $query->whereHas('stocks', function ($query) use ($request) {
@@ -35,13 +35,13 @@ class ZSystProductController extends Controller
             ->when($request->input('expired') == 'true', function ($query) {
                 $query->whereHas('stocks', function ($query) {
                     $query->where('expire_date', '<', today())
-                        ->where('productStock', '>', 0);
+                        ->where('product_stock', '>', 0);
                 });
             })
-            ->withSum('stocks', 'productStock')
+            ->withSum('stocks', 'product_stock')
             ->with(['expiring_item' => function ($query) {
                 $query->select('expire_date', 'product_id')
-                    ->where('productStock', '>', 0)
+                    ->where('product_stock', '>', 0)
                     ->whereNotNull('expire_date');
             }])
             ->latest()
@@ -61,13 +61,13 @@ class ZSystProductController extends Controller
         $business_id = auth()->user()->business_id;
 
         $request->validate([
-            'productName' => 'required|string',
+            'product_name' => 'required|string',
             'category_id' => 'required|integer|exists:categories,id',
             'type_id' => 'nullable|integer|exists:medicine_types,id',
             'unit_id' => 'nullable|integer|exists:units,id',
             'manufacturer_id' => 'nullable|integer|exists:manufacturers,id',
             'box_size_id' => 'nullable|integer|exists:box_sizes,id',
-            'productCode' => [
+            'product_code' => [
                 'nullable',
                 Rule::unique('products')->where(function ($query) use ($business_id) {
                     return $query->where('business_id', $business_id);
@@ -85,16 +85,16 @@ class ZSystProductController extends Controller
         try {
 
             $product = Product::create($request->only([
-                'productName', 'category_id', 'unit_id', 'type_id', 'manufacturer_id',
+                'product_name', 'category_id', 'unit_id', 'type_id', 'manufacturer_id',
                 'box_size_id', 'purchase_without_tax', 'purchase_with_tax',
                 'profit_percent', 'sales_price', 'alert_qty', 'wholesale_price',
-                'productCode', 'meta', 'tax_id', 'tax_type',
+                'product_code', 'meta', 'tax_id', 'tax_type',
             ]) + [
                 'business_id' => $business_id,
                 'images' => $request->images ? $this->multipleUpload($request, 'images') : null,
             ]);
 
-            Stock::create($request->only(['batch_no', 'expire_date', 'productStock']) + [
+            Stock::create($request->only(['batch_no', 'expire_date', 'product_stock']) + [
                 'product_id' => $product->id,
                 'business_id' => $business_id,
             ]);
@@ -118,8 +118,8 @@ class ZSystProductController extends Controller
     public function show($id)
     {
         $data = Product::query()
-            ->with('unit:id,unitName', 'medicine_type:id,name', 'manufacterer:id,name', 'box_size:id,name', 'category:id,categoryName', 'stocks:id,expire_date,product_id,batch_no,productStock', 'tax:id,rate')
-            ->withSum('stocks', 'productStock')
+            ->with('unit:id,unitName', 'medicine_type:id,name', 'manufacterer:id,name', 'box_size:id,name', 'category:id,categoryName', 'stocks:id,expire_date,product_id,batch_no,product_stock', 'tax:id,rate')
+            ->withSum('stocks', 'product_stock')
             ->when(auth()->user()->role !== 'superadmin', fn ($query) => $query->where('business_id', auth()->user()->business_id))
             ->findOrFail($id);
 
@@ -139,13 +139,13 @@ class ZSystProductController extends Controller
             ->first();
 
         $request->validate([
-            'productName' => 'required|string',
+            'product_name' => 'required|string',
             'category_id' => 'required|integer|exists:categories,id',
             'type_id' => 'nullable|integer|exists:medicine_types,id',
             'unit_id' => 'nullable|integer|exists:units,id',
             'manufacturer_id' => 'nullable|integer|exists:manufacturers,id',
             'box_size_id' => 'nullable|integer|exists:box_sizes,id',
-            'productCode' => [
+            'product_code' => [
                 'nullable',
                 'unique:products,productCode,'.$product->id.',id,business_id,'.$business_id,
             ],
@@ -183,7 +183,7 @@ class ZSystProductController extends Controller
                 $stock->update([
                     'batch_no' => $request->batch_no,
                     'expire_date' => $request->expire_date,
-                    'productStock' => $stock->productStock + $request->qty,
+                    'product_stock' => $stock->product_stock + $request->qty,
                 ]);
             } else {
                 Stock::create($request->only(['batch_no', 'expire_date']) + [
@@ -191,17 +191,17 @@ class ZSystProductController extends Controller
                     'business_id' => auth()->user()->role === 'superadmin'
                         ? $product->business_id
                         : $business_id,
-                    'productStock' => $request->qty,
+                    'product_stock' => $request->qty,
                     'batch_no' => $request->batch_no,
                     'expire_date' => $request->expire_date,
                 ]);
             }
 
             $product->update($request->only([
-                'productName', 'category_id', 'type_id', 'unit_id', 'manufacturer_id',
+                'product_name', 'category_id', 'type_id', 'unit_id', 'manufacturer_id',
                 'box_size_id', 'purchase_without_tax', 'purchase_with_tax',
                 'profit_percent', 'sales_price', 'alert_qty', 'wholesale_price',
-                'productCode', 'meta', 'tax_id', 'tax_type',
+                'product_code', 'meta', 'tax_id', 'tax_type',
             ]) + [
                 'images' => $merged_images,
             ]);
@@ -258,12 +258,12 @@ class ZSystProductController extends Controller
                 $stock->update([
                     'batch_no' => $request->batch_no,
                     'expire_date' => $request->expire_date,
-                    'productStock' => $stock->productStock + $request->qty,
+                    'product_stock' => $stock->product_stock + $request->qty,
                 ]);
             } else {
                 Stock::create($request->only(['batch_no', 'expire_date']) + [
                     'product_id' => $product->id,
-                    'productStock' => $request->qty,
+                    'product_stock' => $request->qty,
                     'expire_date' => $request->expire_date,
                     'business_id' => auth()->user()->role === 'superadmin'
                         ? $product->business_id
@@ -304,7 +304,7 @@ class ZSystProductController extends Controller
 
     public function stocksWithProduct(Request $request)
     {
-        $data = Stock::select('id', 'expire_date', 'product_id', 'batch_no', 'productStock')
+        $data = Stock::select('id', 'expire_date', 'product_id', 'batch_no', 'product_stock')
             ->with([
                 'product.tax:id,rate,name',
                 'product:id,productName,purchase_without_tax,purchase_with_tax,profit_percent,sales_price,wholesale_price,tax_id,tax_type,productCode',
@@ -314,13 +314,13 @@ class ZSystProductController extends Controller
                 $query->where(function ($subQuery) use ($term) {
                     $subQuery->where('batch_no', 'like', $term)
                         ->orWhereHas('product', function ($query) use ($term) {
-                            $query->where('productName', 'like', $term)
-                                ->orWhere('productCode', 'like', $term);
+                            $query->where('product_name', 'like', $term)
+                                ->orWhere('product_code', 'like', $term);
                         });
                 });
             })
             ->when($request->input('check_stock') == 'true', function ($query) {
-                $query->where('productStock', '>', 0);
+                $query->where('product_stock', '>', 0);
             })
             ->where('business_id', auth()->user()->business_id)
             ->latest()
@@ -353,14 +353,14 @@ class ZSystProductController extends Controller
             ->where('products.business_id', $businessId)
             ->where('products.id', '!=', $product->id)
             ->whereHas('stocks', function ($q) use ($businessId) {
-                $q->where('business_id', $businessId)->where('productStock', '>', 0);
+                $q->where('business_id', $businessId)->where('product_stock', '>', 0);
             })
             ->get()
             ->map(function (Product $candidate) use ($businessId) {
                 $candidate->available_stock_total = (int) Stock::where('business_id', $businessId)
                     ->where('product_id', $candidate->id)
-                    ->where('productStock', '>', 0)
-                    ->sum('productStock');
+                    ->where('product_stock', '>', 0)
+                    ->sum('product_stock');
                 return $candidate;
             });
 
@@ -379,8 +379,8 @@ class ZSystProductController extends Controller
 
             return [
                 'id' => $candidate->id,
-                'productName' => $candidate->productName,
-                'productCode' => $candidate->productCode,
+                'product_name' => $candidate->productName,
+                'product_code' => $candidate->productCode,
                 'available_stock' => (int) ($candidate->available_stock_total ?? 0),
                 'match_score' => $score,
             ];
@@ -401,7 +401,7 @@ class ZSystProductController extends Controller
         return response()->json([
             'message' => __('Data fetched successfully.'),
             'data' => [
-                'product' => ['id' => $product->id, 'productName' => $product->productName],
+                'product' => ['id' => $product->id, 'product_name' => $product->productName],
                 'alternatives' => $scored,
                 'interaction_warnings' => $warnings,
             ],

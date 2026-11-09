@@ -32,9 +32,9 @@ class BusinessController extends Controller
     {
         $request->validate([
             'address' => 'nullable|max:250',
-            'companyName' => 'required|max:250',
-            'pictureUrl' => 'nullable|image|max:5120',
-            'shopOpeningBalance' => 'nullable|numeric',
+            'company_name' => 'required|max:250',
+            'picture_url' => 'nullable|image|max:5120',
+            'shop_opening_balance' => 'nullable|numeric',
             'business_category_id' => 'required|exists:business_categories,id',
         ]);
 
@@ -44,11 +44,15 @@ class BusinessController extends Controller
             $user = auth()->user();
             $free_plan = Plan::where('subscriptionPrice', '<=', 0)->orWhere('offerPrice', '<=', 0)->first();
 
-            $business = Business::create($request->except('pictureUrl') + [
-                'phoneNumber' => $request->phoneNumber,
-                'subscriptionDate' => $free_plan ? now() : null,
-                'will_expire' => now()->addDays($free_plan->duration),
-                'pictureUrl' => $request->pictureUrl ? $this->upload($request, 'pictureUrl') : null,
+            $business = Business::create([
+                'company_name' => $request->company_name,
+                'address' => $request->address,
+                'phone_number' => $request->phone_number ?? $request->phoneNumber,
+                'business_category_id' => $request->business_category_id,
+                'shop_opening_balance' => $request->shop_opening_balance ?? 0,
+                'subscription_date' => $free_plan ? now() : null,
+                'will_expire' => $free_plan ? now()->addDays($free_plan->duration) : null,
+                'picture_url' => $request->hasFile('picture_url') ? $this->upload($request, 'picture_url') : null,
             ]);
 
             $user->update([
@@ -86,22 +90,22 @@ class BusinessController extends Controller
     {
         $request->validate([
             'address' => 'nullable|max:250',
-            'companyName' => 'required|max:250',
-            'pictureUrl' => 'nullable|image|max:5120',
+            'company_name' => 'required|max:250',
+            'picture_url' => 'nullable|image|max:5120',
             'business_category_id' => 'required|exists:business_categories,id',
-            'phoneNumber' => ['nullable', 'min:5', 'max:15'],
+            'phone_number' => ['nullable', 'min:5', 'max:15'],
         ]);
 
         auth()->user()->update([
-            'name' => $request->companyName,
-            'phone' => $request->phoneNumber,
+            'name' => $request->company_name ?? $request->companyName,
+            'phone' => $request->phone_number ?? $request->phoneNumber,
         ]);
 
         $business->address = $request->address;
-        $business->phoneNumber = $request->phoneNumber;
-        $business->companyName = $request->companyName;
-        $business->business_category_id = $request->business_category_id;
-        $business->pictureUrl = $request->pictureUrl ? $this->upload($request, 'pictureUrl', $business->pictureUrl) : $business->pictureUrl;
+        $business->phone_number = $request->phone_number ?? $request->phoneNumber;
+        $business->company_name = $request->company_name ?? $request->companyName;
+        $business->store_slug = $request->store_slug ?? $business->store_slug;
+        $business->save();
         $business->save();
 
         return response()->json([

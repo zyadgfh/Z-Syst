@@ -32,7 +32,7 @@ class FefoController extends Controller
         $product = Product::where('business_id', $businessId)->findOrFail($productId);
 
         $batches = $this->fefoService->getBestBatches($productId, (int) $quantity, $businessId);
-        $totalAvailable = $batches->sum('productStock');
+        $totalAvailable = $batches->sum('product_stock');
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -47,7 +47,7 @@ class FefoController extends Controller
                         'stock_id' => $batch->id,
                         'batch_no' => $batch->batch_no,
                         'expire_date' => $batch->expire_date,
-                        'available_qty' => $batch->productStock,
+                        'available_qty' => $batch->product_stock,
                         'allocated_qty' => $batch->allocated_quantity ?? 0,
                         'fefo_score' => $this->fefoService->calculateFefoScore($batch),
                         'is_expiring_soon' => $this->fefoService->isExpiringSoon($batch, auth()->user()->business_id),
@@ -81,7 +81,7 @@ class FefoController extends Controller
                         'stock_id' => $batch->id,
                         'batch_no' => $batch->batch_no,
                         'expire_date' => $batch->expire_date,
-                        'available_qty' => $batch->productStock,
+                        'available_qty' => $batch->product_stock,
                         'fefo_score' => $this->fefoService->calculateFefoScore($batch),
                         'is_valid' => $this->fefoService->isBatchValidForSale($batch),
                         'is_expiring_soon' => $this->fefoService->isExpiringSoon($batch, auth()->user()->business_id),
@@ -138,7 +138,7 @@ class FefoController extends Controller
     {
         $businessId = auth()->user()->business_id;
 
-        $logs = FefoLog::with(['product:id,productName', 'sale:id,invoiceNumber'])
+        $logs = FefoLog::with(['product:id,productName', 'sale:id,invoice_number'])
             ->where('business_id', $businessId)
             ->when($request->input('product_id'), function ($q) use ($request) {
                 $q->where('product_id', $request->input('product_id'));

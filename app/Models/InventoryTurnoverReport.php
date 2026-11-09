@@ -4,12 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class InventoryTurnoverReport extends Model
 {
-    use HasFactory;
+    
+    use TenantScoped;
+use HasFactory;
 
     protected $table = 'inventory_turnover_reports';
 
