@@ -22,14 +22,14 @@ class SaleFactory extends Factory
             'party_id' => Party::factory(),
             'business_id' => Business::factory(),
             'user_id' => User::factory(),
-            'totalAmount' => $totalAmount,
-            'paidAmount' => $paidAmount,
-            'dueAmount' => $dueAmount,
-            'discountAmount' => fake()->randomFloat(2, 0, 100),
-            'isPaid' => $dueAmount == 0,
-            'paymentType' => fake()->randomElement(['cash', 'card', 'credit']),
-            'saleDate' => fake()->dateTimeThisYear()->format('Y-m-d'),
-            'invoiceNumber' => 'S-'.str_pad(fake()->unique()->numberBetween(1, 99999), 5, '0', STR_PAD_LEFT),
+            'total_amount' => $totalAmount,
+            'paid_amount' => $paidAmount,
+            'due_amount' => $dueAmount,
+            'discount_amount' => fake()->randomFloat(2, 0, 100),
+            'is_paid' => $dueAmount == 0,
+            'payment_type' => fake()->randomElement(['cash', 'card', 'credit']),
+            'sale_date' => fake()->dateTimeThisYear()->format('Y-m-d'),
+            'invoice_number' => 'S-'.str_pad(fake()->unique()->numberBetween(1, 99999), 5, '0', STR_PAD_LEFT),
         ];
     }
 

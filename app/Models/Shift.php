@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 
 class Shift extends Model
 {
-    public function scopeForBusiness(Builder $q, int $businessId): Builder { return $q->where('business_id', $businessId); }
+    
+    use TenantScoped;
+public function scopeForBusiness(Builder $q, int $businessId): Builder { return $q->where('business_id', $businessId); }
 
     protected $fillable = [
         'business_id', 'user_id', 'shift_number', 'opening_float', 'status',

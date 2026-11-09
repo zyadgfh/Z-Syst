@@ -16,7 +16,7 @@ class StockFactory extends Factory
         return [
             'business_id' => Business::factory(),
             'product_id' => Product::factory(),
-            'productStock' => fake()->randomFloat(2, 10, 500),
+            'product_stock' => fake()->randomFloat(2, 10, 500),
             'batch_no' => fake()->unique()->bothify('BATCH-####'),
             'expire_date' => fake()->dateTimeBetween('+1 month', '+2 years')->format('Y-m-d'),
         ];

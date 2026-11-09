@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -11,7 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class SubscriptionLog extends Model
 {
-    protected $table = 'subscription_logs';
+    
+    use TenantScoped;
+protected $table = 'subscription_logs';
 
     protected $fillable = [
         'subscription_id',

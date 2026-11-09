@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -18,7 +19,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class PurchaseOrder extends Model
 {
-    public const PRIORITY_LOW = 'low';
+    
+    use TenantScoped;
+public const PRIORITY_LOW = 'low';
     public const PRIORITY_NORMAL = 'normal';
     public const PRIORITY_HIGH = 'high';
     public const PRIORITY_URGENT = 'urgent';

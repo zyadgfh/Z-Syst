@@ -4,11 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PlanSubscribe extends Model
 {
-    use HasFactory;
+    use TenantScoped;
+    
+use HasFactory;
 
     /**
      * The attributes that are mass assignable.

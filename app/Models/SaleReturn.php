@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -11,7 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class SaleReturn extends Model
 {
-    protected $table = 'sale_returns';
+    
+    use TenantScoped;
+protected $table = 'sale_returns';
 
     protected $fillable = [
         'business_id',

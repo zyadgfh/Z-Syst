@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 
 class Promotion extends Model
 {
-    protected $fillable = [
+    
+    use TenantScoped;
+protected $fillable = [
         'business_id', 'name', 'type', 'value', 'min_qty', 'bonus_qty',
         'applies_to', 'product_id', 'category_id', 'coupon_code',
         'starts_at', 'ends_at', 'max_uses', 'used_count', 'is_active', 'meta',

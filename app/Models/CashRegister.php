@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -11,7 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class CashRegister extends Model
 {
-    protected $table = 'cash_registers';
+    
+    use TenantScoped;
+protected $table = 'cash_registers';
 
     protected $fillable = [
         'business_id',

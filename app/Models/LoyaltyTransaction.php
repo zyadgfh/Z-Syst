@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -11,7 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class LoyaltyTransaction extends Model
 {
-    protected $table = 'loyalty_transactions';
+    
+    use TenantScoped;
+protected $table = 'loyalty_transactions';
 
     protected $fillable = [
         'business_id',

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
-            $table->integer('productStock')->default(0);
+            $table->integer('product_stock')->default(0);
             $table->string('batch_no')->nullable();
             $table->date('expire_date')->nullable();
             $table->timestamps();

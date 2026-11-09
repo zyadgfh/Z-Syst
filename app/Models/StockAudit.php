@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -14,7 +15,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class StockAudit extends Model
 {
-    protected $table = 'stock_audits';
+    
+    use TenantScoped;
+protected $table = 'stock_audits';
 
     protected $fillable = [
         'business_id',

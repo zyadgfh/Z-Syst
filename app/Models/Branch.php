@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -12,7 +13,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Branch extends Model
 {
-    protected $table = 'branches';
+    
+    use TenantScoped;
+protected $table = 'branches';
 
     protected $fillable = [
         'business_id',

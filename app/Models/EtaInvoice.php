@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 
 class EtaInvoice extends Model
 {
-    protected $fillable = [
+    
+    use TenantScoped;
+protected $fillable = [
         'business_id', 'sale_id', 'submission_uuid', 'long_id', 'status',
         'request_payload', 'response_payload', 'error_message', 'submitted_at',
     ];

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PurchaseDetails extends Model
 {
+    protected $table = 'purchase_details';
     use HasFactory;
 
     /**

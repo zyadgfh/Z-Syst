@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -12,7 +13,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class StockTransfer extends Model
 {
-    protected $table = 'stock_transfers';
+    
+    use TenantScoped;
+protected $table = 'stock_transfers';
 
     protected $fillable = [
         'business_id',

@@ -18,17 +18,17 @@ return new class extends Migration
 
         // Sales table indexes
         Schema::table('sales', function (Blueprint $table) {
-            $table->index(['business_id', 'saleDate']);
+            $table->index(['business_id', 'sale_date']);
             $table->index('party_id');
-            $table->index('invoiceNumber');
+            $table->index('invoice_number');
             $table->index('created_at');
         });
 
         // Purchases table indexes
         Schema::table('purchases', function (Blueprint $table) {
-            $table->index(['business_id', 'purchaseDate']);
+            $table->index(['business_id', 'purchase_date']);
             $table->index('party_id');
-            $table->index('invoiceNumber');
+            $table->index('invoice_number');
             $table->index('created_at');
         });
 
@@ -122,16 +122,16 @@ return new class extends Migration
         });
 
         Schema::table('sales', function (Blueprint $table) {
-            $table->dropIndex(['business_id', 'saleDate']);
+            $table->dropIndex(['business_id', 'sale_date']);
             $table->dropIndex('party_id');
-            $table->dropIndex('invoiceNumber');
+            $table->dropIndex('invoice_number');
             $table->dropIndex('created_at');
         });
 
         Schema::table('purchases', function (Blueprint $table) {
-            $table->dropIndex(['business_id', 'purchaseDate']);
+            $table->dropIndex(['business_id', 'purchase_date']);
             $table->dropIndex('party_id');
-            $table->dropIndex('invoiceNumber');
+            $table->dropIndex('invoice_number');
             $table->dropIndex('created_at');
         });
 

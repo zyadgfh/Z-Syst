@@ -17,7 +17,7 @@ class ProductFactory extends Factory
     {
         return [
             'business_id' => Business::factory(),
-            'productName' => fake()->unique()->word().' '.fake()->randomElement(['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream']),
+            'product_name' => fake()->unique()->word().' '.fake()->randomElement(['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream']),
             'category_id' => Category::factory(),
             'unit_id' => Unit::factory(),
             'manufacturer_id' => Manufacturer::factory(),
@@ -27,7 +27,7 @@ class ProductFactory extends Factory
             'sales_price' => fake()->randomFloat(2, 10, 200),
             'wholesale_price' => fake()->randomFloat(2, 8, 150),
             'alert_qty' => fake()->numberBetween(5, 50),
-            'productCode' => fake()->unique()->bothify('MED-####'),
+            'product_code' => fake()->unique()->bothify('MED-####'),
             'tax_type' => fake()->randomElement(['exclusive', 'inclusive']),
         ];
     }

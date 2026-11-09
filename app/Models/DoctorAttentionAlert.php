@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -12,7 +13,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class DoctorAttentionAlert extends Model
 {
-    use SoftDeletes;
+    
+    use TenantScoped;
+use SoftDeletes;
 
     protected $table = 'doctor_attention_alerts';
 

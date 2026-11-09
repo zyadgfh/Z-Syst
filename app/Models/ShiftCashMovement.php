@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 
 class ShiftCashMovement extends Model
 {
-    protected $fillable = ['shift_id', 'business_id', 'user_id', 'type', 'amount', 'reason', 'sale_id'];
+    
+    use TenantScoped;
+protected $fillable = ['shift_id', 'business_id', 'user_id', 'type', 'amount', 'reason', 'sale_id'];
 
     protected $casts = ['amount' => 'float'];
 

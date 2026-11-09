@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -11,7 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class CouponRedemption extends Model
 {
-    protected $table = 'coupon_redemptions';
+    
+    use TenantScoped;
+protected $table = 'coupon_redemptions';
 
     public $timestamps = false;
 

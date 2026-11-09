@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -11,7 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class ControlledSubstancesLog extends Model
 {
-    protected $table = 'controlled_substances_log';
+    
+    use TenantScoped;
+protected $table = 'controlled_substances_log';
 
     const UPDATED_AT = null;
 

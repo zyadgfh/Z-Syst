@@ -14,11 +14,11 @@ class BusinessFactory extends Factory
     {
         return [
             'business_category_id' => BusinessCategory::factory(),
-            'companyName' => fake()->company(),
+            'company_name' => fake()->company(),
             'address' => fake()->address(),
-            'phoneNumber' => fake()->phoneNumber(),
-            'remainingShopBalance' => fake()->randomFloat(2, 0, 10000),
-            'shopOpeningBalance' => fake()->randomFloat(2, 0, 10000),
+            'phone_number' => fake()->phoneNumber(),
+            'remaining_shop_balance' => fake()->randomFloat(2, 0, 10000),
+            'shop_opening_balance' => fake()->randomFloat(2, 0, 10000),
         ];
     }
 }

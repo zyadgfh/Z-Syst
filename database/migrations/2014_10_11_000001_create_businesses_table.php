@@ -15,15 +15,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('plan_subscribe_id')->nullable();
             $table->foreignId('business_category_id')->constrained()->cascadeOnDelete();
-            $table->string('companyName');
+            $table->string('company_name');
             $table->boolean('status')->default(true);
             $table->date('will_expire')->nullable();
             $table->string('address')->nullable();
-            $table->string('phoneNumber')->nullable();
-            $table->string('pictureUrl')->nullable();
-            $table->timestamp('subscriptionDate')->nullable();
-            $table->double('remainingShopBalance', 10, 2)->default(0);
-            $table->double('shopOpeningBalance', 10, 2)->default(0);
+            $table->string('phone_number')->nullable();
+            $table->string('picture_url')->nullable();
+            $table->timestamp('subscription_date')->nullable();
+            $table->double('remaining_shop_balance', 10, 2)->default(0);
+            $table->double('shop_opening_balance', 10, 2)->default(0);
             $table->timestamps();
         });
     }
