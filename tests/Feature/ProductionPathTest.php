@@ -135,7 +135,7 @@ class ProductionPathTest extends TestCase
         // No retrieveByCredentials() ran (no session recorded) — validation
         // must fail closed without touching the local hash.
         $this->assertFalse($provider->validateCredentials($user, [
-            'email' => $user->email,
+            'email' => $user->getRawOriginal('email'),
             'password' => 'password',
         ]));
     }
