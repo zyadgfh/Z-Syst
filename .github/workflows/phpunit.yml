@@ -68,6 +68,15 @@ jobs:
           EXIT=${PIPESTATUS[0]}
           echo "== last events before end ==" >> test.log
           tail -5 events.txt >> test.log 2>/dev/null || true
+          # A 500 that the app's own exception handler converts into a JSON
+          # response shows no trace in the PHPUnit output at all. Dump the
+          # application logs so handled failures are still diagnosable.
+          echo "== application logs ==" >> test.log
+          for f in storage/logs/*.log; do
+            [ -f "$f" ] || continue
+            echo "---- $f ----" >> test.log
+            tail -n 150 "$f" >> test.log 2>/dev/null || true
+          done
           if [ "$EXIT" -ne 0 ]; then
             if [ -f junit.xml ]; then
               php .github/scripts/emit_test_annotations.php junit.xml
