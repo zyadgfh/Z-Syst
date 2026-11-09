@@ -132,7 +132,8 @@ class SupabaseAuthClient
 
     protected function endpoint(string $key): string
     {
-        return $this->url.config("supabase.auth.{$key}");
+        // Config keys are suffixed _path (token_path, user_path, ...).
+        return $this->url.config("supabase.auth.{$key}_path");
     }
 
     protected function assertConfigured(): void

@@ -77,6 +77,23 @@ jobs:
           fi
           exit $EXIT
 
+      - name: Run production-mode contract (Path A)
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+          SUPABASE_FALLBACK_ELOQUENT: 'false'
+          SUPABASE_URL: 'https://vendor.example.supabase.co'
+          SUPABASE_ANON_KEY: 'ci-anon-key'
+          SUPABASE_SERVICE_ROLE_KEY: 'ci-service-role-key'
+          CACHE_DRIVER: file
+          CACHE_STORE: file
+          SESSION_DRIVER: file
+        run: |
+          timeout -k 15 5m php artisan test --colors=never --filter ProductionPathTest 2>&1 | tee prodpath.log
+          EXIT=${PIPESTATUS[0]}
+          [ "$EXIT" -ne 0 ] && php .github/scripts/emit_log_annotations.php prodpath.log "production contract"
+          exit $EXIT
+
       - name: Surface failures as annotations
         if: failure()
         run: php .github/scripts/emit_test_annotations.php junit.xml
