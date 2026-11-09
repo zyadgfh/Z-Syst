@@ -25,6 +25,30 @@ class ProductionPathTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** True when the process booted in the production posture (env-driven). */
+    protected bool $bootedProduction = false;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->bootedProduction = ! config('supabase.fallback_eloquent');
+    }
+
+    /**
+     * Identity factories write to app_users directly, which the production
+     * posture forbids. Seed locally, then restore the booted posture — so
+     * the class passes under both env modes (CI runs it twice).
+     */
+    protected function seedUser(array $attributes = []): User
+    {
+        Config::set('supabase.fallback_eloquent', true);
+        $user = User::factory()->create($attributes);
+        Config::set('supabase.fallback_eloquent', $this->bootedProduction ? false : true);
+
+        return $user;
+    }
+
     /**
      * In production mode the email accessor reads auth.users through
      * AuthUser::emailFor (request-cached). sqlite has no auth schema, so the
@@ -72,9 +96,7 @@ class ProductionPathTest extends TestCase
 
     public function test_change_password_verifies_through_gotrue_in_production_mode(): void
     {
-        // Seed the identity locally (factories require fallback), then flip
-        // to the production posture.
-        $user = User::factory()->create([
+        $user = $this->seedUser([
             'email' => 'gotrue@example.com',
             'password' => \Illuminate\Support\Facades\Hash::make('password'),
         ]);
@@ -105,7 +127,7 @@ class ProductionPathTest extends TestCase
 
     public function test_change_password_rejects_bad_credentials_via_gotrue(): void
     {
-        $user = User::factory()->create([
+        $user = $this->seedUser([
             'email' => 'gotrue-bad@example.com',
             'password' => \Illuminate\Support\Facades\Hash::make('password'),
         ]);
@@ -127,8 +149,7 @@ class ProductionPathTest extends TestCase
 
     public function test_supabase_user_provider_requires_a_session_in_production_mode(): void
     {
-        // Factories write identities locally; flip to production afterwards.
-        $user = User::factory()->create();
+        $user = $this->seedUser();
         $this->productionMode();
 
         $provider = new \App\Auth\SupabaseUserProvider(
@@ -156,7 +177,7 @@ class ProductionPathTest extends TestCase
 
     public function test_auth_user_email_lookup_reads_app_users_in_fallback_mode(): void
     {
-        $user = User::factory()->create(['email' => 'Lookup@Example.com']);
+        $user = $this->seedUser(['email' => 'Lookup@Example.com']);
         Config::set('supabase.fallback_eloquent', true);
 
         $this->assertNotEmpty(\App\Models\AuthUser::idsForEmail('lookup@example.com'));
