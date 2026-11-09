@@ -35,7 +35,7 @@ SKIP_TABLES = {"grn_items"}
 # Tables that carry a business_id column but whose rows may also be
 # platform-global (business_id IS NULL): a plain equality scope would hide the
 # curated/shared rows from every tenant, which silently disabled the POS
-# drug-interaction warning. These get $tenantIncludeGlobals = true.
+# drug-interaction warning. These override tenantIncludesGlobals().
 GLOBAL_ROW_TABLES = {
     "drug_interactions",
     "inventory_turnover_reports",
@@ -167,8 +167,13 @@ for table in sorted(schema):
     if tenant and not is_user:
         out += ["    use TenantScoped;", ""]
         if table in GLOBAL_ROW_TABLES:
+            # Method, not property: PHP fatals when a class and its trait declare
+            # the same property with different defaults.
             out += ["    /** Platform-global rows (business_id IS NULL) stay visible to every tenant. */",
-                    "    protected static bool $tenantIncludeGlobals = true;", ""]
+                    "    protected static function tenantIncludesGlobals(): bool",
+                    "    {",
+                    "        return true;",
+                    "    }", ""]
     if is_user:
         # app_users is tenant-scoped: an authenticated member of business A must
         # not enumerate or mutate users of business B. Kept here so a
