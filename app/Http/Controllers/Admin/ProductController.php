@@ -21,7 +21,7 @@ class ProductController extends Controller
     {
         $products = Product::query()
             ->when($request->user()?->business_id, fn ($q, $b) => $q->where('business_id', $b))
-            ->orderBy('productName')
+            ->orderBy('product_name')
             ->get();
 
         return response()->json([
@@ -34,8 +34,8 @@ class ProductController extends Controller
     {
         $request->validate([
             'business_id' => 'required|integer|exists:businesses,id',
-            'productName' => 'required|string|max:190',
-            'productCode' => 'nullable|string|max:60',
+            'product_name' => 'required|string|max:190',
+            'product_code' => 'nullable|string|max:60',
             'category_id' => 'nullable|integer',
             'unit_id' => 'nullable|integer',
             'purchase_without_tax' => 'nullable|numeric',
@@ -48,8 +48,8 @@ class ProductController extends Controller
 
         $product = Product::create($request->only([
             'business_id',
-            'productName',
-            'productCode',
+            'product_name',
+            'product_code',
             'category_id',
             'unit_id',
             'purchase_without_tax',

@@ -23,7 +23,7 @@ class StorefrontController extends Controller
 
         return view('web.storefront', [
             'business' => $business,
-            'products' => Product::where('business_id', $business->id)->orderBy('name')->limit(60)->get(['id', 'name', 'sales_price', 'productCode']),
+            'products' => Product::where('business_id', $business->id)->orderBy('name')->limit(60)->get(['id', 'name', 'sales_price', 'product_code']),
         ]);
     }
 

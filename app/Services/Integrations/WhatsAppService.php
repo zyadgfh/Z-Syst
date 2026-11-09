@@ -82,9 +82,9 @@ class WhatsAppService
         return $this->sendTemplate($to, 'sale_confirmation', [$invoiceNo, $total]);
     }
 
-    public function sendDueReminder(string $to, string $invoiceNo, string $dueAmount): bool
+    public function sendDueReminder(string $to, string $invoiceNo, string $due_amount): bool
     {
-        return $this->sendTemplate($to, 'due_reminder', [$invoiceNo, $dueAmount]);
+        return $this->sendTemplate($to, 'due_reminder', [$invoiceNo, $due_amount]);
     }
 
     public function sendRecallNotice(string $to, string $productName, string $batchNo): bool

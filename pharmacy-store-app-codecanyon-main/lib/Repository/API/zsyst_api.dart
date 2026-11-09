@@ -19,7 +19,7 @@ class ZSystApi {
   Map<String, String> get _headers => {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        if (token != null) 'Authorization': 'Bearer $token',
+        if (token != null) 'Authorization': token,
       };
 
   Uri _u(String path) => Uri.parse('${APIConfig.url}/$path');

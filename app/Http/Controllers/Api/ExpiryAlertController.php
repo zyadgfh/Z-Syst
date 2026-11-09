@@ -25,7 +25,7 @@ class ExpiryAlertController extends Controller
         $businessId = auth()->user()->business_id;
         $today = now()->startOfDay();
 
-        $stocks = Stock::where('productStock', '>', 0)
+        $stocks = Stock::where('product_stock', '>', 0)
             ->whereNotNull('expire_date')
             ->whereHas('product', function ($query) use ($businessId) {
                 $query->where('business_id', $businessId);
@@ -93,7 +93,7 @@ class ExpiryAlertController extends Controller
 
         $threshold = $request->threshold; // expired, today, 7, 30, 60, 90, 365, all
 
-        $query = Stock::where('productStock', '>', 0)
+        $query = Stock::where('product_stock', '>', 0)
             ->whereNotNull('expire_date')
             ->whereHas('product', function ($query) use ($businessId) {
                 $query->where('business_id', $businessId);
@@ -140,8 +140,8 @@ class ExpiryAlertController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('batch_no', 'like', "%{$search}%")
                     ->orWhereHas('product', function ($sub) use ($search) {
-                        $sub->where('productName', 'like', "%{$search}%")
-                            ->orWhere('productCode', 'like', "%{$search}%");
+                        $sub->where('product_name', 'like', "%{$search}%")
+                            ->orWhere('product_code', 'like', "%{$search}%");
                     });
             });
         }

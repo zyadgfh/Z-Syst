@@ -45,7 +45,7 @@ class StockReconciliationResource extends JsonResource
                 return [
                     'id' => $this->stock->id,
                     'batch_no' => $this->stock->batch_no,
-                    'quantity' => $this->stock->productStock,
+                    'quantity' => $this->stock->product_stock,
                 ];
             }),
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),

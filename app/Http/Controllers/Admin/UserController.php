@@ -66,22 +66,28 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        $allowedRoles = ['admin', 'manager', 'pharmacist', 'cashier', 'accountant', 'viewer', 'staff', 'shop-owner'];
         $request->validate([
             'name' => 'required|string|max:255',
-            'role' => 'required|string',
-            'phone' => 'nullable|string',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|string|confirmed',
-            'image' => 'nullable|image',
+            'role' => 'required|string|in:'.implode(',', $allowedRoles),
+            'phone' => 'nullable|string|max:30',
+            'email' => 'required|email|max:255|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+            'image' => 'nullable|image|max:2048',
         ]);
 
-        $user = User::create($request->except('image', 'password') + [
-            'image' => $request->image ? $this->upload($request, 'image') : null,
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'role' => $request->role,
+            'business_id' => $request->user()->business_id,
+            'image' => $request->hasFile('image') ? $this->upload($request, 'image') : null,
             'password' => Hash::make($request->password),
         ]);
 
         $role = Role::where('name', $request->role)->first();
-        $user->roles()->sync($role->id);
+        if ($role) $user->roles()->sync($role->id);
 
         sendNotification($user->id, route('admin.users.index', ['users' => $request->role]), __(ucfirst($request->role).' has been created.'), 'action', null, null, true);
 
@@ -106,22 +112,34 @@ class UserController extends Controller
         if ($user->role == 'superadmin') {
             return response()->json(__('You can not update a superadmin.'), 400);
         }
+        if ((int) $user->business_id !== (int) $request->user()->business_id && ! $request->user()->hasRole('superadmin')) {
+            abort(403, 'Cross-tenant update forbidden');
+        }
+        $allowedRoles = ['admin', 'manager', 'pharmacist', 'cashier', 'accountant', 'viewer', 'staff', 'shop-owner'];
         $request->validate([
-            'role' => 'required|string',
-            'phone' => 'nullable|string',
-            'country' => 'nullable|string',
+            'role' => 'required|string|in:'.implode(',', $allowedRoles),
+            'phone' => 'nullable|string|max:30',
+            'country' => 'nullable|string|max:100',
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,'.$user->id,
-            'password' => 'nullable|string|confirmed',
-            'image' => 'nullable|image',
+            'email' => 'required|email|max:255|unique:users,email,'.$user->id,
+            'password' => 'nullable|string|min:8|confirmed',
+            'image' => 'nullable|image|max:2048',
         ]);
 
         $role = Role::where('name', $request->role)->first();
-        $user->roles()->sync($role->id);
-        $user->update($request->except('image', 'password') + [
-            'image' => $request->image ? $this->upload($request, 'image', $user->image) : $user->image,
-            'password' => $request->password ? Hash::make($request->password) : $user->password,
-        ]);
+        if ($role) $user->roles()->sync($role->id);
+        $data = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'country' => $request->country,
+            'role' => $request->role,
+            'image' => $request->hasFile('image') ? $this->upload($request, 'image', $user->image) : $user->image,
+        ];
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+        $user->update($data);
 
         return response()->json([
             'message' => __('Staff updated successfully'),

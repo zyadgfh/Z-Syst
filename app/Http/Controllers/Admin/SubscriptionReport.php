@@ -37,7 +37,7 @@ class SubscriptionReport extends Controller
                             $q->where('name', 'like', '%'.$search.'%');
                         })
                         ->orWhereHas('business', function ($q) use ($search) {
-                            $q->where('companyName', 'like', '%'.$search.'%')
+                            $q->where('company_name', 'like', '%'.$search.'%')
                                 ->orWhereHas('category', function ($q) use ($search) {
                                     $q->where('name', 'like', '%'.$search.'%');
                                 });
@@ -99,7 +99,7 @@ class SubscriptionReport extends Controller
             ]);
 
             $subscribe->business->update([
-                'subscriptionDate' => now(),
+                'subscription_date' => now(),
                 'plan_subscribe_id' => $subscribe->id,
                 'will_expire' => now()->addDays($subscribe->plan->duration),
             ]);

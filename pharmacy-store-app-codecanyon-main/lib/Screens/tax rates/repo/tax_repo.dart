@@ -212,7 +212,7 @@ class TaxRepo {
       final url = Uri.parse('${APIConfig.url}/taxes/$id');
       final headers = {
         'Accept': 'application/json',
-        'Authorization': 'Bearer $token',
+        'Authorization': token,
       };
       final response = await http.delete(url, headers: headers);
 

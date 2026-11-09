@@ -57,8 +57,8 @@ class BarcodeController extends Controller
     {
         $products = Product::query()
             ->forBusiness($request->user()->business_id)
-            ->orderBy('productName')
-            ->get(['id', 'productName', 'productCode', 'sales_price']);
+            ->orderBy('product_name')
+            ->get(['id', 'product_name', 'product_code', 'sales_price']);
 
         return view('admin.barcodes.create', ['products' => $products]);
     }

@@ -14,7 +14,7 @@
                         <div class="row">
                             <div class="mt-3 col-lg-6">
                                 <label class="custom-top-label">{{ __('Company/Business Name') }}</label>
-                                <input type="text" name="companyName"
+                                <input type="text" name="company_name"
                                     placeholder="{{ __('Enter business/store Name') }}" class="form-control" required />
                             </div>
                             <div class="mt-3 col-lg-6">
@@ -32,7 +32,7 @@
 
                             <div class="mt-3 col-lg-6">
                                 <label class="custom-top-label">{{ __('Phone') }}</label>
-                                <input type="number" name="phoneNumber" placeholder="{{ __('Enter Phone Number') }}"
+                                <input type="number" name="phone_number" placeholder="{{ __('Enter Phone Number') }}"
                                     class="form-control" required />
                             </div>
                             <div class="mt-3 col-lg-6">
@@ -52,7 +52,7 @@
                             </div>
                             <div class="mt-3 col-lg-12">
                                 <label class="custom-top-label">{{ __('Opening Balance') }}</label>
-                                <input type="number" name="shopOpeningBalance"
+                                <input type="number" name="shop_opening_balance"
                                     placeholder="{{ __('Enter Opening Balance') }}" class="form-control" />
                             </div>
                         </div>

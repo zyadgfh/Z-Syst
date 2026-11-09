@@ -97,7 +97,7 @@ class StockAuditService
             ->first();
 
         if ($stock) {
-            $detailData['system_quantity'] = $stock->productStock;
+            $detailData['system_quantity'] = $stock->product_stock;
             $detailData['batch_no'] = $stock->batch_no;
             $detailData['expire_date'] = $stock->expire_date;
             $detailData['unit_cost'] = $stock->product->purchase_with_tax ?? 0;
@@ -132,7 +132,7 @@ class StockAuditService
     public function autoPopulateAudit(StockAudit $audit): array
     {
         $stocks = Stock::where('business_id', $audit->business_id)
-            ->where('productStock', '>', 0)
+            ->where('product_stock', '>', 0)
             ->with('product')
             ->get();
 
@@ -143,7 +143,7 @@ class StockAuditService
                 $detail = $this->addAuditDetail($audit, [
                     'product_id' => $stock->product_id,
                     'stock_id' => $stock->id,
-                    'physical_quantity' => $stock->productStock, // Initially same as system
+                    'physical_quantity' => $stock->product_stock, // Initially same as system
                     'notes' => 'Auto-populated from current stock',
                 ]);
                 $details[] = $detail;
@@ -204,15 +204,15 @@ class StockAuditService
                 throw new \Exception('Stock record not found.');
             }
 
-            $beforeQuantity = $stock->productStock;
+            $beforeQuantity = $stock->product_stock;
 
             if ($reconciliation->adjustment_type == 'increase') {
-                $stock->increment('productStock', $reconciliation->adjustment_quantity);
+                $stock->increment('product_stock', $reconciliation->adjustment_quantity);
             } else {
-                if ($stock->productStock < $reconciliation->adjustment_quantity) {
+                if ($stock->product_stock < $reconciliation->adjustment_quantity) {
                     throw new \Exception('Insufficient stock for decrease adjustment.');
                 }
-                $stock->decrement('productStock', $reconciliation->adjustment_quantity);
+                $stock->decrement('product_stock', $reconciliation->adjustment_quantity);
             }
 
             $stock->refresh();
@@ -226,7 +226,7 @@ class StockAuditService
                 'movement_type' => 'adjustment',
                 'quantity' => $reconciliation->adjustment_quantity,
                 'before_quantity' => $beforeQuantity,
-                'after_quantity' => $stock->productStock,
+                'after_quantity' => $stock->product_stock,
                 'batch_no' => $reconciliation->batch_no,
                 'expire_date' => $reconciliation->expire_date,
                 'reference_type' => 'stock_reconciliation',

@@ -77,7 +77,7 @@ class IncomeCategoryRepo {
       final url = Uri.parse('${APIConfig.url}/income-categories/$id');
       final headers = {
         'Accept': 'application/json',
-        'Authorization': 'Bearer $token',
+        'Authorization': token,
       };
 
       final body = {
@@ -109,7 +109,7 @@ class IncomeCategoryRepo {
       final url = Uri.parse('${APIConfig.url}/income-categories/$id');
       final headers = {
         'Accept': 'application/json',
-        'Authorization': 'Bearer $token',
+        'Authorization': token,
       };
       final response = await http.delete(url, headers: headers);
 

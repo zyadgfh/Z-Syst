@@ -32,7 +32,7 @@ class ZSystExpenseController extends Controller
             'expense_category_id' => 'required|exists:expense_categories,id',
         ]);
 
-        Business::findOrFail(auth()->user()->business_id)->decrement('remainingShopBalance', $request->amount);
+        Business::findOrFail(auth()->user()->business_id)->decrement('remaining_shop_balance', $request->amount);
 
         $data = Expense::create($request->except('status') + [
             'user_id' => auth()->id(),
@@ -58,7 +58,7 @@ class ZSystExpenseController extends Controller
 
         $amountDifference = $request->amount - $expense->amount;
 
-        $business->increment('remainingShopBalance', $amountDifference);
+        $business->increment('remaining_shop_balance', $amountDifference);
 
         $expense->update($request->except('user_id', 'business_id') + [
             'user_id' => auth()->id(),

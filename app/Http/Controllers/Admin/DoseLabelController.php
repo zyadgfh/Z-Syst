@@ -91,7 +91,7 @@ class DoseLabelController extends Controller
         $detail = SaleDetails::query()
             ->where('sale_id', (int) $m[1])
             ->where('id', (int) $m[2])
-            ->with(['sale:id,business_id,invoiceNumber,saleDate', 'product:id,productName'])
+            ->with(['sale:id,business_id,invoice_number,sale_date', 'product:id,productName'])
             ->first();
 
         $actor = $request->user() ?: auth()->user();
@@ -107,8 +107,8 @@ class DoseLabelController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'sale' => $detail->sale?->invoiceNumber ?? ('#'.$detail->sale_id),
-                    'sold_at' => optional($detail->sale?->saleDate)->toDateString(),
+                    'sale' => $detail->sale?->invoice_number ?? ('#'.$detail->sale_id),
+                    'sold_at' => optional($detail->sale?->sale_date)->toDateString(),
                     'product' => $detail->product?->name ?? $detail->product?->productName,
                     'dose' => $detail->dose,
                     'dose_code' => $detail->dose_code,

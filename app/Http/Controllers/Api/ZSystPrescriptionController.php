@@ -27,7 +27,7 @@ class ZSystPrescriptionController extends Controller
     {
         $search = $request->input('search');
         $data = Prescription::select('id', 'business_id', 'sale_id', 'party_id', 'image', 'notes', 'status', 'created_at')
-            ->with(['party:id,name,phone', 'sale:id,invoiceNumber'])
+            ->with(['party:id,name,phone', 'sale:id,invoice_number'])
             ->where('business_id', Auth::user()?->business_id)
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($subQuery) use ($search) {
@@ -38,7 +38,7 @@ class ZSystPrescriptionController extends Controller
                                 ->orWhere('phone', 'like', '%'.$search.'%');
                         })
                         ->orWhereHas('sale', function ($q) use ($search) {
-                            $q->where('invoiceNumber', 'like', '%'.$search.'%');
+                            $q->where('invoice_number', 'like', '%'.$search.'%');
                         });
                 });
             })
@@ -113,7 +113,7 @@ class ZSystPrescriptionController extends Controller
     {
         $data = Prescription::with([
             'party:id,name,phone,address',
-            'sale:id,invoiceNumber,totalAmount,saleDate',
+            'sale:id,invoice_number,total_amount,sale_date',
             'sale.details:id,sale_id,product_id,price,quantities',
             'sale.details.product:id,productName',
         ])
@@ -216,7 +216,7 @@ class ZSystPrescriptionController extends Controller
     public function review(Request $request)
     {
         $businessId = Auth::user()?->business_id;
-        $query = Prescription::with(['party:id,name,phone', 'sale:id,invoiceNumber'])
+        $query = Prescription::with(['party:id,name,phone', 'sale:id,invoice_number'])
             ->where('business_id', $businessId)
             ->whereIn('review_status', ['pending', 'approved']);
 
@@ -269,7 +269,7 @@ class ZSystPrescriptionController extends Controller
                 'meta' => $meta,
             ]);
 
-            return $prescription->load(['party:id,name,phone', 'sale:id,invoiceNumber']);
+            return $prescription->load(['party:id,name,phone', 'sale:id,invoice_number']);
         }, 'prescription:link-to-sale', [
             'prescription_id' => $request->prescription_id,
             'sale_id' => $request->sale_id,

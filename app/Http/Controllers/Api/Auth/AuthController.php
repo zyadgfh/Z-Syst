@@ -20,29 +20,49 @@ class AuthController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'password' => 'required|min:6|max:100',
-            'email' => 'required|email',
+            'password' => 'required|min:8|max:100',
+            'email' => 'required|email|max:255',
         ]);
 
         $code = random_int(100000, 999999);
-        $expire = now()->addMinutes(env('OTP_VISIBILITY_TIME') ?? 3);
+        $expire = now()->addMinutes((int) config('auth.otp_visibility_minutes', 10));
         $data = [
             'code' => $code,
             'name' => $request->name,
         ];
 
-        $user = User::where('email', $request->email)->first();
-        if ($user && $user->business_id) {
+        $existing = User::where('email', $request->email)->first();
+        if ($existing && $existing->business_id) {
             return response()->json([
                 'message' => 'This email is already exists.',
             ], 406);
         }
+        // Prevent overwriting an existing superadmin / privileged account via sign-up
+        if ($existing && in_array($existing->role, ['superadmin', 'admin'], true)) {
+            return response()->json([
+                'message' => 'This email is already registered.',
+            ], 406);
+        }
 
-        if (env('MAIL_USERNAME')) {
-            if (env('QUEUE_MAIL')) {
-                Mail::to($request->email)->queue(new WelcomeMail($data));
-            } else {
-                Mail::to($request->email)->send(new WelcomeMail($data));
+        if (! config('mail.from.address') || ! config('mail.mailers.smtp.host')) {
+            // Fallback to env check for backwards compat
+            if (! config('mail.from.address') && ! env('MAIL_USERNAME')) {
+                return response()->json([
+                    'message' => __('Mail service is not configured. Please contact your administrator.'),
+                ], 406);
+            }
+        }
+
+        if (config('mail.from.address')) {
+            try {
+                if (config('queue.default') !== 'sync' && config('mail.queue', false)) {
+                    Mail::to($request->email)->queue(new WelcomeMail($data));
+                } else {
+                    Mail::to($request->email)->send(new WelcomeMail($data));
+                }
+            } catch (\Throwable $e) {
+                report($e);
+                return response()->json(['message' => __('Failed to send verification email.')], 500);
             }
         } else {
             return response()->json([
@@ -50,15 +70,20 @@ class AuthController extends Controller
             ], 406);
         }
 
-        $user = User::updateOrCreate(['email' => $request->email], $request->except('password') + [
-            'remember_token' => $code,
-            'email_verified_at' => $expire,
-            'password' => Hash::make($request->password),
-        ]);
+        // Explicit allowlist — never mass-assign role/business_id/status
+        $user = User::updateOrCreate(
+            ['email' => $request->email],
+            [
+                'name' => $request->name,
+                'remember_token' => $code,
+                'email_verified_at' => $expire,
+                'password' => Hash::make($request->password),
+            ]
+        );
 
         return response()->json([
             'message' => 'An otp code has been sent to your email. Please check and confirm.',
-            'data' => $user,
+            'data' => ['id' => $user->id, 'email' => $user->email, 'name' => $user->name],
         ]);
     }
 
@@ -78,36 +103,34 @@ class AuthController extends Controller
             ], 404);
         }
 
-        if ($user->remember_token == $request->otp) {
-            if ($user->email_verified_at > now()) {
-
-                Auth::login($user);
-                $is_setup = $user->business_id ? true : false;
-                $token = $user->createToken('createToken')->plainTextToken;
-                $accessToken = $user->createToken('createToken');
-                $this->setAccessTokenExpiration($accessToken);
-
-                $user->update([
-                    'remember_token' => null,
-                    'email_verified_at' => now(),
-                ]);
-
-                return response()->json([
-                    'message' => 'Logged In successfully!',
-                    'is_setup' => $is_setup,
-                    'token' => $token,
-                ]);
-
-            } else {
-                return response()->json([
-                    'error' => __('The verification otp has been expired.'),
-                ], 400);
-            }
-        } else {
+        if (! hash_equals((string) $user->remember_token, (string) $request->otp)) {
             return response()->json([
                 'error' => __('Invalid otp.'),
             ], 404);
         }
+
+        if (! $user->email_verified_at || $user->email_verified_at <= now()) {
+            return response()->json([
+                'error' => __('The verification otp has been expired.'),
+            ], 400);
+        }
+
+        Auth::login($user);
+        $is_setup = (bool) $user->business_id;
+        $token = $user->createToken('createToken')->plainTextToken;
+        $accessToken = $user->createToken('createToken');
+        $this->setAccessTokenExpiration($accessToken);
+
+        $user->update([
+            'remember_token' => null,
+            'email_verified_at' => now(),
+        ]);
+
+        return response()->json([
+            'message' => 'Logged In successfully!',
+            'is_setup' => $is_setup,
+            'token' => $token,
+        ]);
     }
 
     public function login(Request $request)
@@ -120,34 +143,37 @@ class AuthController extends Controller
         if (auth()->attempt($request->only('email', 'password'))) {
             $user = auth()->user();
 
+            if ($user->status !== null && $user->status !== 'active' && $user->status !== 1 && $user->status !== '1') {
+                auth()->logout();
+                return response()->json(['message' => __('Account is disabled.')], 403);
+            }
+
             if ($user->role != 'staff' && $user->role != 'shop-owner') {
                 return response()->json([
                     'message' => 'You can not login as '.$user->role.' from the app!',
                 ], 406);
             }
 
-            if ($user->remember_token && ! $user->business_id) { // If user didn't verify email
-
+            if ($user->remember_token && ! $user->business_id) {
                 $code = random_int(100000, 999999);
-                $expire = now()->addMinutes(env('OTP_VISIBILITY_TIME') ?? 3);
+                $expire = now()->addMinutes((int) config('auth.otp_visibility_minutes', 10));
                 $data = [
                     'code' => $code,
-                    'name' => $request->name,
+                    'name' => $user->name,
                 ];
 
-                if (env('MAIL_USERNAME')) {
-                    if (env('QUEUE_MAIL')) {
+                try {
+                    if (config('queue.default') !== 'sync' && config('mail.queue', false)) {
                         Mail::to($request->email)->queue(new WelcomeMail($data));
                     } else {
                         Mail::to($request->email)->send(new WelcomeMail($data));
                     }
-                } else {
-                    return response()->json([
-                        'message' => __('Mail service is not configured. Please contact your administrator.'),
-                    ], 406);
+                } catch (\Throwable $e) {
+                    report($e);
+                    return response()->json(['message' => __('Failed to send verification email.')], 500);
                 }
 
-                User::where('email', $request->email)->first()->update(['remember_token' => $code, 'email_verified_at' => $expire]);
+                User::where('email', $request->email)->first()?->update(['remember_token' => $code, 'email_verified_at' => $expire]);
 
                 return response()->json([
                     'message' => 'An otp code has been sent to your email. Please check and confirm.',
@@ -171,7 +197,7 @@ class AuthController extends Controller
 
     protected function setAccessTokenExpiration(NewAccessToken $accessToken)
     {
-        $expiration = now()->addMinutes(Config::get('sanctum.expiration'));
+        $expiration = now()->addMinutes(Config::get('sanctum.expiration', 60));
 
         DB::table('personal_access_tokens')
             ->where('id', $accessToken->accessToken->id)
@@ -180,7 +206,7 @@ class AuthController extends Controller
 
     public function signOut(): JsonResponse
     {
-        if (auth()->user()->tokens()) {
+        if (auth()->user()?->tokens()) {
             auth()->user()->tokens()->delete();
 
             return response()->json([
@@ -195,13 +221,11 @@ class AuthController extends Controller
 
     public function refreshToken()
     {
-        if (auth()->user()->tokens()) {
-
+        if (auth()->user()?->tokens()) {
             auth()->user()->currentAccessToken()->delete();
             $data['token'] = auth()->user()->createToken('createToken')->plainTextToken;
 
             return response()->json($data);
-
         } else {
             return response()->json([
                 'message' => __('Unauthorized'),
@@ -216,25 +240,24 @@ class AuthController extends Controller
         ]);
 
         $code = random_int(100000, 999999);
-        $expire = now()->addMinutes(env('OTP_VISIBILITY_TIME') ?? 3);
+        $expire = now()->addMinutes((int) config('auth.otp_visibility_minutes', 10));
         $data = [
             'code' => $code,
             'name' => $request->name,
         ];
 
-        if (env('MAIL_USERNAME')) {
-            if (env('QUEUE_MAIL')) {
+        try {
+            if (config('queue.default') !== 'sync' && config('mail.queue', false)) {
                 Mail::to($request->email)->queue(new WelcomeMail($data));
             } else {
                 Mail::to($request->email)->send(new WelcomeMail($data));
             }
-        } else {
-            return response()->json([
-                'message' => __('Mail service is not configured. Please contact your administrator.'),
-            ], 406);
+        } catch (\Throwable $e) {
+            report($e);
+            return response()->json(['message' => __('Failed to send verification email.')], 500);
         }
 
-        User::where('email', $request->email)->first()->update(['remember_token' => $code, 'email_verified_at' => $expire]);
+        User::where('email', $request->email)->first()?->update(['remember_token' => $code, 'email_verified_at' => $expire]);
 
         return response()->json([
             'message' => 'An otp code has been sent to your email. Please check and confirm.',

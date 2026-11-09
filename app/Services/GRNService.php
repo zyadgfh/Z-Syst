@@ -127,7 +127,7 @@ class GRNService
             'business_id' => $grn->business_id,
         ]);
 
-        $stock->increment('productStock', $item->accepted_quantity);
+        $stock->increment('product_stock', $item->accepted_quantity);
     }
 
     /**
@@ -202,7 +202,7 @@ class GRNService
         ])->first();
 
         if ($stock) {
-            $stock->decrement('productStock', $item->accepted_quantity);
+            $stock->decrement('product_stock', $item->accepted_quantity);
         }
     }
 

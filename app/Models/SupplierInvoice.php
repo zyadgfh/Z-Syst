@@ -159,7 +159,7 @@ class SupplierInvoice extends Model
         return $businessId ? $query->where('business_id', $businessId) : $query;
     }
 
-    public function isPaid(): bool
+    public function is_paid(): bool
     {
         return $this->status === self::STATUS_PAID
             || (float) $this->balance <= 0.0;

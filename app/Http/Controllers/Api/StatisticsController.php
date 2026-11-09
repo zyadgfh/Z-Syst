@@ -22,11 +22,11 @@ class StatisticsController extends Controller
         $date = $request->input('date', today());
 
         $total_income = Income::where('business_id', $business_id)->whereDate('incomeDate', $date)->sum('amount');
-        $total_expense = Expense::where('business_id', $business_id)->whereDate('expenseDate', $date)->sum('amount');
+        $total_expense = Expense::where('business_id', $business_id)->whereDate('expense_date', $date)->sum('amount');
 
-        $sales = Sale::where('business_id', $business_id)->whereDate('created_at', $date)->sum('totalAmount');
-        $purchase = Purchase::where('business_id', $business_id)->whereDate('created_at', $date)->sum('totalAmount');
-        $profit = Sale::where('business_id', $business_id)->whereDate('created_at', $date)->sum('lossProfit') + $total_income - $total_expense;
+        $sales = Sale::where('business_id', $business_id)->whereDate('created_at', $date)->sum('total_amount');
+        $purchase = Purchase::where('business_id', $business_id)->whereDate('created_at', $date)->sum('total_amount');
+        $profit = Sale::where('business_id', $business_id)->whereDate('created_at', $date)->sum('loss_profit') + $total_income - $total_expense;
 
         $data = [
             'sales' => $sales,
@@ -79,44 +79,44 @@ class StatisticsController extends Controller
             return [
                 'total_customers' => Party::whereIn('type', ['Retailer', 'Wholesaler'])->where('business_id', $business_id)->whereBetween('created_at', [$start, $end])->count(),
                 'total_suppliers' => Party::whereIn('type', ['Supplier'])->where('business_id', $business_id)->whereBetween('created_at', [$start, $end])->count(),
-                'total_medicine' => (int) Stock::where('business_id', $business_id)->whereBetween('created_at', [$start, $end])->sum('productStock'),
-                'expired_medicine' => (int) Stock::where('business_id', $business_id)->where('expire_date', '<', today())->whereBetween('created_at', [$start, $end])->sum('productStock'),
+                'total_medicine' => (int) Stock::where('business_id', $business_id)->whereBetween('created_at', [$start, $end])->sum('product_stock'),
+                'expired_medicine' => (int) Stock::where('business_id', $business_id)->where('expire_date', '<', today())->whereBetween('created_at', [$start, $end])->sum('product_stock'),
             ];
         });
 
         $sales_data = DB::table('sales')
-            ->select(DB::raw(\App\Support\SqlDate::format('saleDate', '%Y-%m-%d') . ' as date'), DB::raw('SUM(totalAmount) as amount'))
+            ->select(DB::raw(\App\Support\SqlDate::format('sale_date', '%Y-%m-%d') . ' as date'), DB::raw('SUM(total_amount) as amount'))
             ->where('business_id', $business_id)
-            ->whereBetween('saleDate', [$start, $end])
+            ->whereBetween('sale_date', [$start, $end])
             ->groupBy('date')
             ->orderBy('date')
             ->get()
             ->keyBy('date');
 
         $purchase_data = DB::table('purchases')
-            ->select(DB::raw(\App\Support\SqlDate::format('purchaseDate', '%Y-%m-%d') . ' as date'), DB::raw('SUM(totalAmount) as amount'))
+            ->select(DB::raw(\App\Support\SqlDate::format('purchase_date', '%Y-%m-%d') . ' as date'), DB::raw('SUM(total_amount) as amount'))
             ->where('business_id', $business_id)
-            ->whereBetween('purchaseDate', [$start, $end])
+            ->whereBetween('purchase_date', [$start, $end])
             ->groupBy('date')
             ->orderBy('date')
             ->get()
             ->keyBy('date');
 
         $loss_data = DB::table('sales')
-            ->select(DB::raw(\App\Support\SqlDate::format('saleDate', '%Y-%m-%d') . ' as date'), DB::raw('SUM(lossProfit) as amount'))
+            ->select(DB::raw(\App\Support\SqlDate::format('sale_date', '%Y-%m-%d') . ' as date'), DB::raw('SUM(loss_profit) as amount'))
             ->where('business_id', $business_id)
-            ->where('lossProfit', '<=', 0)
-            ->whereBetween('saleDate', [$start, $end])
+            ->where('loss_profit', '<=', 0)
+            ->whereBetween('sale_date', [$start, $end])
             ->groupBy('date')
             ->orderBy('date')
             ->get()
             ->keyBy('date');
 
         $profit_data = DB::table('sales')
-            ->select(DB::raw(\App\Support\SqlDate::format('saleDate', '%Y-%m-%d') . ' as date'), DB::raw('SUM(lossProfit) as amount'))
+            ->select(DB::raw(\App\Support\SqlDate::format('sale_date', '%Y-%m-%d') . ' as date'), DB::raw('SUM(loss_profit) as amount'))
             ->where('business_id', $business_id)
-            ->where('lossProfit', '>', 0)
-            ->whereBetween('saleDate', [$start, $end])
+            ->where('loss_profit', '>', 0)
+            ->whereBetween('sale_date', [$start, $end])
             ->groupBy('date')
             ->orderBy('date')
             ->get()

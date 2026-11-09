@@ -13,11 +13,13 @@ class TwoFactorController extends Controller
     public function show(Request $request)
     {
         $user = $request->user();
+        $enabled = (bool) $user->two_factor_secret;
 
         return view('admin.profile.twofactor', [
-            'enabled' => (bool) $user->two_factor_secret,
-            'secret' => $user->two_factor_secret,
-            'uri' => $user->two_factor_secret ? Totp::uri($user->two_factor_secret, $user->email ?? 'user', config('app.name')) : null,
+            'enabled' => $enabled,
+            // Never expose existing secret — only show during enrollment via enable()
+            'secret' => null,
+            'uri' => null,
         ]);
     }
 

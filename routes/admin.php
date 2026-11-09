@@ -342,28 +342,28 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
 // ═══ Sales Operations Unit (shifts, stock take, promotions, storefront
 // orders, deliveries, ETA, gateways, accounting, analytics, assistant,
 // live board, 2FA) ═══
-Route::prefix('shifts')->name('shifts.')->middleware('permission:shifts-read')->group(function () {
-    Route::get('/', [ADMIN\ShiftController::class, 'index'])->name('index');
-    Route::post('open', [ADMIN\ShiftController::class, 'open'])->name('open');
-    Route::post('{shift}/cash', [ADMIN\ShiftController::class, 'cash'])->name('cash');
-    Route::post('{shift}/close', [ADMIN\ShiftController::class, 'close'])->name('close');
-    Route::get('{shift}/report', [ADMIN\ShiftController::class, 'report'])->name('report');
+Route::prefix('shifts')->name('shifts.')->group(function () {
+    Route::get('/', [ADMIN\ShiftController::class, 'index'])->middleware('permission:shifts-read')->name('index');
+    Route::post('open', [ADMIN\ShiftController::class, 'open'])->middleware('permission:shifts-create')->name('open');
+    Route::post('{shift}/cash', [ADMIN\ShiftController::class, 'cash'])->middleware('permission:shifts-update')->name('cash');
+    Route::post('{shift}/close', [ADMIN\ShiftController::class, 'close'])->middleware('permission:shifts-update')->name('close');
+    Route::get('{shift}/report', [ADMIN\ShiftController::class, 'report'])->middleware('permission:shifts-read')->name('report');
 });
 
-Route::prefix('stock-take')->name('stocktake.')->middleware('permission:stocktake-read')->group(function () {
-    Route::get('/', [ADMIN\StockTakeController::class, 'index'])->name('index');
-    Route::post('/', [ADMIN\StockTakeController::class, 'store'])->name('store');
-    Route::get('{audit}', [ADMIN\StockTakeController::class, 'show'])->name('show');
-    Route::post('{audit}/apply', [ADMIN\StockTakeController::class, 'apply'])->name('apply');
-    Route::post('scan', [ADMIN\StockTakeController::class, 'webScan'])->name('scan');
+Route::prefix('stock-take')->name('stocktake.')->group(function () {
+    Route::get('/', [ADMIN\StockTakeController::class, 'index'])->middleware('permission:stocktake-read')->name('index');
+    Route::post('/', [ADMIN\StockTakeController::class, 'store'])->middleware('permission:stocktake-create')->name('store');
+    Route::get('{audit}', [ADMIN\StockTakeController::class, 'show'])->middleware('permission:stocktake-read')->name('show');
+    Route::post('{audit}/apply', [ADMIN\StockTakeController::class, 'apply'])->middleware('permission:stocktake-update')->name('apply');
+    Route::post('scan', [ADMIN\StockTakeController::class, 'webScan'])->middleware('permission:stocktake-read')->name('scan');
 });
 
-Route::prefix('promotions')->name('promotions.')->middleware('permission:promotions-read')->group(function () {
-    Route::get('/', [ADMIN\PromotionController::class, 'index'])->name('index');
-    Route::post('/', [ADMIN\PromotionController::class, 'store'])->name('store');
-    Route::put('{promotion}', [ADMIN\PromotionController::class, 'update'])->name('update');
-    Route::post('{promotion}/toggle', [ADMIN\PromotionController::class, 'toggle'])->name('toggle');
-    Route::delete('{promotion}', [ADMIN\PromotionController::class, 'destroy'])->name('destroy');
+Route::prefix('promotions')->name('promotions.')->group(function () {
+    Route::get('/', [ADMIN\PromotionController::class, 'index'])->middleware('permission:promotions-read')->name('index');
+    Route::post('/', [ADMIN\PromotionController::class, 'store'])->middleware('permission:promotions-create')->name('store');
+    Route::put('{promotion}', [ADMIN\PromotionController::class, 'update'])->middleware('permission:promotions-update')->name('update');
+    Route::post('{promotion}/toggle', [ADMIN\PromotionController::class, 'toggle'])->middleware('permission:promotions-update')->name('toggle');
+    Route::delete('{promotion}', [ADMIN\PromotionController::class, 'destroy'])->middleware('permission:promotions-delete')->name('destroy');
 });
 
 Route::get('store-orders', [ADMIN\StoreOrderController::class, 'index'])->name('store-orders.index')->middleware('permission:store-orders-read');
@@ -375,11 +375,11 @@ Route::post('deliveries', [ADMIN\DeliveryController::class, 'store'])->name('del
 Route::post('deliveries/{delivery}/assign', [ADMIN\DeliveryController::class, 'assign'])->name('deliveries.assign')->middleware('permission:deliveries-update');
 Route::post('deliveries/{delivery}/status', [ADMIN\DeliveryController::class, 'status'])->name('deliveries.status')->middleware('permission:deliveries-update');
 
-Route::prefix('eta')->name('eta.')->middleware('permission:eta-read')->group(function () {
-    Route::get('/', [ADMIN\EtaInvoiceController::class, 'index'])->name('index');
-    Route::get('settings', [ADMIN\EtaInvoiceController::class, 'settings'])->name('settings');
-    Route::put('settings', [ADMIN\EtaInvoiceController::class, 'saveSettings'])->name('settings.save');
-    Route::post('sales/{sale}/submit', [ADMIN\EtaInvoiceController::class, 'submit'])->name('submit');
+Route::prefix('eta')->name('eta.')->group(function () {
+    Route::get('/', [ADMIN\EtaInvoiceController::class, 'index'])->middleware('permission:eta-read')->name('index');
+    Route::get('settings', [ADMIN\EtaInvoiceController::class, 'settings'])->middleware('permission:eta-read')->name('settings');
+    Route::put('settings', [ADMIN\EtaInvoiceController::class, 'saveSettings'])->middleware('permission:eta-update')->name('settings.save');
+    Route::post('sales/{sale}/submit', [ADMIN\EtaInvoiceController::class, 'submit'])->middleware('permission:eta-create')->name('submit');
 });
 
 Route::post('subscription-pay', [ADMIN\GatewayPaymentController::class, 'checkoutSubscription'])->name('subscription.pay')->middleware('permission:settings-update');
@@ -411,15 +411,15 @@ Route::post('profile/two-factor/verify', [ADMIN\TwoFactorController::class, 'ver
 Route::post('profile/two-factor/disable', [ADMIN\TwoFactorController::class, 'disable'])->name('two-factor.disable');
 
 // Quick-create endpoints used by the admin panel forms and the integration workflow.
-Route::post('sales', [ADMIN\SaleController::class, 'store'])->name('sales.store');
-Route::post('purchases', [ADMIN\PurchaseController::class, 'store'])->name('purchases.store');
+Route::post('sales', [ADMIN\SaleController::class, 'store'])->name('sales.store')->middleware('permission:sales-create');
+Route::post('purchases', [ADMIN\PurchaseController::class, 'store'])->name('purchases.store')->middleware('permission:purchases-create');
 Route::get('products', [ADMIN\ProductController::class, 'index'])->name('products.index');
-Route::post('products', [ADMIN\ProductController::class, 'store'])->name('products.store');
+Route::post('products', [ADMIN\ProductController::class, 'store'])->name('products.store')->middleware('permission:products-create');
 Route::get('dashboard-reports/overall', [ADMIN\DashboardReportController::class, 'overall'])->name('dashboard-reports.overall');
-Route::post('business/upgrade-plan', [ADMIN\SubscriptionController::class, 'upgradePlanForBusiness'])->name('business.upgrade-plan');
+Route::post('business/upgrade-plan', [ADMIN\SubscriptionController::class, 'upgradePlanForBusiness'])->name('business.upgrade-plan')->middleware('role:superadmin');
 });
 
 // Bare-name alias used by the dashboard cache-invalidation flow.
 Route::get('dashboard-reports/overall', [ADMIN\DashboardReportController::class, 'overall'])
     ->name('dashboard-reports.overall')
-    ->middleware('auth');
+    ->middleware(['auth', 'permission:reports-read']);

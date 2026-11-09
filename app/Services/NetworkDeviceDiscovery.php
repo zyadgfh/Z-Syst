@@ -27,6 +27,13 @@ class NetworkDeviceDiscovery
     /** @return array{available: bool, reason?: string, hosts?: array} */
     public function discover(string $cidr = 'auto'): array
     {
+        // Disabled in cloud/production — only allowed on self-host when explicitly enabled by superadmin
+        if (app()->environment('production')) {
+            return ['available' => false, 'reason' => 'network scan disabled in cloud — configure printers manually'];
+        }
+        if (! config('devices.allow_network_scan', false)) {
+            return ['available' => false, 'reason' => 'network scan disabled by configuration'];
+        }
         if (! function_exists('fsockopen')) {
             return ['available' => false, 'reason' => 'sockets unavailable in this runtime'];
         }
@@ -34,6 +41,10 @@ class NetworkDeviceDiscovery
         $local = $this->localIp();
         if (! $local) {
             return ['available' => false, 'reason' => 'no local IP — run on a self-host inside the shop LAN'];
+        }
+        // SSRF guard: only allow private RFC1918 /24 ranges
+        if (! preg_match('/^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/', $local)) {
+            return ['available' => false, 'reason' => 'not a private LAN address'];
         }
 
         $net = $cidr === 'auto' ? implode('.', array_slice(explode('.', $local), 0, 3)).'.' : rtrim($cidr, '.').'.';

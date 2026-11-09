@@ -14,7 +14,7 @@ class BannerRepository {
 
     final response = await http.get(uri, headers: {
       'Accept': 'application/json',
-      'Authorization': 'Bearer $token',
+      'Authorization': token,
     });
     if (response.statusCode == 200) {
       print(response.body);

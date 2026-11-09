@@ -27,11 +27,11 @@ class UnitController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'unitName' => 'required|unique:units,unitName,NULL,id,business_id,'.auth()->user()->business_id,
+            'unit_name' => 'required|unique:units,unitName,NULL,id,business_id,'.auth()->user()->business_id,
         ]);
 
         $data = Unit::create($request->only([
-        'unitName',
+        'unit_name',
         'status'
     ]) + [
             'business_id' => auth()->user()->business_id,
@@ -49,14 +49,14 @@ class UnitController extends Controller
     public function update(Request $request, Unit $unit)
     {
         $request->validate([
-            'unitName' => [
+            'unit_name' => [
                 'required',
                 'unique:units,unitName,'.$unit->id.',id,business_id,'.auth()->user()->business_id,
             ],
         ]);
 
         $unit = $unit->update($request->only([
-        'unitName',
+        'unit_name',
         'status'
     ]));
 

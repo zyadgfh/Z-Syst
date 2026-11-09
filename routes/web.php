@@ -44,16 +44,8 @@ Route::group([
 });
 
 // Payment success/failed routes
-Route::get('/payment/success', [Web\PaymentController::class, 'success'])->name('payment.success');
-Route::get('/payment/failed', [Web\PaymentController::class, 'failed'])->name('payment.failed');
-Route::get('/cache-clear', function () {
-    Artisan::call('cache:clear');
-    Artisan::call('config:clear');
-    Artisan::call('route:clear');
-    Artisan::call('view:clear');
-
-    return back()->with('success', __('Cache has been cleared.'));
-});
+Route::get('/payment/success', [Web\PaymentController::class, 'success'])->name('payment.success')->middleware(['auth', 'throttle:30,1']);
+Route::get('/payment/failed', [Web\PaymentController::class, 'failed'])->name('payment.failed')->middleware('throttle:30,1');
 
 require __DIR__.'/auth.php';
 

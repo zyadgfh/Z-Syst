@@ -26,7 +26,7 @@ class StockTakeService
             'audit_date' => now(),
         ]);
 
-        foreach (Stock::forBusiness($businessId)->where('productStock', '>', 0)->get() as $stock) {
+        foreach (Stock::forBusiness($businessId)->where('product_stock', '>', 0)->get() as $stock) {
             StockAuditDetail::create([
                 'stock_audit_id' => $audit->id,
                 'business_id' => $businessId,
@@ -34,9 +34,9 @@ class StockTakeService
                 'stock_id' => $stock->id,
                 'batch_no' => $stock->batch_no,
                 'expire_date' => $stock->expire_date,
-                'system_quantity' => (int) $stock->productStock,
+                'system_quantity' => (int) $stock->product_stock,
                 'physical_quantity' => 0,
-                'variance' => -(int) $stock->productStock,
+                'variance' => -(int) $stock->product_stock,
                 'variance_type' => 'negative',
             ]);
         }
@@ -70,7 +70,7 @@ class StockTakeService
                 'stock_audit_id' => $audit->id, 'business_id' => $businessId,
                 'product_id' => $productId, 'stock_id' => $stock?->id,
                 'batch_no' => $stock?->batch_no, 'expire_date' => $stock?->expire_date,
-                'system_quantity' => (int) ($stock?->productStock ?? 0),
+                'system_quantity' => (int) ($stock?->product_stock ?? 0),
                 'physical_quantity' => 0, 'variance' => 0, 'variance_type' => 'none',
             ]);
         }
@@ -110,8 +110,8 @@ class StockTakeService
                 continue;
             }
 
-            $before = (int) $stock->productStock;
-            $stock->update(['productStock' => (int) $detail->physical_quantity]);
+            $before = (int) $stock->product_stock;
+            $stock->update(['product_stock' => (int) $detail->physical_quantity]);
 
             StockMovement::create([
                 'business_id' => $audit->business_id,
@@ -137,7 +137,7 @@ class StockTakeService
     protected function resolveProductId(int $businessId, string $code): ?int
     {
         $product = Product::where('business_id', $businessId)
-            ->where(fn ($q) => $q->where('productCode', $code)->orWhere('barcode', $code))->first();
+            ->where(fn ($q) => $q->where('product_code', $code)->orWhere('barcode', $code))->first();
         if ($product) {
             return $product->id;
         }

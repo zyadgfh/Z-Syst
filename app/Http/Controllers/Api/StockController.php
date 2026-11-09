@@ -20,7 +20,7 @@ class StockController extends Controller
         $low_stock_count = DB::table('products')
             ->where('products.business_id', $business_id)
             ->join('stocks', 'products.id', '=', 'stocks.product_id')
-            ->select('products.id', 'products.alert_qty', DB::raw('SUM(stocks.productStock) as totalStock'))
+            ->select('products.id', 'products.alert_qty', DB::raw('SUM(stocks.product_stock) as totalStock'))
             ->groupBy('products.id', 'products.alert_qty')
             ->havingRaw('totalStock < alert_qty')
             ->count();
@@ -28,24 +28,24 @@ class StockController extends Controller
         $total_stock_value = DB::table('products')
             ->where('products.business_id', $business_id)
             ->join('stocks', 'products.id', '=', 'stocks.product_id')
-            ->select(DB::raw('SUM(stocks.productStock * products.purchase_with_tax) as totalStockValue'))
+            ->select(DB::raw('SUM(stocks.product_stock * products.purchase_with_tax) as totalStockValue'))
             ->value('totalStockValue');
 
-        $stocks = Product::select('id', 'productName', 'purchase_with_tax', 'sales_price')
+        $stocks = Product::select('id', 'product_name', 'purchase_with_tax', 'sales_price')
             ->when($request->filled('search'), function ($query) use ($request) {
                 $term = '%'.$request->input('search').'%';
                 $query->where(function ($subQuery) use ($term) {
-                    $subQuery->where('productName', 'like', $term)
-                        ->orWhere('productCode', 'like', $term)
+                    $subQuery->where('product_name', 'like', $term)
+                        ->orWhere('product_code', 'like', $term)
                         ->orWhereHas('stocks', function ($query) use ($term) {
                             $query->where('batch_no', 'like', $term);
                         });
                 });
             })
-            ->withSum('stocks', 'productStock')
+            ->withSum('stocks', 'product_stock')
             ->where('business_id', $business_id)
             ->with(['stocks' => function ($query) use ($fefoEnabled) {
-                $query->select('id', 'batch_no', 'expire_date', 'product_id', 'productStock', 'created_at');
+                $query->select('id', 'batch_no', 'expire_date', 'product_id', 'product_stock', 'created_at');
                 if ($fefoEnabled) {
                     $query->orderByRaw('CASE WHEN expire_date IS NULL THEN 1 ELSE 0 END')
                         ->orderBy('expire_date', 'asc')

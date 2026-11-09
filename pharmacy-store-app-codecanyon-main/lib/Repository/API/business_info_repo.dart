@@ -16,7 +16,7 @@ class BusinessRepository {
 
     final response = await http.get(uri, headers: {
       'Accept': 'application/json',
-      'Authorization': 'Bearer $token', // Assuming Bearer token format
+      'Authorization': token, // Assuming Bearer token format
     });
     if (response.statusCode == 200) {
       final parsedData = jsonDecode(response.body);
@@ -34,7 +34,7 @@ class BusinessRepository {
 
     final response = await http.get(uri, headers: {
       'Accept': 'application/json',
-      'Authorization': 'Bearer $token', // Assuming Bearer token format
+      'Authorization': token, // Assuming Bearer token format
     });
     if (response.statusCode == 200) {
       final parsedData = jsonDecode(response.body);
@@ -51,7 +51,7 @@ class BusinessRepository {
 
     final response = await http.get(uri, headers: {
       'Accept': 'application/json',
-      'Authorization': 'Bearer $token', // Assuming Bearer token format
+      'Authorization': token, // Assuming Bearer token format
     });
     if (response.statusCode == 200) {
       print(response.body);
@@ -69,7 +69,7 @@ class BusinessRepository {
 
     final response = await http.get(uri, headers: {
       'Accept': 'application/json',
-      'Authorization': 'Bearer $token', // Assuming Bearer token format
+      'Authorization': token, // Assuming Bearer token format
     });
     print(response.body);
     if (response.statusCode == 200) {

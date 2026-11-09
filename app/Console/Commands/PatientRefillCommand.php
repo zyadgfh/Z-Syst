@@ -19,7 +19,7 @@ class PatientRefillCommand extends Command
             ->get();
 
         foreach ($due as $med) {
-            $lowStock = (int) $med->product->stocks()->sum('productStock') <= 3;
+            $lowStock = (int) $med->product->stocks()->sum('product_stock') <= 3;
             $telegram->send((int) $med->business_id,
                 '💊 تجديد دواء مزمن: '.($med->party->name ?? 'مريض').' — '.($med->product->name ?? '').
                 ($lowStock ? ' ⚠️ المخزون قارب على النفاد — اتصل بالمريض.' : ' — جاهز للاستلام.'));

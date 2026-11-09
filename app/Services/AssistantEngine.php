@@ -61,7 +61,7 @@ class AssistantEngine
     protected function salesSum(int $businessId, array $period): array
     {
         [$from, $to, $label] = $period;
-        $sum = (float) Sale::forBusiness($businessId)->whereDate('saleDate', '>=', $from->toDateString())->whereDate('saleDate', '<=', $to->toDateString())->sum('totalAmount');
+        $sum = (float) Sale::forBusiness($businessId)->whereDate('sale_date', '>=', $from->toDateString())->whereDate('sale_date', '<=', $to->toDateString())->sum('total_amount');
 
         return ['intent' => 'sales_sum', 'answer' => "إجمالي المبيعات $label: ".number_format($sum, 2).' جنيه'];
     }
@@ -69,7 +69,7 @@ class AssistantEngine
     protected function invoiceCount(int $businessId, array $period): array
     {
         [$from, $to, $label] = $period;
-        $count = (int) Sale::forBusiness($businessId)->whereDate('saleDate', '>=', $from->toDateString())->whereDate('saleDate', '<=', $to->toDateString())->count();
+        $count = (int) Sale::forBusiness($businessId)->whereDate('sale_date', '>=', $from->toDateString())->whereDate('sale_date', '<=', $to->toDateString())->count();
 
         return ['intent' => 'invoice_count', 'answer' => "عدد الفواتير $label: $count فاتورة"];
     }
@@ -77,7 +77,7 @@ class AssistantEngine
     protected function profit(int $businessId, array $period): array
     {
         [$from, $to, $label] = $period;
-        $profit = (float) Sale::forBusiness($businessId)->whereDate('saleDate', '>=', $from->toDateString())->whereDate('saleDate', '<=', $to->toDateString())->sum('lossProfit');
+        $profit = (float) Sale::forBusiness($businessId)->whereDate('sale_date', '>=', $from->toDateString())->whereDate('sale_date', '<=', $to->toDateString())->sum('loss_profit');
 
         return ['intent' => 'profit', 'answer' => "الربح التقديري $label: ".number_format($profit, 2).' جنيه'];
     }
@@ -85,14 +85,14 @@ class AssistantEngine
     protected function stockOf(int $businessId, string $name): array
     {
         $product = Product::where('business_id', $businessId)
-            ->where(fn ($w) => $w->where('productName', 'like', '%'.$name.'%')->orWhere('name', 'like', '%'.$name.'%')->orWhere('productCode', 'like', '%'.$name.'%'))
+            ->where(fn ($w) => $w->where('product_name', 'like', '%'.$name.'%')->orWhere('name', 'like', '%'.$name.'%')->orWhere('product_code', 'like', '%'.$name.'%'))
             ->first();
 
         if (!$product) {
             return ['intent' => 'stock_of', 'answer' => "لم أجد صنفًا باسم «{$name}»."];
         }
 
-        $qty = (int) $product->stocks()->sum('productStock');
+        $qty = (int) $product->stocks()->sum('product_stock');
 
         return ['intent' => 'stock_of', 'answer' => "مخزون «{$product->name}»: $qty وحدة".($qty <= 5 ? ' ⚠️ منخفض' : '')];
     }
@@ -100,7 +100,7 @@ class AssistantEngine
     protected function lowStock(int $businessId): array
     {
         $items = Product::where('business_id', $businessId)->with('stocks')->get()
-            ->map(fn ($p) => ['name' => $p->name, 'qty' => (int) $p->stocks->sum('productStock')])
+            ->map(fn ($p) => ['name' => $p->name, 'qty' => (int) $p->stocks->sum('product_stock')])
             ->filter(fn ($i) => $i['qty'] <= 5)->take(10)->values();
 
         if ($items->isEmpty()) {
@@ -116,7 +116,7 @@ class AssistantEngine
             ->join('sales', 'sales.id', '=', 'sale_details.sale_id')
             ->join('products', 'products.id', '=', 'sale_details.product_id')
             ->where('sales.business_id', $businessId)
-            ->where('sales.saleDate', '>=', now()->subDays(30)->toDateString())
+            ->where('sales.sale_date', '>=', now()->subDays(30)->toDateString())
             ->groupBy('products.name')
             ->orderByRaw('SUM(sale_details.quantities) DESC')
             ->limit(5)

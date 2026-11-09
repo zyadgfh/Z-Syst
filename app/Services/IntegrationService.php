@@ -110,9 +110,9 @@ class IntegrationService
         if ($budget) {
             app(BudgetService::class)->recordTransaction($budget, [
                 'purchase_id' => $purchase->id,
-                'amount' => $purchase->totalAmount,
-                'transaction_date' => $purchase->purchaseDate,
-                'reference' => $purchase->invoiceNumber,
+                'amount' => $purchase->total_amount,
+                'transaction_date' => $purchase->purchase_date,
+                'reference' => $purchase->invoice_number,
             ]);
         }
     }

@@ -27,9 +27,9 @@ class ReceiptService
         $receipt->update([
             'receipt_number' => $number,
             'data' => array_merge($receipt->data ?? [], ['receipt_number' => $number,
-                'paid_amount' => $sale->paidAmount,
-                'due_amount' => $sale->dueAmount,
-                'payment_type' => $sale->paymentType,
+                'paid_amount' => $sale->paid_amount,
+                'due_amount' => $sale->due_amount,
+                'payment_type' => $sale->payment_type,
             ]),
         ]);
         return $receipt->fresh();
@@ -42,9 +42,9 @@ class ReceiptService
         $receipt->update([
             'receipt_number' => $number,
             'data' => array_merge($receipt->data ?? [], ['receipt_number' => $number,
-                'paid_amount' => $purchase->paidAmount,
-                'due_amount' => $purchase->dueAmount,
-                'payment_type' => $purchase->paymentType,
+                'paid_amount' => $purchase->paid_amount,
+                'due_amount' => $purchase->due_amount,
+                'payment_type' => $purchase->payment_type,
             ]),
         ]);
         return $receipt->fresh();
@@ -93,13 +93,13 @@ class ReceiptService
                     ];
                 }),
                 'customer' => $sale->party,
-                'subtotal' => $sale->totalAmount,
+                'subtotal' => $sale->total_amount,
                 'tax' => $sale->tax ?? 0,
                 'discount' => $sale->discount ?? 0,
-                'total' => $sale->netTotal ?? $sale->totalAmount,
-                'paid' => $sale->paidAmount,
-                'due' => $sale->dueAmount,
-                'payment_method' => $sale->paymentType,
+                'total' => $sale->netTotal ?? $sale->total_amount,
+                'paid' => $sale->paid_amount,
+                'due' => $sale->due_amount,
+                'payment_method' => $sale->payment_type,
                 'header' => $setting?->receipt_header,
                 'footer' => $setting?->receipt_footer,
                 'show_barcode' => $setting?->show_barcode ?? true,
@@ -145,13 +145,13 @@ class ReceiptService
                     ];
                 }),
                 'supplier' => $purchase->party,
-                'subtotal' => $purchase->totalAmount,
+                'subtotal' => $purchase->total_amount,
                 'tax' => $purchase->tax ?? 0,
                 'discount' => $purchase->discount ?? 0,
-                'total' => $purchase->netTotal ?? $purchase->totalAmount,
-                'paid' => $purchase->paidAmount,
-                'due' => $purchase->dueAmount,
-                'payment_method' => $purchase->paymentType,
+                'total' => $purchase->netTotal ?? $purchase->total_amount,
+                'paid' => $purchase->paid_amount,
+                'due' => $purchase->due_amount,
+                'payment_method' => $purchase->payment_type,
                 'header' => $setting?->receipt_header,
                 'footer' => $setting?->receipt_footer,
                 'show_barcode' => $setting?->show_barcode ?? true,

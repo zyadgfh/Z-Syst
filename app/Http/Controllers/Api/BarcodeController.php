@@ -342,7 +342,7 @@ class BarcodeController extends Controller
      *
      * Resolution order:
      *  1. Minted barcode row (barcodes.barcode_number) — product + batch (FEFO data on the label).
-     *  2. Fallback: the product's own printed code (products.productCode / products.barcode).
+     *  2. Fallback: the product's own printed code (products.product_code / products.barcode).
      * Returns 404 when the code belongs to another business or is unknown.
      */
     public function lookup(Request $request): JsonResponse
@@ -372,9 +372,9 @@ class BarcodeController extends Controller
                         'id' => $batch->id,
                         'batch_no' => $batch->batch_no,
                         'expiry_date' => $batch->expire_date?->toDateString(),
-                        'quantity' => (int) $batch->productStock,
+                        'quantity' => (int) $batch->product_stock,
                     ] : null,
-                    'stock' => $product ? (int) $product->stocks()->sum('productStock') : 0,
+                    'stock' => $product ? (int) $product->stocks()->sum('product_stock') : 0,
                 ],
             ]);
         }
@@ -382,7 +382,7 @@ class BarcodeController extends Controller
         // Fallback: the code printed on the product itself.
         $product = Product::query()
             ->where('business_id', $businessId)
-            ->where(fn ($query) => $query->where('productCode', $code)->orWhere('barcode', $code))
+            ->where(fn ($query) => $query->where('product_code', $code)->orWhere('barcode', $code))
             ->first();
 
         if (! $product) {
@@ -409,9 +409,9 @@ class BarcodeController extends Controller
                     'id' => $batch->id,
                     'batch_no' => $batch->batch_no,
                     'expiry_date' => $batch->expire_date?->toDateString(),
-                    'quantity' => (int) $batch->productStock,
+                    'quantity' => (int) $batch->product_stock,
                 ] : null,
-                'stock' => (int) $product->stocks()->sum('productStock'),
+                'stock' => (int) $product->stocks()->sum('product_stock'),
             ],
         ]);
     }

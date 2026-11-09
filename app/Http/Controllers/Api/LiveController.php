@@ -29,18 +29,18 @@ class LiveController extends Controller
                 ->whereDate('created_at', Carbon::today());
 
             $salesCount = (clone $salesBase)->count();
-            // Legacy POS rows keep totalAmount = 0; revenue lives in the line
+            // Legacy POS rows keep total_amount = 0; revenue lives in the line
             // items (quantities * price), so derive it there.
             $salesTotal = DB::table('sale_details')
                 ->join('sales', 'sales.id', '=', 'sale_details.sale_id')
                 ->where('sales.business_id', $businessId)
                 ->whereDate('sales.created_at', Carbon::today())
                 ->sum(DB::raw('sale_details.quantities * sale_details.price'));
-            $dueTotal = (clone $salesBase)->sum('dueAmount');
+            $dueTotal = (clone $salesBase)->sum('due_amount');
 
             $lowStock = Stock::join('products', 'products.id', '=', 'stocks.product_id')
                 ->where('stocks.business_id', $businessId)
-                ->whereColumn('stocks.productStock', '<=', 'products.alert_qty')
+                ->whereColumn('stocks.product_stock', '<=', 'products.alert_qty')
                 ->distinct('stocks.product_id')
                 ->count('stocks.product_id');
 

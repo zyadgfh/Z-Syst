@@ -28,12 +28,12 @@ class ZSystCategoryController extends Controller
     {
         $business_id = auth()->user()->business_id;
         $request->validate([
-            'categoryName' => 'required|unique:categories,categoryName,NULL,id,business_id,'.$business_id,
+            'category_name' => 'required|unique:categories,categoryName,NULL,id,business_id,'.$business_id,
             'description' => 'nullable|string',
         ]);
 
         $data = Category::create([
-            'categoryName' => $request->categoryName,
+            'category_name' => $request->categoryName,
             'description' => $request->description,
             'business_id' => $business_id,
         ]);
@@ -50,7 +50,7 @@ class ZSystCategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         $request->validate([
-            'categoryName' => [
+            'category_name' => [
                 'required',
                 'unique:categories,categoryName,'.$category->id.',id,business_id,'.auth()->user()->business_id,
             ],
@@ -58,7 +58,7 @@ class ZSystCategoryController extends Controller
         ]);
 
         $category = $category->update([
-            'categoryName' => $request->categoryName,
+            'category_name' => $request->categoryName,
             'description' => $request->description,
             'business_id' => auth()->user()->business_id,
         ]);

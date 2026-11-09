@@ -29,7 +29,7 @@ class ZSystIncomeController extends Controller
             'income_category_id' => 'required|integer|exists:income_categories,id',
         ]);
 
-        Business::findOrFail(auth()->user()->business_id)->decrement('remainingShopBalance', $request->amount);
+        Business::findOrFail(auth()->user()->business_id)->decrement('remaining_shop_balance', $request->amount);
 
         $data = Income::create($request->except('user_id', 'business_id') + [
             'user_id' => auth()->id(),
@@ -54,7 +54,7 @@ class ZSystIncomeController extends Controller
 
         $amountDifference = $request->amount - $income->amount;
 
-        $business->increment('remainingShopBalance', $amountDifference);
+        $business->increment('remaining_shop_balance', $amountDifference);
 
         $income->update($request->except('user_id', 'business_id') + [
             'user_id' => auth()->id(),

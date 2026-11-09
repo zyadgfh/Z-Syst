@@ -15,16 +15,14 @@ class Business extends Model
      * @var array
      */
     protected $fillable = [
-        'plan_subscribe_id',
-        'business_category_id',
-        'companyName',
+        'company_name',
         'address',
-        'phoneNumber',
-        'pictureUrl',
+        'phone_number',
+        'picture_url',
         'will_expire',
-        'subscriptionDate',
-        'remainingShopBalance',
-        'shopOpeningBalance',
+        'subscription_date',
+        'remaining_shop_balance',
+        'shop_opening_balance',
         'status',
         'store_slug',
     ];
@@ -34,6 +32,20 @@ class Business extends Model
      *
      * @var array<string, string>
      */
+    
+    public function getCompanyNameAttribute(): ?string { return $this->attributes['company_name'] ?? null; }
+    public function setCompanyNameAttribute($v): void { $this->attributes['company_name'] = $v; }
+    public function getPhoneNumberAttribute(): ?string { return $this->attributes['phone_number'] ?? null; }
+    public function setPhoneNumberAttribute($v): void { $this->attributes['phone_number'] = $v; }
+    public function getPictureUrlAttribute(): ?string { return $this->attributes['picture_url'] ?? null; }
+    public function setPictureUrlAttribute($v): void { $this->attributes['picture_url'] = $v; }
+    public function getSubscriptionDateAttribute() { return $this->attributes['subscription_date'] ?? null; }
+    public function setSubscriptionDateAttribute($v): void { $this->attributes['subscription_date'] = $v; }
+    public function getRemainingShopBalanceAttribute() { return $this->attributes['remaining_shop_balance'] ?? null; }
+    public function setRemainingShopBalanceAttribute($v): void { $this->attributes['remaining_shop_balance'] = $v; }
+    public function getShopOpeningBalanceAttribute() { return $this->attributes['shop_opening_balance'] ?? null; }
+    public function setShopOpeningBalanceAttribute($v): void { $this->attributes['shop_opening_balance'] = $v; }
+
     protected $casts = [
         'status' => 'boolean',
     ];

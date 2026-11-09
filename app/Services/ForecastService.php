@@ -24,9 +24,9 @@ class ForecastService
         $rows = SaleDetails::query()
             ->join('sales', 'sales.id', '=', 'sale_details.sale_id')
             ->where('sales.business_id', $businessId)
-            ->where('sales.saleDate', '>=', $since)
+            ->where('sales.sale_date', '>=', $since)
             ->groupBy('sale_details.product_id')
-            ->selectRaw('sale_details.product_id, SUM(sale_details.quantities) total_qty, COUNT(DISTINCT DATE(sales.saleDate)) active_days')
+            ->selectRaw('sale_details.product_id, SUM(sale_details.quantities) total_qty, COUNT(DISTINCT DATE(sales.sale_date)) active_days')
             ->get();
 
         $weekday = $this->weekdayFactors($businessId);
@@ -83,11 +83,11 @@ class ForecastService
         $rows = SaleDetails::query()
             ->join('sales', 'sales.id', '=', 'sale_details.sale_id')
             ->where('sales.business_id', $businessId)
-            ->where('sales.saleDate', '>=', now()->subDays(56)->toDateString())
+            ->where('sales.sale_date', '>=', now()->subDays(56)->toDateString())
             ->groupBy('dow')
             ->selectRaw(DB::connection()->getDriverName() === 'sqlite'
-                ? "CAST(strftime('%w', sales.saleDate) AS INTEGER) dow, SUM(sale_details.quantities) qty"
-                : 'EXTRACT(DOW FROM sales.saleDate) dow, SUM(sale_details.quantities) qty')
+                ? "CAST(strftime('%w', sales.sale_date) AS INTEGER) dow, SUM(sale_details.quantities) qty"
+                : 'EXTRACT(DOW FROM sales.sale_date) dow, SUM(sale_details.quantities) qty')
             ->pluck('qty', 'dow');
 
         $avg = max(1, (float) $rows->avg());

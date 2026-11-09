@@ -23,8 +23,8 @@ class ZSystActiveBusinessReportController extends Controller
 
         $active_stores = Business::with('enrolled_plan:id,plan_id', 'enrolled_plan.plan:id,subscriptionName', 'category:id,name')->whereDate('will_expire', '>', now())->when($search, function ($q) use ($search) {
             $q->where(function ($q) use ($search) {
-                $q->where('companyName', 'like', '%'.$search.'%')
-                    ->orWhere('phoneNumber', 'like', '%'.$search.'%')
+                $q->where('company_name', 'like', '%'.$search.'%')
+                    ->orWhere('phone_number', 'like', '%'.$search.'%')
                     ->orWhereHas('category', function ($q) use ($search) {
                         $q->where('name', 'like', '%'.$search.'%');
                     })

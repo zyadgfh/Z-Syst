@@ -2,48 +2,11 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
-    function getUserProfile() {
-      return exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data
-        : {};
-    }
-
-    function isAdmin() {
-      return isAuthenticated() && getUserProfile().role == 'admin';
-    }
-
-    function isBusinessMember(businessId) {
-      return isAuthenticated() && getUserProfile().businessId == businessId;
-    }
-
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-
-    match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow create: if isAuthenticated() && request.auth.uid == userId;
-      allow update, delete: if isOwner(userId) || isAdmin();
-    }
-
-    match /businesses/{businessId} {
-      allow read: if isBusinessMember(businessId) || isAdmin();
-      allow create: if isAuthenticated();
-      allow update, delete: if isAdmin();
-    }
-
-    match /public/{document=**} {
-      allow read: if true;
-      allow write: if false;
-    }
-
+    // Locked: Supabase is the single source of truth.
+    // Firestore is deny-all. If FCM token storage is needed later,
+    // add a single narrowly-scoped path with Custom-Claim checks.
     match /{document=**} {
-      allow read: if false;
-      allow write: if false;
+      allow read, write: if false;
     }
   }
 }

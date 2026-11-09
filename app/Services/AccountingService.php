@@ -44,13 +44,13 @@ class AccountingService
         $businessId = (int) $sale->business_id;
         $this->ensureChart($businessId);
 
-        $total = (float) $sale->totalAmount;
-        $paid = (float) $sale->paidAmount;
-        $due = (float) $sale->dueAmount;
+        $total = (float) $sale->total_amount;
+        $paid = (float) $sale->paid_amount;
+        $due = (float) $sale->due_amount;
         $cost = (float) $sale->details()->sum(DB::raw('purchase_price * quantities'));
 
         $lines = [
-            ['account_code' => '4010', 'debit' => 0, 'credit' => $total, 'memo' => 'إيراد بيع #'.$sale->invoiceNumber],
+            ['account_code' => '4010', 'debit' => 0, 'credit' => $total, 'memo' => 'إيراد بيع #'.$sale->invoice_number],
         ];
         if ($paid > 0) {
             $lines[] = ['account_code' => '1010', 'debit' => $paid, 'credit' => 0, 'memo' => 'تحصيل نقدي'];
@@ -63,7 +63,7 @@ class AccountingService
             $lines[] = ['account_code' => '1030', 'debit' => 0, 'credit' => $cost, 'memo' => 'صرف مخزون'];
         }
 
-        return $this->post($businessId, $sale->saleDate ?? now()->toDateString(), 'sale', $sale->id, $total, $lines, 'قيد بيع #'.$sale->invoiceNumber);
+        return $this->post($businessId, $sale->sale_date ?? now()->toDateString(), 'sale', $sale->id, $total, $lines, 'قيد بيع #'.$sale->invoice_number);
     }
 
     public function postExpense(Expense $expense): JournalEntry

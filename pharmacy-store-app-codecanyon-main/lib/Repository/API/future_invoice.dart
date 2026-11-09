@@ -9,7 +9,7 @@ class FutureInvoice {
       final response = await http.get(
         Uri.parse('${APIConfig.url}/new-invoice?platform=$tag'),
         headers: {
-          'Authorization': 'Bearer ${await getAuthToken()}',
+          'Authorization': await getAuthToken(),
           'Accept': 'application/json',
         },
       );

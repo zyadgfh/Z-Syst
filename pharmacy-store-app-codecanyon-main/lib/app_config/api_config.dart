@@ -13,5 +13,5 @@ class APIConfig {
   static String get effectiveDomain => useDev ? devDomain : domain;
 
   // route url
-  static String url = '\${effectiveDomain}api/v1';
+  static String get url => '${effectiveDomain}api/v1';
 }

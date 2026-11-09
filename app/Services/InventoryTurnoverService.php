@@ -129,8 +129,8 @@ class InventoryTurnoverService
         $salesData = SaleDetails::join('sales', 'sales.id', '=', 'sale_details.sale_id')
             ->where('sale_details.product_id', $product->id)
             ->where('sales.business_id', $businessId)
-            ->where('sales.saleDate', '>=', $periodStart)
-            ->where('sales.saleDate', '<=', $periodEnd)
+            ->where('sales.sale_date', '>=', $periodStart)
+            ->where('sales.sale_date', '<=', $periodEnd)
             ->select(
                 DB::raw('COALESCE(SUM(sale_details.quantities), 0) as total_qty'),
                 DB::raw('COALESCE(SUM(sale_details.quantities * sale_details.price), 0) as total_sales'),
@@ -145,7 +145,7 @@ class InventoryTurnoverService
         // Get current stock
         $currentStockQty = (float) Stock::where('product_id', $product->id)
             ->where('business_id', $businessId)
-            ->sum('productStock');
+            ->sum('product_stock');
 
         $currentStockValue = $currentStockQty * (float) ($product->purchase_with_tax ?? $product->purchase_without_tax ?? 0);
 
@@ -203,16 +203,16 @@ class InventoryTurnoverService
         $productSales = SaleDetails::join('sales', 'sales.id', '=', 'sale_details.sale_id')
             ->join('products', 'products.id', '=', 'sale_details.product_id')
             ->where('sales.business_id', $businessId)
-            ->where('sales.saleDate', '>=', $periodStart)
-            ->where('sales.saleDate', '<=', $periodEnd)
+            ->where('sales.sale_date', '>=', $periodStart)
+            ->where('sales.sale_date', '<=', $periodEnd)
             ->select(
                 'products.id as product_id',
-                'products.productName',
-                'products.productCode',
+                'products.product_name',
+                'products.product_code',
                 DB::raw('COALESCE(SUM(sale_details.quantities * sale_details.price), 0) as total_sales_value'),
                 DB::raw('COALESCE(SUM(sale_details.quantities), 0) as total_qty')
             )
-            ->groupBy('products.id', 'products.productName', 'products.productCode')
+            ->groupBy('products.id', 'products.product_name', 'products.product_code')
             ->orderByDesc('total_sales_value')
             ->get();
 
@@ -349,11 +349,11 @@ class InventoryTurnoverService
         // Quick stats without DB persistence
         $currentStockValue = (float) Stock::where('business_id', $businessId)
             ->join('products', 'products.id', '=', 'stocks.product_id')
-            ->select(DB::raw('SUM(stocks.productStock * COALESCE(products.purchase_with_tax, products.purchase_without_tax, 0)) as total_value'))
+            ->select(DB::raw('SUM(stocks.product_stock * COALESCE(products.purchase_with_tax, products.purchase_without_tax, 0)) as total_value'))
             ->value('total_value') ?? 0;
 
         $totalProducts = Product::where('business_id', $businessId)->count();
-        $totalStockQty = (float) Stock::where('business_id', $businessId)->sum('productStock');
+        $totalStockQty = (float) Stock::where('business_id', $businessId)->sum('product_stock');
 
         // Get movement distribution
         $movementDistribution = [
@@ -434,12 +434,12 @@ class InventoryTurnoverService
 
         $purchasedQty = (float) PurchaseDetails::whereHas('purchase', function ($q) use ($businessId, $date) {
             $q->where('business_id', $businessId)
-                ->where('purchaseDate', '<=', $date);
+                ->where('purchase_date', '<=', $date);
         })->sum('quantities');
 
         $soldQty = (float) SaleDetails::whereHas('sale', function ($q) use ($businessId, $date) {
             $q->where('business_id', $businessId)
-                ->where('saleDate', '<=', $date);
+                ->where('sale_date', '<=', $date);
         })->sum('quantities');
 
         $netStock = max(0, $purchasedQty - $soldQty);
@@ -461,13 +461,13 @@ class InventoryTurnoverService
         // Get current stock
         $currentStock = (float) Stock::where('product_id', $productId)
             ->where('business_id', $businessId)
-            ->sum('productStock');
+            ->sum('product_stock');
 
         // Get total purchases during period
         $purchases = (float) PurchaseDetails::where('product_id', $productId)
             ->whereHas('purchase', function ($q) use ($businessId, $start, $end) {
                 $q->where('business_id', $businessId)
-                    ->whereBetween('purchaseDate', [$start, $end]);
+                    ->whereBetween('purchase_date', [$start, $end]);
             })
             ->sum('quantities');
 
@@ -475,7 +475,7 @@ class InventoryTurnoverService
         $sales = (float) SaleDetails::where('product_id', $productId)
             ->whereHas('sale', function ($q) use ($businessId, $start, $end) {
                 $q->where('business_id', $businessId)
-                    ->whereBetween('saleDate', [$start, $end]);
+                    ->whereBetween('sale_date', [$start, $end]);
             })
             ->sum('quantities');
 
