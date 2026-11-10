@@ -55,7 +55,7 @@ class OperationsTest extends TestCase
         Stock::create([
             'business_id' => $this->businessId,
             'product_id' => $this->product->id,
-            'productStock' => 50,
+            'product_stock' => 50,
             'batch_no' => 'B1',
             'expire_date' => now()->addYear()->toDateString(),
         ]);
@@ -141,7 +141,7 @@ class OperationsTest extends TestCase
         $this->assertEquals(20.0, $body['promotion']['discount']);
 
         $sale = Sale::findOrFail($body['sale']['id']);
-        $this->assertEquals(20.0, (float) $sale->discountAmount);
+        $this->assertEquals(20.0, (float) $sale->discount_amount);
         // line price untouched (H-01) — discount is sale-level
         $this->assertEquals(100.0, (float) $sale->details()->first()->price);
     }
@@ -155,15 +155,15 @@ class OperationsTest extends TestCase
         $this->assertEquals(1, $audit->details()->count());
 
         // scan 3 physical units (system says 50 → variance -47)
-        $detail = $service->scan($audit, $this->product->productCode);
-        $service->scan($audit, $this->product->productCode);
-        $service->scan($audit, $this->product->productCode);
+        $detail = $service->scan($audit, $this->product->product_code);
+        $service->scan($audit, $this->product->product_code);
+        $service->scan($audit, $this->product->product_code);
         $this->assertEquals(3, $detail->physical_quantity);
         $this->assertEquals(-47, $detail->variance);
 
         $result = $service->apply($audit);
         $this->assertEquals(1, $result['applied']);
-        $this->assertEquals(3, (int) Stock::where('product_id', $this->product->id)->sum('productStock'));
+        $this->assertEquals(3, (int) Stock::where('product_id', $this->product->id)->sum('product_stock'));
         $this->assertEquals('completed', $audit->fresh()->status);
     }
 
@@ -173,10 +173,10 @@ class OperationsTest extends TestCase
     {
         $sale = Sale::create([
             'business_id' => $this->businessId,
-            'totalAmount' => 200, 'paidAmount' => 200, 'dueAmount' => 0,
-            'isPaid' => true, 'paymentType' => 'cash', 'saleDate' => now()->toDateString(),
+            'total_amount' => 200, 'paid_amount' => 200, 'due_amount' => 0,
+            'is_paid' => true, 'payment_type' => 'cash', 'sale_date' => now()->toDateString(),
         ]);
-        $sale->details()->create(['product_id' => $this->product->id, 'price' => 100, 'purchase_price' => 60, 'quantities' => 2, 'lossProfit' => 80]);
+        $sale->details()->create(['product_id' => $this->product->id, 'price' => 100, 'purchase_price' => 60, 'quantities' => 2, 'loss_profit' => 80]);
 
         $entry = app(AccountingService::class)->postSale($sale);
         $this->assertCount(4, $entry->lines); // revenue credit + cash debit + COGS debit + inventory credit
@@ -193,7 +193,7 @@ class OperationsTest extends TestCase
 
     public function test_forecast_generates_rows_and_reorder_points()
     {
-        $sale = Sale::create(['business_id' => $this->businessId, 'totalAmount' => 100, 'saleDate' => now()->subDays(2)->toDateString()]);
+        $sale = Sale::create(['business_id' => $this->businessId, 'total_amount' => 100, 'sale_date' => now()->subDays(2)->toDateString()]);
         $sale->details()->create(['product_id' => $this->product->id, 'price' => 100, 'quantities' => 10]);
 
         $written = app(ForecastService::class)->generate($this->businessId, 7);
@@ -207,7 +207,7 @@ class OperationsTest extends TestCase
     public function test_excessive_returns_raise_anomaly()
     {
         for ($i = 0; $i < 4; $i++) {
-            $sale = Sale::create(['business_id' => $this->businessId, 'totalAmount' => 10, 'saleDate' => now()->toDateString(), 'user_id' => $this->user->id]);
+            $sale = Sale::create(['business_id' => $this->businessId, 'total_amount' => 10, 'sale_date' => now()->toDateString(), 'user_id' => $this->user->id]);
             SaleReturn::create(['business_id' => $this->businessId, 'sale_id' => $sale->id, 'user_id' => $this->user->id, 'invoice_no' => 'R'.$i, 'return_date' => now()->toDateString()]);
         }
 
@@ -219,7 +219,7 @@ class OperationsTest extends TestCase
 
     public function test_assistant_answers_sales_and_stock_questions()
     {
-        Sale::create(['business_id' => $this->businessId, 'totalAmount' => 450, 'saleDate' => now()->toDateString()]);
+        Sale::create(['business_id' => $this->businessId, 'total_amount' => 450, 'sale_date' => now()->toDateString()]);
         $engine = app(AssistantEngine::class);
 
         $sales = $engine->answer($this->businessId, 'كام بيعت النهاردة؟');
@@ -250,7 +250,7 @@ class OperationsTest extends TestCase
 
     public function test_eta_simulation_accepts_document_with_ubl_shape()
     {
-        $sale = Sale::create(['business_id' => $this->businessId, 'totalAmount' => 100, 'paidAmount' => 100, 'saleDate' => now()->toDateString()]);
+        $sale = Sale::create(['business_id' => $this->businessId, 'total_amount' => 100, 'paid_amount' => 100, 'sale_date' => now()->toDateString()]);
         $sale->details()->create(['product_id' => $this->product->id, 'price' => 100, 'quantities' => 1]);
 
         $invoice = app(EtaInvoiceService::class)->submit($sale);
@@ -337,14 +337,14 @@ class OperationsTest extends TestCase
         $first = $service->sync([[
             'client_uuid' => $uuid,
             'products' => [['product_id' => $this->product->id, 'price' => 100, 'quantities' => 1, 'batch_no' => 'B1']],
-            'paidAmount' => 100, 'isPaid' => true, 'paymentType' => 'cash',
+            'paid_amount' => 100, 'is_paid' => true, 'payment_type' => 'cash',
         ]], $this->user, null);
         $this->assertCount(1, $first['accepted']);
 
         $replay = $service->sync([[
             'client_uuid' => $uuid,
             'products' => [['product_id' => $this->product->id, 'price' => 100, 'quantities' => 1, 'batch_no' => 'B1']],
-            'paidAmount' => 100, 'isPaid' => true, 'paymentType' => 'cash',
+            'paid_amount' => 100, 'is_paid' => true, 'payment_type' => 'cash',
         ]], $this->user, null);
         $this->assertCount(1, $replay['duplicates'], 'replay must not double-sell');
         $this->assertCount(0, $replay['accepted']);
@@ -441,7 +441,7 @@ class OperationsTest extends TestCase
 
     public function test_dose_lookup_by_scan_returns_instruction_data()
     {
-        $sale = Sale::create(['business_id' => $this->businessId, 'totalAmount' => 100, 'paidAmount' => 100, 'saleDate' => now()->toDateString(), 'invoiceNumber' => 'INV-1']);
+        $sale = Sale::create(['business_id' => $this->businessId, 'total_amount' => 100, 'paid_amount' => 100, 'sale_date' => now()->toDateString(), 'invoice_number' => 'INV-1']);
         $detail = $sale->details()->create(['product_id' => $this->product->id, 'price' => 100, 'quantities' => 1, 'dose' => 'ثلاث مرات يوميًا', 'dose_code' => 'TID']);
 
         $this->actingAs($this->user);

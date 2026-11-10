@@ -10,6 +10,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class InventoryTurnoverReport extends Model
 {
+    /**
+     * This table's business_id is NULLABLE in the live schema: NULL rows are
+     * platform-global and must stay visible to every tenant.
+     */
+    protected static function tenantIncludesGlobals(): bool
+    {
+        return true;
+    }
+
     
     use TenantScoped;
 use HasFactory;

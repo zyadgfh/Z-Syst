@@ -188,6 +188,9 @@ class LoyaltyApiTest extends TestCase
         $response = $this->actingAs($this->user)
             ->deleteJson("/api/v1/loyalty/{$program->id}");
 
-        $response->assertForbidden();
+        // Cross-tenant access now answers 404 instead of 403 on purpose: a 403
+        // confirms the record exists to an attacker probing ids (IDOR
+        // enumeration). The controllers use abort_unless(..., 404).
+        $response->assertNotFound();
     }
 }

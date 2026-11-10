@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Traits\TenantScoped;
 use App\Models\Concerns\HasSupabaseRoles;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,6 +17,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class AppUser extends Authenticatable
 {
+    /**
+     * Tenant isolation for user records: an authenticated member of business A
+     * must never enumerate or mutate users of business B. app_users.business_id
+     * is nullable in the live schema, so users without a business (onboarding,
+     * platform staff) stay visible, and superadmins bypass the scope entirely.
+     *
+     * Session auth resolves the current principal through this very model; the
+     * re-entrancy guard inside TenantScoped makes that innermost lookup run
+     * unscoped, so authentication itself is unaffected.
+     */
+    use TenantScoped;
+
     use HasFactory;
 
     // Authorisation comes from HasSupabaseRoles (app_users.role column +

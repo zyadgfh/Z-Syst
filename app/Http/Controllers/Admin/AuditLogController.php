@@ -44,7 +44,7 @@ class AuditLogController extends Controller
      */
     public function show(AuditLog $auditLog)
     {
-        $auditLog->load(['user:id,name,email', 'business:id,companyName']);
+        $auditLog->load(['user:id,name,email', 'business:id,company_name']);
 
         return view('admin.audit-logs.show', compact('auditLog'));
     }

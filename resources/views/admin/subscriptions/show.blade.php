@@ -13,7 +13,7 @@
             <span class="badge bg-secondary">{{ $subscription->status }}</span>
         </div>
         <div class="row g-3">
-            <div class="col-md-4"><strong>{{ __('Business') }}:</strong> {{ $subscription->business?->companyName ?? $subscription->business_id }}</div>
+            <div class="col-md-4"><strong>{{ __('Business') }}:</strong> {{ $subscription->business?->company_name ?? $subscription->business_id }}</div>
             <div class="col-md-4"><strong>{{ __('Plan') }}:</strong> {{ $subscription->plan?->name ?? $subscription->plan_id }}</div>
             <div class="col-md-4"><strong>{{ __('Payment method') }}:</strong> {{ $subscription->payment_method }}</div>
             <div class="col-md-4"><strong>{{ __('Starts') }}:</strong> {{ $subscription->starts_at?->format('Y-m-d') }}</div>

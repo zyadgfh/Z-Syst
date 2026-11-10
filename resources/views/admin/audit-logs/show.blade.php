@@ -17,7 +17,7 @@
                 <div class="col-md-6"><strong>{{ __('Action') }}:</strong> {{ $auditLog->action }}</div>
                 <div class="col-md-6"><strong>{{ __('Model') }}:</strong> {{ $auditLog->model_type ? class_basename($auditLog->model_type) : '—' }} #{{ $auditLog->model_id }}</div>
                 <div class="col-md-6"><strong>{{ __('Actor') }}:</strong> {{ $auditLog->user?->email ?? '—' }}</div>
-                <div class="col-md-6"><strong>{{ __('Business') }}:</strong> {{ $auditLog->business?->companyName ?? '—' }}</div>
+                <div class="col-md-6"><strong>{{ __('Business') }}:</strong> {{ $auditLog->business?->company_name ?? '—' }}</div>
                 <div class="col-md-6"><strong>{{ __('IP') }}:</strong> {{ $auditLog->ip_address }}</div>
                 <div class="col-md-6"><strong>{{ __('Date') }}:</strong> {{ $auditLog->created_at?->format('Y-m-d H:i:s') }}</div>
                 <div class="col-12"><strong>{{ __('Description') }}:</strong><p>{{ $auditLog->description }}</p></div>

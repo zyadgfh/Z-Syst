@@ -62,9 +62,9 @@ class DashboardReportService
         $sales = $query->get();
 
         return [
-            'total_revenue' => $sales->sum('netTotal') ?? $sales->sum('total_amount'),
+            'total_revenue' => $sales->sum('total_amount'),
             'total_sales' => $sales->count(),
-            'average_order_value' => $sales->count() > 0 ? ($sales->sum('netTotal') ?? $sales->sum('total_amount')) / $sales->count() : 0,
+            'average_order_value' => $sales->count() > 0 ? ($sales->sum('total_amount')) / $sales->count() : 0,
             'total_paid' => $sales->sum('paid_amount'),
             'total_due' => $sales->sum('due_amount'),
         ];
@@ -86,7 +86,7 @@ class DashboardReportService
         return [
             'total_sales' => $sales->count(),
             'total_quantity' => $sales->sum('totalQuantity'),
-            'total_discount' => $sales->sum('discount'),
+            'total_discount' => $sales->sum('discount_amount'),
             'sales_by_payment_type' => $sales->groupBy('payment_type')->map->count(),
         ];
     }
@@ -106,7 +106,7 @@ class DashboardReportService
 
         return [
             'total_purchases' => $purchases->count(),
-            'total_purchase_amount' => $purchases->sum('netTotal') ?? $purchases->sum('total_amount'),
+            'total_purchase_amount' => $purchases->sum('total_amount'),
             'total_paid' => $purchases->sum('paid_amount'),
             'total_due' => $purchases->sum('due_amount'),
         ];
@@ -200,7 +200,7 @@ class DashboardReportService
         return $grouped->map(function ($group) {
             return [
                 'count' => $group->count(),
-                'revenue' => $group->sum('netTotal') ?? $group->sum('total_amount'),
+                'revenue' => $group->sum('total_amount'),
             ];
         })->toArray();
     }
@@ -243,7 +243,7 @@ class DashboardReportService
 
         $query = Sale::whereBetween('sale_date', [$dateFrom, $dateTo])
             ->with('party')
-            ->select('party_id', DB::raw('COUNT(*) as total_orders'), DB::raw('SUM(netTotal) as total_spent'));
+            ->select('party_id', DB::raw('COUNT(*) as total_orders'), DB::raw('SUM(total_amount) as total_spent'));
 
         if ($businessId) {
             $query->where('business_id', $businessId);
@@ -281,8 +281,8 @@ class DashboardReportService
             $purchasesQuery->where('business_id', $businessId);
         }
 
-        $totalSales = $salesQuery->sum('netTotal') ?? $salesQuery->sum('total_amount');
-        $totalPurchases = $purchasesQuery->sum('netTotal') ?? $purchasesQuery->sum('total_amount');
+        $totalSales = $salesQuery->sum('total_amount');
+        $totalPurchases = $purchasesQuery->sum('total_amount');
         $grossProfit = $totalSales - $totalPurchases;
 
         return [

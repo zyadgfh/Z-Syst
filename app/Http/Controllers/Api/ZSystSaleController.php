@@ -234,9 +234,9 @@ class ZSystSaleController extends Controller
             }
 
             $business = Business::findOrFail($business_id);
-            $business_name = $business->companyName;
+            $business_name = $business->company_name;
             $business->update([
-                'remaining_shop_balance' => $business->remainingShopBalance + $request->paid_amount,
+                'remaining_shop_balance' => $business->remaining_shop_balance + $request->paid_amount,
             ]);
 
             $loss_profit = collect($request->products)->pluck('loss_profit')->toArray();
@@ -294,6 +294,11 @@ class ZSystSaleController extends Controller
                         $deductQty = min($batch->product_stock, $quantity - $totalAllocated);
 
                         $saleDetails[] = [
+                            // Bulk insert() bypasses model events, so neither
+                            // TenantScoped nor the parent-derived fallback can
+                            // fill this: sale_details.business_id is NOT NULL and
+                            // every FEFO-allocated line used to violate it.
+                            'business_id' => $business_id,
                             'sale_id' => $sale->id,
                             'price' => $productData['price'],
                             'batch_no' => $batch->batch_no,
@@ -327,6 +332,7 @@ class ZSystSaleController extends Controller
                     // Manual batch selection (original behavior with FEFO logging)
                     $saleDetails[$key] = [
                         'sale_id' => $sale->id,
+                        'business_id' => $business_id,
                         'price' => $productData['price'],
                         'batch_no' => $productData['batch_no'],
                         'product_id' => $productId,
@@ -370,7 +376,7 @@ class ZSystSaleController extends Controller
             return $sale->load([
                 'tax:id,name,rate',
                 'party:id,name,phone',
-                'details.product:id,productName',
+                'details.product:id,product_name',
                 'details:id,sale_id,product_id,price,quantities',
             ]);
         }, 'sale:store', [
@@ -461,7 +467,7 @@ class ZSystSaleController extends Controller
                     throw new BusinessRuleException(
                         ErrorCode::BUSINESS_INSUFFICIENT_STOCK,
                         __('errors.insufficient_stock', [
-                            'product' => $product->productName,
+                            'product' => $product->product_name,
                             'batch' => $request->products[$key]['batch_no'] ?? 'N/A',
                             'available' => $product_stock,
                             'requested' => $request->products[$key]['quantities'],
@@ -491,6 +497,7 @@ class ZSystSaleController extends Controller
             $saleDetails = [];
             foreach ($request->products as $key => $productData) {
                 $saleDetails[$key] = [
+                    'business_id' => $sale->business_id,
                     'sale_id' => $sale->id,
                     'price' => $productData['price'],
                     'batch_no' => $productData['batch_no'],
@@ -527,7 +534,7 @@ class ZSystSaleController extends Controller
 
             $business = Business::findOrFail($business_id);
             $business->update([
-                'shop_opening_balance' => ($business->shopOpeningBalance - $sale->paid_amount) + $request->paid_amount,
+                'shop_opening_balance' => ($business->shop_opening_balance - $sale->paid_amount) + $request->paid_amount,
             ]);
 
             $loss_profit = collect($request->products)->pluck('loss_profit')->toArray();
@@ -608,7 +615,7 @@ class ZSystSaleController extends Controller
 
             $business = Business::findOrFail(auth()->user()->business_id);
             $business->update([
-                'shop_opening_balance' => $business->shopOpeningBalance - $sale->paid_amount,
+                'shop_opening_balance' => $business->shop_opening_balance - $sale->paid_amount,
             ]);
 
             $sale->delete();

@@ -12,9 +12,25 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class QualityCheck extends Model
 {
-    
     use TenantScoped;
-protected $table = 'quality_checks';
+
+    protected $table = 'quality_checks';
+
+    /**
+     * `GrnItem`-derived tenant key: this table's business_id is NOT NULL
+     * in the live Supabase schema, but bulk inserts and queue jobs run without an
+     * authenticated user (TenantScoped only fills from auth()). Derive it from the
+     * parent row so the constraint can never be hit.
+     * NOTE: hand-added — tools/generate-models.py must preserve this method.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (self $model) {
+            if (empty($model->business_id) && $model->grn_item_id) {
+                $model->business_id = GrnItem::where('id', $model->grn_item_id)->value('business_id');
+            }
+        });
+    }
 
     protected $fillable = [
         'business_id',

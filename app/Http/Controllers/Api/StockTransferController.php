@@ -25,7 +25,7 @@ class StockTransferController extends Controller
         $businessId = auth()->user()->business_id;
 
         $transfers = StockTransfer::where('business_id', $businessId)
-            ->with(['product:id,productName', 'fromWarehouse:id,name', 'toWarehouse:id,name'])
+            ->with(['product:id,product_name', 'fromWarehouse:id,name', 'toWarehouse:id,name'])
             ->when($request->input('status'), fn ($q, $status) => $q->where('status', $status))
             ->latest()
             ->paginate($request->input('per_page', 15));
@@ -72,7 +72,7 @@ class StockTransferController extends Controller
 
         return response()->json([
             'message' => __('Transfer created successfully.'),
-            'data' => $transfer->load(['product:id,productName', 'fromWarehouse:id,name', 'toWarehouse:id,name']),
+            'data' => $transfer->load(['product:id,product_name', 'fromWarehouse:id,name', 'toWarehouse:id,name']),
         ], 201);
     }
 
@@ -82,7 +82,7 @@ class StockTransferController extends Controller
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
-            'data' => $transfer->load(['product:id,productName', 'fromWarehouse:id,name', 'toWarehouse:id,name']),
+            'data' => $transfer->load(['product:id,product_name', 'fromWarehouse:id,name', 'toWarehouse:id,name']),
         ]);
     }
 

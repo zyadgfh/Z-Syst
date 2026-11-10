@@ -20,7 +20,7 @@ class ZSystManualPaymentReportController extends Controller
     {
         $manual_payments = PlanSubscribe::with([
             'plan:id,subscriptionName',
-            'business:id,companyName,pictureUrl,business_category_id',
+            'business:id,company_name,picture_url,business_category_id',
             'business.category:id,name',
             'gateway:id,name',
         ])->whereHas('gateway', function ($query) {
@@ -36,7 +36,7 @@ class ZSystManualPaymentReportController extends Controller
 
         $manual_payments = PlanSubscribe::with([
             'plan:id,subscriptionName',
-            'business:id,companyName,pictureUrl,business_category_id',
+            'business:id,company_name,picture_url,business_category_id',
             'business.category:id,name',
             'gateway:id,name',
         ])->whereHas('gateway', function ($query) {
@@ -134,7 +134,7 @@ class ZSystManualPaymentReportController extends Controller
 
     public function getInvoice($invoice_id)
     {
-        $manual_payment = PlanSubscribe::with(['plan:id,subscriptionName', 'business:id,companyName,business_category_id,phoneNumber,address', 'business.category:id,name', 'gateway:id,name'])->findOrFail($invoice_id);
+        $manual_payment = PlanSubscribe::with(['plan:id,subscriptionName', 'business:id,company_name,business_category_id,phone_number,address', 'business.category:id,name', 'gateway:id,name'])->findOrFail($invoice_id);
 
         return view('admin.manual-payments.invoice', compact('manual_payment'));
     }

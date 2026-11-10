@@ -139,7 +139,10 @@ class WarehouseApiTest extends TestCase
         $response = $this->actingAs($this->user)
             ->getJson("/api/v1/warehouses/{$warehouse->id}");
 
-        $response->assertForbidden();
+        // Cross-tenant access now answers 404 instead of 403 on purpose: a 403
+        // confirms the record exists to an attacker probing ids (IDOR
+        // enumeration). The controllers use abort_unless(..., 404).
+        $response->assertNotFound();
     }
 
     public function test_can_view_warehouse_stock(): void

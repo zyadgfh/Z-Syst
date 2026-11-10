@@ -293,7 +293,7 @@ class StockAuditService
             'variances' => $details->map(function ($detail) {
                 return [
                     'product_id' => $detail->product_id,
-                    'product_name' => $detail->product->productName ?? 'Unknown',
+                    'product_name' => $detail->product->product_name ?? 'Unknown',
                     'batch_no' => $detail->batch_no,
                     'system_quantity' => $detail->system_quantity,
                     'physical_quantity' => $detail->physical_quantity,

@@ -29,6 +29,21 @@ trait TenantScoped
      */
     protected static bool $tenantScopeAuthBusy = false;
 
+    /**
+     * Override on a model whose table allows `business_id IS NULL` rows that are
+     * meant to be visible to every tenant (curated/global catalogues such as
+     * `drug_interactions`, or platform-wide analytics rollups). Without it a
+     * plain `business_id = tenant` filter hides those rows completely.
+     *
+     * This is a method rather than a static property on purpose: PHP aborts with
+     * a fatal "Class was composed" error when a class and one of its traits
+     * declare the same property with a different default.
+     */
+    protected static function tenantIncludesGlobals(): bool
+    {
+        return false;
+    }
+
     public static function bootTenantScoped(): void
     {
         static::addGlobalScope('tenant', function (Builder $builder) {
@@ -47,7 +62,19 @@ trait TenantScoped
                 return;
             }
 
-            $builder->where($builder->getModel()->getTable().'.business_id', $user->business_id);
+            $column = $builder->getModel()->getTable().'.business_id';
+
+            if (static::tenantIncludesGlobals()) {
+                // Global rows (business_id IS NULL) belong to everyone; the
+                // grouping keeps this from leaking into sibling OR clauses.
+                $builder->where(function (Builder $q) use ($column, $user) {
+                    $q->where($column, $user->business_id)->orWhereNull($column);
+                });
+
+                return;
+            }
+
+            $builder->where($column, $user->business_id);
         });
 
         static::creating(function ($model) {

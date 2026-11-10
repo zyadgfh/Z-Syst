@@ -170,12 +170,12 @@ class LoyaltyServiceTest extends TestCase
             'business_id' => $this->business->id,
             'party_id' => $this->party->id,
             'user_id' => $this->user->id,
-            'totalAmount' => 500.0,
-            'paidAmount' => 500.0,
-            'dueAmount' => 0.0,
-            'isPaid' => true,
-            'paymentType' => 'cash',
-            'saleDate' => now()->toDateString(),
+            'total_amount' => 500.0,
+            'paid_amount' => 500.0,
+            'due_amount' => 0.0,
+            'is_paid' => true,
+            'payment_type' => 'cash',
+            'sale_date' => now()->toDateString(),
         ]);
 
         $transaction = $this->service->earnPoints($this->business->id, $this->party->id, 100.0, $sale);

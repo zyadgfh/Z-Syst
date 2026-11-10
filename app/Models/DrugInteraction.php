@@ -12,6 +12,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class DrugInteraction extends Model
 {
+    /**
+     * This table's business_id is NULLABLE in the live schema: NULL rows are
+     * platform-global and must stay visible to every tenant.
+     */
+    protected static function tenantIncludesGlobals(): bool
+    {
+        return true;
+    }
+
     
     use TenantScoped;
 protected $table = 'drug_interactions';

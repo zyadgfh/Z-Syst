@@ -18,7 +18,7 @@
                     <select name="tenant_id" class="form-select" required>
                         <option value="">--</option>
                         @foreach($tenants as $item)
-                            <option value="{{ $item->id }}" >{{ $item->companyName ?? $item->name }}</option>
+                            <option value="{{ $item->id }}" >{{ $item->company_name ?? $item->name }}</option>
                         @endforeach
                     </select>
                 </div>

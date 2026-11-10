@@ -2,52 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Traits\TenantScoped;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
 /**
- * GrnItem - table `grn_items` (Supabase Postgres).
- * AUTO-GENERATED from the live schema by tools/generate-models.py - re-run after migrations.
+ * Alias for GRNItem.
+ *
+ * `app/Models/GRNItem.php` (hand-written, used by GRNService, the
+ * GoodsReceivedNote relation, GRNItemFactory and GRNTest) and this
+ * auto-generated `GrnItem.php` were two divergent models over the same
+ * `grn_items` table — different $fillable, casts and relations, and only one of
+ * them tenant-scoped. They also differ only by letter case, so on a
+ * case-insensitive filesystem Composer resolves both FQCNs to the same file and
+ * one of the two classes simply does not exist (fatal error).
+ *
+ * This file is now a pure alias so there is a single source of truth. It is kept
+ * only because App\Models\QualityCheck imports GrnItem. tools/generate-models.py
+ * skips `grn_items` so a regeneration cannot resurrect the duplicate.
+ *
+ * @deprecated use GRNItem
  */
-class GrnItem extends Model
+class GrnItem extends GRNItem
 {
-    
-    use TenantScoped;
-protected $table = 'grn_items';
-
-    protected $fillable = [
-        'business_id',
-        'grn_id',
-        'product_id',
-        'ordered_quantity',
-        'received_quantity',
-        'accepted_quantity',
-        'rejected_quantity',
-        'batch_number',
-        'expiry_date',
-        'purchase_price',
-        'notes',
-    ];
-
-    protected $casts = [
-        'grn_id' => 'integer',
-        'product_id' => 'integer',
-        'ordered_quantity' => 'integer',
-        'received_quantity' => 'integer',
-        'accepted_quantity' => 'integer',
-        'rejected_quantity' => 'integer',
-        'expiry_date' => 'date',
-        'purchase_price' => 'decimal:2',
-    ];
-
-    public function business(): BelongsTo
-    {
-        return $this->belongsTo(Business::class, 'business_id');
-    }
-
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(Product::class, 'product_id');
-    }
 }

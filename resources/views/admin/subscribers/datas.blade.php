@@ -2,7 +2,7 @@
     <tr class="table-content">
         <td class="table-single-content">{{ ($subscribers->perPage() * ($subscribers->currentPage() - 1)) + $loop->iteration }} <i class="{{ request('id') == $subscriber->id ? 'fas fa-bell text-red' : '' }}"> </td>
         <td class="table-single-content">{{ formatted_date($subscriber->created_at) }}</td>
-        <td class="table-single-content">{{ $subscriber->business->companyName ?? 'N/A' }}</td>
+        <td class="table-single-content">{{ $subscriber->business->company_name ?? 'N/A' }}</td>
         <td class="table-single-content">{{ optional($subscriber->business->category)->name ?? 'N/A' }}</td>
         <td class="table-single-content">
             <div class="d-flex align-items-center justify-content-center ">
@@ -38,8 +38,8 @@
 
                     <li>
                         <a href="#subscriber-view-modal" class="subscriber-view" data-bs-toggle="modal"
-                        data-name="{{ $subscriber->business->companyName ?? 'N/A' }}"
-                        data-image="{{ asset($subscriber->business->pictureUrl ?? 'assets/img/default-shop.svg') }}"
+                        data-name="{{ $subscriber->business->company_name ?? 'N/A' }}"
+                        data-image="{{ asset($subscriber->business->picture_url ?? 'assets/img/default-shop.svg') }}"
                         data-manul-attachment="{{ asset($subscriber->notes['attachment'] ?? '') }}"
                         data-category="{{ optional($subscriber->business->category)->name ?? 'N/A' }}"
                             data-package="{{ $subscriber->plan->subscriptionName ?? 'N/A' }}"

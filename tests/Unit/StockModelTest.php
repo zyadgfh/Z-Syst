@@ -34,7 +34,7 @@ class StockModelTest extends TestCase
 
         $this->assertContains('product_id', $fillable);
         $this->assertContains('business_id', $fillable);
-        $this->assertContains('productStock', $fillable);
+        $this->assertContains('product_stock', $fillable);
         $this->assertContains('batch_no', $fillable);
         $this->assertContains('expire_date', $fillable);
     }

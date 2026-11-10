@@ -80,6 +80,27 @@ return [
             'days' => 30,
         ],
 
+        // Application error log (App\Exceptions\RenderableException::report(),
+        // App\Helpers\Logger, LogApiRequests middleware). These channels are
+        // referenced by name at runtime; an undefined channel makes LogManager
+        // throw from inside the exception handler and mask the original error.
+        'errors' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/errors.log'),
+            'level' => 'debug',
+            'days' => 30,
+            'replace_placeholders' => true,
+        ],
+
+        // Critical-only log, kept separate so on-call tooling can tail it.
+        'critical' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/critical.log'),
+            'level' => 'critical',
+            'days' => 90,
+            'replace_placeholders' => true,
+        ],
+
         // Audit Logging
         'audit' => [
             'driver' => 'daily',

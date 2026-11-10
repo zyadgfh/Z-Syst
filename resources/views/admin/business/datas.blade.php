@@ -9,9 +9,9 @@
         </td>
 
         <td class="table-single-content">{{ $businesses->perPage() * ($businesses->currentPage() - 1) + $loop->iteration }} <i class="{{ request('id') == $business->id ? 'fas fa-bell text-red' : '' }}"></i></td>
-        <td class="table-single-content">{{ $business->companyName }}</td>
+        <td class="table-single-content">{{ $business->company_name }}</td>
         <td class="table-single-content">{{ $business->category->name ?? '' }}</td>
-        <td class="table-single-content">{{ $business->phoneNumber }}</td>
+        <td class="table-single-content">{{ $business->phone_number }}</td>
         <td class="table-single-content">
             <div class="d-flex align-items-center justify-content-center ">
                 <div
@@ -24,7 +24,7 @@
                 </div>
             </div>
         </td>
-        <td class="table-single-content">{{ formatted_date($business->subscriptionDate) }}</td>
+        <td class="table-single-content">{{ formatted_date($business->subscription_date) }}</td>
         <td class="table-single-content">{{ formatted_date($business->will_expire) }}</td>
         <td class="print-d-none table-single-content d-print-none">
             <div class="dropdown table-action">
@@ -34,7 +34,7 @@
                 <ul class="dropdown-menu">
                     <li>
                         <a href="#business-upgrade-modal" class="business-upgrade-plan" data-bs-toggle="modal"
-                            data-id="{{ $business->id }}" data-name="{{ $business->companyName }}" data-url="{{ route('admin.business.upgrade.plan', $business->id) }}">
+                            data-id="{{ $business->id }}" data-name="{{ $business->company_name }}" data-url="{{ route('admin.business.upgrade.plan', $business->id) }}">
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M15.7466 6.19842L15.4807 5.93342C15.429 5.88092 15.3991 5.81096 15.3991 5.73679V5.36346C15.3991 4.02429 14.3091 2.93426 12.9699 2.93426H12.5966C12.5233 2.93426 12.4515 2.90422 12.3999 2.85339L12.135 2.58758C11.1883 1.64091 9.64743 1.63924 8.6991 2.58758L8.4342 2.85257C8.38254 2.90424 8.3108 2.93426 8.23747 2.93426H7.86413C6.52497 2.93426 5.43493 4.02429 5.43493 5.36346V5.73679C5.43493 5.81096 5.40585 5.88094 5.35335 5.93261L5.08744 6.19923C4.14077 7.1459 4.14077 8.6876 5.08744 9.6351L5.35335 9.9001C5.40502 9.9526 5.43493 10.0226 5.43493 10.0967V10.4701C5.43493 11.4909 6.06911 12.3626 6.96244 12.7218L5.64917 17.3284C5.58417 17.5575 5.65498 17.8043 5.83248 17.9643C6.00914 18.1234 6.26082 18.1693 6.48332 18.0801L8.79004 17.156C9.84004 16.7376 10.9949 16.7376 12.0432 17.156L14.3516 18.0809C14.4274 18.1109 14.5066 18.1259 14.5841 18.1259C14.7366 18.1259 14.8857 18.0709 15.0024 17.9651C15.1799 17.8051 15.2507 17.5593 15.1857 17.3293L13.8724 12.7226C14.7658 12.3634 15.3999 11.4917 15.3999 10.4709V10.0975C15.3999 10.0234 15.429 9.95339 15.4815 9.90173L15.7474 9.63592C15.7474 9.63592 15.7474 9.63594 15.7474 9.6351C16.6933 8.6876 16.6933 7.14592 15.7466 6.19842ZM12.5067 15.9943C11.1608 15.4576 9.67662 15.4568 8.32495 15.9943L7.19987 16.4451L8.21081 12.8993H8.23584C8.30917 12.8993 8.3807 12.9293 8.43237 12.9801L8.69747 13.2459C9.1708 13.7193 9.79248 13.9568 10.4158 13.9568C11.0375 13.9568 11.66 13.7201 12.1342 13.2459L12.399 12.9809C12.4507 12.9293 12.5224 12.8993 12.5958 12.8993H12.6208L13.6315 16.4451L12.5067 15.9943ZM14.8632 8.75091L14.5975 9.01672C14.3084 9.30505 14.1499 9.68923 14.1499 10.0967V10.4701C14.1499 11.1201 13.6207 11.6493 12.9707 11.6493H12.5974C12.1949 11.6493 11.8008 11.8126 11.5167 12.0976L11.2516 12.3626C10.8058 12.8076 10.0291 12.8076 9.58329 12.3626L9.31819 12.0968C9.03403 11.8126 8.6408 11.6493 8.23747 11.6493H7.86413C7.21413 11.6493 6.68493 11.1201 6.68493 10.4701V10.0967C6.68493 9.6884 6.52671 9.30507 6.23755 9.0159L5.97164 8.75091C5.51247 8.29091 5.51247 7.54178 5.97164 7.08261L6.23755 6.81681C6.52671 6.52847 6.68493 6.14429 6.68493 5.73679V5.36346C6.68493 4.71346 7.21413 4.18426 7.86413 4.18426H8.23747C8.63997 4.18426 9.03403 4.02095 9.31819 3.73595L9.58329 3.47096C10.0291 3.02596 10.8058 3.02596 11.2516 3.47096L11.5167 3.73677C11.8008 4.02094 12.1941 4.18426 12.5974 4.18426H12.9707C13.6207 4.18426 14.1499 4.71346 14.1499 5.36346V5.73679C14.1499 6.14512 14.3084 6.52845 14.5975 6.81762L14.8632 7.08261C15.3224 7.54261 15.3224 8.29091 14.8632 8.75091ZM12.7675 6.52262L11.7024 6.3684L11.2432 5.44341C11.0866 5.12675 10.77 4.93092 10.4166 4.93092C10.0625 4.93092 9.74584 5.12758 9.59 5.44341L9.13082 6.3684L8.06575 6.52262C7.72325 6.57262 7.44325 6.80757 7.33659 7.13673C7.22909 7.46673 7.31754 7.82097 7.56588 8.06264L8.33492 8.8093L8.15995 9.82096C8.09995 10.1693 8.23994 10.5151 8.52494 10.7235C8.80994 10.9318 9.18244 10.9601 9.49744 10.7951L10.4166 10.3142L11.3366 10.7959C11.4725 10.8667 11.619 10.9018 11.7657 10.9018C11.9565 10.9018 12.1475 10.8409 12.3091 10.7225C12.595 10.5142 12.7341 10.1684 12.6741 9.82177L12.4991 8.80757L13.2692 8.06091C13.5175 7.81924 13.605 7.4651 13.4975 7.1351C13.39 6.8076 13.11 6.57262 12.7675 6.52262ZM11.4976 8.03924C11.2826 8.24674 11.1849 8.54595 11.2357 8.84012L11.3291 9.38089L10.8341 9.1218C10.7041 9.05346 10.5608 9.02007 10.4174 9.02007C10.2733 9.02007 10.1292 9.05428 9.99752 9.12261L9.50415 9.38089L9.59753 8.83931C9.64837 8.54514 9.55004 8.24674 9.33671 8.03924L8.94324 7.65757L9.48828 7.57924C9.78328 7.53674 10.0374 7.35264 10.169 7.08597L10.4158 6.58925L10.6624 7.08597C10.7941 7.35264 11.0492 7.53757 11.3425 7.57924L11.8884 7.65838L11.4976 8.03924Z" fill="#4A4A52"/>
                                 </svg>
@@ -44,12 +44,12 @@
                     </li>
                     <li>
                         <a href="#business-view-modal" class="business-view" data-bs-toggle="modal"
-                            data-image="{{ asset($business->pictureUrl ?? 'assets/img/default-shop.svg') }}"
-                            data-name="{{ $business->companyName }}" data-address="{{ $business->address }}"
+                            data-image="{{ asset($business->picture_url ?? 'assets/img/default-shop.svg') }}"
+                            data-name="{{ $business->company_name }}" data-address="{{ $business->address }}"
                             data-category="{{ $business->category->name ?? '' }}"
-                            data-phone="{{ $business->phoneNumber }}"
+                            data-phone="{{ $business->phone_number }}"
                             data-package="{{ $business->enrolled_plan->plan->subscriptionName ?? '' }}"
-                            data-last_enroll="{{ formatted_date($business->subscriptionDate) }}"
+                            data-last_enroll="{{ formatted_date($business->subscription_date) }}"
                             data-expired_date="{{ formatted_date($business->will_expire) }}"
                             data-created_date="{{ formatted_date($business->created_at) }}">
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -19,7 +19,7 @@
                         <select name="product_id" class="form-select" required>
                             <option value="">--</option>
                             @foreach($products as $product)
-                                <option value="{{ $product->id }}">{{ $product->name }} ({{ $product->productCode }})</option>
+                                <option value="{{ $product->id }}">{{ $product->name }} ({{ $product->product_code }})</option>
                             @endforeach
                         </select>
                     </div>

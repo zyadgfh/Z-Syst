@@ -75,7 +75,7 @@ class EtaInvoiceService
             $items[] = [
                 'description' => $detail->product?->name ?? 'Item',
                 'itemType' => 'GS1',
-                'itemCode' => 'EG-'.($detail->product?->productCode ?? $detail->product_id),
+                'itemCode' => 'EG-'.($detail->product?->product_code ?? $detail->product_id),
                 'unitType' => 'URE',
                 'quantity' => (int) $detail->quantities,
                 'unitPrice' => round((float) $detail->price, 5),

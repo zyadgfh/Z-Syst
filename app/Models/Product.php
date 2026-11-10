@@ -49,7 +49,7 @@ class Product extends Model
      */
     public function getNameAttribute(): ?string
     {
-        return $this->productName;
+        return $this->product_name;
     }
 
     public function stocks(): HasMany

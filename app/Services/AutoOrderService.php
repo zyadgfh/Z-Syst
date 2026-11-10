@@ -228,8 +228,8 @@ class AutoOrderService
         return [
             'id' => $suggestionId,
             'product_id' => $product->id,
-            'product_name' => $product->productName,
-            'product_code' => $product->productCode,
+            'product_name' => $product->product_name,
+            'product_code' => $product->product_code,
             'current_stock' => (float) $currentStock,
             'pending_purchases' => (float) $pendingPurchases,
             'predicted_demand' => round($predictedDemand, 2),
@@ -266,7 +266,7 @@ class AutoOrderService
         return [
             'success' => true,
             'message' => 'تمت الموافقة على الاقتراح.',
-            'suggestion' => $suggestion->load('product:id,productName'),
+            'suggestion' => $suggestion->load('product:id,product_name'),
         ];
     }
 
@@ -365,7 +365,7 @@ class AutoOrderService
                 'due_amount' => $total_amount,
                 'is_paid' => false,
                 'payment_type' => 'credit',
-                'note' => 'طلب تلقائي من نظام التنبؤ - '.($product->productName ?? ''),
+                'note' => 'طلب تلقائي من نظام التنبؤ - '.($product->product_name ?? ''),
             ]);
 
             // Create purchase detail
@@ -417,7 +417,7 @@ class AutoOrderService
             'message' => 'تم تحويل الاقتراح إلى فاتورة شراء بنجاح.',
             'purchase_id' => $purchase->id,
             'invoice_number' => $purchase->invoice_number,
-            'purchase' => $purchase->load('details.product:id,productName'),
+            'purchase' => $purchase->load('details.product:id,product_name'),
         ];
     }
 
@@ -428,7 +428,7 @@ class AutoOrderService
     {
         $query = AutoOrderSuggestion::where('business_id', $businessId)
             ->with([
-                'product:id,productName,productCode,sales_price',
+                'product:id,product_name,product_code,sales_price',
                 'preferredSupplier:id,name,phone',
             ]);
 
@@ -472,7 +472,7 @@ class AutoOrderService
     public function getReport(int $businessId): array
     {
         $suggestions = AutoOrderSuggestion::where('business_id', $businessId)
-            ->with('product:id,productName')
+            ->with('product:id,product_name')
             ->get();
 
         $totalSuggestedQty = $suggestions->sum('suggested_order_qty');

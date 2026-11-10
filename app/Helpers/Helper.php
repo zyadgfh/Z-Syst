@@ -127,13 +127,13 @@ function dueCollectMessage($data, $party, $business_name, $invoice_number)
 {
     if ($invoice_number) {
         $message = 'Dear '.$party->name.'
-We have received a payment of: '.$data->payDueAmount.'
+We have received a payment of: '.$data->paid_amount.'
 Your Total Previous Due: '.$party->due.'
 Thanks, '.$business_name;
     } else {
         $message = 'Dear '.$party->name.'
 Your Invoice : '.$data->invoice_number.'
-We have received a payment of: '.$data->payDueAmount.'
+We have received a payment of: '.$data->paid_amount.'
 Your Total Previous Due: '.$party->due.'
 Thanks, '.$business_name;
     }

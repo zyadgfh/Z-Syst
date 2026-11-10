@@ -74,12 +74,12 @@ class ReceiptServiceTest extends TestCase
             'business_id' => $this->business->id,
             'party_id' => null,
             'user_id' => $this->user->id,
-            'totalAmount' => 100.0,
-            'paidAmount' => 100.0,
-            'dueAmount' => 0.0,
-            'isPaid' => true,
-            'paymentType' => 'cash',
-            'saleDate' => now()->toDateString(),
+            'total_amount' => 100.0,
+            'paid_amount' => 100.0,
+            'due_amount' => 0.0,
+            'is_paid' => true,
+            'payment_type' => 'cash',
+            'sale_date' => now()->toDateString(),
         ]);
 
         SaleDetails::create([
@@ -109,12 +109,12 @@ class ReceiptServiceTest extends TestCase
             'business_id' => $this->business->id,
             'party_id' => null,
             'user_id' => $this->user->id,
-            'totalAmount' => 200.0,
-            'paidAmount' => 200.0,
-            'dueAmount' => 0.0,
-            'isPaid' => true,
-            'paymentType' => 'cash',
-            'purchaseDate' => now()->toDateString(),
+            'total_amount' => 200.0,
+            'paid_amount' => 200.0,
+            'due_amount' => 0.0,
+            'is_paid' => true,
+            'payment_type' => 'cash',
+            'purchase_date' => now()->toDateString(),
         ]);
 
         PurchaseDetails::create([
@@ -140,12 +140,12 @@ class ReceiptServiceTest extends TestCase
         $sale = Sale::create([
             'business_id' => $this->business->id,
             'user_id' => $this->user->id,
-            'totalAmount' => 100.0,
-            'paidAmount' => 100.0,
-            'dueAmount' => 0.0,
-            'isPaid' => true,
-            'paymentType' => 'cash',
-            'saleDate' => now()->toDateString(),
+            'total_amount' => 100.0,
+            'paid_amount' => 100.0,
+            'due_amount' => 0.0,
+            'is_paid' => true,
+            'payment_type' => 'cash',
+            'sale_date' => now()->toDateString(),
         ]);
 
         $receipt = $this->service->getOrCreateSettings($this->business->id);
@@ -187,12 +187,12 @@ class ReceiptServiceTest extends TestCase
             'business_id' => $this->business->id,
             'party_id' => null,
             'user_id' => $this->user->id,
-            'totalAmount' => 150.0,
-            'paidAmount' => 100.0,
-            'dueAmount' => 50.0,
-            'isPaid' => false,
-            'paymentType' => 'credit',
-            'saleDate' => now()->toDateString(),
+            'total_amount' => 150.0,
+            'paid_amount' => 100.0,
+            'due_amount' => 50.0,
+            'is_paid' => false,
+            'payment_type' => 'credit',
+            'sale_date' => now()->toDateString(),
         ]);
 
         SaleDetails::create([
@@ -218,12 +218,12 @@ class ReceiptServiceTest extends TestCase
         $sale = Sale::create([
             'business_id' => $this->business->id,
             'user_id' => $this->user->id,
-            'totalAmount' => 100.0,
-            'paidAmount' => 100.0,
-            'dueAmount' => 0.0,
-            'isPaid' => true,
-            'paymentType' => 'cash',
-            'saleDate' => now()->toDateString(),
+            'total_amount' => 100.0,
+            'paid_amount' => 100.0,
+            'due_amount' => 0.0,
+            'is_paid' => true,
+            'payment_type' => 'cash',
+            'sale_date' => now()->toDateString(),
         ]);
 
         SaleDetails::create([

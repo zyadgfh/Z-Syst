@@ -229,18 +229,20 @@
     // ---------- checkout ----------
     document.getElementById('checkoutBtn').onclick = async () => {
         if (cart.size === 0) return;
+        // Payload keys match the server contract (snake_case). The DOM element
+        // ids stay camelCase — they are markup, not the API contract.
         const products = [...cart.values()].map(l => ({
-            product_id: l.product_id, price: l.price, lossProfit: 0,
+            product_id: l.product_id, price: l.price, loss_profit: 0,
             quantities: l.qty, batch_no: l.batch_no || null,
             dose: l.dose || null, dose_code: l.dose_code || null,
         }));
-        const payload = { products, paidAmount: +document.getElementById('paidAmount').value,
-                          paymentType: document.getElementById('paymentType').value,
+        const payload = { products, paid_amount: +document.getElementById('paidAmount').value,
+                          payment_type: document.getElementById('paymentType').value,
                           coupon_code: document.getElementById('couponCode').value.trim() || null,
-                          isPaid: +document.getElementById('paidAmount').value >= totals0() };
+                          is_paid: +document.getElementById('paidAmount').value >= totals0() };
 
         function totals0() { let t = 0; for (const l of cart.values()) t += l.qty * l.price; return t; }
-        payload.dueAmount = Math.max(0, totals0() - payload.paidAmount);
+        payload.due_amount = Math.max(0, totals0() - payload.paid_amount);
 
         let res;
         try {

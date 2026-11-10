@@ -15,11 +15,11 @@
         @foreach ($businesses as $business)
             <tr>
                 <td>{{ $loop->iteration }}</td>
-                <td>{{ $business->companyName }}</td>
+                <td>{{ $business->company_name }}</td>
                 <td>{{ $business->category->name ?? '' }}</td>
-                <td>{{ $business->phoneNumber }}</td>
+                <td>{{ $business->phone_number }}</td>
                 <td>{{ $business->enrolled_plan?->plan?->subscriptionName }}</td>
-                <td>{{ formatted_date($business->subscriptionDate) }}</td>
+                <td>{{ formatted_date($business->subscription_date) }}</td>
                 <td>{{ formatted_date($business->will_expire) }}</td>
 
             </tr>

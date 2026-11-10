@@ -148,13 +148,13 @@
                                                 {{ formatted_date($business->created_at) }}
                                             </td>
                                             <td class="table-single-content">
-                                                {{ $business->companyName }}
+                                                {{ $business->company_name }}
                                             </td>
                                             <td class="table-single-content">
                                                 {{ $business->category->name }}
                                             </td>
                                             <td class="table-single-content">
-                                                {{ $business->phoneNumber }}
+                                                {{ $business->phone_number }}
                                             </td>
                                             <td class="table-single-content">
                                                 <div class="d-flex align-items-center justify-content-center ">

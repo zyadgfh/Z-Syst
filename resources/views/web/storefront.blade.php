@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ $business->companyName }} — {{ __('متجر') }}</title>
+<title>{{ $business->company_name }} — {{ __('متجر') }}</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
 <style>
 :root {
@@ -28,7 +28,7 @@ body { font-family: var(--ap-font); background: var(--ap-bg); color: var(--ap-te
 <body class="bg-light" x-data="cart()">
 <nav class="navbar bg-white shadow-sm mb-4">
     <div class="container">
-        <span class="navbar-brand fw-bold">💊 {{ $business->companyName }}</span>
+        <span class="navbar-brand fw-bold">💊 {{ $business->company_name }}</span>
         <button class="btn btn-success position-relative" @click="open = true">
             🛒 {{ __('السلة') }}
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" x-text="count()"></span>

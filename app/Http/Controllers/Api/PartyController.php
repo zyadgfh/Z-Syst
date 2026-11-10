@@ -35,20 +35,16 @@ class PartyController extends Controller
         ]);
 
         $data = Party::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'phone' => $request->phone,
-                'type' => $request->type,
-                'address' => $request->address,
-                'opening_balance' => $request->opening_balance ?? 0,
-                'business_id' => $request->user()->business_id,
-                'due' => 0,
-                'status' => $request->status ?? 1,
-                'image' => $request->hasFile('image') ? $this->upload($request,'image') : null,
-            ]); // patched
-            'opening_balance' => $request->due,
-            'business_id' => auth()->user()->business_id,
-            'image' => $request->image ? $this->upload($request, 'image') : null,
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'type' => $request->type,
+            'address' => $request->address,
+            'opening_balance' => $request->opening_balance ?? $request->due ?? 0,
+            'due' => $request->due ?? 0,
+            'status' => $request->status ?? 1,
+            'business_id' => $request->user()->business_id,
+            'image' => $request->hasFile('image') ? $this->upload($request, 'image') : null,
         ]);
 
         return response()->json([
@@ -65,7 +61,7 @@ class PartyController extends Controller
         if (config('services.message.enabled')) {
             if ($party->due) {
                 $business = Business::findOrFail($party->business_id);
-                $response = sendMessage($party->phone, dueMessage($party, $business->companyName));
+                $response = sendMessage($party->phone, dueMessage($party, $business->company_name));
 
                 if ($response->successful()) {
                     return response()->json([
@@ -100,17 +96,20 @@ class PartyController extends Controller
             'phone' => 'required|max:20|unique:parties,phone,'.$party->id,
         ]);
 
+        // Partial updates must not erase columns that were not sent.
+        // `parties.type`, `due`, `opening_balance` and `status` are NOT NULL in
+        // the live schema, so writing a bare `$request->type` (null when the
+        // client omits it) aborts the whole update with a 500.
         $party->update([
-                'name' => $request->name,
-                'email' => $request->email,
-                'phone' => $request->phone,
-                'type' => $request->type,
-                'address' => $request->address,
-                'status' => $request->status ?? $party->status,
-                'image' => $request->hasFile('image') ? $this->upload($request,'image', $party->image) : $party->image,
-            ]); // patched
-            'opening_balance' => $request->due,
-            'image' => $request->image ? $this->upload($request, 'image', $party->image) : $party->image,
+            'name' => $request->name ?? $party->name,
+            'email' => $request->email ?? $party->email,
+            'phone' => $request->phone ?? $party->phone,
+            'type' => $request->type ?? $party->type,
+            'address' => $request->address ?? $party->address,
+            'opening_balance' => $request->opening_balance ?? $request->due ?? $party->opening_balance,
+            'due' => $request->due ?? $party->due,
+            'status' => $request->status ?? $party->status,
+            'image' => $request->hasFile('image') ? $this->upload($request, 'image', $party->image) : $party->image,
         ]);
 
         return response()->json([

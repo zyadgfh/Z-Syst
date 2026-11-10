@@ -177,9 +177,9 @@ class ZSystDrugInteractionController extends Controller
 
             return [
                 'product_id' => $product->id,
-                'product_name' => $product->productName,
+                'product_name' => $product->product_name,
                 'generic_name' => $genericName,
-                'search_name' => $genericName ?? $product->productName,
+                'search_name' => $genericName ?? $product->product_name,
             ];
         });
 

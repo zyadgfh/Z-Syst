@@ -47,3 +47,7 @@ temp_*.html
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Python bytecode (tools/*.py)
+__pycache__/
+*.pyc

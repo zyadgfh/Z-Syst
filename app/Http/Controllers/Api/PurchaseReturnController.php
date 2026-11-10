@@ -63,7 +63,7 @@ class PurchaseReturnController extends Controller
             ]);
 
             $purchase = Purchase::findOrFail($request->purchase_id);
-            $purchase_data = $purchase->purchase_data ?? $purchase->load('details.product:id,productName');
+            $purchase_data = $purchase->purchase_data ?? $purchase->load('details.product:id,product_name');
 
             $party = Party::find($purchase->party_id);
             $total_return_amount = array_sum($request->return_amount);

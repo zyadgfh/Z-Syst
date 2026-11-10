@@ -14,7 +14,7 @@ class UnitFactory extends Factory
     {
         return [
             'business_id' => Business::factory(),
-            'unitName' => fake()->unique()->word(),
+            'unit_name' => fake()->unique()->word(),
             'status' => true,
         ];
     }

@@ -12,9 +12,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class SaleDetail extends Model
 {
-    
     use TenantScoped;
-protected $table = 'sale_details';
+
+    protected $table = 'sale_details';
+
+    /**
+     * `Sale`-derived tenant key: business_id is NOT NULL in the live
+     * Supabase schema, but bulk inserts and queue jobs run without an
+     * authenticated user (TenantScoped only fills from auth()).
+     * NOTE: hand-added — tools/generate-models.py must preserve this method.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (self $model) {
+            if (empty($model->business_id) && $model->sale_id) {
+                $model->business_id = Sale::where('id', $model->sale_id)->value('business_id');
+            }
+        });
+    }
 
     public $timestamps = false;
 

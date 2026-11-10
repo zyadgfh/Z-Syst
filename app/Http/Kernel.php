@@ -8,6 +8,7 @@ use App\Http\Middleware\CheckSubscriptionLimits;
 use App\Http\Middleware\DemoMode;
 use App\Http\Middleware\EncryptCookies;
 use App\Http\Middleware\EnsureBusinessContext;
+use App\Http\Middleware\NormalizeLegacyPayloadKeys;
 use App\Http\Middleware\PageOptimizationMiddleware;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RedirectIfAuthenticated;
@@ -58,6 +59,7 @@ class Kernel extends HttpKernel
         ValidatePostSize::class,
         TrimStrings::class,
         ConvertEmptyStringsToNull::class,
+        NormalizeLegacyPayloadKeys::class,
         TenantContextMiddleware::class,
         SecurityHeaders::class,
         PageOptimizationMiddleware::class,

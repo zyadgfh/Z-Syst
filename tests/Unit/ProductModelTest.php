@@ -31,7 +31,7 @@ class ProductModelTest extends TestCase
 
         $this->assertDatabaseHas('products', [
             'id' => $product->id,
-            'productName' => $product->productName,
+            'product_name' => $product->product_name,
         ]);
     }
 
@@ -39,13 +39,13 @@ class ProductModelTest extends TestCase
     {
         $fillable = (new Product)->getFillable();
 
-        $this->assertContains('productName', $fillable);
+        $this->assertContains('product_name', $fillable);
         $this->assertContains('business_id', $fillable);
         $this->assertContains('category_id', $fillable);
         $this->assertContains('unit_id', $fillable);
         $this->assertContains('manufacturer_id', $fillable);
         $this->assertContains('sales_price', $fillable);
-        $this->assertContains('productCode', $fillable);
+        $this->assertContains('product_code', $fillable);
     }
 
     public function test_product_has_casts()
@@ -88,8 +88,8 @@ class ProductModelTest extends TestCase
     public function test_product_has_many_stocks()
     {
         $product = Product::factory()->create();
-        $stock1 = Stock::factory()->create(['product_id' => $product->id, 'productStock' => 100]);
-        $stock2 = Stock::factory()->create(['product_id' => $product->id, 'productStock' => 50]);
+        $stock1 = Stock::factory()->create(['product_id' => $product->id, 'product_stock' => 100]);
+        $stock2 = Stock::factory()->create(['product_id' => $product->id, 'product_stock' => 50]);
 
         $this->assertCount(2, $product->stocks);
     }
@@ -100,13 +100,13 @@ class ProductModelTest extends TestCase
 
         $stockFar = Stock::factory()->create([
             'product_id' => $product->id,
-            'productStock' => 100,
+            'product_stock' => 100,
             'expire_date' => now()->addYear()->format('Y-m-d'),
         ]);
 
         $stockNear = Stock::factory()->create([
             'product_id' => $product->id,
-            'productStock' => 100,
+            'product_stock' => 100,
             'expire_date' => now()->addMonth()->format('Y-m-d'),
         ]);
 

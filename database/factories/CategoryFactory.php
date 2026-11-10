@@ -14,7 +14,7 @@ class CategoryFactory extends Factory
     {
         return [
             'business_id' => Business::factory(),
-            'categoryName' => fake()->word(),
+            'category_name' => fake()->word(),
             'status' => true,
         ];
     }

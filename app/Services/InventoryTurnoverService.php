@@ -176,8 +176,8 @@ class InventoryTurnoverService
 
         return [
             'product_id' => $product->id,
-            'product_name' => $product->productName,
-            'product_code' => $product->productCode,
+            'product_name' => $product->product_name,
+            'product_code' => $product->product_code,
             'total_quantity_sold' => $totalQuantitySold,
             'total_sales_value' => $totalSalesValue,
             'total_cogs' => $totalCogs,
@@ -237,8 +237,8 @@ class InventoryTurnoverService
 
             $abcResults[] = [
                 'product_id' => $item->product_id,
-                'product_name' => $item->productName,
-                'product_code' => $item->productCode,
+                'product_name' => $item->product_name,
+                'product_code' => $item->product_code,
                 'total_sales_value' => round((float) $item->total_sales_value, 2),
                 'total_quantity' => (float) $item->total_qty,
                 'percentage_of_total' => $totalValue > 0 ? round(((float) $item->total_sales_value / $totalValue) * 100, 2) : 0,

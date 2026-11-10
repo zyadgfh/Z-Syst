@@ -45,7 +45,7 @@ class DoseLabelController extends Controller
     {
         abort_unless((int) $sale->business_id === (int) $request->user()->business_id, 404);
 
-        $lines = $sale->details()->with('product:id,productName')->get()
+        $lines = $sale->details()->with('product:id,product_name')->get()
             ->filter(fn ($d) => filled($d->dose))
             ->values();
 
@@ -56,7 +56,7 @@ class DoseLabelController extends Controller
 
             return [
                 'id' => $detail->id,
-                'product' => $detail->product?->name ?? $detail->product?->productName ?? ('#'.$detail->product_id),
+                'product' => $detail->product?->name ?? $detail->product?->product_name ?? ('#'.$detail->product_id),
                 'dose' => $detail->dose,
                 'dose_code' => $detail->dose_code,
                 'schedule_hint' => self::SCHEDULES[$detail->dose_code][0] ?? null,
@@ -91,7 +91,7 @@ class DoseLabelController extends Controller
         $detail = SaleDetails::query()
             ->where('sale_id', (int) $m[1])
             ->where('id', (int) $m[2])
-            ->with(['sale:id,business_id,invoice_number,sale_date', 'product:id,productName'])
+            ->with(['sale:id,business_id,invoice_number,sale_date', 'product:id,product_name'])
             ->first();
 
         $actor = $request->user() ?: auth()->user();
@@ -109,7 +109,7 @@ class DoseLabelController extends Controller
                 'data' => [
                     'sale' => $detail->sale?->invoice_number ?? ('#'.$detail->sale_id),
                     'sold_at' => optional($detail->sale?->sale_date)->toDateString(),
-                    'product' => $detail->product?->name ?? $detail->product?->productName,
+                    'product' => $detail->product?->name ?? $detail->product?->product_name,
                     'dose' => $detail->dose,
                     'dose_code' => $detail->dose_code,
                     'schedule_hint' => self::SCHEDULES[$detail->dose_code][0] ?? null,

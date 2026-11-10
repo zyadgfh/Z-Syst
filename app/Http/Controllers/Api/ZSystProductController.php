@@ -24,8 +24,10 @@ class ZSystProductController extends Controller
             ->where('business_id', auth()->user()->business_id)
             ->when($request->filled('search'), function ($query) use ($request) {
                 $term = '%'.$request->input('search').'%';
-                $query->where('product_name', 'like', $term)
-                    ->orWhere('product_code', 'like', $term);
+                $query->where(function ($sub) use ($term) {
+                    $sub->where('product_name', 'like', $term)
+                        ->orWhere('product_code', 'like', $term);
+                });
             })
             ->when($request->filled('expire_date'), function ($query) use ($request) {
                 $query->whereHas('stocks', function ($query) use ($request) {
@@ -118,7 +120,7 @@ class ZSystProductController extends Controller
     public function show($id)
     {
         $data = Product::query()
-            ->with('unit:id,unitName', 'medicine_type:id,name', 'manufacterer:id,name', 'box_size:id,name', 'category:id,categoryName', 'stocks:id,expire_date,product_id,batch_no,product_stock', 'tax:id,rate')
+            ->with('unit:id,unit_name', 'medicine_type:id,name', 'manufacterer:id,name', 'box_size:id,name', 'category:id,category_name', 'stocks:id,expire_date,product_id,batch_no,product_stock', 'tax:id,rate')
             ->withSum('stocks', 'product_stock')
             ->when(auth()->user()->role !== 'superadmin', fn ($query) => $query->where('business_id', auth()->user()->business_id))
             ->findOrFail($id);
@@ -147,7 +149,7 @@ class ZSystProductController extends Controller
             'box_size_id' => 'nullable|integer|exists:box_sizes,id',
             'product_code' => [
                 'nullable',
-                'unique:products,productCode,'.$product->id.',id,business_id,'.$business_id,
+                'unique:products,product_code,'.$product->id.',id,business_id,'.$business_id,
             ],
             'batch_no' => [
                 'nullable',
@@ -306,8 +308,8 @@ class ZSystProductController extends Controller
     {
         $data = Stock::select('id', 'expire_date', 'product_id', 'batch_no', 'product_stock')
             ->with([
-                'product.tax:id,rate,name',
-                'product:id,productName,purchase_without_tax,purchase_with_tax,profit_percent,sales_price,wholesale_price,tax_id,tax_type,productCode',
+                'product.tax:id,rate,product_name',
+                'product:id,product_name,purchase_without_tax,purchase_with_tax,profit_percent,sales_price,wholesale_price,tax_id,tax_type,product_code',
             ])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $term = '%'.$request->input('search').'%';
@@ -347,7 +349,7 @@ class ZSystProductController extends Controller
         $businessId = auth()->user()->business_id;
         abort_unless($product->business_id === $businessId, 404);
 
-        $root = trim(mb_strtolower(explode(' ', trim($product->productName))[0] ?? ''));
+        $root = trim(mb_strtolower(explode(' ', trim($product->product_name))[0] ?? ''));
 
         $candidates = Product::query()
             ->where('products.business_id', $businessId)
@@ -365,7 +367,7 @@ class ZSystProductController extends Controller
             });
 
         $scored = $candidates->map(function (Product $candidate) use ($product, $root) {
-            $first = trim(mb_strtolower(explode(' ', trim($candidate->productName))[0] ?? ''));
+            $first = trim(mb_strtolower(explode(' ', trim($candidate->product_name))[0] ?? ''));
             $score = 0;
             if ($root !== '' && $first === $root) {
                 $score += 3;
@@ -379,8 +381,8 @@ class ZSystProductController extends Controller
 
             return [
                 'id' => $candidate->id,
-                'product_name' => $candidate->productName,
-                'product_code' => $candidate->productCode,
+                'product_name' => $candidate->product_name,
+                'product_code' => $candidate->product_code,
                 'available_stock' => (int) ($candidate->available_stock_total ?? 0),
                 'match_score' => $score,
             ];
@@ -392,8 +394,8 @@ class ZSystProductController extends Controller
 
         $warnings = \App\Models\DrugInteraction::where('business_id', $businessId)
             ->where(function ($q) use ($product) {
-                $q->where('drug_a_name', 'like', '%' . $product->productName . '%')
-                    ->orWhere('drug_b_name', 'like', '%' . $product->productName . '%');
+                $q->where('drug_a_name', 'like', '%' . $product->product_name . '%')
+                    ->orWhere('drug_b_name', 'like', '%' . $product->product_name . '%');
             })
             ->limit(5)
             ->get(['drug_a_name', 'drug_b_name', 'description', 'recommendation']);
@@ -401,7 +403,7 @@ class ZSystProductController extends Controller
         return response()->json([
             'message' => __('Data fetched successfully.'),
             'data' => [
-                'product' => ['id' => $product->id, 'product_name' => $product->productName],
+                'product' => ['id' => $product->id, 'product_name' => $product->product_name],
                 'alternatives' => $scored,
                 'interaction_warnings' => $warnings,
             ],

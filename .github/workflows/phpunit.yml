@@ -68,6 +68,15 @@ jobs:
           EXIT=${PIPESTATUS[0]}
           echo "== last events before end ==" >> test.log
           tail -5 events.txt >> test.log 2>/dev/null || true
+          # A 500 that the app's own exception handler converts into a JSON
+          # response shows no trace in the PHPUnit output at all. Dump the
+          # application logs so handled failures are still diagnosable.
+          echo "== application logs ==" >> test.log
+          for f in storage/logs/*.log; do
+            [ -f "$f" ] || continue
+            echo "---- $f ----" >> test.log
+            tail -n 150 "$f" >> test.log 2>/dev/null || true
+          done
           if [ "$EXIT" -ne 0 ]; then
             if [ -f junit.xml ]; then
               php .github/scripts/emit_test_annotations.php junit.xml
@@ -117,7 +126,12 @@ jobs:
           git fetch origin ci-runtime || true
           git checkout --orphan ci-runtime-phpunit-tmp
           git rm -rf --cached . -q || true
-          git add -f test.log events.txt junit.xml 2>/dev/null || true
+          # add each artifact only if it exists: `git add -f a b c` aborts
+          # entirely when one pathspec is missing, which silently dropped the
+          # whole diagnostics commit.
+          for f in test.log events.txt junit.xml migrate.log install.log prodpath.log; do
+            [ -f "$f" ] && git add -f "$f"
+          done
           git commit -q -m "phpunit diagnostics $(date -u +%FT%TZ)" || echo nothing to commit
           git branch -M ci-runtime-phpunit
           git push -q --force origin ci-runtime-phpunit || echo push failed

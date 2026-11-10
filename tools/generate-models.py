@@ -26,6 +26,24 @@ def singular(t):
     return t
 
 
+# Tables whose model is hand-maintained under a different (acronym) class name.
+# Generating them here would create a second class over the same table that
+# differs only by letter case -- GRNItem.php vs GrnItem.php -- which collides on
+# case-insensitive filesystems and silently diverges on Linux.
+SKIP_TABLES = {"grn_items"}
+
+# Tables that carry a business_id column but whose rows may also be
+# platform-global (business_id IS NULL): a plain equality scope would hide the
+# curated/shared rows from every tenant, which silently disabled the POS
+# drug-interaction warning. These override tenantIncludesGlobals().
+GLOBAL_ROW_TABLES = {
+    "drug_interactions",
+    "inventory_turnover_reports",
+    "product_inventory_analysis",
+    "supplier_performance",
+}
+
+
 def model_name(t):
     return studly(singular(t))
 
@@ -104,6 +122,9 @@ os.makedirs(OUT, exist_ok=True)
 written = []
 
 for table in sorted(schema):
+    if table in SKIP_TABLES:
+        continue
+
     cols = schema[table]
     names = [n for n, _ in cols]
     types = dict(cols)
@@ -119,6 +140,13 @@ for table in sorted(schema):
     soft = "deleted_at" in names
     if soft:
         imports.append("use Illuminate\\Database\\Eloquent\\SoftDeletes;")
+
+    # Tenant isolation: every business-owned table gets the TenantScoped trait.
+    # This used to be patched in by hand after generation, so re-running this
+    # script silently stripped isolation from ~84 models.
+    tenant = "business_id" in names or is_user
+    if tenant:
+        imports.append("use App\\Traits\\TenantScoped;")
 
     fillable = [n for n in names if n not in ("id", "created_at", "updated_at", "deleted_at")]
     casts = casts_for(cols)
@@ -136,8 +164,21 @@ for table in sorted(schema):
             f"class {cls} extends {'Authenticatable' if is_user else 'Model'}", "{"]
     if soft:
         out += ["    use SoftDeletes;", ""]
+    if tenant and not is_user:
+        out += ["    use TenantScoped;", ""]
+        if table in GLOBAL_ROW_TABLES:
+            # Method, not property: PHP fatals when a class and its trait declare
+            # the same property with different defaults.
+            out += ["    /** Platform-global rows (business_id IS NULL) stay visible to every tenant. */",
+                    "    protected static function tenantIncludesGlobals(): bool",
+                    "    {",
+                    "        return true;",
+                    "    }", ""]
     if is_user:
-        out += ["    use Notifiable;", ""]
+        # app_users is tenant-scoped: an authenticated member of business A must
+        # not enumerate or mutate users of business B. Kept here so a
+        # regeneration does not silently drop the isolation.
+        out += ["    use TenantScoped;", "    use Notifiable;", ""]
     out += [f"    protected $table = '{table}';", ""]
 
     if is_user:

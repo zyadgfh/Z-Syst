@@ -103,7 +103,11 @@ jobs:
       - name: Prepare environment (writes APP_KEY into .env.testing for APP_ENV=testing)
         env:
           APP_ENV: testing
-        run: php artisan key:generate
+        run: |
+          # key:generate (and therefore migrate:fresh below) aborts when no env
+          # file exists at all; mirror the Run PHPUnit job and seed one first.
+          cp .env.example .env || true
+          php artisan key:generate --ansi
 
       - name: Fresh sqlite schema
         env:

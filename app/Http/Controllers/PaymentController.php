@@ -128,7 +128,7 @@ class PaymentController extends Controller
             $payment_data['currency'] = $gateway->currency->code ?? 'EGP';
             $payment_data['email'] = $user->email;
             $payment_data['name'] = $business->name;
-            $payment_data['phone'] = $business->phoneNumber;
+            $payment_data['phone'] = $business->phone_number;
             $payment_data['billName'] = __('Make plan purchase payment');
             $payment_data['amount'] = $amount;
             $payment_data['mode'] = $gateway->mode;
