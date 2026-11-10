@@ -24,8 +24,10 @@ class ZSystProductController extends Controller
             ->where('business_id', auth()->user()->business_id)
             ->when($request->filled('search'), function ($query) use ($request) {
                 $term = '%'.$request->input('search').'%';
-                $query->where('product_name', 'like', $term)
-                    ->orWhere('product_code', 'like', $term);
+                $query->where(function ($sub) use ($term) {
+                    $sub->where('product_name', 'like', $term)
+                        ->orWhere('product_code', 'like', $term);
+                });
             })
             ->when($request->filled('expire_date'), function ($query) use ($request) {
                 $query->whereHas('stocks', function ($query) use ($request) {

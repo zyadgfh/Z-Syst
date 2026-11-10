@@ -19,9 +19,14 @@ class ZSystDueController extends Controller
         $search = $request->input('search');
         $data = DueCollect::with('user:id,name', 'party:id,name,email,phone,type')
             ->when($search, function ($query) use ($search) {
-                $query->where('invoice_number', 'like', '%'.$search.'%')
-                    ->orWhere('totalDue', 'like', '%'.$search.'%')
-                    ->orWhere('payment_type', 'like', '%'.$search.'%');
+                // Grouped on purpose: an ungrouped orWhere chain binds looser
+                // than the trailing `AND business_id = ?`, which let a search
+                // term match other businesses' due collections.
+                $query->where(function ($sub) use ($search) {
+                    $sub->where('invoice_number', 'like', '%'.$search.'%')
+                        ->orWhere('amount', 'like', '%'.$search.'%')
+                        ->orWhere('payment_type', 'like', '%'.$search.'%');
+                });
             })
             ->where('business_id', auth()->user()->business_id)
             ->latest()
@@ -39,11 +44,14 @@ class ZSystDueController extends Controller
         $type = $request->input('type');
         $query = Party::select('id', 'name', 'type', 'due', 'phone')
             ->when($search, function ($query) use ($search) {
-                $query->where('name', 'like', '%'.$search.'%')
-                    ->orWhere('phone', 'like', '%'.$search.'%')
-                    ->orWhere('email', 'like', '%'.$search.'%')
-                    ->orWhere('type', 'like', '%'.$search.'%')
-                    ->orWhere('address', 'like', '%'.$search.'%');
+                // Grouped: an ungrouped orWhere binds looser than the tenant filter that is appended afterwards, so the earlier terms matched other businesses' rows.
+                $query->where(function ($sub) use ($search) {
+                    $sub->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('phone', 'like', '%'.$search.'%')
+                        ->orWhere('email', 'like', '%'.$search.'%')
+                        ->orWhere('type', 'like', '%'.$search.'%')
+                        ->orWhere('address', 'like', '%'.$search.'%');
+                });
             })
             ->when($type, function ($query) use ($type) {
                 $query->where('type', $type);
@@ -69,8 +77,8 @@ class ZSystDueController extends Controller
 
         $request->validate([
             'payment_type' => 'required|string',
-            'paymentDate' => 'required|string',
-            'payDueAmount' => 'required|numeric',
+            'payment_date' => 'required|string',
+            'paid_amount' => 'required|numeric',
             'party_id' => 'required|exists:parties,id',
             'invoice_number' => 'nullable|exists:'.($party->type == 'Supplier' ? 'purchases' : 'sales').',invoice_number',
         ]);
@@ -96,67 +104,73 @@ class ZSystDueController extends Controller
                 );
             }
 
-            if ($invoice->due_amount < $request->payDueAmount) {
+            if ($invoice->due_amount < $request->paid_amount) {
                 throw new BusinessRuleException(
                     ErrorCode::BUSINESS_INVOICE_DUE_EXCEEDED,
                     __('errors.invoice_due_exceeded', ['due' => $invoice->due_amount]),
                     [
                         'invoice_due' => $invoice->due_amount,
-                        'payment_amount' => $request->payDueAmount,
+                        'payment_amount' => $request->paid_amount,
                     ]
                 );
             }
         }
 
         if (! $request->invoice_number) {
-            if ($request->payDueAmount > $party->opening_balance) {
+            if ($request->paid_amount > $party->opening_balance) {
                 throw new BusinessRuleException(
                     ErrorCode::BUSINESS_OPENING_BALANCE_EXCEEDED,
                     __('errors.opening_balance_exceeded', ['balance' => $party->opening_balance]),
                     [
                         'opening_balance' => $party->opening_balance,
-                        'payment_amount' => $request->payDueAmount,
+                        'payment_amount' => $request->paid_amount,
                     ]
                 );
             }
         }
 
+        // `business_id` and `user_id` are deliberately absent from only():
+        // `$request->only([...]) + ['business_id' => ...]` keeps the LEFT
+        // operand when the key exists, so a client that sent its own
+        // business_id/user_id used to plant rows into another tenant. Identity
+        // and tenant always come from the authenticated session.
         $data = DueCollect::create($request->only([
-        'business_id',
-        'party_id',
-        'user_id',
-        'sale_id',
-        'purchase_id',
-        'invoice_number',
-        'totalDue',
-        'dueAmountAfterPay',
-        'payDueAmount',
-        'payment_type',
-        'paymentDate'
-    ]) + [
+            'party_id',
+            'sale_id',
+            'purchase_id',
+            'invoice_number',
+            'amount',
+            'due_amount',
+            'paid_amount',
+            'payment_type',
+            'payment_date',
+            'note',
+        ]) + [
             'user_id' => auth()->id(),
             'business_id' => auth()->user()->business_id,
             'sale_id' => $party->type != 'Supplier' && isset($invoice) ? $invoice->id : null,
             'purchase_id' => $party->type == 'Supplier' && isset($invoice) ? $invoice->id : null,
-            'totalDue' => isset($invoice) ? $invoice->due_amount : $party->due,
-            'dueAmountAfterPay' => isset($invoice) ? ($invoice->due_amount - $request->payDueAmount) : ($party->due - $request->payDueAmount),
+            'amount' => isset($invoice) ? $invoice->due_amount : $party->due,
+            'due_amount' => isset($invoice)
+                ? ($invoice->due_amount - $request->paid_amount)
+                : ($party->due - $request->paid_amount),
         ]);
 
         if (isset($invoice)) {
             $invoice->update([
-                'due_amount' => $invoice->due_amount - $request->payDueAmount,
+                'due_amount' => $invoice->due_amount - $request->paid_amount,
             ]);
         }
 
         $business = Business::findOrFail(auth()->user()->business_id);
         $business_name = $business->company_name;
         $business->update([
-            'remaining_shop_balance' => $party->type == 'Supplier' ? ($business->remaining_shop_balance - $request->payDueAmount) : ($business->remaining_shop_balance + $request->payDueAmount),
+            'remaining_shop_balance' => $party->type == 'Supplier' ? ($business->remaining_shop_balance - $request->paid_amount) : ($business->remaining_shop_balance + $request->paid_amount),
         ]);
 
         $party->update([
-            'due' => $party->due - $request->payDueAmount,
-            'opening_balance' => $request->invoice_number ? $party->opening_balance : $party->opening_balance - $request->payDueAmount,
+            'due' => $party->due - $request->paid_amount,
+            'opening_balance' => $request->invoice_number ? $party->opening_balance : $party->opening_balance - $request->paid_amount,
         ]);
 
         if (config('services.message.enabled')) {

@@ -25,9 +25,11 @@ class InsurancePolicyController extends Controller
     {
         $policies = InsurancePolicy::with(['company:id,name', 'business:id,company_name', 'customer'])
             ->when($request->search, function ($q) use ($request) {
-                $q->where('policy_number', 'like', '%' . $request->search . '%')
-                    ->orWhere('holder_name', 'like', '%' . $request->search . '%')
-                    ->orWhere('member_id', 'like', '%' . $request->search . '%');
+                $q->where(function ($sub) use ($request) {
+                    $sub->where('policy_number', 'like', '%' . $request->search . '%')
+                        ->orWhere('holder_name', 'like', '%' . $request->search . '%')
+                        ->orWhere('member_id', 'like', '%' . $request->search . '%');
+                });
             })
             ->when($request->status, function ($q) use ($request) {
                 $q->where('status', $request->status);

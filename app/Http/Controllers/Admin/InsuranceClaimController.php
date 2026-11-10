@@ -24,8 +24,10 @@ class InsuranceClaimController extends Controller
     {
         $claims = InsuranceClaim::with(['company:id,name', 'policy:id,policy_number', 'business:id,company_name', 'customer'])
             ->when($request->search, function ($q) use ($request) {
-                $q->where('claim_number', 'like', '%' . $request->search . '%')
-                    ->orWhere('external_reference', 'like', '%' . $request->search . '%');
+                $q->where(function ($sub) use ($request) {
+                    $sub->where('claim_number', 'like', '%' . $request->search . '%')
+                        ->orWhere('external_reference', 'like', '%' . $request->search . '%');
+                });
             })
             ->when($request->status, function ($q) use ($request) {
                 $q->where('status', $request->status);

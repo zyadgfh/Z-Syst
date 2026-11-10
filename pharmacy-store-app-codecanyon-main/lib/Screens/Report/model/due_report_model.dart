@@ -149,12 +149,12 @@ class DueReportData {
   DueReportData.fromJson(dynamic json) {
     id = json['id'];
     partyId = json['party_id'];
-    invoiceNumber = json['invoiceNumber'];
-    totalDue = json['totalDue'];
-    dueAmountAfterPay = json['dueAmountAfterPay'];
-    payDueAmount = json['payDueAmount'];
-    paymentType = json['paymentType'];
-    paymentDate = json['paymentDate'];
+    invoiceNumber = json['invoice_number'] ?? json['invoiceNumber'];
+    totalDue = json['amount'] ?? json['totalDue'];
+    dueAmountAfterPay = json['due_amount'] ?? json['dueAmountAfterPay'];
+    payDueAmount = json['paid_amount'] ?? json['payDueAmount'];
+    paymentType = json['payment_type'] ?? json['paymentType'];
+    paymentDate = json['payment_date'] ?? json['paymentDate'];
     party = json['party'] != null ? Party.fromJson(json['party']) : null;
   }
   num? id;

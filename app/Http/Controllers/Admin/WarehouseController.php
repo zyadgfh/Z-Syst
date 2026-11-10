@@ -25,8 +25,10 @@ class WarehouseController extends Controller
     {
         $warehouses = Warehouse::with(['business:id,company_name'])
             ->when($request->search, function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                    ->orWhere('code', 'like', '%' . $request->search . '%');
+                $q->where(function ($sub) use ($request) {
+                    $sub->where('name', 'like', '%' . $request->search . '%')
+                        ->orWhere('code', 'like', '%' . $request->search . '%');
+                });
             })
             ->latest()
             ->paginate(10);

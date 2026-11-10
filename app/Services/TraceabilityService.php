@@ -47,9 +47,10 @@ class TraceabilityService
 
             // Mark batch as recalled if batch_lot_number is provided
             if ($data['batch_lot_number']) {
-                BatchLot::where('batch_number', $data['batch_lot_number'])
-                    ->orWhere('lot_number', $data['batch_lot_number'])
-                    ->update(['recall_date' => now()]);
+                BatchLot::where(function ($q) use ($data) {
+                    $q->where('batch_number', $data['batch_lot_number'])
+                        ->orWhere('lot_number', $data['batch_lot_number']);
+                })->update(['recall_date' => now()]);
             }
 
             return $recall;
@@ -148,8 +149,10 @@ class TraceabilityService
         }
 
         if ($recall->batch_lot_number) {
-            $query->where('batch_number', $recall->batch_lot_number)
-                ->orWhere('lot_number', $recall->batch_lot_number);
+            $query->where(function ($q) use ($recall) {
+                $q->where('batch_number', $recall->batch_lot_number)
+                    ->orWhere('lot_number', $recall->batch_lot_number);
+            });
         }
 
         $batches = $query->with('product')->get();

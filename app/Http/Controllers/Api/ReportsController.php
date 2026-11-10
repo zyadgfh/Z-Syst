@@ -109,7 +109,7 @@ class ReportsController extends Controller
 
     public function dueCollectsReport(ReportRequest $request)
     {
-        $query = DueCollect::select('id', 'party_id', 'invoice_number', 'totalDue', 'dueAmountAfterPay', 'payDueAmount', 'payment_type', 'paymentDate')
+        $query = DueCollect::select('id', 'business_id', 'party_id', 'invoice_number', 'amount', 'due_amount', 'paid_amount', 'payment_type', 'payment_date')
             ->with('party:id,name,phone')
             ->when($request->filled('search'), function ($query) use ($request) {
                 $term = '%'.$request->input('search').'%';
@@ -123,13 +123,13 @@ class ReportsController extends Controller
                 });
             })
             ->when($request->filled('from_date') || $request->filled('to_date'), function ($query) use ($request) {
-                $query->whereBetween('paymentDate', [$request->input('from_date'), $request->input('to_date')]);
+                $query->whereBetween('payment_date', [$request->input('from_date'), $request->input('to_date')]);
             })
             ->where('business_id', auth()->user()->business_id);
 
         $data = (clone $query)->latest()->paginate($request->input('per_page', 10));
-        $total_paid = (clone $query)->sum('payDueAmount');
-        $total_due = (clone $query)->sum('totalDue');
+        $total_paid = (clone $query)->sum('paid_amount');
+        $total_due = (clone $query)->sum('amount');
 
         return response()->json([
             'message' => __('Data fetched successfully.'),
@@ -250,8 +250,13 @@ class ReportsController extends Controller
             ->havingRaw('totalStock < alert_qty')
             ->when($request->filled('search'), function ($query) use ($request) {
                 $term = '%'.$request->input('search').'%';
-                $query->where('product_name', 'like', $term)
-                    ->orWhere('product_code', 'like', $term);
+                // DB::table() applies no global scopes, so the explicit
+                // products.business_id filter above is the only tenant defence —
+                // and an ungrouped orWhere binds looser than it.
+                $query->where(function ($sub) use ($term) {
+                    $sub->where('products.product_name', 'like', $term)
+                        ->orWhere('products.product_code', 'like', $term);
+                });
             });
 
         $data = (clone $query)->paginate($request->input('per_page', 10));
@@ -321,11 +326,13 @@ class ReportsController extends Controller
             ])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->input('search');
-                $query->where('invoice_no', 'like', "%$search%")
-                    ->orWhereHas('sale.party', function ($subQuery) use ($search) {
-                        $subQuery->where('name', 'like', "%$search%")
-                            ->orWhere('phone', 'like', "%$search%");
-                    });
+                $query->where(function ($sub) use ($search) {
+                    $sub->where('invoice_no', 'like', "%$search%")
+                        ->orWhereHas('sale.party', function ($subQuery) use ($search) {
+                            $subQuery->where('name', 'like', "%$search%")
+                                ->orWhere('phone', 'like', "%$search%");
+                        });
+                });
             })
             ->when($request->filled('from_date') && $request->filled('to_date'), function ($query) use ($request) {
                 $query->whereBetween('return_date', [$request->input('from_date'), $request->input('to_date')]);
@@ -363,11 +370,13 @@ class ReportsController extends Controller
             ])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->input('search');
-                $query->where('invoice_no', 'like', "%$search%")
-                    ->orWhereHas('purchase.party', function ($subQuery) use ($search) {
-                        $subQuery->where('name', 'like', "%$search%")
-                            ->orWhere('phone', 'like', "%$search%");
-                    });
+                $query->where(function ($sub) use ($search) {
+                    $sub->where('invoice_no', 'like', "%$search%")
+                        ->orWhereHas('purchase.party', function ($subQuery) use ($search) {
+                            $subQuery->where('name', 'like', "%$search%")
+                                ->orWhere('phone', 'like', "%$search%");
+                        });
+                });
             })
             ->when($request->filled('from_date') && $request->filled('to_date'), function ($query) use ($request) {
                 $query->whereBetween('return_date', [$request->input('from_date'), $request->input('to_date')]);

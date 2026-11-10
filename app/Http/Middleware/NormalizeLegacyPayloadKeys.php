@@ -59,6 +59,13 @@ class NormalizeLegacyPayloadKeys
         'lossProfit' => 'loss_profit',
         'isPaid' => 'is_paid',
         'paymentType' => 'payment_type',
+
+        // Due collections. The live columns are amount / paid_amount /
+        // due_amount; the mobile app still posts the old camelCase names.
+        'totalDue' => 'amount',
+        'payDueAmount' => 'paid_amount',
+        'dueAmountAfterPay' => 'due_amount',
+        'paymentDate' => 'payment_date',
     ];
 
     public function handle(Request $request, Closure $next): Response

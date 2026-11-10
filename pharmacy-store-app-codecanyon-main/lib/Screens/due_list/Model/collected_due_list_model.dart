@@ -152,12 +152,12 @@ class CollectedDueData {
     userId = json['user_id'];
     saleId = json['sale_id'];
     purchaseId = json['purchase_id'];
-    invoiceNumber = json['invoiceNumber'];
-    totalDue = json['totalDue'];
-    dueAmountAfterPay = json['dueAmountAfterPay'];
-    payDueAmount = json['payDueAmount'];
-    paymentType = json['paymentType'];
-    paymentDate = json['paymentDate'];
+    invoiceNumber = json['invoice_number'] ?? json['invoiceNumber'];
+    totalDue = json['amount'] ?? json['totalDue'];
+    dueAmountAfterPay = json['due_amount'] ?? json['dueAmountAfterPay'];
+    payDueAmount = json['paid_amount'] ?? json['payDueAmount'];
+    paymentType = json['payment_type'] ?? json['paymentType'];
+    paymentDate = json['payment_date'] ?? json['paymentDate'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     collectedBy = json['user'] != null ? User.fromJson(json['user']) : null;
