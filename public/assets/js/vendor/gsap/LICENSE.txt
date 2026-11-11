@@ -1,0 +1,63 @@
+GSAP — license notice for the vendored files in this directory
+===============================================================
+
+Files vendored here:
+  gsap.min.js            GSAP core (includes CSSPlugin)
+  ScrollTrigger.min.js   scroll-linked animation, pinning, scrub
+  Flip.min.js            animate between two layout states
+  ScrollToPlugin.min.js  animate scroll position / scroll-into-view
+
+Version : 3.15.1
+Source   : https://registry.npmjs.org/gsap/-/gsap-3.15.1.tgz  (package `gsap`, `dist/`)
+Fetched  : 2026-11-10
+Files are copied verbatim from the official npm package. Do not edit them.
+
+LICENSE — IMPORTANT, READ THIS
+------------------------------
+GSAP is **not** MIT-licensed. Each file carries this header:
+
+  /*!
+   * GSAP 3.15.1
+   * https://gsap.com
+   *
+   * @license Copyright 2026, GreenSock. All rights reserved.
+   * Subject to the terms at https://gsap.com/standard-license.
+   * @author: Jack Doyle, jack@greensock.com
+   */
+
+It is distributed under GreenSock's standard **"no charge" license**:
+https://gsap.com/standard-license
+
+In practice, and per the official package README: GSAP is **100% free, including
+for commercial use, and including every formerly "Club GSAP" bonus plugin**
+(SplitText, MorphSVG, DrawSVG, ScrollSmoother, …). Since Webflow's acquisition of
+GreenSock there is no paid tier, no membership, no license key and no auth token.
+Everything installs from the public `gsap` npm package.
+
+Consequences for this repository:
+
+* Commercial use in Z-Syst is permitted at no charge. No key or account needed.
+* The npm `license` field is the string
+  `Standard 'no charge' license: https://gsap.com/standard-license` — dependency
+  scanners and `composer/npm audit` style tooling may flag it as a non-SPDX
+  license. That is expected; it is not a violation.
+* Do not relicense, do not strip the header comments from these files, and do not
+  redistribute them claiming MIT.
+* The **skills documentation** under `.agents/skills/gsap*/` is a separate thing
+  and *is* MIT-licensed (upstream `greensock/gsap-skills`). That MIT license
+  covers the docs, not this library.
+
+Re-fetching / updating
+----------------------
+    curl -sL https://registry.npmjs.org/gsap/-/gsap-<version>.tgz -o /tmp/gsap.tgz
+    mkdir -p /tmp/g && tar -xzf /tmp/gsap.tgz -C /tmp/g
+    cp /tmp/g/package/dist/{gsap,ScrollTrigger,Flip,ScrollToPlugin}.min.js \
+       public/assets/js/vendor/gsap/
+
+Then update the version above, the `GSAP <version>` string in the header check,
+and `public/assets/js/vendor/gsap/README.md`.
+
+Note: `cdnjs.cloudflare.com` is the CDN GSAP's own docs recommend, but it is
+**blocked** by this project's Content-Security-Policy
+(`app/Http/Middleware/SecurityHeaders.php`). Vendoring locally keeps these files
+on `'self'` and avoids that entirely. See `.agents/skills/gsap/SKILL.md`.

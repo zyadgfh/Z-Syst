@@ -25,9 +25,13 @@ Request: $ARGUMENTS
 3. **Handle the subcommands:**
    - `install` — vendor the UMD builds into `public/assets/js/vendor/gsap/`, add
      the `<script>` tags to `resources/views/layouts/partials/script.blade.php`
-     *before* `custom.js`, register plugins once in
-     `public/assets/js/custom/custom.js`, and verify every host you used is
-     allowed by `script-src` in `app/Http/Middleware/SecurityHeaders.php`.
+     *before* `custom.js`, register plugins once in the single registration point
+     `public/assets/js/zs-motion.js`, and verify every host you used is allowed by
+     `script-src` in `app/Http/Middleware/SecurityHeaders.php`.
+     **GSAP 3.15.1 is already installed this way** (core + ScrollTrigger global,
+     Flip/ScrollToPlugin vendored but opt-in, storefront wired separately because
+     it is a standalone page). So treat `install` as *add another plugin* or
+     *re-verify*, and do not duplicate the existing tags or registration.
    - `audit` — check all GSAP usage for plugins registered more than once,
      tweens/ScrollTriggers with no matching `kill()`, animated layout properties
      (`width`/`height`/`top`/`left` instead of `transform`/`opacity`), missing

@@ -19,6 +19,12 @@ the relevant one before writing animation code**; do not answer from memory.
 > acquisition. Club GSAP is no longer a paid tier. Everything installs from the
 > public `gsap` npm package — no auth token, `.npmrc`, or private registry.
 > (`references/llms.txt`)
+>
+> **License precision:** the *library* is **not** MIT — it is GreenSock's standard
+> "no charge" license (`https://gsap.com/standard-license`, 100% free including
+> commercial use). Dependency scanners may flag the non-SPDX `license` field; that
+> is expected. The *skills documentation* under `.agents/skills/gsap*/` **is** MIT.
+> See `public/assets/js/vendor/gsap/LICENSE.txt`.
 
 ## Route to the right skill
 
@@ -60,18 +66,44 @@ Pages pull local files with `asset()` from `public/assets/js/`, listed in
 `resources/views/layouts/partials/script.blade.php` (jQuery 3.7.1, Bootstrap
 bundle, ApexCharts, `custom-ajax.js`, `pos-keys.js`, `pos-offline.js`, …).
 
-So install GSAP the same way — **not** with `npm install` + `@vite`:
+So install GSAP the same way — **not** with `npm install` + `@vite`.
 
-1. Put the UMD builds under version control next to the other vendored assets:
-   `public/assets/js/vendor/gsap/gsap.min.js`, plus any plugin
-   (`ScrollTrigger.min.js`, `Flip.min.js`, …).
-2. Add the tag in `resources/views/layouts/partials/script.blade.php`, **before**
-   `custom.js` so page scripts can rely on `gsap` existing:
-   ```blade
-   <script src="{{ asset('assets/js/vendor/gsap/gsap.min.js') }}"></script>
-   <script src="{{ asset('assets/js/vendor/gsap/ScrollTrigger.min.js') }}"></script>
-   ```
-3. Register plugins once, in `public/assets/js/custom/custom.js`.
+### Already installed (GSAP 3.15.1) — do not repeat this
+
+Vendored from `https://registry.npmjs.org/gsap/-/gsap-3.15.1.tgz` into
+`public/assets/js/vendor/gsap/`: `gsap.min.js` (73 KB), `ScrollTrigger.min.js`
+(45 KB), plus opt-in `Flip.min.js` (26 KB) and `ScrollToPlugin.min.js` (4 KB).
+See that directory's `README.md` and `LICENSE.txt`.
+
+Loaded globally, in this order, by `resources/views/layouts/partials/script.blade.php`
+(which all five layouts include) **and** by `resources/views/web/storefront.blade.php`:
+
+```
+gsap.min.js → ScrollTrigger.min.js → zs-motion.js → custom.js → @stack('js')
+```
+
+`public/assets/js/zs-motion.js` is the **single registration point** — it
+registers ScrollTrigger, applies the project defaults (`duration: 0.22`,
+`ease: "power2.out"`, `overwrite: "auto"`), guards `prefers-reduced-motion`, and
+exposes `window.zsMotion` (`reduced`, `whenMotion`, `enter`, `refresh`, `kill`,
+`revert`). It performs **no animation on its own**, so installing GSAP changed
+nothing visually. It has no jQuery dependency and lives beside `ap-theme.js` /
+`pos-keys.js` rather than inside `custom.js`, because the storefront never loads
+`custom.js`.
+
+### To add another plugin
+
+Vendor the UMD file into `public/assets/js/vendor/gsap/`, then load and register it
+**on the page that needs it** via `@push('js')` — do not add it to the global
+partial (dead weight on every admin page) and do not register it in a loop or an
+AJAX callback. `Flip` and `ScrollToPlugin` are already on disk, unloaded.
+
+### Standalone pages get nothing automatically
+
+Any view with its own `<!DOCTYPE>` and no `@extends` never sees the shared
+partial. `storefront.blade.php` is wired explicitly. The others are receipts,
+`purchase-orders/pdf`, barcode/label sheets, mail templates, the installer and
+`layouts/error-blank` — print/PDF/email output, where animation is pointless.
 
 ### CSP — this will silently break if you ignore it
 

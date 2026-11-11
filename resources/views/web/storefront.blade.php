@@ -76,6 +76,14 @@ body { font-family: var(--ap-font); background: var(--ap-bg); color: var(--ap-te
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+{{-- GSAP 3.15.1 (vendored locally — this page is standalone and does not extend a
+     layout, so it loads the same three files as layouts/partials/script.blade.php).
+     Local paths satisfy script-src 'self'; cdnjs.cloudflare.com would be blocked.
+     Flip.min.js / ScrollToPlugin.min.js are opt-in: load and register them here if a
+     page needs them. Guidance: .agents/skills/gsap/SKILL.md --}}
+<script src="{{ asset('assets/js/vendor/gsap/gsap.min.js') }}"></script>
+<script src="{{ asset('assets/js/vendor/gsap/ScrollTrigger.min.js') }}"></script>
+<script src="{{ asset('assets/js/zs-motion.js') }}"></script>
 <script>
 function cart() {
     return {

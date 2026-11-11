@@ -26,12 +26,33 @@ and so an upstream update is a straight file copy:
 .agents/skills/gsap-frameworks/SKILL.md    10,621 B
 ```
 
-Nothing upstream was edited. The only files written for this repository are:
+Nothing upstream was edited. The files written for this repository are:
 
 - `.agents/skills/gsap/SKILL.md` — the router, plus the Z-Syst integration and
   CSP rules that upstream cannot know about.
 - `.claude/commands/gsap.md` — the `/gsap` slash command.
 - This file.
+
+## The library itself is vendored separately
+
+Installed by `/gsap install` on 2026-11-10 — a different artifact from the docs
+above, and under a **different license**.
+
+| | |
+|---|---|
+| Package | `gsap` **3.15.1** from `https://registry.npmjs.org/gsap/-/gsap-3.15.1.tgz` |
+| Location | `public/assets/js/vendor/gsap/` |
+| Files | `gsap.min.js` 73 KB · `ScrollTrigger.min.js` 45 KB · `Flip.min.js` 26 KB (opt-in) · `ScrollToPlugin.min.js` 4 KB (opt-in) |
+| License | **GreenSock standard "no charge" license — NOT MIT.** `https://gsap.com/standard-license`. 100% free including commercial use and including all formerly Club-GSAP plugins. Details in `public/assets/js/vendor/gsap/LICENSE.txt`. |
+| Wiring | `public/assets/js/zs-motion.js` — the single registration point; loaded by `layouts/partials/script.blade.php` and by `resources/views/web/storefront.blade.php` |
+
+Vendored rather than npm-installed because this Blade app has no runtime bundler,
+and rather than CDN-loaded because the project's CSP blocks
+`cdnjs.cloudflare.com` — the CDN GSAP's own documentation recommends.
+
+Note the license asymmetry, which is easy to get wrong: the **skills docs** are
+MIT, the **library** is not. Dependency scanners may flag gsap's non-SPDX
+`license` field; that is expected and is not a violation.
 
 `references/examples/` holds upstream's runnable vanilla / React / Vue / Nuxt
 examples. React, Vue and Nuxt are **not** used by this project — they are kept

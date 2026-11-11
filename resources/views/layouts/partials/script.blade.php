@@ -13,6 +13,15 @@
 <script src="{{ asset('assets/js/custom-ajax.js') }}"></script>
 {{-- Toaster --}}
 <script src="{{ asset('assets/js/toastr.min.js') }}"></script>
+{{-- GSAP 3.15.1 — vendored locally because this app has no runtime bundler and the
+     CSP (app/Http/Middleware/SecurityHeaders.php) blocks cdnjs.cloudflare.com.
+     Core + ScrollTrigger are global; Flip/ScrollToPlugin are opt-in per page.
+     See public/assets/js/vendor/gsap/README.md --}}
+<script src="{{ asset('assets/js/vendor/gsap/gsap.min.js') }}"></script>
+<script src="{{ asset('assets/js/vendor/gsap/ScrollTrigger.min.js') }}"></script>
+{{-- registers ScrollTrigger once, sets project defaults, exposes window.zsMotion.
+     No jQuery dependency; safe on any page. Performs no animation by itself. --}}
+<script src="{{ asset('assets/js/zs-motion.js') }}"></script>
 <script src="{{ asset('assets/js/custom/custom.js') }}"></script>
 <script src="{{ asset('assets/js/apexcharts.min.js') }}"></script>
 
