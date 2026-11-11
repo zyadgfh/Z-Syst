@@ -20,7 +20,7 @@ return new class extends Migration
             $table->boolean('charge')->default(0);
             $table->string('image')->nullable();
             $table->text('data')->nullable();
-            $table->text('manual_data')->nullable();
+            $table->json('manual_data')->nullable();
             $table->boolean('is_manual')->default(0);
             $table->boolean('accept_img')->default(0);
             $table->string('namespace')->nullable();

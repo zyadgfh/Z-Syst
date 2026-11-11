@@ -76,6 +76,44 @@ jobs:
           git push -q --force origin ci-runtime-lint || echo push failed
 
   # ------------------------------------------------------------------
+  # Schema drift — blocking, and deliberately so. Production (Supabase) and
+  # this repository's migrations drifted apart in silence: 137 columns the
+  # models mass-assign did not exist live, and 24 production tables were
+  # created by no migration at all. CI could not see any of it, because the
+  # suite builds sqlite *from the migrations* — it validated a database that
+  # was not production, so 398 green tests coexisted with features that
+  # returned 500 live. This job locks the three sides together: models ↔
+  # migrations ↔ production. It needs no secrets and no network access.
+  # ------------------------------------------------------------------
+  schema-drift:
+    name: Schema drift — models vs migrations vs production
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: curl, bcmath, gd, zip, mbstring, xml, intl, sqlite, pdo_sqlite
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --ansi
+
+      - name: Assert the migrated schema matches every model and every production table
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+          SUPABASE_FALLBACK_ELOQUENT: 'true'
+        run: vendor/bin/phpunit --colors=never --filter SchemaDriftTest
+
+  # ------------------------------------------------------------------
   # Test suite — informational while the Path B runtime is being
   # stabilized (identity lives in Supabase GoTrue; see PROJECT_KB §5b
   # and docs/zsyst/16). Failures are reported as annotations but do not
