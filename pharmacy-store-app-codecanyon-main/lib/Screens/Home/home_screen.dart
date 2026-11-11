@@ -14,6 +14,7 @@ import 'package:nb_utils/nb_utils.dart';
 import '../../Provider/profile_provider.dart';
 import '../../constant.dart';
 import '../../model/business_info_model.dart' as business;
+import '../../services/ad_mob_service.dart';
 import '../DashBoard/components.dart';
 import '../banner/provider/banner_provider.dart';
 import 'components/home_screen_shemmer.dart';
@@ -344,6 +345,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     );
                                   },
                                 ),
+                                const SizedBox(height: 16),
+                                const AdMobBanner(),
                               ],
                             ),
                           ),
@@ -530,7 +533,12 @@ class _HomeGridCardsState extends State<HomeGridCards> {
       return GestureDetector(
         onTap: () async {
           if (checkPermission(item: widget.gridItems.route)) {
-            Navigator.of(context).pushNamed('/${widget.gridItems.route}');
+            await Navigator.of(context).pushNamed('/${widget.gridItems.route}');
+            // Product browsing is a non-sensitive transition. Do not invoke
+            // ads from expense, sales, payment, or synchronization flows.
+            if (widget.gridItems.route == 'Products') {
+              AdMobService.showAfterNonSensitiveTransition();
+            }
           } else {
             EasyLoading.showError(
               lang.S.of(context).permissionNotGranted,

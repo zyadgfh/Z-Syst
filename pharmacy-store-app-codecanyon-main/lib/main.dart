@@ -56,9 +56,11 @@ import 'Screens/ledger/ledger_list.dart';
 import 'Screens/tax rates/tax_rates_screen.dart';
 import 'generated/l10n.dart';
 import 'internet checker/Internet_check_provider/controller/network_provider_controller.dart';
+import 'services/ad_mob_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AdMobService.initialize();
   runApp(
     const ProviderScope(
       child: MyApp(),
