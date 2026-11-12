@@ -1,0 +1,87 @@
+# Build context for the Laravel image. The repository is a monorepo: it also
+# holds a 23 MB Flutter app, a separate Vite/Firebase SPA, agent tooling and an
+# 80 MB .git. None of it is served by this container, and copying it would make
+# every build slower and the image larger for nothing.
+#
+# What MUST stay in the context (do not add these): app, bootstrap, config,
+# database, docker, lang, Modules, modules_statuses.json, public, resources,
+# routes, storage, artisan, composer.json, composer.lock.
+
+# --- version control & CI ----------------------------------------------------
+.git
+.gitignore
+.gitattributes
+.github
+
+# --- agent scratch & tooling -------------------------------------------------
+.scratch
+.agents
+.blackbox
+.bug-hunter
+.claude
+.clinerules
+.mcp.json
+agent
+skills
+skills-lock.json
+tools_local
+
+# --- dependencies rebuilt inside the image ----------------------------------
+node_modules
+vendor
+
+# --- tests (run in CI, never in the production image) ------------------------
+tests
+phpunit.xml
+run-coverage.bat
+run-coverage.sh
+Vulnscan_results.md
+
+# --- Flutter companion app ---------------------------------------------------
+pharmacy-store-app-codecanyon-main
+
+# --- the separate Vite/Firebase SPA (deployed via vercel.json, not here) -----
+.firebase
+.firebaserc
+dataconnect
+firebase.json
+firestore.indexes.json
+firestore.rules
+functions
+index.html
+src
+vercel-public
+vercel.json
+vite.config.js
+vite.config.vercel.js
+design-system
+zsyst-apple-design-samples.zip
+VSC.png
+
+# --- local Supabase CLI project & one-off SQL -------------------------------
+supabase
+
+# --- compose files for the optional Valkey/Redis sidecar ---------------------
+docker-compose.valkey.yml
+supervisor.conf
+
+# --- env files: configuration comes from Render's environment, never the image
+.env
+.env.*
+!.env.production.example
+
+# --- docs & planning notes ---------------------------------------------------
+docs
+documentation
+*.md
+!README.md
+
+# --- local artefacts ---------------------------------------------------------
+automation.sh
+plan.md
+prescription_management_prompt.md
+storage/logs/*.log
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*.php

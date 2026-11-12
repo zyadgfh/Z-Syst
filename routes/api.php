@@ -3,6 +3,21 @@
 use App\Http\Controllers\Api;
 use Illuminate\Support\Facades\Route;
 
+// Deploy health check — render.yaml's healthCheckPath is /api/up.
+//
+// Deliberately dependency-free: it proves nginx → php-fpm → framework bootstrap
+// are all alive, and nothing more. It must not touch the database, because a
+// Supabase pooler blip would then make Render consider the instance unhealthy
+// and restart it in a loop — turning a transient database hiccup into an outage
+// of the API itself. The scheduler and the application's own logging surface
+// database problems.
+//
+// Registered under the `api` group (prefix `api`, ThrottleRequests +
+// SubstituteBindings only), so no session, cookie or CSRF work happens per tick.
+Route::get('/up', function () {
+    return response('ok', 200)->header('Content-Type', 'text/plain');
+});
+
 Route::prefix('v1')->group(function () {
 
     Route::middleware('throttle:10,1')->group(function () {
