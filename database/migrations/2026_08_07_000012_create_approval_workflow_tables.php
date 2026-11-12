@@ -24,6 +24,17 @@ return new class extends Migration
 
         Schema::create('approval_steps', function (Blueprint $table) {
             $table->id();
+
+            // Production has always had this column; this migration never created
+            // it, so `migrate:fresh` built an approval_steps without a tenant key
+            // while production had one — the two databases disagreed on a
+            // security-relevant column. A step belongs to the same business as its
+            // workflow, and both TenantScoped and the database's RLS policies key
+            // off it. Declared NOT NULL with a foreign key to match its two
+            // sibling tables in this file and the state production was aligned to
+            // by `enforce_tenant_ownership_on_business_id`.
+            $table->foreignId('business_id')->constrained()->cascadeOnDelete();
+
             $table->foreignId('workflow_id')->constrained('approval_workflows')->cascadeOnDelete();
 
             $table->integer('step_number');
