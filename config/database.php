@@ -48,14 +48,18 @@ return [
             'url' => env('DATABASE_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'forge'),
+            // DB_NAME is what managed Postgres providers (Wasmer Edge, some
+            // PaaS add-ons) inject; DB_DATABASE stays the canonical Laravel key.
+            'database' => env('DB_DATABASE', env('DB_NAME', 'forge')),
             'username' => env('DB_USERNAME', 'forge'),
             'password' => env('DB_PASSWORD', ''),
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
             'search_path' => 'public',
-            'sslmode' => 'prefer',
+            // TLS-required servers (Supabase, Wasmer Edge databases, most
+            // managed Postgres) need "require"; local Postgres keeps "prefer".
+            'sslmode' => env('DB_SSLMODE', 'prefer'),
         ],
 
         'sqlsrv' => [

@@ -13,6 +13,7 @@ package-lock.json.bak
 .env.*
 !.env.example
 !.env.production.example
+!.env.wasmer.example
 !.env.testing
 
 # ---- Caches & test artifacts ----
