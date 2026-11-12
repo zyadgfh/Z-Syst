@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use ReflectionClass;
 use Tests\TestCase;
@@ -55,11 +56,16 @@ class SchemaDriftTest extends TestCase
     ];
 
     /**
-     * Tables created by the migrations but absent from production: Breeze
+     * Relations created by the migrations but absent from production: Breeze
      * scaffolding that was never used. routes/auth.php is not loaded by
      * RouteServiceProvider, and the real reset flow is the OTP mailer in
      * Api\Auth\ZSystForgotPasswordController. Kept (rather than deleted) so an
      * environment that already ran them does not orphan its migrations rows.
+     *
+     * `users` is special: 2026_11_08_000003 drops the legacy integer-keyed table
+     * and re-creates the name as a VIEW over app_users, so no model may treat it
+     * as a second identity store. Schema::hasTable() reports false for a view on
+     * sqlite, hence the view-aware relationExists() below.
      */
     private const REPO_ONLY_TABLES = [
         'password_resets',
@@ -98,7 +104,7 @@ class SchemaDriftTest extends TestCase
 
             $checked++;
 
-            if (! Schema::hasTable($table)) {
+            if (! $this->relationExists($table)) {
                 $problems[] = "{$class}: table `{$table}` does not exist — no migration creates it";
                 continue;
             }
@@ -151,7 +157,7 @@ class SchemaDriftTest extends TestCase
 
         $missing = array_values(array_filter(
             $tables,
-            static fn (string $t): bool => ! Schema::hasTable($t)
+            fn (string $t): bool => ! $this->relationExists($t)
         ));
 
         $this->assertSame(
@@ -171,7 +177,7 @@ class SchemaDriftTest extends TestCase
     {
         $present = array_values(array_filter(
             self::REPO_ONLY_TABLES,
-            static fn (string $t): bool => Schema::hasTable($t)
+            fn (string $t): bool => $this->relationExists($t)
         ));
 
         $this->assertSame(
@@ -180,6 +186,28 @@ class SchemaDriftTest extends TestCase
             'The set of Breeze scaffolding tables changed. If one was removed deliberately, update '
             .'REPO_ONLY_TABLES; if a new one appeared, it needs a decision, not a silent pass.'
         );
+    }
+
+    /**
+     * Does this name exist as a table *or* a view in the migrated schema?
+     *
+     * Schema::hasTable() answers false for a view, and this application has one:
+     * `users` was retired as a table and re-created as a view over app_users so
+     * that legacy reads keep working without a second identity store. Checking
+     * only hasTable() would report that relation as missing schema drift.
+     */
+    private function relationExists(string $name): bool
+    {
+        return Schema::hasTable($name) || $this->viewExists($name);
+    }
+
+    private function viewExists(string $name): bool
+    {
+        $sql = DB::getDriverName() === 'sqlite'
+            ? "select name from sqlite_master where type = 'view' and name = ?"
+            : 'select table_name as name from information_schema.views where table_schema = current_schema() and table_name = ?';
+
+        return (bool) DB::selectOne($sql, [$name]);
     }
 
     /**
