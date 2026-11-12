@@ -51,3 +51,6 @@ desktop.ini
 # Python bytecode (tools/*.py)
 __pycache__/
 *.pyc
+
+# ---- Code-VulnScan local scan state (artifacts, not source) ----
+.github/skills/code-vulnscan/workspace/
