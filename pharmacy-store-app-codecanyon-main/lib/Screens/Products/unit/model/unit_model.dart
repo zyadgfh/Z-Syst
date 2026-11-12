@@ -9,7 +9,7 @@ class UnitModel {
 
   UnitModel.fromJson(dynamic json) {
     id = json['id'];
-    unitName = json['unitName'];
+    unitName = (json['unit_name'] ?? json['unitName']);
     businessId = json['business_id'];
     status = json['status'];
     createdAt = json['created_at'];

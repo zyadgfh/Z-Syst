@@ -24,13 +24,27 @@ use Symfony\Component\HttpFoundation\Response;
  *    `$request->paidAmount` keep working;
  *  - unknown keys are passed through untouched.
  *
- * The map deliberately excludes `categoryName` / `categoryDescription`, which
- * are still the real column names on `expense_categories` and
- * `income_categories`, and the `plans` camelCase columns. Those endpoints handle
- * their own aliases locally so the two meanings never collide.
+ * The map deliberately excludes the camelCase keys that are *correct* camelCase,
+ * each verified against the live schema or the controller that reads it — do not
+ * "complete" the map with them:
+ *  - `categoryName` / `categoryDescription`: still the real column names on
+ *    `expense_categories` and `income_categories`;
+ *  - `subscriptionName`, `offerPrice`, `subscriptionPrice`: real camelCase
+ *    columns on `plans`;
+ *  - `imageUrl`: a real quoted camelCase column on `banners`;
+ *  - the `*Permission` keys (`salePermission`, `stockPermission`, ...):
+ *    ZSystUserController reads `$request->addExpensePermission` directly, so the
+ *    camelCase name is the contract, not a legacy alias;
+ *  - `unitName`: UnitController merges its own `unit_name` alias locally;
+ *  - `expanseFor` / `expenseDate`: ZSystExpenseController already reads both
+ *    spellings (`$request->expanse_for ?? $request->expanseFor`);
+ *  - `productDealerPrice` / `productPurchasePrice`: no such column exists in any
+ *    table, so there is no canonical twin to add. These are dead fields in the
+ *    mobile models and need a product decision, not a shim.
  *
  * @see \App\Http\Controllers\Api\ZSystCategoryController
  * @see \App\Http\Controllers\Api\UnitController
+ * @see \App\Http\Controllers\Api\ZSystUserController
  */
 class NormalizeLegacyPayloadKeys
 {
@@ -66,6 +80,23 @@ class NormalizeLegacyPayloadKeys
         'payDueAmount' => 'paid_amount',
         'dueAmountAfterPay' => 'due_amount',
         'paymentDate' => 'payment_date',
+
+        // Incomes. Unlike ZSystExpenseController — which reads
+        // `$request->expanse_for ?? $request->expanseFor` — ZSystIncomeController
+        // reads snake_case only, so the mobile app's camelCase keys were being
+        // stored as null rather than rejected: an income silently lost its
+        // purpose, date and reference.
+        'incomeFor' => 'income_for',
+        'incomeDate' => 'income_date',
+        'referenceNo' => 'reference_no',
+
+        // Products. ZSystProductController validates `wholesale_price` as
+        // required|numeric with no camelCase fallback, so a mobile request
+        // sending productWholeSalePrice failed with 422 and the product could
+        // not be saved at all. Note that the canonical name is NOT the
+        // mechanical conversion of the legacy key (product_whole_sale_price
+        // does not exist), which is exactly why it belongs in this map.
+        'productWholeSalePrice' => 'wholesale_price',
     ];
 
     public function handle(Request $request, Closure $next): Response

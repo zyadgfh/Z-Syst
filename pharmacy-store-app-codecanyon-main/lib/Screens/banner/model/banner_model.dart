@@ -37,7 +37,7 @@ class Data {
 
   Data.fromJson(dynamic json) {
     id = json['id'];
-    imageUrl = json['imageUrl'];
+    imageUrl = (json['image_url'] ?? json['imageUrl']);
     status = json['status'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];

@@ -222,7 +222,7 @@ class PrescriptionSale {
 
   PrescriptionSale.fromJson(dynamic json) {
     id = json['id'];
-    invoiceNumber = json['invoiceNumber'];
+    invoiceNumber = (json['invoice_number'] ?? json['invoiceNumber']);
   }
   num? id;
   String? invoiceNumber;

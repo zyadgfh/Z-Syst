@@ -33,9 +33,9 @@ class ProductModel {
 
   ProductModel.fromJson(dynamic json) {
     id = json['id'];
-    productName = json['productName'];
+    productName = (json['product_name'] ?? json['productName']);
     businessId = json['business_id'];
-    productCode = json['productCode'];
+    productCode = (json['product_code'] ?? json['productCode']);
     images = json['images'] != null ? json['images'].cast<String>() : [];
     categoryId = json['category_id'];
     typeId = json['type_id'];
@@ -155,7 +155,7 @@ class ProductCategory {
 
   ProductCategory.fromJson(dynamic json) {
     id = json['id'];
-    categoryName = json['categoryName'];
+    categoryName = (json['category_name'] ?? json['categoryName']);
   }
   num? id;
   String? categoryName;
@@ -258,7 +258,7 @@ class ProductUnit {
 
   ProductUnit.fromJson(dynamic json) {
     id = json['id'];
-    unitName = json['unitName'];
+    unitName = (json['unit_name'] ?? json['unitName']);
   }
   num? id;
   String? unitName;
@@ -313,7 +313,7 @@ class Stocks {
   Stocks.fromJson(dynamic json) {
     id = json['id'];
     productId = json['product_id'];
-    productStock = json['productStock'];
+    productStock = (json['product_stock'] ?? json['productStock']);
     expireDate = json['expire_date'];
     batchNo = json['batch_no'];
   }

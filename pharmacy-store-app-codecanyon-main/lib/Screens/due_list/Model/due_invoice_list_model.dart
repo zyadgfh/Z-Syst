@@ -120,10 +120,10 @@ class SalesDues {
   factory SalesDues.fromJson(Map<String, dynamic> json) => SalesDues(
         id: json["id"],
         partyId: json["party_id"],
-        dueAmount: json["dueAmount"],
-        paidAmount: json["paidAmount"],
-        totalAmount: json["totalAmount"],
-        invoiceNumber: json["invoiceNumber"],
+        dueAmount: (json["due_amount"] ?? json["dueAmount"]),
+        paidAmount: (json["paid_amount"] ?? json["paidAmount"]),
+        totalAmount: (json["total_amount"] ?? json["totalAmount"]),
+        invoiceNumber: (json["invoice_number"] ?? json["invoiceNumber"]),
       );
 
   Map<String, dynamic> toJson() => {

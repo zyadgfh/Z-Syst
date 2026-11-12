@@ -10,7 +10,7 @@ class ProductCategoryModel {
 
   ProductCategoryModel.fromJson(dynamic json) {
     id = json['id'];
-    categoryName = json['categoryName'];
+    categoryName = (json['category_name'] ?? json['categoryName']);
     businessId = json['business_id'];
     status = json['status'];
     createdAt = json['created_at'];

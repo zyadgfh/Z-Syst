@@ -148,7 +148,7 @@ class SingleStockData {
 
   SingleStockData.fromJson(dynamic json) {
     id = json['id'];
-    productName = json['productName'];
+    productName = (json['product_name'] ?? json['productName']);
     purchaseWithTax = json['purchase_with_tax'];
     salesPrice = json['sales_price'];
     stocksSumProductStock = json['stocks_sum_product_stock'];
@@ -194,7 +194,7 @@ class Stock {
     batchNo = json['batch_no'];
     expireDate = json['expire_date'];
     productId = json['product_id'];
-    productStock = json['productStock'];
+    productStock = (json['product_stock'] ?? json['productStock']);
   }
   num? id;
   String? batchNo;

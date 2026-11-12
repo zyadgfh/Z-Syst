@@ -191,8 +191,8 @@ class Purchase {
   Purchase.fromJson(dynamic json) {
     id = json['id'];
     partyId = json['party_id'];
-    invoiceNumber = json['invoiceNumber'];
-    totalAmount = json['totalAmount'];
+    invoiceNumber = (json['invoice_number'] ?? json['invoiceNumber']);
+    totalAmount = (json['total_amount'] ?? json['totalAmount']);
     party = json['party'] != null ? Party.fromJson(json['party']) : null;
   }
   num? id;

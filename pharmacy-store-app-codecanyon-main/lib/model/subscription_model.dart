@@ -14,12 +14,12 @@ class SubscriptionModel {
   int saleNumber, purchaseNumber, partiesNumber, dueNumber, duration, products;
 
   SubscriptionModel.fromJson(Map<dynamic, dynamic> json)
-      : subscriptionName = json['subscriptionName'] as String,
-        saleNumber = json['saleNumber'],
-        subscriptionDate = json['subscriptionDate'],
-        purchaseNumber = json['purchaseNumber'],
-        partiesNumber = json['partiesNumber'],
-        dueNumber = json['dueNumber'],
+      : subscriptionName = (json['subscription_name'] ?? json['subscriptionName']) as String,
+        saleNumber = (json['sale_number'] ?? json['saleNumber']),
+        subscriptionDate = (json['subscription_date'] ?? json['subscriptionDate']),
+        purchaseNumber = (json['purchase_number'] ?? json['purchaseNumber']),
+        partiesNumber = (json['parties_number'] ?? json['partiesNumber']),
+        dueNumber = (json['due_number'] ?? json['dueNumber']),
         duration = json['duration'],
         products = json['products'];
 

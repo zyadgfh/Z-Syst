@@ -23,15 +23,15 @@ class BusinessInformation {
     id = json['id'];
     planSubscribeId = json['plan_subscribe_id'];
     businessCategoryId = json['business_category_id'];
-    companyName = json['companyName'];
+    companyName = (json['company_name'] ?? json['companyName']);
     willExpire = json['will_expire'];
     address = json['address'];
-    phoneNumber = json['phoneNumber'];
-    pictureUrl = json['pictureUrl'];
+    phoneNumber = (json['phone_number'] ?? json['phoneNumber']);
+    pictureUrl = (json['picture_url'] ?? json['pictureUrl']);
     language = json['language'];
-    subscriptionDate = json['subscriptionDate'];
-    remainingShopBalance = json['remainingShopBalance'];
-    shopOpeningBalance = json['shopOpeningBalance'];
+    subscriptionDate = (json['subscription_date'] ?? json['subscriptionDate']);
+    remainingShopBalance = (json['remaining_shop_balance'] ?? json['remainingShopBalance']);
+    shopOpeningBalance = (json['shop_opening_balance'] ?? json['shopOpeningBalance']);
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     category = json['category'] != null ? Category.fromJson(json['category']) : null;
@@ -141,18 +141,18 @@ class Visibility {
   });
 
   Visibility.fromJson(dynamic json) {
-    addExpensePermission = json['addExpensePermission'];
-    dueListPermission = json['dueListPermission'];
-    lossProfitPermission = json['lossProfitPermission'];
-    partiesPermission = json['partiesPermission'];
-    productPermission = json['productPermission'];
-    profileEditPermission = json['profileEditPermission'];
-    purchaseListPermission = json['purchaseListPermission'];
-    purchasePermission = json['purchasePermission'];
-    reportsPermission = json['reportsPermission'];
-    salePermission = json['salePermission'];
-    salesListPermission = json['salesListPermission'];
-    stockPermission = json['stockPermission'];
+    addExpensePermission = (json['add_expense_permission'] ?? json['addExpensePermission']);
+    dueListPermission = (json['due_list_permission'] ?? json['dueListPermission']);
+    lossProfitPermission = (json['loss_profit_permission'] ?? json['lossProfitPermission']);
+    partiesPermission = (json['parties_permission'] ?? json['partiesPermission']);
+    productPermission = (json['product_permission'] ?? json['productPermission']);
+    profileEditPermission = (json['profile_edit_permission'] ?? json['profileEditPermission']);
+    purchaseListPermission = (json['purchase_list_permission'] ?? json['purchaseListPermission']);
+    purchasePermission = (json['purchase_permission'] ?? json['purchasePermission']);
+    reportsPermission = (json['reports_permission'] ?? json['reportsPermission']);
+    salePermission = (json['sale_permission'] ?? json['salePermission']);
+    salesListPermission = (json['sales_list_permission'] ?? json['salesListPermission']);
+    stockPermission = (json['stock_permission'] ?? json['stockPermission']);
   }
   bool? addExpensePermission;
   bool? dueListPermission;
@@ -232,7 +232,7 @@ class Plan {
 
   Plan.fromJson(dynamic json) {
     id = json['id'];
-    subscriptionName = json['subscriptionName'];
+    subscriptionName = (json['subscription_name'] ?? json['subscriptionName']);
   }
   num? id;
   String? subscriptionName;

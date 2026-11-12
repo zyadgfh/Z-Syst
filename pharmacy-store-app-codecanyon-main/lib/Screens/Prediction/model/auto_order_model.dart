@@ -97,8 +97,8 @@ class AutoOrderProduct {
   factory AutoOrderProduct.fromJson(Map<String, dynamic> json) {
     return AutoOrderProduct(
       id: json['id'],
-      productName: json['productName'],
-      productCode: json['productCode'],
+      productName: (json['product_name'] ?? json['productName']),
+      productCode: (json['product_code'] ?? json['productCode']),
       salesPrice: (json['sales_price']?.toDouble()),
     );
   }

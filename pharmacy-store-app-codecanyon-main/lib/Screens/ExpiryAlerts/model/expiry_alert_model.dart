@@ -88,7 +88,7 @@ class ExpiryAlertItem {
     return ExpiryAlertItem(
       id: json['id'],
       productId: json['product_id'],
-      productStock: json['productStock'],
+      productStock: (json['product_stock'] ?? json['productStock']),
       batchNo: json['batch_no'],
       expireDate: json['expire_date'],
       daysRemaining: json['days_remaining'],
@@ -121,8 +121,8 @@ class ExpiryAlertProduct {
   factory ExpiryAlertProduct.fromJson(Map<String, dynamic> json) {
     return ExpiryAlertProduct(
       id: json['id'],
-      productName: json['productName'],
-      productCode: json['productCode'],
+      productName: (json['product_name'] ?? json['productName']),
+      productCode: (json['product_code'] ?? json['productCode']),
       salesPrice: json['sales_price'],
       purchaseWithTax: json['purchase_with_tax'],
       category: json['category'] != null ? ExpiryAlertCategory.fromJson(json['category']) : null,
@@ -139,7 +139,7 @@ class ExpiryAlertCategory {
   factory ExpiryAlertCategory.fromJson(Map<String, dynamic> json) {
     return ExpiryAlertCategory(
       id: json['id'],
-      categoryName: json['categoryName'],
+      categoryName: (json['category_name'] ?? json['categoryName']),
     );
   }
 }
