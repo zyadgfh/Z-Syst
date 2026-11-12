@@ -309,6 +309,12 @@ Two consequences worth knowing:
   selected a driver that could not connect. Both fallbacks are now `database`, and
   `config/cache.php` states `lock_table` explicitly rather than relying on the
   framework default.
+- `config/session.php` likewise fell back to the framework default `'file'`, which
+  on an ephemeral-disk host is exactly the failure this section exists to prevent:
+  one missing or misspelled `SESSION_DRIVER` and every deploy silently logs
+  everyone out. Its fallback is now `database`, so all three stateful drivers fail
+  safe to Postgres. This changes nothing for local development or tests — both pin
+  the variable explicitly (`.env.example` → `file`, `phpunit.xml` → `array`).
 
 The scheduler in `app/Console/Kernel.php` already runs
 `queue:work --stop-when-empty` every minute, so the database queue drains without

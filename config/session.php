@@ -10,15 +10,22 @@ return [
     |--------------------------------------------------------------------------
     |
     | This option controls the default session "driver" that will be used on
-    | requests. By default, we will use the lightweight native driver but
-    | you may specify any of the other wonderful drivers provided here.
+    | requests. The framework default is the lightweight native "file" driver,
+    | but this application falls back to "database" instead: it runs on
+    | ephemeral-disk hosts, where a session store on disk is wiped by every
+    | deploy and restart, logging every user out. The `sessions` table already
+    | exists in production, and config/cache.php and config/queue.php fall back
+    | to their database drivers for the same reason. Local development and the
+    | test suite both pin SESSION_DRIVER explicitly (.env.example=file,
+    | phpunit.xml=array), so this fallback only ever applies to production.
+    | Move to SESSION_DRIVER=redis once a Redis/Valkey instance is provisioned.
     |
     | Supported: "file", "cookie", "database", "apc",
     |            "memcached", "redis", "dynamodb", "array"
     |
     */
 
-    'driver' => env('SESSION_DRIVER', 'file'),
+    'driver' => env('SESSION_DRIVER', 'database'),
 
     /*
     |--------------------------------------------------------------------------
