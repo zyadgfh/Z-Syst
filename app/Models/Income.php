@@ -25,6 +25,7 @@ class Income extends Model
         'reference_no',
         'note',
         'income_date',
+        'user_id',
     ];
 
     protected $casts = [

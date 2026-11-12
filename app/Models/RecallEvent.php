@@ -28,6 +28,7 @@ use HasFactory;
         'resolved_at',
         'status',
         'description',
+        'user_id',
     ];
 
     protected $casts = [

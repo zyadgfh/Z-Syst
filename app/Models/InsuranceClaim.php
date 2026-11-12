@@ -42,6 +42,7 @@ use HasFactory;
         'notes',
         'line_items',
         'metadata',
+        'user_id',
     ];
 
     public function policy(): BelongsTo

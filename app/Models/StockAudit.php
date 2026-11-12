@@ -28,6 +28,7 @@ protected $table = 'stock_audits';
         'completed_at',
         'notes',
         'metadata',
+        'user_id',
     ];
 
     public function scopeForBusiness(Builder $q, int $businessId): Builder { return $q->where('business_id', $businessId); }

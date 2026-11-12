@@ -188,6 +188,36 @@ php artisan test
 ./vendor/bin/pint   # code style
 ```
 
+### Schema type audit (run after any production DDL)
+
+```bash
+python3 tools/audit-schema-types.py    # exit 0 == no unexplained divergence
+```
+
+CI builds sqlite *from the migrations*, so a migration that declares the wrong
+column type produces a green build and a broken production database. This tool
+closes that gap: it parses every `database/migrations/*.php` (up-phase only) and
+compares the result, by type **family**, against the recorded live schema in
+`database/schema/production_column_types.txt`.
+
+Family-level on purpose. `boolean` in production where the model compares
+`'pending'` raises `operator does not exist: boolean = text` at runtime;
+`varchar(255)` vs `text` breaks nothing. Reporting both would bury the fault
+that matters.
+
+It is **not** wired into CI as a gate. The fixture is a snapshot of production,
+so a contributor who legitimately adds a column in a migration *before* applying
+it to production would fail the build for doing the right thing. Treat it as the
+post-DDL check it is: after changing the live schema, refresh the fixture with
+the query in the tool's docstring and re-run it until it reports
+`NEW FINDINGS: 0`. Every divergence that is understood rather than fixed is
+listed in the tool's `ACCEPTED_*` maps with its reason — add to those instead of
+deleting a finding.
+
+`tests/Feature/MigrationTypeContractTest.php` is the part that *is* gated: it
+pins the specific type decisions in the migration sources and asserts the columns
+the application writes exist after migrating.
+
 ---
 
 ## 7. Deployment (Render + Supabase)

@@ -16,8 +16,12 @@ return new class extends Migration
             $table->string('name');
             $table->foreignId('currency_id')->constrained()->cascadeOnDelete();
             $table->string('mode'); // 1 = Sandbox || 0 = Live
-            $table->string('status');
-            $table->boolean('charge')->default(0);
+            // boolean, not string: production stores boolean and GatewaySeeder writes
+            // 1/'1'. A varchar column would also reject the integer the seeder binds.
+            $table->boolean('status')->default(true);
+            // charge is a money amount added to the payable total (Helper::convert_money,
+            // PaymentController pay_amount), not a flag. Production stores numeric.
+            $table->double('charge', 10, 2)->default(0);
             $table->string('image')->nullable();
             $table->text('data')->nullable();
             $table->json('manual_data')->nullable();

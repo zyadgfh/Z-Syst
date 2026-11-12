@@ -62,18 +62,14 @@ return new class extends Migration
             // `enforce_tenant_ownership_on_business_id`.
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
 
-            // Present in production, absent from this migration until now, so a
-            // fresh database did not reproduce the live one. They predate the
-            // parent_id/parent_type design below — production's column order shows
-            // this table started as (id, business_id, type, amount, description,
-            // timestamps) and had the current columns appended later. Nothing in
-            // the application reads or writes them (they are not fillable and no
-            // query names them); they are declared so that `migrate:fresh` matches
-            // production rather than silently diverging from it again. If the owner
-            // confirms no external consumer (report, edge function, dashboard)
-            // reads them, dropping them from both sides is the cleaner end state.
-            $table->text('type')->nullable();
-            $table->text('description')->nullable();
+            // Production also carried `type` and `description` here, leftovers from
+            // an earlier design of this table — its column order showed it began as
+            // (id, business_id, type, amount, description, timestamps) and had the
+            // parent_id/parent_type/product_id design below appended later. Nothing
+            // in the application read or wrote them, no index or view depended on
+            // them, and the table was empty, so they were dropped from production by
+            // `drop_legacy_type_and_description_from_credit_debit_items` rather than
+            // enshrined here as dead columns. Do not re-add them without a consumer.
 
             $table->foreignId('parent_id');
             $table->string('parent_type');

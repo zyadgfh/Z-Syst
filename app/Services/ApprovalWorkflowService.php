@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class ApprovalWorkflowService
 {
-    public function createWorkflow(string $type, int $entityId, int $businessId, int $createdBy): ApprovalWorkflow
+    public function createWorkflow(string $type, int $entityId, int $businessId, string|int|null $createdBy = null): ApprovalWorkflow
     {
         return DB::transaction(function () use ($type, $entityId, $businessId, $createdBy) {
             $template = ApprovalTemplate::where('type', $type)
@@ -27,7 +27,12 @@ class ApprovalWorkflowService
             ]);
 
             if ($template) {
-                $steps = json_decode($template->steps_config, true);
+                // steps_config is cast to 'array' on the model, so it already arrives
+                // decoded. Passing that array to json_decode() is a TypeError in PHP 8;
+                // the string branch keeps raw/un-cast rows working too.
+                $raw = $template->steps_config;
+                $steps = is_array($raw) ? $raw : (is_string($raw) ? (json_decode($raw, true) ?? []) : []);
+
                 foreach ($steps as $stepConfig) {
                     ApprovalStep::create([
                         // From the parent workflow, not from auth(): this runs
@@ -48,7 +53,7 @@ class ApprovalWorkflowService
         });
     }
 
-    public function approveStep(ApprovalWorkflow $workflow, int $stepNumber, int $approverId, string $notes = null): ApprovalWorkflow
+    public function approveStep(ApprovalWorkflow $workflow, int $stepNumber, string|int|null $approverId, ?string $notes = null): ApprovalWorkflow
     {
         return DB::transaction(function () use ($workflow, $stepNumber, $approverId, $notes) {
             $step = $workflow->steps()->where('step_number', $stepNumber)->first();
@@ -71,7 +76,7 @@ class ApprovalWorkflowService
         });
     }
 
-    public function rejectStep(ApprovalWorkflow $workflow, int $stepNumber, int $approverId, string $reason): ApprovalWorkflow
+    public function rejectStep(ApprovalWorkflow $workflow, int $stepNumber, string|int|null $approverId, string $reason): ApprovalWorkflow
     {
         return DB::transaction(function () use ($workflow, $stepNumber, $approverId, $reason) {
             $step = $workflow->steps()->where('step_number', $stepNumber)->first();

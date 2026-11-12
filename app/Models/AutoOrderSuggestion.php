@@ -33,6 +33,9 @@ protected $table = 'auto_order_suggestions';
         'converted_at',
         'notes',
         'reasoning',
+        'lead_time_days',
+        'reorder_point',
+        'safety_stock',
     ];
 
     protected $casts = [

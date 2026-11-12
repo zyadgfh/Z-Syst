@@ -60,6 +60,8 @@ public const PRIORITY_LOW = 'low';
         'rejected_at',
         'rejection_reason',
         'is_active',
+        'branch_id',
+        'created_by',
     ];
 
     protected $casts = [

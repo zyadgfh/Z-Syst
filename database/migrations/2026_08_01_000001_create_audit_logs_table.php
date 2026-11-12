@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -26,6 +27,13 @@ return new class extends Migration
             $table->index(['business_id', 'created_at']);
             $table->index(['user_id', 'created_at']);
         });
+
+        // Production stores this as inet, which validates addresses and sorts them
+        // correctly. Blueprint has no inet type, so on Postgres the column is narrowed
+        // after creation; sqlite/CI keeps the varchar the builder produced.
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("ALTER TABLE audit_logs ALTER COLUMN ip_address TYPE inet USING NULLIF(ip_address, '')::inet");
+        }
     }
 
     public function down(): void

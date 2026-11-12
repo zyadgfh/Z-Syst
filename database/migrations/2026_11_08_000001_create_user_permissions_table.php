@@ -27,7 +27,9 @@ return new class extends Migration
             // `migrate:fresh` yields a schema the RLS policies can be created on.
             $table->unsignedBigInteger('business_id')->nullable();
 
-            $table->string('user_id', 64);
+            // uuid, matching production and the comment above: grants are looked up by
+            // app_users.id, which is a uuid.
+            $table->uuid('user_id');
             $table->string('name', 120);
             $table->timestamps();
 

@@ -26,6 +26,7 @@ class Expense extends Model
         'reference_no',
         'note',
         'expense_date',
+        'user_id',
     ];
 
     public function category(): BelongsTo
@@ -40,7 +41,9 @@ class Expense extends Model
      */
     protected $casts = [
         'amount' => 'double',
-        'user_id' => 'integer',
+        // expenses.user_id is a uuid (app_users.id); an 'integer' cast turned every
+        // actor id into 0 on read.
+        'user_id' => 'string',
         'business_id' => 'integer',
         'expense_category_id' => 'integer',
     ];
