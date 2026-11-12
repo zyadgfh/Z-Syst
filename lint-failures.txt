@@ -1,0 +1,73 @@
+== database/migrations/2026_11_10_000002_create_cache_locks_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000002_create_cache_locks_table.php on line 34
+Errors parsing database/migrations/2026_11_10_000002_create_cache_locks_table.php
+== database/migrations/2026_11_10_000005_create_comments_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000005_create_comments_table.php on line 40
+Errors parsing database/migrations/2026_11_10_000005_create_comments_table.php
+== database/migrations/2026_11_10_000023_create_stock_take_items_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000023_create_stock_take_items_table.php on line 61
+Errors parsing database/migrations/2026_11_10_000023_create_stock_take_items_table.php
+== database/migrations/2026_11_10_000012_create_cash_registers_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000012_create_cash_registers_table.php on line 63
+Errors parsing database/migrations/2026_11_10_000012_create_cash_registers_table.php
+== database/migrations/2026_11_10_000014_create_financial_transactions_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000014_create_financial_transactions_table.php on line 59
+Errors parsing database/migrations/2026_11_10_000014_create_financial_transactions_table.php
+== database/migrations/2026_11_10_000010_create_coupons_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000010_create_coupons_table.php on line 52
+Errors parsing database/migrations/2026_11_10_000010_create_coupons_table.php
+== database/migrations/2026_11_10_000017_create_prescription_refills_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000017_create_prescription_refills_table.php on line 57
+Errors parsing database/migrations/2026_11_10_000017_create_prescription_refills_table.php
+== database/migrations/2026_11_10_000022_create_stock_takes_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000022_create_stock_takes_table.php on line 56
+Errors parsing database/migrations/2026_11_10_000022_create_stock_takes_table.php
+== database/migrations/2026_11_10_000001_create_cache_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000001_create_cache_table.php on line 34
+Errors parsing database/migrations/2026_11_10_000001_create_cache_table.php
+== database/migrations/2026_11_10_000011_create_coupon_redemptions_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000011_create_coupon_redemptions_table.php on line 50
+Errors parsing database/migrations/2026_11_10_000011_create_coupon_redemptions_table.php
+== database/migrations/2026_11_10_000009_create_testimonials_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000009_create_testimonials_table.php on line 40
+Errors parsing database/migrations/2026_11_10_000009_create_testimonials_table.php
+== database/migrations/2026_11_10_000006_create_features_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000006_create_features_table.php on line 38
+Errors parsing database/migrations/2026_11_10_000006_create_features_table.php
+== database/migrations/2026_11_10_000004_create_blogs_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000004_create_blogs_table.php on line 42
+Errors parsing database/migrations/2026_11_10_000004_create_blogs_table.php
+== database/migrations/2026_11_10_000007_create_messages_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000007_create_messages_table.php on line 38
+Errors parsing database/migrations/2026_11_10_000007_create_messages_table.php
+== database/migrations/2026_11_10_000003_create_job_batches_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000003_create_job_batches_table.php on line 39
+Errors parsing database/migrations/2026_11_10_000003_create_job_batches_table.php
+== database/migrations/2026_11_10_000015_create_controlled_substances_log_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000015_create_controlled_substances_log_table.php on line 64
+Errors parsing database/migrations/2026_11_10_000015_create_controlled_substances_log_table.php
+== database/migrations/2026_11_10_000024_create_warehouse_stock_batches_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000024_create_warehouse_stock_batches_table.php on line 49
+Errors parsing database/migrations/2026_11_10_000024_create_warehouse_stock_batches_table.php
+== database/migrations/2026_11_10_000020_create_sale_items_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000020_create_sale_items_table.php on line 49
+Errors parsing database/migrations/2026_11_10_000020_create_sale_items_table.php
+== database/migrations/2026_11_10_000019_create_purchase_return_items_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000019_create_purchase_return_items_table.php on line 54
+Errors parsing database/migrations/2026_11_10_000019_create_purchase_return_items_table.php
+== database/migrations/2026_11_10_000013_create_cash_register_transactions_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000013_create_cash_register_transactions_table.php on line 48
+Errors parsing database/migrations/2026_11_10_000013_create_cash_register_transactions_table.php
+== database/migrations/2026_11_10_000016_create_prescription_items_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000016_create_prescription_items_table.php on line 50
+Errors parsing database/migrations/2026_11_10_000016_create_prescription_items_table.php
+== database/migrations/2026_11_10_000008_create_pos_app_interfaces_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000008_create_pos_app_interfaces_table.php on line 37
+Errors parsing database/migrations/2026_11_10_000008_create_pos_app_interfaces_table.php
+== database/migrations/2026_11_10_000018_create_purchase_items_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000018_create_purchase_items_table.php on line 50
+Errors parsing database/migrations/2026_11_10_000018_create_purchase_items_table.php
+== database/migrations/2026_11_10_000021_create_sale_return_items_table.php
+PHP Parse error:  syntax error, unexpected end of file, expecting ";" in database/migrations/2026_11_10_000021_create_sale_return_items_table.php on line 54
+Errors parsing database/migrations/2026_11_10_000021_create_sale_return_items_table.php
+linted 848 files, failures=24
