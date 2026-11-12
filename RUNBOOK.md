@@ -280,32 +280,70 @@ query is in that file's header.
 intentionally does **not** touch the database: a Supabase pooler blip must not
 make Render restart the API in a loop.
 
+### Where state lives
+
+Sessions, cache and queue are stored in **Postgres**, not on the container
+filesystem:
+
+```
+SESSION_DRIVER=database     CACHE_DRIVER=database     QUEUE_CONNECTION=database
+```
+
+This was chosen over Redis/Valkey because it needs **no new dependency and no
+schema change** — production already had every table Laravel's drivers expect,
+with the right shape and the right indexes:
+
+| Driver | Tables | Indexes verified in production |
+|---|---|---|
+| session | `sessions` | `sessions_pkey`, `sessions_last_activity_index` (drives GC), `sessions_user_id_index` |
+| cache | `cache`, `cache_locks` | `cache_pkey`, `cache_locks_pkey` |
+| queue | `jobs`, `failed_jobs` | `jobs_queue_index`, `failed_jobs_uuid_key` |
+
+Two consequences worth knowing:
+
+- `php artisan migrate --isolated` now takes a **genuinely shared** lock (a row in
+  `public.cache_locks`) instead of a per-filesystem one, so concurrent deploys
+  cannot migrate at the same time.
+- `config/cache.php` and `config/queue.php` had `'redis'` as their fallback while
+  no Redis client existed anywhere in `composer.lock`. An unset env var therefore
+  selected a driver that could not connect. Both fallbacks are now `database`, and
+  `config/cache.php` states `lock_table` explicitly rather than relying on the
+  framework default.
+
+The scheduler in `app/Console/Kernel.php` already runs
+`queue:work --stop-when-empty` every minute, so the database queue drains without
+a worker service.
+
 ### Known trade-off: the persistent disk
 
-`z-syst-api` mounts a 10 GB disk at `/var/www/html/storage` because the app still
-runs `SESSION_DRIVER=file`, `CACHE_DRIVER=file`, `FILESYSTEM_DISK=local` and
-`QUEUE_CONNECTION=sync` while writing uploads in 10 places. On an ephemeral
-filesystem every deploy would discard uploaded files and log every user out.
+`z-syst-api` mounts a 10 GB disk at `/var/www/html/storage`. It used to carry
+sessions, cache and queue as well; now it holds exactly two things:
+
+- **uploads** — `FILESYSTEM_DISK=local` writes under `storage/app`, and the app
+  writes uploads in 10 places;
+- **the application's own log files** (`LOG_CHANNEL=stack`; `config/logging.php`
+  has no stdout/stderr channel).
 
 A Render disk is attached to a **single instance**: it pins the service to one
 replica and disables zero-downtime deploys. **Do not scale this service
 horizontally while the disk is mounted.**
 
-The end state is uploads on S3 and sessions/cache/queue on Valkey (the `redis`
-driver works with Valkey unchanged — see `docs/valkey-setup-ar.md` and
-`docker-compose.valkey.yml`), after which the disk can shrink to logs only or go
-away. Two things block that today and both need a change, not just configuration:
+Getting rid of it needs two changes, both of which are code changes rather than
+configuration:
 
-- **No Redis client.** `composer.lock` has neither `predis/predis` nor the
-  `redis` PHP extension, so `CACHE_DRIVER=redis` cannot work. The Dockerfile now
-  installs `ext-redis`, so the image side is ready; `config/cache.php` already
-  defaults to `redis`.
 - **No S3 adapter.** `league/flysystem-aws-s3-v3` is not in `composer.json`, so
-  `FILESYSTEM_DISK=s3` cannot work either. `composer require
-  league/flysystem-aws-s3-v3` is needed before switching.
-
-Until both land, the four drivers in `.env.production.example` and `render.yaml`
-stay on `file`/`local`/`sync` — consistent with each other on purpose.
+  `FILESYSTEM_DISK=s3` cannot work. `composer require
+  league/flysystem-aws-s3-v3` (and a bucket + credentials) must land first. After
+  that the disk can shrink to logs only, or disappear once logging is pointed at
+  stdout.
+- **No Redis client.** `composer.lock` has neither `predis/predis` nor the `redis`
+  extension, so `CACHE_DRIVER=redis` still cannot work. The Dockerfile now
+  installs `ext-redis`, so the image side is ready; pointing `REDIS_HOST` at a
+  Valkey instance and switching the three drivers to `redis` is then
+  configuration only. The `redis` driver works unchanged with **Valkey** (free
+  drop-in — `docs/valkey-setup-ar.md`, `docker-compose.valkey.yml`). Valkey is
+  worth doing for cache and sessions at load, since every session read is
+  currently a database round-trip to Supabase through the pooler.
 
 ---
 

@@ -13,7 +13,13 @@ return [
     |
     */
 
-    'default' => env('QUEUE_CONNECTION', 'redis'),
+    // Fallback changed from 'redis' to 'database' for the same reason as in
+    // config/cache.php: no Redis client ships with this application, so an unset
+    // QUEUE_CONNECTION selected an unusable driver. public.jobs and
+    // public.failed_jobs exist and are indexed (jobs_queue_index), and the
+    // scheduler in app/Console/Kernel.php already drains the queue every minute
+    // with `queue:work --stop-when-empty` — a runner that needs no Redis.
+    'default' => env('QUEUE_CONNECTION', 'database'),
 
     /*
     |--------------------------------------------------------------------------

@@ -29,9 +29,10 @@ echo "== deploy: migrations =="
 # no-op that only picks up migrations added since the previous deploy.
 #
 # --isolated takes a cache lock so two instances cannot migrate concurrently.
-# The lock is only truly shared once the cache lives in Valkey/Redis; while
-# CACHE_DRIVER=file it protects a single instance, which is what render.yaml
-# runs today (see RUNBOOK §7).
+# With CACHE_DRIVER=database that lock is a row in public.cache_locks — i.e.
+# genuinely shared across every instance and every container, not per-filesystem
+# as it would be with CACHE_DRIVER=file. This is why the driver choice in
+# render.yaml matters for deploy safety, not only for runtime.
 php artisan migrate --force --isolated
 
 echo "== deploy: ready =="

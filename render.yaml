@@ -51,14 +51,18 @@ services:
     # KNOWN TRADE-OFF, and the reason RUNBOOK §7 exists.
     #
     # Render's disk is local to ONE instance: it pins the service to a single
-    # replica and disables zero-downtime deploys. It is here because the app
-    # still runs SESSION_DRIVER=file, CACHE_DRIVER=file and FILESYSTEM_DISK=local
-    # while writing uploads in 10 places — on an ephemeral filesystem every
-    # deploy would discard uploaded files and log every user out.
+    # replica and disables zero-downtime deploys.
     #
-    # The correct end state is S3 for uploads and Valkey/Redis for
-    # sessions/cache/queue, after which this disk can shrink to logs only or be
-    # removed. Do not scale this service horizontally while the disk is mounted.
+    # It used to carry sessions, cache and queue as well. Those now live in
+    # Postgres (CACHE_DRIVER/SESSION_DRIVER/QUEUE_CONNECTION = database), so the
+    # disk is left with exactly two things:
+    #   * uploads — FILESYSTEM_DISK=local writes under storage/app, and s3 is not
+    #     available until league/flysystem-aws-s3-v3 is added to composer.json;
+    #   * the application's own log files (LOG_CHANNEL=stack).
+    #
+    # Once uploads move to S3 this disk can shrink to logs only, or disappear if
+    # logging is pointed at stdout. Until then: do not scale this service
+    # horizontally while the disk is mounted.
     # ------------------------------------------------------------------
     disk:
       name: z-syst-storage
@@ -108,20 +112,26 @@ services:
       - key: DB_PASSWORD
         sync: false
 
-      # Mirrors .env.production.example. These four are the blocker RUNBOOK §7
-      # tracks: they assume a writable, persistent filesystem.
+      # Session, cache and queue are stored in Postgres, so they survive a
+      # deploy and are shared by every instance. The tables already exist in
+      # production with the exact shape and indexes Laravel's drivers expect
+      # (cache + cache_locks, sessions, jobs + failed_jobs) — no new dependency,
+      # no schema change. Mirrors .env.production.example.
       - key: BROADCAST_DRIVER
         value: log
       - key: CACHE_DRIVER
-        value: file
-      - key: FILESYSTEM_DISK
-        value: local
-      - key: QUEUE_CONNECTION
-        value: sync
+        value: database
       - key: SESSION_DRIVER
-        value: file
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
       - key: SESSION_LIFETIME
         value: "120"
+      # Uploads are the remaining filesystem dependency: s3 needs
+      # league/flysystem-aws-s3-v3, which is not in composer.json. See the disk
+      # note below and RUNBOOK §7.
+      - key: FILESYSTEM_DISK
+        value: local
 
       - key: REDIS_HOST
         value: ""
@@ -264,18 +274,21 @@ services:
       - key: DB_PASSWORD
         sync: false
 
+      # Same stores as the web service, and they must match: the scheduler
+      # drains the queue with `queue:work --stop-when-empty`, so it has to read
+      # the same public.jobs table the web tier writes to.
       - key: BROADCAST_DRIVER
         value: log
       - key: CACHE_DRIVER
-        value: file
-      - key: FILESYSTEM_DISK
-        value: local
-      - key: QUEUE_CONNECTION
-        value: sync
+        value: database
       - key: SESSION_DRIVER
-        value: file
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
       - key: SESSION_LIFETIME
         value: "120"
+      - key: FILESYSTEM_DISK
+        value: local
 
       - key: REDIS_HOST
         value: ""
