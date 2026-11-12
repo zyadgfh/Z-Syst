@@ -45,4 +45,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('warehouse_stock_batches');
     }
-}
+};

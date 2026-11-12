@@ -46,4 +46,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('purchase_items');
     }
-}
+};

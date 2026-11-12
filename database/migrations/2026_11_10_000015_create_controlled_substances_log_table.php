@@ -60,4 +60,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('controlled_substances_log');
     }
-}
+};

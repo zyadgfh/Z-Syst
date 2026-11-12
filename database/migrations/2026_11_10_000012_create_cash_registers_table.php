@@ -59,4 +59,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('cash_registers');
     }
-}
+};
