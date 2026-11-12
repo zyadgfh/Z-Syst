@@ -142,12 +142,47 @@ class SchemaDriftTest extends TestCase
 
         $this->assertFileExists($path, 'The production table snapshot is missing; regenerate it (see the file header).');
 
-        $lines = preg_split('/[\r\n,]+/', (string) file_get_contents($path)) ?: [];
+        // Comment lines are dropped BEFORE the comma split, never after. The
+        // header explains how to regenerate the snapshot and so contains prose
+        // with commas and full stops; splitting first turns a fragment like
+        // "i.e. that `php artisan migrate:fresh` can rebuild" into a table name,
+        // and the two dots in it make Schema::hasTable() throw
+        // "Using three-part references is not supported" instead of reporting
+        // drift. Commas are still honoured, so a comma-separated paste works.
+        $tables = [];
 
-        $tables = array_values(array_unique(array_filter(array_map(
-            static fn (string $line): string => trim($line),
-            $lines
-        ), static fn (string $line): bool => $line !== '' && ! str_starts_with($line, '#'))));
+        foreach (preg_split('/\r\n|\r|\n/', (string) file_get_contents($path)) ?: [] as $line) {
+            $line = trim($line);
+
+            if ($line === '' || str_starts_with($line, '#')) {
+                continue;
+            }
+
+            foreach (explode(',', $line) as $name) {
+                $name = trim($name);
+
+                if ($name !== '') {
+                    $tables[] = $name;
+                }
+            }
+        }
+
+        $tables = array_values(array_unique($tables));
+
+        // Reject anything that is not a bare Postgres identifier here, with the
+        // offending text quoted, rather than letting it surface as an opaque
+        // exception from the schema builder two frames down.
+        $malformed = array_values(array_filter(
+            $tables,
+            static fn (string $t): bool => preg_match('/^[a-z_][a-z0-9_]*$/', $t) !== 1
+        ));
+
+        $this->assertSame(
+            [],
+            $malformed,
+            'The production snapshot must hold one bare table name per line. Malformed entries: '
+            .implode(' | ', array_map(static fn (string $t): string => '"'.$t.'"', $malformed))
+        );
 
         $this->assertGreaterThan(
             100,
