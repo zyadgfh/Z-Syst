@@ -15,7 +15,14 @@ return [
     |
     */
 
-    'default' => env('CACHE_DRIVER', 'redis'),
+    // Fallback changed from 'redis' to 'database'. Neither predis/predis nor the
+    // redis PHP extension was in composer.lock, so an unset CACHE_DRIVER resolved
+    // to a store that could not connect — and config/cache.php's own default was
+    // the only thing deciding it. 'database' works with what production actually
+    // has: public.cache and public.cache_locks, both present and indexed.
+    // Set CACHE_DRIVER=redis only after a Valkey/Redis instance exists and is
+    // reachable through REDIS_HOST (see RUNBOOK §7).
+    'default' => env('CACHE_DRIVER', 'database'),
 
     /*
     |--------------------------------------------------------------------------
@@ -45,6 +52,11 @@ return [
         'database' => [
             'driver' => 'database',
             'table' => 'cache',
+            // Stated explicitly rather than left to the framework default, because
+            // atomic locks ride on it: `php artisan migrate --isolated` (used by
+            // docker/deploy.sh) and Cache::lock() both need this table. It exists
+            // in production as public.cache_locks, key-primary.
+            'lock_table' => 'cache_locks',
             'connection' => null,
             'lock_connection' => null,
         ],

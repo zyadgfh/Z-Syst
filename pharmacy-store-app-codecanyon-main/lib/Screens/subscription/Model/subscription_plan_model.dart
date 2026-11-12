@@ -11,10 +11,10 @@ class SubscriptionPlanModel {
 
   SubscriptionPlanModel.fromJson(dynamic json) {
     id = json['id'];
-    subscriptionName = json['subscriptionName'];
+    subscriptionName = (json['subscription_name'] ?? json['subscriptionName']);
     duration = json['duration'];
-    offerPrice = json['offerPrice'];
-    subscriptionPrice = json['subscriptionPrice'];
+    offerPrice = (json['offer_price'] ?? json['offerPrice']);
+    subscriptionPrice = (json['subscription_price'] ?? json['subscriptionPrice']);
     status = json['status'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];

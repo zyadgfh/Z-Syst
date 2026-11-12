@@ -188,18 +188,198 @@ php artisan test
 ./vendor/bin/pint   # code style
 ```
 
+### Schema type audit (run after any production DDL)
+
+```bash
+python3 tools/audit-schema-types.py    # exit 0 == no unexplained divergence
+```
+
+CI builds sqlite *from the migrations*, so a migration that declares the wrong
+column type produces a green build and a broken production database. This tool
+closes that gap: it parses every `database/migrations/*.php` (up-phase only) and
+compares the result, by type **family**, against the recorded live schema in
+`database/schema/production_column_types.txt`.
+
+Family-level on purpose. `boolean` in production where the model compares
+`'pending'` raises `operator does not exist: boolean = text` at runtime;
+`varchar(255)` vs `text` breaks nothing. Reporting both would bury the fault
+that matters.
+
+It is **not** wired into CI as a gate. The fixture is a snapshot of production,
+so a contributor who legitimately adds a column in a migration *before* applying
+it to production would fail the build for doing the right thing. Treat it as the
+post-DDL check it is: after changing the live schema, refresh the fixture with
+the query in the tool's docstring and re-run it until it reports
+`NEW FINDINGS: 0`. Every divergence that is understood rather than fixed is
+listed in the tool's `ACCEPTED_*` maps with its reason — add to those instead of
+deleting a finding.
+
+`tests/Feature/MigrationTypeContractTest.php` is the part that *is* gated: it
+pins the specific type decisions in the migration sources and asserts the columns
+the application writes exist after migrating.
+
 ---
 
-## 7. Deployment Notes (when ready)
+## 7. Deployment (Render + Supabase)
 
-- `APP_DEBUG=false` and a **fresh** `APP_KEY` in production
-- Real `DB_PASSWORD` (no empty root)
-- Set `CACHE_DRIVER=redis` and `SESSION_DRIVER=redis` for multi-instance
-- Set `QUEUE_CONNECTION=redis` (or `sqs`/`beanstalkd`)
-- The `redis` driver works unchanged with **Valkey** (recommended free drop-in Redis replacement) — see `docs/valkey-setup-ar.md` and `docker-compose.valkey.yml`
-- Run `php artisan config:cache && php artisan route:cache && php artisan view:cache`
-- Run `php artisan migrate --force` from CI, not from a manual SSH session
-- Schedule `php artisan schedule:run` via cron every minute, or use Laravel Cloud
+The Laravel app deploys from `render.yaml` — import it as a Render **Blueprint**
+(New + → Blueprint → this repository). `vercel.json` is *not* this app: it builds
+the separate Vite/Firebase SPA.
+
+### What gets created
+
+| Service | Type | Role |
+|---|---|---|
+| `z-syst-api` | web (Docker) | nginx + php-fpm under supervisord |
+| `z-syst-scheduler` | cron (Docker) | `php artisan schedule:run`, every minute |
+
+Both build from the same `Dockerfile`. `APP_ROLE` decides the behaviour:
+`docker/entrypoint.sh` execs `schedule:run` for `cron` and supervisord for `web`.
+
+The scheduler is mandatory, not optional — `app/Console/Kernel.php` schedules ten
+commands (`expiry-alert:send`, `backup:database`, `doctor-attention:calculate`,
+`subscriptions:manage`, `forecast:generate`, `anomalies:scan`, `telegram:daily`,
+`patients:refill`, `eta:retry`, and a `queue:work --stop-when-empty` runner). None
+of them run without it. There is deliberately **no queue-worker service**: the
+code dispatches zero jobs today, and the scheduler already drains the queue.
+(The root `supervisor.conf` is a bare-metal VPS artefact for a redis worker at
+`/var/www/z-syst`; it is not this container's process manager.)
+
+### Secrets to fill in the dashboard
+
+Keys marked `sync: false` in `render.yaml` are prompted for and never written
+back into the repository: `APP_KEY`, `DB_PASSWORD`, `SUPABASE_ANON_KEY`,
+`SUPABASE_JWT_SECRET`, the `MAIL_*` credentials, the `AWS_*` credentials,
+`HCAPTCHA_SITE_KEY`, `REDIS_PASSWORD`. Generate `APP_KEY` with
+`php artisan key:generate --show` and store the whole `base64:...` value;
+`docker/deploy.sh` aborts the deploy if it is empty.
+
+`SUPABASE_FALLBACK_ELOQUENT` must stay `false`: GoTrue owns credentials and
+`public.app_users` is a per-business profile mirror with no `email`/`password`.
+
+### What runs where — and why the split matters
+
+Render runs `preDeployCommand` in a **separate one-off container**. Only the
+mounted disk (`/var/www/html/storage`) survives from it. So:
+
+- `docker/deploy.sh` (preDeploy) → `migrate --force --isolated` only. The
+  database is external, so its effects persist.
+- `docker/entrypoint.sh` (every boot) → storage skeleton, permissions,
+  `package:discover`, `config:cache`, and for the web role nginx config,
+  `view:cache` and `storage:link`. These write to `bootstrap/cache` and
+  `public/`, i.e. inside the container, so building them in preDeploy would
+  produce caches the serving container never sees.
+
+### Three traps that are already handled — do not "simplify" them away
+
+1. **`php artisan route:cache` must never be run.** `routes/web.php` registers
+   closure routes (e.g. `Route::get('/dashboard', fn () => redirect()...)`), and
+   Artisan refuses to serialize closures — the command aborts and would fail
+   every deploy. Converting those closures to controllers is a separate change.
+2. **`clear_env = no` and `variables_order = "EGPCS"` are load-bearing.**
+   php-fpm's documented default strips the environment from workers, which would
+   mean no `DB_PASSWORD` and no `APP_KEY` at runtime. This codebase also calls
+   `env()` directly in **451 places outside `config/`** (including
+   `resources/views/admin/settings/system.blade.php`), so environment visibility
+   cannot be assumed. Both settings are explicit — in
+   `docker/php-fpm-pool.conf` and `docker/php.ini` — rather than inherited from
+   whatever the base image happens to ship.
+3. **`config:cache` is safe only because configuration comes from real
+   environment variables.** Render injects them, and `env()` reads `$_SERVER` /
+   `$_ENV`. If a deployment ever switches to a `.env` *file*, caching config
+   would silently turn those 451 `env()` calls into `null`.
+
+### Migrations and the production ledger
+
+Production was **not** built by `php artisan migrate`: `public.migrations` did not
+exist at all. On 2026-11-10 the schema was aligned to the repository (Supabase
+migrations `align_prod_with_repository_migrations` and `fix_banners_imageurl_case`)
+and the ledger was baselined (`baseline_laravel_migrations_ledger`), which records
+all 116 migrations as applied. Without that baseline the first `migrate --force`
+would have re-run every migration and failed on the first non-idempotent
+`Schema::create`.
+
+`tests/Feature/SchemaDriftTest.php` (blocking CI job `schema-drift`) keeps models,
+migrations and production locked together. Refresh
+`database/schema/production_tables.txt` after any production schema change — the
+query is in that file's header.
+
+### Health check
+
+`healthCheckPath: /api/up` → the closure route at the top of `routes/api.php`. It
+intentionally does **not** touch the database: a Supabase pooler blip must not
+make Render restart the API in a loop.
+
+### Where state lives
+
+Sessions, cache and queue are stored in **Postgres**, not on the container
+filesystem:
+
+```
+SESSION_DRIVER=database     CACHE_DRIVER=database     QUEUE_CONNECTION=database
+```
+
+This was chosen over Redis/Valkey because it needs **no new dependency and no
+schema change** — production already had every table Laravel's drivers expect,
+with the right shape and the right indexes:
+
+| Driver | Tables | Indexes verified in production |
+|---|---|---|
+| session | `sessions` | `sessions_pkey`, `sessions_last_activity_index` (drives GC), `sessions_user_id_index` |
+| cache | `cache`, `cache_locks` | `cache_pkey`, `cache_locks_pkey` |
+| queue | `jobs`, `failed_jobs` | `jobs_queue_index`, `failed_jobs_uuid_key` |
+
+Two consequences worth knowing:
+
+- `php artisan migrate --isolated` now takes a **genuinely shared** lock (a row in
+  `public.cache_locks`) instead of a per-filesystem one, so concurrent deploys
+  cannot migrate at the same time.
+- `config/cache.php` and `config/queue.php` had `'redis'` as their fallback while
+  no Redis client existed anywhere in `composer.lock`. An unset env var therefore
+  selected a driver that could not connect. Both fallbacks are now `database`, and
+  `config/cache.php` states `lock_table` explicitly rather than relying on the
+  framework default.
+- `config/session.php` likewise fell back to the framework default `'file'`, which
+  on an ephemeral-disk host is exactly the failure this section exists to prevent:
+  one missing or misspelled `SESSION_DRIVER` and every deploy silently logs
+  everyone out. Its fallback is now `database`, so all three stateful drivers fail
+  safe to Postgres. This changes nothing for local development or tests — both pin
+  the variable explicitly (`.env.example` → `file`, `phpunit.xml` → `array`).
+
+The scheduler in `app/Console/Kernel.php` already runs
+`queue:work --stop-when-empty` every minute, so the database queue drains without
+a worker service.
+
+### Known trade-off: the persistent disk
+
+`z-syst-api` mounts a 10 GB disk at `/var/www/html/storage`. It used to carry
+sessions, cache and queue as well; now it holds exactly two things:
+
+- **uploads** — `FILESYSTEM_DISK=local` writes under `storage/app`, and the app
+  writes uploads in 10 places;
+- **the application's own log files** (`LOG_CHANNEL=stack`; `config/logging.php`
+  has no stdout/stderr channel).
+
+A Render disk is attached to a **single instance**: it pins the service to one
+replica and disables zero-downtime deploys. **Do not scale this service
+horizontally while the disk is mounted.**
+
+Getting rid of it needs two changes, both of which are code changes rather than
+configuration:
+
+- **No S3 adapter.** `league/flysystem-aws-s3-v3` is not in `composer.json`, so
+  `FILESYSTEM_DISK=s3` cannot work. `composer require
+  league/flysystem-aws-s3-v3` (and a bucket + credentials) must land first. After
+  that the disk can shrink to logs only, or disappear once logging is pointed at
+  stdout.
+- **No Redis client.** `composer.lock` has neither `predis/predis` nor the `redis`
+  extension, so `CACHE_DRIVER=redis` still cannot work. The Dockerfile now
+  installs `ext-redis`, so the image side is ready; pointing `REDIS_HOST` at a
+  Valkey instance and switching the three drivers to `redis` is then
+  configuration only. The `redis` driver works unchanged with **Valkey** (free
+  drop-in — `docs/valkey-setup-ar.md`, `docker-compose.valkey.yml`). Valkey is
+  worth doing for cache and sessions at load, since every session read is
+  currently a database round-trip to Supabase through the pooler.
 
 ---
 

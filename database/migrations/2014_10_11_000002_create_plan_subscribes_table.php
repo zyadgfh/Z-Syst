@@ -19,7 +19,7 @@ return new class extends Migration
             $table->double('price', 10, 2)->default(0);
             $table->string('payment_status')->default('unpaid');
             $table->integer('duration')->default(0);
-            $table->text('notes')->nullable();
+            $table->json('notes')->nullable(); // production stores jsonb
             $table->timestamps();
         });
     }

@@ -88,8 +88,9 @@ class StockTransferController extends Controller
 
     /**
      * Advance the transfer lifecycle: pending → shipped → received.
-     * Receiving applies the quantity movement on both warehouses and logs
-     * two stock_movements rows (out / in).
+     * Shipping decrements the source warehouse and receiving increments the target;
+     * each leg logs one stock_movements row with movement_type 'transfer', which
+     * ProductAnalyticsService counts as net-neutral for the business.
      */
     public function transition(Request $request, StockTransfer $transfer): JsonResponse
     {
@@ -116,10 +117,33 @@ class StockTransferController extends Controller
             }
 
             DB::transaction(function () use ($transfer) {
-                WarehouseStock::where('business_id', $transfer->business_id)
+                $source = WarehouseStock::where('business_id', $transfer->business_id)
                     ->where('warehouse_id', $transfer->from_warehouse_id)
                     ->where('product_id', $transfer->product_id)
-                    ->decrement('quantity', $transfer->quantity);
+                    ->first();
+
+                $before = (int) ($source->quantity ?? 0);
+
+                if ($source) {
+                    $source->decrement('quantity', $transfer->quantity);
+                }
+
+                // Without this row the outbound leg of a transfer left no trace:
+                // stock_movements is the only audit trail, and the receiving leg
+                // alone cannot show where the quantity went.
+                StockMovement::create([
+                    'business_id' => $transfer->business_id,
+                    'product_id' => $transfer->product_id,
+                    'warehouse_id' => $transfer->from_warehouse_id,
+                    'user_id' => auth()->id(),
+                    'movement_type' => 'transfer',
+                    'quantity' => -$transfer->quantity,
+                    'before_quantity' => $before,
+                    'after_quantity' => $before - $transfer->quantity,
+                    'reference_type' => 'stock_transfer',
+                    'reference_id' => $transfer->id,
+                    'notes' => 'Stock transfer shipped #' . $transfer->id,
+                ]);
 
                 $transfer->update(['status' => 'shipped']);
             });
@@ -146,7 +170,13 @@ class StockTransferController extends Controller
             StockMovement::create([
                 'business_id' => $transfer->business_id,
                 'product_id' => $transfer->product_id,
-                'user_id' => is_int($moverId) ? $moverId : (ctype_digit((string) $moverId) ? (int) $moverId : null),
+                'warehouse_id' => $transfer->to_warehouse_id,
+                // app_users.id is a uuid, so the actor id is stored as-is. Coercing it
+                // with ctype_digit() always yielded null and lost the actor entirely.
+                'user_id' => $moverId,
+                // movement_type is NOT NULL with no default: omitting it raised a
+                // not-null violation and rolled back the whole receipt.
+                'movement_type' => 'transfer',
                 'quantity' => $transfer->quantity,
                 'before_quantity' => $before,
                 'after_quantity' => $before + $transfer->quantity,

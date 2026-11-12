@@ -148,11 +148,11 @@ class LossProfitData {
   LossProfitData.fromJson(dynamic json) {
     id = json['id'];
     partyId = json['party_id'];
-    invoiceNumber = json['invoiceNumber'];
-    saleDate = json['saleDate'];
-    dueAmount = json['dueAmount'];
-    lossProfit = json['lossProfit'];
-    totalAmount = json['totalAmount'];
+    invoiceNumber = (json['invoice_number'] ?? json['invoiceNumber']);
+    saleDate = (json['sale_date'] ?? json['saleDate']);
+    dueAmount = (json['due_amount'] ?? json['dueAmount']);
+    lossProfit = (json['loss_profit'] ?? json['lossProfit']);
+    totalAmount = (json['total_amount'] ?? json['totalAmount']);
     party = json['party'] != null ? Party.fromJson(json['party']) : null;
   }
   num? id;

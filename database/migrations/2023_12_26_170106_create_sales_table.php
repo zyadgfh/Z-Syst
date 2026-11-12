@@ -27,8 +27,8 @@ return new class extends Migration
             $table->string('payment_type')->nullable();
             $table->string('invoice_number')->nullable();
             $table->timestamp('sale_date')->nullable();
-            $table->longText('sale_data')->nullable();
-            $table->text('meta')->nullable();
+            $table->json('sale_data')->nullable(); // production stores jsonb
+            $table->json('meta')->nullable(); // production stores jsonb
             $table->timestamps();
         });
     }

@@ -26,7 +26,7 @@ return new class extends Migration
             $table->boolean('is_paid')->default(0);
             $table->string('payment_type')->default('Cash');
             $table->timestamp('purchase_date')->nullable();
-            $table->longText('purchase_data')->nullable();
+            $table->json('purchase_data')->nullable(); // production stores jsonb
             $table->string('note')->nullable();
             $table->timestamps();
         });

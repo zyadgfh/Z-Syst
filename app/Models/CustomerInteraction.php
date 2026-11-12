@@ -21,6 +21,7 @@ protected $table = 'customer_interactions';
         'party_id',
         'type',
         'notes',
+        'user_id',
     ];
 
     public function user(): BelongsTo

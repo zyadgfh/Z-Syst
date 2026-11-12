@@ -140,7 +140,7 @@ class BatchWiseStockModel {
     expireDate = json['expire_date'];
     productId = json['product_id'];
     batchNo = json['batch_no'];
-    productStock = json['productStock'];
+    productStock = (json['product_stock'] ?? json['productStock']);
     product = json['product'] != null ? BatchWiseProductModel.fromJson(json['product']) : null;
   }
   num? id;
@@ -181,7 +181,7 @@ class BatchWiseProductModel {
 
   BatchWiseProductModel.fromJson(dynamic json) {
     id = json['id'];
-    productName = json['productName'];
+    productName = (json['product_name'] ?? json['productName']);
     purchaseWithoutTax = json['purchase_without_tax'];
     purchaseWithTax = json['purchase_with_tax'];
     profitPercent = json['profit_percent'];
@@ -189,7 +189,7 @@ class BatchWiseProductModel {
     wholesalePrice = json['wholesale_price'];
     taxId = json['tax_id'];
     taxType = json['tax_type'];
-    productCode = json['productCode'];
+    productCode = (json['product_code'] ?? json['productCode']);
     tax = json['tax'] != null ? Tax.fromJson(json['tax']) : null;
   }
   num? id;

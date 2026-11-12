@@ -152,11 +152,11 @@ class ExpenseReportData {
     expenseCategoryId = json['expense_category_id'];
     userId = json['user_id'];
     businessId = json['business_id'];
-    expanseFor = json['expanseFor'];
-    paymentType = json['paymentType'];
-    referenceNo = json['referenceNo'];
+    expanseFor = (json['expanse_for'] ?? json['expanseFor']);
+    paymentType = (json['payment_type'] ?? json['paymentType']);
+    referenceNo = (json['reference_no'] ?? json['referenceNo']);
     note = json['note'];
-    expenseDate = json['expenseDate'];
+    expenseDate = (json['expense_date'] ?? json['expenseDate']);
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     category = json['category'] != null ? Category.fromJson(json['category']) : null;
@@ -204,7 +204,7 @@ class Category {
 
   Category.fromJson(dynamic json) {
     id = json['id'];
-    categoryName = json['categoryName'];
+    categoryName = (json['category_name'] ?? json['categoryName']);
   }
   num? id;
   String? categoryName;

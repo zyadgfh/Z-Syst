@@ -57,16 +57,16 @@ class SalesDetailsData {
     partyId = json['party_id'];
     userId = json['user_id'];
     taxId = json['tax_id'];
-    discountAmount = json['discountAmount'];
-    dueAmount = json['dueAmount'];
-    isPaid = json['isPaid'];
+    discountAmount = (json['discount_amount'] ?? json['discountAmount']);
+    dueAmount = (json['due_amount'] ?? json['dueAmount']);
+    isPaid = (json['is_paid'] ?? json['isPaid']);
     taxAmount = json['tax_amount'];
-    paidAmount = json['paidAmount'];
-    totalAmount = json['totalAmount'];
-    lossProfit = json['lossProfit'];
-    paymentType = json['paymentType'];
-    invoiceNumber = json['invoiceNumber'];
-    saleDate = json['saleDate'];
+    paidAmount = (json['paid_amount'] ?? json['paidAmount']);
+    totalAmount = (json['total_amount'] ?? json['totalAmount']);
+    lossProfit = (json['loss_profit'] ?? json['lossProfit']);
+    paymentType = (json['payment_type'] ?? json['paymentType']);
+    invoiceNumber = (json['invoice_number'] ?? json['invoiceNumber']);
+    saleDate = (json['sale_date'] ?? json['saleDate']);
     meta = json['meta'] != null ? SalesDetailsMeta.fromJson(json['meta']) : null;
     salesData = json['sale_data'] != null ? SalesDetailsData.fromJson(json['sale_data']) : null;
     createdAt = json['created_at'];
@@ -213,7 +213,7 @@ class SalesDetailsProduct {
 
   SalesDetailsProduct.fromJson(dynamic json) {
     id = json['id'];
-    productName = json['productName'];
+    productName = (json['product_name'] ?? json['productName']);
     productCurrentStock = json['stocks_sum_product_stock'];
   }
   num? id;

@@ -26,15 +26,15 @@ class PurchaseTransaction {
     partyId = json['party_id'];
     businessId = json['business_id'];
     userId = json['user_id'];
-    discountAmount = json['discountAmount'];
-    dueAmount = json['dueAmount'];
-    paidAmount = json['paidAmount'];
+    discountAmount = (json['discount_amount'] ?? json['discountAmount']);
+    dueAmount = (json['due_amount'] ?? json['dueAmount']);
+    paidAmount = (json['paid_amount'] ?? json['paidAmount']);
     hasReturn = json['has_return'];
-    totalAmount = json['totalAmount'];
-    invoiceNumber = json['invoiceNumber'];
-    isPaid = json['isPaid'];
-    paymentType = json['paymentType'];
-    purchaseDate = json['purchaseDate'];
+    totalAmount = (json['total_amount'] ?? json['totalAmount']);
+    invoiceNumber = (json['invoice_number'] ?? json['invoiceNumber']);
+    isPaid = (json['is_paid'] ?? json['isPaid']);
+    paymentType = (json['payment_type'] ?? json['paymentType']);
+    purchaseDate = (json['purchase_date'] ?? json['purchaseDate']);
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     user = json['user'] != null ? User.fromJson(json['user']) : null;
@@ -120,7 +120,7 @@ class PurchaseDetails {
     id = json['id'];
     purchaseId = json['purchase_id'];
     productId = json['product_id'];
-    productPurchasePrice = json['productPurchasePrice'];
+    productPurchasePrice = (json['purchase_with_tax'] ?? json['productPurchasePrice']);
     quantities = json['quantities'];
     product = json['product'] != null ? Product.fromJson(json['product']) : null;
   }
@@ -155,7 +155,7 @@ class Product {
 
   Product.fromJson(dynamic json) {
     id = json['id'];
-    productName = json['productName'];
+    productName = (json['product_name'] ?? json['productName']);
     categoryId = json['category_id'];
     category = json['category'] != null ? Category.fromJson(json['category']) : null;
   }
@@ -184,7 +184,7 @@ class Category {
 
   Category.fromJson(dynamic json) {
     id = json['id'];
-    categoryName = json['categoryName'];
+    categoryName = (json['category_name'] ?? json['categoryName']);
   }
   num? id;
   String? categoryName;

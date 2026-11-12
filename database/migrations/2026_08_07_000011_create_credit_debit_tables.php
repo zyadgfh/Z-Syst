@@ -50,6 +50,27 @@ return new class extends Migration
 
         Schema::create('credit_debit_items', function (Blueprint $table) {
             $table->id();
+
+            // Production has always had this column; this migration never created
+            // it, so `migrate:fresh` built a credit_debit_items without a tenant
+            // key while production had one. A ledger line belongs to the same
+            // business as its parent credit/debit, and both TenantScoped and the
+            // database's RLS policies key off it — without the column a line could
+            // not be attributed to a tenant at all. Declared NOT NULL with a
+            // foreign key to match supplier_credits and supplier_debits above and
+            // the state production was aligned to by
+            // `enforce_tenant_ownership_on_business_id`.
+            $table->foreignId('business_id')->constrained()->cascadeOnDelete();
+
+            // Production also carried `type` and `description` here, leftovers from
+            // an earlier design of this table — its column order showed it began as
+            // (id, business_id, type, amount, description, timestamps) and had the
+            // parent_id/parent_type/product_id design below appended later. Nothing
+            // in the application read or wrote them, no index or view depended on
+            // them, and the table was empty, so they were dropped from production by
+            // `drop_legacy_type_and_description_from_credit_debit_items` rather than
+            // enshrined here as dead columns. Do not re-add them without a consumer.
+
             $table->foreignId('parent_id');
             $table->string('parent_type');
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();

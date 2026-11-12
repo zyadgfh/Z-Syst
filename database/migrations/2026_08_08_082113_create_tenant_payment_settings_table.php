@@ -13,6 +13,20 @@ return new class extends Migration
     {
         Schema::create('tenant_payment_settings', function (Blueprint $table) {
             $table->id();
+
+            // The application's tenant column on this table is `tenant_id`, below:
+            // the model's fillable, its belongsTo(Business::class, 'tenant_id') and
+            // every query in TenantPaymentSettingController use that name. This
+            // second column exists only because the database enforces tenancy
+            // independently of Eloquent — tenant_payment_settings has Row Level
+            // Security enabled with four policies of the form
+            // `business_id = private.current_business_id()`. Production declares it
+            // nullable with no foreign key; reproducing it here keeps
+            // `migrate:fresh` identical to production so those policies can be
+            // created on a fresh database. Do not "tidy" this into tenant_id
+            // without migrating the RLS policies with it.
+            $table->unsignedBigInteger('business_id')->nullable();
+
             $table->foreignId('tenant_id')->constrained('businesses')->onDelete('cascade');
             $table->unsignedBigInteger('branch_id')->nullable();
             $table->foreignId('gateway_id')->constrained('gateways')->onDelete('cascade');

@@ -54,15 +54,15 @@ class PurchaseDetailsData {
     businessId = json['business_id'];
     userId = json['user_id'];
     taxId = json['tax_id'];
-    discountAmount = json['discountAmount'];
+    discountAmount = (json['discount_amount'] ?? json['discountAmount']);
     taxAmount = json['tax_amount'];
-    dueAmount = json['dueAmount'];
-    paidAmount = json['paidAmount'];
-    totalAmount = json['totalAmount'];
-    invoiceNumber = json['invoiceNumber'];
-    isPaid = json['isPaid'];
-    paymentType = json['paymentType'];
-    purchaseDate = json['purchaseDate'];
+    dueAmount = (json['due_amount'] ?? json['dueAmount']);
+    paidAmount = (json['paid_amount'] ?? json['paidAmount']);
+    totalAmount = (json['total_amount'] ?? json['totalAmount']);
+    invoiceNumber = (json['invoice_number'] ?? json['invoiceNumber']);
+    isPaid = (json['is_paid'] ?? json['isPaid']);
+    paymentType = (json['payment_type'] ?? json['paymentType']);
+    purchaseDate = (json['purchase_date'] ?? json['purchaseDate']);
     note = json['note'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
@@ -210,7 +210,7 @@ class Product {
 
   Product.fromJson(dynamic json) {
     id = json['id'];
-    productName = json['productName'];
+    productName = (json['product_name'] ?? json['productName']);
     taxType = json['tax_type'];
   }
   num? id;

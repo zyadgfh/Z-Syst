@@ -13,7 +13,14 @@ return new class extends Migration
     {
         Schema::create('inventory_turnover_reports', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('business_id')->constrained()->cascadeOnDelete();
+            // Nullable on purpose. InventoryTurnoverReport overrides
+            // TenantScoped::tenantIncludesGlobals(), which makes a row with
+            // business_id IS NULL a platform-wide rollup visible to every tenant.
+            // Declaring this NOT NULL would make that documented contract
+            // unreachable, and the unique report key below treats NULL as a
+            // distinct owner. Production allows NULL here; the migration now
+            // agrees with both the model and the live schema.
+            $table->foreignId('business_id')->nullable()->constrained()->cascadeOnDelete();
             $table->enum('report_type', ['monthly', 'quarterly', 'yearly'])->default('monthly');
             $table->date('period_start');
             $table->date('period_end');

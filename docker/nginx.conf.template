@@ -1,0 +1,108 @@
+# nginx for the Z-Syst container.
+#
+# This is a TEMPLATE: docker/entrypoint.sh runs
+#     envsubst '${PORT}' < nginx.conf.template > /etc/nginx/nginx.conf
+# Only ${PORT} is substituted, so nginx's own runtime variables ($uri,
+# $query_string, $fastcgi_script_name, ...) survive untouched. Do not add other
+# ${VARS} here unless you also add them to that envsubst argument list.
+#
+# Render assigns the port (10000 by default) and routes external traffic to it,
+# so nothing here may hardcode :80.
+
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+error_log /dev/stderr warn;
+
+events {
+    worker_connections 1024;
+    multi_accept on;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    server_tokens off;
+    types_hash_max_size 2048;
+
+    # Container convention: logs go to stdout/stderr so Render captures them.
+    # storage/logs is for the application's own channels, not for nginx.
+    access_log /dev/stdout;
+
+    gzip on;
+    gzip_vary on;
+    gzip_comp_level 5;
+    gzip_min_length 256;
+    gzip_proxied any;
+    gzip_types
+        application/atom+xml
+        application/javascript
+        application/json
+        application/xml+rss
+        image/svg+xml
+        text/css
+        text/plain
+        text/xml;
+
+    # Must stay >= php.ini's post_max_size (72M), otherwise nginx rejects the
+    # request body before PHP ever sees it and the upload error is misleading.
+    client_max_body_size 72M;
+    client_body_buffer_size 128k;
+
+    server {
+        listen ${PORT} default_server;
+        server_name _;
+
+        root /var/www/html/public;
+        index index.php;
+        charset utf-8;
+
+        location = /favicon.ico { access_log off; log_not_found off; }
+        location = /robots.txt  { access_log off; log_not_found off; }
+
+        # Laravel's single front controller.
+        location / {
+            try_files $uri $uri/ /index.php?$query_string;
+        }
+
+        location = /index.php {
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            fastcgi_param SCRIPT_NAME     $fastcgi_script_name;
+            # php-fpm's default pool listens here; both processes share the
+            # container's loopback, so no unix socket permissions to manage.
+            fastcgi_pass 127.0.0.1:9000;
+            fastcgi_read_timeout 120s;
+            fastcgi_send_timeout 120s;
+            fastcgi_buffer_size 32k;
+            fastcgi_buffers 16 16k;
+            fastcgi_hide_header X-Powered-By;
+        }
+
+        # Any other .php is a mistake or a probe: 404 rather than 403, so the
+        # response does not confirm what exists.
+        location ~ \.php$ {
+            return 404;
+        }
+
+        # Vendored/fingerprinted assets under public/. The application sets its
+        # own security headers in App\Http\Middleware\SecurityHeaders; this block
+        # only governs caching for files PHP never touches.
+        location ~* \.(?:css|js|png|jpe?g|gif|webp|svg|ico|woff2?|ttf|eot)$ {
+            access_log off;
+            expires 30d;
+            add_header Cache-Control "public, max-age=2592000, immutable";
+            try_files $uri =404;
+        }
+
+        # Dotfiles, except ACME challenge paths.
+        location ~ /\.(?!well-known).* {
+            deny all;
+        }
+    }
+}

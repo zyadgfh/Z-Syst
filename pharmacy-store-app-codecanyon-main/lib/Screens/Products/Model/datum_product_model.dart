@@ -204,8 +204,8 @@ class Datum {
 
   factory Datum.fromJson(Map<String, dynamic> json) => Datum(
         id: json["id"],
-        productName: json["productName"],
-        productCode: json["productCode"],
+        productName: (json["product_name"] ?? json["productName"]),
+        productCode: (json["product_code"] ?? json["productCode"]),
         purchaseWithTax: json["purchase_with_tax"],
         salesPrice: json["sales_price"]?.toDouble(),
         stocksSumProductStock: json["stocks_sum_product_stock"],

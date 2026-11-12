@@ -17,8 +17,13 @@ return new class extends Migration
             $table->integer('duration')->default(0); // Duration in days
             $table->double('offerPrice', 10, 2)->nullable();
             $table->double('subscriptionPrice', 10, 2)->default(0);
-            $table->boolean('status')->default(1);
-            $table->longText('features')->nullable();
+            // integer, not boolean: the code compares this column against 1 in the
+            // landing page pricing block, the admin plan list and the subscription API
+            // (Plan::where('status', 1), Plan::whereStatus(1)). Against a boolean
+            // column that is `boolean = integer`, which Postgres has no operator for.
+            $table->integer('status')->default(1);
+            // json: production stores jsonb and Plan casts 'features' to json.
+            $table->json('features')->nullable();
             $table->timestamps();
         });
     }

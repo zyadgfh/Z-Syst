@@ -43,6 +43,8 @@ public const STATUS_PENDING = 'pending';
         'status',
         'notes',
         'verified_at',
+        'branch_id',
+        'received_by',
     ];
 
     protected $casts = [

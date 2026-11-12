@@ -11,9 +11,9 @@ class ExpenseCategoryModel {
 
   ExpenseCategoryModel.fromJson(dynamic json) {
     id = json['id'];
-    categoryName = json['categoryName'];
+    categoryName = (json['category_name'] ?? json['categoryName']);
     businessId = json['business_id'];
-    categoryDescription = json['categoryDescription'];
+    categoryDescription = (json['category_description'] ?? json['categoryDescription']);
     status = json['status'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];

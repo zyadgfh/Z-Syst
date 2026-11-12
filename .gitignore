@@ -51,3 +51,6 @@ desktop.ini
 # Python bytecode (tools/*.py)
 __pycache__/
 *.pyc
+
+# agent scratch space (never committed)
+/.scratch/

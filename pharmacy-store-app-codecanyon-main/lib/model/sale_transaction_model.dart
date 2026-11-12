@@ -30,20 +30,20 @@ class SalesTransactionModel {
     businessId = json['business_id'];
     partyId = json['party_id'];
     userId = json['user_id'];
-    discountAmount = json['discountAmount'];
-    dueAmount = json['dueAmount'];
-    isPaid = json['isPaid'];
+    discountAmount = (json['discount_amount'] ?? json['discountAmount']);
+    dueAmount = (json['due_amount'] ?? json['dueAmount']);
+    isPaid = (json['is_paid'] ?? json['isPaid']);
     hasReturn = json['has_return'];
     vatAmount = json['vat_amount'];
     vatPercent = json['vat_percent'];
-    paidAmount = json['paidAmount'];
-    totalAmount = json['totalAmount'];
-    paymentType = json['paymentType'];
-    invoiceNumber = json['invoiceNumber'];
-    saleDate = json['saleDate'];
+    paidAmount = (json['paid_amount'] ?? json['paidAmount']);
+    totalAmount = (json['total_amount'] ?? json['totalAmount']);
+    paymentType = (json['payment_type'] ?? json['paymentType']);
+    invoiceNumber = (json['invoice_number'] ?? json['invoiceNumber']);
+    saleDate = (json['sale_date'] ?? json['saleDate']);
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
-    detailsSumLossProfit = json['lossProfit'];
+    detailsSumLossProfit = (json['loss_profit'] ?? json['lossProfit']);
     user = json['user'] != null ? User.fromJson(json['user']) : null;
     meta = json['meta'] != null ? Meta.fromJson(json['meta']) : null;
     party = json['party'] != null ? SalesParty.fromJson(json['party']) : SalesParty(name: 'Guest', type: 'Guest');
@@ -138,7 +138,7 @@ class SalesDetails {
     saleId = json['sale_id'];
     productId = json['product_id'];
     price = json['price'];
-    lossProfit = json['lossProfit'];
+    lossProfit = (json['loss_profit'] ?? json['lossProfit']);
     quantities = json['quantities'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
@@ -181,7 +181,7 @@ class SalesProduct {
 
   SalesProduct.fromJson(dynamic json) {
     id = json['id'];
-    productName = json['productName'];
+    productName = (json['product_name'] ?? json['productName']);
     categoryId = json['category_id'];
     category = json['category'] != null ? Category.fromJson(json['category']) : null;
   }
@@ -210,7 +210,7 @@ class Category {
 
   Category.fromJson(dynamic json) {
     id = json['id'];
-    categoryName = json['categoryName'];
+    categoryName = (json['category_name'] ?? json['categoryName']);
   }
   num? id;
   String? categoryName;

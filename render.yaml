@@ -1,0 +1,367 @@
+# Render Blueprint for the Z-Syst Laravel application.
+# https://render.com/docs/blueprint-spec
+#
+# Before this file existed there was no deploy definition for the Laravel app at
+# all: vercel.json builds the *separate* Vite/Firebase SPA (index.html +
+# src/main.js), and .env.production.example was written for Render but nothing
+# in the repository could reproduce a deployment. Everything had to be clicked
+# together in the dashboard, so a new environment could not be rebuilt and
+# `php artisan migrate` ran in no deploy path.
+#
+# Import this file in Render ("New +" → "Blueprint") and point it at the
+# repository. Secrets are marked `sync: false`, which means Render prompts for
+# them in the dashboard and never writes them back into this file.
+#
+# Two services, one image:
+#   z-syst-api        web   — nginx + php-fpm under supervisord
+#   z-syst-scheduler  cron  — `php artisan schedule:run`, one tick per minute
+#
+# The scheduler is a service and not an afterthought: app/Console/Kernel.php
+# schedules ten commands, including expiry-alert:send, backup:database,
+# subscriptions:manage, forecast:generate, anomalies:scan, eta:retry and a
+# `queue:work --stop-when-empty` runner. Without this cron service none of them
+# ever execute.
+#
+# A queue *worker* service is intentionally absent: the codebase dispatches no
+# jobs (zero `dispatch()` calls, zero `ShouldQueue` implementations), and the
+# scheduler already drains the queue every minute. Add one when real queued work
+# appears — and note that the root supervisor.conf (redis, /var/www/z-syst) is a
+# bare-metal VPS artefact, not this container's process manager.
+
+services:
+  # ---------------------------------------------------------------------------
+  # HTTP: Blade admin + JSON API
+  # ---------------------------------------------------------------------------
+  - type: web
+    name: z-syst-api
+    runtime: docker
+    # Supabase runs this project in eu-central-1; keeping the app in the same
+    # region is what makes the pooler latency tolerable.
+    region: frankfurt
+    # A persistent disk requires a paid instance type.
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/up
+
+    # Runs once per deploy, in a separate container, before traffic is switched.
+    # Only migrations belong here — see docker/deploy.sh for why.
+    preDeployCommand: sh /usr/local/bin/deploy.sh
+
+    # ------------------------------------------------------------------
+    # KNOWN TRADE-OFF, and the reason RUNBOOK §7 exists.
+    #
+    # Render's disk is local to ONE instance: it pins the service to a single
+    # replica and disables zero-downtime deploys.
+    #
+    # It used to carry sessions, cache and queue as well. Those now live in
+    # Postgres (CACHE_DRIVER/SESSION_DRIVER/QUEUE_CONNECTION = database), so the
+    # disk is left with exactly two things:
+    #   * uploads — FILESYSTEM_DISK=local writes under storage/app, and s3 is not
+    #     available until league/flysystem-aws-s3-v3 is added to composer.json;
+    #   * the application's own log files (LOG_CHANNEL=stack).
+    #
+    # Once uploads move to S3 this disk can shrink to logs only, or disappear if
+    # logging is pointed at stdout. Until then: do not scale this service
+    # horizontally while the disk is mounted.
+    # ------------------------------------------------------------------
+    disk:
+      name: z-syst-storage
+      mountPath: /var/www/html/storage
+      sizeGB: 10
+
+    envVars:
+      - key: APP_ROLE
+        value: web
+      - key: APP_NAME
+        value: Z-Syst Pharmacy
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        sync: false
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        value: https://z-syst-api.onrender.com
+
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://app.z-syst.com
+      - key: CORS_ALLOWED_ORIGINS_PATTERNS
+        value: ""
+      - key: CORS_SUPPORTS_CREDENTIALS
+        value: "false"
+
+      - key: LOG_CHANNEL
+        value: stack
+      - key: LOG_DEPRECATIONS_CHANNEL
+        value: "null"
+      - key: LOG_LEVEL
+        value: warning
+
+      # Supabase session-mode pooler (5432). Transaction mode (6543) must not be
+      # used: migrations and prepared statements need a session connection.
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        value: aws-0-eu-central-1.pooler.supabase.com
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_DATABASE
+        value: postgres
+      - key: DB_USERNAME
+        value: postgres.atvttthrqsybjjwrbiyl
+      - key: DB_PASSWORD
+        sync: false
+
+      # Session, cache and queue are stored in Postgres, so they survive a
+      # deploy and are shared by every instance. The tables already exist in
+      # production with the exact shape and indexes Laravel's drivers expect
+      # (cache + cache_locks, sessions, jobs + failed_jobs) — no new dependency,
+      # no schema change. Mirrors .env.production.example.
+      - key: BROADCAST_DRIVER
+        value: log
+      - key: CACHE_DRIVER
+        value: database
+      - key: SESSION_DRIVER
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: SESSION_LIFETIME
+        value: "120"
+      # Uploads are the remaining filesystem dependency: s3 needs
+      # league/flysystem-aws-s3-v3, which is not in composer.json. See the disk
+      # note below and RUNBOOK §7.
+      - key: FILESYSTEM_DISK
+        value: local
+
+      - key: REDIS_HOST
+        value: ""
+      - key: REDIS_PASSWORD
+        sync: false
+      - key: REDIS_PORT
+        value: "6379"
+
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_ENCRYPTION
+        value: tls
+      - key: MAIL_FROM_ADDRESS
+        sync: false
+      - key: MAIL_FROM_NAME
+        value: Z-Syst Pharmacy
+
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        value: us-east-1
+      - key: AWS_BUCKET
+        sync: false
+      - key: AWS_USE_PATH_STYLE_ENDPOINT
+        value: "false"
+
+      - key: SECURITY_ENABLED
+        value: "true"
+      - key: SECURITY_MAX_LOGIN_ATTEMPTS
+        value: "5"
+      - key: SECURITY_LOCKOUT_DURATION
+        value: "15"
+
+      - key: BACKUP_ENABLED
+        value: "true"
+      - key: BACKUP_RETENTION_DAYS
+        value: "30"
+      - key: BACKUP_SCHEDULE
+        value: 0 2 * * *
+
+      - key: CACHE_TTL
+        value: "3600"
+      - key: ENABLE_QUERY_LOGGING
+        value: "false"
+      - key: ENABLE_CACHE
+        value: "true"
+
+      - key: SAAS_ENABLED
+        value: "true"
+      - key: SAAS_TRIAL_DAYS
+        value: "14"
+      - key: SAAS_MAX_TENANTS
+        value: "1000"
+
+      - key: SUPABASE_URL
+        value: https://atvttthrqsybjjwrbiyl.supabase.co
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_JWT_SECRET
+        sync: false
+      - key: SUPABASE_JWT_ISSUER
+        value: https://atvttthrqsybjjwrbiyl.supabase.co/auth/v1
+      - key: SUPABASE_JWT_AUDIENCE
+        value: authenticated
+      - key: SUPABASE_JWT_LEEWAY
+        value: "10"
+      - key: SUPABASE_ENFORCE_RLS
+        value: "true"
+      - key: SUPABASE_FALLBACK_ELOQUENT
+        # Must stay false: GoTrue owns credentials, and public.app_users is a
+        # per-business profile mirror with no email/password columns.
+        value: "false"
+
+      - key: SUPABASE_CAPTCHA_ENABLED
+        value: "false"
+      - key: SUPABASE_CAPTCHA_PROVIDER
+        value: hcaptcha
+      - key: HCAPTCHA_SITE_KEY
+        sync: false
+
+  # ---------------------------------------------------------------------------
+  # Scheduler: one container per tick
+  # ---------------------------------------------------------------------------
+  - type: cron
+    name: z-syst-scheduler
+    runtime: docker
+    region: frankfurt
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    # docker/entrypoint.sh sees APP_ROLE=cron and execs `schedule:run` directly,
+    # so the container exits when the tick finishes.
+    startCommand: php artisan schedule:run
+    schedule: "* * * * *"
+
+    # Note: the disk belongs to z-syst-api only — Render disks are attached to a
+    # single service. Scheduler logs therefore go to the ephemeral filesystem and
+    # to Render's log stream; set LOG_CHANNEL=stderr here if the tick output
+    # should be visible without the file channel.
+    envVars:
+      - key: APP_ROLE
+        value: cron
+      - key: APP_NAME
+        value: Z-Syst Pharmacy
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        sync: false
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        value: https://z-syst-api.onrender.com
+
+      - key: LOG_CHANNEL
+        value: stack
+      - key: LOG_DEPRECATIONS_CHANNEL
+        value: "null"
+      - key: LOG_LEVEL
+        value: warning
+
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        value: aws-0-eu-central-1.pooler.supabase.com
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_DATABASE
+        value: postgres
+      - key: DB_USERNAME
+        value: postgres.atvttthrqsybjjwrbiyl
+      - key: DB_PASSWORD
+        sync: false
+
+      # Same stores as the web service, and they must match: the scheduler
+      # drains the queue with `queue:work --stop-when-empty`, so it has to read
+      # the same public.jobs table the web tier writes to.
+      - key: BROADCAST_DRIVER
+        value: log
+      - key: CACHE_DRIVER
+        value: database
+      - key: SESSION_DRIVER
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: SESSION_LIFETIME
+        value: "120"
+      - key: FILESYSTEM_DISK
+        value: local
+
+      - key: REDIS_HOST
+        value: ""
+      - key: REDIS_PASSWORD
+        sync: false
+      - key: REDIS_PORT
+        value: "6379"
+
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_ENCRYPTION
+        value: tls
+      - key: MAIL_FROM_ADDRESS
+        sync: false
+      - key: MAIL_FROM_NAME
+        value: Z-Syst Pharmacy
+
+      - key: SECURITY_ENABLED
+        value: "true"
+      - key: SECURITY_MAX_LOGIN_ATTEMPTS
+        value: "5"
+      - key: SECURITY_LOCKOUT_DURATION
+        value: "15"
+
+      - key: BACKUP_ENABLED
+        value: "true"
+      - key: BACKUP_RETENTION_DAYS
+        value: "30"
+      - key: BACKUP_SCHEDULE
+        value: 0 2 * * *
+
+      - key: CACHE_TTL
+        value: "3600"
+      - key: ENABLE_QUERY_LOGGING
+        value: "false"
+      - key: ENABLE_CACHE
+        value: "true"
+
+      - key: SAAS_ENABLED
+        value: "true"
+      - key: SAAS_TRIAL_DAYS
+        value: "14"
+      - key: SAAS_MAX_TENANTS
+        value: "1000"
+
+      - key: SUPABASE_URL
+        value: https://atvttthrqsybjjwrbiyl.supabase.co
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_JWT_SECRET
+        sync: false
+      - key: SUPABASE_JWT_ISSUER
+        value: https://atvttthrqsybjjwrbiyl.supabase.co/auth/v1
+      - key: SUPABASE_JWT_AUDIENCE
+        value: authenticated
+      - key: SUPABASE_JWT_LEEWAY
+        value: "10"
+      - key: SUPABASE_ENFORCE_RLS
+        value: "true"
+      - key: SUPABASE_FALLBACK_ELOQUENT
+        value: "false"
+
+      - key: SUPABASE_CAPTCHA_ENABLED
+        value: "false"
+      - key: SUPABASE_CAPTCHA_PROVIDER
+        value: hcaptcha
+      - key: HCAPTCHA_SITE_KEY
+        sync: false

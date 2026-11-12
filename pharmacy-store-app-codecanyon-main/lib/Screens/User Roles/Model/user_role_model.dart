@@ -74,18 +74,18 @@ class Permission {
   });
 
   Permission.fromJson(dynamic json) {
-    addExpensePermission = json['addExpensePermission'];
-    dueListPermission = json['dueListPermission'];
-    lossProfitPermission = json['lossProfitPermission'];
-    partiesPermission = json['partiesPermission'];
-    productPermission = json['productPermission'];
-    profileEditPermission = json['profileEditPermission'];
-    purchaseListPermission = json['purchaseListPermission'];
-    purchasePermission = json['purchasePermission'];
-    reportsPermission = json['reportsPermission'];
-    salePermission = json['salePermission'];
-    salesListPermission = json['salesListPermission'];
-    stockPermission = json['stockPermission'];
+    addExpensePermission = (json['add_expense_permission'] ?? json['addExpensePermission']);
+    dueListPermission = (json['due_list_permission'] ?? json['dueListPermission']);
+    lossProfitPermission = (json['loss_profit_permission'] ?? json['lossProfitPermission']);
+    partiesPermission = (json['parties_permission'] ?? json['partiesPermission']);
+    productPermission = (json['product_permission'] ?? json['productPermission']);
+    profileEditPermission = (json['profile_edit_permission'] ?? json['profileEditPermission']);
+    purchaseListPermission = (json['purchase_list_permission'] ?? json['purchaseListPermission']);
+    purchasePermission = (json['purchase_permission'] ?? json['purchasePermission']);
+    reportsPermission = (json['reports_permission'] ?? json['reportsPermission']);
+    salePermission = (json['sale_permission'] ?? json['salePermission']);
+    salesListPermission = (json['sales_list_permission'] ?? json['salesListPermission']);
+    stockPermission = (json['stock_permission'] ?? json['stockPermission']);
   }
   bool? addExpensePermission;
   bool? dueListPermission;

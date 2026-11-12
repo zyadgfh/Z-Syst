@@ -32,6 +32,9 @@ use SoftDeletes;
         'notes',
         'approved_at',
         'file_path',
+        'branch_id',
+        'created_by',
+        'approved_by',
     ];
 
     protected $casts = [

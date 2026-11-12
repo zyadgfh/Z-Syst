@@ -57,7 +57,11 @@ class AnalyticsController extends Controller
             ->map(fn ($p) => [
                 'name' => $p->name,
                 'qty' => (int) $p->stocks->sum('product_stock'),
-                'value' => round((float) $p->stocks->sum(fn ($s) => $s->product_stock * ($p->purchase_price ?? 0)), 2),
+                // products has no purchase_price column, so this always evaluated to 0
+                // and every dead-stock item reported a value of 0.00 — which made the
+                // sortByDesc('value') ranking below meaningless. purchase_with_tax is
+                // the cost basis the rest of the app reads (see NormalizeLegacyPayloadKeys).
+                'value' => round((float) $p->stocks->sum(fn ($s) => $s->product_stock * (float) ($p->purchase_with_tax ?: $p->purchase_without_tax)), 2),
             ])
             ->filter(fn ($r) => $r['qty'] > 0)
             ->reject(function ($r) use ($businessId) {

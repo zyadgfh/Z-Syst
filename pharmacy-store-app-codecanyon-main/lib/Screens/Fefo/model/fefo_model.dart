@@ -246,7 +246,7 @@ class FefoLogProduct {
   factory FefoLogProduct.fromJson(Map<String, dynamic> json) {
     return FefoLogProduct(
       id: json['id'],
-      productName: json['productName'],
+      productName: (json['product_name'] ?? json['productName']),
     );
   }
 }
@@ -260,7 +260,7 @@ class FefoLogSale {
   factory FefoLogSale.fromJson(Map<String, dynamic> json) {
     return FefoLogSale(
       id: json['id'],
-      invoiceNumber: json['invoiceNumber'],
+      invoiceNumber: (json['invoice_number'] ?? json['invoiceNumber']),
     );
   }
 }

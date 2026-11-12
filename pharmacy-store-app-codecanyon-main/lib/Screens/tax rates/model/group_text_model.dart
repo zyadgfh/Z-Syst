@@ -17,9 +17,9 @@ class GroupTaxModel {
     name = json['name'];
     taxRate = json['rate'];
     id = json['id'];
-    if (json['subTax'] != null) {
+    if ((json['sub_tax'] ?? json['subTax']) != null) {
       subTaxes = <TaxModel>[];
-      json['subTax'].forEach((v) {
+      (json['sub_tax'] ?? json['subTax']).forEach((v) {
         subTaxes!.add(TaxModel.fromJson(v));
       });
     }

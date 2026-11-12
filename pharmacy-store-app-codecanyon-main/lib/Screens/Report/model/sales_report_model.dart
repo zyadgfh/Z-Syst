@@ -150,13 +150,13 @@ class SaleData {
   SaleData.fromJson(dynamic json) {
     id = json['id'];
     partyId = json['party_id'];
-    invoiceNumber = json['invoiceNumber'];
-    saleDate = json['saleDate'];
+    invoiceNumber = (json['invoice_number'] ?? json['invoiceNumber']);
+    saleDate = (json['sale_date'] ?? json['saleDate']);
     saleReturnCounter = json['sale_returns_count'];
-    totalAmount = json['totalAmount'];
-    dueAmount = json['dueAmount'];
-    paidAmount = json['paidAmount'];
-    paymentType = json['paymentType'];
+    totalAmount = (json['total_amount'] ?? json['totalAmount']);
+    dueAmount = (json['due_amount'] ?? json['dueAmount']);
+    paidAmount = (json['paid_amount'] ?? json['paidAmount']);
+    paymentType = (json['payment_type'] ?? json['paymentType']);
     party = json['party'] != null ? Party.fromJson(json['party']) : null;
   }
   num? id;
