@@ -18,6 +18,11 @@ class CreditDebitService
             if (isset($data['items'])) {
                 foreach ($data['items'] as $item) {
                     CreditDebitItem::create([
+                        // Inherited from the parent document rather than from
+                        // auth(): credit_debit_items.business_id is NOT NULL, and
+                        // a line without a tenant is invisible to every tenant
+                        // under the global scope — a ledger entry nobody can read.
+                        'business_id' => $credit->business_id,
                         'parent_id' => $credit->id,
                         'parent_type' => SupplierCredit::class,
                         'product_id' => $item['product_id'],
@@ -41,6 +46,7 @@ class CreditDebitService
             if (isset($data['items'])) {
                 foreach ($data['items'] as $item) {
                     CreditDebitItem::create([
+                        'business_id' => $debit->business_id,
                         'parent_id' => $debit->id,
                         'parent_type' => SupplierDebit::class,
                         'product_id' => $item['product_id'],

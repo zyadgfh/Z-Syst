@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Traits\TenantScoped;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use ReflectionClass;
+use ReflectionMethod;
 use Tests\TestCase;
 use Throwable;
 
@@ -75,6 +77,27 @@ class SchemaDriftTest extends TestCase
 
     /** A snapshot of production's public schema; see the file header for how to refresh it. */
     private const PRODUCTION_TABLES = 'database/schema/production_tables.txt';
+
+    /**
+     * TenantScoped models whose `business_id` is legitimately nullable even
+     * though they do NOT opt into global rows via tenantIncludesGlobals().
+     *
+     * Both are documented decisions, not oversights:
+     *  - app_users: a user mid-onboarding has no business yet, and TenantScoped
+     *    skips scoping entirely for such a user;
+     *  - audit_logs: an audit trail must outlive the business it describes, so
+     *    the migration uses nullable()->nullOnDelete() rather than cascading the
+     *    history away.
+     *
+     * A table listed here that later becomes NOT NULL, or a new nullable one that
+     * is not listed, both fail test_business_id_nullability_matches_the_tenant_contract.
+     *
+     * @var array<string, string>
+     */
+    private const NULLABLE_TENANT_COLUMN_BY_DESIGN = [
+        'app_users' => 'a user being onboarded has no business yet',
+        'audit_logs' => 'an audit trail must survive deletion of its business',
+    ];
 
     /**
      * Every model must map to a table the migrations actually create, and every
@@ -221,6 +244,151 @@ class SchemaDriftTest extends TestCase
             'The set of Breeze scaffolding tables changed. If one was removed deliberately, update '
             .'REPO_ONLY_TABLES; if a new one appeared, it needs a decision, not a silent pass.'
         );
+    }
+
+    /**
+     * `business_id` is the tenant key at two layers at once — TenantScoped's
+     * Eloquent global scope and 124 database RLS policies of the form
+     * `business_id = private.current_business_id()`. Both compare by equality, so
+     * a NULL belongs to no tenant: the row is written successfully and then is
+     * readable by nobody, forever.
+     *
+     * That makes nullability part of the contract rather than a detail, and the
+     * contract runs in both directions:
+     *  - a model that does NOT opt into global rows must have a NOT NULL
+     *    business_id, or any code path that forgets to set it (a queue worker, a
+     *    console command, a service that only passes the tenant to the parent
+     *    document) silently creates an orphan;
+     *  - a model that DOES opt in via tenantIncludesGlobals() must have a
+     *    nullable one, or the curated/platform-wide rows it exists to support
+     *    cannot be represented at all and the override is dead code.
+     *
+     * This is not hypothetical: ApprovalWorkflowService and CreditDebitService
+     * both created child rows with no business_id, which was a NOT NULL violation
+     * against the intended schema and a silent orphan against the drifted one.
+     */
+    public function test_business_id_nullability_matches_the_tenant_contract(): void
+    {
+        $scoped = $this->tenantScopedModels();
+
+        $this->assertGreaterThan(
+            100,
+            count($scoped),
+            'Too few TenantScoped models were discovered — the trait-detection is probably broken, '
+            .'so this guard would pass vacuously.'
+        );
+
+        $shouldBeNull = [];
+        $shouldNotBeNull = [];
+        $globalsSeen = 0;
+
+        foreach ($scoped as $class) {
+            $table = (new $class)->getTable();
+
+            // A model with no business_id column at all is not this test's
+            // concern; the fillable test above already covers missing columns.
+            if (! Schema::hasColumn($table, 'business_id')) {
+                continue;
+            }
+
+            $nullable = $this->columnIsNullable($table, 'business_id');
+            $includesGlobals = $this->tenantIncludesGlobals($class);
+
+            if ($includesGlobals) {
+                $globalsSeen++;
+
+                if (! $nullable) {
+                    $shouldBeNull[] = $table." ({$class} overrides tenantIncludesGlobals())";
+                }
+
+                continue;
+            }
+
+            if ($nullable && ! array_key_exists($table, self::NULLABLE_TENANT_COLUMN_BY_DESIGN)) {
+                $shouldNotBeNull[] = $table." ({$class})";
+            }
+        }
+
+        $this->assertGreaterThan(
+            0,
+            $globalsSeen,
+            'No TenantScoped model overrides tenantIncludesGlobals(), so the nullable branch of this '
+            .'guard was never exercised. Either the overrides were removed (update this test) or the '
+            .'detection is broken.'
+        );
+
+        $this->assertSame(
+            [],
+            $shouldBeNull,
+            "These models document that NULL business_id means a platform-wide row visible to every\n"
+            ."tenant, but their column is NOT NULL, so such a row cannot exist:\n  - "
+            .implode("\n  - ", $shouldBeNull)
+        );
+
+        $this->assertSame(
+            [],
+            $shouldNotBeNull,
+            "These tenant-scoped tables allow business_id IS NULL, which makes any row written\n"
+            ."without a tenant an orphan nobody can read. Either set it on create, or — if NULL\n"
+            ."really is meaningful here — override tenantIncludesGlobals() on the model or add the\n"
+            ."table to NULLABLE_TENANT_COLUMN_BY_DESIGN with a reason:\n  - "
+            .implode("\n  - ", $shouldNotBeNull)
+        );
+    }
+
+    /**
+     * @return array<int, class-string<Model>>
+     */
+    private function tenantScopedModels(): array
+    {
+        return array_values(array_filter(
+            $this->modelClasses(),
+            static fn (string $class): bool => in_array(
+                TenantScoped::class,
+                class_uses_recursive($class),
+                true
+            )
+        ));
+    }
+
+    /**
+     * The trait declares tenantIncludesGlobals() protected static, so it has to be
+     * read by reflection rather than called.
+     */
+    private function tenantIncludesGlobals(string $class): bool
+    {
+        $method = new ReflectionMethod($class, 'tenantIncludesGlobals');
+        $method->setAccessible(true);
+
+        return (bool) $method->invoke(null);
+    }
+
+    /**
+     * Driver-aware, because CI builds the schema on sqlite while production is
+     * Postgres and the two expose nullability completely differently.
+     */
+    private function columnIsNullable(string $table, string $column): bool
+    {
+        if (DB::getDriverName() === 'sqlite') {
+            foreach (DB::select('PRAGMA table_info("'.$table.'")') as $info) {
+                $name = is_array($info) ? ($info['name'] ?? null) : ($info->name ?? null);
+                $notNull = is_array($info) ? ($info['notnull'] ?? 0) : ($info->notnull ?? 0);
+
+                if ($name === $column) {
+                    return ! (bool) $notNull;
+                }
+            }
+
+            return false;
+        }
+
+        $row = DB::selectOne(
+            'SELECT is_nullable FROM information_schema.columns
+              WHERE table_schema = current_schema() AND table_name = ? AND column_name = ?',
+            [$table, $column]
+        );
+
+        return ($row->is_nullable ?? 'NO') === 'YES';
     }
 
     /**

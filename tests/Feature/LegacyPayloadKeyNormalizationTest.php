@@ -147,13 +147,99 @@ class LegacyPayloadKeyNormalizationTest extends TestCase
     public function test_unknown_keys_pass_through_unchanged(): void
     {
         $request = $this->normalize([
-            'productDealerPrice' => 7,   // no such column in any table
             'someFutureKey' => 'x',
+            'another_one' => 'y',
         ]);
 
-        $this->assertSame(7, $request->input('productDealerPrice'));
-        $this->assertNull($request->input('product_dealer_price'));
         $this->assertSame('x', $request->input('someFutureKey'));
+        $this->assertSame('y', $request->input('another_one'));
         $this->assertCount(2, $request->all());
+    }
+
+    /**
+     * The mobile bulk-import template generates columns named "Purchase Price*",
+     * "MRP*" and "Wholesale Price", which the app sends as productPurchasePrice,
+     * productSalePrice and productWholeSalePrice. None of the mechanical
+     * camel-to-snake conversions exist as columns, and because the real ones are
+     * NOT NULL DEFAULT 0 an unmapped key did not fail — it created the product
+     * with a zero selling price and a zero cost, i.e. stock that sells for nothing
+     * and reports a 100% margin.
+     */
+    public function test_bulk_product_prices_map_onto_the_columns_that_exist(): void
+    {
+        $request = $this->normalize([
+            'productName' => 'Panadol',
+            'productPurchasePrice' => 4.5,
+            'productSalePrice' => 9.5,
+            'productWholeSalePrice' => 7.25,
+        ]);
+
+        $this->assertSame('Panadol', $request->input('product_name'));
+        $this->assertSame(4.5, $request->input('purchase_without_tax'));
+        $this->assertSame(9.5, $request->input('sales_price'));
+        $this->assertSame(7.25, $request->input('wholesale_price'));
+
+        foreach (['product_purchase_price', 'product_sale_price', 'product_whole_sale_price'] as $invented) {
+            $this->assertNull(
+                $request->input($invented),
+                "{$invented} does not exist on products; mapping to it would silently store nothing."
+            );
+        }
+    }
+
+    /**
+     * "Purchase Price*" in the template is a tax-exclusive cost — the bulk screen
+     * populates the field from productPurchasePriceWithoutTax — so it must land in
+     * purchase_without_tax. Filing it under purchase_with_tax would put a
+     * tax-exclusive figure in a tax-inclusive column.
+     */
+    public function test_the_bulk_purchase_price_is_treated_as_tax_exclusive(): void
+    {
+        $request = $this->normalize(['productPurchasePrice' => 4.5]);
+
+        $this->assertSame(4.5, $request->input('purchase_without_tax'));
+        $this->assertNull($request->input('purchase_with_tax'));
+    }
+
+    /**
+     * No products column backs the dealer price, but the generated template still
+     * asks the user for one, so the value is kept in the product's meta JSON — the
+     * extension point the same bulk flow already uses for strength, generic_name,
+     * shelf, batch_no and medicine_details — instead of being discarded. The
+     * sibling meta keys must survive the merge.
+     */
+    public function test_dealer_price_is_preserved_in_product_meta_alongside_its_siblings(): void
+    {
+        $request = $this->normalize([
+            'productDealerPrice' => 6.5,
+            'meta' => ['strength' => '500mg', 'shelf' => 'A3'],
+        ]);
+
+        $this->assertSame(6.5, $request->input('meta.dealer_price'));
+        $this->assertSame('500mg', $request->input('meta.strength'));
+        $this->assertSame('A3', $request->input('meta.shelf'));
+
+        // ZSystProductController persists this via $request->only(['meta']), so the
+        // value has to be genuinely nested, not a literal "meta.dealer_price" key.
+        $this->assertSame(
+            ['strength' => '500mg', 'shelf' => 'A3', 'dealer_price' => 6.5],
+            $request->only(['meta'])['meta']
+        );
+    }
+
+    /**
+     * The canonical-wins invariant has to hold for a nested target too. This is why
+     * the middleware checks Arr::has() rather than array_key_exists(): a literal
+     * array_key_exists('meta.dealer_price', $input) is always false, so the legacy
+     * key would have overwritten a value the client sent explicitly.
+     */
+    public function test_an_explicit_nested_value_is_never_overwritten_by_a_legacy_key(): void
+    {
+        $request = $this->normalize([
+            'meta' => ['dealer_price' => 'canonical'],
+            'productDealerPrice' => 'legacy',
+        ]);
+
+        $this->assertSame('canonical', $request->input('meta.dealer_price'));
     }
 }

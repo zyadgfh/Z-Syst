@@ -13,7 +13,12 @@ return new class extends Migration
     {
         Schema::create('product_inventory_analysis', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('business_id')->constrained()->cascadeOnDelete();
+            // Nullable on purpose: ProductInventoryAnalysis overrides
+            // TenantScoped::tenantIncludesGlobals(), so a NULL business_id marks a
+            // platform-wide ABC/movement analysis visible to every tenant rather
+            // than an orphan. Production allows NULL here; the migration now
+            // agrees with both the model and the live schema.
+            $table->foreignId('business_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->foreignId('report_id')->nullable()->constrained('inventory_turnover_reports')->cascadeOnDelete();
             $table->decimal('total_quantity_sold', 15, 2)->default(0);

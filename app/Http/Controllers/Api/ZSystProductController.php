@@ -86,12 +86,28 @@ class ZSystProductController extends Controller
         DB::beginTransaction();
         try {
 
-            $product = Product::create($request->only([
+            $attributes = $request->only([
                 'product_name', 'category_id', 'unit_id', 'type_id', 'manufacturer_id',
                 'box_size_id', 'purchase_without_tax', 'purchase_with_tax',
                 'profit_percent', 'sales_price', 'alert_qty', 'wholesale_price',
                 'product_code', 'meta', 'tax_id', 'tax_type',
-            ]) + [
+            ]);
+
+            // The mobile bulk-import template has a single "Purchase Price*"
+            // column and the app sends it as the tax-exclusive cost, so a product
+            // can legitimately arrive with purchase_without_tax and no
+            // purchase_with_tax. Both columns are NOT NULL DEFAULT 0, so the
+            // insert would silently succeed with purchase_with_tax = 0 — and every
+            // report that reads purchase_with_tax as the cost of goods
+            // (Admin\SaleController, AutoOrderService) would then treat that stock
+            // as free and show a 100% margin. With no tax selected the two figures
+            // are equal by definition (products.tax_type defaults to 'exclusive'),
+            // so fall back to the tax-exclusive value rather than to zero.
+            if (! isset($attributes['purchase_with_tax']) && isset($attributes['purchase_without_tax'])) {
+                $attributes['purchase_with_tax'] = $attributes['purchase_without_tax'];
+            }
+
+            $product = Product::create($attributes + [
                 'business_id' => $business_id,
                 'images' => $request->images ? $this->multipleUpload($request, 'images') : null,
             ]);

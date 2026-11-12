@@ -72,7 +72,12 @@ return new class extends Migration
         Schema::create('supplier_performance', function (Blueprint $table) {
             $table->id();
             $table->foreignId('supplier_id')->constrained('suppliers')->cascadeOnDelete();
-            $table->foreignId('business_id')->constrained()->cascadeOnDelete();
+            // Nullable on purpose, unlike the three sibling supplier tables in this
+            // file: SupplierPerformance overrides
+            // TenantScoped::tenantIncludesGlobals(), so a NULL business_id is a
+            // platform-wide benchmark row visible to every tenant. Production
+            // allows NULL here; the migration now agrees with both.
+            $table->foreignId('business_id')->nullable()->constrained()->cascadeOnDelete();
 
             $table->decimal('on_time_delivery_rate', 5, 2)->default(0);
             $table->decimal('quality_score', 5, 2)->default(0);

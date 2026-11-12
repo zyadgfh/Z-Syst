@@ -106,7 +106,19 @@ trait HasSupabaseRoles
             ->all();
 
         foreach ($names as $name) {
-            UserPermission::firstOrCreate(['user_id' => $this->getKey(), 'name' => $name]);
+            // business_id is passed as the *create* attributes, not the match
+            // attributes: the unique key is (user_id, name), and adding the tenant
+            // to the match would let the same grant be inserted twice for two
+            // businesses. It is populated because the database enforces tenancy
+            // through Row Level Security policies on this column
+            // (`business_id = private.current_business_id()`) for any client that
+            // reaches the table without going through Eloquent. Deliberately no
+            // TenantScoped global scope here — scoping the permission table by
+            // tenant would hide grants while auth is being resolved.
+            UserPermission::firstOrCreate(
+                ['user_id' => $this->getKey(), 'name' => $name],
+                ['business_id' => $this->business_id],
+            );
         }
 
         return $this;

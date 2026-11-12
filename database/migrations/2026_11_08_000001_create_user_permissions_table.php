@@ -14,6 +14,19 @@ return new class extends Migration
     {
         Schema::create('user_permissions', function (Blueprint $table) {
             $table->id();
+
+            // Not used by the application's own queries — a grant is looked up by
+            // user_id, and the model deliberately does NOT use TenantScoped, since
+            // scoping the permission table by tenant would hide grants during auth
+            // resolution and could lock a user out. This column exists because the
+            // database enforces tenancy independently of Eloquent: user_permissions
+            // has Row Level Security enabled with four policies of the form
+            // `business_id = private.current_business_id()`, which protect direct
+            // Supabase-client access. Production declares it nullable with no
+            // foreign key, and this migration now reproduces that exactly, so
+            // `migrate:fresh` yields a schema the RLS policies can be created on.
+            $table->unsignedBigInteger('business_id')->nullable();
+
             $table->string('user_id', 64);
             $table->string('name', 120);
             $table->timestamps();

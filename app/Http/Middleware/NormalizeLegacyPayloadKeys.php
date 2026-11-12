@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -38,9 +39,28 @@ use Symfony\Component\HttpFoundation\Response;
  *  - `unitName`: UnitController merges its own `unit_name` alias locally;
  *  - `expanseFor` / `expenseDate`: ZSystExpenseController already reads both
  *    spellings (`$request->expanse_for ?? $request->expanseFor`);
- *  - `productDealerPrice` / `productPurchasePrice`: no such column exists in any
- *    table, so there is no canonical twin to add. These are dead fields in the
- *    mobile models and need a product decision, not a shim.
+ * Three product keys map to a column whose name is NOT their mechanical
+ * camel-to-snake conversion, so each is justified here rather than derived:
+ *  - `productWholeSalePrice` => `wholesale_price` (products has no
+ *    `product_whole_sale_price`);
+ *  - `productSalePrice` => `sales_price`. The mobile bulk-import template calls
+ *    this column "MRP*" and it is the product's selling price.
+ *  - `productPurchasePrice` => `purchase_without_tax`. The bulk screen populates
+ *    it from `productPurchasePriceWithoutTax`, i.e. the template's "Purchase
+ *    Price*" column is a tax-exclusive cost, so mapping it to
+ *    `purchase_with_tax` would store a tax-exclusive figure in a tax-inclusive
+ *    column. Note the *response* side disagrees on purpose: a purchase line's
+ *    price comes back as `purchase_with_tax`, which is what
+ *    PurchaseController selects.
+ *
+ * `productDealerPrice` has no column in any table. It is still mapped — to
+ * `meta.dealer_price` — because the mobile app generates a bulk-import template
+ * with a "Dealer Price" header that the user fills in, and an unmapped key means
+ * that value is silently discarded. `products.meta` is the application's own
+ * extension point (the same bulk flow already stores strength, generic_name,
+ * shelf, batch_no and medicine_details there) and is json-cast and fillable.
+ * Nothing surfaces it in a UI yet; making dealer price a first-class column is a
+ * product decision, not a shim.
  *
  * @see \App\Http\Controllers\Api\ZSystCategoryController
  * @see \App\Http\Controllers\Api\UnitController
@@ -90,13 +110,35 @@ class NormalizeLegacyPayloadKeys
         'incomeDate' => 'income_date',
         'referenceNo' => 'reference_no',
 
-        // Products. ZSystProductController validates `wholesale_price` as
-        // required|numeric with no camelCase fallback, so a mobile request
-        // sending productWholeSalePrice failed with 422 and the product could
-        // not be saved at all. Note that the canonical name is NOT the
-        // mechanical conversion of the legacy key (product_whole_sale_price
-        // does not exist), which is exactly why it belongs in this map.
+        // Products. The canonical names here are NOT the mechanical conversion
+        // of the legacy keys — products has no product_whole_sale_price, no
+        // product_sale_price and no product_purchase_price — which is exactly why
+        // they belong in this map. Verified against the live `products` columns:
+        // purchase_without_tax, purchase_with_tax, profit_percent, sales_price
+        // and wholesale_price, all NOT NULL DEFAULT 0.
+        //
+        // Because they default to 0 rather than rejecting the row, an unmapped key
+        // does not fail loudly: ZSystProductController::store() only validates
+        // product_name and category_id, so a bulk import from the mobile app used
+        // to create the product "successfully" with sales_price 0 and
+        // purchase_without_tax 0 — a product that sells for nothing and reports
+        // 100% margin. (updateStock() is the endpoint that does validate these as
+        // required|numeric; the mobile stock screens already send them snake_case.)
         'productWholeSalePrice' => 'wholesale_price',
+        'productSalePrice' => 'sales_price',
+
+        // The bulk-import template's "Purchase Price*" column is a tax-exclusive
+        // cost: bulk_product_upload_screen.dart populates this field from
+        // productPurchasePriceWithoutTax. Mapping it to purchase_with_tax would
+        // file a tax-exclusive figure under a tax-inclusive column.
+        'productPurchasePrice' => 'purchase_without_tax',
+
+        // No such column exists. The template still asks the user for a "Dealer
+        // Price", so keep the value in the product's meta JSON — the extension
+        // point this same bulk flow already uses for strength, generic_name,
+        // shelf, batch_no and medicine_details — instead of discarding it. See
+        // the class docblock; surfacing it in a UI is a product decision.
+        'productDealerPrice' => 'meta.dealer_price',
     ];
 
     public function handle(Request $request, Closure $next): Response
@@ -139,7 +181,13 @@ class NormalizeLegacyPayloadKeys
 
             $snake = self::LEGACY_MAP[$key] ?? null;
 
-            if ($snake === null || array_key_exists($snake, $input)) {
+            // Arr::has(), not array_key_exists(): a mapping may target a nested
+            // path (`productDealerPrice` => `meta.dealer_price`), and the whole
+            // point of this guard is that a canonical value the client already
+            // sent is never overwritten by its legacy alias. A literal
+            // array_key_exists('meta.dealer_price', $input) is always false, so
+            // the legacy key would have won.
+            if ($snake === null || Arr::has($input, $snake)) {
                 continue;
             }
 

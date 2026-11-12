@@ -30,6 +30,12 @@ class ApprovalWorkflowService
                 $steps = json_decode($template->steps_config, true);
                 foreach ($steps as $stepConfig) {
                     ApprovalStep::create([
+                        // From the parent workflow, not from auth(): this runs
+                        // inside a transaction that may be driven by a queue
+                        // worker or a console command, where there is no
+                        // authenticated user to inherit a tenant from — and
+                        // approval_steps.business_id is NOT NULL.
+                        'business_id' => $businessId,
                         'workflow_id' => $workflow->id,
                         'step_number' => $stepConfig['step_number'],
                         'approver_role' => $stepConfig['approver_role'],

@@ -120,7 +120,7 @@ class PurchaseDetails {
     id = json['id'];
     purchaseId = json['purchase_id'];
     productId = json['product_id'];
-    productPurchasePrice = json['productPurchasePrice'];
+    productPurchasePrice = (json['purchase_with_tax'] ?? json['productPurchasePrice']);
     quantities = json['quantities'];
     product = json['product'] != null ? Product.fromJson(json['product']) : null;
   }
