@@ -1,0 +1,4992 @@
+
+   FAIL  Tests\Unit\PartyModelTest
+  ⨯ party sales dues excludes zero due                                   0.41s  
+  ⨯ party has purchases dues relation                                    0.03s  
+  ⨯ party has sales dues relation                                        0.02s  
+  ✓ party has fillable attributes                                        0.02s  
+  ✓ party has due cast                                                   0.03s  
+  ✓ party can be deleted                                                 0.02s  
+  ✓ can create party                                                     0.02s  
+
+   FAIL  Tests\Unit\PredictionServiceTest
+  ⨯ forecast product returns forecast data                               0.04s  
+  ✓ calculate reorder point returns expected structure                   0.03s  
+  ✓ forecast product creates forecast records                            0.03s  
+  ✓ get demand report returns expected structure                         0.03s  
+  ✓ batch forecast returns results for multiple products                 0.06s  
+  ✓ forecast all products forecasts all business products                0.07s  
+
+   FAIL  Tests\Unit\PurchaseModelTest
+  ⨯ purchase belongs to user                                             0.03s  
+  ⨯ can create purchase                                                  0.02s  
+  ⨯ purchase belongs to party                                            0.03s  
+  ⨯ purchase has many details                                            0.03s  
+  ⨯ purchase is paid flag works                                          0.03s  
+  ✓ purchase has casts                                                   0.02s  
+  ✓ purchase has fillable attributes                                     0.02s  
+
+   FAIL  Tests\Unit\SaleModelTest
+  ⨯ sale belongs to user                                                 0.02s  
+  ⨯ sale belongs to party                                                0.03s  
+  ⨯ sale has many details                                                0.02s  
+  ⨯ sale has many sale returns                                           0.03s  
+  ⨯ sale is paid flag works                                              0.03s  
+  ⨯ can create sale                                                      0.03s  
+  ✓ sale has fillable attributes                                         0.02s  
+  ✓ sale has casts                                                       0.02s  
+
+   FAIL  Tests\Unit\Services\LoyaltyServiceTest
+  ⨯ get or create program creates default
+  ⨯ get or create program returns existing
+  ⨯ earn points creates transaction
+  ⨯ earn points does not create when program inactive
+  ⨯ earn points with custom rate
+  ⨯ redeem points creates negative transaction
+  ⨯ redeem points throws on insufficient balance
+  ⨯ redeem points throws on zero points
+  ⨯ get balance returns zero for no transactions
+  ⨯ get balance returns sum of transactions
+  ⨯ get history returns transactions
+  ⨯ log interaction creates record
+  ⨯ earn points with sale reference
+
+   FAIL  Tests\Unit\Services\ReceiptServiceTest
+  ⨯ get or create settings creates default
+  ⨯ get or create settings returns existing
+  ⨯ generate receipt for sale
+  ⨯ generate receipt for purchase
+  ⨯ get receipt by sale
+  ⨯ receipt settings update
+  ⨯ receipt contains party info
+  ⨯ render pdf generates content
+
+   FAIL  Tests\Unit\Services\TraceabilityServiceTest
+  ⨯ get batch lots for product
+  ⨯ get expiring batches
+  ⨯ get expired batches excludes recalled
+  ⨯ initiate recall updates batch lots
+  ⨯ resolve recall sets status
+  ⨯ log traceability creates log entry
+  ⨯ create batch lot
+  ⨯ batch lot is expired
+  ⨯ batch lot not expired
+  ⨯ batch lot not recalled
+  ⨯ batch lot is recalled
+
+   FAIL  Tests\Unit\Services\WarehouseStockServiceTest
+  ⨯ can create warehouse
+  ⨯ can update warehouse
+  ⨯ get default warehouse returns active default
+  ⨯ get default warehouse returns null when none exists
+  ⨯ get warehouses returns active only
+  ⨯ get stock by product and warehouse
+  ⨯ transfer stock updates quantities
+  ⨯ transfer stock throws on same warehouse
+  ⨯ transfer stock throws on insufficient quantity
+
+   PASS  Tests\Unit\ExampleTest
+  ✓ that true is true
+
+   PASS  Tests\Unit\PrescriptionModelTest
+  ✓ prescription is usable only when approved and not expired            0.02s  
+  ✓ prescription is not usable when pending or expired                   0.03s  
+
+   PASS  Tests\Unit\ProductModelTest
+  ✓ product has fillable attributes                                      0.02s  
+  ✓ product has casts                                                    0.02s  
+  ✓ can create product                                                   0.03s  
+  ✓ product belongs to category                                          0.03s  
+  ✓ product belongs to unit                                              0.03s  
+  ✓ product belongs to manufacturer                                      0.03s  
+  ✓ product scope expiring soon                                          0.03s  
+  ✓ product scope has expired                                            0.03s  
+  ✓ product has many stocks                                              0.03s  
+  ✓ product fefo stocks ordered by expiry                                0.03s  
+
+   PASS  Tests\Unit\ServiceTest
+  ✓ security service validate table name                                 0.02s  
+  ✓ xss protection service check xss                                     0.02s  
+  ✓ csrf protection service validate token                               0.02s  
+  ✓ cache service business key                                           0.02s  
+  ✓ query optimization service detect n plus one                         0.02s  
+  ✓ page optimization service minify css                                 0.02s  
+  ✓ page optimization service minify js                                  0.02s  
+  ✓ security service sanitize input                                      0.02s  
+  ✓ xss protection service sanitize html                                 0.02s  
+  ✓ csrf protection service generate token                               0.02s  
+  ✓ cache service remember                                               0.02s  
+  ✓ backup service create database backup                                0.02s  
+  ✓ page optimization service minify html                                0.02s  
+
+   PASS  Tests\Unit\StockModelTest
+  ✓ stock has fillable attributes                                        0.03s  
+  ✓ can create stock                                                     0.03s  
+  ✓ stock belongs to product                                             0.03s  
+  ✓ stock with expired date                                              0.03s  
+  ✓ stock expiring soon                                                  0.03s  
+  ✓ stock can be deleted                                                 0.03s  
+
+   FAIL  Tests\Feature\Api\LoyaltyApiTest
+  ⨯ can list loyalty programs
+  ⨯ can create loyalty program
+  ⨯ can update loyalty program
+  ⨯ can delete loyalty program
+  ⨯ can get customer balance
+  ⨯ can get customer history
+  ⨯ can view customer interactions
+  ⨯ cannot access other business program
+
+   FAIL  Tests\Feature\Api\ReceiptApiTest
+  ⨯ can get receipt settings
+  ⨯ can update receipt settings
+  ⨯ can generate receipt for sale
+  ⨯ can show receipt
+  ⨯ cannot generate receipt for other business sale
+
+   FAIL  Tests\Feature\Api\TraceabilityApiTest
+  ⨯ can list batch lots
+  ⨯ can list batch lots filtered by product
+  ⨯ can view expiring batches
+  ⨯ can view expired batches
+  ⨯ can list recalls
+  ⨯ can initiate recall
+  ⨯ recall validation requires batch and reason
+  ⨯ can resolve recall
+  ⨯ can view traceability logs
+
+   FAIL  Tests\Feature\Api\WarehouseApiTest
+  ⨯ can list warehouses
+  ⨯ can create warehouse
+  ⨯ warehouse code must be unique
+  ⨯ can show warehouse
+  ⨯ can update warehouse
+  ⨯ can delete warehouse
+  ⨯ cannot access other business warehouse
+  ⨯ can view warehouse stock
+
+   FAIL  Tests\Feature\AuditLoggingTest
+  ⨯ password change is logged to audit log                               0.03s  
+  ⨯ backup action is logged to audit log                                 0.03s  
+  ⨯ profile update is logged to audit log                                0.02s  
+
+   FAIL  Tests\Feature\BackupAuthorizationTest
+  ⨯ superadmin can create backup                                         0.03s  
+  ⨯ non superadmin cannot create backup                                  0.02s  
+
+   FAIL  Tests\Feature\BarcodeTest
+  ⨯ api can create barcode                                               0.03s  
+  ⨯ api can list barcodes                                                0.02s  
+  ⨯ api can search barcode                                               0.02s  
+  ⨯ can mark barcode as printed                                          0.03s  
+  ⨯ can mark barcode as reprinted                                        0.03s  
+  ✓ upc checksum calculation                                             0.02s  
+  ✓ ean13 validation                                                     0.02s  
+  ✓ upc validation                                                       0.02s  
+  ✓ barcode number generation                                            0.02s  
+  ✓ ean13 checksum calculation                                           0.02s  
+  ✓ can search barcode by number                                         0.03s  
+  ✓ product has barcodes                                                 0.03s  
+  ✓ can delete barcode                                                   0.03s  
+  ✓ can restore barcode                                                  0.03s  
+  ✓ can generate barcode for batch                                       0.05s  
+  ✓ barcode scope for business                                           0.03s  
+  ✓ barcode scope active                                                 0.04s  
+  ✓ can get barcodes by product                                          0.03s  
+  ✓ can get not printed barcodes                                         0.03s  
+  ✓ barcode scope for product                                            0.04s  
+  ✓ barcode scope by print status                                        0.03s  
+  ✓ barcode scope not printed                                            0.03s  
+  ✓ stock has barcodes                                                   0.04s  
+  ✓ can generate multiple barcodes for batch                             0.08s  
+  ✓ can generate barcode for product                                     0.04s  
+  ✓ can generate multiple barcodes for product                           0.12s  
+  ✓ can get barcodes by batch                                            0.04s  
+  ✓ barcode scope for batch                                              0.04s  
+
+   FAIL  Tests\Feature\BusinessContextMiddlewareTest
+  ⨯ user without business id cannot access business context routes       0.04s  
+  ⨯ report endpoint requires business context                            0.02s  
+  ⨯ user with business id can access business context routes             0.02s  
+
+   FAIL  Tests\Feature\DueCollectionTest
+  ⨯ can collect due using legacy camel case payload
+  ⨯ response exposes both canonical and legacy keys
+  ⨯ collecting more than the opening balance is rejected
+  ⨯ client cannot spoof the tenant on create
+  ⨯ dues index search does not leak other tenants
+  ⨯ due collects report returns totals
+
+   FAIL  Tests\Feature\GRNTest
+  ⨯ can update grn                                                       0.03s  
+  ⨯ can verify grn                                                       0.02s  
+  ⨯ grn business scope                                                   0.02s  
+  ⨯ get grn statistics                                                   0.03s  
+  ⨯ api can create grn                                                   0.02s  
+  ⨯ api can list grns                                                    0.02s  
+  ⨯ api can show grn                                                     0.03s  
+  ⨯ api can update grn                                                   0.02s  
+  ⨯ api can delete grn                                                   0.02s  
+  ⨯ api can verify grn                                                   0.03s  
+  ⨯ api can accept grn                                                   0.02s  
+  ⨯ api can reject grn                                                   0.02s  
+  ⨯ api can get pending grns                                             0.03s  
+  ⨯ api can get grn statistics                                           0.02s  
+  ⨯ can create grn                                                       0.02s  
+  ✓ cannot accept non verified grn                                       0.03s  
+  ✓ cannot reject non verified grn                                       0.02s  
+  ✓ cannot delete verified grn                                           0.02s  
+  ✓ grn number is generated                                              0.03s  
+  ✓ grn supplier scope                                                   0.03s  
+  ✓ grn status scope                                                     0.03s  
+  ✓ can accept grn                                                       0.04s  
+  ✓ can partially accept grn                                             0.03s  
+  ✓ can reject grn                                                       0.03s  
+  ✓ grn completion percentage                                            0.03s  
+  ✓ grn total received quantity                                          0.03s  
+  ✓ grn total accepted quantity                                          0.03s  
+  ✓ grn total value                                                      0.04s  
+  ✓ cannot verify non pending grn                                        0.02s  
+
+   FAIL  Tests\Feature\InsuranceTest
+  ⨯ can list companies
+  ⨯ can create company
+  ⨯ company code must be unique
+  ⨯ cannot access company from other business
+  ⨯ can create policy with generated number
+  ⨯ policy is valid within date range
+  ⨯ policy end date must be after start date
+  ⨯ can create claim with computed coverage
+  ⨯ can submit claim and transitions status
+  ⨯ approval updates policy utilization
+  ⨯ payment moves claim to paid
+  ⨯ rejection requires reason
+  ⨯ service resolves coverage using product rule
+  ⨯ summary endpoint returns aggregates
+
+   FAIL  Tests\Feature\IntegrationTest
+  ⨯ complete sale workflow                                               0.03s  
+  ⨯ complete purchase workflow                                           0.02s  
+  ⨯ receipt generation workflow                                          0.02s  
+  ⨯ loyalty program workflow                                             0.02s  
+  ⨯ warehouse transfer workflow                                          0.03s  
+  ⨯ audit logging workflow                                               0.02s  
+  ⨯ permission enforcement                                               0.02s  
+  ⨯ cache invalidation on data change                                    0.03s  
+  ⨯ subscription upgrade workflow                                        0.03s  
+  ⨯ tenant isolation                                                     0.02s  
+  ⨯ user registration and login                                          0.05s  
+
+   FAIL  Tests\Feature\NotificationServiceTest
+  ⨯ notify users skips null entries                                      0.03s  
+  ⨯ email users deduplicates recipients                                  0.03s  
+  ⨯ email users returns zero without emails                              0.02s  
+  ⨯ notify users sends database notifications                            0.02s  
+  ✓ email party returns false without address                            0.02s  
+  ✓ sms returns zero without numbers                                     0.02s  
+  ✓ notify supplier without supplier returns zero results                0.02s  
+  ✓ email party sends business mail                                      0.03s  
+  ✓ notify supplier sends email and sms                                  0.02s  
+  ✓ sms counts unique numbers                                            0.02s  
+
+   FAIL  Tests\Feature\OperationsTest
+  ⨯ shift lifecycle open sell cash and close with variance
+  ⨯ promotion engine percent coupon and qty bonus
+  ⨯ pos checkout applies promotion as sale discount
+  ⨯ stock take scan and apply adjusts stock
+  ⨯ sale posts journal and vat report balances
+  ⨯ forecast generates rows and reorder points
+  ⨯ excessive returns raise anomaly
+  ⨯ assistant answers sales and stock questions
+  ⨯ totp rfc6238 vector and verification window
+  ⨯ eta simulation accepts document with ubl shape
+  ⨯ gateway simulation flow initiates and marks paid
+  ⨯ gateway rejects unsigned callback in live mode
+  ⨯ storefront checkout uses server prices and creates order
+  ⨯ offline sync accepts and dedupes by client uuid
+  ⨯ pos interactions endpoint warns on known pair
+  ⨯ device stock take scan flow
+  ⨯ telegram digest falls back to simulation
+  ⨯ dose persists through sale and sheet renders code128
+  ⨯ dose lookup by scan returns instruction data
+  ⨯ openapi spec lists api routes
+
+   FAIL  Tests\Feature\PartyApiTest
+  ⨯ unauthenticated user cannot access parties
+  ⨯ can list parties
+  ⨯ can create party
+  ⨯ cannot create party with duplicate phone
+  ⨯ can update party
+  ⨯ can delete party
+
+   FAIL  Tests\Feature\ProfileOwnershipTest
+  ⨯ user can access own profile                                          0.03s  
+  ⨯ user cannot update profile without required fields                   0.02s  
+  ⨯ user cannot change password without valid current password           0.02s  
+  ⨯ user can update own profile                                          0.02s  
+
+   FAIL  Tests\Feature\PurchaseOrderNotificationTest
+  ⨯ sending purchase order emails supplier with po details               0.03s  
+  ⨯ cancelling purchase order notifies supplier again                    0.02s  
+  ⨯ restoring cancelled purchase order notifies supplier                 0.02s  
+
+   FAIL  Tests\Feature\PurchaseOrderTest
+  ⨯ can create purchase order                                            0.03s  
+  ⨯ can update purchase order                                            0.02s  
+  ⨯ can approve purchase order                                           0.02s  
+  ⨯ can reject purchase order                                            0.03s  
+  ⨯ po business scope                                                    0.02s  
+  ⨯ get po statistics                                                    0.02s  
+  ⨯ api can create purchase order                                        0.03s  
+  ⨯ api can list purchase orders                                         0.02s  
+  ⨯ api can show purchase order                                          0.02s  
+  ⨯ api can update purchase order                                        0.03s  
+  ⨯ api can delete purchase order                                        0.02s  
+  ⨯ api can send purchase order                                          0.02s  
+  ⨯ api can approve purchase order                                       0.03s  
+  ⨯ api can reject purchase order                                        0.02s  
+  ⨯ api can cancel purchase order                                        0.02s  
+  ⨯ api can convert po to purchase                                       0.03s  
+  ⨯ api can get pending purchase orders                                  0.02s  
+  ⨯ api can get overdue purchase orders                                  0.02s  
+  ⨯ api can get purchase order statistics                                0.03s  
+  ⨯ po without items can be created                                      0.02s  
+  ✓ cannot send non draft order                                          0.02s  
+  ✓ cannot approve non sent order                                        0.03s  
+  ✓ cannot convert non approved order                                    0.03s  
+  ✓ cannot cancel received order                                         0.02s  
+  ✓ po number is generated                                               0.03s  
+  ✓ can cancel purchase order                                            0.03s  
+  ✓ can restore purchase order                                           0.03s  
+  ✓ po supplier scope                                                    0.03s  
+  ✓ po overdue scope                                                     0.03s  
+  ✓ po pending scope                                                     0.03s  
+  ✓ po status scope                                                      0.03s  
+  ✓ can add item to po                                                   0.03s  
+  ✓ po item total is calculated                                          0.03s  
+  ✓ po completion percentage                                             0.03s  
+  ✓ can send purchase order                                              0.03s  
+  ✓ po with multiple items                                               0.03s  
+  ✓ can convert po to purchase                                           0.04s  
+  ✓ po total is calculated                                               0.04s  
+
+   FAIL  Tests\Feature\SecurityHardeningTest
+  ⨯ admin panel denies json callers with 403 instead of a redirect       0.04s  
+  ⨯ trusted proxies can be overridden by environment                     0.02s  
+  ⨯ trusted proxies default to private ranges only                       0.02s  
+  ✓ gateway allowlist is closed                                          0.03s  
+  ✓ blocking the wizard does not block application routes                0.03s  
+  ✓ setup wizard routes are unreachable                                  0.03s  
+  ✓ callback for unknown gateway is not found                            0.04s  
+
+   FAIL  Tests\Feature\SupplierInvoiceTest
+  ⨯ api can create invoice                                               0.03s  
+  ⨯ api can list invoices                                                0.02s  
+  ⨯ api can approve invoice                                              0.02s  
+  ⨯ api can get statistics                                               0.03s  
+  ⨯ api can get aging report                                             0.02s  
+  ⨯ api can add payment                                                  0.02s  
+  ⨯ can create invoice from purchase                                     0.03s  
+  ⨯ can approve invoice                                                  0.03s  
+  ⨯ can reject invoice                                                   0.03s  
+  ⨯ can approve payment                                                  0.03s  
+  ⨯ can create supplier invoice                                          0.02s  
+  ✓ invoice calculations                                                 0.02s  
+  ✓ invoice due soon check                                               0.03s  
+  ✓ invoice critically overdue check                                     0.02s  
+  ✓ invoice number generation                                            0.02s  
+  ✓ can add payment to invoice                                           0.03s  
+  ✓ full payment marks invoice as paid                                   0.03s  
+  ✓ invoice scopes                                                       0.03s  
+  ✓ payment number generation                                            0.03s  
+  ✓ can cancel invoice                                                   0.03s  
+
+   FAIL  Tests\Feature\SupplierTest
+  ⨯ can create supplier                                                  0.03s  
+  ⨯ can update supplier                                                  0.02s  
+  ⨯ can add rating                                                       0.02s  
+  ⨯ can calculate performance                                            0.03s  
+  ⨯ supplier business scope                                              0.02s  
+  ⨯ api can create supplier                                              0.02s  
+  ⨯ api can list suppliers                                               0.03s  
+  ⨯ api can show supplier                                                0.02s  
+  ⨯ api can update supplier                                              0.02s  
+  ⨯ api can delete supplier                                              0.03s  
+  ⨯ api can calculate performance                                        0.02s  
+  ⨯ api can get top performers                                           0.02s  
+  ✓ supplier active scope                                                0.03s  
+  ✓ supplier performance score calculation                               0.02s  
+  ✓ supplier average rating                                              0.03s  
+
+   FAIL  Tests\Feature\TenantContextTest
+  ⨯ tenant resolver skips superadmin                                     0.03s  
+  ⨯ tenant access check allows same tenant access                        0.02s  
+  ⨯ tenant resolver resolves from authenticated user                     0.02s  
+  ⨯ tenant access check blocks cross tenant access                       0.03s  
+  ⨯ tenant access check allows superadmin                                0.02s  
+  ⨯ user model global scope applies tenant filtering                     0.02s  
+  ⨯ user model global scope skips for superadmin                         0.03s  
+  ✓ tenant resolver accepts business id parameter                        0.02s  
+
+   PASS  Tests\Feature\ExampleTest
+  ✓ the application returns a successful response                        0.03s  
+
+   PASS  Tests\Feature\FeatureStatusTest
+  ✓ feature status service reports completed modules                     0.02s  
+
+   PASS  Tests\Feature\InsuranceModuleTest
+  ✓ can create insurance company                                         0.02s  
+  ✓ can create insurance policy                                          0.03s  
+  ✓ generates unique company codes                                       0.02s  
+  ✓ can create insurance claim                                           0.03s  
+  ✓ policy eligibility validation                                        0.03s  
+  ✓ can submit claim                                                     0.03s  
+  ✓ can process claim payment                                            0.03s  
+  ✓ generates unique policy numbers                                      0.03s  
+  ✓ can process claim                                                    0.03s  
+  ✓ generates unique claim numbers                                       0.03s  
+  ✓ can get claim statistics                                             0.06s  
+
+   PASS  Tests\Feature\LandingApiTest
+  ✓ contact api returns contact info                                     0.03s  
+  ✓ pricing api returns plans with discounts                             0.03s  
+  ✓ features api returns active features                                 0.02s  
+  ✓ landing api handles empty data                                       0.03s  
+  ✓ landing api returns required data                                    0.03s  
+
+   PASS  Tests\Feature\LandingHomeTest
+  ✓ home page renders without manage pages settings                      0.03s  
+
+   PASS  Tests\Feature\LegacyPayloadKeyNormalizationTest
+  ✓ income camel case keys are mapped onto the real columns              0.02s  
+  ✓ product wholesale price maps to the column that actually exists      0.03s  
+  ✓ explicit snake case value is never overwritten                       0.02s  
+  ✓ keys that are correctly camel case are left alone                    0.02s  
+  ✓ nested legacy keys are mapped without wiping siblings                0.02s  
+  ✓ unknown keys pass through unchanged                                  0.02s  
+  ✓ bulk product prices map onto the columns that exist                  0.02s  
+  ✓ the bulk purchase price is treated as tax exclusive                  0.02s  
+  ✓ dealer price is preserved in product meta alongside its siblings     0.02s  
+  ✓ an explicit nested value is never overwritten by a legacy key        0.02s  
+
+   PASS  Tests\Feature\MigrationTypeContractTest
+  ✓ migrations declare the column types production uses                  0.03s  
+  ✓ stock movement keeps its audit trail fields assignable               0.02s  
+  ✓ the approval service accepts a uuid actor                            0.02s  
+  ✓ no model casts an actor column to a numeric type                     0.03s  
+  ✓ the migrated schema has every column the application writes          0.03s  
+
+   PASS  Tests\Feature\ProductAnalyticsTest
+  ✓ analytics endpoint requires authentication                           0.03s  
+
+   PASS  Tests\Feature\ProductionPathTest
+  ✓ set supabase context is a noop on non pgsql drivers                  0.03s  
+  ✓ identity mutators are locked in production mode                      0.02s  
+  ✓ self service registration is closed in production mode               0.03s  
+  ✓ supabase user provider requires a session in production mode         0.03s  
+  ✓ auth user email lookup reads app users in fallback mode              0.02s  
+  ✓ change password rejects bad credentials via gotrue                   0.04s  
+  ✓ change password verifies through gotrue in production mode           0.04s  
+
+   PASS  Tests\Feature\ProtectedApiRoutesTest
+  ✓ backup endpoint requires authentication                              0.03s  
+  ✓ profile endpoint requires authentication                             0.03s  
+  ✓ purchase report requires authentication                              0.02s  
+
+   PASS  Tests\Feature\RateLimitingTest
+  ✓ password reset endpoints have rate limiting                          0.05s  
+  ✓ sign up endpoint has rate limiting                                   0.06s  
+  ✓ sign in endpoint has rate limiting                                   0.04s  
+
+   PASS  Tests\Feature\SchemaDriftTest
+  ✓ repository only tables are still the documented three                0.03s  
+  ✓ every production table is reproduced by the migrations               0.03s  
+  ✓ business id nullability matches the tenant contract                  0.08s  
+  ✓ every fillable column exists on the migrated table                   0.24s  
+
+   PASS  Tests\Feature\SecurityHeadersTest
+  ✓ security headers are present on homepage                             0.03s  
+
+   PASS  Tests\Feature\SecurityTest
+  ✓ sql injection prevention                                             0.03s  
+  ✓ xss detection                                                        0.02s  
+  ✓ xss sanitization                                                     0.02s  
+  ✓ csrf token generation                                                0.02s  
+  ✓ csrf token validation                                                0.02s  
+  ✓ csrf token validation fails with wrong token                         0.02s  
+  ✓ table name validation                                                0.02s  
+  ✓ column name validation                                               0.02s  
+  ✓ array sanitization                                                   0.02s  
+  ✓ query validation rejects dangerous queries                           0.03s  
+  ✓ query validation accepts safe queries                                0.02s  
+
+   PASS  Tests\Feature\TenantAndBackupTest
+  ✓ tenant resolver uses authenticated business id                       0.02s  
+  ✓ database backup command creates a backup file                        0.03s  
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\PartyModelTest > party sales dues ex…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+21 vendor frames [22m
+  23  tests/Unit/PartyModelTest.php:78
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\PartyModelTest > party has purchases…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+21 vendor frames [22m
+  23  tests/Unit/PartyModelTest.php:66
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\PartyModelTest > party has sales due…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+21 vendor frames [22m
+  23  tests/Unit/PartyModelTest.php:54
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\PredictionServiceTest > forecast pro…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+21 vendor frames [22m
+  23  tests/Unit/PredictionServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\PurchaseModelTest > purchase belongs…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Unit/PurchaseModelTest.php:74
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\PurchaseModelTest > can create purch…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/PurchaseModelTest.php:21
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\PurchaseModelTest > purchase belongs…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+21 vendor frames [22m
+  23  tests/Unit/PurchaseModelTest.php:66
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\PurchaseModelTest > purchase has man…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+20 vendor frames [22m
+  22  tests/Unit/PurchaseModelTest.php:83
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\PurchaseModelTest > purchase is paid…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+21 vendor frames [22m
+  23  tests/Unit/PurchaseModelTest.php:91
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\SaleModelTest > sale belongs to user   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Unit/SaleModelTest.php:75
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\SaleModelTest > sale belongs to part…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+21 vendor frames [22m
+  23  tests/Unit/SaleModelTest.php:67
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\SaleModelTest > sale has many detail…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+20 vendor frames [22m
+  22  tests/Unit/SaleModelTest.php:84
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\SaleModelTest > sale has many sale r…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+20 vendor frames [22m
+  22  tests/Unit/SaleModelTest.php:92
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\SaleModelTest > sale is paid flag wo…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+21 vendor frames [22m
+  23  tests/Unit/SaleModelTest.php:99
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\SaleModelTest > can create sale        RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/SaleModelTest.php:22
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\LoyaltyServiceTest > get or…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/LoyaltyServiceTest.php:33
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\LoyaltyServiceTest > get or…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/LoyaltyServiceTest.php:33
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\LoyaltyServiceTest > earn p…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/LoyaltyServiceTest.php:33
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\LoyaltyServiceTest > earn p…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/LoyaltyServiceTest.php:33
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\LoyaltyServiceTest > earn p…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/LoyaltyServiceTest.php:33
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\LoyaltyServiceTest > redeem…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/LoyaltyServiceTest.php:33
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\LoyaltyServiceTest > redeem…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/LoyaltyServiceTest.php:33
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\LoyaltyServiceTest > redeem…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/LoyaltyServiceTest.php:33
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\LoyaltyServiceTest > get ba…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/LoyaltyServiceTest.php:33
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\LoyaltyServiceTest > get ba…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/LoyaltyServiceTest.php:33
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\LoyaltyServiceTest > get hi…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/LoyaltyServiceTest.php:33
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\LoyaltyServiceTest > log in…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/LoyaltyServiceTest.php:33
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\LoyaltyServiceTest > earn p…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/LoyaltyServiceTest.php:33
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\ReceiptServiceTest > get or…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/ReceiptServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\ReceiptServiceTest > get or…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/ReceiptServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\ReceiptServiceTest > genera…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/ReceiptServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\ReceiptServiceTest > genera…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/ReceiptServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\ReceiptServiceTest > get re…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/ReceiptServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\ReceiptServiceTest > receip…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/ReceiptServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\ReceiptServiceTest > receip…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/ReceiptServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\ReceiptServiceTest > render…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/ReceiptServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\TraceabilityServiceTest > g…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/TraceabilityServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\TraceabilityServiceTest > g…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/TraceabilityServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\TraceabilityServiceTest > g…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/TraceabilityServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\TraceabilityServiceTest > i…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/TraceabilityServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\TraceabilityServiceTest > r…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/TraceabilityServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\TraceabilityServiceTest > l…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/TraceabilityServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\TraceabilityServiceTest > c…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/TraceabilityServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\TraceabilityServiceTest > b…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/TraceabilityServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\TraceabilityServiceTest > b…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/TraceabilityServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\TraceabilityServiceTest > b…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/TraceabilityServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\TraceabilityServiceTest > b…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/TraceabilityServiceTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\WarehouseStockServiceTest >…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/WarehouseStockServiceTest.php:32
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\WarehouseStockServiceTest >…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/WarehouseStockServiceTest.php:32
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\WarehouseStockServiceTest >…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/WarehouseStockServiceTest.php:32
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\WarehouseStockServiceTest >…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/WarehouseStockServiceTest.php:32
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\WarehouseStockServiceTest >…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/WarehouseStockServiceTest.php:32
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\WarehouseStockServiceTest >…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/WarehouseStockServiceTest.php:32
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\WarehouseStockServiceTest >…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/WarehouseStockServiceTest.php:32
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\WarehouseStockServiceTest >…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/WarehouseStockServiceTest.php:32
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Unit\Services\WarehouseStockServiceTest >…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Unit/Services/WarehouseStockServiceTest.php:32
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\LoyaltyApiTest > can list loy…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/LoyaltyApiTest.php:29
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\LoyaltyApiTest > can create l…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/LoyaltyApiTest.php:29
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\LoyaltyApiTest > can update l…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/LoyaltyApiTest.php:29
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\LoyaltyApiTest > can delete l…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/LoyaltyApiTest.php:29
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\LoyaltyApiTest > can get cust…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/LoyaltyApiTest.php:29
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\LoyaltyApiTest > can get cust…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/LoyaltyApiTest.php:29
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\LoyaltyApiTest > can view cus…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/LoyaltyApiTest.php:29
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\LoyaltyApiTest > cannot acces…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/LoyaltyApiTest.php:29
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\ReceiptApiTest > can get rece…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/ReceiptApiTest.php:28
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\ReceiptApiTest > can update r…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/ReceiptApiTest.php:28
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\ReceiptApiTest > can generate…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/ReceiptApiTest.php:28
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\ReceiptApiTest > can show rec…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/ReceiptApiTest.php:28
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\ReceiptApiTest > cannot gener…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/ReceiptApiTest.php:28
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\TraceabilityApiTest > can lis…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/TraceabilityApiTest.php:30
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\TraceabilityApiTest > can lis…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/TraceabilityApiTest.php:30
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\TraceabilityApiTest > can vie…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/TraceabilityApiTest.php:30
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\TraceabilityApiTest > can vie…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/TraceabilityApiTest.php:30
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\TraceabilityApiTest > can lis…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/TraceabilityApiTest.php:30
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\TraceabilityApiTest > can ini…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/TraceabilityApiTest.php:30
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\TraceabilityApiTest > recall…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/TraceabilityApiTest.php:30
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\TraceabilityApiTest > can res…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/TraceabilityApiTest.php:30
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\TraceabilityApiTest > can vie…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/TraceabilityApiTest.php:30
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\WarehouseApiTest > can list w…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/WarehouseApiTest.php:26
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\WarehouseApiTest > can create…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/WarehouseApiTest.php:26
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\WarehouseApiTest > warehouse…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/WarehouseApiTest.php:26
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\WarehouseApiTest > can show w…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/WarehouseApiTest.php:26
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\WarehouseApiTest > can update…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/WarehouseApiTest.php:26
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\WarehouseApiTest > can delete…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/WarehouseApiTest.php:26
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\WarehouseApiTest > cannot acc…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/WarehouseApiTest.php:26
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Api\WarehouseApiTest > can view w…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/Api/WarehouseApiTest.php:26
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\AuditLoggingTest > password chang…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/AuditLoggingTest.php:44
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\AuditLoggingTest > backup action…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/AuditLoggingTest.php:73
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\AuditLoggingTest > profile update…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/AuditLoggingTest.php:20
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BackupAuthorizationTest > superad…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/BackupAuthorizationTest.php:32
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BackupAuthorizationTest > non sup…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/BackupAuthorizationTest.php:17
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BarcodeTest > api can create barc…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/BarcodeTest.php:422
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BarcodeTest > api can list barcod…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/BarcodeTest.php:450
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BarcodeTest > api can search barc…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/BarcodeTest.php:473
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BarcodeTest > can mark barcode as…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/BarcodeTest.php:164
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BarcodeTest > can mark barcode as…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/BarcodeTest.php:183
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BusinessContextMiddlewareTest > u…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/BusinessContextMiddlewareTest.php:16
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BusinessContextMiddlewareTest > r…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/BusinessContextMiddlewareTest.php:36
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BusinessContextMiddlewareTest > u…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/BusinessContextMiddlewareTest.php:27
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\DueCollectionTest > can collect d…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/DueCollectionTest.php:35
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\DueCollectionTest > response expo…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/DueCollectionTest.php:35
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\DueCollectionTest > collecting mo…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/DueCollectionTest.php:35
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\DueCollectionTest > client cannot…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/DueCollectionTest.php:35
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\DueCollectionTest > dues index se…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/DueCollectionTest.php:35
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\DueCollectionTest > due collects…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/DueCollectionTest.php:35
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\GRNTest > can update grn            RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/GRNTest.php:69
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\GRNTest > can verify grn            RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/GRNTest.php:89
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\GRNTest > grn business scope        RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/GRNTest.php:276
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\GRNTest > get grn statistics        RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/GRNTest.php:324
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\GRNTest > api can create grn        RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/GRNTest.php:352
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\GRNTest > api can list grns         RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/GRNTest.php:384
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\GRNTest > api can show grn          RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/GRNTest.php:399
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\GRNTest > api can update grn        RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/GRNTest.php:416
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\GRNTest > api can delete grn        RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/GRNTest.php:440
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\GRNTest > api can verify grn        RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/GRNTest.php:463
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\GRNTest > api can accept grn        RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/GRNTest.php:484
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\GRNTest > api can reject grn        RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/GRNTest.php:505
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\GRNTest > api can get pending grn…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/GRNTest.php:526
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\GRNTest > api can get grn statist…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/GRNTest.php:544
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\GRNTest > can create grn            RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/GRNTest.php:33
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InsuranceTest > can list companie…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/InsuranceTest.php:31
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InsuranceTest > can create compan…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/InsuranceTest.php:31
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InsuranceTest > company code must…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/InsuranceTest.php:31
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InsuranceTest > cannot access com…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/InsuranceTest.php:31
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InsuranceTest > can create policy…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/InsuranceTest.php:31
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InsuranceTest > policy is valid w…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/InsuranceTest.php:31
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InsuranceTest > policy end date m…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/InsuranceTest.php:31
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InsuranceTest > can create claim…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/InsuranceTest.php:31
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InsuranceTest > can submit claim…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/InsuranceTest.php:31
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InsuranceTest > approval updates…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/InsuranceTest.php:31
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InsuranceTest > payment moves cla…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/InsuranceTest.php:31
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InsuranceTest > rejection require…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/InsuranceTest.php:31
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InsuranceTest > service resolves…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/InsuranceTest.php:31
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\InsuranceTest > summary endpoint…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/InsuranceTest.php:31
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\IntegrationTest > complete sale w…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/IntegrationTest.php:24
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\IntegrationTest > complete purcha…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/IntegrationTest.php:84
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\IntegrationTest > receipt generat…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/IntegrationTest.php:227
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\IntegrationTest > loyalty program…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/IntegrationTest.php:275
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\IntegrationTest > warehouse trans…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/IntegrationTest.php:329
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\IntegrationTest > audit logging w…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/IntegrationTest.php:386
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\IntegrationTest > permission enfo…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/IntegrationTest.php:419
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\IntegrationTest > cache invalidat…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/IntegrationTest.php:477
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\IntegrationTest > subscription up…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/IntegrationTest.php:178
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\IntegrationTest > tenant isolatio…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/IntegrationTest.php:447
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\IntegrationTest > user registration and login          
+  Failed asserting that a row in the table [users] matches the attributes {
+    "email": "test@example.com",
+    "business_id": 1
+}.
+
+The table is empty.
+
+  at tests/Feature/IntegrationTest.php:157
+    153▕         $response = $this->post('/register', $userData);
+    154▕         $response->assertRedirect();
+    155▕ 
+    156▕         // Verify user was created
+  ➜ 157▕         $this->assertDatabaseHas('users', [
+    158▕             'email' => 'test@example.com',
+    159▕             'business_id' => $business->id,
+    160▕         ]);
+    161▕
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\NotificationServiceTest > notify…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/NotificationServiceTest.php:45
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\NotificationServiceTest > email u…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/NotificationServiceTest.php:79
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\NotificationServiceTest > email u…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/NotificationServiceTest.php:94
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\NotificationServiceTest > notify…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/NotificationServiceTest.php:32
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > shift lifecycle…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > promotion engine…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > pos checkout app…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > stock take scan…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > sale posts journ…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > forecast generat…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > excessive return…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > assistant answer…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > totp rfc6238 vec…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > eta simulation a…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > gateway simulati…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > gateway rejects…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > storefront check…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > offline sync acc…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > pos interactions…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > device stock tak…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > telegram digest…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > dose persists th…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > dose lookup by s…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\OperationsTest > openapi spec lis…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/OperationsTest.php:48
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PartyApiTest > unauthenticated us…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/PartyApiTest.php:24
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PartyApiTest > can list parties     RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/PartyApiTest.php:24
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PartyApiTest > can create party     RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/PartyApiTest.php:24
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PartyApiTest > cannot create part…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/PartyApiTest.php:24
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PartyApiTest > can update party     RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/PartyApiTest.php:24
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PartyApiTest > can delete party     RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/PartyApiTest.php:24
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ProfileOwnershipTest > user can a…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/ProfileOwnershipTest.php:17
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ProfileOwnershipTest > user canno…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/ProfileOwnershipTest.php:58
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ProfileOwnershipTest > user canno…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/ProfileOwnershipTest.php:74
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ProfileOwnershipTest > user can u…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/ProfileOwnershipTest.php:34
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderNotificationTest > s…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderNotificationTest.php:29
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderNotificationTest > c…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderNotificationTest.php:29
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderNotificationTest > r…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderNotificationTest.php:29
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > can create pu…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:32
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > can update pu…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:66
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > can approve p…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:100
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > can reject pu…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:115
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > po business s…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:245
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > get po statis…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:327
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > api can creat…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:456
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > api can list…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:488
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > api can show…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:503
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > api can updat…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:520
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > api can delet…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:544
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > api can send…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:564
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > api can appro…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:585
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > api can rejec…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:606
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > api can cance…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:629
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > api can conve…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:650
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > api can get p…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:673
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > api can get o…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:691
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > api can get p…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:710
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\PurchaseOrderTest > po without it…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/PurchaseOrderTest.php:357
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SecurityHardeningTest > admin pan…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/SecurityHardeningTest.php:93
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SecurityHardeningTest > trusted proxies can be over…   
+  Failed asserting that Array &0 [
+    0 => '203.0.113.7',
+] is identical to '203.0.113.7'.
+
+  at tests/Feature/SecurityHardeningTest.php:136
+    132▕         config()->set('app.env', 'testing');
+    133▕         putenv('TRUSTED_PROXIES=203.0.113.7');
+    134▕         $_ENV['TRUSTED_PROXIES'] = '203.0.113.7';
+    135▕ 
+  ➜ 136▕         $this->assertSame('203.0.113.7', $this->readProxies(new TrustProxies));
+    137▕ 
+    138▕         putenv('TRUSTED_PROXIES');
+    139▕         unset($_ENV['TRUSTED_PROXIES']);
+    140▕     }
+
+  1   tests/Feature/SecurityHardeningTest.php:136
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SecurityHardeningTest > trusted proxies default to…    
+  Failed asserting that an array contains '10.0.0.0/8'.
+
+  at tests/Feature/SecurityHardeningTest.php:113
+    109▕     {
+    110▕         $proxies = $this->readProxies(new TrustProxies);
+    111▕ 
+    112▕         $this->assertNotContains('*', $proxies, 'wildcard trust allows X-Forwarded-For spoofing');
+  ➜ 113▕         $this->assertContains('10.0.0.0/8', $proxies);
+    114▕         $this->assertContains('172.16.0.0/12', $proxies);
+    115▕         $this->assertContains('192.168.0.0/16', $proxies);
+    116▕ 
+    117▕         foreach ($proxies as $range) {
+
+  1   tests/Feature/SecurityHardeningTest.php:113
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierInvoiceTest > api can cre…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierInvoiceTest.php:304
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierInvoiceTest > api can lis…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierInvoiceTest.php:339
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierInvoiceTest > api can app…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierInvoiceTest.php:362
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierInvoiceTest > api can get…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierInvoiceTest.php:415
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierInvoiceTest > api can get…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierInvoiceTest.php:441
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierInvoiceTest > api can add…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierInvoiceTest.php:385
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierInvoiceTest > can create…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+20 vendor frames [22m
+  22  tests/Feature/SupplierInvoiceTest.php:70
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierInvoiceTest > can approve…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierInvoiceTest.php:91
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierInvoiceTest > can reject…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierInvoiceTest.php:108
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierInvoiceTest > can approve…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierInvoiceTest.php:193
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierInvoiceTest > can create…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierInvoiceTest.php:33
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierTest > can create supplie…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierTest.php:32
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierTest > can update supplie…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierTest.php:59
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierTest > can add rating       RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierTest.php:78
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierTest > can calculate perf…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierTest.php:98
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierTest > supplier business…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierTest.php:113
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierTest > api can create sup…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierTest.php:178
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierTest > api can list suppl…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierTest.php:202
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierTest > api can show suppl…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierTest.php:217
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierTest > api can update sup…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierTest.php:234
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierTest > api can delete sup…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierTest.php:257
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierTest > api can calculate…   RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierTest.php:277
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\SupplierTest > api can get top pe…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+10 vendor frames [22m
+  12  tests/Feature/SupplierTest.php:295
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\TenantContextTest > tenant resolv…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/TenantContextTest.php:41
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\TenantContextTest > tenant access…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/TenantContextTest.php:93
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\TenantContextTest > tenant resolv…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/TenantContextTest.php:22
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\TenantContextTest > tenant access…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/TenantContextTest.php:79
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\TenantContextTest > tenant access…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/TenantContextTest.php:107
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\TenantContextTest > user model gl…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/TenantContextTest.php:123
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\TenantContextTest > user model gl…  RuntimeException   
+  Emails live in auth.users (Path B). Create the identity in Supabase instead.
+
+  at app/Models/User.php:108
+    104▕ 
+    105▕             return;
+    106▕         }
+    107▕ 
+  ➜ 108▕         throw new RuntimeException(
+    109▕             'Emails live in auth.users (Path B). Create the identity in Supabase instead.'
+    110▕         );
+    111▕     }
+    112▕
+
+  1   app/Models/User.php:108
+      [2m+11 vendor frames [22m
+  13  tests/Feature/TenantContextTest.php:150
+
+
+  Tests:    235 failed, 189 passed (559 assertions)
+  Duration: 12.30s
+
