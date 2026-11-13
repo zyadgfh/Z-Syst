@@ -79,7 +79,7 @@ class ZSystPrescriptionController extends Controller
         $request->validate([
             'party_id' => 'nullable|exists:parties,id',
             'notes' => 'nullable|string|max:1000',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif',
             'status' => 'nullable|in:pending,used',
             'prescription_number' => 'nullable|string|max:50',
             'review_status' => 'nullable|in:pending,approved,rejected',
@@ -135,7 +135,7 @@ class ZSystPrescriptionController extends Controller
         $request->validate([
             'party_id' => 'nullable|exists:parties,id',
             'notes' => 'nullable|string|max:1000',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'status' => 'nullable|in:pending,used',
             'prescription_number' => 'nullable|string|max:50',
             'review_status' => 'nullable|in:pending,approved,rejected',

@@ -62,7 +62,7 @@ class ZSystTestimonialController extends Controller
             'text' => 'nullable',
             'star' => 'nullable',
             'client_name' => 'required|string',
-            'client_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:1024',
+            'client_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:1024',
         ]);
 
         Testimonial::create($request->except('client_image') + [
@@ -87,7 +87,7 @@ class ZSystTestimonialController extends Controller
             'text' => 'nullable|string',
             'star' => 'nullable|integer',
             'client_name' => 'required|string',
-            'client_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:1024',
+            'client_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:1024',
         ]);
 
         $testimonial->update($request->except('client_image') + [

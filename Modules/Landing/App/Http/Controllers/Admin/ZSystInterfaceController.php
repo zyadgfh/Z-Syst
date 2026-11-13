@@ -51,7 +51,7 @@ class ZSystInterfaceController extends Controller
     {
         $request->validate([
             'status' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         PosAppInterface::create($request->except('image') + [
@@ -76,7 +76,7 @@ class ZSystInterfaceController extends Controller
         $interface = PosAppInterface::findOrFail($id);
         $request->validate([
             'status' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $interface->update($request->except('image') + [

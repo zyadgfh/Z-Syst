@@ -80,7 +80,11 @@ class PaymentController extends Controller
         // Handle manual payments
         if ($gateway->is_manual) {
             $request->validate([
-                'attachment' => 'required|max:2048|file',
+                // Same allowlist the uploader enforces at runtime
+                // (config('integrations.uploads')), declared here too so a
+                // wrong type is rejected as a 422 by validation instead of
+                // surfacing later as an UploadException.
+                'attachment' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
             ]);
 
             DB::beginTransaction();
