@@ -4,6 +4,7 @@ namespace App\Http;
 
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\BlockInstallerRoutes;
 use App\Http\Middleware\CheckSubscriptionLimits;
 use App\Http\Middleware\DemoMode;
 use App\Http\Middleware\EncryptCookies;
@@ -54,6 +55,10 @@ class Kernel extends HttpKernel
     protected $middleware = [
         // \App\Http\Middleware\TrustHosts::class,
         TrustProxies::class,
+        // The laravel-installer package registers /install, /update and /envato
+        // unconditionally and guards them only with file_exists(storage_path('installed')).
+        // Refuse those prefixes before routing, in every environment.
+        BlockInstallerRoutes::class,
         HandleCors::class,
         PreventRequestsDuringMaintenance::class,
         ValidatePostSize::class,

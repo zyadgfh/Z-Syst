@@ -25,7 +25,12 @@ class ZSystForgotPasswordController extends Controller
         }
         RateLimiter::hit($key, 900);
 
-        $expire = now()->addHour();
+        // 30 minutes: long enough to reach an inbox that is being polled, short
+        // enough that a leaked code stops being useful quickly. The code is a
+        // six-digit number, so its lifetime is the main thing bounding a guess —
+        // verify/reset sit behind throttle:5,5 and the code is single-use
+        // (resetPassword clears remember_token and deletes every issued token).
+        $expire = now()->addMinutes(30);
         $code = random_int(100000, 999999);
         $user = User::where('email', $request->email)->firstOrFail();
         $user->update(['remember_token' => (string) $code, 'email_verified_at' => $expire]);

@@ -16,8 +16,26 @@ use Illuminate\Support\Facades\Http;
  */
 class PaymentGatewayService
 {
+    /**
+     * Gateways this service knows how to talk to and how to verify.
+     *
+     * The gateway name arrives from a URL segment, so it is attacker-controlled
+     * on the callback route. It is interpolated into config() keys and into a
+     * BusinessSetting key; keeping it inside a closed set means neither can be
+     * steered somewhere unintended, and an unknown name fails closed instead of
+     * falling through to a signature scheme that was never meant for it.
+     */
+    public const SUPPORTED_GATEWAYS = ['paymob', 'fawry', 'instapay'];
+
+    public static function isSupported(string $gateway): bool
+    {
+        return in_array($gateway, self::SUPPORTED_GATEWAYS, true);
+    }
+
     public function initiate(int $businessId, string $gateway, string $purpose, ?int $payableId, float $amount): GatewayTransaction
     {
+        abort_unless(self::isSupported($gateway), 404, 'Unknown payment gateway.');
+
         $tx = GatewayTransaction::create([
             'business_id' => $businessId,
             'gateway' => $gateway,
@@ -39,6 +57,12 @@ class PaymentGatewayService
 
     public function mode(int $businessId, string $gateway): string
     {
+        // Unknown gateway: no mode at all, which makes handleCallback() mark the
+        // transaction failed instead of guessing a verification scheme.
+        if (! self::isSupported($gateway)) {
+            return 'disabled';
+        }
+
         // Simulation is disabled in production — platform keys only
         if (app()->environment('production')) {
             $platformKey = config("services.{$gateway}.api_key") ?? config("integrations.{$gateway}.api_key");

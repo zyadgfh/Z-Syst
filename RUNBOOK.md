@@ -427,6 +427,140 @@ tests/
 | 403 on `/api/*` | `business_id` mismatch; check `TenantResolver` |
 | Tests randomly fail | Clear `phpunit.result.cache`; check `DB_DATABASE=pharmacy_testing` |
 
+
+## 10. Security posture (pre-launch review, 2026-11-13)
+
+Everything below is enforced in code, not by convention. The test that keeps each
+control honest is named next to it — if a control is removed, its test must be
+removed in the same commit, which is what makes the removal visible in review.
+
+### 10.1 Control map
+
+| Control | Where | Verified by |
+|---------|-------|-------------|
+| Setup/update wizard unreachable | `app/Http/Middleware/BlockInstallerRoutes.php` (global stack) + `docker/nginx.conf.template` (`location ~ ^/(install|update|envato)`) + `docker/entrypoint.sh` (`touch storage/installed`) | `SecurityHardeningTest::test_setup_wizard_routes_are_unreachable` |
+| Trusted proxies = private ranges only | `app/Http/Middleware/TrustProxies.php`, override with `TRUSTED_PROXIES` | `SecurityHardeningTest::test_trusted_proxies_*` |
+| Generated URLs are https in production | `app/Providers/AppServiceProvider.php` (`URL::forceScheme`) | manual: `route()` output on Render |
+| Payment price computed server-side | `app/Http/Controllers/Admin/GatewayPaymentController.php` (client `amount` ignored, read from `subscription_plans.price`) | `SecurityHardeningTest::test_gateway_allowlist_is_closed` covers the gateway half |
+| Gateway callback hardening | `routes/web.php` (`where` + `throttle:60,1`), `GatewayWebhookController` (allowlist), `PaymentGatewayService::mode()` (unknown ⇒ `disabled`) | `SecurityHardeningTest::test_callback_for_unknown_gateway_is_not_found` |
+| Upload allowlist (extension **and** sniffed MIME) | `config/integrations.php` → `integrations.uploads`, enforced by `app/Helpers/HasUploader.php::zsValidateUpload()` | manual: an `.svg` upload is rejected |
+| Uploaded files never behave as documents | `docker/nginx.conf.template` (`location ^~ /uploads/`: nosniff + `default-src 'none'; sandbox`, `Content-Disposition: attachment` for svg) | manual: open an uploaded svg directly |
+| Admin denials are visible to API callers | `app/Http/Middleware/AdminMiddleware.php` (403 JSON, redirect only for browsers) | `SecurityHardeningTest::test_admin_panel_denies_json_callers_with_403_instead_of_a_redirect` |
+| Failed logins are audited | `app/Http/Requests/Auth/LoginRequest.php`, `app/Http/Controllers/Api/Auth/AuthController.php` → `AuditService::logFailedLogin()` (identifier only, never the password) | `audit_logs` rows with `action='failed_login'` |
+| Password-reset code lifetime | `ZSystForgotPasswordController::sendResetCode()` — 30 min, single use, tokens revoked after change | manual |
+| Marketing-site headers + strict CSP | `vercel.json` | Vercel deployment headers |
+| Full-history secret scan | `.github/workflows/secret-scan.yml` job `gitleaks-history` (`fetch-depth: 0`, `--log-opts=--all`) + `.gitleaks.toml` | the job summary on every push/PR |
+
+### 10.2 Why the wizard is blocked three times
+
+`safiull/laravel-installer` is in `composer.json` and registers its routes
+unconditionally from its own service provider. Its only guard is
+`file_exists(storage_path('installed'))`, and that file is git-ignored — so a
+container booting on a fresh disk exposed:
+
+* `POST /install/environment/saveClassic` — rewrites `.env` (`APP_KEY`, `DB_*`,
+  `APP_DEBUG`). A rewritten `APP_KEY` invalidates every session; a rewritten
+  `DB_*` points the application at someone else's database.
+* `GET /install/database`, `GET /install/final` — migrations against the live DB.
+* `GET /update/final` — deliberately **outside** the guard, per the package's own
+  comment in `src/Routes/web.php`; runs `migrate --force`, module seeds and clears
+  every cache.
+
+Three independent layers refuse it (framework middleware, nginx, and the marker
+file) because any one of them can be bypassed by a deployment change: serving
+with `artisan serve`, moving to another platform, or mounting the disk read-only.
+The package itself is still installed — see §10.6 for the open decision.
+
+### 10.3 Uploads
+
+Two layers disagree on purpose, and the stricter one wins:
+
+1. Controller validation (`'image' => 'nullable|image|mimes:jpeg,png,jpg,gif'`) —
+   produces the 422 the client sees. `svg` was removed from these rules in this
+   review; it used to be allowed here while being rejected at runtime.
+2. `HasUploader::zsValidateUpload()` — checks the extension **and**
+   `$file->getMimeType()` (finfo content sniffing, not the client's header)
+   against `config('integrations.uploads.allowed_*')`. Defaults exclude svg.
+
+Files go cloud-first to the Supabase Storage `uploads` bucket when
+`UPLOADS_CLOUD_ENABLED=true`, with the local disk as fallback. Note that the
+`public` disk in `config/filesystems.php` has `'root' => '.'`, i.e. the project
+root — local fallback therefore writes **outside** `public/` and is not directly
+served, which is the safe direction for item 18 but means a local-only upload is
+not visible at `/uploads/...` unless the cloud leg succeeded. Keep
+`UPLOADS_CLOUD_ENABLED=true` in production.
+
+nginx still hardens `/uploads/` because `public/uploads/` holds files committed
+before that split.
+
+### 10.4 Payments
+
+* `PaymentGatewayService::mode()` returns `disabled` in production unless a
+  platform key exists — the `simulation` shortcut (which skips signature
+  verification) can never be reached in production.
+* `verifySignature()` fails closed when no secret is configured, uses
+  `hash_equals()`, and binds the amount (Paymob HMAC-SHA512 over the ordered
+  field list; Fawry/InstaPay SHA256 over merchant+reference+amount+secret).
+* The amount is taken from the plan, never from the request. The webhook proves
+  the payer paid *that transaction*; only the server knows what it should cost.
+* `StorefrontController::checkout()` already computed totals from
+  `products.sales_price` — unchanged, and the reference implementation.
+
+### 10.5 Rate limiting and client IPs
+
+`throttle:10,1` on `/api/v1/sign-in` and `RateLimiter` (5 attempts) on the web
+login are per-IP. That is only true if `$request->ip()` is the client, which
+needs the platform proxy to be trusted — see `TrustProxies`. Before this review
+`$proxies` was null: every request appeared to come from the proxy, so all users
+shared one bucket (one attacker could lock out the whole platform) and
+`audit_logs.ip_address` recorded the proxy. `'*'` would have fixed that by
+letting clients forge `X-Forwarded-For`. Private ranges only is the setting that
+does both.
+
+If Render's router ever connects from a public range, set `TRUSTED_PROXIES`
+(comma separated, `REMOTE_ADDR` means "trust the peer") rather than widening the
+default in code.
+
+### 10.6 Credential rotation checklist (from the full-history scan)
+
+The scan over all 241 commits of `main` found files that were committed and later
+deleted. **Deleting a file does not remove it from history** — every value below
+must be treated as public and rotated in the provider's own dashboard. Nothing
+here is a value; names only, because this file is in a public repository.
+
+| What | Where it was | Where to revoke / rotate |
+|------|--------------|--------------------------|
+| Laravel `APP_KEY` (`base64:` + 44 chars — a real key, 2 versions) | `.env` (Jul–Aug 2026, commits `90b942be`…`a7eca878`) | Render → `z-syst-api` → Environment → `APP_KEY`: set a fresh `php artisan key:generate` value. Rotating invalidates all sessions/cookies and anything encrypted with `Crypt` — re-issue Sanctum tokens afterwards. |
+| SMTP credentials (`MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_HOST`) | `.env` | The mail provider's dashboard (API key / app password), then update `MAIL_*` on Render. |
+| Pusher `PUSHER_APP_ID` / `PUSHER_APP_SECRET` | `.env`, `.env.production` | Pusher → App → App keys → reset secret. Verify first whether these were placeholders. |
+| Google **service-account private key** (full JSON with a PEM block) | `Super-Admin/public/uploads/service-account-credentials.json`, project id `pospro-7a386` | Google Cloud Console → project `pospro-7a386` → IAM & Admin → Service Accounts → Keys → delete the key. If that project is not yours, it shipped inside the purchased POS Pro template — in that case the only action is to keep it out of this repository. |
+| Firebase iOS config (`API_KEY`, `CLIENT_ID`, `DATABASE_URL`, project `salespro-saas-4a6d5`) | `third_party/pospro-app-codecanyon-Codecanyon_6.1/ios/Runner/GoogleService-Info.plist` | Firebase console → project settings → API keys → restrict by bundle id / HTTP referrer. These are client identifiers, not secrets, so restriction (not rotation) is the fix. |
+| Local Postgres user/password | `docker-compose.yml` | Dev-only; rotate if that compose file was ever pointed at a shared database. |
+| `DB_PASSWORD`, `AWS_ACCESS_KEY_ID`, `AWS_BUCKET`, `SUPABASE_ANON_KEY`, `SUPABASE_JWT_SECRET`, `APP_KEY` in `.env.production.example` | tracked in HEAD today | Inspected value-by-value: all are placeholders (15 uppercase / 0 digits, `AWS_ACCESS_KEY_ID_HERE`-shaped, etc.). `DB_HOST`, `DB_USERNAME`, `DB_DATABASE` are real but are not secrets. **Re-check this row if the file is ever edited** — a real value pasted into it is published immediately, because this repository is public. |
+
+Two structural notes that follow from the above:
+
+* This repository is **public** (`zyadgfh/Z-Syst`). Anything committed here is
+  public forever, including deleted files reachable by SHA.
+* Purging history (`git filter-repo` / BFG) rewrites every SHA and force-pushes
+  `main`, which invalidates open PRs and every local clone. It does **not**
+  replace rotation — GitHub caches forks and the old SHAs. Rotate first; decide
+  about the rewrite afterwards.
+
+### 10.7 Re-running the history scan locally
+
+```bash
+# The clone is shallow by default; history must be fetched once.
+git fetch --depth=2147483647 origin refs/heads/main:refs/remotes/origin/main
+gitleaks detect --source . --log-opts="--all" --config .gitleaks.toml --redact=24
+```
+
+CI runs the same thing as the non-blocking `gitleaks-history` job on every push
+and pull request; its findings land in the job summary and in the
+`gitleaks-history-report` artifact. It is non-blocking because a historical
+finding cannot be fixed by the PR that happens to trigger it — it needs a
+rotation.
+
 ---
 
 *Maintained by the Z-Syst team. Update this file when you discover a new

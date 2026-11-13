@@ -75,7 +75,7 @@ class ZSystBlogController extends Controller
     {
         $request->validate([
             'title' => 'required|unique:blogs,title',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif',
             'status' => 'boolean',
             'tags' => 'nullable|array',
             'meta.title' => 'nullable|string',
@@ -111,7 +111,7 @@ class ZSystBlogController extends Controller
     {
         $request->validate([
             'title' => 'required|unique:blogs,title,'.$blog->id,
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'status' => 'boolean',
             'descriptions' => 'nullable|string',
             'tags' => 'nullable|array',

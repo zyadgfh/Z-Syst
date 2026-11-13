@@ -189,6 +189,17 @@ class AuthController extends Controller
                 ],
             ]);
         } else {
+            // Same audit trail as the web login: the route-level throttle:10,1
+            // bounds how fast an address can try, and this row is what remains
+            // afterwards to show that somebody did. Identifier only — the
+            // password never reaches the log. Wrapped so an audit failure can
+            // never change the response the app receives.
+            try {
+                app(\App\Services\AuditService::class)->logFailedLogin((string) $request->input('email'));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
             return response()->json([
                 'message' => 'Invalid email or password!',
             ], 404);

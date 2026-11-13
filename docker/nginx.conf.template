@@ -65,6 +65,53 @@ http {
         location = /favicon.ico { access_log off; log_not_found off; }
         location = /robots.txt  { access_log off; log_not_found off; }
 
+        # Security headers for responses nginx serves itself, i.e. everything
+        # PHP never touches. App\Http\Middleware\SecurityHeaders only runs for
+        # requests that reach index.php, so without these a file under public/
+        # would ship with no nosniff, no frame protection and no referrer
+        # policy — which matters because user uploads live in public/uploads.
+        # They are declared per-location rather than at server level on purpose:
+        # index.php already sets its own, and nginx would otherwise emit
+        # duplicates that security scanners read as misconfiguration.
+        #
+        # The setup/update wizard of safiull/laravel-installer registers
+        # /install, /update and /envato and is guarded only by the existence of
+        # storage/installed. Refuse the prefixes here as well:
+        # App\Http\Middleware\BlockInstallerRoutes is the same rule one layer
+        # down, and both must hold for the routes to be unreachable.
+        location ~ ^/(install|update|envato)(/|$) {
+            return 404;
+        }
+
+        # User-supplied files. These are the only bytes on this server whose
+        # content an attacker controls, so they get the strictest treatment:
+        #   nosniff            – never reinterpret an upload as script/HTML
+        #   default-src 'none' – an uploaded SVG/HTML cannot load or run anything
+        #   sandbox            – if a document does render, it gets a unique
+        #                        origin: no cookies, no same-origin fetch
+        #   attachment for svg – direct navigation to an SVG downloads it rather
+        #                        than opening it as a document in our origin
+        # `^~` so this wins over the static-asset regex below.
+        location ^~ /uploads/ {
+            access_log off;
+            add_header X-Content-Type-Options "nosniff" always;
+            add_header Content-Security-Policy "default-src 'none'; sandbox; style-src 'unsafe-inline'" always;
+            add_header X-Frame-Options "DENY" always;
+            add_header Referrer-Policy "no-referrer" always;
+            add_header Cache-Control "private, max-age=3600" always;
+
+            location ~* \.svg$ {
+                add_header X-Content-Type-Options "nosniff" always;
+                add_header Content-Security-Policy "default-src 'none'; sandbox" always;
+                add_header Content-Disposition "attachment" always;
+                add_header Cache-Control "private, max-age=3600" always;
+                try_files $uri =404;
+            }
+
+            expires 1h;
+            try_files $uri =404;
+        }
+
         # Laravel's single front controller.
         location / {
             try_files $uri $uri/ /index.php?$query_string;
@@ -92,11 +139,14 @@ http {
 
         # Vendored/fingerprinted assets under public/. The application sets its
         # own security headers in App\Http\Middleware\SecurityHeaders; this block
-        # only governs caching for files PHP never touches.
+        # governs caching plus the headers for files PHP never touches.
         location ~* \.(?:css|js|png|jpe?g|gif|webp|svg|ico|woff2?|ttf|eot)$ {
             access_log off;
             expires 30d;
             add_header Cache-Control "public, max-age=2592000, immutable";
+            add_header X-Content-Type-Options "nosniff" always;
+            add_header X-Frame-Options "DENY" always;
+            add_header Referrer-Policy "strict-origin-when-cross-origin" always;
             try_files $uri =404;
         }
 

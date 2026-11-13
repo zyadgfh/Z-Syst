@@ -33,6 +33,16 @@ mkdir -p \
 # compiled views and cached config.
 chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 
+# Third layer on the setup wizard (see App\Http\Middleware\BlockInstallerRoutes
+# and the /install|/update|/envato location in docker/nginx.conf.template).
+# safiull/laravel-installer guards its routes with nothing but
+# file_exists(storage_path('installed')), and storage/installed is git-ignored,
+# so a container booting on a fresh disk would otherwise expose a wizard that
+# can rewrite .env and run migrations. The application is deployed from an
+# image, never installed through a browser, so the marker is always true here.
+touch storage/installed
+chown www-data:www-data storage/installed 2>/dev/null || true
+
 # composer.json's post-autoload-dump does not run package:discover, so without
 # this bootstrap/cache/packages.php is missing and auto-discovered providers
 # (Sanctum, Spatie Permission, dompdf, Excel, laravel-modules) never register.
