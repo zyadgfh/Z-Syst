@@ -451,6 +451,7 @@ removed in the same commit, which is what makes the removal visible in review.
 | `staff` confined to operational areas | `app/Http/Middleware/AdminMiddleware.php` — three tiers; staff is deny-by-default, passes a route that carries its own `permission:`/`role:` gate, or is in `STAFF_OPERATIONAL` (see §10.10) | `SecurityHardeningTest::test_staff_is_denied_the_administrative_back_office`, `::test_staff_keeps_the_till_and_the_operational_screens`, `::test_routes_with_their_own_gate_are_left_to_that_gate`, `::test_the_staff_allowlist_has_no_dead_entries`, `::test_tenant_owners_and_platform_admins_still_reach_the_admin_panel` |
 | No middleware rewrites request input | `SecurityCheck` deleted; `SecurityService::escapeString()` (addslashes) deleted | `SupplyChainHardeningTest::test_the_request_mutating_security_middleware_is_gone`, `::test_the_addslashes_helper_is_gone` |
 | User uploads are not in Git | `.gitignore` (`/public/uploads`, `/public/demo_images`), 202 files untracked | `SupplyChainHardeningTest::test_user_uploads_are_not_tracked` |
+| The `public` disk cannot write into the code tree | `config/filesystems.php` — `root` was `'.'` (the application root); now `storage_path('app/public')`, which is also what `asset('storage/…')` and the 11 `Storage::url()` sites already assumed | `SecurityHardeningTest::test_the_public_disk_writes_inside_storage_and_not_into_the_code_tree` |
 | Dependency floors + a real build gate | `package.json` (`engines.node`), `composer.lock`, CI job `frontend` | `SupplyChainHardeningTest::test_locked_*`, `::test_the_node_runtime_is_pinned`; CI `frontend` |
 | One npm build definition, and it is the audited one | root `package.json`/`package-lock.json` only — `vite.config.js`, `resources/js`, `resources/css` and `Modules/Landing/{package.json,vite.config.js}` removed (§10.8); firebase and its nested `@grpc/grpc-js` left the tree with them | `SupplyChainHardeningTest::test_the_unconsumed_frontend_bundle_and_its_tree_stay_gone`, `::test_no_module_ships_its_own_unaudited_frontend_build`, `::test_the_data_connect_sample_is_not_in_the_tree`; CI `frontend` "Assert the removed bundles did not come back" |
 | Every static asset a view names exists | `public/` is the serving contract for all Blade views (core + modules); the two unpublished pricing SVGs were copied in and the non-existent `demo-img.png` fallback repointed at `assets/img/icon/no-image.svg` | `LandingHomeTest::test_every_static_asset_a_blade_view_names_actually_exists` |
@@ -765,14 +766,17 @@ first is what made removing firebase safe. `src/` (the SPA Vercel actually
 serves) imports no npm package at all, so nothing was left referencing it; the
 SPA build output hashes were byte-identical before and after.
 
-**npm has no Dependabot coverage** (`.github/dependabot.yml` lists composer and
-pub only). The CI job `frontend` is the substitute: it runs `npm ci` — which is
-the check that `package-lock.json` and `package.json` still agree — then builds
-the one vite config that ships, then asserts the removed bundles did not come
-back, then reports `npm audit` as a warning. The audit is a warning for the same
-reason `composer-audit` is: an advisory in a transitive dependency is not always
-fixable by the PR that discovers it. The version floors this project *can*
-control are asserted as blocking PHPUnit tests instead.
+**npm now has Dependabot coverage** (`.github/dependabot.yml`: composer, npm and
+pub, all daily). It was missing before, and the CI job `frontend` was standing in
+for it: that job runs `npm ci` — the check that `package-lock.json` and
+`package.json` still agree — builds the one vite config that ships, asserts the
+removed bundles did not come back, and reports `npm audit` as a warning. The
+audit stays a warning for the same reason `composer-audit` does: an advisory in a
+transitive dependency is not always fixable by the PR that discovers it, and a
+red build nobody can act on gets ignored. The version floors this project *can*
+control are asserted as blocking PHPUnit tests instead. Dependabot covers the
+half CI cannot — opening a PR when vite itself publishes an advisory — and is
+cheap now that the tree is two devDependencies.
 
 **Removed — the Laravel-side frontend bundle (was an open decision).** It had no
 consumer in *either* deployment path, and that was verified rather than assumed:

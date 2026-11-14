@@ -36,9 +36,52 @@ return [
             'throw' => false,
         ],
 
+        /*
+        |--------------------------------------------------------------------------
+        | Public disk
+        |--------------------------------------------------------------------------
+        |
+        | `root` used to be '.', which resolved every path against the
+        | *application root* — the code tree. A write through this disk was
+        | therefore a write into the deployment directory: able to overwrite
+        | tracked files, or to land content under public/ where nginx would
+        | serve it. Nothing confined the disk except one caller's string checks
+        | (BarcodeController::image() rejects '..' and requires a 'barcodes/'
+        | prefix), which is a thin thing to depend on for a filesystem boundary.
+        |
+        | It also split one service across two locations. BarcodeService::
+        | barcodeDirectory() creates storage/app/public/barcodes/{businessId} and
+        | saves its PDFs there via storage_path(), but wrote the PNG/SVG labels
+        | through this disk — so images landed at <app root>/barcodes/{id}
+        | instead. On Render that is the container's ephemeral filesystem: the
+        | mounted volume is /var/www/html/storage, so every deploy discarded the
+        | images while keeping the PDFs.
+        |
+        | Both now resolve to the same place, on the persistent disk. This is
+        | safe without a migration because BarcodeController::image() already
+        | re-renders a label on the fly when the stored artifact is missing.
+        |
+        | The rest of the application was already written for the standard
+        | layout and only this config disagreed with it. SupplierInvoiceService
+        | stores invoice and payment-receipt attachments through this disk, and
+        | SupplierInvoiceResource / SupplierInvoicePaymentResource hand the
+        | client `asset('storage/'.$path)` — which nginx (root public/) resolves
+        | through the public/storage symlink that docker/entrypoint.sh creates
+        | with `artisan storage:link`, i.e. into storage/app/public. With root
+        | '.' the bytes went to <app root>/supplier-invoices/… instead, so every
+        | file_url the API returned was a guaranteed 404 *and* the file sat
+        | outside the mounted volume, discarded on each deploy. The same is true
+        | of the 11 Storage::url() sites for barcode labels and PDFs.
+        |
+        | `url` is not load-bearing for this disk: nothing generates a public
+        | URL from it — callers build asset('storage/…') or stream through the
+        | controller with an explicit Content-Type and Cache-Control.
+        |
+        */
+
         'public' => [
             'driver' => 'local',
-            'root' => '.',
+            'root' => storage_path('app/public'),
             'url' => env('APP_URL'),
             'visibility' => 'public',
             'throw' => false,

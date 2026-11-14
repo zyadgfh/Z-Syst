@@ -5,6 +5,18 @@ updates:
     schedule:
       interval: "daily"
 
+  # The frontend tree is two devDependencies (vite, supabase CLI) since the
+  # unconsumed bundles were removed — see RUNBOOK §10.8 — so this is quiet.
+  # It closes the gap the CI `frontend` job was standing in for: that job
+  # verifies the lockfile installs and builds, but only Dependabot opens a PR
+  # when vite itself publishes an advisory. Modules/*/package.json is
+  # deliberately absent; SupplyChainHardeningTest fails the build if a module
+  # grows its own unaudited npm manifest.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+
   - package-ecosystem: "pub"
     directory: "/pharmacy-store-app-codecanyon-main"
     schedule:

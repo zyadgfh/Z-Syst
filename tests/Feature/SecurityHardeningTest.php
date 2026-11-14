@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -451,6 +452,68 @@ class SecurityHardeningTest extends TestCase
         // value cannot leak into the next test.
         $this->assertContains('10.0.0.0/8', $this->readProxies(new TrustProxies));
         $this->assertCount(5, $this->readProxies(new TrustProxies));
+    }
+
+    /**
+     * `config/filesystems.php` gave the `public` disk `'root' => '.'`, which
+     * resolves against the *application root* — the code tree. A write through
+     * that disk was a write into the deployment directory: able to overwrite
+     * tracked files or drop content under public/ where nginx serves it. The
+     * only thing confining it was one caller's string checks
+     * (BarcodeController::image() rejects '..' and requires a 'barcodes/'
+     * prefix), which is a thin basis for a filesystem boundary.
+     *
+     * It also split BarcodeService across two locations: barcodeDirectory()
+     * creates storage/app/public/barcodes/{businessId} and the PDFs are saved
+     * there via storage_path(), while the PNG/SVG labels went through this disk
+     * and landed at <app root>/barcodes/{id} — the container's ephemeral
+     * filesystem on Render, where the mounted volume is /var/www/html/storage,
+     * so each deploy discarded the images and kept the PDFs.
+     *
+     * The rest of the application was already written for the standard layout.
+     * SupplierInvoiceService stores invoice and receipt attachments through this
+     * disk and the two Supplier resources hand the client
+     * `asset('storage/'.$path)`, which nginx (root public/) resolves through the
+     * public/storage symlink into storage/app/public — so with root '.' every
+     * file_url returned by the API was a 404 and the bytes were outside the
+     * mounted volume. Same for the 11 Storage::url() barcode sites.
+     *
+     * Both halves are asserted: the configured root, and where a write actually
+     * lands. The configuration check alone would pass for a root that is
+     * nominally inside storage but resolved differently at runtime.
+     */
+    public function test_the_public_disk_writes_inside_storage_and_not_into_the_code_tree(): void
+    {
+        $root = (string) config('filesystems.disks.public.root');
+
+        $this->assertNotSame('', $root, 'the public disk must declare a root');
+        $this->assertNotSame('.', $root, "root '.' resolves against the application root");
+        $this->assertStringStartsWith(
+            rtrim(storage_path(), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR,
+            rtrim($root, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR,
+            "the public disk root ($root) must sit under storage_path()"
+        );
+
+        $probe = 'barcodes/security-probe.txt';
+        try {
+            Storage::disk('public')->put($probe, 'probe');
+
+            $this->assertFileExists(
+                storage_path('app/public/'.$probe),
+                'a write through the public disk must land in storage/app/public'
+            );
+            $this->assertFileDoesNotExist(
+                base_path($probe),
+                'a write through the public disk must not land in the application root'
+            );
+            $this->assertFileDoesNotExist(
+                public_path($probe),
+                'a write through the public disk must not land where nginx serves files'
+            );
+        } finally {
+            Storage::disk('public')->delete($probe);
+            @unlink(storage_path('app/public/'.$probe));
+        }
     }
 
     /**
