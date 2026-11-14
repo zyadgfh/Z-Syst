@@ -83,6 +83,35 @@ class SecurityHardeningTest extends TestCase
     }
 
     /**
+     * Which gateways may be believed about the OUTCOME of a payment.
+     *
+     * Paymob signs an ordered field list that includes `success`, so its HMAC
+     * binds the amount, the transaction and the result together. Fawry and
+     * InstaPay sign sha256(merchantCode + reference + amount + secret) — all
+     * values this application already holds — so their signature proves
+     * authenticity and says nothing about whether the customer paid. Marking a
+     * gateway as outcome-bound without that property is what allowed a declined
+     * callback to be replayed with success=true; `OperationsTest` covers the
+     * replay itself, this locks the map it depends on.
+     */
+    public function test_only_outcome_bound_gateways_are_trusted_with_the_result(): void
+    {
+        $this->assertTrue(PaymentGatewayService::signatureCoversOutcome('paymob'));
+        $this->assertFalse(PaymentGatewayService::signatureCoversOutcome('fawry'));
+        $this->assertFalse(PaymentGatewayService::signatureCoversOutcome('instapay'));
+        $this->assertFalse(PaymentGatewayService::signatureCoversOutcome(''), 'an unknown gateway is never outcome-bound');
+
+        // The property that makes paymob safe, asserted rather than assumed: if
+        // `success` ever leaves the signed field list the claim above is false.
+        $this->assertContains('success', PaymentGatewayService::PAYMOB_HMAC_FIELDS);
+        $this->assertSame(
+            PaymentGatewayService::PAYMOB_HMAC_FIELDS,
+            array_values(array_unique(PaymentGatewayService::PAYMOB_HMAC_FIELDS)),
+            'a duplicated field would change the concatenation and silently break verification'
+        );
+    }
+
+    /**
      * The callback route constrains the segment, so a gateway outside the
      * allowlist never reaches the controller — no transaction lookup, no
      * config() interpolation.
@@ -292,7 +321,7 @@ class SecurityHardeningTest extends TestCase
      *
      * @param  array<int, string>  $routeMiddleware
      */
-    private function adminDecision(string $uri, array $routeMiddleware = ['web', 'auth', 'admin']): int
+    private function adminDecision(string $uri, array $routeMiddleware = ['web', 'auth', 'admin']): string
     {
         $route = new Route(['GET', 'POST'], $uri, fn () => 'passed');
         $route->middleware($routeMiddleware);

@@ -443,6 +443,7 @@ removed in the same commit, which is what makes the removal visible in review.
 | Generated URLs are https in production | `app/Providers/AppServiceProvider.php` (`URL::forceScheme`) | manual: `route()` output on Render |
 | Payment price computed server-side | `app/Http/Controllers/Admin/GatewayPaymentController.php` (client `amount` ignored, read from `subscription_plans.price`) | `SecurityHardeningTest::test_gateway_allowlist_is_closed` covers the gateway half |
 | Gateway callback hardening | `routes/web.php` (`where` + `throttle:60,1`), `GatewayWebhookController` (allowlist), `PaymentGatewayService::mode()` (unknown ⇒ `disabled`) | `SecurityHardeningTest::test_callback_for_unknown_gateway_is_not_found` |
+| A valid signature cannot buy an entitlement it does not cover | `PaymentGatewayService::handleCallback()` — reference must match and is never overwritten; gateways outside `OUTCOME_BOUND_GATEWAYS` (fawry, instapay) stay `pending`; `success` defaults to false | `OperationsTest::test_replaying_a_declined_fawry_callback_with_success_true_grants_nothing`, `::test_paymob_live_callback_is_paid_because_its_hmac_covers_the_outcome`, `SecurityHardeningTest::test_only_outcome_bound_gateways_are_trusted_with_the_result` |
 | Upload allowlist (extension **and** sniffed MIME) | `config/integrations.php` → `integrations.uploads`, enforced by `app/Helpers/HasUploader.php::zsValidateUpload()` | manual: an `.svg` upload is rejected |
 | Uploaded files never behave as documents | `docker/nginx.conf.template` (`location ^~ /uploads/`: nosniff + `default-src 'none'; sandbox`, `Content-Disposition: attachment` for svg) | manual: open an uploaded svg directly |
 | Admin denials are visible to API callers | `app/Http/Middleware/AdminMiddleware.php` (403 JSON, redirect only for browsers) | `SecurityHardeningTest::test_admin_panel_denies_json_callers_with_403_instead_of_a_redirect` |
@@ -534,13 +535,69 @@ select count(*) from <table> where <column>::text like '%uploads/%'
 * `PaymentGatewayService::mode()` returns `disabled` in production unless a
   platform key exists — the `simulation` shortcut (which skips signature
   verification) can never be reached in production.
-* `verifySignature()` fails closed when no secret is configured, uses
-  `hash_equals()`, and binds the amount (Paymob HMAC-SHA512 over the ordered
-  field list; Fawry/InstaPay SHA256 over merchant+reference+amount+secret).
+* `verifySignature()` fails closed when no secret is configured and uses
+  `hash_equals()` for both schemes.
 * The amount is taken from the plan, never from the request. The webhook proves
   the payer paid *that transaction*; only the server knows what it should cost.
 * `StorefrontController::checkout()` already computed totals from
   `products.sales_price` — unchanged, and the reference implementation.
+
+**A valid signature is not the same as a paid invoice.** The two schemes are not
+equivalent, and treating them as if they were is what made this the highest-value
+payment finding in the review:
+
+| Gateway | Signature | Covers `success`? |
+|---------|-----------|-------------------|
+| paymob | HMAC-SHA512 over `PAYMOB_HMAC_FIELDS`, which includes `success` | **yes** |
+| fawry / instapay | `sha256(merchantCode + reference + amount + secret)` | **no** |
+
+Every input to the fawry/instapay hash is a value the application already holds.
+So the signature is *identical* whatever the callback says about the outcome: it
+proves "the caller knows the secret and means this transaction for this amount",
+and nothing about whether the customer paid. `handleCallback()` then read
+`filter_var($params['success'] ?? 'true', …)` — trusting an unsigned field that
+**defaulted to true**. One observed callback for a *declined* payment could be
+replayed at the same URL with `success=true` and the subscription activated for
+free. This cannot be fixed by verifying harder: the outcome is not in the signed
+material, and the scheme is the gateway's to define, not ours.
+
+What `handleCallback()` does now:
+
+1. **Reference binding.** The callback's `reference` must equal the stored one;
+   a mismatch fails the transaction with reason `reference_mismatch`. The stored
+   reference is never overwritten from the callback — it is an input to the
+   signature, so letting the callback redefine it would corrupt every later
+   verification.
+2. **Outcome binding** (`PaymentGatewayService::signatureCoversOutcome()`,
+   `OUTCOME_BOUND_GATEWAYS = ['paymob']`). In live mode, a gateway whose
+   signature does not cover the outcome does **not** get its `success` flag
+   believed: the transaction is left `pending` with reason
+   `outcome_not_bound_to_signature` and a `Log::warning`, and no entitlement is
+   granted. `pending` rather than `failed` on purpose — the money may genuinely
+   have been taken, and recording a decline invites a second charge.
+3. **`success` defaults to false**, not true, for the gateways that are trusted.
+   An absent or stripped flag used to mean "paid".
+4. Simulation is exempt from (2) and only from (2): `mode()` cannot return
+   `simulation` in production, and a simulation that could not state its own
+   outcome would be useless.
+
+**Consequence for anyone integrating fawry or instapay for real:** as of this
+review neither has an API client, credentials, or a `config/services.php` entry,
+so both are `disabled` in production and this path is latent rather than live.
+Turning one on is not enough — `mode()` will report `live` as soon as a platform
+`api_key` exists, and every callback will then sit in `pending` until the
+integration adds a **server-to-server status query** (or the gateway offers a
+signature that covers the outcome). That is the intended behaviour: it makes the
+missing corroboration loud at integration time instead of quiet at attack time.
+Wire the query into the `outcome_not_bound_to_signature` branch.
+
+Guards: `OperationsTest::test_replaying_a_declined_fawry_callback_with_success_true_grants_nothing`
+(the replay), `::test_paymob_live_callback_is_paid_because_its_hmac_covers_the_outcome`
+(the counter-example, so fail-closed is per gateway and not a blanket refusal),
+`::test_gateway_rejects_unsigned_callback_in_live_mode` (forged signature, and
+the reference rules), and
+`SecurityHardeningTest::test_only_outcome_bound_gateways_are_trusted_with_the_result`
+(the map itself, including that `success` is still in `PAYMOB_HMAC_FIELDS`).
 
 ### 10.5 Rate limiting and client IPs
 

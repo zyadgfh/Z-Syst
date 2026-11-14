@@ -295,8 +295,143 @@ class OperationsTest extends TestCase
 
         $tx->update(['reference' => 'REF1']);
         $good = hash('sha256', 'M1'.'REF1'.(300.0).'topsecret');
+
+        // Authentic — but fawry signs merchantCode + reference + amount + secret,
+        // all values this application already holds. The outcome is not in the
+        // signed material, so `success` is not believed and no entitlement is
+        // granted. Left pending rather than failed, because the money may
+        // genuinely have been taken and a recorded decline invites a second
+        // charge; pending grants nothing and stays open for reconciliation.
         $ok = $service->handleCallback('fawry', $tx->id, ['success' => 'true', 'reference' => 'REF1', 'signature' => $good]);
-        $this->assertEquals('paid', $ok->status);
+        $this->assertEquals('pending', $ok->status);
+        $this->assertNull($ok->paid_at);
+        $this->assertEquals('outcome_not_bound_to_signature', $ok->payload['reason']);
+
+        // The reference is ours, not the callback's: a callback claiming a
+        // different one is describing another transaction, and it must not be
+        // allowed to rewrite the value every later verification is keyed on.
+        $mismatch = $service->handleCallback('fawry', $tx->id, ['success' => 'true', 'reference' => 'OTHER', 'signature' => $good]);
+        $this->assertEquals('failed', $mismatch->status);
+        $this->assertEquals('reference_mismatch', $mismatch->payload['reason']);
+        $this->assertEquals('REF1', $mismatch->reference);
+    }
+
+    /**
+     * The attack the fawry/instapay signature scheme allows, stated plainly.
+     *
+     * Their signature is sha256(merchantCode + reference + amount + secret):
+     * every input is a value this application already holds, so the hash is
+     * identical no matter what the callback says about the outcome. One observed
+     * callback for a DECLINED payment therefore carries a signature that also
+     * validates for success=true — and `success` used to be read straight off the
+     * query string, defaulting to true when absent. Replaying that URL bought a
+     * subscription.
+     */
+    public function test_replaying_a_declined_fawry_callback_with_success_true_grants_nothing()
+    {
+        BusinessSetting::put($this->businessId, 'fawry_api_key', 'test-key');
+        BusinessSetting::put($this->businessId, 'fawry_hmac_secret', 'topsecret');
+        BusinessSetting::put($this->businessId, 'fawry_merchant_code', 'M1');
+
+        $service = app(PaymentGatewayService::class);
+        $tx = $service->initiate($this->businessId, 'fawry', 'subscription', null, 300);
+        $tx->update(['reference' => 'REF9']);
+
+        // One genuine callback, declined. The signature is valid — and identical
+        // for every outcome, which is the whole problem.
+        $signature = hash('sha256', 'M1'.'REF9'.(300.0).'topsecret');
+        $declined = $service->handleCallback('fawry', $tx->id, [
+            'success' => 'false', 'reference' => 'REF9', 'signature' => $signature,
+        ]);
+        $this->assertNotEquals('paid', $declined->status);
+
+        // The replay: same signed callback, flag flipped.
+        $replayed = $service->handleCallback('fawry', $tx->id, [
+            'success' => 'true', 'reference' => 'REF9', 'signature' => $signature,
+        ]);
+        $this->assertNotEquals('paid', $replayed->status, 'a replayed signature must not buy an entitlement');
+        $this->assertNull($replayed->paid_at);
+        $this->assertEquals('outcome_not_bound_to_signature', $replayed->payload['reason']);
+
+        // The flag is ignored, not merely unlucky: the recorded reason is the same
+        // whether it arrived false, true, or missing entirely.
+        $absent = $service->handleCallback('fawry', $tx->id, ['reference' => 'REF9', 'signature' => $signature]);
+        $this->assertNotEquals('paid', $absent->status);
+        $this->assertEquals('outcome_not_bound_to_signature', $absent->payload['reason']);
+
+        // Nothing downstream was granted either.
+        $this->assertDatabaseHas('gateway_transactions', ['id' => $tx->id, 'status' => 'pending', 'paid_at' => null]);
+    }
+
+    /**
+     * The counter-example that keeps the rule above honest: paymob's HMAC really
+     * does cover `success`, so a live paymob callback marks the transaction paid
+     * and tampering with the outcome invalidates the signature. Fail-closed is
+     * applied per gateway, not as a blanket refusal.
+     */
+    public function test_paymob_live_callback_is_paid_because_its_hmac_covers_the_outcome()
+    {
+        BusinessSetting::put($this->businessId, 'paymob_api_key', 'live-key');
+        BusinessSetting::put($this->businessId, 'paymob_hmac_secret', 'hmac-secret-value');
+
+        $service = app(PaymentGatewayService::class);
+        $tx = $service->initiate($this->businessId, 'paymob', 'subscription', null, 500);
+
+        $params = [
+            'amount_cents' => '50000',
+            'created_at' => '2026-11-14T10:00:00.000Z',
+            'currency' => 'EGP',
+            'error_occured' => 'false',
+            'has_parent_transaction' => 'false',
+            'id' => '777',
+            'integration_id' => '55',
+            'is_3d_secure' => 'false',
+            'is_auth' => 'false',
+            'is_capture' => 'true',
+            'is_refunded' => 'false',
+            'is_standalone_payment' => 'true',
+            'is_voided' => 'false',
+            'order' => ['id' => '999'],
+            'owner' => 'z-syst',
+            'pending' => 'false',
+            'source_data' => ['pan' => '424242xxxxxx4242', 'sub_type' => 'MASTERCARD', 'type' => 'CARD'],
+            'success' => 'true',
+        ];
+        $params['hmac'] = $this->paymobHmac($params, 'hmac-secret-value');
+
+        $paid = $service->handleCallback('paymob', $tx->id, $params);
+        $this->assertEquals('paid', $paid->status);
+        $this->assertNotNull($paid->paid_at);
+
+        // Flip the outcome, keep the signature: verification fails, so the
+        // transaction is refused rather than trusted. This is exactly the
+        // property fawry's scheme lacks.
+        $tampered = $params;
+        $tampered['success'] = 'false';
+        $other = $service->initiate($this->businessId, 'paymob', 'subscription', null, 500);
+        $this->assertEquals('failed', $service->handleCallback('paymob', $other->id, $tampered)->status);
+
+        // An absent outcome field must not mean "paid" — it used to.
+        $noFlag = $params;
+        unset($noFlag['success']);
+        $noFlag['hmac'] = $this->paymobHmac($noFlag, 'hmac-secret-value');
+        $third = $service->initiate($this->businessId, 'paymob', 'subscription', null, 500);
+        $this->assertEquals('failed', $service->handleCallback('paymob', $third->id, $noFlag)->status);
+    }
+
+    /**
+     * Build a paymob HMAC the way the service verifies it, from the published
+     * field list rather than a copy of it.
+     *
+     * @param  array<string, mixed>  $params
+     */
+    private function paymobHmac(array $params, string $secret): string
+    {
+        $concat = collect(PaymentGatewayService::PAYMOB_HMAC_FIELDS)
+            ->map(fn ($k) => (string) data_get($params, $k, ''))
+            ->implode('');
+
+        return hash_hmac('sha512', $concat, $secret);
     }
 
     // ── Storefront ──────────────────────────────────────────────────────
