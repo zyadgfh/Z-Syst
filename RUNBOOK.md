@@ -440,6 +440,7 @@ removed in the same commit, which is what makes the removal visible in review.
 |---------|-------|-------------|
 | Setup/update wizard gone, not just blocked | package removed from `composer.json`/`composer.lock`; published files deleted; `BlockInstallerRoutes` (global stack) + `docker/nginx.conf.template` + `touch storage/installed` kept as depth | `SupplyChainHardeningTest::test_the_setup_wizard_package_is_not_a_dependency`, `::test_no_published_installer_files_remain_in_the_repository`, `::test_the_route_table_contains_no_wizard_prefixes`; `SecurityHardeningTest::test_setup_wizard_routes_are_unreachable` |
 | Trusted proxies = private ranges only | `app/Http/Middleware/TrustProxies.php`, override with `TRUSTED_PROXIES` | `SecurityHardeningTest::test_trusted_proxies_*` |
+| Guest auth endpoints are rate limited | `app/Providers/RouteServiceProvider.php` (`auth-guest`, `auth-reset`) attached in `routes/auth.php`; `/login` limits itself in `LoginRequest` | `SecurityHardeningTest::test_the_guest_auth_endpoints_carry_a_throttle`, `::test_the_password_reset_request_endpoint_actually_limits` |
 | Generated URLs are https in production | `app/Providers/AppServiceProvider.php` (`URL::forceScheme`) | manual: `route()` output on Render |
 | Payment price computed server-side | `app/Http/Controllers/Admin/GatewayPaymentController.php` (client `amount` ignored, read from `subscription_plans.price`) | `SecurityHardeningTest::test_gateway_allowlist_is_closed` covers the gateway half |
 | Gateway callback hardening | `routes/web.php` (`where` + `throttle:60,1`), `GatewayWebhookController` (allowlist), `PaymentGatewayService::mode()` (unknown ⇒ `disabled`) | `SecurityHardeningTest::test_callback_for_unknown_gateway_is_not_found` |
@@ -613,6 +614,45 @@ does both.
 If Render's router ever connects from a public range, set `TRUSTED_PROXIES`
 (comma separated, `REMOTE_ADDR` means "trust the peer") rather than widening the
 default in code.
+
+**Coverage of the web authentication routes.** Every state-changing guest
+endpoint is now limited; the limits are defined in `RouteServiceProvider::boot()`
+and attached in `routes/auth.php`:
+
+| Endpoint | Limiter | Buckets |
+|----------|---------|---------|
+| `POST /login` | *none at the route level* | `LoginRequest::ensureIsNotRateLimited()` — 5 attempts keyed `email\|ip`, hit on every failure, cleared on success |
+| `POST /register` | `auth-guest` | 5/min per `email\|ip` **and** 20/min per IP |
+| `POST /otp-resend`, `POST /otp-submit` | `auth-guest` | same |
+| `POST /forgot-password` | `auth-guest` | same |
+| `POST /reset-password` | `auth-reset` | 10/min per IP (it carries a GoTrue recovery token, not an address) |
+
+`POST /login` deliberately has no route-level throttle: it is already limited
+more tightly and with a better key inside the form request, and a second counter
+over it would only make the two disagree.
+
+The reason the other five needed limits is not password guessing — it is that
+each one does real work per request. `forgot-password` and `reset-password` call
+Supabase GoTrue **outbound**, so an unthrottled guest could burn the project's
+auth quota (a cheap denial of service on the reset path for every legitimate
+user) and fire unlimited recovery e-mails at any address, which is harassment.
+`register` returns 403 in production, but under `supabase.fallback_eloquent`
+(dev/CI) it provisions an account and runs bcrypt, which is deliberately
+expensive. `otp-resend` and `otp-submit` are 410 stubs today; they are limited
+anyway so the bucket is already in place if they are ever implemented.
+
+Two buckets rather than one, because either alone is bypassable: keyed on
+`email|ip` an attacker rotating addresses still pays per address, and keyed on IP
+alone one attacker can exhaust a whole pharmacy's bucket behind a shared NAT.
+Both together cap each.
+
+GET routes are not throttled — they render a form and cost nothing, so limiting
+them would mostly risk locking out a whole site behind one address for no gain.
+
+Guards: `SecurityHardeningTest::test_the_guest_auth_endpoints_carry_a_throttle`
+(the wiring) and `::test_the_password_reset_request_endpoint_actually_limits`
+(drives the real endpoint five times through and asserts the sixth is refused —
+declaring a limiter and attaching it are two different things).
 
 ### 10.6 Credential rotation checklist (from the full-history scan)
 

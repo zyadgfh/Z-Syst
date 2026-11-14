@@ -9,6 +9,7 @@ use App\Services\PaymentGatewayService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 /**
@@ -109,6 +110,69 @@ class SecurityHardeningTest extends TestCase
             array_values(array_unique(PaymentGatewayService::PAYMOB_HMAC_FIELDS)),
             'a duplicated field would change the concatenation and silently break verification'
         );
+    }
+
+    /**
+     * The guest authentication endpoints that do work per request. None of these
+     * is about password guessing — POST /login already limits itself to 5
+     * attempts keyed on email|ip inside LoginRequest, which is why it is absent:
+     *
+     *   forgot-password / reset-password  call Supabase GoTrue outbound, so an
+     *       unthrottled guest can burn the project's auth quota (a cheap DoS on
+     *       the reset path for every legitimate user) and fire unlimited recovery
+     *       e-mails at any address.
+     *   register  403s in production, but under supabase.fallback_eloquent it
+     *       provisions an account and runs bcrypt — deliberately expensive.
+     *   otp-resend / otp-submit  410 stubs today, throttled so the limit is
+     *       already in place if they are ever implemented.
+     */
+    public function test_the_guest_auth_endpoints_carry_a_throttle(): void
+    {
+        $expected = [
+            'POST register' => 'throttle:auth-guest',
+            'POST otp-resend' => 'throttle:auth-guest',
+            'POST otp-submit' => 'throttle:auth-guest',
+            'POST forgot-password' => 'throttle:auth-guest',
+            'POST reset-password' => 'throttle:auth-reset',
+        ];
+
+        foreach (\Illuminate\Support\Facades\Route::getRoutes() as $route) {
+            foreach ((array) $route->methods() as $method) {
+                $key = $method.' '.ltrim((string) $route->uri(), '/');
+
+                if (! array_key_exists($key, $expected)) {
+                    continue;
+                }
+
+                $this->assertContains($expected[$key], $route->gatherMiddleware(), "$key must be throttled");
+                unset($expected[$key]);
+            }
+        }
+
+        $this->assertSame([], array_values($expected), 'these guest auth routes were not found at all');
+    }
+
+    /**
+     * Declaring a limiter and attaching it are two different things, so drive the
+     * real endpoint: five requests through, the sixth refused. Http is faked
+     * because SupabaseAuthClient posts through the Http facade and this test is
+     * about the bucket, not about GoTrue.
+     */
+    public function test_the_password_reset_request_endpoint_actually_limits(): void
+    {
+        Http::fake();
+
+        $payload = ['email' => 'someone@example.com'];
+
+        for ($attempt = 1; $attempt <= 5; $attempt++) {
+            $this->assertNotSame(
+                429,
+                $this->postJson('/forgot-password', $payload)->getStatusCode(),
+                "attempt $attempt is inside the limit and must not be refused"
+            );
+        }
+
+        $this->assertSame(429, $this->postJson('/forgot-password', $payload)->getStatusCode(), 'the 6th attempt within a minute must be refused');
     }
 
     /**
