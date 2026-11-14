@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\TrustProxies;
 use App\Models\User;
 use App\Services\PaymentGatewayService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 use Tests\TestCase;
 
 /**
@@ -18,6 +21,12 @@ use Tests\TestCase;
 class SecurityHardeningTest extends TestCase
 {
     use RefreshDatabase;
+
+    /** adminDecision(): the middleware called $next, so the request went through. */
+    private const PASSED = 'passed';
+
+    /** adminDecision(): the middleware refused the request itself. */
+    private const DENIED = 'denied';
 
     /**
      * safiull/laravel-installer registers /install, /update and /envato from its
@@ -98,25 +107,135 @@ class SecurityHardeningTest extends TestCase
     }
 
     /**
-     * 'staff' was in AdminMiddleware's allowlist until 2026-11-13. Staff are
-     * pharmacy employees: the API they belong to is the one the mobile app talks
-     * to (AuthController::login accepts staff and shop-owner). Letting the role
-     * into /admin handed every employee the whole back office — users,
-     * delete-all, bulk status changes, settings and gateway configuration —
-     * with only the per-route permission: gates (present on 56 of 58 admin
-     * controllers, absent on the other 2) standing in the way.
+     * `staff` is the low-trust role, and 251 of the 289 named admin routes carry
+     * no `permission:` gate — for those, AdminMiddleware is the only thing
+     * between an employee account and the action. Before this review staff was
+     * in the blanket allowlist, so any employee could reach `users/delete-all`,
+     * `users/bulk-change-status`, `system-settings`, `gateways`, `roles` and
+     * `plans`.
+     *
+     * Denied through the real stack, as JSON, so the caller sees the 403 rather
+     * than a redirect it would follow and misread as success.
      */
-    public function test_staff_cannot_reach_the_admin_panel(): void
+    public function test_staff_is_denied_the_administrative_back_office(): void
     {
         $staff = User::factory()->create(['role' => 'staff']);
 
-        $this->actingAs($staff)->getJson('/admin')->assertStatus(403);
-        $this->actingAs($staff)->get('/admin')->assertStatus(403);
+        foreach ([
+            '/admin/users',
+            '/admin/roles',
+            '/admin/permissions',
+            '/admin/plans',
+            '/admin/system-settings',
+            '/admin/gateways',
+            '/admin/audit-logs',
+            '/admin/business',
+            '/admin/subscriptions',
+            '/admin/currencies',
+            '/admin/banners',
+            '/admin/supplier-invoices',
+            '/admin/tenant-payment-settings',
+        ] as $path) {
+            $this->assertSame(403, $this->actingAs($staff)->getJson($path)->getStatusCode(), "$path must be denied to staff");
+        }
+
+        // POST-only administrative endpoints, including the destructive ones.
+        foreach (['/admin/users/delete-all', '/admin/users/bulk-change-status'] as $path) {
+            $this->assertSame(403, $this->actingAs($staff)->postJson($path)->getStatusCode(), "$path must be denied to staff");
+        }
     }
 
     /**
-     * The roles that own a tenant keep their access, so the change above is a
-     * narrowing and not a lockout.
+     * The other half of the same decision, and the half that a blanket denial
+     * got wrong: `config/supabase.php` gives `staff` `sales-create` and gives
+     * `shop-owner` no such ability, so the employee is the only role allowed to
+     * ring up a sale — and `admin/pos/*` and `admin/dose/*` have no `permission:`
+     * gate, which makes this middleware the till's only door.
+     *
+     * Exercised against the middleware directly with a synthetic matched route,
+     * so the assertion is about the authorization decision and not about whether
+     * a controller happens to have its fixtures in order.
+     */
+    public function test_staff_keeps_the_till_and_the_operational_screens(): void
+    {
+        $staff = User::factory()->create(['role' => 'staff']);
+        $this->actingAs($staff);
+
+        foreach ([
+            'admin',                       // dashboard-read
+            'admin/get-dashboard',
+            'admin/dashboard-reports',     // reports-read
+            'admin/pos',                   // sales-create — the till
+            'admin/pos/checkout',
+            'admin/pos/interactions',
+            'admin/pos/dose-labels/1',
+            'admin/dose/DOSE:1:2',
+            'admin/notifications',
+            'admin/loyalty',
+            'admin/receipts',
+            'admin/prescriptions',
+            'admin/traceability',
+            'admin/warehouses',
+            'admin/stock-transfers',
+            'admin/barcodes',
+            'admin/device-setup',          // printers-read (printers live under it)
+            'admin/insurance/claims',      // insurance-claims-read (nested)
+            'admin/profile/two-factor',    // self-service
+        ] as $uri) {
+            $this->assertSame(
+                self::PASSED,
+                $this->adminDecision($uri),
+                "staff must reach /$uri — it is operational and has no gate of its own"
+            );
+        }
+
+        foreach ([
+            'admin/users/delete-all',
+            'admin/system-settings',
+            'admin/gateways',
+            'admin/plans',
+            'admin/business',
+            'admin/audit-logs',
+        ] as $uri) {
+            $this->assertSame(
+                self::DENIED,
+                $this->adminDecision($uri),
+                "staff must not reach /$uri"
+            );
+        }
+    }
+
+    /**
+     * A route that carries its own authorization gate is delegated to that gate,
+     * so `config/supabase.php` stays the single source of truth instead of being
+     * duplicated here where it would drift. staff holds 8 of the 38 gated
+     * permissions and is refused the other 30 by the gate itself — which is why
+     * `IntegrationTest::test_permission_enforcement` still sees its 403 for
+     * `products-create`: it comes from the permission layer, not from this one.
+     */
+    public function test_routes_with_their_own_gate_are_left_to_that_gate(): void
+    {
+        $staff = User::factory()->create(['role' => 'staff']);
+        $this->actingAs($staff);
+
+        // Gated: passed through, whatever the permission map later decides.
+        // Every area here is deliberately outside STAFF_OPERATIONAL, so it is
+        // the gate and not the allowlist that lets the request through.
+        $this->assertSame(self::PASSED, $this->adminDecision('admin/products', ['permission:products-create']));
+        $this->assertSame(self::PASSED, $this->adminDecision('admin/promotions', ['permission:promotions-read']));
+        $this->assertSame(self::PASSED, $this->adminDecision('admin/store-orders', ['permission:store-orders-read']));
+        $this->assertSame(self::PASSED, $this->adminDecision('admin/business/upgrade-plan/1', ['role:superadmin']));
+
+        // The same URIs with the gate taken away fall back to deny-by-default,
+        // which is what proves the delegation above is keyed on the gate.
+        $this->assertSame(self::DENIED, $this->adminDecision('admin/products'));
+        $this->assertSame(self::DENIED, $this->adminDecision('admin/promotions'));
+        $this->assertSame(self::DENIED, $this->adminDecision('admin/store-orders'));
+    }
+
+    /**
+     * The roles that own or administer a tenant keep the whole panel, so the
+     * narrowing above is aimed at one role and is not a general lockout.
      */
     public function test_tenant_owners_and_platform_admins_still_reach_the_admin_panel(): void
     {
@@ -129,6 +248,62 @@ class SecurityHardeningTest extends TestCase
                 "role '$role' must pass AdminMiddleware"
             );
         }
+
+        // And a role outside the model entirely is refused.
+        $customer = User::factory()->create(['role' => 'customer']);
+        $this->actingAs($customer);
+        $this->assertSame(self::DENIED, $this->adminDecision('admin/pos'));
+    }
+
+    /**
+     * An allowlist entry that matches no route is a rename waiting to become a
+     * hole: the operational area silently moves somewhere the list does not
+     * cover, or — worse — the list keeps a stale name while a new administrative
+     * route is added under the old one.
+     */
+    public function test_the_staff_allowlist_has_no_dead_entries(): void
+    {
+        $uris = [];
+        foreach (\Illuminate\Support\Facades\Route::getRoutes() as $route) {
+            $uris[] = ltrim((string) $route->uri(), '/');
+        }
+
+        foreach (AdminMiddleware::staffOperationalAreas() as $area) {
+            if ($area === '') {
+                $this->assertContains('admin', $uris, 'the panel root must exist');
+
+                continue;
+            }
+
+            $matched = false;
+            foreach ($uris as $uri) {
+                if ($uri === "admin/$area" || str_starts_with($uri, "admin/$area/")) {
+                    $matched = true;
+                    break;
+                }
+            }
+
+            $this->assertTrue($matched, "allowlist entry '$area' matches no admin route — stale or renamed");
+        }
+    }
+
+    /**
+     * Run AdminMiddleware against a synthetic matched route.
+     *
+     * @param  array<int, string>  $routeMiddleware
+     */
+    private function adminDecision(string $uri, array $routeMiddleware = ['web', 'auth', 'admin']): int
+    {
+        $route = new Route(['GET', 'POST'], $uri, fn () => 'passed');
+        $route->middleware($routeMiddleware);
+
+        $request = Request::create('/'.$uri, 'GET');
+        $request->headers->set('Accept', 'application/json');
+        $request->setRouteResolver(fn () => $route);
+
+        $response = (new AdminMiddleware)->handle($request, fn () => response('passed'));
+
+        return $response->getContent() === 'passed' ? self::PASSED : self::DENIED;
     }
 
     /**

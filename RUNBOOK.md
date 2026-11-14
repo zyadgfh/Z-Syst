@@ -446,7 +446,7 @@ removed in the same commit, which is what makes the removal visible in review.
 | Upload allowlist (extension **and** sniffed MIME) | `config/integrations.php` → `integrations.uploads`, enforced by `app/Helpers/HasUploader.php::zsValidateUpload()` | manual: an `.svg` upload is rejected |
 | Uploaded files never behave as documents | `docker/nginx.conf.template` (`location ^~ /uploads/`: nosniff + `default-src 'none'; sandbox`, `Content-Disposition: attachment` for svg) | manual: open an uploaded svg directly |
 | Admin denials are visible to API callers | `app/Http/Middleware/AdminMiddleware.php` (403 JSON, redirect only for browsers) | `SecurityHardeningTest::test_admin_panel_denies_json_callers_with_403_instead_of_a_redirect` |
-| `staff` cannot reach `/admin` | `app/Http/Middleware/AdminMiddleware.php` allowlist = `shop-owner`, `superadmin`, `admin` | `SecurityHardeningTest::test_staff_cannot_reach_the_admin_panel`, `::test_tenant_owners_and_platform_admins_still_reach_the_admin_panel` |
+| `staff` confined to operational areas | `app/Http/Middleware/AdminMiddleware.php` — three tiers; staff is deny-by-default, passes a route that carries its own `permission:`/`role:` gate, or is in `STAFF_OPERATIONAL` (see §10.10) | `SecurityHardeningTest::test_staff_is_denied_the_administrative_back_office`, `::test_staff_keeps_the_till_and_the_operational_screens`, `::test_routes_with_their_own_gate_are_left_to_that_gate`, `::test_the_staff_allowlist_has_no_dead_entries`, `::test_tenant_owners_and_platform_admins_still_reach_the_admin_panel` |
 | No middleware rewrites request input | `SecurityCheck` deleted; `SecurityService::escapeString()` (addslashes) deleted | `SupplyChainHardeningTest::test_the_request_mutating_security_middleware_is_gone`, `::test_the_addslashes_helper_is_gone` |
 | User uploads are not in Git | `.gitignore` (`/public/uploads`, `/public/demo_images`), 202 files untracked | `SupplyChainHardeningTest::test_user_uploads_are_not_tracked` |
 | Dependency floors + a real build gate | `package.json` (`engines.node`, `overrides`), `composer.lock`, CI job `frontend` | `SupplyChainHardeningTest::test_locked_*`, `::test_the_grpc_override_survives_and_the_lock_honours_it`, `::test_the_node_runtime_is_pinned`; CI `frontend` |
@@ -731,6 +731,97 @@ Two services were deliberately **kept**:
   registers `@cleanInput`, `@sanitizeURL`, `@safeAttribute` and `@stripTags`
   from it. Those are opt-in Blade directives, i.e. the safe direction: a
   template author chooses them, and they do not rewrite request input.
+
+### 10.10 Authorization tiers on /admin
+
+`/admin` is not an administrators-only panel. It is the whole authenticated back
+office — 289 named routes, and **the till is inside it**. That single fact is
+what makes the obvious fixes wrong.
+
+**Where authorization actually comes from.** Not Spatie's tables: production has
+no `roles`, `permissions`, `model_has_roles`, `model_has_permissions` or
+`role_has_permissions` table, and `App\Models\AppUser` deliberately does not use
+Spatie's `HasRoles` trait (see the comment at `AppUser.php:37`). It comes from
+`HasSupabaseRoles` — the single `app_users.role` text column plus the ability map
+in `config/supabase.php`, with `user_permissions` holding runtime grants on top.
+Spatie's `permission:` middleware still works because `HasSupabaseRoles`
+implements the Spatie-compatible `checkPermissionTo()`, and Spatie's
+`Gate::before` consults it. So a missing Spatie table is not a bug here; a
+missing entry in `config/supabase.php` is.
+
+The map, as of this review:
+
+| Role | Abilities | Notable |
+|------|-----------|---------|
+| `superadmin` | `*` | wildcard |
+| `admin` | 82 | platform administration |
+| `staff` | 22 | **includes `sales-create`** |
+| `shop-owner` | 14 | **does not include `sales-create`** |
+
+Read the last two rows together: the pharmacy employee is the only role allowed
+to ring up a sale. `admin/pos/*` and `admin/dose/*` carry no `permission:` gate
+of their own, so `AdminMiddleware` is the till's only door.
+
+**Coverage of the fine-grained layer.** Of 289 named admin routes, **38 carry a
+`permission:` gate and 251 carry none**. For those 251 the coarse role check is
+the entire authorization decision — which is why `staff` being in the blanket
+allowlist meant any employee account could reach `users/delete-all`,
+`users/bulk-change-status`, `system-settings`, `gateways`, `roles` and `plans`.
+
+**Both obvious fixes were tried and both were wrong.**
+
+* *Allow staff wholesale* (the state before this review): the 251 ungated routes
+  are open to every employee.
+* *Deny staff wholesale*: the till switches off for the only role permitted to
+  use it. This is not theoretical — it turned 4 POS tests red
+  (`OperationsTest`: checkout with a promotion, drug-interaction warning, dose
+  label sheet with Code128, dose scan lookup) because `UserFactory`'s default
+  role is `staff` and those tests are the till's regression suite.
+
+**What is implemented instead.** Three tiers in `AdminMiddleware`:
+
+1. `shop-owner`, `superadmin`, `admin` → the whole panel (gates still apply).
+2. `staff` → **deny by default**, with two ways through:
+   * the matched route carries its own `permission:` / `role:` /
+     `role_or_permission:` gate → step aside and let that gate decide. This is
+     deliberate: it keeps `config/supabase.php` the single source of truth.
+     staff holds 8 of the 38 gated permissions (`deliveries-read/update`,
+     `sales-create`, `shifts-read/create/update`, `stocktake-read/create`) and is
+     refused the other 30 by the gate itself — `stocktake-update` and
+     `products-create` stay out of reach without `AdminMiddleware` duplicating
+     the map and drifting away from it;
+   * otherwise the first URI segment after `/admin/` is in
+     `AdminMiddleware::STAFF_OPERATIONAL` (21 entries, each one justified by a
+     matching ability in the config map).
+3. anything else (`customer`, …) → denied.
+
+Entries are **first URI segments**, so nested areas are reached through their
+parent: `device-setup/printers` via `device-setup`, `insurance/claims` via
+`insurance`, `profile/two-factor` via `profile`. Listing the child instead is a
+dead entry, and `SecurityHardeningTest::test_the_staff_allowlist_has_no_dead_entries`
+fails on those — that is how a route rename surfaces instead of quietly leaving
+staff locked out of a screen or, worse, leaving a stale name that a new
+administrative route could be added under.
+
+**Maintenance rule:** adding an entry to `STAFF_OPERATIONAL` widens what every
+staff account in every tenant can do, so it must be justified by an ability in
+`config/supabase.php` — not the other way round.
+
+**Open follow-up (not done here).** The durable fix for the 251 ungated routes is
+to gate them: add `permission:<ability>` using names that already exist in
+`config/supabase.php`, so every role is decided by one map instead of by a
+middleware allowlist. That is ~250 route edits and each wrong permission name is
+a lockout, so it needs its own review pass rather than riding along with a
+security batch. Until then the tier rule above is what contains `staff`, and the
+other roles are contained by their position in the map plus the 38 existing
+gates.
+
+**Test shape.** The tier boundaries are asserted against the middleware directly
+with a synthetic matched route (`SecurityHardeningTest::adminDecision()`), so the
+assertions are about the authorization decision and not about whether a
+controller happens to have its fixtures in order. The destructive endpoints are
+additionally asserted end-to-end over HTTP as JSON, so a denial is a visible 403
+and not a redirect a client would follow and misread as success.
 
 ---
 
