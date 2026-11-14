@@ -9,11 +9,22 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Hard block for the setup/update wizard shipped by `safiull/laravel-installer`.
  *
- * Why this exists
- * ---------------
- * That package registers its routes unconditionally from its own service
+ * Status: the package was REMOVED from composer.json and composer.lock on
+ * 2026-11-13, together with the 54 files it had published into this repository
+ * (config/installer.php, resources/views/vendor/installer/, public/installer/,
+ * public/assets/js/installer.js). This middleware deliberately survives that
+ * removal. It costs one string comparison per request, and it is what makes the
+ * removal durable: if the package ever comes back — through a composer require,
+ * a template update, or a merge from a branch that predates the removal — these
+ * prefixes stay dark instead of returning to the internet.
+ * `SupplyChainHardeningTest` fails the build if the dependency or its published
+ * files reappear; this is the runtime half of the same guard.
+ *
+ * Why the package had to go
+ * -------------------------
+ * It registered its routes unconditionally from its own service
  * provider (Laravel\LaravelInstaller\Providers\LaravelInstallerServiceProvider
- * calls loadRoutesFrom() in boot()). Its only guard is the `canInstall`
+ * called loadRoutesFrom() in boot()). Its only guard was the `canInstall`
  * middleware, which reduces to:
  *
  *     file_exists(storage_path('installed'))
@@ -39,7 +50,7 @@ use Symfony\Component\HttpFoundation\Response;
  * middleware is the layer that still holds when the app is served by
  * `artisan serve`, a different web server, or a platform router.
  *
- * @see RUNBOOK.md — "Setup wizard routes are blocked"
+ * @see RUNBOOK.md §10.2 — "Why the wizard was removed, and why three blocks stay"
  */
 class BlockInstallerRoutes
 {

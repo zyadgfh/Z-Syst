@@ -181,6 +181,40 @@ jobs:
         run: composer audit --locked || echo "::warning::composer audit reported advisories — see log above"
 
   # ------------------------------------------------------------------
+  # Frontend build — blocking. Two vite configs ship from this repo:
+  # vite.config.vercel.js builds the SPA Vercel serves from dist/, and
+  # vite.config.js builds the Laravel bundle into public/build/. Both are
+  # built here so a vite major bump or a stale package-lock.json cannot
+  # reach a deploy unnoticed. `npm ci` is the check that the lockfile and
+  # package.json agree — a hand-edited manifest fails here, not on Vercel.
+  #
+  # npm audit is a warning, matching composer-audit above: an advisory in a
+  # transitive dependency is not something a commit can always fix, and a
+  # red build nobody can act on gets ignored. The version floors that this
+  # project *can* control are asserted as blocking tests instead —
+  # see tests/Feature/SupplyChainHardeningTest.php.
+  # ------------------------------------------------------------------
+  frontend:
+    name: Frontend — npm ci + vite build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # Floor comes from vite 7 (node ^20.19.0 || >=22.12.0) and is
+          # declared in package.json#engines so the build host cannot drift.
+          node-version: '22'
+          cache: npm
+      - name: Install from the lockfile
+        run: npm ci --no-audit --no-fund
+      - name: Build the Vercel SPA
+        run: npm run build
+      - name: Build the Laravel bundle
+        run: npm run build:laravel
+      - name: Audit (informational)
+        run: npm audit || echo "::warning::npm audit reported advisories — see log above"
+
+  # ------------------------------------------------------------------
   # Flutter companion app — blocking: builds with the version pinned in
   # this workflow and runs a decoupled toolchain smoke test.
   # ------------------------------------------------------------------

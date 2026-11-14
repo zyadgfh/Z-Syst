@@ -438,7 +438,7 @@ removed in the same commit, which is what makes the removal visible in review.
 
 | Control | Where | Verified by |
 |---------|-------|-------------|
-| Setup/update wizard unreachable | `app/Http/Middleware/BlockInstallerRoutes.php` (global stack) + `docker/nginx.conf.template` (`location ~ ^/(install|update|envato)`) + `docker/entrypoint.sh` (`touch storage/installed`) | `SecurityHardeningTest::test_setup_wizard_routes_are_unreachable` |
+| Setup/update wizard gone, not just blocked | package removed from `composer.json`/`composer.lock`; published files deleted; `BlockInstallerRoutes` (global stack) + `docker/nginx.conf.template` + `touch storage/installed` kept as depth | `SupplyChainHardeningTest::test_the_setup_wizard_package_is_not_a_dependency`, `::test_no_published_installer_files_remain_in_the_repository`, `::test_the_route_table_contains_no_wizard_prefixes`; `SecurityHardeningTest::test_setup_wizard_routes_are_unreachable` |
 | Trusted proxies = private ranges only | `app/Http/Middleware/TrustProxies.php`, override with `TRUSTED_PROXIES` | `SecurityHardeningTest::test_trusted_proxies_*` |
 | Generated URLs are https in production | `app/Providers/AppServiceProvider.php` (`URL::forceScheme`) | manual: `route()` output on Render |
 | Payment price computed server-side | `app/Http/Controllers/Admin/GatewayPaymentController.php` (client `amount` ignored, read from `subscription_plans.price`) | `SecurityHardeningTest::test_gateway_allowlist_is_closed` covers the gateway half |
@@ -446,15 +446,26 @@ removed in the same commit, which is what makes the removal visible in review.
 | Upload allowlist (extension **and** sniffed MIME) | `config/integrations.php` → `integrations.uploads`, enforced by `app/Helpers/HasUploader.php::zsValidateUpload()` | manual: an `.svg` upload is rejected |
 | Uploaded files never behave as documents | `docker/nginx.conf.template` (`location ^~ /uploads/`: nosniff + `default-src 'none'; sandbox`, `Content-Disposition: attachment` for svg) | manual: open an uploaded svg directly |
 | Admin denials are visible to API callers | `app/Http/Middleware/AdminMiddleware.php` (403 JSON, redirect only for browsers) | `SecurityHardeningTest::test_admin_panel_denies_json_callers_with_403_instead_of_a_redirect` |
+| `staff` cannot reach `/admin` | `app/Http/Middleware/AdminMiddleware.php` allowlist = `shop-owner`, `superadmin`, `admin` | `SecurityHardeningTest::test_staff_cannot_reach_the_admin_panel`, `::test_tenant_owners_and_platform_admins_still_reach_the_admin_panel` |
+| No middleware rewrites request input | `SecurityCheck` deleted; `SecurityService::escapeString()` (addslashes) deleted | `SupplyChainHardeningTest::test_the_request_mutating_security_middleware_is_gone`, `::test_the_addslashes_helper_is_gone` |
+| User uploads are not in Git | `.gitignore` (`/public/uploads`, `/public/demo_images`), 202 files untracked | `SupplyChainHardeningTest::test_user_uploads_are_not_tracked` |
+| Dependency floors + a real build gate | `package.json` (`engines.node`, `overrides`), `composer.lock`, CI job `frontend` | `SupplyChainHardeningTest::test_locked_*`, `::test_the_grpc_override_survives_and_the_lock_honours_it`, `::test_the_node_runtime_is_pinned`; CI `frontend` |
+| No REPL in the production image | `laravel/tinker` moved to `require-dev` (dropped by `dump-autoload --no-dev`) | `SupplyChainHardeningTest::test_tinker_is_a_dev_dependency_only` |
 | Failed logins are audited | `app/Http/Requests/Auth/LoginRequest.php`, `app/Http/Controllers/Api/Auth/AuthController.php` → `AuditService::logFailedLogin()` (identifier only, never the password) | `audit_logs` rows with `action='failed_login'` |
 | Password-reset code lifetime | `ZSystForgotPasswordController::sendResetCode()` — 30 min, single use, tokens revoked after change | manual |
 | Marketing-site headers + strict CSP | `vercel.json` | Vercel deployment headers |
 | Full-history secret scan | `.github/workflows/secret-scan.yml` job `gitleaks-history` (`fetch-depth: 0`, `--log-opts=--all`) + `.gitleaks.toml` | the job summary on every push/PR |
 
-### 10.2 Why the wizard is blocked three times
+### 10.2 Why the wizard was removed, and why three blocks stay
 
-`safiull/laravel-installer` is in `composer.json` and registers its routes
-unconditionally from its own service provider. Its only guard is
+`safiull/laravel-installer` **was** in `composer.json`. It is not any more — it
+was removed outright on 2026-11-13 together with the 54 files it had published
+into the repository (`config/installer.php`, `resources/views/vendor/installer/`,
+`public/installer/`, `public/assets/js/installer.js`). What follows is why the
+removal was the right call and not just a config toggle.
+
+The package registered its routes
+unconditionally from its own service provider. Its only guard was
 `file_exists(storage_path('installed'))`, and that file is git-ignored — so a
 container booting on a fresh disk exposed:
 
@@ -466,10 +477,17 @@ container booting on a fresh disk exposed:
   comment in `src/Routes/web.php`; runs `migrate --force`, module seeds and clears
   every cache.
 
-Three independent layers refuse it (framework middleware, nginx, and the marker
-file) because any one of them can be bypassed by a deployment change: serving
-with `artisan serve`, moving to another platform, or mounting the disk read-only.
-The package itself is still installed — see §10.6 for the open decision.
+Three independent layers still refuse those prefixes (framework middleware,
+nginx, and the marker file) even though the package is gone. They cost one
+string comparison per request and they make the failure mode explicit: if the
+package is ever re-added — by a `composer require`, by a template update, by a
+merge from a branch that predates this one — the routes stay dark instead of
+coming back live. `SupplyChainHardeningTest` is what turns that from hope into a
+red build.
+
+The removal also drops `Auth::extend('sessionss', …)`, a second session guard
+the package registered from its own provider, and the Envy/`CheckToken` purchase
+code verification path that phoned home to Envato on every install check.
 
 ### 10.3 Uploads
 
@@ -490,8 +508,26 @@ served, which is the safe direction for item 18 but means a local-only upload is
 not visible at `/uploads/...` unless the cloud leg succeeded. Keep
 `UPLOADS_CLOUD_ENABLED=true` in production.
 
-nginx still hardens `/uploads/` because `public/uploads/` holds files committed
-before that split.
+nginx still hardens `/uploads/`.
+
+`public/uploads/` (109 files, 19 MB) and `public/demo_images/` (93 files) were
+committed before that split and are **no longer tracked** as of 2026-11-13 —
+this repository is public, and uploads can contain prescriptions and other
+tenant/patient data. The files stay on disk; only Git stops carrying them.
+
+Before untracking, every text/varchar/json/jsonb column of every `public` table
+in production was scanned for a reference to either path (`%uploads/%`,
+`%demo_images%`): **zero rows**, across the 23 image/attachment columns
+(`app_users.image`, `banners."imageUrl"`, `products.images`,
+`supplier_*`.{file_path,file_name,file_mime_type}, `testimonials.client_image`,
+…) and across all 59 json/jsonb columns. No Blade view or built asset references
+either directory. So nothing served from Git history was live. Re-run that check
+before ever re-tracking them:
+
+```sql
+select count(*) from <table> where <column>::text like '%uploads/%'
+                            or <column>::text like '%demo_images%';
+```
 
 ### 10.4 Payments
 
@@ -560,6 +596,141 @@ and pull request; its findings land in the job summary and in the
 `gitleaks-history-report` artifact. It is non-blocking because a historical
 finding cannot be fixed by the PR that happens to trigger it — it needs a
 rotation.
+
+### 10.8 Supply chain: what is installed, and the traps in changing it
+
+**PHP.** `composer.json` lost `safiull/laravel-installer` (§10.2) and moved
+`laravel/tinker` to `require-dev` — a REPL with full application access has no
+business being present in the production image, and `Dockerfile` already drops
+dev packages with `dump-autoload --optimize --no-dev`. `laravel/framework` was
+bumped **v12.69.3 → v12.71.0** in the lock, which closes GHSA-63hm-g96r-2m2q
+(low). The two tags differ *only* in `require-dev`
+(`orchestra/testbench-core`, `phpstan/phpstan`); `require`, `replace`,
+`conflict` and `provide` are byte-identical, so the patch carries no new runtime
+constraint. Result: **91 production packages (was 95), 42 dev (was 39)**, and no
+open advisory in the PHP graph.
+
+**Trap — the lock was edited by hand, so its `content-hash` had to be recomputed.**
+`composer validate --strict` (CI, `php-quality`) compares the hash in
+`composer.lock` against a hash of the *relevant keys* of `composer.json`
+(`name, version, require, require-dev, conflict, replace, provide,
+minimum-stability, prefer-stable, repositories, extra`, plus `config.platform`
+only when set, `ksort`ed, then `md5` of `json_encode` with **no whitespace and
+`/` escaped** — `JsonFile::encode($data, 0)`). Any other encoding gives a
+different hash and CI fails with "lock file is not up to date". If you have a
+local PHP/composer, just run `composer update --lock` and skip all of this.
+
+**Trap — dropping a package changes the dependency closure, and the closure rules
+are subtle.** `illuminate/*` are satisfied by `laravel/framework`'s `replace`,
+and virtual packages are `php`, `php-*` (**including `php-64bit`**), `ext-*`,
+`lib-*`, `hhvm*`, `composer-runtime-api`, `composer-plugin-api`. Getting
+`replace` wrong silently drops `phpoffice/phpspreadsheet`, `markbaker/*`,
+`composer/semver` and `ezyang/htmlpurifier` — i.e. the whole Excel chain.
+
+**npm.** `vite` **^3 → ^7.3.8** and `laravel-vite-plugin` **^0.7 → ^2.0.1**
+(resolved 7.3.8 / 2.1.0, esbuild 0.15.18 → 0.28.2). That clears the high
+`vite <=6.4.3` finding and the moderate `esbuild <=0.24.2` one
+(GHSA-67mh-4wv8-2f99 — the dev server answers cross-origin requests and leaks
+what it reads). Both are dev-server issues, but a developer's `npm run dev` is
+where they land. `@vercel/analytics` and `@dataconnect/generated` were dropped:
+neither is imported anywhere. `engines.node` was added (`>=22.12.0`) because
+vite 7 requires `^20.19.0 || >=22.12.0` and Vercel otherwise picks its own
+default — a default change becomes a build failure with no commit to explain it.
+
+**Trap — `overrides` looked like leftovers and was load-bearing.**
+`"@grpc/grpc-js": ">=1.13.6"` reads as if it existed for
+`@dataconnect/generated`. It does not: `@firebase/firestore` nests
+`@grpc/grpc-js <=1.13.5`, which carries two **high** advisories
+(GHSA-m9gg-hp2v-232j, GHSA-f596-whhp-79r4), and Firebase publishes no release
+that bumps it. Removing the override re-exposed 4 high findings; `npm audit fix
+--force` "resolves" them by **downgrading firebase to 9.14.0**. The override
+stays, and `SupplyChainHardeningTest::test_the_grpc_override_survives_and_the_lock_honours_it`
+fails the build if anyone deletes it again.
+
+**Trap — `firebase` is *not* unused.** It is easy to conclude otherwise, because
+nothing in the SPA imports it. `resources/js/app.js` → `resources/js/firebase.js`
+imports `firebase/app` and `firebase/firestore`, and that file is an input of
+`vite.config.js`. See the open decision below before removing it.
+
+**npm has no Dependabot coverage** (`.github/dependabot.yml` lists composer and
+pub only). The CI job `frontend` is the substitute: it runs `npm ci` — which is
+the check that `package-lock.json` and `package.json` still agree — then builds
+**both** vite configs, then reports `npm audit` as a warning. The audit is a
+warning for the same reason `composer-audit` is: an advisory in a transitive
+dependency is not always fixable by the PR that discovers it. The version floors
+this project *can* control are asserted as blocking PHPUnit tests instead.
+
+**Open decision — the Laravel-side frontend bundle appears to be dead.** No
+Blade view calls `@vite` or `vite()`, `resources/css/app.css` is **0 bytes**,
+`public/build` is git-ignored, and `Dockerfile` has no node/npm step at all — so
+the image never contains the bundle even if it were referenced. If that reading
+is right, `build:laravel`, `vite.config.js`, `laravel-vite-plugin`,
+`resources/js/*`, `resources/css/app.css` and the npm packages `firebase`,
+`tailwindcss`, `postcss`, `autoprefixer`, `@tailwindcss/forms`, `alpinejs`,
+`axios` and `lodash` are all dead weight (Alpine is loaded from a CDN in the
+Blade layouts, not from npm). Deleting them removes tracked files, so it is a
+product decision, not a security fix — it is deliberately *not* done here.
+
+**Open decision — `dataconnect/` and `src/dataconnect-generated/`.** These are
+the Firebase Data Connect **quickstart sample** (`createMovie`, `listUsers`,
+`addReview`) generated into the repo. Nothing outside that directory imports
+them. The npm dependency is gone; the 9 generated files and the `dataconnect/`
+example connector are still tracked.
+
+**Deployment note (found while verifying the above).** The Vercel project
+`z-syst` has two production deployments and **both failed**: the latest with
+`git_info_fail` (GitHub App installation 404 — the repo moved from `zyadgam` to
+`zyadgfh`, and `githubRepoId` changed), the earlier one with
+`STATIC_BUILD_NO_OUT_DIR`. Its only domain is `z-syst.vercel.app`; there is no
+custom domain, so `app.z-syst.com` (the value in `CORS_ALLOWED_ORIGINS`) is not
+served by Vercel. The hardened headers and CSP in `vercel.json` therefore protect
+a site that is not currently deployed. Reconnect the GitHub integration in the
+Vercel project settings before relying on any of it.
+
+### 10.9 Middleware that was removed on purpose
+
+`SecurityCheck` sat in the `web` group and did this to **every** request input:
+
+```php
+foreach ($request->all() as $k => $v) {
+    if (is_string($v)) { $request->merge([$k => $this->security->sanitizeHTML($v)]); }
+}
+```
+
+Three problems, in ascending order of seriousness:
+
+1. It is a regex blacklist. Blacklists miss encodings they were not written for,
+   so they never actually stop an attacker who reads them.
+2. It **mutates** the request. A product description containing the word
+   `select`, a clinical note containing `<3`, a JSON field with a `<` in it was
+   silently truncated on the way to the database. That is data corruption in a
+   pharmacy system, wearing a security costume — and it is invisible, because
+   nothing logs what it rewrote.
+3. Its security value was already zero: it only *logged* SQL-injection patterns
+   and its `abort(403)` was commented out.
+
+Removed by decision on 2026-11-13 (`app/Http/Middleware/SecurityCheck.php`
+deleted, its entry dropped from `App\Http\Kernel::$middlewareGroups['web']`).
+What actually protects the application, and what to point at if anyone proposes
+putting it back:
+
+| Threat | Real defence |
+|--------|--------------|
+| SQL injection | Eloquent's builder and bound parameters. Every `whereRaw`/`selectRaw` in the tree passes `?`; the five raw-SQL sites were audited individually. |
+| Stored/reflected XSS | Blade escapes on output by default. The five `{!! !!}` sites either emit server-generated barcode SVG (`barcodes/single`, `barcodes/multiple`, `admin/pos/dose-labels`) or pass through `App\Support\HtmlSanitizer::clean()` (two Landing pages). |
+| Upload abuse | Extension allowlist **and** finfo MIME sniffing in `HasUploader::zsValidateUpload()`, then nginx §10.3 headers. |
+
+Two services were deliberately **kept**:
+
+* `app/Services/SecurityService.php` — `tests/Feature/SecurityTest.php` exercises
+  ten of its methods. Its class docblock now states plainly that it is pattern
+  detection and logging, *not* a defence, and `escapeString()` (which was
+  `addslashes()` — not SQL escaping: it does not know the connection charset and
+  does not escape identifiers) was deleted so nobody reintroduces it.
+* `app/Services/XSSProtectionService.php` — `app/Providers/BladeServiceProvider`
+  registers `@cleanInput`, `@sanitizeURL`, `@safeAttribute` and `@stripTags`
+  from it. Those are opt-in Blade directives, i.e. the safe direction: a
+  template author chooses them, and they do not rewrite request input.
 
 ---
 

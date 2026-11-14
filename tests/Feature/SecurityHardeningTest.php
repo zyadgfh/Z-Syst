@@ -9,7 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * Guards for the pre-launch security review (items 4, 9, 12, 18, 19, 23).
+ * Guards for the pre-launch security review (items 2, 4, 9, 12, 18, 19, 23, 26).
  *
  * Each test exists because something in the codebase used to make the opposite
  * true; the comment on each one names what that was, so the test is not
@@ -95,6 +95,40 @@ class SecurityHardeningTest extends TestCase
         $this->actingAs($user)
             ->getJson('/admin')
             ->assertStatus(403);
+    }
+
+    /**
+     * 'staff' was in AdminMiddleware's allowlist until 2026-11-13. Staff are
+     * pharmacy employees: the API they belong to is the one the mobile app talks
+     * to (AuthController::login accepts staff and shop-owner). Letting the role
+     * into /admin handed every employee the whole back office — users,
+     * delete-all, bulk status changes, settings and gateway configuration —
+     * with only the per-route permission: gates (present on 56 of 58 admin
+     * controllers, absent on the other 2) standing in the way.
+     */
+    public function test_staff_cannot_reach_the_admin_panel(): void
+    {
+        $staff = User::factory()->create(['role' => 'staff']);
+
+        $this->actingAs($staff)->getJson('/admin')->assertStatus(403);
+        $this->actingAs($staff)->get('/admin')->assertStatus(403);
+    }
+
+    /**
+     * The roles that own a tenant keep their access, so the change above is a
+     * narrowing and not a lockout.
+     */
+    public function test_tenant_owners_and_platform_admins_still_reach_the_admin_panel(): void
+    {
+        foreach (['shop-owner', 'superadmin', 'admin'] as $role) {
+            $user = User::factory()->create(['role' => $role]);
+
+            $this->assertNotSame(
+                403,
+                $this->actingAs($user)->getJson('/admin')->getStatusCode(),
+                "role '$role' must pass AdminMiddleware"
+            );
+        }
     }
 
     /**

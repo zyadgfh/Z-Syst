@@ -11,16 +11,15 @@
         "laravel/framework": "^12.61.0",
         "laravel/prompts": "^0.3.0",
         "laravel/sanctum": "^4.0",
-        "laravel/tinker": "^2.8",
         "maatwebsite/excel": "^3.1.70",
         "nwidart/laravel-modules": "^12.0",
-        "safiull/laravel-installer": "^3.3",
         "spatie/laravel-permission": "^6.3"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
         "laravel/pint": "^1.0",
         "laravel/sail": "^1.18",
+        "laravel/tinker": "^2.8",
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^8.8",
         "phpunit/phpunit": "^11.0",

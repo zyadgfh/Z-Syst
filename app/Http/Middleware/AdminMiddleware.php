@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Coarse gate for the /admin panel.
+ * Coarse gate for the /admin panel: shop-owner, superadmin and admin only.
  *
  * This is the outer check only: 56 of the 58 admin controllers add a
  * `permission:<name>` gate of their own (Spatie), which is what actually decides
@@ -24,7 +24,14 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $allowed = ['shop-owner', 'staff', 'superadmin', 'admin'];
+        // 'staff' was in this list until 2026-11-13. Staff are pharmacy
+        // employees: they belong on the API the mobile app talks to
+        // (AuthController::login accepts staff and shop-owner), not on the
+        // whole /admin panel — including users/delete-all, bulk status
+        // changes, settings and gateway configuration. The permission: gates
+        // on 56 of 58 admin controllers are the fine-grained control; this is
+        // the coarse one, and it now matches the roles that own a tenant.
+        $allowed = ['shop-owner', 'superadmin', 'admin'];
         if (Auth::check() && in_array(Auth::user()->role, $allowed, true)) {
             return $next($request);
         }
