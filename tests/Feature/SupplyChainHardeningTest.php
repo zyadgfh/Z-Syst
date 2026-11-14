@@ -107,9 +107,9 @@ class SupplyChainHardeningTest extends TestCase
     /**
      * vite 3 pulled esbuild <= 0.24.2 (GHSA-67mh-4wv8-2f99, moderate) and vite
      * itself was <= 6.4.3 (high): the dev server answers cross-origin requests
-     * and leaks what it reads. `npm audit fix --force` "solves" the firebase
-     * finding by downgrading to firebase 9, so the manifests are asserted here
-     * instead of left to whoever runs audit next.
+     * and leaks what it reads. `npm audit fix --force` "solves" such a finding by
+     * downgrading across a major, so the floors this project controls are
+     * asserted here instead of left to whoever runs audit next.
      */
     public function test_locked_build_tooling_is_outside_the_advisory_ranges(): void
     {
@@ -127,49 +127,115 @@ class SupplyChainHardeningTest extends TestCase
             "locked esbuild is $esbuild; the advisory range is <= 0.24.2"
         );
 
-        $plugin = $this->npmLockedVersion('laravel-vite-plugin');
-        $this->assertNotNull($plugin, 'laravel-vite-plugin must be locked');
-        $this->assertTrue(
-            version_compare((string) $plugin, '2.0.0', '>='),
-            "locked laravel-vite-plugin is $plugin; 0.7.x peers vite ^3||^4 only"
-        );
     }
 
     /**
-     * @firebase/firestore nests @grpc/grpc-js <= 1.13.5 (GHSA-m9gg-hp2v-232j and
-     * GHSA-f596-whhp-79r4, both high) and Firebase ships no release that bumps
-     * it, so the override in package.json is the only mitigation. It reads like
-     * leftovers from the removed @dataconnect/generated dependency and is very
-     * easy to delete by accident — this is why it must not be.
+     * The Laravel-side vite bundle had no consumer in either deployment path.
+     * Blade layouts load static files through asset('css/...') and
+     * asset('assets/...') — no view calls @vite or vite(), nothing references
+     * /build/ — and `Dockerfile` has no node step, so the Render image never
+     * contained the output even if something had pointed at it. The Vercel SPA
+     * builds from the root index.html + src/ through vite.config.vercel.js,
+     * which imports no Laravel plugin; src/ imports no npm package at all.
+     *
+     * So the bundle went together with the nine packages only it used, and with
+     * them @grpc/grpc-js: firebase was the sole reason the override existed
+     * (@firebase/firestore nests <= 1.13.5 — GHSA-m9gg-hp2v-232j and
+     * GHSA-f596-whhp-79r4, both high). Dropping firebase removes the advisory
+     * instead of pinning around it. 191 packages left the tree and the SPA build
+     * output hashes were byte-identical before and after, which is the evidence
+     * that nothing consumed what was deleted.
+     *
+     * This asserts the removal holds. Re-adding a frontend that nothing serves
+     * is how the tree grew back to 219 packages in the first place.
      */
-    public function test_the_grpc_override_survives_and_the_lock_honours_it(): void
+    public function test_the_unconsumed_frontend_bundle_and_its_tree_stay_gone(): void
     {
         $package = $this->npmManifest();
-
-        $this->assertArrayHasKey('overrides', $package, 'the @grpc/grpc-js override is load-bearing, not legacy');
-        $this->assertArrayHasKey('@grpc/grpc-js', $package['overrides']);
-
         $lock = $this->npmLock();
-        $found = 0;
-        foreach ($lock['packages'] ?? [] as $path => $entry) {
-            if (! str_ends_with((string) $path, 'node_modules/@grpc/grpc-js')) {
-                continue;
-            }
-            $found++;
-            $this->assertTrue(
-                version_compare((string) ($entry['version'] ?? '0'), '1.13.6', '>='),
-                "$path resolved to ".($entry['version'] ?? '?').'; the advisory range is <= 1.13.5'
-            );
+
+        $this->assertArrayNotHasKey('overrides', $package, 'the @grpc override existed only for firebase, and firebase is gone');
+        $this->assertArrayNotHasKey('build:laravel', $package['scripts'] ?? [], 'there is no second frontend to build');
+
+        $dead = ['firebase', 'laravel-vite-plugin', 'tailwindcss', 'postcss', 'autoprefixer', '@tailwindcss/forms', 'alpinejs', 'axios', 'lodash'];
+        foreach ($dead as $name) {
+            $this->assertArrayNotHasKey($name, $package['dependencies'] ?? [], "$name was used only by the removed bundle");
+            $this->assertArrayNotHasKey($name, $package['devDependencies'] ?? [], "$name was used only by the removed bundle");
         }
 
-        $this->assertGreaterThan(0, $found, 'expected at least one @grpc/grpc-js entry in the lock');
+        foreach (array_keys($lock['packages'] ?? []) as $path) {
+            $this->assertStringNotContainsString('node_modules/firebase', (string) $path, 'firebase must not re-enter the lock');
+            $this->assertStringNotContainsString('@grpc/grpc-js', (string) $path, 'grpc arrived through firebase only');
+            $this->assertStringNotContainsString('laravel-vite-plugin', (string) $path);
+        }
+
+        $this->assertFileDoesNotExist(base_path('vite.config.js'));
+        $this->assertDirectoryDoesNotExist(resource_path('js'));
+        $this->assertDirectoryDoesNotExist(resource_path('css'));
+
+        // Neither config ever existed, which is the tell that those packages
+        // were never wired to anything.
+        $this->assertFileDoesNotExist(base_path('tailwind.config.js'));
+        $this->assertFileDoesNotExist(base_path('postcss.config.js'));
+    }
+
+    /**
+     * dataconnect/ and src/dataconnect-generated/ were the Firebase Data Connect
+     * quickstart sample: schema.gql is literally headed "Example schema for
+     * simple movie review app" and dataconnect.yaml points at a Cloud SQL
+     * instance (www-fdc, us-central1) unrelated to this project, which runs on
+     * Supabase in Frankfurt. Nothing outside those directories imported them. A
+     * generated client with a live-looking endpoint sitting in a public
+     * repository is an invitation rather than a harmless leftover.
+     */
+    public function test_the_data_connect_sample_is_not_in_the_tree(): void
+    {
+        $this->assertDirectoryDoesNotExist(base_path('dataconnect'));
+        $this->assertDirectoryDoesNotExist(base_path('src/dataconnect-generated'));
+
+        foreach (array_keys($this->npmLock()['packages'] ?? []) as $path) {
+            $this->assertStringNotContainsString('dataconnect', (string) $path);
+        }
+    }
+
+    /**
+     * `Modules/Landing` is enabled and serves 48 Blade views, but it shipped its
+     * own frontend build that nothing ran and nothing could have run:
+     * `vite.config.js` declared two inputs and one of them
+     * (`resources/assets/js/app.js`) does not exist, `public/build-landing/` was
+     * never produced, and the only mention of `build-landing` anywhere in the
+     * repository was that config file itself. No view calls `@vite` — the module
+     * loads `asset('assets/web/js/…')` and `asset('assets/js/…')`, static files
+     * that are tracked under `public/assets/`, exactly like the core layouts.
+     *
+     * The reason this is a security item and not just tidiness: its manifest
+     * pinned **vite ^4.0.0**, inside the `<= 6.4.3` high-severity range, with
+     * `laravel-vite-plugin ^0.7.5` and **no lockfile**. Root `npm ci` never
+     * installed it, so root `npm audit` never saw it — an advisory-range build
+     * tool parked where no scanner looks, waiting for whoever runs `npm install`
+     * in that directory next.
+     */
+    public function test_no_module_ships_its_own_unaudited_frontend_build(): void
+    {
+        $this->assertFileDoesNotExist(base_path('Modules/Landing/package.json'));
+        $this->assertFileDoesNotExist(base_path('Modules/Landing/vite.config.js'));
+
+        // Generalised: the root manifest is the only npm build definition in the
+        // application tree, so it is the only one CI installs and audits.
+        foreach (glob(base_path('Modules/*/package.json')) ?: [] as $stray) {
+            $this->fail("a module ships its own npm manifest outside the audited root: $stray");
+        }
+
+        foreach (glob(base_path('Modules/*/vite.config.js')) ?: [] as $stray) {
+            $this->fail("a module ships its own vite config outside the audited root: $stray");
+        }
     }
 
     /**
      * Nothing in the tree imports these. @vercel/analytics appeared only in its
      * own manifest line, and @dataconnect/generated is the generated client for
-     * dataconnect/example — the Firebase Data Connect quickstart sample.
-     * Unused dependencies are installed, patched and audited for no reason.
+     * the removed Data Connect sample. Unused dependencies are installed,
+     * patched and audited for no reason.
      */
     public function test_unused_runtime_packages_are_not_declared(): void
     {
@@ -178,7 +244,7 @@ class SupplyChainHardeningTest extends TestCase
 
         $this->assertArrayNotHasKey('@vercel/analytics', $dependencies);
         $this->assertArrayNotHasKey('@dataconnect/generated', $dependencies);
-        $this->assertArrayNotHasKey('@grpc/grpc-js', $dependencies, 'grpc is an override target, never a direct dependency');
+        $this->assertArrayNotHasKey('@grpc/grpc-js', $dependencies, 'grpc is never a direct dependency');
     }
 
     /**

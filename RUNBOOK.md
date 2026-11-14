@@ -451,7 +451,9 @@ removed in the same commit, which is what makes the removal visible in review.
 | `staff` confined to operational areas | `app/Http/Middleware/AdminMiddleware.php` — three tiers; staff is deny-by-default, passes a route that carries its own `permission:`/`role:` gate, or is in `STAFF_OPERATIONAL` (see §10.10) | `SecurityHardeningTest::test_staff_is_denied_the_administrative_back_office`, `::test_staff_keeps_the_till_and_the_operational_screens`, `::test_routes_with_their_own_gate_are_left_to_that_gate`, `::test_the_staff_allowlist_has_no_dead_entries`, `::test_tenant_owners_and_platform_admins_still_reach_the_admin_panel` |
 | No middleware rewrites request input | `SecurityCheck` deleted; `SecurityService::escapeString()` (addslashes) deleted | `SupplyChainHardeningTest::test_the_request_mutating_security_middleware_is_gone`, `::test_the_addslashes_helper_is_gone` |
 | User uploads are not in Git | `.gitignore` (`/public/uploads`, `/public/demo_images`), 202 files untracked | `SupplyChainHardeningTest::test_user_uploads_are_not_tracked` |
-| Dependency floors + a real build gate | `package.json` (`engines.node`, `overrides`), `composer.lock`, CI job `frontend` | `SupplyChainHardeningTest::test_locked_*`, `::test_the_grpc_override_survives_and_the_lock_honours_it`, `::test_the_node_runtime_is_pinned`; CI `frontend` |
+| Dependency floors + a real build gate | `package.json` (`engines.node`), `composer.lock`, CI job `frontend` | `SupplyChainHardeningTest::test_locked_*`, `::test_the_node_runtime_is_pinned`; CI `frontend` |
+| One npm build definition, and it is the audited one | root `package.json`/`package-lock.json` only — `vite.config.js`, `resources/js`, `resources/css` and `Modules/Landing/{package.json,vite.config.js}` removed (§10.8); firebase and its nested `@grpc/grpc-js` left the tree with them | `SupplyChainHardeningTest::test_the_unconsumed_frontend_bundle_and_its_tree_stay_gone`, `::test_no_module_ships_its_own_unaudited_frontend_build`, `::test_the_data_connect_sample_is_not_in_the_tree`; CI `frontend` "Assert the removed bundles did not come back" |
+| Every static asset a view names exists | `public/` is the serving contract for all Blade views (core + modules); the two unpublished pricing SVGs were copied in and the non-existent `demo-img.png` fallback repointed at `assets/img/icon/no-image.svg` | `LandingHomeTest::test_every_static_asset_a_blade_view_names_actually_exists` |
 | No REPL in the production image | `laravel/tinker` moved to `require-dev` (dropped by `dump-autoload --no-dev`) | `SupplyChainHardeningTest::test_tinker_is_a_dev_dependency_only` |
 | Failed logins are audited | `app/Http/Requests/Auth/LoginRequest.php`, `app/Http/Controllers/Api/Auth/AuthController.php` → `AuditService::logFailedLogin()` (identifier only, never the password) | `audit_logs` rows with `action='failed_login'` |
 | Password-reset code lifetime | `ZSystForgotPasswordController::sendResetCode()` — 30 min, single use, tokens revoked after change | manual |
@@ -734,45 +736,136 @@ neither is imported anywhere. `engines.node` was added (`>=22.12.0`) because
 vite 7 requires `^20.19.0 || >=22.12.0` and Vercel otherwise picks its own
 default — a default change becomes a build failure with no commit to explain it.
 
-**Trap — `overrides` looked like leftovers and was load-bearing.**
-`"@grpc/grpc-js": ">=1.13.6"` reads as if it existed for
-`@dataconnect/generated`. It does not: `@firebase/firestore` nests
+**Resolved trap — `overrides` looked like leftovers, was load-bearing, and is
+now genuinely gone.** `"@grpc/grpc-js": ">=1.13.6"` read as if it existed for
+`@dataconnect/generated`. It did not: `@firebase/firestore` nests
 `@grpc/grpc-js <=1.13.5`, which carries two **high** advisories
 (GHSA-m9gg-hp2v-232j, GHSA-f596-whhp-79r4), and Firebase publishes no release
-that bumps it. Removing the override re-exposed 4 high findings; `npm audit fix
---force` "resolves" them by **downgrading firebase to 9.14.0**. The override
-stays, and `SupplyChainHardeningTest::test_the_grpc_override_survives_and_the_lock_honours_it`
-fails the build if anyone deletes it again.
+that bumps it. Removing the override on its own re-exposed 4 high findings, and
+`npm audit fix --force` "resolves" them by **downgrading firebase to 9.14.0** —
+so for as long as firebase was a dependency, the override had to stay.
 
-**Trap — `firebase` is *not* unused.** It is easy to conclude otherwise, because
-nothing in the SPA imports it. `resources/js/app.js` → `resources/js/firebase.js`
-imports `firebase/app` and `firebase/firestore`, and that file is an input of
-`vite.config.js`. See the open decision below before removing it.
+That is no longer the situation, because firebase itself was removed with the
+bundle that consumed it (below). The advisory is now *absent* rather than pinned
+around, and `overrides` is gone from `package.json`.
+`SupplyChainHardeningTest::test_the_unconsumed_frontend_bundle_and_its_tree_stay_gone`
+asserts the absence of firebase, of every `@grpc/grpc-js` lock entry, and of the
+`overrides` key. **If firebase ever comes back, the override must come back in
+the same commit** — the test will fail until both are present or both are absent,
+which is the point.
+
+**Resolved trap — `firebase` was *not* unused, and now nothing uses it.** It was
+easy to conclude the package was dead, and that conclusion was wrong at the
+time: nothing in the SPA imported it, but `resources/js/app.js` →
+`resources/js/firebase.js` imported `firebase/app` and `firebase/firestore`, and
+that file was an input of `vite.config.js`. The correct question was not "does
+anything import firebase" but "does anything serve the bundle that imports it" —
+and the answer to that was no, in both deployment paths. Removing the bundle
+first is what made removing firebase safe. `src/` (the SPA Vercel actually
+serves) imports no npm package at all, so nothing was left referencing it; the
+SPA build output hashes were byte-identical before and after.
 
 **npm has no Dependabot coverage** (`.github/dependabot.yml` lists composer and
 pub only). The CI job `frontend` is the substitute: it runs `npm ci` — which is
 the check that `package-lock.json` and `package.json` still agree — then builds
-**both** vite configs, then reports `npm audit` as a warning. The audit is a
-warning for the same reason `composer-audit` is: an advisory in a transitive
-dependency is not always fixable by the PR that discovers it. The version floors
-this project *can* control are asserted as blocking PHPUnit tests instead.
+the one vite config that ships, then asserts the removed bundles did not come
+back, then reports `npm audit` as a warning. The audit is a warning for the same
+reason `composer-audit` is: an advisory in a transitive dependency is not always
+fixable by the PR that discovers it. The version floors this project *can*
+control are asserted as blocking PHPUnit tests instead.
 
-**Open decision — the Laravel-side frontend bundle appears to be dead.** No
-Blade view calls `@vite` or `vite()`, `resources/css/app.css` is **0 bytes**,
-`public/build` is git-ignored, and `Dockerfile` has no node/npm step at all — so
-the image never contains the bundle even if it were referenced. If that reading
-is right, `build:laravel`, `vite.config.js`, `laravel-vite-plugin`,
-`resources/js/*`, `resources/css/app.css` and the npm packages `firebase`,
-`tailwindcss`, `postcss`, `autoprefixer`, `@tailwindcss/forms`, `alpinejs`,
-`axios` and `lodash` are all dead weight (Alpine is loaded from a CDN in the
-Blade layouts, not from npm). Deleting them removes tracked files, so it is a
-product decision, not a security fix — it is deliberately *not* done here.
+**Removed — the Laravel-side frontend bundle (was an open decision).** It had no
+consumer in *either* deployment path, and that was verified rather than assumed:
 
-**Open decision — `dataconnect/` and `src/dataconnect-generated/`.** These are
-the Firebase Data Connect **quickstart sample** (`createMovie`, `listUsers`,
-`addReview`) generated into the repo. Nothing outside that directory imports
-them. The npm dependency is gone; the 9 generated files and the `dataconnect/`
-example connector are still tracked.
+| Path | How assets actually load |
+|---|---|
+| Render / `Dockerfile` (Blade UI) | `asset('css/…')` and `asset('assets/…')` → static files already tracked under `public/css/` and `public/assets/`. No view calls `@vite` or `vite()`; nothing references `/build/`. The image has **no node step**, so it never contained the bundle. |
+| Vercel (SPA) | root `index.html` + `src/` through `vite.config.vercel.js`, which imports no Laravel plugin. `src/` imports **no npm package at all** — only relative modules. |
+
+So `vite.config.js`, `resources/js/` (`app.js`, `bootstrap.js`, `firebase.js`),
+`resources/css/` and the `build:laravel` script were deleted along with the nine
+packages only that bundle used: `firebase`, `laravel-vite-plugin`, `tailwindcss`,
+`postcss`, `autoprefixer`, `@tailwindcss/forms`, `alpinejs`, `axios`, `lodash`.
+Neither `tailwind.config.js` nor `postcss.config.js` ever existed — the tell that
+tailwind and postcss were never wired to anything (Alpine is loaded from a CDN in
+the Blade layouts, not from npm).
+
+**191 packages left the tree** (lock: 276 → 85 entries), `npm audit` stays at 0,
+and the SPA build output hashes were **byte-identical before and after**
+(`index-CIFAAZVl.js`, `index-ldwyCBNe.css`) — which is the evidence that nothing
+consumed what was removed. `npm ci` + `npm run build` is all the frontend job
+needs now; it also asserts the bundle did not come back.
+
+Two consequences worth knowing:
+
+- **The `@grpc/grpc-js` override was deleted with it.** That override existed
+  *only* because `@firebase/firestore` nests `@grpc/grpc-js <= 1.13.5`
+  (GHSA-m9gg-hp2v-232j, GHSA-f596-whhp-79r4, both high) and Firebase shipped no
+  release bumping it. Removing firebase removes the advisory instead of pinning
+  around it. `SupplyChainHardeningTest::test_the_unconsumed_frontend_bundle_and_its_tree_stay_gone`
+  now asserts the *absence* of firebase, grpc, the override, both directories and
+  the script — the inverse of what it used to guard. If a frontend that genuinely
+  needs firebase comes back, re-add the override in the same commit.
+- **`resources/css/design-system.css` was not a stale copy of
+  `public/css/design-system.css`.** They share **18 lines out of 423** (130 rules
+  vs 177) — two different files with the same name. Only the `public/css/` one is
+  served. That is a confusion trap: editing the `resources/` one changes nothing
+  visible. Both copies of the name now resolve to the served file.
+
+`resources/js/firebase.js` is *not* a credential exposure, for the record: it
+read every value from `VITE_FIREBASE_*` and refused to initialize without them,
+and `firestore.rules` is **deny-all** (`allow read, write: if false`) with
+Supabase as the single source of truth. It was dead code, not a leak.
+
+**Removed — `dataconnect/` and `src/dataconnect-generated/`.** The Firebase Data
+Connect **quickstart sample** (`createMovie`, `listUsers`, `addReview`), 15
+tracked files. `schema/schema.gql` is literally headed *"Example schema for
+simple movie review app"*, and `dataconnect.yaml` points at Cloud SQL instance
+`www-fdc` in `us-central1` — unrelated to this project, which runs on Supabase in
+Frankfurt. Nothing outside those directories imported them; the npm dependency
+had already gone, leaving a stale `extraneous` entry in the lock that was cleaned
+out too. A generated client with a live-looking endpoint in a **public**
+repository is an invitation rather than a harmless leftover.
+`docs/PROJECT_FULL_ANALYSIS_AR.md` had its directory tree corrected to match.
+
+**Removed — `Modules/Landing`'s own frontend build.** The Landing module is
+enabled (`modules_statuses.json`) and serves 48 Blade views, and it shipped a
+*second* frontend definition next to the root one. It was dead on three
+independent counts: `vite.config.js` declared two inputs and one of them
+(`resources/assets/js/app.js`) **does not exist**, so the build could not have
+run; `public/build-landing/` was never produced; and the only occurrence of the
+string `build-landing` in the entire repository was that config file. No view in
+the module calls `@vite` — like every other view it loads `asset('assets/web/…')`
+and `asset('assets/js/…')` from `public/`.
+
+The security weight is the manifest, not the config: it pinned **`vite ^4.0.0`**
+— inside the `<= 6.4.3` high-severity range — plus `laravel-vite-plugin ^0.7.5`,
+`axios`, `sass` and `postcss`, with **no lockfile**. Root `npm ci` never
+installed it, so root `npm audit` never saw it: an advisory-range build tool
+parked exactly where no scanner looks, one `cd Modules/Landing && npm install`
+away from being real. Both files are gone;
+`SupplyChainHardeningTest::test_no_module_ships_its_own_unaudited_frontend_build`
+asserts no module grows one back. **`Modules/Landing/resources/assets/` was
+deliberately kept** — see below, it is not vite input.
+
+**Fixed — three broken images on the live public site.** Deleting the module's
+build meant proving what actually serves its pages, and comparing all 129 static
+`asset('…')` references in every Blade view against `public/` found three that
+resolve to nothing. A missing static asset is invisible to every other test: the
+page returns 200 and the HTML is well-formed.
+
+| Reference | State found | Fix |
+|---|---|---|
+| `assets/web/images/banner/plan-check.svg` | existed only under `Modules/Landing/resources/assets/…`, never published to `public/` — the tick on the **public pricing comparison table** rendered broken | copied to `public/assets/web/images/banner/` |
+| `assets/web/images/banner/plan-cross.svg` | same — the cross on the same table | copied to `public/assets/web/images/banner/` |
+| `assets/img/demo-img.png` | **did not exist anywhere in the repository**; used as the fallback in the public footer's social icons and two admin image previews | repointed at the already-tracked `assets/img/icon/no-image.svg` rather than inventing a new asset |
+
+`Modules/Landing/resources/assets/` therefore holds *published source assets*,
+not vite input — deleting it would have removed the only copy of the two SVGs.
+`LandingHomeTest::test_every_static_asset_a_blade_view_names_actually_exists`
+now scans every view root (core + all modules) and fails on any literal
+`asset('…')` that is not a real file under `public/`, so a new view is covered
+the moment it is written. All 101 literal references currently pass.
 
 **Deployment note (found while verifying the above).** The Vercel project
 `z-syst` has two production deployments and **both failed**: the latest with

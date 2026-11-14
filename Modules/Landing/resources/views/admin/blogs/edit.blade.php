@@ -52,7 +52,7 @@
                                                     class="form-control">
                                             </div>
                                             <div class="col-2 align-self-center mt-3">
-                                                <img src="{{ asset($blog->image ?? 'assets/img/demo-img.png') }}"
+                                                <img src="{{ asset($blog->image ?? 'assets/img/icon/no-image.svg') }}"
                                                     id="blog-image" class="table-img">
                                             </div>
                                         </div>
