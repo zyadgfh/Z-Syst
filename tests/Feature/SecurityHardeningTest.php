@@ -160,17 +160,47 @@ class SecurityHardeningTest extends TestCase
     /**
      * The deployment can still widen trust through the environment without a
      * code change, which is what makes the default safe to keep strict.
+     *
+     * proxies() hands Symfony the raw string and the framework splits it on
+     * commas, so readProxies() below normalises to an array — and the array is
+     * what gets asserted. This test first shipped comparing the bare string
+     * against that normalised array and failed on the type alone, so the
+     * assertion now states the contract instead of the accident.
      */
     public function test_trusted_proxies_can_be_overridden_by_environment(): void
     {
-        config()->set('app.env', 'testing');
-        putenv('TRUSTED_PROXIES=203.0.113.7');
-        $_ENV['TRUSTED_PROXIES'] = '203.0.113.7';
+        $this->setTrustedProxies('203.0.113.7');
+        $this->assertSame(['203.0.113.7'], $this->readProxies(new TrustProxies));
 
-        $this->assertSame('203.0.113.7', $this->readProxies(new TrustProxies));
+        // A comma separated override arrives as one string and is split, with
+        // the surrounding whitespace trimmed.
+        $this->setTrustedProxies('203.0.113.7, 198.51.100.9');
+        $this->assertSame(['203.0.113.7', '198.51.100.9'], $this->readProxies(new TrustProxies));
 
+        $this->clearTrustedProxies();
+
+        // With the override gone the documented defaults come back, so a stale
+        // value cannot leak into the next test.
+        $this->assertContains('10.0.0.0/8', $this->readProxies(new TrustProxies));
+        $this->assertCount(5, $this->readProxies(new TrustProxies));
+    }
+
+    /**
+     * env() reads through phpdotenv's repository, whose adapters are consulted
+     * in a fixed order ($_SERVER, then $_ENV, then getenv()). Set all three so
+     * the test does not depend on which adapter happens to win.
+     */
+    private function setTrustedProxies(string $value): void
+    {
+        putenv('TRUSTED_PROXIES='.$value);
+        $_ENV['TRUSTED_PROXIES'] = $value;
+        $_SERVER['TRUSTED_PROXIES'] = $value;
+    }
+
+    private function clearTrustedProxies(): void
+    {
         putenv('TRUSTED_PROXIES');
-        unset($_ENV['TRUSTED_PROXIES']);
+        unset($_ENV['TRUSTED_PROXIES'], $_SERVER['TRUSTED_PROXIES']);
     }
 
     /**
