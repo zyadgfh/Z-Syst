@@ -871,15 +871,51 @@ now scans every view root (core + all modules) and fails on any literal
 `asset('…')` that is not a real file under `public/`, so a new view is covered
 the moment it is written. All 101 literal references currently pass.
 
-**Deployment note (found while verifying the above).** The Vercel project
-`z-syst` has two production deployments and **both failed**: the latest with
-`git_info_fail` (GitHub App installation 404 — the repo moved from `zyadgam` to
-`zyadgfh`, and `githubRepoId` changed), the earlier one with
-`STATIC_BUILD_NO_OUT_DIR`. Its only domain is `z-syst.vercel.app`; there is no
-custom domain, so `app.z-syst.com` (the value in `CORS_ALLOWED_ORIGINS`) is not
-served by Vercel. The hardened headers and CSP in `vercel.json` therefore protect
-a site that is not currently deployed. Reconnect the GitHub integration in the
-Vercel project settings before relying on any of it.
+**Deployment note — the Vercel project is not deployable, and holds secrets it
+cannot use.** Found while verifying the above. Project `z-syst`
+(`prj_mgAB0jwxskozdMpzacRUaQLBuvx5`, team `team_CBA8jYMkUySLAjsYCnECK4AJ`) has
+two production deployments and **both failed**:
+
+| Deployment | Error | Cause |
+|---|---|---|
+| `dpl_D4CnAaSQyrHnHX2xjdBuDxHVboXY` | `git_info_fail` | GitHub returned 404 on `POST /app/installations/…/access_tokens`. The repository moved from `zyadgam/Z-Syst` (repoId 1304479586) to `zyadgfh/Z-Syst` (repoId 1331061422), so the stored installation points at an id that no longer exists. |
+| `dpl_7jMciGzkAnCgTajZe2UvTGuuknBH` | `STATIC_BUILD_NO_OUT_DIR` | earlier build produced no output directory |
+
+Its only domain is `z-syst.vercel.app` — there is **no custom domain**, so
+`app.z-syst.com` (the value in `CORS_ALLOWED_ORIGINS`, and the origin the Flutter
+and SPA clients are configured for) is served by something else entirely. The
+hardened headers and strict CSP in `vercel.json` therefore protect a site that is
+not currently deployed at all.
+
+Remediation, in order — the first step needs a human, it cannot be done through
+the API:
+
+1. **Re-link the GitHub App.** Vercel project → Settings → Git → *Disconnect*,
+   then reconnect and select `zyadgfh/Z-Syst`. Confirm the deployment metadata
+   picks up repoId 1331061422. Until this is done every deploy fails at
+   `git_info_fail` before it ever runs a build.
+2. **Decide what this project is.** `vercel.json` declares `framework: vite`,
+   `buildCommand: npm run build`, `outputDirectory: dist` — a static SPA, and the
+   repository has **no `api/` directory**, so there are no serverless functions to
+   consume a backend environment. Either (a) keep it as the SPA host and do step
+   3, or (b) attach the `app.z-syst.com` domain if that is what it is meant to
+   serve, and re-check `CORS_ALLOWED_ORIGINS` against whatever ends up behind it.
+3. **Prune the environment.** The project holds backend secrets that a Vite
+   static build cannot read — Vite inlines only `VITE_*`-prefixed variables, and
+   `src/` imports no npm package and reads no env var. Present but unusable:
+   `APP_KEY`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`,
+   `MAIL_PASSWORD`, `REDIS_PASSWORD`, `PUSHER_APP_SECRET`, the `TELESCOPE_*`
+   set, and the Supabase `POSTGRES_*` set. Every one of them is live exposure to
+   anyone with access to this Vercel project, for zero functionality — the
+   backend runs on Render (`z-syst-api`), which has its own copy. Remove them and
+   keep only what the SPA actually needs, which today is nothing beyond the
+   `VITE_*` keys. **This is deliberately not done from here:** deletion is not
+   reversible without re-entering each value by hand, and that is a decision to
+   make in the dashboard with the values in front of you.
+4. **Then re-verify the headers.** After a successful deploy, confirm the
+   `vercel.json` header block is actually applied (`curl -I
+   https://z-syst.vercel.app`) — a strict CSP that never ships is the same as no
+   CSP.
 
 ### 10.9 Middleware that was removed on purpose
 
