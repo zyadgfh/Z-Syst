@@ -4,10 +4,10 @@ The supplied audit describes `main` at `aba23cd6`, not this branch. Its line num
 
 ## Source findings addressed on this branch
 
-- **P0-2 (partial):** `StoreSaleRequest` already requires positive integer quantities, and the API uses the authenticated user ID. Sale creation now derives total and due from line prices and quantities, rejects invalid quantities/payments, rejects missing stock, locks stock before allocation, and prorates FEFO profit across batches. Line prices, discounts and tax remain client-supplied; sale updates, authoritative price/tax rules, FEFO concurrency and real database behavior require further work and testing. There is no `Admin/PosController.php` in this branch, so the report's specific P0-1 path does not map directly.
+- **P0-2 (partial):** `StoreSaleRequest` already requires positive integer quantities, and the API uses the authenticated user ID. Sale creation now derives total and due from line prices and quantities, rejects invalid quantities/payments, rejects missing stock, locks stock before allocation, and prorates FEFO profit across batches. Sale updates now recalculate totals and validate batches; sale cash balance tracks paid amounts without applying revenue twice. Line prices, discounts and tax remain client-supplied; authoritative price/tax rules, FEFO concurrency and real database behavior require further work and testing. Historical cash balances are not automatically reconciled. There is no `Admin/PosController.php` in this branch, so the report's specific P0-1 path does not map directly.
 - **P0-8:** notification reads are scoped to the authenticated user's notifications, with local-path-only redirect handling.
 - **P1-6:** transfer creation derives business and user from the session, validates the business of warehouses and product, and scopes listing, detail and actions. Completion/cancellation lock the transfer; completion also locks source stock. These paths still require integration and concurrency tests against the target databases.
-- **P0-9 (partial):** daily statistics use portable `DATE(...)` and quoted identifiers; low-stock `HAVING` uses the aggregate expression rather than its alias. Other MySQL-only reporting queries remain, including dashboard and purchase-report queries.
+- **P0-9 (partial):** daily statistics use portable `DATE(...)` and quoted identifiers; low-stock `HAVING` uses the aggregate expression rather than its alias. Additional dashboard and purchase-report date groupings were rewritten for SQLite, MySQL and PostgreSQL; they require execution tests on each driver.
 
 ## Findings different from the report
 
@@ -20,6 +20,6 @@ The supplied audit describes `main` at `aba23cd6`, not this branch. Its line num
 ## Still open / not verified
 
 - Authoritative sale price, tax and discount policy; sale update and refund accounting; FEFO and transfer concurrency on PostgreSQL; previously recorded financial data.
-- PostgreSQL compatibility of the remaining reports and a PostgreSQL CI job; model/schema mismatches and index coverage; role/permission system and admin route coverage.
+- PostgreSQL execution tests for reporting and a PostgreSQL CI job; model/schema mismatches and index coverage; role/permission system and admin route coverage.
 - Dependency audit, Sanctum token lifecycle, access policy for staff, frontend asset pipeline, RLS policies, queue configuration, Flutter checks, and end-to-end testing.
 - Laravel/PHPUnit tests and migrations have **not** been run on this branch in this environment. Syntax checks and front-end build do not prove runtime behavior. No live Supabase, Firebase, or production data was changed by this review.

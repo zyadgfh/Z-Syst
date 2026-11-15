@@ -165,4 +165,25 @@ class SaleStockIntegrationTest extends TestCase
             ->allocate($stale, 2, \App\Models\Sale::class, 1, $this->user->id);
     }
 
+    public function test_cash_balance_tracks_paid_amount_once_through_sale_lifecycle(): void
+    {
+        $this->business->update(['remainingShopBalance' => 1000, 'shopOpeningBalance' => 1000]);
+        $party = Party::factory()->create(['business_id' => $this->business->id]);
+        $data = [
+            'party_id' => $party->id,
+            'saleDate' => now()->toDateString(),
+            'paidAmount' => 50,
+            'products' => [['product_id' => $this->product->id, 'batch_no' => 'BATCH-001', 'quantities' => 2, 'price' => 50, 'lossProfit' => 0]],
+        ];
+        $sale = $this->saleService->create($data, $this->business->id, $this->user->id);
+        $this->assertEquals(1050, $this->business->fresh()->remainingShopBalance);
+        $data['paidAmount'] = 100;
+        $sale = $this->saleService->update($sale, $data, $this->business->id, $this->user->id);
+        $this->assertEquals(1100, $this->business->fresh()->remainingShopBalance);
+        $this->assertEquals(0, $party->fresh()->due);
+        $this->saleService->delete($sale, $this->business->id, $this->user->id);
+        $this->assertEquals(1000, $this->business->fresh()->remainingShopBalance);
+        $this->assertEquals(1000, $this->business->fresh()->shopOpeningBalance);
+    }
+
 }

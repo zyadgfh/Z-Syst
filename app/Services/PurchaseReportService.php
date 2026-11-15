@@ -66,19 +66,17 @@ class PurchaseReportService
 
     public function getPurchaseTrends(int $businessId, string $period = 'monthly'): array
     {
-        $query = PurchaseOrder::forBusiness($businessId);
+        $group = match ($period) {
+            'monthly' => 'month',
+            'yearly' => 'year',
+            default => throw new \InvalidArgumentException('Unsupported purchase trend period'),
+        };
+        // Purchase orders have no order_date column; created_at is their creation date.
+        $bucket = \App\Support\SqlDateBucket::expression('created_at', $group);
 
-        if ($period === 'monthly') {
-            $query->selectRaw('DATE_FORMAT(order_date, "%Y-%m") as period, COUNT(*) as total, SUM(total_amount) as amount')
-                ->groupBy('period')
-                ->orderBy('period');
-        } elseif ($period === 'yearly') {
-            $query->selectRaw('YEAR(order_date) as period, COUNT(*) as total, SUM(total_amount) as amount')
-                ->groupBy('period')
-                ->orderBy('period');
-        }
-
-        return $query->get()->toArray();
+        return PurchaseOrder::forBusiness($businessId)
+            ->selectRaw("$bucket as period, COUNT(*) as total, SUM(total_amount) as amount")
+            ->groupBy('period')->orderBy('period')->get()->toArray();
     }
 
     public function getCostVariance(int $businessId): array

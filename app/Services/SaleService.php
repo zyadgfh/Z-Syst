@@ -43,9 +43,7 @@ class SaleService
 
         if ($batchNo) {
             $stock = $productStocks->first(fn ($item) => $item->batch_no === $batchNo);
-            if ($stock) {
-                return $stock;
-            }
+            return $stock;
         }
 
         return $productStocks->first();
@@ -73,29 +71,34 @@ class SaleService
             ->paginate($perPage);
     }
 
+    /** Calculate totals consistently for creation and updates; line prices and tax remain policy inputs. */
+    private function normalizeSaleAmounts(array $data): array
+    {
+        $subtotal = 0;
+        foreach ($data['products'] as $line) {
+            if (! isset($line['quantities'], $line['price']) || ! is_numeric($line['quantities'])
+                || (int) $line['quantities'] != $line['quantities'] || (int) $line['quantities'] < 1
+                || ! is_numeric($line['price']) || (float) $line['price'] < 0) {
+                throw new \InvalidArgumentException('Invalid sale quantity or price');
+            }
+            $subtotal += (int) $line['quantities'] * (float) $line['price'];
+        }
+        $total = round($subtotal - (float) ($data['discountAmount'] ?? 0) + (float) ($data['tax_amount'] ?? 0), 2);
+        $paid = round((float) ($data['paidAmount'] ?? 0), 2);
+        if ($total < 0 || $paid < 0 || $paid > $total) {
+            throw new \InvalidArgumentException('Invalid sale total or payment');
+        }
+        $data['totalAmount'] = $total;
+        $data['paidAmount'] = $paid;
+        $data['dueAmount'] = round($total - $paid, 2);
+        $data['isPaid'] = $data['dueAmount'] == 0;
+        return $data;
+    }
+
     public function create(array $data, int $businessId, int $userId): Sale
     {
         return DB::transaction(function () use ($data, $businessId, $userId) {
-            // Calculate totals from line quantities and prices rather than trusting a client total.
-            // Prices, discounts and tax are still supplied by the client and require a separate pricing policy.
-            $subtotal = 0;
-            foreach ($data['products'] as $line) {
-                if (! isset($line['quantities'], $line['price']) || ! is_numeric($line['quantities'])
-                    || (int) $line['quantities'] != $line['quantities'] || (int) $line['quantities'] < 1
-                    || ! is_numeric($line['price']) || (float) $line['price'] < 0) {
-                    throw new \InvalidArgumentException('Invalid sale quantity or price');
-                }
-                $subtotal += (int) $line['quantities'] * (float) $line['price'];
-            }
-            $total = round($subtotal - (float) ($data['discountAmount'] ?? 0) + (float) ($data['tax_amount'] ?? 0), 2);
-            $paid = round((float) ($data['paidAmount'] ?? 0), 2);
-            if ($total < 0 || $paid < 0 || $paid > $total) {
-                throw new \InvalidArgumentException('Invalid sale total or payment');
-            }
-            $data['totalAmount'] = $total;
-            $data['paidAmount'] = $paid;
-            $data['dueAmount'] = round($total - $paid, 2);
-            $data['isPaid'] = $data['dueAmount'] == 0;
+            $data = $this->normalizeSaleAmounts($data);
 
             $fefoSettings = \App\Models\FefoSetting::getForBusiness($businessId);
 
@@ -177,7 +180,7 @@ class SaleService
                 ]);
             }
 
-            $business = Business::findOrFail($businessId);
+            $business = Business::whereKey($businessId)->lockForUpdate()->firstOrFail();
             $business_name = $business->companyName;
             
             if(!empty($data['paidAmount'])){
@@ -326,41 +329,35 @@ class SaleService
     public function update(Sale $sale, array $data, int $businessId, int $userId)
     {
         return DB::transaction(function () use ($sale, $data, $businessId, $userId) {
+            $sale = Sale::where('business_id', $businessId)->lockForUpdate()->findOrFail($sale->id);
+            $data = $this->normalizeSaleAmounts($data);
+            if ($data['dueAmount'] > 0 && empty($data['party_id'])) {
+                throw new BusinessRuleException(ErrorCode::BUSINESS_DUE_SALE_WALKING_CUSTOMER, __('errors.due_sale_walking_customer'), ['due_amount' => $data['dueAmount']]);
+            }
             $prevDetails = SaleDetails::where('sale_id', $sale->id)->get();
             $productIds = collect($data['products'])->pluck('product_id')->filter()->unique()->values()->all();
             $allProductIds = collect([...$productIds, ...$prevDetails->pluck('product_id')->all()])->filter()->unique()->values()->all();
             $businessStocks = $this->loadBusinessStocks($businessId, $allProductIds);
-            $products = \App\Models\Product::select('id', 'productName')->whereIn('id', $productIds)->get();
-
-            foreach ($products as $key => $product) {
-                $productData = $data['products'][$key];
-                $prevProduct = $prevDetails->first(fn($item) => $item->product_id == $product->id);
-                $stock = $this->resolveStockForProduct($businessStocks, $product->id, $productData['batch_no'] ?? null);
-
-                $productStock = $stock ? ($stock->productStock + ($prevProduct ? $prevProduct->quantities : 0)) : 0;
-                $requestedQty = (int) $productData['quantities'];
-
-                if ($productStock < $requestedQty) {
-                    throw new BusinessRuleException(
-                        ErrorCode::BUSINESS_INSUFFICIENT_STOCK,
-                        __('errors.insufficient_stock', [
-                            'product' => $product->productName,
-                            'batch' => $productData['batch_no'] ?? 'N/A',
-                            'available' => $productStock,
-                            'requested' => $requestedQty,
-                        ]),
-                        [
-                            'product_id' => $product->id,
-                            'batch_no' => $productData['batch_no'] ?? null,
-                            'available_qty' => $productStock,
-                            'requested_qty' => $requestedQty,
-                        ]
-                    );
+            foreach ($data['products'] as $productData) {
+                $productId = (int) $productData['product_id'];
+                $stock = $this->resolveStockForProduct($businessStocks, $productId, $productData['batch_no'] ?? null);
+                $previousQuantity = $prevDetails->filter(function ($item) use ($productId, $stock) {
+                    return $stock && $item->product_id == $productId && $item->batch_no === $stock->batch_no;
+                })->sum('quantities');
+                $available = ($stock ? $stock->productStock : 0) + $previousQuantity;
+                $requested = (int) $productData['quantities'];
+                if ($available < $requested) {
+                    throw new BusinessRuleException(ErrorCode::BUSINESS_INSUFFICIENT_STOCK,
+                        __('errors.insufficient_stock', ['product' => $productId, 'batch' => $productData['batch_no'] ?? 'N/A', 'available' => $available, 'requested' => $requested]),
+                        ['product_id' => $productId, 'available_qty' => $available, 'requested_qty' => $requested]);
                 }
             }
 
             foreach ($prevDetails as $prevItem) {
                 $stock = $this->resolveStockForProduct($businessStocks, $prevItem->product_id, $prevItem->batch_no);
+                if (! $stock) {
+                    throw new \App\Exceptions\StockUnavailableException('Original stock batch not found');
+                }
                 if ($stock) {
                     $this->stockAllocationService->release($stock, $prevItem->quantities, Sale::class, $sale->id, $userId, 'Stock restored during sale update');
                 }
@@ -383,6 +380,9 @@ class SaleService
                 ];
 
                 $stock = $this->resolveStockForProduct($businessStocks, $productData['product_id'], $productData['batch_no'] ?? null);
+                if (! $stock) {
+                    throw new \App\Exceptions\StockUnavailableException('Requested stock batch not found');
+                }
                 if ($stock) {
                     $this->stockAllocationService->allocate($stock, $requestedQty, Sale::class, $sale->id, $userId, 'Stock deducted during sale update');
                 }
@@ -390,28 +390,26 @@ class SaleService
 
             SaleDetails::insert($saleDetails);
 
-            $dueAmount = $data['dueAmount'] ?? 0;
-            if ($sale->dueAmount || $dueAmount) {
-                $partyId = $data['party_id'] ?? null;
-                if ($partyId) {
-                    $party = Party::where('id', $partyId)->where('business_id', $businessId)->firstOrFail();
-                    $party->update([
-                        'due' => $partyId == $sale->party_id ? (($party->due - $sale->dueAmount) + $dueAmount) : ($party->due + $dueAmount),
-                    ]);
-
-                    if ($partyId != $sale->party_id && $sale->party_id) {
-                        $prevParty = Party::where('id', $sale->party_id)->where('business_id', $businessId)->firstOrFail();
-                        $prevParty->update([
-                            'due' => $prevParty->due - $sale->dueAmount,
-                        ]);
-                    }
-                }
+            $dueAmount = $data['dueAmount'];
+            $newPartyId = $data['party_id'] ?? null;
+            $partyIds = array_values(array_unique(array_filter([$sale->party_id, $newPartyId])));
+            sort($partyIds);
+            $parties = Party::where('business_id', $businessId)->whereIn('id', $partyIds)
+                ->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            if (count($partyIds) !== $parties->count()) {
+                throw new \InvalidArgumentException('Customer does not belong to this business');
+            }
+            if ($sale->party_id) {
+                $parties[$sale->party_id]->decrement('due', $sale->dueAmount);
+            }
+            if ($newPartyId && $dueAmount > 0) {
+                $parties[$newPartyId]->increment('due', $dueAmount);
             }
 
-            $business = Business::findOrFail($businessId);
+            $business = Business::whereKey($businessId)->lockForUpdate()->firstOrFail();
             $paidAmount = $data['paidAmount'] ?? 0;
             $business->update([
-                'shopOpeningBalance' => ($business->shopOpeningBalance - $sale->paidAmount) + $paidAmount,
+                'remainingShopBalance' => ($business->remainingShopBalance - $sale->paidAmount) + $paidAmount,
             ]);
 
             $lossProfit = collect($data['products'])->pluck('lossProfit')->toArray();
@@ -441,6 +439,7 @@ class SaleService
     public function delete(Sale $sale, int $businessId, int $userId)
     {
         return DB::transaction(function () use ($sale, $businessId, $userId) {
+            $sale = Sale::where('business_id', $businessId)->lockForUpdate()->findOrFail($sale->id);
             $productIds = $sale->details->pluck('product_id')->filter()->unique()->values()->all();
             $businessStocks = $this->loadBusinessStocks($businessId, $productIds);
 
@@ -466,7 +465,7 @@ class SaleService
             }
 
             if ($sale->dueAmount && $sale->party_id) {
-                $party = Party::find($sale->party_id);
+                $party = Party::where('business_id', $businessId)->whereKey($sale->party_id)->lockForUpdate()->first();
                 if ($party) {
                     $party->update([
                         'due' => $party->due - $sale->dueAmount,
@@ -474,9 +473,9 @@ class SaleService
                 }
             }
 
-            $business = Business::findOrFail($businessId);
+            $business = Business::whereKey($businessId)->lockForUpdate()->firstOrFail();
             $business->update([
-                'shopOpeningBalance' => $business->shopOpeningBalance - $sale->paidAmount,
+                'remainingShopBalance' => $business->remainingShopBalance - $sale->paidAmount,
             ]);
 
             // Delete associated financial transactions

@@ -22,9 +22,9 @@ class FinancialTransactionService
      * @return FinancialTransaction
      * @throws \Exception
      */
-    public function recordTransaction(array $data, int $businessId): FinancialTransaction
+    public function recordTransaction(array $data, int $businessId, bool $adjustBalance = true): FinancialTransaction
     {
-        return $this->executeTransaction(function () use ($data, $businessId) {
+        return $this->executeTransaction(function () use ($data, $businessId, $adjustBalance) {
             $transaction = FinancialTransaction::create([
                 'business_id' => $businessId,
                 'branch_id' => $data['branch_id'] ?? null,
@@ -40,13 +40,13 @@ class FinancialTransactionService
                 'notes' => $data['notes'] ?? null,
             ]);
 
-            // Update business balance with explicit assignment for safety
-            $business = Business::findOrFail($businessId);
-            $newBalance = $data['type'] === 'revenue' 
-                ? $business->remainingShopBalance + $data['amount']
-                : $business->remainingShopBalance - $data['amount'];
-            
-            $business->update(['remainingShopBalance' => $newBalance]);
+            if ($adjustBalance) {
+                $business = Business::whereKey($businessId)->lockForUpdate()->firstOrFail();
+                $newBalance = $data['type'] === 'revenue'
+                    ? $business->remainingShopBalance + $data['amount']
+                    : $business->remainingShopBalance - $data['amount'];
+                $business->update(['remainingShopBalance' => $newBalance]);
+            }
 
             return $transaction->fresh();
         });
@@ -356,7 +356,7 @@ class FinancialTransactionService
                 'category' => 'sales',
                 'payment_method' => $sale->paymentType,
                 'branch_id' => $sale->branch_id ?? null,
-            ], $businessId);
+            ], $businessId, false);
         });
     }
 
@@ -388,12 +388,14 @@ class FinancialTransactionService
     }
 
     /**
-     * Delete all financial transactions linked to a given purchase.
+     * Delete transactions belonging to the given sale or purchase.
+     * Balance reconciliation remains the caller's responsibility.
      */
-    public function deleteTransactionFor(\App\Models\Purchase $purchase): bool
+    public function deleteTransactionFor(\App\Models\Purchase|\App\Models\Sale $record): bool
     {
-        return FinancialTransaction::where('reference_type', 'purchase')
-            ->where('reference_id', $purchase->id)
+        return FinancialTransaction::where('business_id', $record->business_id)
+            ->where('reference_type', $record instanceof \App\Models\Sale ? 'sale' : 'purchase')
+            ->where('reference_id', $record->id)
             ->delete() > 0;
     }
 }
