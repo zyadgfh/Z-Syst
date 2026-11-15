@@ -9,6 +9,7 @@ use Illuminate\Auth\SessionGuard;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,6 +30,23 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+
+        // Every production URL this application generates must be https.
+        //
+        // The container sits behind Render's proxy, which terminates TLS and
+        // forwards plain HTTP to nginx. Whether Laravel sees the request as
+        // secure therefore depends entirely on X-Forwarded-Proto being trusted
+        // (see App\Http\Middleware\TrustProxies, which trusts private ranges
+        // only — a client-supplied header must not be able to flip the scheme).
+        // Forcing the scheme removes that dependency for generated URLs: no
+        // http:// redirect, no http:// asset, no http:// callback handed to a
+        // payment gateway. HSTS in SecurityHeaders covers the browser side.
+        //
+        // Guarded on production so the test suite (APP_ENV=testing, sqlite
+        // in-memory) keeps building plain http URLs against APP_URL.
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
 
         Product::observe(ModelAuditObserver::class);
 

@@ -181,6 +181,58 @@ jobs:
         run: composer audit --locked || echo "::warning::composer audit reported advisories — see log above"
 
   # ------------------------------------------------------------------
+  # Frontend build — blocking. Exactly one vite config ships from this repo:
+  # vite.config.vercel.js builds the SPA that Vercel serves from dist/. The
+  # second config (vite.config.js, the Laravel bundle) and the Landing module's
+  # own manifest were removed — see RUNBOOK §10.8. `npm ci` is the check that
+  # the lockfile and package.json agree — a hand-edited manifest fails here,
+  # not on Vercel. The step below asserts the removals hold.
+  #
+  # npm audit is a warning, matching composer-audit above: an advisory in a
+  # transitive dependency is not something a commit can always fix, and a
+  # red build nobody can act on gets ignored. The version floors that this
+  # project *can* control are asserted as blocking tests instead —
+  # see tests/Feature/SupplyChainHardeningTest.php.
+  # ------------------------------------------------------------------
+  frontend:
+    name: Frontend — npm ci + vite build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # Floor comes from vite 7 (node ^20.19.0 || >=22.12.0) and is
+          # declared in package.json#engines so the build host cannot drift.
+          node-version: '22'
+          cache: npm
+      - name: Install from the lockfile
+        run: npm ci --no-audit --no-fund
+      - name: Build the Vercel SPA
+        run: npm run build
+      # There is deliberately no second build step. The Laravel-side vite bundle
+      # (vite.config.js + resources/js + resources/css) had no consumer in
+      # either deployment path: Blade layouts load static files through
+      # asset('css/...') / asset('assets/...'), and the Dockerfile has no node
+      # step, so the image never contained the output. It was removed along with
+      # the nine npm packages only it used. SupplyChainHardeningTest asserts it
+      # stays gone; re-adding a build step here without a consumer would be the
+      # same dead weight returning.
+      - name: Assert the removed bundles did not come back
+        run: |
+          test ! -e vite.config.js
+          test ! -d resources/js
+          ! npm run | grep -q 'build:laravel'
+          # The Landing module shipped its own manifest pinning vite ^4 (inside
+          # the high advisory range) with no lockfile, so no audit ever saw it —
+          # and its vite.config.js declared an input that does not exist, so it
+          # could not have built anyway. Its 48 Blade views load static files
+          # through asset('assets/...'), like every other view in the repo.
+          test ! -e Modules/Landing/package.json
+          test ! -e Modules/Landing/vite.config.js
+      - name: Audit (informational)
+        run: npm audit || echo "::warning::npm audit reported advisories — see log above"
+
+  # ------------------------------------------------------------------
   # Flutter companion app — blocking: builds with the version pinned in
   # this workflow and runs a decoupled toolchain smoke test.
   # ------------------------------------------------------------------

@@ -1,6 +1,8 @@
 # ---- Laravel core ----
 /node_modules
 /public/build
+# Vercel SPA build output (vite.config.vercel.js writes here); built on deploy.
+/dist
 /public/hot
 /vendor
 npm-debug.log
@@ -40,8 +42,15 @@ routes.txt
 temp_*.html
 
 # ---- User uploads belong on object storage (Supabase Storage / S3) ----
-# Existing tracked files are intentionally kept until migrated; new ones stay out.
+# Runtime artifacts, not source. They used to be tracked; they are not any
+# more: this repository is public and uploads can carry prescriptions and
+# other tenant/patient data. Verified safe to untrack on 2026-11-13 — every
+# text/json/jsonb column of every public table in production was scanned and
+# no row references uploads/ or demo_images, and no Blade view or built asset
+# references either directory. New uploads stay out of Git; a deploy image no
+# longer carries the old ones.
 /public/uploads
+/public/demo_images
 
 # ---- OS / editor junk ----
 .DS_Store

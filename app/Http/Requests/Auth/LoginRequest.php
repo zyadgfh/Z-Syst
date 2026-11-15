@@ -74,12 +74,34 @@ class LoginRequest extends FormRequest
         if (! Auth::attempt($credentials, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
+            // Auditing a rejected login is what makes a credential-stuffing run
+            // visible after the fact: the rate limiter forgets its counter after
+            // a minute, audit_logs does not. Only the identifier is recorded —
+            // never the password, never the captcha token.
+            $this->auditFailedLogin($credentials['email']);
+
             throw ValidationException::withMessages([
                 'email' => $this->failureMessage(),
             ]);
         }
 
         RateLimiter::clear($this->throttleKey());
+    }
+
+    /**
+     * Record a rejected login attempt.
+     *
+     * Never allowed to influence the response: a failed audit write (a full
+     * disk, a database blip) must not turn "wrong password" into a 500, and it
+     * must not leak that auditing is broken to whoever is probing.
+     */
+    protected function auditFailedLogin(string $email): void
+    {
+        try {
+            app(\App\Services\AuditService::class)->logFailedLogin($email);
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     /**

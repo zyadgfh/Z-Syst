@@ -50,7 +50,7 @@ Z-Syst/
 ├── routes/                  # api.php (346 سطر), admin.php, web.php, auth.php
 ├── tests/Feature            # ~30 ملف اختبار ميزة
 ├── Flutter/ + pharmacy-store-app-codecanyon-main/  # تطبيقات الجوال
-├── functions/ + z-syst/ + dataconnect/ + firestore.* # Firebase (تجريبي/وثائق)
+├── functions/ + z-syst/ + firestore.*       # Firebase (تجريبي/وثائق)
 ├── docs/                    # ~27 وثيقة تشغيل وتطوير
 └── ملفات إرشادية للمساعدات البرمجية (.claude, .agents, .windsurf, …)
 ```
@@ -58,7 +58,8 @@ Z-Syst/
 **ملاحظات على التكرار/الإرث:**
 - `pharmacy-store-app-codecanyon-main` هو تطبيق Flutter الأساسي (اسم الحزمة `mobile_pos`) — مأخوذ من CodeCanyon ومعدّل ليتكامل مع الـ API.
 - `functions/` و`z-syst/` كلاهما مشاريع Firebase Functions (تكرار)؛ `firebase.json` يستضيف مجلد `documentation/pharmacy-doc` فقط.
-- `dataconnect/` + `src/dataconnect-generated`: تجارب Google Data Connect.
+- `dataconnect/` + `src/dataconnect-generated`: تجارب Google Data Connect — **حُذفت** (كانت عيّنة Quickstart لأفلام، ولا يستوردها شيء).
+- حزمة vite الخاصة بـ Laravel (`vite.config.js` + `resources/js` + `resources/css`) و`Modules/Landing/package.json`: **حُذفت** — لا يستهلكها أي مسار نشر؛ كل واجهات Blade تحمّل من `public/assets/` و`public/css/` الثابتة. التفاصيل في `RUNBOOK.md` §10.8.
 - `refactor_acnoo.php/.py`, `update_branding*.php`, `inspect_options.php`, `routes.txt`, ملف `d` الفارغ، `temp_plans.html`: مخلفات جلسات تطوير — مرشحة للتنظيف.
 
 ---

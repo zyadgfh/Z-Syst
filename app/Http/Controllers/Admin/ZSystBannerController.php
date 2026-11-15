@@ -54,7 +54,7 @@ class ZSystBannerController extends Controller
         $request->validate([
             'name' => 'required|max:250',
             'status' => 'nullable|in:on',
-            'imageUrl' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
+            'imageUrl' => 'required|image|mimes:jpeg,png,jpg,gif',
         ]);
 
         Banner::create([
@@ -74,7 +74,7 @@ class ZSystBannerController extends Controller
         $request->validate([
             'name' => 'required|max:250',
             'status' => 'nullable|in:on',
-            'imageUrl' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+            'imageUrl' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
 
         $banner = Banner::findOrFail($id);

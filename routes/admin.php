@@ -62,16 +62,31 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
 
     Route::resource('subscription-reports', ADMIN\SubscriptionReport::class)->only('index');
     Route::post('subscription-reports/filter', [ADMIN\SubscriptionReport::class, 'zsystFilter'])->name('subscription-reports.filter');
-    Route::post('subscription-reports/reject/{id}', [ADMIN\SubscriptionReport::class, 'reject'])->name('subscription-reports.reject');
-    Route::post('subscription-reports/paid/{id}', [ADMIN\SubscriptionReport::class, 'paid'])->name('subscription-reports.paid');
+    // Approving or rejecting a manual payment request is a platform action, so
+    // it is gated on the role rather than left to the panel-wide allowance that
+    // owner roles get. The money for a subscription goes to the platform, not to
+    // the tenant — and PlanSubscribe is TenantScoped, which restricts a
+    // shop-owner to their own business's rows. That is exactly the wrong scope
+    // here: it means a shop-owner reaching these routes finds precisely the
+    // request they submitted themselves, and `paid()` marks it paid and extends
+    // business.will_expire. Self-approval of a subscription that was never paid
+    // for. superadmin is the only role that is unscoped by TenantScoped and the
+    // only one with a claim to know the money arrived.
+    //
+    // This matters more now that automatic gateway payments are switched off
+    // (config/payments.php) and this is the path that grants a subscription.
+    Route::post('subscription-reports/reject/{id}', [ADMIN\SubscriptionReport::class, 'reject'])->name('subscription-reports.reject')->middleware('role:superadmin');
+    Route::post('subscription-reports/paid/{id}', [ADMIN\SubscriptionReport::class, 'paid'])->name('subscription-reports.paid')->middleware('role:superadmin');
     Route::get('subscription-report/get-invoice/{id}', [ADMIN\SubscriptionReport::class, 'getInvoice'])->name('subscription-reports.invoice');
     Route::get('subscription-reports-excel', [ADMIN\SubscriptionReport::class, 'exportExcel'])->name('subscription-reports.excel');
     Route::get('subscription-reports-csv', [ADMIN\SubscriptionReport::class, 'exportCsv'])->name('subscription-reports.csv');
 
     Route::resource('manual-payments', ADMIN\ZSystManualPaymentReportController::class)->only('index');
     Route::post('manual-payments/filter', [ADMIN\ZSystManualPaymentReportController::class, 'zsystFilter'])->name('manual-payments.filter');
-    Route::post('manual-payments/reject/{id}', [ADMIN\ZSystManualPaymentReportController::class, 'reject'])->name('manual-payments.reject');
-    Route::post('manual-payments/paid/{id}', [ADMIN\ZSystManualPaymentReportController::class, 'paid'])->name('manual-payments.paid');
+    // Same gate, same reason — these two review the identical PlanSubscribe rows
+    // as subscription-reports above, through a different screen.
+    Route::post('manual-payments/reject/{id}', [ADMIN\ZSystManualPaymentReportController::class, 'reject'])->name('manual-payments.reject')->middleware('role:superadmin');
+    Route::post('manual-payments/paid/{id}', [ADMIN\ZSystManualPaymentReportController::class, 'paid'])->name('manual-payments.paid')->middleware('role:superadmin');
     Route::get('manual-payments/get-invoice/{id}', [ADMIN\ZSystManualPaymentReportController::class, 'getInvoice'])->name('manual-payments.invoice');
     Route::get('manual-payments-excel', [ADMIN\ZSystManualPaymentReportController::class, 'exportExcel'])->name('manual-payments.excel');
     Route::get('manual-payments-csv', [ADMIN\ZSystManualPaymentReportController::class, 'exportCsv'])->name('manual-payments.csv');

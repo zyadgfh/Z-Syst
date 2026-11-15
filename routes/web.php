@@ -52,6 +52,16 @@ require __DIR__.'/auth.php';
 // ═══ Storefront (per-tenant public shop) + payment gateway callbacks ═══
 Route::prefix('store/{slug}')->name('store.')->group(function () {
     Route::get('/', [\App\Http\Controllers\Web\StorefrontController::class, 'show'])->name('show');
-    Route::post('/checkout', [\App\Http\Controllers\Web\StorefrontController::class, 'checkout'])->name('checkout');
+    // Public and unauthenticated: it writes a store_orders row per call, so it
+    // needs a per-IP budget or it is a free way to fill the table.
+    Route::post('/checkout', [\App\Http\Controllers\Web\StorefrontController::class, 'checkout'])
+        ->middleware('throttle:20,1')
+        ->name('checkout');
 });
-Route::get('/gateway/{gateway}/callback/{transaction}', \App\Http\Controllers\Web\GatewayWebhookController::class)->name('web.gateway.callback');
+// {gateway} is constrained at the route level so an unknown name never reaches
+// the controller, and {transaction} must be numeric so the int type hint cannot
+// be used to probe. 60/min leaves room for a gateway's own retry burst.
+Route::get('/gateway/{gateway}/callback/{transaction}', \App\Http\Controllers\Web\GatewayWebhookController::class)
+    ->where(['gateway' => 'paymob|fawry|instapay', 'transaction' => '[0-9]+'])
+    ->middleware('throttle:60,1')
+    ->name('web.gateway.callback');

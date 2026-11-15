@@ -994,7 +994,7 @@
                                                                                         <input type="file" name="footer_socials_icons[]" accept="image/*" class="form-control" onchange="readURL(this)">
                                                                                     </div>
                                                                                     <div class="col-sm-1 align-self-center mt-2">
-                                                                                        <img width="100%" height="auto" class="multi-image-preview" data-default-src="{{ asset('assets/img/demo-img.png') }}" id="footer_socials_icons" src="{{ asset($page_data['footer_socials_icons'][$key] ?? 'assets/img/demo-img.png') }}" alt="img">
+                                                                                        <img width="100%" height="auto" class="multi-image-preview" data-default-src="{{ asset('assets/img/icon/no-image.svg') }}" id="footer_socials_icons" src="{{ asset($page_data['footer_socials_icons'][$key] ?? 'assets/img/icon/no-image.svg') }}" alt="img">
                                                                                     </div>
                                                                                 </div>
                                                                             </div>

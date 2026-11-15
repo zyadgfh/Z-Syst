@@ -1,0 +1,46 @@
+# gitleaks configuration for Z-Syst.
+#
+# Two jobs in .github/workflows/secret-scan.yml use this file:
+#   • "Run gitleaks scan"       — the incremental gate on every push/PR
+#   • "Full history scan"        — every commit ever pushed (see the note below)
+#
+# The incremental gate alone is not enough for this repository: `actions/checkout`
+# defaults to fetch-depth 1, so on a pull request the scanner only ever sees the
+# commits in that PR. The credentials that were committed in July/August 2026 and
+# later deleted from the working tree are still fully retrievable from history,
+# and a shallow scan reports nothing. Hence the second job, which checks out with
+# fetch-depth: 0 and runs `gitleaks detect --log-opts="--all"`.
+
+title = "Z-Syst gitleaks configuration"
+
+[allowlist]
+description = "Third-party code and generated data that trips the default rules"
+paths = [
+    # Composer/npm trees are not ours to fix, and their fixtures (cacert.pem,
+    # phpseclib key-format parsers, swagger-ui's published .npmrc, razorpay's
+    # docs) are constant false positives. They were committed to history once
+    # and removed; scanning them again produces noise that hides real findings.
+    '''(^|/)vendor/''',
+    '''(^|/)node_modules/''',
+    '''(^|/)third_party/''',
+    # lang/ holds a country/phone-code dataset (en.json, ar.json, ...), not
+    # translations, and its long base64-ish tokens match entropy rules.
+    '''lang/[a-zA-Z0-9_\-]+\.json''',
+    # Minified vendor bundles shipped in public/assets.
+    '''\.min\.(js|css)$''',
+    '''public/assets/js/(apexcharts|summernote-lite|swiper|particles)[^/]*\.js''',
+]
+regexes = [
+    # phpunit.xml pins a fixed APP_KEY so the sqlite :memory: suite can boot
+    # without a keygen step. It is a test-only key: production takes APP_KEY
+    # from the platform secret store (render.yaml sets sync: false), and
+    # .env.testing never references it.
+    '''base64:2fl\+KtGpDvJW4P1H0X7cSv2pHJ7b1Xq8A3nR9kQwE5Y=''',
+]
+
+# NOTE on what is deliberately NOT allowlisted:
+#   .env, .env.production, .env.docker, docker-compose.yml and
+#   Super-Admin/public/uploads/service-account-credentials.json were all
+#   committed at some point and later deleted. They must keep showing up in the
+#   history report until the credentials they contained have been rotated —
+#   silencing them would hide the only reminder that the rotation is pending.

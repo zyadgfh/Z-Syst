@@ -4,6 +4,7 @@ namespace App\Http;
 
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\BlockInstallerRoutes;
 use App\Http\Middleware\CheckSubscriptionLimits;
 use App\Http\Middleware\DemoMode;
 use App\Http\Middleware\EncryptCookies;
@@ -12,7 +13,6 @@ use App\Http\Middleware\NormalizeLegacyPayloadKeys;
 use App\Http\Middleware\PageOptimizationMiddleware;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RedirectIfAuthenticated;
-use App\Http\Middleware\SecurityCheck;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\TenantContextMiddleware;
@@ -54,6 +54,12 @@ class Kernel extends HttpKernel
     protected $middleware = [
         // \App\Http\Middleware\TrustHosts::class,
         TrustProxies::class,
+        // The laravel-installer package used to register /install, /update and
+        // /envato unconditionally, guarded only by file_exists(storage_path('installed')).
+        // It was removed from composer.json outright on 2026-11-13; this block
+        // stays so a re-added dependency finds these prefixes dark instead of
+        // live. See RUNBOOK.md §10.2 and SupplyChainHardeningTest.
+        BlockInstallerRoutes::class,
         HandleCors::class,
         PreventRequestsDuringMaintenance::class,
         ValidatePostSize::class,
@@ -77,7 +83,15 @@ class Kernel extends HttpKernel
             StartSession::class,
             ShareErrorsFromSession::class,
             VerifyCsrfToken::class,
-            SecurityCheck::class,
+            // SecurityCheck used to sit here. It filtered every request input
+            // through a regex blacklist and then wrote the result back with
+            // $request->merge(), so a product description containing "select"
+            // or a "<" was silently truncated on the way to the database.
+            // That is data corruption wearing a security costume: the real
+            // defences are output encoding (Blade escapes by default, the five
+            // {!! !!} sites go through HtmlSanitizer) and bound parameters
+            // (every whereRaw/selectRaw in the tree passes ?). Removed by
+            // decision on 2026-11-13.
             SetSupabaseContext::class,
             SubstituteBindings::class,
             SetLocale::class,

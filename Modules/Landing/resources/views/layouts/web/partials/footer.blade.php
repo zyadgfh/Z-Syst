@@ -27,7 +27,7 @@
                     @foreach (data_get($headings, 'footer_socials_links', []) as $key => $footer_socials_links)
                         <a href="{{ $footer_socials_links ?? '' }}" target="_blank">
                             <img class="footer-social-icon"
-                                src="{{ asset(data_get($pageData, 'footer_socials_icons.' . $key) ?: 'assets/img/demo-img.png') }}"
+                                src="{{ asset(data_get($pageData, 'footer_socials_icons.' . $key) ?: 'assets/img/icon/no-image.svg') }}"
                                 alt="icon" />
                         </a>
                     @endforeach

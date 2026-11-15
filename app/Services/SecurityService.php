@@ -5,6 +5,30 @@ namespace App\Services;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
+/**
+ * Pattern detection and security event logging — NOT a defence.
+ *
+ * Everything here is a regex blacklist. Blacklists are for noticing traffic,
+ * never for making data safe: they miss encodings they were not written for,
+ * and when they do match they destroy legitimate input (a product description
+ * containing the word "select", a note containing "<3"). That is why this
+ * class has no production caller any more — SecurityCheck, the middleware that
+ * used it to rewrite request input, was removed on 2026-11-13.
+ *
+ * What actually protects this application:
+ *   SQL     — Eloquent's query builder and bound parameters (no string
+ *             concatenation anywhere; every whereRaw/selectRaw passes ?).
+ *   XSS     — Blade escapes on output by default, and the five raw {!! !!}
+ *             sites either emit server-generated barcode SVG or go through
+ *             App\Support\HtmlSanitizer::clean().
+ *   Uploads — config('integrations.uploads') allowlist, checked against the
+ *             sniffed MIME as well as the extension, in HasUploader.
+ *
+ * escapeString() was removed with that middleware: it was addslashes(), which
+ * is not an SQL escaping function (it does not know the connection's charset
+ * and it does not escape identifiers). Leaving a method with that name in a
+ * class called SecurityService is an invitation to reintroduce injection.
+ */
 class SecurityService
 {
     /**
@@ -51,14 +75,6 @@ class SecurityService
         }
 
         return true;
-    }
-
-    /**
-     * Escape string for safe use in raw queries
-     */
-    public function escapeString(string $value): string
-    {
-        return addslashes($value);
     }
 
     /**
