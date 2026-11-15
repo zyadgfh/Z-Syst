@@ -23,25 +23,25 @@ class StockAllocationService
      */
     public function allocate(Stock $stock, int $quantity, string $referenceType, int $referenceId, int $userId, ?string $notes = null): StockMovement
     {
-        if ($stock->productStock < $quantity) {
-            throw new StockUnavailableException("الكمية المطلوبة غير متوفرة. المتاح: {$stock->productStock}");
+        if ($quantity <= 0) {
+            throw new \InvalidArgumentException('Stock allocation quantity must be positive');
         }
 
-        $beforeQuantity = $stock->productStock;
-        $stock->decrement('productStock', $quantity);
-        $afterQuantity = $stock->productStock; // or $beforeQuantity - $quantity
+        return DB::transaction(function () use ($stock, $quantity, $referenceType, $referenceId, $userId, $notes) {
+            $locked = Stock::whereKey($stock->id)->lockForUpdate()->firstOrFail();
+            if ($locked->productStock < $quantity) {
+                throw new StockUnavailableException("الكمية المطلوبة غير متوفرة. المتاح: {$locked->productStock}");
+            }
 
-        return $this->recordMovement(
-            $stock,
-            'out',
-            $quantity,
-            $beforeQuantity,
-            $afterQuantity,
-            $referenceType,
-            $referenceId,
-            $userId,
-            $notes
-        );
+            $beforeQuantity = $locked->productStock;
+            $locked->decrement('productStock', $quantity);
+            $stock->setAttribute('productStock', $locked->productStock);
+
+            return $this->recordMovement(
+                $locked, 'out', $quantity, $beforeQuantity, $locked->productStock,
+                $referenceType, $referenceId, $userId, $notes
+            );
+        });
     }
 
     /**

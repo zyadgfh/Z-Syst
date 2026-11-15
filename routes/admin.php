@@ -249,12 +249,12 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('warehouses/statistics', [ADMIN\WarehouseController::class, 'statistics'])->name('warehouses.statistics');
 
     // Stock Transfers
+    Route::get('stock-transfers/statistics', [ADMIN\StockTransferController::class, 'statistics'])->name('stock-transfers.statistics');
+    Route::get('stock-transfers/stock-distribution', [ADMIN\StockTransferController::class, 'stockDistribution'])->name('stock-transfers.stock-distribution');
     Route::resource('stock-transfers', ADMIN\StockTransferController::class)->except('show');
     Route::get('stock-transfers/{transfer}', [ADMIN\StockTransferController::class, 'show'])->name('stock-transfers.show');
     Route::post('stock-transfers/{transfer}/complete', [ADMIN\StockTransferController::class, 'complete'])->name('stock-transfers.complete');
     Route::post('stock-transfers/{transfer}/cancel', [ADMIN\StockTransferController::class, 'cancel'])->name('stock-transfers.cancel');
-    Route::get('stock-transfers/statistics', [ADMIN\StockTransferController::class, 'statistics'])->name('stock-transfers.statistics');
-    Route::get('stock-transfers/stock-distribution', [ADMIN\StockTransferController::class, 'stockDistribution'])->name('stock-transfers.stock-distribution');
 
     // Barcodes
     Route::resource('barcodes', ADMIN\BarcodeController::class)->except('show');

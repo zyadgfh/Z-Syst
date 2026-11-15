@@ -324,7 +324,7 @@ class ReportsControllerOptimized extends Controller
                 ->join('stocks', 'products.id', '=', 'stocks.product_id')
                 ->select('products.id', 'products.productName', 'products.productCode', 'products.alert_qty', 'products.sales_price', DB::raw('SUM(stocks.productStock) as totalStock'))
                 ->groupBy('products.id', 'products.productName', 'products.productCode', 'products.alert_qty', 'products.sales_price')
-                ->havingRaw('totalStock < alert_qty')
+                ->havingRaw('SUM('.DB::getQueryGrammar()->wrap('stocks.productStock').') < '.DB::getQueryGrammar()->wrap('products.alert_qty'))
                 ->when($request->filled('search'), function ($query) use ($request) {
                     $term = '%'.$request->input('search').'%';
                     $query->where('productName', 'like', $term)

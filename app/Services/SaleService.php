@@ -76,6 +76,27 @@ class SaleService
     public function create(array $data, int $businessId, int $userId): Sale
     {
         return DB::transaction(function () use ($data, $businessId, $userId) {
+            // Calculate totals from line quantities and prices rather than trusting a client total.
+            // Prices, discounts and tax are still supplied by the client and require a separate pricing policy.
+            $subtotal = 0;
+            foreach ($data['products'] as $line) {
+                if (! isset($line['quantities'], $line['price']) || ! is_numeric($line['quantities'])
+                    || (int) $line['quantities'] != $line['quantities'] || (int) $line['quantities'] < 1
+                    || ! is_numeric($line['price']) || (float) $line['price'] < 0) {
+                    throw new \InvalidArgumentException('Invalid sale quantity or price');
+                }
+                $subtotal += (int) $line['quantities'] * (float) $line['price'];
+            }
+            $total = round($subtotal - (float) ($data['discountAmount'] ?? 0) + (float) ($data['tax_amount'] ?? 0), 2);
+            $paid = round((float) ($data['paidAmount'] ?? 0), 2);
+            if ($total < 0 || $paid < 0 || $paid > $total) {
+                throw new \InvalidArgumentException('Invalid sale total or payment');
+            }
+            $data['totalAmount'] = $total;
+            $data['paidAmount'] = $paid;
+            $data['dueAmount'] = round($total - $paid, 2);
+            $data['isPaid'] = $data['dueAmount'] == 0;
+
             $fefoSettings = \App\Models\FefoSetting::getForBusiness($businessId);
 
             $productIds = collect($data['products'])->pluck('product_id')->filter()->unique()->values()->all();
@@ -203,7 +224,7 @@ class SaleService
                             'price' => $productData['price'],
                             'batch_no' => $batch->batch_no,
                             'product_id' => $productId,
-                            'lossProfit' => ($productData['lossProfit'] ?? 0) / count($data['products']),
+                            'lossProfit' => ($productData['lossProfit'] ?? 0) * $deductQty / $quantity,
                             'quantities' => $deductQty,
                             'expire_date' => $batch->expire_date,
                             'purchase_price' => $productData['purchase_price'] ?? 0,
@@ -225,8 +246,11 @@ class SaleService
                             notes: 'FEFO auto-deduction during sale creation'
                         );
                     }
+                    if ($totalAllocated !== $quantity) {
+                        throw new \App\Exceptions\StockUnavailableException('Insufficient stock for sale');
+                    }
                 } else {
-                    $saleDetails[$key] = [
+                    $saleDetails[] = [
                         'sale_id' => $sale->id,
                         'price' => $productData['price'],
                         'batch_no' => $productData['batch_no'] ?? null,
@@ -239,6 +263,9 @@ class SaleService
 
                     $stock = $this->resolveStockForProduct($businessStocks, $productId, $productData['batch_no'] ?? null);
 
+                    if (! $stock) {
+                        throw new \App\Exceptions\StockUnavailableException('No matching stock for sale');
+                    }
                     if ($stock) {
                         $this->stockAllocationService->allocate($stock, $quantity, Sale::class, $sale->id, $userId, 'Manual batch selection during sale');
                         

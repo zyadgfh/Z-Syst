@@ -132,7 +132,7 @@ class StatisticsControllerOptimized extends Controller
             // Get sales data with cache
             $salesData = $this->cacheService->rememberForBusiness($businessId, "sales_data:{$start}:{$end}", 300, function () use ($businessId, $start, $end) {
                 return DB::table('sales')
-                    ->select(DB::raw("DATE_FORMAT(saleDate, '%Y-%m-%d') as date"), DB::raw('SUM(totalAmount) as amount'))
+                    ->select(DB::raw('DATE('.DB::getQueryGrammar()->wrap('saleDate').') as date'), DB::raw('SUM('.DB::getQueryGrammar()->wrap('totalAmount').') as amount'))
                     ->where('business_id', $businessId)
                     ->whereBetween('saleDate', [$start, $end])
                     ->groupBy('date')
@@ -144,7 +144,7 @@ class StatisticsControllerOptimized extends Controller
             // Get purchase data with cache
             $purchaseData = $this->cacheService->rememberForBusiness($businessId, "purchase_data:{$start}:{$end}", 300, function () use ($businessId, $start, $end) {
                 return DB::table('purchases')
-                    ->select(DB::raw("DATE_FORMAT(purchaseDate, '%Y-%m-%d') as date"), DB::raw('SUM(totalAmount) as amount'))
+                    ->select(DB::raw('DATE('.DB::getQueryGrammar()->wrap('purchaseDate').') as date'), DB::raw('SUM('.DB::getQueryGrammar()->wrap('totalAmount').') as amount'))
                     ->where('business_id', $businessId)
                     ->whereBetween('purchaseDate', [$start, $end])
                     ->groupBy('date')
@@ -156,7 +156,7 @@ class StatisticsControllerOptimized extends Controller
             // Get loss data with cache
             $lossData = $this->cacheService->rememberForBusiness($businessId, "loss_data:{$start}:{$end}", 300, function () use ($businessId, $start, $end) {
                 return DB::table('sales')
-                    ->select(DB::raw("DATE_FORMAT(saleDate, '%Y-%m-%d') as date"), DB::raw('SUM(lossProfit) as amount'))
+                    ->select(DB::raw('DATE('.DB::getQueryGrammar()->wrap('saleDate').') as date'), DB::raw('SUM('.DB::getQueryGrammar()->wrap('lossProfit').') as amount'))
                     ->where('business_id', $businessId)
                     ->where('lossProfit', '<=', 0)
                     ->whereBetween('saleDate', [$start, $end])
@@ -169,7 +169,7 @@ class StatisticsControllerOptimized extends Controller
             // Get profit data with cache
             $profitData = $this->cacheService->rememberForBusiness($businessId, "profit_data:{$start}:{$end}", 300, function () use ($businessId, $start, $end) {
                 return DB::table('sales')
-                    ->select(DB::raw("DATE_FORMAT(saleDate, '%Y-%m-%d') as date"), DB::raw('SUM(lossProfit) as amount'))
+                    ->select(DB::raw('DATE('.DB::getQueryGrammar()->wrap('saleDate').') as date'), DB::raw('SUM('.DB::getQueryGrammar()->wrap('lossProfit').') as amount'))
                     ->where('business_id', $businessId)
                     ->where('lossProfit', '>', 0)
                     ->whereBetween('saleDate', [$start, $end])

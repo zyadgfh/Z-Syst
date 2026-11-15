@@ -24,7 +24,7 @@ class StockController extends Controller
             ->join('stocks', 'products.id', '=', 'stocks.product_id')
             ->select('products.id', 'products.alert_qty', DB::raw('SUM(stocks.productStock) as totalStock'))
             ->groupBy('products.id', 'products.alert_qty')
-            ->havingRaw('totalStock < alert_qty')
+            ->havingRaw('SUM('.DB::getQueryGrammar()->wrap('stocks.productStock').') < '.DB::getQueryGrammar()->wrap('products.alert_qty'))
             ->count();
 
         $total_stock_value = DB::table('products')
