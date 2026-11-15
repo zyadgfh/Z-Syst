@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class PurchaseOrderRequest extends FormRequest
 {
@@ -20,14 +21,14 @@ class PurchaseOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'supplier_id' => 'nullable|exists:parties,id',
+            'supplier_id' => ['nullable', Rule::exists('parties', 'id')->where('business_id', $this->user()?->business_id)],
             'priority' => 'required|in:low,normal,high,urgent',
             'expected_delivery_date' => 'nullable|date|after:today',
             'terms' => 'nullable|string|max:5000',
             'internal_notes' => 'nullable|string|max:2000',
             'notes' => 'nullable|string|max:2000',
             'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.product_id' => ['required', Rule::exists('products', 'id')->where('business_id', $this->user()?->business_id)],
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unit_price' => 'required|numeric|min:0',
             'items.*.discount' => 'nullable|numeric|min:0',

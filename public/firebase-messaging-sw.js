@@ -5,46 +5,16 @@
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
-// Firebase config will be passed from the main app
-let firebaseConfig = null;
-
-// Listen for config messages from the main thread
-self.addEventListener('message', (event) => {
-    if (event.data && event.data.type === 'FIREBASE_CONFIG') {
-        firebaseConfig = event.data.config;
-        initFirebase();
+// The browser-visible Firebase configuration is encoded in the worker URL so
+// it is available again when the browser restarts this worker for a push.
+try {
+    const config = JSON.parse(new URL(self.location.href).searchParams.get('config') || '{}');
+    if (config.apiKey && config.projectId && config.messagingSenderId && config.appId) {
+        firebase.initializeApp(config);
+        // FCM displays notification payloads automatically in the background.
     }
-});
-
-function initFirebase() {
-    if (!firebaseConfig || firebase.apps.length > 0) return;
-
-    try {
-        firebase.initializeApp(firebaseConfig);
-        const messaging = firebase.messaging();
-
-        messaging.onBackgroundMessage((payload) => {
-            console.log('[FCM Background]', payload);
-
-            const title = payload.notification?.title || 'Z-Syst';
-            const options = {
-                body: payload.notification?.body || '',
-                icon: '/logo.png',
-                badge: '/logo.png',
-                data: payload.data || {},
-                actions: [
-                    { action: 'view', title: 'عرض' },
-                    { action: 'dismiss', title: 'إغلاق' },
-                ],
-                tag: payload.data?.alert_id || 'default',
-                renotify: true,
-            };
-
-            self.registration.showNotification(title, options);
-        });
-    } catch (e) {
-        console.error('[FCM] Init error:', e);
-    }
+} catch (error) {
+    console.error('[FCM] Init error:', error);
 }
 
 // Handle notification clicks

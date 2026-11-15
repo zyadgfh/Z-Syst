@@ -45,15 +45,20 @@ class PushToken extends Model
      */
     public static function register(int $userId, string $token, string $platform = 'web'): static
     {
-        return static::updateOrCreate(
-            ['user_id' => $userId, 'token' => $token],
-            [
-                'business_id'  => auth()->user()->business_id ?? null,
-                'platform'     => $platform,
-                'is_active'    => true,
-                'last_used_at' => now(),
-            ]
-        );
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($userId, $token, $platform) {
+            // A browser token can survive logout; stop delivering a previous user's alerts to it.
+            static::where('token', $token)->where('user_id', '!=', $userId)->update(['is_active' => false]);
+
+            return static::updateOrCreate(
+                ['user_id' => $userId, 'token' => $token],
+                [
+                    'business_id' => auth()->user()->business_id ?? null,
+                    'platform' => $platform,
+                    'is_active' => true,
+                    'last_used_at' => now(),
+                ]
+            );
+        });
     }
 
     /**

@@ -29,7 +29,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Schema::defaultStringLength(191);
+        // Reject outbound Laravel mail even when a caller selects a specific mailer.
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Mail\Events\MessageSending::class, function () {
+            throw new \RuntimeException('Email delivery is disabled.');
+        });
         
         // Warm up cache on application boot
         $this->warmupCache();

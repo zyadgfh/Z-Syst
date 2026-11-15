@@ -134,8 +134,8 @@ class DoctorAttentionController extends Controller
             'attention_score_warning' => 'nullable|numeric|min:0|max:100',
             'attention_score_critical' => 'nullable|numeric|min:0|max:100',
             'enable_push_notifications' => 'nullable|boolean',
-            'enable_email_notifications' => 'nullable|boolean',
-            'enable_sms_notifications' => 'nullable|boolean',
+            'enable_email_notifications' => 'prohibited',
+            'enable_sms_notifications' => 'prohibited',
             'notify_roles' => 'nullable|array',
             'alert_frequency_hours' => 'nullable|integer|min:1|max:168',
         ]);

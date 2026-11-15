@@ -34,27 +34,7 @@ class SupabaseAuthService
      */
     public function register(string $email, string $password, array $metadata = []): array
     {
-        try {
-            $response = $this->gotrueClient->signUp([
-                'email' => $email,
-                'password' => $password,
-                'data' => $metadata,
-            ]);
-
-            return [
-                'success' => true,
-                'user' => $response['user'] ?? null,
-                'session' => $response['session'] ?? null,
-                'access_token' => $response['access_token'] ?? null,
-            ];
-        } catch (\Exception $e) {
-            StructuredLogger::logSupabaseError('register', ['email' => $email], $e);
-            throw new SupabaseAuthException(
-                'Registration failed',
-                ['email' => $email],
-                $e
-            );
-        }
+        return ['success' => false, 'error' => 'Email-based registration is disabled'];
     }
 
     /**
@@ -175,23 +155,7 @@ class SupabaseAuthService
      */
     public function sendPasswordReset(string $email): array
     {
-        try {
-            $response = $this->gotrueClient->resetPasswordForEmail($email, [
-                'redirectTo' => route('password.reset'),
-            ]);
-
-            return [
-                'success' => true,
-                'message' => 'Password reset email sent',
-            ];
-        } catch (\Exception $e) {
-            StructuredLogger::logSupabaseError('send_password_reset', ['email' => $email], $e);
-            throw new SupabaseAuthException(
-                'Failed to send password reset',
-                ['email' => $email],
-                $e
-            );
-        }
+        return ['success' => false, 'error' => 'Email delivery is disabled'];
     }
 
     /**

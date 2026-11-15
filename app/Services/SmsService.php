@@ -20,14 +20,8 @@ class SmsService
      */
     public function send(string $to, string $message): bool
     {
-        $driver = config('sms.driver', 'log');
-
-        return match ($driver) {
-            'twilio' => $this->sendViaTwilio($to, $message),
-            'infobip' => $this->sendViaInfobip($to, $message),
-            'custom' => $this->sendViaCustomApi($to, $message),
-            default => $this->sendViaLog($to, $message),
-        };
+        // SMS delivery is disabled for all drivers, regardless of environment settings.
+        return false;
     }
 
     /**

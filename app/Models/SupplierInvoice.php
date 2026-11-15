@@ -377,7 +377,7 @@ class SupplierInvoice extends Model
      */
     public function getDaysUntilDue(): int
     {
-        return now()->diffInDays($this->due_date, false);
+        return (int) now()->startOfDay()->diffInDays($this->due_date->copy()->startOfDay(), false);
     }
 
     /**
