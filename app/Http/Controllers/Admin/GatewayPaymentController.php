@@ -37,6 +37,18 @@ class GatewayPaymentController extends Controller
             'subscription_id' => 'nullable|exists:subscriptions,id',
         ]);
 
+        // Automatic payments are switched off (config/payments.php). This is the
+        // only route into PaymentGatewayService::initiate(), which refuses as
+        // well — the answer here is for the caller's benefit, so a client can
+        // distinguish "this method is off" (403) from "nothing is due" (422) or
+        // a malformed request (422 from validation).
+        if (! config('payments.automatic_enabled')) {
+            return response()->json([
+                'success' => false,
+                'message' => __('الدفع الآلي معطّل حالياً — استخدم طلب الدفع اليدوي'),
+            ], 403);
+        }
+
         $businessId = (int) $request->user()->business_id;
         $subscription = isset($data['subscription_id'])
             ? Subscription::where('business_id', $businessId)->findOrFail($data['subscription_id'])

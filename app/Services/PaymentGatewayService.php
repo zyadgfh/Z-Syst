@@ -92,6 +92,20 @@ class PaymentGatewayService
     {
         abort_unless(self::isSupported($gateway), 404, 'Unknown payment gateway.');
 
+        // Automatic (gateway-hosted) payments are switched off — see
+        // config/payments.php. Refusing here rather than only at the HTTP edge
+        // means no caller can open a transaction and mint a callback URL while
+        // the switch is off: not the admin checkout endpoint, not a console
+        // command, not a queue job, not a route added later.
+        //
+        // The transaction row is the thing that later settles a subscription, so
+        // "cannot be created" is a stronger guarantee than "cannot be reached".
+        abort_unless(
+            (bool) config('payments.automatic_enabled'),
+            403,
+            'Automatic gateway payments are disabled. Submit a manual payment request instead.'
+        );
+
         $tx = GatewayTransaction::create([
             'business_id' => $businessId,
             'gateway' => $gateway,

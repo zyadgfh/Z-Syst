@@ -133,6 +133,17 @@ services:
       - key: FILESYSTEM_DISK
         value: local
 
+      # Payments run manual-only: the customer submits a receipt and a platform
+      # superadmin approves it. Declared explicitly rather than left to the
+      # config default, so that turning automatic gateway checkout back on is a
+      # visible change to this file and not a silent one — and so that anyone
+      # reading the service definition can see the mode it is in. Read RUNBOOK
+      # §10.4 before flipping it: fawry and instapay signatures do not cover the
+      # payment outcome, so callbacks settle as `pending` until a
+      # server-to-server status query is wired in.
+      - key: PAYMENTS_AUTOMATIC_ENABLED
+        value: "false"
+
       - key: REDIS_HOST
         value: ""
       - key: REDIS_PASSWORD
@@ -289,6 +300,12 @@ services:
         value: "120"
       - key: FILESYSTEM_DISK
         value: local
+
+      # Kept identical to the web service on purpose: the two must not disagree
+      # about which payment mode the deployment is in, or a job dispatched here
+      # would apply different rules from the request that created it.
+      - key: PAYMENTS_AUTOMATIC_ENABLED
+        value: "false"
 
       - key: REDIS_HOST
         value: ""

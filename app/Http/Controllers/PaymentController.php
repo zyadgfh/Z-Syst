@@ -38,7 +38,16 @@ class PaymentController extends Controller
 
         $plan = Plan::findOrFail($id);
         session()->put('business_id', $isSuper ? (int) $business_id : $actor->business_id);
-        $gateways = Gateway::with('currency:id,code,rate,symbol,position')->where('status', 1)->get();
+
+        // Manual only, while automatic payments are switched off
+        // (config/payments.php). A gateway listed here is a gateway the customer
+        // can pick, so filtering the list is the part that actually takes the
+        // option away; payment() refuses the same request again for anyone
+        // posting a gateway_id they already have.
+        $gateways = Gateway::with('currency:id,code,rate,symbol,position')
+            ->where('status', 1)
+            ->when(! config('payments.automatic_enabled'), fn ($query) => $query->where('is_manual', 1))
+            ->get();
 
         return view('payments.index', compact('gateways', 'plan'));
     }
@@ -129,6 +138,18 @@ class PaymentController extends Controller
 
         // Handle Egyptian payment gateways
         if ($gateway->namespace) {
+            // Automatic payments are switched off (config/payments.php), so no
+            // App\Library\*::make_payment() redirect leaves this application
+            // while it is. Deliberately the same answer the method already gives
+            // for an unusable gateway rather than an explanation of the config:
+            // the form is authenticated, but why a payment method disappeared is
+            // not the customer's business and the message is not the place to
+            // describe deployment state.
+            if (! config('payments.automatic_enabled')) {
+                return redirect(route('order.status', ['status' => 'failed']))
+                    ->with('error', __('Payment method not available.'));
+            }
+
             $payment_data['currency'] = $gateway->currency->code ?? 'EGP';
             $payment_data['email'] = $user->email;
             $payment_data['name'] = $business->name;

@@ -22,6 +22,23 @@ use HasFactory;
         'picture_url',
         'will_expire',
         'subscription_date',
+
+        // The subscription this business is currently paying for. The column has
+        // existed and been indexed since 2014, and five call sites write it
+        // through $business->update([...]) — SubscriptionReport::paid(),
+        // ZSystManualPaymentReportController::paid(), ZSystBusinessController
+        // (three places) and Api/BusinessController — but it was missing from
+        // $fillable, so Eloquent's mass-assignment protection dropped it
+        // silently in every one of them. The updates still "succeeded": the
+        // subscription_date and will_expire beside it were written, so the
+        // business looked subscribed with no record of which request paid for
+        // it. Api/BusinessController wrote nothing but this key, making that
+        // whole update a no-op.
+        //
+        // It matters now because manual approval is the live path for granting a
+        // subscription (config/payments.php): this is the audit trail from a
+        // business back to the payment request a superadmin approved.
+        'plan_subscribe_id',
         'remaining_shop_balance',
         'shop_opening_balance',
         'status',

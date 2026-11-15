@@ -445,6 +445,10 @@ removed in the same commit, which is what makes the removal visible in review.
 | Payment price computed server-side | `app/Http/Controllers/Admin/GatewayPaymentController.php` (client `amount` ignored, read from `subscription_plans.price`) | `SecurityHardeningTest::test_gateway_allowlist_is_closed` covers the gateway half |
 | Gateway callback hardening | `routes/web.php` (`where` + `throttle:60,1`), `GatewayWebhookController` (allowlist), `PaymentGatewayService::mode()` (unknown ⇒ `disabled`) | `SecurityHardeningTest::test_callback_for_unknown_gateway_is_not_found` |
 | A valid signature cannot buy an entitlement it does not cover | `PaymentGatewayService::handleCallback()` — reference must match and is never overwritten; gateways outside `OUTCOME_BOUND_GATEWAYS` (fawry, instapay) stay `pending`; `success` defaults to false | `OperationsTest::test_replaying_a_declined_fawry_callback_with_success_true_grants_nothing`, `::test_paymob_live_callback_is_paid_because_its_hmac_covers_the_outcome`, `SecurityHardeningTest::test_only_outcome_bound_gateways_are_trusted_with_the_result` |
+| Payments are manual-only, and one switch says so | `config/payments.php` → `PAYMENTS_AUTOMATIC_ENABLED` (default false, declared on both Render services). Every automatic entry point refuses: the checkout list, the checkout form, the admin checkout endpoint, `initiate()`, and the public callback (404) | `ManualPaymentsTest` — 10 tests; `OperationsTest` flips the switch on in `setUp()` to test the machinery itself |
+| Only the platform can approve a payment request | `routes/admin.php` — `role:superadmin` on `subscription-reports.{paid,reject}` and `manual-payments.{paid,reject}`. `PlanSubscribe` is `TenantScoped`, so without the gate a shop-owner's visible row is the one they submitted | `ManualPaymentsTest::test_a_tenant_owner_cannot_approve_their_own_payment_request`, `::test_a_tenant_owner_cannot_reject_requests_either`, `::test_a_superadmin_approval_activates_the_subscription_and_records_which_request_paid` |
+| An approved subscription records which request paid for it | `app/Models/Business.php` — `plan_subscribe_id` added to `$fillable`; it was dropped silently at all five write sites | `ManualPaymentsTest::test_a_superadmin_approval_activates_the_subscription_and_records_which_request_paid` |
+| Seeding gateways cannot switch on six providers | `database/seeders/GatewaySeeder.php` — `updateOrCreate()` keyed on name (was `insert()`, duplicating every row per run), automatic rows follow the switch, `Manual` always enabled | `ManualPaymentsTest::test_the_seeder_is_idempotent_and_leaves_automatic_methods_off` |
 | Upload allowlist (extension **and** sniffed MIME) | `config/integrations.php` → `integrations.uploads`, enforced by `app/Helpers/HasUploader.php::zsValidateUpload()` | manual: an `.svg` upload is rejected |
 | Uploaded files never behave as documents | `docker/nginx.conf.template` (`location ^~ /uploads/`: nosniff + `default-src 'none'; sandbox`, `Content-Disposition: attachment` for svg) | manual: open an uploaded svg directly |
 | Admin denials are visible to API callers | `app/Http/Middleware/AdminMiddleware.php` (403 JSON, redirect only for browsers) | `SecurityHardeningTest::test_admin_panel_denies_json_callers_with_403_instead_of_a_redirect` |
@@ -601,6 +605,115 @@ Guards: `OperationsTest::test_replaying_a_declined_fawry_callback_with_success_t
 `::test_gateway_rejects_unsigned_callback_in_live_mode` (forged signature, and
 the reference rules), and
 `SecurityHardeningTest::test_only_outcome_bound_gateways_are_trusted_with_the_result`
+
+#### The deployment runs on manual payment
+
+Everything above describes machinery that is **switched off**. Payments are
+manual: the customer submits a request with a receipt, and a platform superadmin
+approves or rejects it. One switch controls it —
+`config/payments.php` → `PAYMENTS_AUTOMATIC_ENABLED`, default **false** — and it
+is declared explicitly as `false` on both Render services rather than left
+implicit, so turning it back on is a visible change to `render.yaml`.
+
+One switch rather than per-gateway flags, because there are **two** payment
+systems here and a flag on one leaves the other open:
+
+| System | Entry | Manual path | Automatic path |
+|---|---|---|---|
+| `gateways` table | `/payments-gateways/{plan}/{business}` | a row with `is_manual = 1`: upload a receipt + bank name + transaction id → `PlanSubscribe` (`unpaid`) → notification → superadmin approves | a row with a `namespace`: `App\Library\*::make_payment()` redirects out to Vodafone Cash, Orange Cash, InstaPay, Bank Card, Fawry or Cash Payment |
+| `PaymentGatewayService` | `admin.subscription.pay` | none — automatic only | `initiate()` → `gateway_transactions` → the public `/gateway/{gateway}/callback/{transaction}` webhook |
+
+With the switch off, **all four automatic entry points refuse**, and each refusal
+sits where it is strongest:
+
+| Where | Refusal | Why there |
+|---|---|---|
+| `PaymentController::index()` | lists `is_manual = 1` rows only | a gateway that is listed is a gateway a customer can pick — this is what actually removes the option |
+| `PaymentController::payment()` | redirects to `order.status?status=failed`, same as an unusable method | filtering the list is not enough: a `gateway_id` saved from before the flip can still be posted. Asserted by the session key that branch writes just before `make_payment()` |
+| `Admin\GatewayPaymentController::checkoutSubscription()` | JSON 403 | distinguishes "this method is off" from "nothing is due" (422) for the client |
+| `PaymentGatewayService::initiate()` | `abort(403)` | the service-layer refusal. Guarding only the HTTP edge leaves a console command, a queue job or a future route free to open a transaction — and the transaction row is what later settles a subscription, so "cannot be created" beats "cannot be reached" |
+| `Web\GatewayWebhookController` | `abort(404)` + `Log::warning` | a *valid* signature is no reason to accept a callback for a transaction that should not exist. 404 matches the unknown-gateway answer, so a probe learns nothing about the configuration; the log line is where the distinction lives |
+
+`OperationsTest` turns the switch on in `setUp()`, because that suite exercises
+the gateway machinery itself — signature verification and settlement — and would
+otherwise be asserting the refusal instead of the behaviour it was written for.
+`ManualPaymentsTest` asserts the refusal, and keeps `setUp()` on the shipped
+default.
+
+#### Approving a manual payment is a platform action
+
+The manual path grants a subscription, so who may grant it is the security
+question — and the obvious scoping was wrong here.
+
+`PlanSubscribe` is `TenantScoped`, which restricts a `shop-owner` to their own
+business's rows. For *reading* requests that is right. For `paid()` and
+`reject()` it is exactly backwards: the row a shop-owner can find is precisely
+the one they submitted, and `paid()` flips it to `paid` and extends
+`business.will_expire`. Owner roles get the whole `/admin` panel by design
+(§10.10), so before this change **a tenant could approve their own subscription
+without paying for it** — through two screens, `subscription-reports` and
+`manual-payments`, which review the same rows.
+
+`role:superadmin` now gates all four mutations (paid + reject on both screens).
+superadmin is the only role `TenantScoped` leaves unscoped and the only one with
+a claim to know the money arrived, because a subscription is paid **to the
+platform**, not to the tenant. The read screens, invoices and exports are
+untouched — tenant-scoped, and harmless.
+
+Related: `admin.subscription.pay` and `admin.gateway.transactions` carry
+`permission:settings-update`, an ability that **does not exist anywhere in
+`config/supabase.php`** (the map spells it `settings.update`, and grants it only
+to `manager`). No role satisfies it, so only superadmin passes via `*`. That is
+stricter than the comment in `checkoutSubscription` assumes — worth knowing
+before granting anyone the ability to pay, and worth deciding whether the
+spelling was a typo.
+
+#### `plan_subscribe_id` was silently dropped on every write
+
+`businesses.plan_subscribe_id` has existed and been indexed since 2014, and
+**five** call sites write it through `$business->update([...])` —
+`SubscriptionReport::paid()`, `ZSystManualPaymentReportController::paid()`,
+`ZSystBusinessController` (three places) and `Api\BusinessController`. It was
+missing from `Business::$fillable`, so mass-assignment protection dropped it in
+every one of them.
+
+It went unnoticed because the neighbouring keys *were* written: `subscription_date`
+and `will_expire` succeeded, so the business looked subscribed — just with no
+record of which request paid for it. `Api\BusinessController` wrote nothing but
+that key, making its entire update a no-op (it is the free-plan assignment during
+onboarding). Nothing in the application reads the `planSubscribe()` relation yet,
+so this was latent rather than breaking a feature; it is fixed now because the
+manual approval path is the live way a subscription gets granted, and this is the
+audit trail from a business back to the request a superadmin approved.
+
+#### Seeding: the table is empty in production
+
+`gateways` has **0 rows**, and every one of the six `App\Library\*` classes does
+`Gateway::where('status', 1)->findOrFail()` — so before seeding, *every* payment
+attempt 404s, manual ones included. `GatewaySeeder` is what fixes that, and it
+had two problems of its own:
+
+* it called `Gateway::insert()`, so each run appended a duplicate set — and
+  checkout lists every row with `status = 1`, meaning a re-run showed every
+  payment method twice. It is `updateOrCreate()` keyed on `name` now, safe to
+  re-run against production.
+* it seeded **all seven rows enabled**, i.e. it switched on six gateway-hosted
+  providers with no credentials configured. Automatic rows now follow
+  `payments.automatic_enabled` and come out disabled; `Manual` is always enabled,
+  because it is the path the application runs on.
+
+**To go live on manual payment:** `php artisan db:seed --class=GatewaySeeder`
+(idempotent). Then confirm the `Manual` row is the only one with `status = 1`,
+and that a currency exists — the seeder creates USD if the table is empty, which
+is the wrong default for Egyptian gateways, so seed `currencies` with EGP first.
+Flipping to automatic later is: set the switch, add provider keys, re-run the
+seeder, and read the integration consequence above first.
+
+Guards: `ManualPaymentsTest` — the default, the seeder (both halves), the service
+refusal, the callback 404, the admin 403, the filtered checkout list, the posted
+automatic gateway that never reaches a provider, the tenant owner refused on both
+approve and reject on both screens, and the superadmin approval that activates
+the subscription *and* records which request paid for it.
 (the map itself, including that `success` is still in `PAYMOB_HMAC_FIELDS`).
 
 ### 10.5 Rate limiting and client IPs

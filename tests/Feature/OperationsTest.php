@@ -45,6 +45,16 @@ class OperationsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // This suite exercises the gateway machinery itself — initiate(),
+        // signature verification, callback settlement — and that machinery is
+        // switched off by default now (config/payments.php): the application
+        // runs on manual payment. Turn it on for these tests, otherwise every
+        // one of them would be asserting the refusal rather than the behaviour
+        // it was written for. The refusal itself is covered in
+        // SecurityHardeningTest::test_automatic_payments_are_off_by_default_*.
+        config(['payments.automatic_enabled' => true]);
+
         $this->user = User::factory()->create();
         $this->businessId = (int) $this->user->business_id;
         $this->product = Product::factory()->create([
