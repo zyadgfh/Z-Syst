@@ -23,3 +23,9 @@ The supplied audit describes `main` at `aba23cd6`, not this branch. Its line num
 - PostgreSQL execution tests for reporting and a PostgreSQL CI job; model/schema mismatches and index coverage; role/permission system and admin route coverage.
 - Dependency audit, Sanctum token lifecycle, access policy for staff, frontend asset pipeline, RLS policies, queue configuration, Flutter checks, and end-to-end testing.
 - Laravel/PHPUnit tests and migrations have **not** been run on this branch in this environment. Syntax checks and front-end build do not prove runtime behavior. No live Supabase, Firebase, or production data was changed by this review.
+
+## قرارات السياسة والاختبار اللاحقة
+
+قرر صاحب الطلب أن لكل موظف حد خصم بالقيمة وبالنسبة يحدده صاحب المتجر أو المسؤول؛ عند وجود الحدين يجب احترام كليهما. يشمل الخصم الفرق الناتج عن خفض السعر يدويًا مقارنة بسعر المنتج المسجل إضافة إلى خصم الفاتورة. الضرائب معطلة افتراضيًا، وعند تفعيلها من صاحب الصلاحية تحسب لكل منتج وفق إعداد السعر الشامل أو غير الشامل. هذه قرارات مطلوبة للتنفيذ، وليست ادعاء بأن واجهات الإعداد أو فرض السياسة على البيع قد اكتملت. يلزم تحديد توزيع خصم الفاتورة بين المنتجات وحالات التقريب قبل اعتماد حساب الضرائب، والتحقق من جميع مسارات البيع والاسترجاع قبل تشغيلها ماليًا.
+
+أُضيف مسار CI للتحقق على SQLite وPostgreSQL وMySQL. المحاولة الأولى فشلت في تثبيت Composer على PHP 8.2، وهو لا يستوفي متطلبات بعض الحزم المقفلة. بعد استخدام PHP 8.3 فشلت المحاولة الثانية أيضًا قبل الاختبارات: أرشيف الحزمة المقفلة `supabase-php/supabase-client` يشير إلى مستودع GitHub يُرجع 404، وفشل الرجوع إلى git. لا يمكن اعتبار أي اختبار من هذه المحاولات ناجحًا. يلزم توفير مصدر قابل للوصول للحزمة أو استبدالها ومراجعة توافق استخدامها قبل إعادة الاختبارات. إعداد CI لا يمثل تعديلًا لبيانات الإنتاج أو تسوية للأرصدة.
