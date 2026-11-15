@@ -109,47 +109,54 @@ class StockTransfer extends Model
      */
     public function complete(): bool
     {
-        if (! $this->canBeCompleted()) {
-            return false;
-        }
-
         return \DB::transaction(function () {
-            // Decrease stock from source warehouse
-            $fromStock = WarehouseStock::where([
-                'warehouse_id' => $this->from_warehouse_id,
-                'product_id' => $this->product_id,
-            ])->first();
-
-            if (! $fromStock || ! $fromStock->decrease($this->quantity)) {
+            $transfer = static::whereKey($this->id)->lockForUpdate()->firstOrFail();
+            if ($transfer->status !== 'pending' || $transfer->quantity <= 0
+                || $transfer->from_warehouse_id == $transfer->to_warehouse_id) {
                 return false;
             }
 
-            // Increase stock in destination warehouse
-            $toStock = WarehouseStock::firstOrCreate([
-                'warehouse_id' => $this->to_warehouse_id,
-                'product_id' => $this->product_id,
-                'business_id' => $this->business_id,
+            $warehouses = Warehouse::where('business_id', $transfer->business_id)
+                ->whereIn('id', [$transfer->from_warehouse_id, $transfer->to_warehouse_id])->count();
+            $productExists = Product::where('business_id', $transfer->business_id)->whereKey($transfer->product_id)->exists();
+            if ($warehouses !== 2 || ! $productExists) {
+                return false;
+            }
+
+            $source = WarehouseStock::where('business_id', $transfer->business_id)
+                ->where('warehouse_id', $transfer->from_warehouse_id)
+                ->where('product_id', $transfer->product_id)->lockForUpdate()->first();
+            if (! $source || $source->quantity < $transfer->quantity) {
+                return false;
+            }
+
+            $destination = WarehouseStock::firstOrCreate([
+                'business_id' => $transfer->business_id,
+                'warehouse_id' => $transfer->to_warehouse_id,
+                'product_id' => $transfer->product_id,
             ]);
-
-            $toStock->increase($this->quantity);
-
-            // Update transfer status
-            $this->update(['status' => 'completed']);
+            $source->decrement('quantity', $transfer->quantity);
+            $destination->increment('quantity', $transfer->quantity);
+            $transfer->update(['status' => 'completed']);
+            $this->setAttribute('status', 'completed');
 
             return true;
         });
     }
 
-    /**
-     * Cancel the transfer
-     */
+    /** Cancel only a pending transfer while holding its row lock. */
     public function cancel(): bool
     {
-        if ($this->status !== 'pending') {
-            return false;
-        }
+        return \DB::transaction(function () {
+            $transfer = static::whereKey($this->id)->lockForUpdate()->firstOrFail();
+            if ($transfer->status !== 'pending') {
+                return false;
+            }
+            $transfer->update(['status' => 'cancelled']);
+            $this->setAttribute('status', 'cancelled');
 
-        return $this->update(['status' => 'cancelled']);
+            return true;
+        });
     }
 
     /**

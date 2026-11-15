@@ -18,48 +18,7 @@ class AuthController extends Controller
 {
     public function signUp(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'password' => 'required|min:6|max:100',
-            'email' => 'required|email',
-        ]);
-
-        $code = random_int(100000, 999999);
-        $expire = now()->addMinutes(config('zsyst.otp.visibility_time'));
-        $data = [
-            'code' => $code,
-            'name' => $request->name,
-        ];
-
-        $user = User::where('email', $request->email)->first();
-        if ($user && $user->business_id) {
-            return response()->json([
-                'message' => 'This email is already exists.',
-            ], 406);
-        }
-
-        if (config('mail.mailers.smtp.username')) {
-            if (config('zsyst.queue_mail')) {
-                Mail::to($request->email)->queue(new WelcomeMail($data));
-            } else {
-                Mail::to($request->email)->send(new WelcomeMail($data));
-            }
-        } else {
-            return response()->json([
-                'message' => __('Mail service is not configured. Please contact your administrator.'),
-            ], 406);
-        }
-
-        $user = User::updateOrCreate(['email' => $request->email], $request->except('password') + [
-            'remember_token' => $code,
-            'email_verified_at' => $expire,
-            'password' => Hash::make($request->password),
-        ]);
-
-        return response()->json([
-            'message' => 'An otp code has been sent to your email. Please check and confirm.',
-            'data' => $user,
-        ]);
+        return response()->json(['message' => 'Email-based registration is disabled.'], 503);
     }
 
     public function submitOtp(Request $request)
@@ -128,30 +87,7 @@ class AuthController extends Controller
 
             if ($user->remember_token && ! $user->business_id) { // If user didn't verify email
 
-                $code = random_int(100000, 999999);
-                $expire = now()->addMinutes(config('zsyst.otp.visibility_time'));
-                $data = [
-                    'code' => $code,
-                    'name' => $request->name,
-                ];
-
-                if (config('mail.mailers.smtp.username')) {
-                    if (config('zsyst.queue_mail')) {
-                        Mail::to($request->email)->queue(new WelcomeMail($data));
-                    } else {
-                        Mail::to($request->email)->send(new WelcomeMail($data));
-                    }
-                } else {
-                    return response()->json([
-                        'message' => __('Mail service is not configured. Please contact your administrator.'),
-                    ], 406);
-                }
-
-                User::where('email', $request->email)->first()->update(['remember_token' => $code, 'email_verified_at' => $expire]);
-
-                return response()->json([
-                    'message' => 'An otp code has been sent to your email. Please check and confirm.',
-                ], 201);
+                return response()->json(['message' => 'Email verification is disabled; contact an administrator.'], 503);
             }
 
             return response()->json([
@@ -211,33 +147,6 @@ class AuthController extends Controller
 
     public function resendOtp(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email|exists:users,email',
-        ]);
-
-        $code = random_int(100000, 999999);
-        $expire = now()->addMinutes(config('zsyst.otp.visibility_time'));
-        $data = [
-            'code' => $code,
-            'name' => $request->name,
-        ];
-
-        if (config('mail.mailers.smtp.username')) {
-            if (config('zsyst.queue_mail')) {
-                Mail::to($request->email)->queue(new WelcomeMail($data));
-            } else {
-                Mail::to($request->email)->send(new WelcomeMail($data));
-            }
-        } else {
-            return response()->json([
-                'message' => __('Mail service is not configured. Please contact your administrator.'),
-            ], 406);
-        }
-
-        User::where('email', $request->email)->first()->update(['remember_token' => $code, 'email_verified_at' => $expire]);
-
-        return response()->json([
-            'message' => 'An otp code has been sent to your email. Please check and confirm.',
-        ]);
+        return response()->json(['message' => 'Email verification is disabled.'], 503);
     }
 }

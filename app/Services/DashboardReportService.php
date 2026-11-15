@@ -221,20 +221,10 @@ class DashboardReportService
         $cacheKey = "sales_by_date:{$businessId}:{$dateFrom}:{$dateTo}:{$groupBy}";
 
         return $this->cacheService->remember($cacheKey, 300, function () use ($businessId, $dateFrom, $dateTo, $groupBy) {
-            $dateFormat = match ($groupBy) {
-                'hour' => '%Y-%m-%d %H:00',
-                'day' => '%Y-%m-%d',
-                'week' => '%x-W%v',
-                'month' => '%Y-%m',
-                default => '%Y-%m-%d',
-            };
-
+            $bucket = \App\Support\SqlDateBucket::expression('saleDate', $groupBy);
+            $totalColumn = \DB::connection()->getQueryGrammar()->wrap('totalAmount');
             $query = Sale::whereBetween('saleDate', [$dateFrom, $dateTo])
-                ->selectRaw("
-                    DATE_FORMAT(saleDate, '{$dateFormat}') as date_key,
-                    COUNT(*) as count,
-                    COALESCE(SUM(totalAmount), 0) as revenue
-                ")
+                ->selectRaw("$bucket as date_key, COUNT(*) as count, COALESCE(SUM($totalColumn), 0) as revenue")
                 ->groupBy('date_key')
                 ->orderBy('date_key');
 

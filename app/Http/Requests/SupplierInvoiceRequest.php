@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SupplierInvoiceRequest extends FormRequest
 {
@@ -20,9 +21,9 @@ class SupplierInvoiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'supplier_id' => 'nullable|exists:parties,id',
-            'purchase_id' => 'nullable|exists:purchases,id',
-            'purchase_order_id' => 'nullable|exists:purchase_orders,id',
+            'supplier_id' => ['nullable', Rule::exists('parties', 'id')->where('business_id', $this->user()?->business_id)],
+            'purchase_id' => ['nullable', Rule::exists('purchases', 'id')->where('business_id', $this->user()?->business_id)],
+            'purchase_order_id' => ['nullable', Rule::exists('purchase_orders', 'id')->where('business_id', $this->user()?->business_id)],
             'invoice_date' => 'nullable|date',
             'due_date' => 'nullable|date|after:invoice_date',
             'tax_amount' => 'nullable|numeric|min:0',
@@ -33,8 +34,8 @@ class SupplierInvoiceRequest extends FormRequest
             'internal_notes' => 'nullable|string|max:2000',
             'file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
             'items' => 'required|array|min:1',
-            'items.*.product_id' => 'nullable|exists:products,id',
-            'items.*.purchase_detail_id' => 'nullable|exists:purchase_details,id',
+            'items.*.product_id' => ['nullable', Rule::exists('products', 'id')->where('business_id', $this->user()?->business_id)],
+            'items.*.purchase_detail_id' => ['nullable', Rule::exists('purchase_details', 'id')->where(fn ($query) => $query->whereIn('purchase_id', \App\Models\Purchase::where('business_id', $this->user()?->business_id)->select('id')))],
             'items.*.description' => 'required|string|max:500',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unit_price' => 'required|numeric|min:0',

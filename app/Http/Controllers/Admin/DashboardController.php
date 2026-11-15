@@ -91,10 +91,16 @@ class DashboardController extends Controller
 
         $cacheKey = "admin:dashboard:yearly_subs:{$year}";
         $subscriptions = $this->cacheService->remember($cacheKey, 600, function () use ($year) {
+            $month = \App\Support\SqlDateBucket::expression('created_at', 'month');
             return PlanSubscribe::whereYear('created_at', $year)
-                ->selectRaw('MONTHNAME(created_at) as month, SUM(price) as total_amount')
-                ->groupBy('month')
-                ->get();
+                ->selectRaw("$month as month_key, SUM(price) as total_amount")
+                ->groupBy('month_key')->orderBy('month_key')->get()
+                ->map(function ($row) {
+                    return [
+                        'month' => \Carbon\Carbon::createFromFormat('!Y-m', $row->month_key)->format('F'),
+                        'total_amount' => $row->total_amount,
+                    ];
+                });
         });
 
         return response()->json($subscriptions);

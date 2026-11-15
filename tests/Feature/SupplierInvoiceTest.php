@@ -126,6 +126,25 @@ class SupplierInvoiceTest extends TestCase
         $this->assertNotNull($invoice->cancelled_at);
     }
 
+    public function test_cannot_cancel_invoice_with_a_recorded_payment(): void
+    {
+        $invoice = SupplierInvoice::factory()->create([
+            'status' => SupplierInvoice::STATUS_PARTIALLY_PAID,
+            'paid_amount' => 25,
+        ]);
+
+        $this->expectExceptionMessage('Cannot cancel an invoice with payments');
+        $this->invoiceService->cancel($invoice, 'test');
+    }
+
+    public function test_cannot_add_payment_to_cancelled_invoice(): void
+    {
+        $invoice = SupplierInvoice::factory()->create(['status' => SupplierInvoice::STATUS_CANCELLED]);
+
+        $this->expectExceptionMessage('Cannot add a payment');
+        $this->invoiceService->addPayment($invoice, ['amount' => 10, 'payment_method' => 'cash']);
+    }
+
     /**
      * Test adding payment to invoice.
      */
@@ -195,6 +214,34 @@ class SupplierInvoiceTest extends TestCase
         $this->assertEquals(SupplierInvoicePayment::STATUS_APPROVED, $payment->status);
         $this->assertEquals($userId, $payment->approved_by);
         $this->assertNotNull($payment->approved_at);
+    }
+
+    public function test_approving_a_recorded_payment_does_not_charge_it_twice(): void
+    {
+        $invoice = SupplierInvoice::factory()->create([
+            'total_amount' => 1000,
+            'paid_amount' => 0,
+            'balance' => 1000,
+            'status' => SupplierInvoice::STATUS_APPROVED,
+        ]);
+        $payment = $this->invoiceService->addPayment($invoice, ['amount' => 300, 'payment_method' => 'cash']);
+        $this->invoiceService->approvePayment($payment, User::factory()->create()->id);
+
+        $invoice->refresh();
+        $this->assertEquals(300, $invoice->paid_amount);
+        $this->assertEquals(700, $invoice->balance);
+    }
+
+    public function test_payment_cannot_exceed_invoice_balance(): void
+    {
+        $invoice = SupplierInvoice::factory()->create([
+            'total_amount' => 100,
+            'balance' => 100,
+            'status' => SupplierInvoice::STATUS_APPROVED,
+        ]);
+
+        $this->expectExceptionMessage('Payment must be positive and not exceed the invoice balance');
+        $this->invoiceService->addPayment($invoice, ['amount' => 101, 'payment_method' => 'cash']);
     }
 
     /**

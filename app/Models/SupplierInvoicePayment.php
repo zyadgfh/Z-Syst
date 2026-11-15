@@ -204,8 +204,7 @@ class SupplierInvoicePayment extends Model
             'approved_at' => now(),
         ]);
 
-        // Update invoice
-        $this->invoice->addPayment($this->amount);
+        // The invoice balance is updated when the payment is recorded by the service.
     }
 
     /**

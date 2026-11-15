@@ -7,6 +7,7 @@ use App\Models\StockTransfer;
 use App\Models\Warehouse;
 use App\Services\WarehouseService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class StockTransferController extends Controller
 {
@@ -23,7 +24,7 @@ class StockTransferController extends Controller
 
     public function index(Request $request)
     {
-        $transfers = StockTransfer::with([
+        $transfers = StockTransfer::forBusiness($request->user()->business_id)->with([
             'fromWarehouse:id,name,code',
             'toWarehouse:id,name,code',
             'product:id,name',
@@ -60,17 +61,21 @@ class StockTransferController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'business_id' => 'required|exists:businesses,id',
-            'from_warehouse_id' => 'required|exists:warehouses,id',
-            'to_warehouse_id' => 'required|exists:warehouses,id|different:from_warehouse_id',
-            'product_id' => 'required|exists:products,id',
+        $businessId = $request->user()->business_id;
+        abort_if($businessId === null, 403);
+        $validated = $request->validate([
+            'from_warehouse_id' => ['required', Rule::exists('warehouses', 'id')->where('business_id', $businessId)],
+            'to_warehouse_id' => ['required', 'different:from_warehouse_id', Rule::exists('warehouses', 'id')->where('business_id', $businessId)],
+            'product_id' => ['required', Rule::exists('products', 'id')->where('business_id', $businessId)],
             'quantity' => 'required|integer|min:1',
             'notes' => 'nullable|string',
         ]);
+        $validated['business_id'] = $businessId;
+        $validated['user_id'] = $request->user()->id;
+        $validated['status'] = 'pending';
 
         try {
-            $transfer = $this->warehouseService->createTransfer($request->all());
+            $transfer = $this->warehouseService->createTransfer($validated);
 
             return response()->json([
                 'message' => __('Stock transfer created successfully'),
@@ -85,6 +90,8 @@ class StockTransferController extends Controller
 
     public function show(StockTransfer $transfer)
     {
+        $this->assertTransferOwnership($transfer);
+
         $transfer->load([
             'fromWarehouse',
             'toWarehouse',
@@ -98,6 +105,8 @@ class StockTransferController extends Controller
 
     public function destroy(StockTransfer $transfer)
     {
+        $this->assertTransferOwnership($transfer);
+
         if ($transfer->status !== 'pending') {
             return response()->json([
                 'message' => __('Cannot delete non-pending transfers'),
@@ -123,6 +132,8 @@ class StockTransferController extends Controller
      */
     public function complete(StockTransfer $transfer)
     {
+        $this->assertTransferOwnership($transfer);
+
         try {
             $transfer = $this->warehouseService->completeTransfer($transfer);
 
@@ -142,6 +153,8 @@ class StockTransferController extends Controller
      */
     public function cancel(StockTransfer $transfer)
     {
+        $this->assertTransferOwnership($transfer);
+
         try {
             $transfer = $this->warehouseService->cancelTransfer($transfer);
 
@@ -168,7 +181,7 @@ class StockTransferController extends Controller
             'warehouse_id' => $request->warehouse_id,
         ];
 
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = auth()->user()->business_id;
         $statistics = $this->warehouseService->getTransferStatistics($businessId, $filters);
 
         return response()->json($statistics);
@@ -180,12 +193,18 @@ class StockTransferController extends Controller
     public function stockDistribution(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|exists:products,id',
+            'product_id' => ['required', Rule::exists('products', 'id')->where('business_id', $request->user()->business_id)],
         ]);
 
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = auth()->user()->business_id;
         $distribution = $this->warehouseService->getStockDistribution($businessId, $request->product_id);
 
         return response()->json($distribution);
     }
+    private function assertTransferOwnership(StockTransfer $transfer): void
+    {
+        $businessId = auth()->user()->business_id;
+        abort_unless($businessId !== null && (string) $transfer->business_id === (string) $businessId, 404);
+    }
+
 }

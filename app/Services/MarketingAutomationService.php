@@ -149,9 +149,9 @@ class MarketingAutomationService
         try {
             switch ($campaign->type) {
                 case 'email':
-                    return $this->sendEmail($campaign, $recipient);
+                    return ['status' => 'failed', 'error' => 'Email delivery is disabled'];
                 case 'sms':
-                    return $this->sendSms($campaign, $recipient);
+                    return ['status' => 'failed', 'error' => 'SMS delivery is disabled'];
                 case 'push':
                     return $this->sendPushNotification($campaign, $recipient);
                 default:

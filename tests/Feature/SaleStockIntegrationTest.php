@@ -124,4 +124,66 @@ class SaleStockIntegrationTest extends TestCase
         $this->stock->refresh();
         $this->assertEquals(100, $this->stock->productStock);
     }
+    public function test_sale_total_and_due_are_calculated_from_lines(): void
+    {
+        $party = Party::factory()->create(['business_id' => $this->business->id]);
+        $sale = $this->saleService->create([
+            'party_id' => $party->id,
+            'saleDate' => now()->toDateString(),
+            'totalAmount' => 1,
+            'paidAmount' => 50,
+            'dueAmount' => 0,
+            'discountAmount' => 0,
+            'products' => [[
+                'product_id' => $this->product->id,
+                'batch_no' => 'BATCH-001',
+                'quantities' => 2,
+                'price' => 50,
+                'lossProfit' => 0,
+            ]],
+        ], $this->business->id, $this->user->id);
+
+        $this->assertEquals(100, $sale->totalAmount);
+        $this->assertEquals(50, $sale->dueAmount);
+        $this->assertFalse((bool) $sale->isPaid);
+    }
+
+    public function test_sale_rejects_non_positive_quantity_even_when_called_directly(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->saleService->create([
+            'products' => [['product_id' => $this->product->id, 'quantities' => -1, 'price' => 10]],
+        ], $this->business->id, $this->user->id);
+    }
+
+    public function test_stock_allocation_checks_current_database_quantity_not_stale_model(): void
+    {
+        $stale = Stock::findOrFail($this->stock->id);
+        Stock::whereKey($this->stock->id)->update(['productStock' => 1]);
+        $this->expectException(\App\Exceptions\StockUnavailableException::class);
+        app(\App\Services\Stock\StockAllocationService::class)
+            ->allocate($stale, 2, \App\Models\Sale::class, 1, $this->user->id);
+    }
+
+    public function test_cash_balance_tracks_paid_amount_once_through_sale_lifecycle(): void
+    {
+        $this->business->update(['remainingShopBalance' => 1000, 'shopOpeningBalance' => 1000]);
+        $party = Party::factory()->create(['business_id' => $this->business->id]);
+        $data = [
+            'party_id' => $party->id,
+            'saleDate' => now()->toDateString(),
+            'paidAmount' => 50,
+            'products' => [['product_id' => $this->product->id, 'batch_no' => 'BATCH-001', 'quantities' => 2, 'price' => 50, 'lossProfit' => 0]],
+        ];
+        $sale = $this->saleService->create($data, $this->business->id, $this->user->id);
+        $this->assertEquals(1050, $this->business->fresh()->remainingShopBalance);
+        $data['paidAmount'] = 100;
+        $sale = $this->saleService->update($sale, $data, $this->business->id, $this->user->id);
+        $this->assertEquals(1100, $this->business->fresh()->remainingShopBalance);
+        $this->assertEquals(0, $party->fresh()->due);
+        $this->saleService->delete($sale, $this->business->id, $this->user->id);
+        $this->assertEquals(1000, $this->business->fresh()->remainingShopBalance);
+        $this->assertEquals(1000, $this->business->fresh()->shopOpeningBalance);
+    }
+
 }

@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Notification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class NotificationController extends Controller
 {
@@ -26,7 +24,7 @@ class NotificationController extends Controller
 
     public function zsystFilter(Request $request)
     {
-        $notifications = Notification::whereDate('created_at', today())->latest()->paginate($request->per_page ?? 10);
+        $notifications = auth()->user()->notifications()->whereDate('created_at', today())->latest()->paginate($request->per_page ?? 10);
 
         if ($request->ajax()) {
             return response()->json([
@@ -39,24 +37,17 @@ class NotificationController extends Controller
 
     public function mtView($id)
     {
-        $notify = Notification::find($id);
-        if ($notify) {
-            $notify->read_at = now();
-            $notify->save();
+        $notify = auth()->user()->notifications()->findOrFail($id);
+        $notify->markAsRead();
 
-            // Open redirect protection: only allow local paths
-            $url = $notify->data['url'] ?? '/';
-            if (
-                Str::startsWith($url, ['http://', 'https://'])
-                && !Str::startsWith($url, url('/'))
-            ) {
-                $url = '/'; // Block external redirects
-            }
-
-            return redirect($url);
+        // Permit only local absolute paths, never protocol-relative or backslash URLs.
+        $url = $notify->data['url'] ?? '/';
+        if (! is_string($url) || ! str_starts_with($url, '/') || str_starts_with($url, '//')
+            || str_contains($url, chr(92)) || preg_match('/[\x00-\x1f\x7f]/', $url)) {
+            $url = '/';
         }
 
-        return back()->with('error', __('Permission denied.'));
+        return redirect($url);
     }
 
     public function mtReadAll()

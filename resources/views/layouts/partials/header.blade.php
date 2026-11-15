@@ -274,31 +274,38 @@
         };
 
         function registerFCMToken(messaging) {
-            messaging.getToken({ vapidKey: null }).then(function(token) {
-                if (token) {
-                    fetch('{{ route("api.v1.push-tokens.store") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || ''),
-                        },
-                        body: JSON.stringify({ token: token, platform: 'web' }),
-                    });
-                }
-            }).catch(function(err) {
-                console.log('FCM token error:', err);
-            });
-
-            // Listen for token refresh
-            messaging.onTokenRefresh(function() {
-                messaging.getToken().then(function(newToken) {
-                    if (newToken) {
-                        registerFCMToken(messaging);
-                    }
+            if (!('serviceWorker' in navigator)) return;
+            var workerUrl = '/firebase-messaging-sw.js?config=' + encodeURIComponent(JSON.stringify(firebaseConfig));
+            navigator.serviceWorker.register(workerUrl).then(function(registration) {
+                return messaging.getToken({
+                    vapidKey: @json(env('VITE_FIREBASE_VAPID_KEY')),
+                    serviceWorkerRegistration: registration,
                 });
+            }).then(function(token) {
+                if (!token) return;
+                return fetch('{{ route("admin.push-tokens.store") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify({ token: token, platform: 'web' }),
+                }).then(function(response) {
+                    if (!response.ok) throw new Error('Push token registration failed');
+                });
+            }).catch(function(err) {
+                console.warn('FCM token registration error:', err);
             });
         }
+
+        messaging.onMessage(function(payload) {
+            if (Notification.permission === 'granted' && payload.notification) {
+                new Notification(payload.notification.title || 'Z-Syst', {
+                    body: payload.notification.body || '',
+                });
+            }
+        });
 
         // Auto-register if already granted
         if (Notification.permission === 'granted') {

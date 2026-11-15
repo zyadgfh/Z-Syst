@@ -21,23 +21,7 @@ class MessagingService
      */
     public function sendSms(string $phoneNumber, string $message, int $businessId): array
     {
-        // Integrate with SMS service (Twilio, MessageBird, local SMS gateway)
-        // For now, simulate the response
-        
-        $log = MessageLog::create([
-            'business_id' => $businessId,
-            'type' => 'sms',
-            'recipient' => $phoneNumber,
-            'message' => $message,
-            'status' => 'sent',
-            'sent_at' => now(),
-        ]);
-
-        return [
-            'success' => true,
-            'message_id' => $log->id,
-            'status' => 'sent',
-        ];
+        return ['success' => false, 'status' => 'disabled', 'error' => 'SMS delivery is disabled'];
     }
 
     /**

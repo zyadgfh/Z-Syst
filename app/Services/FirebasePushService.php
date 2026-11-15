@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\InventoryAlert;
+use App\Models\DoctorAttentionAlert;
 use App\Models\PushToken;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -56,14 +57,35 @@ class FirebasePushService
         return $this->sendToMultipleTokens($tokens, $payload);
     }
 
+    /** Send an attention alert only to the selected users of its business. */
+    public function sendDoctorAttentionAlert(DoctorAttentionAlert $alert, array $userIds): int
+    {
+        if (empty($userIds)) {
+            return 0;
+        }
+
+        $tokens = PushToken::forBusiness($alert->business_id)
+            ->whereIn('user_id', $userIds)->pluck('token')->all();
+
+        return $this->sendToMultipleTokens($tokens, [
+            'notification' => ['title' => 'Doctor attention alert', 'body' => $alert->message],
+            'data' => [
+                'type' => 'doctor_attention',
+                'alert_id' => (string) $alert->id,
+                'severity' => (string) $alert->severity,
+            ],
+        ]);
+    }
+
     /**
      * Send to multiple FCM tokens using the HTTP v1 API.
-     * Falls back to legacy API if no service account is configured.
+     * Requires a Firebase service account for the HTTP v1 API.
      */
-    protected function sendToMultipleTokens(array $tokens, array $payload): int
+    public function sendToMultipleTokens(array $tokens, array $payload): int
     {
+        if (empty($tokens)) return 0;
+
         $projectId = config('services.firebase.project_id', env('VITE_FIREBASE_PROJECT_ID'));
-        $serverKey = config('services.firebase.server_key', env('FIREBASE_SERVER_KEY'));
         $serviceAccount = config('services.firebase.credentials');
 
         $sent = 0;
@@ -89,7 +111,7 @@ class FirebasePushService
                         $sent++;
                     } else {
                         // Token might be invalid — deactivate it
-                        if (in_array($response->status(), [404, 400])) {
+                        if ($response->json('error.details.0.errorCode') === 'UNREGISTERED') {
                             PushToken::deactivate($token);
                         }
                         Log::warning("FCM push failed for token: {$response->status()}");
@@ -99,33 +121,8 @@ class FirebasePushService
                 }
             }
         }
-        // Fallback: use legacy FCM server key API
-        elseif ($serverKey) {
-            foreach ($tokens as $token) {
-                try {
-                    $response = Http::withHeaders([
-                        'Authorization' => "key={$serverKey}",
-                        'Content-Type'  => 'application/json',
-                    ])->post('https://fcm.googleapis.com/fcm/send', [
-                        'to'   => $token,
-                        'notification' => $payload['notification'] ?? [],
-                        'data'         => $payload['data'] ?? [],
-                        'webpush'      => $payload['webpush'] ?? [],
-                    ]);
-
-                    if ($response->successful()) {
-                        $sent++;
-                    } else {
-                        if (in_array($response->status(), [404, 400])) {
-                            PushToken::deactivate($token);
-                        }
-                    }
-                } catch (\Exception $e) {
-                    Log::error("FCM legacy push error: {$e->getMessage()}");
-                }
-            }
-        } else {
-            Log::info('Firebase: No server key or service account configured — push notifications disabled');
+        else {
+            Log::warning('Firebase: No service account configured — push notifications disabled');
         }
 
         return $sent;
@@ -141,8 +138,9 @@ class FirebasePushService
             if (!$credentials) return null;
 
             $now = time();
-            $jwtHeader = base64_encode(json_encode(['alg' => 'RS256', 'typ' => 'JWT']));
-            $jwtClaimSet = base64_encode(json_encode([
+            $encode = static fn (string $value): string => rtrim(strtr(base64_encode($value), '+/', '-_'), '=');
+            $jwtHeader = $encode(json_encode(['alg' => 'RS256', 'typ' => 'JWT']));
+            $jwtClaimSet = $encode(json_encode([
                 'iss'   => $credentials['client_email'],
                 'scope' => 'https://www.googleapis.com/auth/firebase.messaging',
                 'aud'   => 'https://oauth2.googleapis.com/token',
@@ -152,8 +150,10 @@ class FirebasePushService
 
             $dataToSign = "{$jwtHeader}.{$jwtClaimSet}";
             $signature = '';
-            openssl_sign($dataToSign, $signature, $credentials['private_key'], 'SHA256');
-            $jwt = "{$dataToSign}." . base64_encode($signature);
+            if (! openssl_sign($dataToSign, $signature, $credentials['private_key'], 'SHA256')) {
+                return null;
+            }
+            $jwt = "{$dataToSign}." . $encode($signature);
 
             $response = Http::asForm()->post('https://oauth2.googleapis.com/token', [
                 'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',

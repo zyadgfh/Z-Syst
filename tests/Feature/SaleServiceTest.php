@@ -204,7 +204,7 @@ class SaleServiceTest extends TestCase
                     'purchase_price' => 30.00,
                 ],
             ],
-            'totalAmount' => 825.00,
+            'totalAmount' => 1.00, // A forged total is ignored.
             'paidAmount' => 825.00,
             'dueAmount' => 0,
             'isPaid' => true,

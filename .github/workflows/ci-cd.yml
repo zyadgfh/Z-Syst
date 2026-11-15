@@ -18,7 +18,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.3'
           extensions: mbstring, xml, mysql, bcmath, gd, intl, zip
           coverage: xdebug
 
@@ -55,7 +55,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.3'
 
       - name: Install dependencies
         run: composer install --no-progress --no-interaction
@@ -63,9 +63,6 @@ jobs:
       - name: Run security audit
         run: composer audit
 
-      - name: Run Laravel security check
-        run: composer require enlightn/security-checker --dev
-        run: vendor/bin/security-checker
 
   code-quality:
     name: Code Quality Check
@@ -78,17 +75,15 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.3'
 
       - name: Install dependencies
         run: composer install --no-progress --no-interaction
 
       - name: Run PHPStan
-        run: composer require phpstan/phpstan --dev
         run: vendor/bin/phpstan analyse --memory-limit=2G
 
       - name: Run Pint
-        run: composer require laravel/pint --dev
         run: vendor/bin/pint --test
 
   deploy-staging:
@@ -107,7 +102,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.3'
 
       - name: Install dependencies
         run: composer install --no-dev --optimize-autoloader
@@ -145,7 +140,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.3'
 
       - name: Install dependencies
         run: composer install --no-dev --optimize-autoloader

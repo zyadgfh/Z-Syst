@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'admin', 'clerk.auth']], function () {
     Route::get('/', [ADMIN\DashboardController::class, 'index'])->name('dashboard.index');
+    Route::post('/push-tokens', [\App\Http\Controllers\Api\PushTokenController::class, 'store'])->name('push-tokens.store');
     Route::get('/get-dashboard', [ADMIN\DashboardController::class, 'getDashboardData'])->name('dashboard.data');
     Route::get('/yearly-subscriptions', [ADMIN\DashboardController::class, 'yearlySubscriptions'])->name('dashboard.subscriptions');
     Route::get('/plans-overview', [ADMIN\DashboardController::class, 'subscriptionPlan'])->name('dashboard.plans-overview');
@@ -248,12 +249,12 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('warehouses/statistics', [ADMIN\WarehouseController::class, 'statistics'])->name('warehouses.statistics');
 
     // Stock Transfers
+    Route::get('stock-transfers/statistics', [ADMIN\StockTransferController::class, 'statistics'])->name('stock-transfers.statistics');
+    Route::get('stock-transfers/stock-distribution', [ADMIN\StockTransferController::class, 'stockDistribution'])->name('stock-transfers.stock-distribution');
     Route::resource('stock-transfers', ADMIN\StockTransferController::class)->except('show');
     Route::get('stock-transfers/{transfer}', [ADMIN\StockTransferController::class, 'show'])->name('stock-transfers.show');
     Route::post('stock-transfers/{transfer}/complete', [ADMIN\StockTransferController::class, 'complete'])->name('stock-transfers.complete');
     Route::post('stock-transfers/{transfer}/cancel', [ADMIN\StockTransferController::class, 'cancel'])->name('stock-transfers.cancel');
-    Route::get('stock-transfers/statistics', [ADMIN\StockTransferController::class, 'statistics'])->name('stock-transfers.statistics');
-    Route::get('stock-transfers/stock-distribution', [ADMIN\StockTransferController::class, 'stockDistribution'])->name('stock-transfers.stock-distribution');
 
     // Barcodes
     Route::resource('barcodes', ADMIN\BarcodeController::class)->except('show');
@@ -323,6 +324,11 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('receipts/statistics', [ADMIN\ReceiptController::class, 'statistics'])->name('receipts.statistics');
 
     // Supplier Invoices
+    Route::get('supplier-invoices/pending', [ADMIN\SupplierInvoiceController::class, 'pending'])->name('supplier-invoices.pending');
+    Route::get('supplier-invoices/overdue', [ADMIN\SupplierInvoiceController::class, 'overdue'])->name('supplier-invoices.overdue');
+    Route::get('supplier-invoices/unpaid', [ADMIN\SupplierInvoiceController::class, 'unpaid'])->name('supplier-invoices.unpaid');
+    Route::get('supplier-invoices/statistics', [ADMIN\SupplierInvoiceController::class, 'statistics'])->name('supplier-invoices.statistics');
+    Route::get('supplier-invoices/aging-report', [ADMIN\SupplierInvoiceController::class, 'agingReport'])->name('supplier-invoices.aging-report');
     Route::resource('supplier-invoices', ADMIN\SupplierInvoiceController::class)->except('show');
     Route::get('supplier-invoices/{supplierInvoice}', [ADMIN\SupplierInvoiceController::class, 'show'])->name('supplier-invoices.show');
     Route::post('supplier-invoices/{supplierInvoice}/approve', [ADMIN\SupplierInvoiceController::class, 'approve'])->name('supplier-invoices.approve');
@@ -330,11 +336,6 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::post('supplier-invoices/{supplierInvoice}/cancel', [ADMIN\SupplierInvoiceController::class, 'cancel'])->name('supplier-invoices.cancel');
     Route::post('supplier-invoices/{supplierInvoice}/add-payment', [ADMIN\SupplierInvoiceController::class, 'addPayment'])->name('supplier-invoices.add-payment');
     Route::post('supplier-invoices/payments/{paymentId}/approve', [ADMIN\SupplierInvoiceController::class, 'approvePayment'])->name('supplier-invoices.approve-payment');
-    Route::get('supplier-invoices/pending', [ADMIN\SupplierInvoiceController::class, 'pending'])->name('supplier-invoices.pending');
-    Route::get('supplier-invoices/overdue', [ADMIN\SupplierInvoiceController::class, 'overdue'])->name('supplier-invoices.overdue');
-    Route::get('supplier-invoices/unpaid', [ADMIN\SupplierInvoiceController::class, 'unpaid'])->name('supplier-invoices.unpaid');
-    Route::get('supplier-invoices/statistics', [ADMIN\SupplierInvoiceController::class, 'statistics'])->name('supplier-invoices.statistics');
-    Route::get('supplier-invoices/aging-report', [ADMIN\SupplierInvoiceController::class, 'agingReport'])->name('supplier-invoices.aging-report');
     Route::post('supplier-invoices/create-from-purchase', [ADMIN\SupplierInvoiceController::class, 'createFromPurchase'])->name('supplier-invoices.create-from-purchase');
 
     // Doctor Attention Alerts
@@ -351,6 +352,9 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::post('doctor-attention/record-activity', [ADMIN\DoctorAttentionController::class, 'recordActivity'])->name('doctor-attention.record-activity');
 
     // Purchase Orders
+    Route::get('purchase-orders/pending', [ADMIN\PurchaseOrderController::class, 'pending'])->name('purchase-orders.pending');
+    Route::get('purchase-orders/overdue', [ADMIN\PurchaseOrderController::class, 'overdue'])->name('purchase-orders.overdue');
+    Route::get('purchase-orders/statistics', [ADMIN\PurchaseOrderController::class, 'statistics'])->name('purchase-orders.statistics');
     Route::resource('purchase-orders', ADMIN\PurchaseOrderController::class)->except('show');
     Route::get('purchase-orders/{purchaseOrder}', [ADMIN\PurchaseOrderController::class, 'show'])->name('purchase-orders.show');
     Route::post('purchase-orders/{purchaseOrder}/send', [ADMIN\PurchaseOrderController::class, 'send'])->name('purchase-orders.send');
@@ -360,9 +364,6 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::post('purchase-orders/{purchaseOrder}/restore', [ADMIN\PurchaseOrderController::class, 'restore'])->name('purchase-orders.restore');
     Route::post('purchase-orders/{purchaseOrder}/convert', [ADMIN\PurchaseOrderController::class, 'convertToPurchase'])->name('purchase-orders.convert');
     Route::get('purchase-orders/{purchaseOrder}/pdf', [ADMIN\PurchaseOrderController::class, 'pdf'])->name('purchase-orders.pdf');
-    Route::get('purchase-orders/pending', [ADMIN\PurchaseOrderController::class, 'pending'])->name('purchase-orders.pending');
-    Route::get('purchase-orders/overdue', [ADMIN\PurchaseOrderController::class, 'overdue'])->name('purchase-orders.overdue');
-    Route::get('purchase-orders/statistics', [ADMIN\PurchaseOrderController::class, 'statistics'])->name('purchase-orders.statistics');
 
     // GRN (Goods Received Notes)
     Route::resource('grn', ADMIN\GRNController::class)->except('show');

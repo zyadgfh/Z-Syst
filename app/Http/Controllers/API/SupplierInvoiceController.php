@@ -69,6 +69,8 @@ class SupplierInvoiceController extends Controller
      */
     public function show(SupplierInvoice $supplierInvoice): JsonResponse
     {
+        $this->assertBusinessOwnership($supplierInvoice);
+
         $supplierInvoice->load(['supplier', 'items.product', 'payments', 'createdBy', 'approvedBy']);
 
         return response()->json([
@@ -82,6 +84,8 @@ class SupplierInvoiceController extends Controller
      */
     public function update(SupplierInvoiceRequest $request, SupplierInvoice $supplierInvoice): JsonResponse
     {
+        $this->assertBusinessOwnership($supplierInvoice);
+
         $validated = $request->validated();
 
         $invoice = $this->invoiceService->update($supplierInvoice, $validated);
@@ -98,6 +102,8 @@ class SupplierInvoiceController extends Controller
      */
     public function destroy(SupplierInvoice $supplierInvoice): JsonResponse
     {
+        $this->assertBusinessOwnership($supplierInvoice);
+
         $this->invoiceService->delete($supplierInvoice);
 
         return response()->json([
@@ -111,6 +117,8 @@ class SupplierInvoiceController extends Controller
      */
     public function approve(Request $request, SupplierInvoice $supplierInvoice): JsonResponse
     {
+        $this->assertBusinessOwnership($supplierInvoice);
+
         $invoice = $this->invoiceService->approve($supplierInvoice, $request->user()->id);
 
         return response()->json([
@@ -125,6 +133,8 @@ class SupplierInvoiceController extends Controller
      */
     public function reject(Request $request, SupplierInvoice $supplierInvoice): JsonResponse
     {
+        $this->assertBusinessOwnership($supplierInvoice);
+
         $request->validate([
             'reason' => 'required|string|max:500',
         ]);
@@ -143,6 +153,8 @@ class SupplierInvoiceController extends Controller
      */
     public function cancel(Request $request, SupplierInvoice $supplierInvoice): JsonResponse
     {
+        $this->assertBusinessOwnership($supplierInvoice);
+
         $request->validate([
             'reason' => 'required|string|max:500',
         ]);
@@ -161,6 +173,8 @@ class SupplierInvoiceController extends Controller
      */
     public function addPayment(SupplierInvoicePaymentRequest $request, SupplierInvoice $supplierInvoice): JsonResponse
     {
+        $this->assertBusinessOwnership($supplierInvoice);
+
         $payment = $this->invoiceService->addPayment($supplierInvoice, $request->validated());
 
         return response()->json([
@@ -175,7 +189,7 @@ class SupplierInvoiceController extends Controller
      */
     public function approvePayment(Request $request, $paymentId): JsonResponse
     {
-        $payment = SupplierInvoicePayment::findOrFail($paymentId);
+        $payment = SupplierInvoicePayment::forBusiness($request->user()->business_id)->findOrFail($paymentId);
         $payment = $this->invoiceService->approvePayment($payment, $request->user()->id);
 
         return response()->json([
@@ -250,7 +264,7 @@ class SupplierInvoiceController extends Controller
             'purchase_id' => 'required|exists:purchases,id',
         ]);
 
-        $purchase = Purchase::findOrFail($request->purchase_id);
+        $purchase = Purchase::where('business_id', $request->user()->business_id)->findOrFail($request->purchase_id);
         $invoice = $this->invoiceService->createFromPurchase($purchase);
 
         return response()->json([
@@ -259,4 +273,11 @@ class SupplierInvoiceController extends Controller
             'data' => new SupplierInvoiceResource($invoice),
         ], 201);
     }
+    /** Prevent access to another business's records. */
+    private function assertBusinessOwnership(SupplierInvoice $supplierInvoice): void
+    {
+        $businessId = request()->user()?->business_id;
+        abort_unless($businessId !== null && (string) $supplierInvoice->business_id === (string) $businessId, 404);
+    }
+
 }

@@ -104,16 +104,17 @@ class PurchaseOrderService
      */
     public function send(PurchaseOrder $po): PurchaseOrder
     {
-        if (! $po->isDraft()) {
-            throw new \Exception('Only draft orders can be sent');
-        }
+        return DB::transaction(function () use ($po) {
+            if (! $po->isDraft()) {
+                throw new \Exception('Only draft orders can be sent');
+            }
 
-        $po->markAsSent();
+            $po->markAsSent();
 
-        // TODO: Send notification to supplier
-        // TODO: Email supplier with PO details
+            $this->notifySupplier($po, 'new_order', 'New purchase order');
 
-        return $po;
+            return $po;
+        });
     }
 
     /**
@@ -121,16 +122,17 @@ class PurchaseOrderService
      */
     public function approve(PurchaseOrder $po, int $userId): PurchaseOrder
     {
-        if (! $po->isSent()) {
-            throw new \Exception('Only sent orders can be approved');
-        }
+        return DB::transaction(function () use ($po, $userId) {
+            if (! $po->isSent()) {
+                throw new \Exception('Only sent orders can be approved');
+            }
 
-        $po->approve($userId);
+            $po->approve($userId);
 
-        // TODO: Notify supplier
-        // TODO: Update purchase order status
+            $this->notifySupplier($po, 'order_update', 'Purchase order updated');
 
-        return $po;
+            return $po;
+        });
     }
 
     /**
@@ -138,16 +140,17 @@ class PurchaseOrderService
      */
     public function reject(PurchaseOrder $po, int $userId, string $reason): PurchaseOrder
     {
-        if (! $po->isSent()) {
-            throw new \Exception('Only sent orders can be rejected');
-        }
+        return DB::transaction(function () use ($po, $userId, $reason) {
+            if (! $po->isSent()) {
+                throw new \Exception('Only sent orders can be rejected');
+            }
 
-        $po->reject($userId, $reason);
+            $po->reject($userId, $reason);
 
-        // TODO: Notify supplier
-        // TODO: Update purchase order status
+            $this->notifySupplier($po, 'order_update', 'Purchase order updated');
 
-        return $po;
+            return $po;
+        });
     }
 
     /**
@@ -155,16 +158,17 @@ class PurchaseOrderService
      */
     public function cancel(PurchaseOrder $po): PurchaseOrder
     {
-        if ($po->isReceived() || $po->isPartiallyReceived()) {
-            throw new \Exception('Cannot cancel received orders');
-        }
+        return DB::transaction(function () use ($po) {
+            if ($po->isReceived() || $po->isPartiallyReceived()) {
+                throw new \Exception('Cannot cancel received orders');
+            }
 
-        $po->cancel();
+            $po->cancel();
 
-        // TODO: Notify supplier
-        // TODO: Update inventory if needed
+            $this->notifySupplier($po, 'order_update', 'Purchase order cancelled');
 
-        return $po;
+            return $po;
+        });
     }
 
     /**
@@ -172,15 +176,26 @@ class PurchaseOrderService
      */
     public function restore(PurchaseOrder $po): PurchaseOrder
     {
-        if (! $po->isCancelled()) {
-            throw new \Exception('Only cancelled orders can be restored');
-        }
+        return DB::transaction(function () use ($po) {
+            if (! $po->isCancelled()) {
+                throw new \Exception('Only cancelled orders can be restored');
+            }
 
-        $po->update(['status' => PurchaseOrder::STATUS_DRAFT]);
+            $po->update(['status' => PurchaseOrder::STATUS_DRAFT]);
 
-        // TODO: Notify supplier
+            $this->notifySupplier($po, 'order_update', 'Purchase order restored');
 
-        return $po;
+            return $po;
+        });
+    }
+
+    private function notifySupplier(PurchaseOrder $po, string $type, string $title): void
+    {
+        app(SupplierPortalNotificationService::class)->notify(
+            $po->business_id, $po->supplier_id, $type, $title,
+            "Purchase order {$po->po_number}: {$po->status}.",
+            ['purchase_order_id' => $po->id, 'status' => $po->status]
+        );
     }
 
     /**

@@ -165,16 +165,17 @@ class SupplierInvoiceService
      */
     public function approve(SupplierInvoice $invoice, int $userId): SupplierInvoice
     {
-        if (! $invoice->isPending()) {
-            throw new \Exception('Only pending invoices can be approved');
-        }
+        return DB::transaction(function () use ($invoice, $userId) {
+            if (! $invoice->isPending()) {
+                throw new \Exception('Only pending invoices can be approved');
+            }
 
-        $invoice->approve($userId);
+            $invoice->approve($userId);
 
-        // TODO: Send notification to supplier
-        // TODO: Update purchase status if linked
+            $this->notifySupplier($invoice, 'Invoice approved');
 
-        return $invoice;
+            return $invoice;
+        });
     }
 
     /**
@@ -182,15 +183,17 @@ class SupplierInvoiceService
      */
     public function reject(SupplierInvoice $invoice, int $userId, string $reason): SupplierInvoice
     {
-        if (! $invoice->isPending()) {
-            throw new \Exception('Only pending invoices can be rejected');
-        }
+        return DB::transaction(function () use ($invoice, $userId, $reason) {
+            if (! $invoice->isPending()) {
+                throw new \Exception('Only pending invoices can be rejected');
+            }
 
-        $invoice->reject($userId, $reason);
+            $invoice->reject($userId, $reason);
 
-        // TODO: Send notification to supplier
+            $this->notifySupplier($invoice, 'Invoice rejected');
 
-        return $invoice;
+            return $invoice;
+        });
     }
 
     /**
@@ -198,16 +201,27 @@ class SupplierInvoiceService
      */
     public function cancel(SupplierInvoice $invoice, string $reason): SupplierInvoice
     {
-        if ($invoice->isPaid()) {
-            throw new \Exception('Cannot cancel paid invoices');
-        }
+        return DB::transaction(function () use ($invoice, $reason) {
+            $invoice = SupplierInvoice::query()->lockForUpdate()->findOrFail($invoice->id);
+            if ($invoice->isPaid() || (float) $invoice->paid_amount > 0 || $invoice->payments()->exists()) {
+                throw new \Exception('Cannot cancel an invoice with payments; reconcile them first');
+            }
 
-        $invoice->cancel($reason);
+            $invoice->cancel($reason);
 
-        // TODO: Reverse any payments
-        // TODO: Update purchase status if linked
+            $this->notifySupplier($invoice, 'Invoice cancelled');
 
-        return $invoice;
+            return $invoice;
+        });
+    }
+
+    private function notifySupplier(SupplierInvoice $invoice, string $title): void
+    {
+        app(SupplierPortalNotificationService::class)->notify(
+            $invoice->business_id, $invoice->supplier_id, 'invoice_update', $title,
+            "Invoice {$invoice->invoice_number}: {$invoice->status}.",
+            ['supplier_invoice_id' => $invoice->id, 'status' => $invoice->status]
+        );
     }
 
     /**
@@ -216,6 +230,14 @@ class SupplierInvoiceService
     public function addPayment(SupplierInvoice $invoice, array $paymentData): SupplierInvoicePayment
     {
         return DB::transaction(function () use ($invoice, $paymentData) {
+            $invoice = SupplierInvoice::query()->lockForUpdate()->findOrFail($invoice->id);
+            if (in_array($invoice->status, [SupplierInvoice::STATUS_CANCELLED, SupplierInvoice::STATUS_REJECTED], true)) {
+                throw new \Exception('Cannot add a payment to a cancelled or rejected invoice');
+            }
+            $amount = (float) ($paymentData['amount'] ?? 0);
+            if (! is_finite($amount) || $amount <= 0 || round($amount, 2) > round((float) $invoice->balance, 2)) {
+                throw new \InvalidArgumentException('Payment must be positive and not exceed the invoice balance');
+            }
             $payment = SupplierInvoicePayment::create([
                 'supplier_invoice_id' => $invoice->id,
                 'business_id' => $invoice->business_id,
@@ -256,13 +278,16 @@ class SupplierInvoiceService
      */
     public function approvePayment(SupplierInvoicePayment $payment, int $userId): SupplierInvoicePayment
     {
-        if (! $payment->isPending()) {
-            throw new \Exception('Only pending payments can be approved');
-        }
+        return DB::transaction(function () use ($payment, $userId) {
+            $payment = SupplierInvoicePayment::query()->lockForUpdate()->findOrFail($payment->id);
+            if (! $payment->isPending()) {
+                throw new \Exception('Only pending payments can be approved');
+            }
 
-        $payment->approve($userId);
+            $payment->approve($userId);
 
-        return $payment;
+            return $payment;
+        });
     }
 
     /**
@@ -392,11 +417,11 @@ class SupplierInvoiceService
         foreach ($invoices as $invoice) {
             $daysOverdue = $invoice->getDaysUntilDue();
 
-            if ($daysOverdue <= 0) {
+            if ($daysOverdue >= -30) {
                 $period30 += $invoice->balance;
-            } elseif ($daysOverdue <= -30) {
+            } elseif ($daysOverdue >= -60) {
                 $period60 += $invoice->balance;
-            } elseif ($daysOverdue <= -60) {
+            } elseif ($daysOverdue >= -90) {
                 $period90 += $invoice->balance;
             } else {
                 $period90Plus += $invoice->balance;

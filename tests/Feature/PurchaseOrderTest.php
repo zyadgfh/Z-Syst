@@ -79,6 +79,41 @@ class PurchaseOrderTest extends TestCase
         $this->assertEquals('high', $updatedPo->priority);
     }
 
+    public function test_order_notification_only_reaches_active_matching_supplier(): void
+    {
+        $po = PurchaseOrder::factory()->create(['status' => PurchaseOrder::STATUS_DRAFT]);
+        $user = \App\Models\SupplierPortalUser::create([
+            'business_id' => $po->business_id,
+            'party_id' => $po->supplier_id,
+            'name' => 'Supplier',
+            'email' => 'supplier@example.test',
+            'password' => bcrypt('test-password'),
+            'role' => 'viewer',
+            'is_active' => true,
+        ]);
+        $other = \App\Models\SupplierPortalUser::create([
+            'business_id' => $po->business_id,
+            'party_id' => $po->supplier_id,
+            'name' => 'Inactive',
+            'email' => 'inactive@example.test',
+            'password' => bcrypt('test-password'),
+            'role' => 'viewer',
+            'is_active' => false,
+        ]);
+
+        $this->poService->send($po);
+
+        $this->assertDatabaseHas('supplier_notifications', [
+            'supplier_portal_user_id' => $user->id,
+            'business_id' => $po->business_id,
+            'type' => 'new_order',
+        ]);
+        $this->assertDatabaseMissing('supplier_notifications', [
+            'supplier_portal_user_id' => $other->id,
+            'type' => 'new_order',
+        ]);
+    }
+
     /**
      * Test sending a purchase order.
      */

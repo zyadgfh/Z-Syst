@@ -138,10 +138,9 @@ class DoctorAttentionService
      */
     public function generateAlert(Party $doctor, DoctorAttentionScore $score, DoctorAttentionSettings $settings): ?DoctorAttentionAlert
     {
-        // Check if alert was already sent recently
+        // Limit duplicate alerts, including when push delivery is unavailable.
         $recentAlert = DoctorAttentionAlert::forDoctor($doctor->id)
             ->where('created_at', '>=', now()->subHours($settings->alert_frequency_hours))
-            ->where('is_sent', true)
             ->first();
 
         if ($recentAlert) {
@@ -187,14 +186,6 @@ class DoctorAttentionService
             $this->sendPushNotification($alert, $settings);
         }
 
-        if ($settings->enable_email_notifications) {
-            $this->sendEmailNotification($alert, $settings);
-        }
-
-        if ($settings->enable_sms_notifications) {
-            $this->sendSmsNotification($alert, $settings);
-        }
-
         return $alert;
     }
 
@@ -215,51 +206,14 @@ class DoctorAttentionService
      */
     private function sendPushNotification(DoctorAttentionAlert $alert, DoctorAttentionSettings $settings): void
     {
-        // Get notification recipients
         $recipients = $this->getNotificationRecipients($alert, $settings);
+        $sent = app(FirebasePushService::class)->sendDoctorAttentionAlert($alert, $recipients->modelKeys());
 
-        // TODO: Implement push notification logic
-        // This would integrate with your notification system
-        // For now, we'll just mark as sent
-        $alert->markAsSent();
-
-        Log::info('Push notification sent for doctor attention alert', [
-            'alert_id' => $alert->id,
-            'doctor_id' => $alert->doctor_id,
-            'recipients_count' => $recipients->count(),
-        ]);
-    }
-
-    /**
-     * Send email notification.
-     */
-    private function sendEmailNotification(DoctorAttentionAlert $alert, DoctorAttentionSettings $settings): void
-    {
-        $recipients = $this->getNotificationRecipients($alert, $settings);
-
-        // TODO: Implement email notification logic
-        // This would send emails to recipients
-
-        Log::info('Email notification sent for doctor attention alert', [
-            'alert_id' => $alert->id,
-            'doctor_id' => $alert->doctor_id,
-        ]);
-    }
-
-    /**
-     * Send SMS notification.
-     */
-    private function sendSmsNotification(DoctorAttentionAlert $alert, DoctorAttentionSettings $settings): void
-    {
-        $recipients = $this->getNotificationRecipients($alert, $settings);
-
-        // TODO: Implement SMS notification logic
-        // This would send SMS to recipients
-
-        Log::info('SMS notification sent for doctor attention alert', [
-            'alert_id' => $alert->id,
-            'doctor_id' => $alert->doctor_id,
-        ]);
+        if ($sent > 0) {
+            $alert->markAsSent();
+        } else {
+            Log::warning('Doctor attention push was not delivered', ['alert_id' => $alert->id]);
+        }
     }
 
     /**

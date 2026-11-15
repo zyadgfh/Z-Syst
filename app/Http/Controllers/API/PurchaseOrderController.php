@@ -69,6 +69,8 @@ class PurchaseOrderController extends Controller
      */
     public function show(PurchaseOrder $purchaseOrder): JsonResponse
     {
+        $this->assertBusinessOwnership($purchaseOrder);
+
         $purchaseOrder->load(['supplier', 'items.product', 'createdBy', 'approvedBy']);
 
         return response()->json([
@@ -82,6 +84,8 @@ class PurchaseOrderController extends Controller
      */
     public function update(PurchaseOrderRequest $request, PurchaseOrder $purchaseOrder): JsonResponse
     {
+        $this->assertBusinessOwnership($purchaseOrder);
+
         $validated = $request->validated();
 
         $po = $this->poService->update($purchaseOrder, $validated);
@@ -98,6 +102,8 @@ class PurchaseOrderController extends Controller
      */
     public function destroy(PurchaseOrder $purchaseOrder): JsonResponse
     {
+        $this->assertBusinessOwnership($purchaseOrder);
+
         $this->poService->delete($purchaseOrder);
 
         return response()->json([
@@ -111,6 +117,8 @@ class PurchaseOrderController extends Controller
      */
     public function send(Request $request, PurchaseOrder $purchaseOrder): JsonResponse
     {
+        $this->assertBusinessOwnership($purchaseOrder);
+
         $po = $this->poService->send($purchaseOrder);
 
         return response()->json([
@@ -125,6 +133,8 @@ class PurchaseOrderController extends Controller
      */
     public function approve(Request $request, PurchaseOrder $purchaseOrder): JsonResponse
     {
+        $this->assertBusinessOwnership($purchaseOrder);
+
         $po = $this->poService->approve($purchaseOrder, $request->user()->id);
 
         return response()->json([
@@ -139,6 +149,8 @@ class PurchaseOrderController extends Controller
      */
     public function reject(Request $request, PurchaseOrder $purchaseOrder): JsonResponse
     {
+        $this->assertBusinessOwnership($purchaseOrder);
+
         $request->validate([
             'reason' => 'required|string|max:500',
         ]);
@@ -157,6 +169,8 @@ class PurchaseOrderController extends Controller
      */
     public function cancel(Request $request, PurchaseOrder $purchaseOrder): JsonResponse
     {
+        $this->assertBusinessOwnership($purchaseOrder);
+
         $po = $this->poService->cancel($purchaseOrder);
 
         return response()->json([
@@ -171,6 +185,8 @@ class PurchaseOrderController extends Controller
      */
     public function convertToPurchase(Request $request, PurchaseOrder $purchaseOrder): JsonResponse
     {
+        $this->assertBusinessOwnership($purchaseOrder);
+
         $purchase = $this->poService->convertToPurchase($purchaseOrder);
 
         return response()->json([
@@ -215,4 +231,11 @@ class PurchaseOrderController extends Controller
             'data' => $stats,
         ]);
     }
+    /** Prevent access to another business's records. */
+    private function assertBusinessOwnership(PurchaseOrder $purchaseOrder): void
+    {
+        $businessId = request()->user()?->business_id;
+        abort_unless($businessId !== null && (string) $purchaseOrder->business_id === (string) $businessId, 404);
+    }
+
 }

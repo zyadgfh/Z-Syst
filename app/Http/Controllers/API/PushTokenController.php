@@ -42,7 +42,9 @@ class PushTokenController extends Controller
             'token' => 'required|string',
         ]);
 
-        PushToken::deactivate($request->input('token'));
+        PushToken::where('user_id', $request->user()->id)
+            ->where('token', $request->input('token'))
+            ->update(['is_active' => false]);
 
         return response()->json([
             'success' => true,
@@ -84,41 +86,7 @@ class PushTokenController extends Controller
             ],
         ];
 
-        $projectId = config('services.firebase.project_id', env('VITE_FIREBASE_PROJECT_ID'));
-        $serverKey = config('services.firebase.server_key', env('FIREBASE_SERVER_KEY'));
-        $serviceAccount = config('services.firebase.credentials');
-
-        $sent = 0;
-
-        foreach ($tokens as $token) {
-            try {
-                if ($serviceAccount && file_exists($serviceAccount)) {
-                    // Use HTTP v1 (simplified — reuses FirebasePushService logic)
-                    $response = \Illuminate\Support\Facades\Http::withHeaders([
-                        'Content-Type' => 'application/json',
-                    ])->post("https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send", [
-                        'message' => array_merge($payload, ['token' => $token]),
-                    ]);
-                    if ($response->successful()) $sent++;
-                } elseif ($serverKey) {
-                    $response = \Illuminate\Support\Facades\Http::withHeaders([
-                        'Authorization' => "key={$serverKey}",
-                        'Content-Type'  => 'application/json',
-                    ])->post('https://fcm.googleapis.com/fcm/send', [
-                        'to'           => $token,
-                        'notification' => $payload['notification'],
-                        'data'         => $payload['data'],
-                    ]);
-                    if ($response->successful()) $sent++;
-                } else {
-                    // No Firebase config — just confirm registration works
-                    $sent = count($tokens);
-                    break;
-                }
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error("FCM test push error: {$e->getMessage()}");
-            }
-        }
+        $sent = app(FirebasePushService::class)->sendToMultipleTokens($tokens, $payload);
 
         return response()->json([
             'success' => $sent > 0,
