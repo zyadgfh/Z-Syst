@@ -10,6 +10,10 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        if (! app()->environment(['local', 'testing'])) {
+            throw new \RuntimeException('Destructive demo seeding is restricted to local and testing environments.');
+        }
+
         // Disable foreign key checks for SQLite
         if (config('database.default') === 'sqlite') {
             DB::statement('PRAGMA foreign_keys = OFF;');

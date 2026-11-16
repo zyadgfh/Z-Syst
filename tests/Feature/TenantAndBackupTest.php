@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Services\TenantResolver;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Services\BackupService;
 use Tests\TestCase;
 
 class TenantAndBackupTest extends TestCase
@@ -21,15 +21,34 @@ class TenantAndBackupTest extends TestCase
         $this->assertSame(42, $resolver->resolve($request));
     }
 
-    public function test_database_backup_command_creates_a_backup_file(): void
+    public function test_database_backup_command_reports_success_only_after_service_succeeds(): void
     {
-        Storage::fake('local');
+        $path = tempnam(sys_get_temp_dir(), 'backup-test-');
+        file_put_contents($path, 'CREATE TABLE test (id integer);');
+        try {
+            $service = \Mockery::mock(BackupService::class);
+            $service->shouldReceive('createDatabaseBackup')->once()->andReturn($path);
+            $this->app->instance(BackupService::class, $service);
+            $this->artisan('backup:database', ['--disk' => 'local'])
+                ->expectsOutputToContain('Backup created')
+                ->assertSuccessful();
+        } finally {
+            unlink($path);
+        }
+    }
 
-        $this->artisan('backup:database', ['--disk' => 'local'])
-            ->expectsOutputToContain('Backup created')
-            ->assertSuccessful();
+    public function test_database_backup_command_returns_failure_if_dump_fails(): void
+    {
+        $service = \Mockery::mock(BackupService::class);
+        $service->shouldReceive('createDatabaseBackup')->once()->andThrow(new \RuntimeException('dump failed'));
+        $this->app->instance(BackupService::class, $service);
+        $this->artisan('backup:database', ['--disk' => 'local'])->assertFailed();
+    }
 
-        $files = Storage::disk('local')->allFiles('backups');
-        $this->assertNotEmpty($files);
+    public function test_unsupported_database_driver_fails_closed(): void
+    {
+        config(['database.default' => 'sqlite']);
+        $this->expectException(\RuntimeException::class);
+        app(BackupService::class)->createDatabaseBackup();
     }
 }

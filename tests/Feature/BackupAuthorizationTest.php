@@ -41,4 +41,19 @@ class BackupAuthorizationTest extends TestCase
             ->assertStatus(200)
             ->assertJsonFragment(['message' => 'Backup created successfully.']);
     }
+    public function test_failed_command_is_not_reported_as_a_successful_backup(): void
+    {
+        Role::firstOrCreate(['name' => 'superadmin']);
+        $user = User::factory()->create();
+        $user->assignRole('superadmin');
+        Artisan::shouldReceive('call')->once()->with('backup:database', ['--disk' => 'local'])->andReturn(1);
+        Artisan::shouldNotReceive('output');
+
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/v1/backup')
+            ->assertStatus(500)
+            ->assertJsonFragment(['message' => 'Failed to create backup.']);
+        $this->assertDatabaseMissing('audit_logs', ['action' => 'backup.created', 'user_id' => $user->id]);
+    }
+
 }

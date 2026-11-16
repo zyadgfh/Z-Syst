@@ -4,6 +4,8 @@ namespace App\Services;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\Process\Process;
 
 class BackupService
 {
@@ -12,35 +14,97 @@ class BackupService
      */
     public function createDatabaseBackup(?string $filename = null): string
     {
-        $filename = $filename ?? 'backup_'.Carbon::now()->format('Y_m_d_His').'.sql';
-        $path = storage_path('app/backups/'.$filename);
-
-        // Ensure backup directory exists
-        if (! File::exists(dirname($path))) {
-            File::makeDirectory(dirname($path), 0755, true);
+        $filename = $filename ?? 'backup_'.Carbon::now()->format('Y_m_d_His').'_'.bin2hex(random_bytes(8)).'.sql';
+        if (basename($filename) !== $filename || ! preg_match('/\A[a-zA-Z0-9_.-]+\.sql\z/', $filename)) {
+            throw new \InvalidArgumentException('Invalid backup filename');
         }
 
-        // Get database configuration
-        $dbConfig = config('database.connections.mysql');
-
-        // Build mysqldump command
-        $command = sprintf(
-            'mysqldump -h%s -u%s -p%s %s > %s',
-            $dbConfig['host'],
-            $dbConfig['username'],
-            $dbConfig['password'],
-            $dbConfig['database'],
-            $path
-        );
-
-        // Execute backup
-        exec($command, $output, $returnCode);
-
-        if ($returnCode !== 0) {
-            throw new \Exception('Database backup failed');
+        $directory = storage_path('app/backups');
+        if (! is_dir($directory) && ! mkdir($directory, 0700, true) && ! is_dir($directory)) {
+            throw new \RuntimeException('Unable to create backup directory');
+        }
+        $path = $directory.'/'.$filename;
+        // Never overwrite an existing backup, including a symlink.
+        if (file_exists($path) || is_link($path)) {
+            throw new \RuntimeException('Backup destination already exists');
+        }
+        $temporary = tempnam($directory, '.backup-');
+        if ($temporary === false || ! chmod($temporary, 0600)) {
+            if ($temporary !== false) { @unlink($temporary); }
+            throw new \RuntimeException('Unable to create private backup file');
         }
 
-        return $path;
+        try {
+            // The resolved connection includes values parsed from DATABASE_URL.
+            $config = DB::connection()->getConfig();
+            $driver = $config['driver'] ?? '';
+            $database = $config['database'] ?? '';
+            $username = $config['username'] ?? '';
+            if (! is_string($database) || $database === '' || ! is_string($username) || $username === '') {
+                throw new \RuntimeException('Database connection is not fully configured');
+            }
+            $host = $config['host'] ?? '';
+            if (! is_string($host)) {
+                throw new \RuntimeException('Multiple database hosts are not supported by backup');
+            }
+            $port = (string) ($config['port'] ?? '');
+            $password = (string) ($config['password'] ?? '');
+
+            if ($driver === 'pgsql') {
+                $args = ['pg_dump', '--no-password', '--format=plain', '--no-owner', '--no-privileges',
+                    '--host='.$host, '--port='.$port, '--username='.$username,
+                    '--file='.$temporary, '--dbname='.$database];
+                $environment = ['PGPASSWORD' => $password, 'PGSSLMODE' => (string) ($config['sslmode'] ?? 'require')];
+            } elseif (in_array($driver, ['mysql', 'mariadb'], true)) {
+                $args = ['mysqldump', '--no-defaults', '--single-transaction', '--routines', '--triggers', '--events',
+                    '--host='.$host, '--port='.$port, '--user='.$username, '--result-file='.$temporary];
+                if (! empty($config['unix_socket'])) {
+                    $args[] = '--socket='.$config['unix_socket'];
+                }
+                $args[] = '--';
+                $args[] = $database;
+                $environment = ['MYSQL_PWD' => $password];
+            } else {
+                throw new \RuntimeException('Backup is not supported for database driver: '.$driver);
+            }
+
+            $process = new Process($args, null, $environment, null, 900);
+            $process->run();
+            if (! $process->isSuccessful()) {
+                // Do not expose command output or credentials in logs and responses.
+                throw new \RuntimeException('Database dump command failed');
+            }
+            clearstatcache(true, $temporary);
+            if (! is_file($temporary) || filesize($temporary) === 0 || ! $this->containsDumpSchema($temporary)) {
+                throw new \RuntimeException('Database dump is empty or contains no schema');
+            }
+            // link() atomically refuses to replace a file created by a concurrent request.
+            if (! link($temporary, $path)) {
+                throw new \RuntimeException('Unable to publish database backup');
+            }
+            return $path;
+        } finally {
+            @unlink($temporary);
+        }
+    }
+
+    /** Reject comment-only or empty output; this is not a substitute for a restore test. */
+    private function containsDumpSchema(string $path): bool
+    {
+        $handle = fopen($path, 'rb');
+        if ($handle === false) {
+            return false;
+        }
+        try {
+            while (($line = fgets($handle)) !== false) {
+                if (preg_match('/^\s*CREATE\s+(?:UNLOGGED\s+)?(?:TABLE|VIEW|MATERIALIZED\s+VIEW|SCHEMA|TYPE|SEQUENCE)\b/i', $line)) {
+                    return true;
+                }
+            }
+            return false;
+        } finally {
+            fclose($handle);
+        }
     }
 
     /**

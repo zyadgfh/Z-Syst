@@ -81,11 +81,21 @@ jobs:
       - name: Summarize concurrency test
         if: always() && matrix.database != 'sqlite'
         run: python3 scripts/ci/summarize-junit.py concurrency.xml
+      - name: Run backup and isolated restore tests
+        id: backup
+        continue-on-error: true
+        run: vendor/bin/phpunit --colors=never --filter 'TenantAndBackupTest|BackupAuthorizationTest|DatabaseBackupRestoreTest' --log-junit backup.xml
+      - name: Summarize backup tests
+        if: always()
+        run: python3 scripts/ci/summarize-junit.py backup.xml
       - name: Run test suite
         run: vendor/bin/phpunit --colors=never --log-junit junit.xml
       - name: Summarize test failures
         if: always()
         run: python3 scripts/ci/summarize-junit.py junit.xml
+      - name: Enforce backup test result
+        if: always() && steps.backup.outcome == 'failure'
+        run: exit 1
       - name: Enforce concurrency test result
         if: always() && steps.concurrency.outcome == 'failure'
         run: exit 1
@@ -98,6 +108,7 @@ jobs:
             junit.xml
             smoke.xml
             concurrency.xml
+            backup.xml
           if-no-files-found: warn
 
   flutter:
