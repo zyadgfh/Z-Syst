@@ -47,6 +47,7 @@ jobs:
       DB_DATABASE: ${{ matrix.database == 'sqlite' && ':memory:' || 'zsyst_test' }}
       DB_USERNAME: ${{ matrix.database == 'pgsql' && 'zsyst' || 'root' }}
       DB_PASSWORD: zsyst_test
+      DB_SSLMODE: disable
       CACHE_DRIVER: array
       SESSION_DRIVER: array
       QUEUE_CONNECTION: sync
