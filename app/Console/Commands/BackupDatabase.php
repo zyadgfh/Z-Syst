@@ -34,7 +34,11 @@ class BackupDatabase extends Command
 
             $path = $backupService->createDatabaseBackup();
 
-            $this->info("Backup created: {$path} (SHA-256: ".hash_file('sha256', $path).")");
+            $checksum = hash_file('sha256', $path);
+            if ($checksum === false) {
+                throw new \RuntimeException('Unable to hash the database backup');
+            }
+            $this->info("Backup created: {$path} (SHA-256: {$checksum})");
 
             return Command::SUCCESS;
         } catch (\Throwable $e) {
