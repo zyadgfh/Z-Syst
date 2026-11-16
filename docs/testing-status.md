@@ -32,4 +32,4 @@ covers allocation rather than an entire sale HTTP flow.
 
 Flutter's hosted-runner `flutter test` is not a physical-device test. The
 initial Flutter dependency install failed under 3.24.3 because the checked-in
-lockfile requires Dart 3.10 and Flutter 3.27 or newer; CI now uses stable Flutter.
+lockfile requires Dart 3.10 and Flutter 3.27 or newer; CI now pins Flutter 3.38.9.
