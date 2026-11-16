@@ -123,7 +123,18 @@ jobs:
             done
           fi
           exit "$result"
-      - run: flutter test
+      - name: Run Flutter tests
+        run: |
+          set +e
+          flutter test > "$RUNNER_TEMP/flutter-test.log" 2>&1
+          result=$?
+          cat "$RUNNER_TEMP/flutter-test.log"
+          if [ "$result" -ne 0 ]; then
+            tail -20 "$RUNNER_TEMP/flutter-test.log" | while IFS= read -r line; do
+              echo "::warning::${line//%/%25}"
+            done
+          fi
+          exit "$result"
 
   report-tests:
     name: CI report unit tests
