@@ -48,6 +48,7 @@ jobs:
       DB_USERNAME: ${{ matrix.database == 'pgsql' && 'zsyst' || 'root' }}
       DB_PASSWORD: zsyst_test
       DB_SSLMODE: disable
+      ZSYST_DISPOSABLE_DATABASE: 'yes'
       CACHE_DRIVER: array
       SESSION_DRIVER: array
       QUEUE_CONNECTION: sync
