@@ -10,10 +10,15 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: upgrade-validation-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   tests:
     name: PHP tests (${{ matrix.database }})
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -93,3 +98,26 @@ jobs:
             smoke.xml
             concurrency.xml
           if-no-files-found: warn
+
+  flutter:
+    name: Flutter widget tests (hosted runner)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: pharmacy-store-app-codecanyon-main
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.3'
+          channel: stable
+      - run: flutter pub get
+      - run: flutter test
+
+  report-tests:
+    name: CI report unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m unittest scripts/ci/test_summarize_junit.py -v
