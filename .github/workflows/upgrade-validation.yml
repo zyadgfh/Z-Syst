@@ -61,4 +61,14 @@ jobs:
       - name: Install locked dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
       - name: Run test suite
-        run: vendor/bin/phpunit --colors=never
+        run: vendor/bin/phpunit --colors=never --log-junit junit.xml
+      - name: Summarize test failures
+        if: always()
+        run: python3 scripts/ci/summarize-junit.py junit.xml
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phpunit-${{ matrix.database }}
+          path: junit.xml
+          if-no-files-found: warn
