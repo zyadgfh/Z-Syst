@@ -60,6 +60,12 @@ jobs:
           coverage: none
       - name: Install locked dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Probe application boot
+        continue-on-error: true
+        run: vendor/bin/phpunit --colors=never --filter ExampleTest --stop-on-error --log-junit smoke.xml
+      - name: Summarize boot probe
+        if: always()
+        run: python3 scripts/ci/summarize-junit.py smoke.xml
       - name: Run test suite
         run: vendor/bin/phpunit --colors=never --log-junit junit.xml
       - name: Summarize test failures

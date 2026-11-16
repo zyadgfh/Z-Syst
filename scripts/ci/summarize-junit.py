@@ -24,7 +24,7 @@ for case in cases:
             counts[kind] += 1
             text = (node.get('message') or node.text or '').strip()
             lines = [line.strip() for line in text.splitlines() if line.strip()]
-            reason = next((line for line in lines if not line.startswith(('Stack trace', '#'))), kind)
+            reason = ' | '.join([line for line in lines if not line.startswith(('Stack trace', '#'))][:5]) or kind
             key = (kind, reason[:300])
             examples.setdefault(key, (case.get('classname', ''), case.get('name', '')))
             break
