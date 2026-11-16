@@ -65,3 +65,59 @@ Route::get('/gateway/{gateway}/callback/{transaction}', \App\Http\Controllers\We
     ->where(['gateway' => 'paymob|fawry|instapay', 'transaction' => '[0-9]+'])
     ->middleware('throttle:60,1')
     ->name('web.gateway.callback');
+
+// ═══ Stripe Connect Sample Integration (V2 Accounts, Storefront & Subscriptions) ═══
+Route::prefix('connect')->name('stripe-connect.')->group(function () {
+    // Merchant Connect Dashboard: create V2 accounts, onboard via Account Links,
+    // view live status from Stripe API, create products, subscribe & open Billing Portal.
+    Route::get('/', [\App\Http\Controllers\Web\StripeConnectController::class, 'index'])
+        ->name('dashboard');
+    Route::post('/accounts', [\App\Http\Controllers\Web\StripeConnectController::class, 'createAccount'])
+        ->middleware('throttle:30,1')
+        ->name('accounts.store');
+
+    Route::where(['accountId' => 'acct_[A-Za-z0-9]+'])->group(function () {
+        Route::post('/accounts/{accountId}/onboard', [\App\Http\Controllers\Web\StripeConnectController::class, 'onboard'])
+            ->middleware('throttle:30,1')
+            ->name('accounts.onboard');
+        Route::get('/accounts/{accountId}/status', [\App\Http\Controllers\Web\StripeConnectController::class, 'accountStatus'])
+            ->middleware('throttle:60,1')
+            ->name('accounts.status');
+        Route::post('/accounts/{accountId}/products', [\App\Http\Controllers\Web\StripeConnectController::class, 'createProduct'])
+            ->middleware('throttle:30,1')
+            ->name('products.store');
+        Route::post('/accounts/{accountId}/subscribe', [\App\Http\Controllers\Web\StripeConnectController::class, 'subscribe'])
+            ->middleware('throttle:30,1')
+            ->name('subscriptions.checkout');
+        Route::get('/accounts/{accountId}/subscription/success', [\App\Http\Controllers\Web\StripeConnectController::class, 'subscriptionSuccess'])
+            ->name('subscription.success');
+        Route::post('/accounts/{accountId}/billing-portal', [\App\Http\Controllers\Web\StripeConnectController::class, 'billingPortal'])
+            ->middleware('throttle:30,1')
+            ->name('billing-portal');
+
+        // Public per-account Storefront & Direct Charge Checkout.
+        // NOTE: Using the raw Stripe Account ID (`acct_...`) in the public URL is for
+        // demo simplicity only. In production, route by a non-Stripe public identifier
+        // (such as `businesses.store_slug` or an internal UUID) and look up the Stripe
+        // account ID server-side.
+        Route::get('/storefront/{accountId}', [\App\Http\Controllers\Web\StripeConnectStorefrontController::class, 'show'])
+            ->name('storefront.show');
+        Route::post('/storefront/{accountId}/checkout', [\App\Http\Controllers\Web\StripeConnectStorefrontController::class, 'checkout'])
+            ->middleware('throttle:30,1')
+            ->name('checkout.create');
+        Route::get('/storefront/{accountId}/success', [\App\Http\Controllers\Web\StripeConnectStorefrontController::class, 'success'])
+            ->name('checkout.success');
+    });
+});
+
+// ═══ Stripe Webhooks (V2 Thin Events + V1 Snapshot Subscription Events) ═══
+// Excluded from CSRF in App\Http\Middleware\VerifyCsrfToken because Stripe
+// authenticates webhook requests via the `Stripe-Signature` HMAC header.
+Route::prefix('webhooks/stripe')->name('webhooks.stripe.')->middleware('throttle:120,1')->group(function () {
+    // V2 *Thin* Event Destination for Connected account requirement & capability updates.
+    Route::post('/thin', [\App\Http\Controllers\Web\StripeWebhookController::class, 'handleThinEvents'])
+        ->name('thin');
+    // V1 *Snapshot* Webhook endpoint for platform subscriptions, invoices, customer & portal events.
+    Route::post('/billing', [\App\Http\Controllers\Web\StripeWebhookController::class, 'handleBillingEvents'])
+        ->name('billing');
+});

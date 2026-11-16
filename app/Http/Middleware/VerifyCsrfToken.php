@@ -13,8 +13,10 @@ class VerifyCsrfToken extends Middleware
      */
     // L-01: previously listed ssl-commerz/phonepe/paytm exemptions for routes
     // that do not exist in this codebase — removed (dead attack surface).
+    // Stripe webhooks verify authenticity via `Stripe-Signature` HMAC headers
+    // rather than browser session CSRF tokens.
     protected $except = [
-        //
+        'webhooks/stripe/*',
     ];
 
 }
