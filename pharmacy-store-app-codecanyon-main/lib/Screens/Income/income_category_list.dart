@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import '../../constant.dart';
+import '../../generated/l10n.dart' as lang;
 import '../widget/acnoo_scafold.dart';
 import 'Providers/income_category_provider.dart';
 import 'add_income_category.dart';
@@ -73,7 +74,7 @@ class _IncomeCategoryListState extends State<IncomeCategoryList> {
                       },
                       decoration: InputDecoration(
                         border: const OutlineInputBorder(),
-                        hintText: lang.S.of(context).search,
+                        hintText: lang.search,
                         prefixIcon: Icon(
                           Icons.search,
                           color: kGreyTextColor.withValues(alpha: 0.5),
