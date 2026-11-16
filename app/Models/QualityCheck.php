@@ -56,7 +56,7 @@ class QualityCheck extends Model
      */
     public function grnItem(): BelongsTo
     {
-        return $this->belongsTo(GRNItem::class);
+        return $this->belongsTo(GrnItem::class);
     }
 
     /**

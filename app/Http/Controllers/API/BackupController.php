@@ -16,7 +16,10 @@ class BackupController extends Controller
         }
 
         try {
-            Artisan::call('backup:database', ['--disk' => 'local']);
+            $exitCode = Artisan::call('backup:database', ['--disk' => 'local']);
+            if ($exitCode !== 0) {
+                throw new \RuntimeException('Database backup command failed');
+            }
             $output = trim(Artisan::output());
 
             AuditLogger::log('backup.created', 'Database backup created by administrator.', [

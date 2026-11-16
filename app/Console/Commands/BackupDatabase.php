@@ -12,7 +12,7 @@ class BackupDatabase extends Command
      *
      * @var string
      */
-    protected $signature = 'backup:database';
+    protected $signature = 'backup:database {--disk=local}';
 
     /**
      * The console command description.
@@ -27,14 +27,21 @@ class BackupDatabase extends Command
     public function handle(BackupService $backupService): int
     {
         try {
+            if ($this->option('disk') !== 'local') {
+                throw new \InvalidArgumentException('Only private local backup storage is supported');
+            }
             $this->info('Starting database backup...');
 
             $path = $backupService->createDatabaseBackup();
 
-            $this->info("Database backup created successfully: {$path}");
+            $checksum = hash_file('sha256', $path);
+            if ($checksum === false) {
+                throw new \RuntimeException('Unable to hash the database backup');
+            }
+            $this->info("Backup created: {$path} (SHA-256: {$checksum})");
 
             return Command::SUCCESS;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->error("Backup failed: {$e->getMessage()}");
 
             return Command::FAILURE;

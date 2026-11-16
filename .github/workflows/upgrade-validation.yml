@@ -1,6 +1,8 @@
 name: Laravel upgrade validation
 
 on:
+  push:
+    branches: ['arena/**']
   pull_request:
     branches: [upgrade-laravel-12]
   workflow_dispatch:
@@ -8,10 +10,15 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: upgrade-validation-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   tests:
     name: PHP tests (${{ matrix.database }})
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -45,6 +52,8 @@ jobs:
       DB_DATABASE: ${{ matrix.database == 'sqlite' && ':memory:' || 'zsyst_test' }}
       DB_USERNAME: ${{ matrix.database == 'pgsql' && 'zsyst' || 'root' }}
       DB_PASSWORD: zsyst_test
+      DB_SSLMODE: disable
+      ZSYST_DISPOSABLE_DATABASE: 'yes'
       CACHE_DRIVER: array
       SESSION_DRIVER: array
       QUEUE_CONNECTION: sync
@@ -58,5 +67,91 @@ jobs:
           coverage: none
       - name: Install locked dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Probe application boot
+        continue-on-error: true
+        run: vendor/bin/phpunit --colors=never --filter ExampleTest --stop-on-error --log-junit smoke.xml
+      - name: Summarize boot probe
+        if: always()
+        run: python3 scripts/ci/summarize-junit.py smoke.xml
+      - name: Run last-unit concurrency test
+        if: matrix.database != 'sqlite'
+        id: concurrency
+        continue-on-error: true
+        run: vendor/bin/phpunit --colors=never --filter StockAllocationConcurrencyTest --stop-on-error --log-junit concurrency.xml
+      - name: Summarize concurrency test
+        if: always() && matrix.database != 'sqlite'
+        run: python3 scripts/ci/summarize-junit.py concurrency.xml
+      - name: Run backup and isolated restore tests
+        id: backup
+        continue-on-error: true
+        run: vendor/bin/phpunit --colors=never --filter 'TenantAndBackupTest|BackupAuthorizationTest|DatabaseBackupRestoreTest' --log-junit backup.xml
+      - name: Summarize backup tests
+        if: always()
+        run: python3 scripts/ci/summarize-junit.py backup.xml
       - name: Run test suite
-        run: vendor/bin/phpunit --colors=never
+        run: vendor/bin/phpunit --colors=never --log-junit junit.xml
+      - name: Summarize test failures
+        if: always()
+        run: python3 scripts/ci/summarize-junit.py junit.xml
+      - name: Enforce backup test result
+        if: always() && steps.backup.outcome == 'failure'
+        run: exit 1
+      - name: Enforce concurrency test result
+        if: always() && steps.concurrency.outcome == 'failure'
+        run: exit 1
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phpunit-${{ matrix.database }}
+          path: |
+            junit.xml
+            smoke.xml
+            concurrency.xml
+            backup.xml
+          if-no-files-found: warn
+
+  flutter:
+    name: Flutter widget tests (hosted runner)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: pharmacy-store-app-codecanyon-main
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.9'
+          channel: stable
+      - name: Install Flutter dependencies
+        run: |
+          set +e
+          flutter pub get > "$RUNNER_TEMP/flutter-pub.log" 2>&1
+          result=$?
+          cat "$RUNNER_TEMP/flutter-pub.log"
+          if [ "$result" -ne 0 ]; then
+            tail -15 "$RUNNER_TEMP/flutter-pub.log" | while IFS= read -r line; do
+              echo "::warning::${line//%/%25}"
+            done
+          fi
+          exit "$result"
+      - name: Run Flutter tests
+        run: |
+          set +e
+          flutter test > "$RUNNER_TEMP/flutter-test.log" 2>&1
+          result=$?
+          cat "$RUNNER_TEMP/flutter-test.log"
+          if [ "$result" -ne 0 ]; then
+            tail -20 "$RUNNER_TEMP/flutter-test.log" | while IFS= read -r line; do
+              echo "::warning::${line//%/%25}"
+            done
+          fi
+          exit "$result"
+
+  report-tests:
+    name: CI report unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m unittest scripts/ci/test_summarize_junit.py -v

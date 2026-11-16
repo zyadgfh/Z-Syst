@@ -121,7 +121,7 @@ class GoodsReceivedNote extends Model
      */
     public function items(): HasMany
     {
-        return $this->hasMany(GRNItem::class, 'grn_id');
+        return $this->hasMany(GrnItem::class, 'grn_id');
     }
 
     protected static function boot(): void

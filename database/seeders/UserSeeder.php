@@ -10,6 +10,10 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        if (! app()->environment(['local', 'testing'])) {
+            throw new \RuntimeException('Demo users can only be seeded in local and testing environments.');
+        }
+
         // Create Super Admin
         $superAdmin = User::create([
             'name' => 'Super Admin',

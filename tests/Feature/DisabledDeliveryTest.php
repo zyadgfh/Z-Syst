@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Http\Controllers\API\Auth\ZSystForgotPasswordController;
+use App\Http\Controllers\Api\Auth\ZSystForgotPasswordController;
 use App\Services\FirebasePushService;
 use App\Services\Integration\MessagingService;
 use App\Services\SmsService;

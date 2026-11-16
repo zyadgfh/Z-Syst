@@ -75,6 +75,9 @@ class AuditLoggingTest extends TestCase
         ]);
         $user->assignRole('superadmin');
 
+        \Illuminate\Support\Facades\Artisan::shouldReceive('call')->once()->with('backup:database', ['--disk' => 'local'])->andReturn(0);
+        \Illuminate\Support\Facades\Artisan::shouldReceive('output')->andReturn('verified test dump');
+
         $this->actingAs($user, 'sanctum')
             ->postJson('/api/v1/backup')
             ->assertStatus(200);
