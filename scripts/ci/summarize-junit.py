@@ -29,6 +29,10 @@ for case in cases:
             examples.setdefault(key, (case.get('classname', ''), case.get('name', '')))
             break
 print(f"::notice::PHPUnit cases={len(cases)} failures={counts['failure']} errors={counts['error']} skipped={counts['skipped']}")
+for case in cases:
+    if case.get('classname', '').endswith('DatabaseBackupRestoreTest'):
+        result = next((kind for kind in ('failure', 'error', 'skipped') if case.find(kind) is not None), 'passed')
+        print(f'::notice::PostgreSQL isolated backup restore: {result}')
 for (kind, reason), (classname, name) in list(examples.items())[:20]:
     reason = reason.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
     print(f'::warning::{kind} {classname}::{name}: {reason}')
