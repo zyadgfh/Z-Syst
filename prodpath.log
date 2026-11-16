@@ -1,0 +1,13 @@
+
+   PASS  Tests\Feature\ProductionPathTest
+  ✓ set supabase context is a noop on non pgsql drivers                  0.77s  
+  ✓ identity mutators are locked in production mode                      0.10s  
+  ✓ supabase user provider requires a session in production mode         0.09s  
+  ✓ auth user email lookup reads app users in fallback mode              0.09s  
+  ✓ self service registration is closed in production mode               0.12s  
+  ✓ change password rejects bad credentials via gotrue                   0.12s  
+  ✓ change password verifies through gotrue in production mode           0.10s  
+
+  Tests:    7 passed (12 assertions)
+  Duration: 1.59s
+

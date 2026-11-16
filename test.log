@@ -1,0 +1,834 @@
+
+   PASS  Tests\Unit\ExampleTest
+  ✓ that true is true
+
+   PASS  Tests\Unit\PartyModelTest
+  ✓ can create party                                                     0.78s  
+  ✓ party has fillable attributes                                        0.08s  
+  ✓ party has due cast                                                   0.08s  
+  ✓ party has sales dues relation                                        0.10s  
+  ✓ party has purchases dues relation                                    0.12s  
+  ✓ party sales dues excludes zero due                                   0.10s  
+  ✓ party can be deleted                                                 0.09s  
+
+   PASS  Tests\Unit\PredictionServiceTest
+  ✓ forecast product returns forecast data                               0.14s  
+  ✓ forecast product creates forecast records                            0.11s  
+  ✓ calculate reorder point returns expected structure                   0.11s  
+  ✓ batch forecast returns results for multiple products                 0.21s  
+  ✓ forecast all products forecasts all business products                0.27s  
+  ✓ get demand report returns expected structure                         0.11s  
+
+   PASS  Tests\Unit\PrescriptionModelTest
+  ✓ prescription is usable only when approved and not expired            0.09s  
+  ✓ prescription is not usable when pending or expired                   0.08s  
+
+   PASS  Tests\Unit\ProductModelTest
+  ✓ can create product                                                   0.10s  
+  ✓ product has fillable attributes                                      0.08s  
+  ✓ product has casts                                                    0.08s  
+  ✓ product belongs to category                                          0.10s  
+  ✓ product belongs to unit                                              0.10s  
+  ✓ product belongs to manufacturer                                      0.10s  
+  ✓ product has many stocks                                              0.10s  
+  ✓ product fefo stocks ordered by expiry                                0.11s  
+  ✓ product scope expiring soon                                          0.10s  
+  ✓ product scope has expired                                            0.10s  
+
+   PASS  Tests\Unit\PurchaseModelTest
+  ✓ can create purchase                                                  0.11s  
+  ✓ purchase has fillable attributes                                     0.08s  
+  ✓ purchase has casts                                                   0.08s  
+  ✓ purchase belongs to party                                            0.10s  
+  ✓ purchase belongs to user                                             0.10s  
+  ✓ purchase has many details                                            0.14s  
+  ✓ purchase is paid flag works                                          0.11s  
+
+   PASS  Tests\Unit\SaleModelTest
+  ✓ can create sale                                                      0.10s  
+  ✓ sale has fillable attributes                                         0.08s  
+  ✓ sale has casts                                                       0.08s  
+  ✓ sale belongs to party                                                0.10s  
+  ✓ sale belongs to user                                                 0.10s  
+  ✓ sale has many details                                                0.15s  
+  ✓ sale has many sale returns                                           0.10s  
+  ✓ sale is paid flag works                                              0.11s  
+
+   PASS  Tests\Unit\ServiceTest
+  ✓ security service sanitize input                                      0.09s  
+  ✓ security service validate table name                                 0.08s  
+  ✓ xss protection service sanitize html                                 0.08s  
+  ✓ xss protection service check xss                                     0.08s  
+  ✓ csrf protection service generate token                               0.08s  
+  ✓ csrf protection service validate token                               0.08s  
+  ✓ cache service remember                                               0.08s  
+  ✓ cache service business key                                           0.08s  
+  ✓ query optimization service detect n plus one                         0.08s  
+  ✓ backup service create database backup                                0.08s  
+  ✓ page optimization service minify html                                0.08s  
+  ✓ page optimization service minify css                                 0.08s  
+  ✓ page optimization service minify js                                  0.08s  
+
+   PASS  Tests\Unit\Services\LoyaltyServiceTest
+  ✓ get or create program creates default                                0.11s  
+  ✓ get or create program returns existing                               0.10s  
+  ✓ earn points creates transaction                                      0.09s  
+  ✓ earn points does not create when program inactive                    0.09s  
+  ✓ earn points with custom rate                                         0.10s  
+  ✓ redeem points creates negative transaction                           0.10s  
+  ✓ redeem points throws on insufficient balance                         0.10s  
+  ✓ redeem points throws on zero points                                  0.10s  
+  ✓ get balance returns zero for no transactions                         0.10s  
+  ✓ get balance returns sum of transactions                              0.10s  
+  ✓ get history returns transactions                                     0.10s  
+  ✓ log interaction creates record                                       0.10s  
+  ✓ earn points with sale reference                                      0.10s  
+
+   PASS  Tests\Unit\Services\ReceiptServiceTest
+  ✓ get or create settings creates default                               0.12s  
+  ✓ get or create settings returns existing                              0.09s  
+  ✓ generate receipt for sale                                            0.12s  
+  ✓ generate receipt for purchase                                        0.12s  
+  ✓ get receipt by sale                                                  0.11s  
+  ✓ receipt settings update                                              0.10s  
+  ✓ receipt contains party info                                          0.12s  
+  ✓ render pdf generates content                                         0.25s  
+
+   PASS  Tests\Unit\Services\TraceabilityServiceTest
+  ✓ get batch lots for product                                           0.12s  
+  ✓ get expiring batches                                                 0.11s  
+  ✓ get expired batches excludes recalled                                0.11s  
+  ✓ initiate recall updates batch lots                                   0.11s  
+  ✓ resolve recall sets status                                           0.11s  
+  ✓ log traceability creates log entry                                   0.11s  
+  ✓ create batch lot                                                     0.10s  
+  ✓ batch lot is expired                                                 0.11s  
+  ✓ batch lot not expired                                                0.10s  
+  ✓ batch lot not recalled                                               0.10s  
+  ✓ batch lot is recalled                                                0.11s  
+
+   PASS  Tests\Unit\Services\WarehouseStockServiceTest
+  ✓ can create warehouse                                                 0.12s  
+  ✓ can update warehouse                                                 0.11s  
+  ✓ get default warehouse returns active default                         0.10s  
+  ✓ get default warehouse returns null when none exists                  0.10s  
+  ✓ get warehouses returns active only                                   0.10s  
+  ✓ get stock by product and warehouse                                   0.11s  
+  ✓ transfer stock updates quantities                                    0.11s  
+  ✓ transfer stock throws on same warehouse                              0.10s  
+  ✓ transfer stock throws on insufficient quantity                       0.11s  
+
+   PASS  Tests\Unit\StockModelTest
+  ✓ can create stock                                                     0.11s  
+  ✓ stock has fillable attributes                                        0.09s  
+  ✓ stock belongs to product                                             0.10s  
+  ✓ stock with expired date                                              0.10s  
+  ✓ stock expiring soon                                                  0.10s  
+  ✓ stock can be deleted                                                 0.11s  
+
+   PASS  Tests\Feature\Api\LoyaltyApiTest
+  ✓ can list loyalty programs                                            0.12s  
+  ✓ can create loyalty program                                           0.11s  
+  ✓ can update loyalty program                                           0.11s  
+  ✓ can delete loyalty program                                           0.11s  
+  ✓ can get customer balance                                             0.11s  
+  ✓ can get customer history                                             0.11s  
+  ✓ can view customer interactions                                       0.11s  
+  ✓ cannot access other business program                                 0.11s  
+
+   PASS  Tests\Feature\Api\ReceiptApiTest
+  ✓ can get receipt settings                                             0.12s  
+  ✓ can update receipt settings                                          0.10s  
+  ✓ can generate receipt for sale                                        0.13s  
+  ✓ can show receipt                                                     0.11s  
+  ✓ cannot generate receipt for other business sale                      0.10s  
+
+   PASS  Tests\Feature\Api\TraceabilityApiTest
+  ✓ can list batch lots                                                  0.13s  
+  ✓ can list batch lots filtered by product                              0.13s  
+  ✓ can view expiring batches                                            0.12s  
+  ✓ can view expired batches                                             0.12s  
+  ✓ can list recalls                                                     0.12s  
+  ✓ can initiate recall                                                  0.12s  
+  ✓ recall validation requires batch and reason                          0.12s  
+  ✓ can resolve recall                                                   0.12s  
+  ✓ can view traceability logs                                           0.12s  
+
+   PASS  Tests\Feature\Api\WarehouseApiTest
+  ✓ can list warehouses                                                  0.12s  
+  ✓ can create warehouse                                                 0.10s  
+  ✓ warehouse code must be unique                                        0.10s  
+  ✓ can show warehouse                                                   0.10s  
+  ✓ can update warehouse                                                 0.10s  
+  ✓ can delete warehouse                                                 0.10s  
+  ✓ cannot access other business warehouse                               0.10s  
+  ✓ can view warehouse stock                                             0.12s  
+
+   PASS  Tests\Feature\AuditLoggingTest
+  ✓ profile update is logged to audit log                                0.11s  
+  ✓ password change is logged to audit log                               0.11s  
+  ✓ backup action is logged to audit log                                 0.12s  
+
+   PASS  Tests\Feature\BackupAuthorizationTest
+  ✓ non superadmin cannot create backup                                  0.10s  
+  ✓ superadmin can create backup                                         0.10s  
+
+   PASS  Tests\Feature\BarcodeTest
+  ✓ can generate barcode for product                                     0.11s  
+  ✓ can generate barcode for batch                                       0.11s  
+  ✓ can generate multiple barcodes for product                           0.12s  
+  ✓ can generate multiple barcodes for batch                             0.12s  
+  ✓ barcode number generation                                            0.08s  
+  ✓ ean13 checksum calculation                                           0.08s  
+  ✓ upc checksum calculation                                             0.08s  
+  ✓ ean13 validation                                                     0.08s  
+  ✓ upc validation                                                       0.08s  
+  ✓ can mark barcode as printed                                          0.11s  
+  ✓ can mark barcode as reprinted                                        0.11s  
+  ✓ barcode scope for business                                           0.11s  
+  ✓ barcode scope for product                                            0.12s  
+  ✓ barcode scope for batch                                              0.15s  
+  ✓ barcode scope by print status                                        0.12s  
+  ✓ barcode scope active                                                 0.12s  
+  ✓ barcode scope not printed                                            0.12s  
+  ✓ product has barcodes                                                 0.10s  
+  ✓ stock has barcodes                                                   0.13s  
+  ✓ can delete barcode                                                   0.10s  
+  ✓ can restore barcode                                                  0.10s  
+  ✓ can search barcode by number                                         0.10s  
+  ✓ can get barcodes by product                                          0.11s  
+  ✓ can get barcodes by batch                                            0.14s  
+  ✓ can get not printed barcodes                                         0.12s  
+  ✓ api can create barcode                                               0.12s  
+  ✓ api can list barcodes                                                0.15s  
+  ✓ api can search barcode                                               0.12s  
+
+   PASS  Tests\Feature\BusinessContextMiddlewareTest
+  ✓ user without business id cannot access business context routes       0.16s  
+  ✓ user with business id can access business context routes             0.13s  
+  ✓ report endpoint requires business context                            0.09s  
+
+   PASS  Tests\Feature\DueCollectionTest
+  ✓ can collect due using legacy camel case payload                      0.12s  
+  ✓ response exposes both canonical and legacy keys                      0.11s  
+  ✓ collecting more than the opening balance is rejected                 0.11s  
+  ✓ client cannot spoof the tenant on create                             0.10s  
+  ✓ dues index search does not leak other tenants                        0.14s  
+  ✓ due collects report returns totals                                   0.12s  
+
+   PASS  Tests\Feature\ExampleTest
+  ✓ the application returns a successful response                        0.11s  
+
+   PASS  Tests\Feature\FeatureStatusTest
+  ✓ feature status service reports completed modules                     0.08s  
+
+   PASS  Tests\Feature\GRNTest
+  ✓ can create grn                                                       0.11s  
+  ✓ can update grn                                                       0.10s  
+  ✓ can verify grn                                                       0.12s  
+  ✓ can accept grn                                                       0.11s  
+  ✓ can partially accept grn                                             0.11s  
+  ✓ can reject grn                                                       0.11s  
+  ✓ cannot verify non pending grn                                        0.10s  
+  ✓ cannot accept non verified grn                                       0.09s  
+  ✓ cannot reject non verified grn                                       0.09s  
+  ✓ cannot delete verified grn                                           0.09s  
+  ✓ grn number is generated                                              0.09s  
+  ✓ grn total received quantity                                          0.13s  
+  ✓ grn total accepted quantity                                          0.12s  
+  ✓ grn total value                                                      0.12s  
+  ✓ grn completion percentage                                            0.11s  
+  ✓ grn business scope                                                   0.10s  
+  ✓ grn supplier scope                                                   0.10s  
+  ✓ grn status scope                                                     0.11s  
+  ✓ get grn statistics                                                   0.13s  
+  ✓ api can create grn                                                   0.13s  
+  ✓ api can list grns                                                    0.14s  
+  ✓ api can show grn                                                     0.11s  
+  ✓ api can update grn                                                   0.12s  
+  ✓ api can delete grn                                                   0.10s  
+  ✓ api can verify grn                                                   0.11s  
+  ✓ api can accept grn                                                   0.11s  
+  ✓ api can reject grn                                                   0.11s  
+  ✓ api can get pending grns                                             0.12s  
+  ✓ api can get grn statistics                                           0.10s  
+
+   PASS  Tests\Feature\InsuranceModuleTest
+  ✓ can create insurance company                                         0.11s  
+  ✓ can create insurance policy                                          0.10s  
+  ✓ can create insurance claim                                           0.10s  
+  ✓ policy eligibility validation                                        0.10s  
+  ✓ can submit claim                                                     0.11s  
+  ✓ can process claim                                                    0.11s  
+  ✓ can process claim payment                                            0.11s  
+  ✓ can get claim statistics                                             0.21s  
+  ✓ generates unique company codes                                       0.10s  
+  ✓ generates unique policy numbers                                      0.10s  
+  ✓ generates unique claim numbers                                       0.13s  
+
+   PASS  Tests\Feature\InsuranceTest
+  ✓ can list companies                                                   0.13s  
+  ✓ can create company                                                   0.11s  
+  ✓ company code must be unique                                          0.11s  
+  ✓ cannot access company from other business                            0.11s  
+  ✓ can create policy with generated number                              0.11s  
+  ✓ policy is valid within date range                                    0.09s  
+  ✓ policy end date must be after start date                             0.11s  
+  ✓ can create claim with computed coverage                              0.11s  
+  ✓ can submit claim and transitions status                              0.11s  
+  ✓ approval updates policy utilization                                  0.11s  
+  ✓ payment moves claim to paid                                          0.11s  
+  ✓ rejection requires reason                                            0.11s  
+  ✓ service resolves coverage using product rule                         0.11s  
+  ✓ summary endpoint returns aggregates                                  0.12s  
+
+   PASS  Tests\Feature\IntegrationTest
+  ✓ complete sale workflow                                               0.15s  
+  ✓ complete purchase workflow                                           0.15s  
+  ✓ user registration and login                                          0.11s  
+  ✓ subscription upgrade workflow                                        0.12s  
+  ✓ receipt generation workflow                                          0.14s  
+  ✓ loyalty program workflow                                             0.12s  
+  ✓ warehouse transfer workflow                                          0.13s  
+  ✓ audit logging workflow                                               0.10s  
+  ✓ permission enforcement                                               0.11s  
+  ✓ tenant isolation                                                     0.13s  
+  ✓ cache invalidation on data change                                    0.14s  
+
+   PASS  Tests\Feature\LandingApiTest
+  ✓ landing api returns required data                                    0.11s  
+  ✓ pricing api returns plans with discounts                             0.09s  
+  ✓ features api returns active features                                 0.09s  
+  ✓ contact api returns contact info                                     0.09s  
+  ✓ landing api handles empty data                                       0.10s  
+
+   PASS  Tests\Feature\LandingHomeTest
+  ✓ home page renders without manage pages settings                      0.11s  
+  ✓ every static asset a blade view names actually exists                0.09s  
+
+   PASS  Tests\Feature\LegacyPayloadKeyNormalizationTest
+  ✓ income camel case keys are mapped onto the real columns              0.09s  
+  ✓ product wholesale price maps to the column that actually exists      0.08s  
+  ✓ explicit snake case value is never overwritten                       0.08s  
+  ✓ keys that are correctly camel case are left alone                    0.08s  
+  ✓ nested legacy keys are mapped without wiping siblings                0.08s  
+  ✓ unknown keys pass through unchanged                                  0.08s  
+  ✓ bulk product prices map onto the columns that exist                  0.08s  
+  ✓ the bulk purchase price is treated as tax exclusive                  0.08s  
+  ✓ dealer price is preserved in product meta alongside its siblings     0.08s  
+  ✓ an explicit nested value is never overwritten by a legacy key        0.08s  
+
+   PASS  Tests\Feature\ManualPaymentsTest
+  ✓ automatic payments are off by default                                0.09s  
+  ✓ the seeder is idempotent and leaves automatic methods off            0.14s  
+  ✓ the service will not open an automatic transaction                   0.09s  
+  ✓ the callback endpoint settles nothing while automatic is off         0.10s  
+  ✓ the admin checkout endpoint refuses with 403                         0.11s  
+  ✓ the checkout screen offers only manual methods                       0.12s  
+  ✓ posting an automatic gateway never reaches the provider              0.11s  
+  ✓ a tenant owner cannot approve their own payment request              0.12s  
+  ✓ a superadmin approval activates the subscription and records which…  0.12s  
+  ✓ a tenant owner cannot reject requests either                         0.11s  
+
+   PASS  Tests\Feature\MigrationTypeContractTest
+  ✓ the migrated schema has every column the application writes          0.11s  
+  ✓ migrations declare the column types production uses                  0.09s  
+  ✓ no model casts an actor column to a numeric type                     0.09s  
+  ✓ stock movement keeps its audit trail fields assignable               0.08s  
+  ✓ the approval service accepts a uuid actor                            0.08s  
+
+   PASS  Tests\Feature\NotificationServiceTest
+  ✓ notify users sends database notifications                            0.10s  
+  ✓ notify users skips null entries                                      0.09s  
+  ✓ email party sends business mail                                      0.08s  
+  ✓ email party returns false without address                            0.08s  
+  ✓ email users deduplicates recipients                                  0.09s  
+  ✓ email users returns zero without emails                              0.09s  
+  ✓ sms counts unique numbers                                            0.08s  
+  ✓ sms returns zero without numbers                                     0.08s  
+  ✓ notify supplier sends email and sms                                  0.09s  
+  ✓ notify supplier without supplier returns zero results                0.08s  
+
+   PASS  Tests\Feature\OperationsTest
+  ✓ shift lifecycle open sell cash and close with variance               0.13s  
+  ✓ promotion engine percent coupon and qty bonus                        0.11s  
+  ✓ pos checkout applies promotion as sale discount                      0.17s  
+  ✓ stock take scan and apply adjusts stock                              0.13s  
+  ✓ sale posts journal and vat report balances                           0.12s  
+  ✓ forecast generates rows and reorder points                           0.13s  
+  ✓ excessive returns raise anomaly                                      0.11s  
+  ✓ assistant answers sales and stock questions                          0.11s  
+  ✓ totp rfc6238 vector and verification window                          0.10s  
+  ✓ eta simulation accepts document with ubl shape                       0.12s  
+  ✓ gateway simulation flow initiates and marks paid                     0.11s  
+  ✓ gateway rejects unsigned callback in live mode                       0.12s  
+  ✓ replaying a declined fawry callback with success true grants nothin… 0.13s  
+  ✓ paymob live callback is paid because its hmac covers the outcome     0.12s  
+  ✓ storefront checkout uses server prices and creates order             0.14s  
+  ✓ offline sync accepts and dedupes by client uuid                      0.13s  
+  ✓ pos interactions endpoint warns on known pair                        0.13s  
+  ✓ device stock take scan flow                                          0.14s  
+  ✓ telegram digest falls back to simulation                             0.11s  
+  ✓ dose persists through sale and sheet renders code128                 0.22s  
+  ✓ dose lookup by scan returns instruction data                         0.15s  
+  ✓ openapi spec lists api routes                                        0.17s  
+
+   PASS  Tests\Feature\PartyApiTest
+  ✓ unauthenticated user cannot access parties                           0.12s  
+  ✓ can list parties                                                     0.10s  
+  ✓ can create party                                                     0.10s  
+  ✓ cannot create party with duplicate phone                             0.10s  
+  ✓ can update party                                                     0.10s  
+  ✓ can delete party                                                     0.10s  
+
+   PASS  Tests\Feature\ProductAnalyticsTest
+  ✓ analytics endpoint requires authentication                           0.10s  
+
+   PASS  Tests\Feature\ProductionPathTest
+  ✓ self service registration is closed in production mode               0.09s  
+  ✓ identity mutators are locked in production mode                      0.09s  
+  ✓ change password verifies through gotrue in production mode           0.12s  
+  ✓ change password rejects bad credentials via gotrue                   0.10s  
+  ✓ supabase user provider requires a session in production mode         0.09s  
+  ✓ set supabase context is a noop on non pgsql drivers                  0.08s  
+  ✓ auth user email lookup reads app users in fallback mode              0.09s  
+
+   PASS  Tests\Feature\ProfileOwnershipTest
+  ✓ user can access own profile                                          0.11s  
+  ✓ user can update own profile                                          0.10s  
+  ✓ user cannot update profile without required fields                   0.10s  
+  ✓ user cannot change password without valid current password           0.10s  
+
+   PASS  Tests\Feature\ProtectedApiRoutesTest
+  ✓ backup endpoint requires authentication                              0.09s  
+  ✓ profile endpoint requires authentication                             0.09s  
+  ✓ purchase report requires authentication                              0.09s  
+
+   PASS  Tests\Feature\PurchaseOrderNotificationTest
+  ✓ sending purchase order emails supplier with po details               0.13s  
+  ✓ cancelling purchase order notifies supplier again                    0.12s  
+  ✓ restoring cancelled purchase order notifies supplier                 0.13s  
+
+   PASS  Tests\Feature\PurchaseOrderTest
+  ✓ can create purchase order                                            0.12s  
+  ✓ can update purchase order                                            0.10s  
+  ✓ can send purchase order                                              0.10s  
+  ✓ can approve purchase order                                           0.11s  
+  ✓ can reject purchase order                                            0.10s  
+  ✓ can cancel purchase order                                            0.10s  
+  ✓ can restore purchase order                                           0.10s  
+  ✓ can convert po to purchase                                           0.13s  
+  ✓ cannot cancel received order                                         0.09s  
+  ✓ cannot send non draft order                                          0.10s  
+  ✓ cannot approve non sent order                                        0.10s  
+  ✓ cannot convert non approved order                                    0.09s  
+  ✓ po number is generated                                               0.10s  
+  ✓ po total is calculated                                               0.14s  
+  ✓ po business scope                                                    0.10s  
+  ✓ po supplier scope                                                    0.10s  
+  ✓ po status scope                                                      0.11s  
+  ✓ po pending scope                                                     0.10s  
+  ✓ po overdue scope                                                     0.10s  
+  ✓ get po statistics                                                    0.14s  
+  ✓ po without items can be created                                      0.10s  
+  ✓ can add item to po                                                   0.12s  
+  ✓ po item total is calculated                                          0.11s  
+  ✓ po with multiple items                                               0.13s  
+  ✓ po completion percentage                                             0.12s  
+  ✓ api can create purchase order                                        0.13s  
+  ✓ api can list purchase orders                                         0.15s  
+  ✓ api can show purchase order                                          0.11s  
+  ✓ api can update purchase order                                        0.12s  
+  ✓ api can delete purchase order                                        0.11s  
+  ✓ api can send purchase order                                          0.11s  
+  ✓ api can approve purchase order                                       0.12s  
+  ✓ api can reject purchase order                                        0.12s  
+  ✓ api can cancel purchase order                                        0.11s  
+  ✓ api can convert po to purchase                                       0.15s  
+  ✓ api can get pending purchase orders                                  0.13s  
+  ✓ api can get overdue purchase orders                                  0.12s  
+  ✓ api can get purchase order statistics                                0.12s  
+
+   PASS  Tests\Feature\RateLimitingTest
+  ✓ sign in endpoint has rate limiting                                   1.81s  
+  ✓ sign up endpoint has rate limiting                                   0.14s  
+  ✓ password reset endpoints have rate limiting                          0.12s  
+
+   PASS  Tests\Feature\SchemaDriftTest
+  ✓ every fillable column exists on the migrated table                   0.61s  
+  ✓ every production table is reproduced by the migrations               0.10s  
+  ✓ repository only tables are still the documented three                0.08s  
+  ✓ business id nullability matches the tenant contract                  0.22s  
+
+   PASS  Tests\Feature\SecurityHardeningTest
+  ✓ setup wizard routes are unreachable                                  0.13s  
+  ✓ blocking the wizard does not block application routes                0.11s  
+  ✓ gateway allowlist is closed                                          0.08s  
+  ✓ only outcome bound gateways are trusted with the result              0.08s  
+  ✓ the guest auth endpoints carry a throttle                            0.09s  
+  ✓ the password reset request endpoint actually limits                  0.15s  
+  ✓ callback for unknown gateway is not found                            0.13s  
+  ✓ admin panel denies json callers with 403 instead of a redirect       0.10s  
+  ✓ staff is denied the administrative back office                       0.20s  
+  ✓ staff keeps the till and the operational screens                     0.09s  
+  ✓ routes with their own gate are left to that gate                     0.09s  
+  ✓ tenant owners and platform admins still reach the admin panel        0.22s  
+  ✓ the staff allowlist has no dead entries                              0.09s  
+  ✓ trusted proxies default to private ranges only                       0.09s  
+  ✓ trusted proxies can be overridden by environment                     0.08s  
+  ✓ the public disk writes inside storage and not into the code tree     0.08s  
+
+   PASS  Tests\Feature\SecurityHeadersTest
+  ✓ security headers are present on homepage                             0.12s  
+
+   PASS  Tests\Feature\SecurityTest
+  ✓ sql injection prevention                                             0.08s  
+  ✓ xss detection                                                        0.08s  
+  ✓ xss sanitization                                                     0.09s  
+  ✓ csrf token generation                                                0.08s  
+  ✓ csrf token validation                                                0.08s  
+  ✓ csrf token validation fails with wrong token                         0.09s  
+  ✓ table name validation                                                0.08s  
+  ✓ column name validation                                               0.08s  
+  ✓ array sanitization                                                   0.09s  
+  ✓ query validation rejects dangerous queries                           0.08s  
+  ✓ query validation accepts safe queries                                0.08s  
+
+   PASS  Tests\Feature\StripeConnectTest
+  ✓ sdk uses expected api version automatically                          0.10s  
+  ✓ helpful error when placeholder values are not configured             0.12s  
+  ✓ create v2 connected account sends exact v2 payload and maps user in… 0.11s  
+  ✓ onboarding account link and live status retrieval                    0.12s  
+  ✓ create product list storefront and direct charge checkout use strip… 0.14s  
+  ✓ platform subscription and billing portal use customer account not c… 0.12s  
+  ✓ v2 thin webhook verifies signature fetches full event and handles a… 0.15s  
+  ✓ v1 snapshot billing webhooks sync subscriptions payment methods tax… 0.19s  
+  ✓ dashboard renders live status products and subscription ui and enfo… 0.14s  
+  ✓ checkout success and subscription success pages render cleanly       0.11s  
+
+   PASS  Tests\Feature\SupplierInvoiceTest
+  ✓ can create supplier invoice                                          0.13s  
+  ✓ can create invoice from purchase                                     0.10s  
+  ✓ can approve invoice                                                  0.11s  
+  ✓ can reject invoice                                                   0.11s  
+  ✓ can cancel invoice                                                   0.10s  
+  ✓ can add payment to invoice                                           0.10s  
+  ✓ full payment marks invoice as paid                                   0.10s  
+  ✓ can approve payment                                                  0.10s  
+  ✓ invoice scopes                                                       0.10s  
+  ✓ invoice calculations                                                 0.10s  
+  ✓ invoice due soon check                                               0.09s  
+  ✓ invoice critically overdue check                                     0.09s  
+  ✓ invoice number generation                                            0.10s  
+  ✓ payment number generation                                            0.10s  
+  ✓ api can create invoice                                               0.13s  
+  ✓ api can list invoices                                                0.13s  
+  ✓ api can approve invoice                                              0.11s  
+  ✓ api can add payment                                                  0.11s  
+  ✓ api can get statistics                                               0.13s  
+  ✓ api can get aging report                                             0.11s  
+
+   PASS  Tests\Feature\SupplierTest
+  ✓ can create supplier                                                  0.11s  
+  ✓ can update supplier                                                  0.09s  
+  ✓ can add rating                                                       0.10s  
+  ✓ can calculate performance                                            0.11s  
+  ✓ supplier business scope                                              0.10s  
+  ✓ supplier active scope                                                0.09s  
+  ✓ supplier performance score calculation                               0.10s  
+  ✓ supplier average rating                                              0.10s  
+  ✓ api can create supplier                                              0.10s  
+  ✓ api can list suppliers                                               0.12s  
+  ✓ api can show supplier                                                0.11s  
+  ✓ api can update supplier                                              0.11s  
+  ✓ api can delete supplier                                              0.10s  
+  ✓ api can calculate performance                                        0.11s  
+  ✓ api can get top performers                                           0.13s  
+
+   PASS  Tests\Feature\SupplyChainHardeningTest
+  ✓ the setup wizard package is not a dependency                         0.10s  
+  ✓ no published installer files remain in the repository                0.08s  
+  ✓ the route table contains no wizard prefixes                          0.09s  
+  ✓ tinker is a dev dependency only                                      0.08s  
+  ✓ locked framework version is patched                                  0.08s  
+  ✓ locked build tooling is outside the advisory ranges                  0.09s  
+  ✓ the unconsumed frontend bundle and its tree stay gone                0.08s  
+  ✓ the data connect sample is not in the tree                           0.08s  
+  ✓ no module ships its own unaudited frontend build                     0.08s  
+  ✓ unused runtime packages are not declared                             0.08s  
+  ✓ the node runtime is pinned                                           0.08s  
+  ✓ user uploads are not tracked                                         0.08s  
+  ✓ the request mutating security middleware is gone                     0.08s  
+  ✓ the addslashes helper is gone                                        0.08s  
+
+   PASS  Tests\Feature\TenantAndBackupTest
+  ✓ tenant resolver uses authenticated business id                       0.10s  
+  ✓ database backup command creates a backup file                        0.09s  
+
+   PASS  Tests\Feature\TenantContextTest
+  ✓ tenant resolver resolves from authenticated user                     0.10s  
+  ✓ tenant resolver skips superadmin                                     0.09s  
+  ✓ tenant resolver accepts business id parameter                        0.08s  
+  ✓ tenant access check blocks cross tenant access                       0.10s  
+  ✓ tenant access check allows same tenant access                        0.09s  
+  ✓ tenant access check allows superadmin                                0.09s  
+  ✓ user model global scope applies tenant filtering                     0.10s  
+  ✓ user model global scope skips for superadmin                         0.10s  
+
+  Tests:    470 passed (2057 assertions)
+  Duration: 54.13s
+
+== last events before end ==
+Test Suite Finished (Feature, 369 tests)
+Test Suite Finished (/home/runner/work/Z-Syst/Z-Syst/phpunit.xml, 470 tests)
+Test Runner Execution Finished
+Test Runner Finished
+PHPUnit Finished (Shell Exit Code: 0)
+== application logs ==
+---- storage/logs/errors-2026-11-17.log ----
+[2026-11-17 04:18:17] testing.ERROR: No query results for model [App\Models\LoyaltyProgram] 1 {"exception":"Illuminate\\Database\\Eloquent\\ModelNotFoundException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/ImplicitRouteBinding.php","line":61,"message":"No query results for model [App\\Models\\LoyaltyProgram] 1","user_id":"85c2059a-5efb-4dcc-acec-90cf02d4e5e4","role":"staff","url":"https://z-syst.wasmer.app/api/v1/loyalty/1","method":"DELETE"} 
+[2026-11-17 04:18:17] testing.ERROR: Forbidden. {"exception":"Symfony\\Component\\HttpKernel\\Exception\\HttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1440,"message":"Forbidden.","user_id":"60c7d3f8-5092-41ea-89dc-680d8fe409bf","role":"staff","url":"https://z-syst.wasmer.app/api/v1/receipts/sales/1","method":"POST"} 
+[2026-11-17 04:18:19] testing.ERROR: No query results for model [App\Models\Warehouse] 1 {"exception":"Illuminate\\Database\\Eloquent\\ModelNotFoundException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/ImplicitRouteBinding.php","line":61,"message":"No query results for model [App\\Models\\Warehouse] 1","user_id":"cfa9b7e4-4611-437a-b436-e3fd447d52d3","role":"staff","url":"https://z-syst.wasmer.app/api/v1/warehouses/1","method":"GET"} 
+[2026-11-17 04:18:24] testing.WARNING: You can only pay {balance} without selecting an invoice. {"error_code":"BUSINESS_OPENING_BALANCE_EXCEEDED","message":"You can only pay {balance} without selecting an invoice.","context":{"opening_balance":500.0,"payment_amount":900},"debug":[]} 
+[2026-11-17 04:18:24] testing.ERROR: You do not have permission to access this tenant data. {"exception":"Symfony\\Component\\HttpKernel\\Exception\\HttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1440,"message":"You do not have permission to access this tenant data.","user_id":"525e2457-0dda-4206-984e-05d3495281de","role":"staff","url":"https://z-syst.wasmer.app/api/v1/dues","method":"POST"} 
+[2026-11-17 04:18:29] testing.ERROR: No query results for model [App\Models\InsuranceCompany] 2 {"exception":"Illuminate\\Database\\Eloquent\\ModelNotFoundException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/ImplicitRouteBinding.php","line":61,"message":"No query results for model [App\\Models\\InsuranceCompany] 2","user_id":"6f36af2b-b8dd-43a5-b262-48ff62a940b5","role":"staff","url":"https://z-syst.wasmer.app/api/v1/insurance/companies/2","method":"GET"} 
+[2026-11-17 04:18:30] testing.ERROR: The rejection reason field is required. {"exception":"Illuminate\\Validation\\ValidationException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Support/helpers.php","line":423,"message":"The rejection reason field is required.","user_id":"e27237c3-68da-4486-b784-3a9f1850593a","role":"staff","url":"https://z-syst.wasmer.app/api/v1/insurance/claims/1/reject","method":"POST"} 
+[2026-11-17 04:18:31] testing.ERROR: User does not have the right permissions. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":36,"message":"User does not have the right permissions.","user_id":"b8063d0c-3303-4520-a884-eb7a7d7a7ef5","role":"staff","url":"https://z-syst.wasmer.app/admin/products","method":"POST"} 
+[2026-11-17 04:18:34] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/gateway/paymob/callback/1?success=true","method":"GET"} 
+[2026-11-17 04:18:34] testing.ERROR: User does not have the right roles. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":22,"message":"User does not have the right roles.","user_id":"bf6557cd-8f4d-4a91-9126-b773aa5ec3f7","role":"shop-owner","url":"https://z-syst.wasmer.app/admin/subscription-reports/paid/1","method":"POST"} 
+[2026-11-17 04:18:34] testing.ERROR: User does not have the right roles. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":22,"message":"User does not have the right roles.","user_id":"bf6557cd-8f4d-4a91-9126-b773aa5ec3f7","role":"shop-owner","url":"https://z-syst.wasmer.app/admin/manual-payments/paid/1","method":"POST"} 
+[2026-11-17 04:18:34] testing.ERROR: User does not have the right roles. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":22,"message":"User does not have the right roles.","user_id":"63b0c496-6ef1-48c9-bdaa-050d999c29e5","role":"shop-owner","url":"https://z-syst.wasmer.app/admin/subscription-reports/reject/1","method":"POST"} 
+[2026-11-17 04:18:34] testing.ERROR: User does not have the right roles. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":22,"message":"User does not have the right roles.","user_id":"63b0c496-6ef1-48c9-bdaa-050d999c29e5","role":"shop-owner","url":"https://z-syst.wasmer.app/admin/manual-payments/reject/1","method":"POST"} 
+[2026-11-17 04:18:39] testing.ERROR: Unauthenticated. {"exception":"Illuminate\\Auth\\AuthenticationException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php","line":101,"message":"Unauthenticated.","url":"https://z-syst.wasmer.app/api/v1/parties","method":"GET"} 
+[2026-11-17 04:18:39] testing.ERROR: The phone has already been taken. {"exception":"Illuminate\\Validation\\ValidationException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Support/helpers.php","line":423,"message":"The phone has already been taken.","user_id":"bf79fbd2-dddb-4405-b615-fbe01668383d","role":"staff","url":"https://z-syst.wasmer.app/api/v1/parties","method":"POST"} 
+[2026-11-17 04:18:39] testing.ERROR: Unauthenticated. {"exception":"Illuminate\\Auth\\AuthenticationException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php","line":101,"message":"Unauthenticated.","url":"https://z-syst.wasmer.app/api/v1/product-analytics?period=month","method":"GET"} 
+[2026-11-17 04:18:40] testing.ERROR: The name field is required. (and 1 more error) {"exception":"Illuminate\\Validation\\ValidationException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Support/helpers.php","line":423,"message":"The name field is required. (and 1 more error)","user_id":"057d2b5d-2d42-446c-8131-50fb0218ea6e","role":"staff","url":"https://z-syst.wasmer.app/api/v1/profile","method":"POST"} 
+[2026-11-17 04:18:41] testing.ERROR: Unauthenticated. {"exception":"Illuminate\\Auth\\AuthenticationException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php","line":101,"message":"Unauthenticated.","url":"https://z-syst.wasmer.app/api/v1/backup","method":"POST"} 
+[2026-11-17 04:18:41] testing.ERROR: Unauthenticated. {"exception":"Illuminate\\Auth\\AuthenticationException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php","line":101,"message":"Unauthenticated.","url":"https://z-syst.wasmer.app/api/v1/profile","method":"GET"} 
+[2026-11-17 04:18:41] testing.ERROR: Unauthenticated. {"exception":"Illuminate\\Auth\\AuthenticationException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php","line":101,"message":"Unauthenticated.","url":"https://z-syst.wasmer.app/api/v1/purchase-report","method":"GET"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-in","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-in","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-in","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-in","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-in","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-in","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-in","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-up","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-up","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-up","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-up","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-up","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-up","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-up","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-up","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-up","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-up","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-up","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-up","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-up","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-up","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/sign-up","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/send-reset-code","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/send-reset-code","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/send-reset-code","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/send-reset-code","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/send-reset-code","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/send-reset-code","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/send-reset-code","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/send-reset-code","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/send-reset-code","method":"POST"} 
+[2026-11-17 04:18:47] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/api/v1/send-reset-code","method":"POST"} 
+[2026-11-17 04:18:49] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/install","method":"GET"} 
+[2026-11-17 04:18:49] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/install","method":"POST"} 
+[2026-11-17 04:18:49] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/install/environment/classic","method":"GET"} 
+[2026-11-17 04:18:49] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/install/environment/classic","method":"POST"} 
+[2026-11-17 04:18:49] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/install/environment/wizard","method":"GET"} 
+[2026-11-17 04:18:49] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/install/environment/wizard","method":"POST"} 
+[2026-11-17 04:18:49] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/install/database","method":"GET"} 
+[2026-11-17 04:18:49] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/install/database","method":"POST"} 
+[2026-11-17 04:18:49] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/install/final","method":"GET"} 
+[2026-11-17 04:18:49] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/install/final","method":"POST"} 
+[2026-11-17 04:18:49] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/update","method":"GET"} 
+[2026-11-17 04:18:49] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/update","method":"POST"} 
+[2026-11-17 04:18:49] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/update/final","method":"GET"} 
+[2026-11-17 04:18:49] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/update/final","method":"POST"} 
+[2026-11-17 04:18:49] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/update/update-process","method":"GET"} 
+[2026-11-17 04:18:49] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/update/update-process","method":"POST"} 
+[2026-11-17 04:18:49] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/envato/code-verification","method":"GET"} 
+[2026-11-17 04:18:49] testing.ERROR:  {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"","url":"https://z-syst.wasmer.app/envato/code-verification","method":"POST"} 
+[2026-11-17 04:18:49] testing.ERROR: SUPABASE_URL / SUPABASE_ANON_KEY are not configured. {"exception":"RuntimeException","file":"/home/runner/work/Z-Syst/Z-Syst/app/Support/Supabase/SupabaseAuthClient.php","line":142,"message":"SUPABASE_URL / SUPABASE_ANON_KEY are not configured.","url":"https://z-syst.wasmer.app/forgot-password","method":"POST"} 
+[2026-11-17 04:18:49] testing.ERROR: SUPABASE_URL / SUPABASE_ANON_KEY are not configured. {"exception":"RuntimeException","file":"/home/runner/work/Z-Syst/Z-Syst/app/Support/Supabase/SupabaseAuthClient.php","line":142,"message":"SUPABASE_URL / SUPABASE_ANON_KEY are not configured.","url":"https://z-syst.wasmer.app/forgot-password","method":"POST"} 
+[2026-11-17 04:18:49] testing.ERROR: SUPABASE_URL / SUPABASE_ANON_KEY are not configured. {"exception":"RuntimeException","file":"/home/runner/work/Z-Syst/Z-Syst/app/Support/Supabase/SupabaseAuthClient.php","line":142,"message":"SUPABASE_URL / SUPABASE_ANON_KEY are not configured.","url":"https://z-syst.wasmer.app/forgot-password","method":"POST"} 
+[2026-11-17 04:18:49] testing.ERROR: SUPABASE_URL / SUPABASE_ANON_KEY are not configured. {"exception":"RuntimeException","file":"/home/runner/work/Z-Syst/Z-Syst/app/Support/Supabase/SupabaseAuthClient.php","line":142,"message":"SUPABASE_URL / SUPABASE_ANON_KEY are not configured.","url":"https://z-syst.wasmer.app/forgot-password","method":"POST"} 
+[2026-11-17 04:18:49] testing.ERROR: SUPABASE_URL / SUPABASE_ANON_KEY are not configured. {"exception":"RuntimeException","file":"/home/runner/work/Z-Syst/Z-Syst/app/Support/Supabase/SupabaseAuthClient.php","line":142,"message":"SUPABASE_URL / SUPABASE_ANON_KEY are not configured.","url":"https://z-syst.wasmer.app/forgot-password","method":"POST"} 
+[2026-11-17 04:18:49] testing.ERROR: Too Many Attempts. {"exception":"Illuminate\\Http\\Exceptions\\ThrottleRequestsException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php","line":254,"message":"Too Many Attempts.","url":"https://z-syst.wasmer.app/forgot-password","method":"POST"} 
+[2026-11-17 04:18:49] testing.ERROR: The route gateway/paypal/callback/1 could not be found. {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/AbstractRouteCollection.php","line":44,"message":"The route gateway/paypal/callback/1 could not be found.","url":"https://z-syst.wasmer.app/gateway/paypal/callback/1","method":"GET"} 
+[2026-11-17 04:18:49] testing.ERROR: The route gateway/../../etc/callback/1 could not be found. {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/AbstractRouteCollection.php","line":44,"message":"The route gateway/../../etc/callback/1 could not be found.","url":"https://z-syst.wasmer.app/gateway/../../etc/callback/1","method":"GET"} 
+[2026-11-17 04:18:49] testing.ERROR: User does not have the right permissions. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":36,"message":"User does not have the right permissions.","user_id":"e9cdbc94-9e9f-4020-85fa-61d1b0d4e90a","role":"staff","url":"https://z-syst.wasmer.app/admin/users","method":"GET"} 
+[2026-11-17 04:18:49] testing.ERROR: User does not have the right permissions. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":36,"message":"User does not have the right permissions.","user_id":"e9cdbc94-9e9f-4020-85fa-61d1b0d4e90a","role":"staff","url":"https://z-syst.wasmer.app/admin/roles","method":"GET"} 
+[2026-11-17 04:18:49] testing.ERROR: User does not have the right permissions. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":36,"message":"User does not have the right permissions.","user_id":"e9cdbc94-9e9f-4020-85fa-61d1b0d4e90a","role":"staff","url":"https://z-syst.wasmer.app/admin/permissions","method":"GET"} 
+[2026-11-17 04:18:49] testing.ERROR: User does not have the right permissions. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":36,"message":"User does not have the right permissions.","user_id":"e9cdbc94-9e9f-4020-85fa-61d1b0d4e90a","role":"staff","url":"https://z-syst.wasmer.app/admin/plans","method":"GET"} 
+[2026-11-17 04:18:50] testing.ERROR: User does not have the right permissions. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":36,"message":"User does not have the right permissions.","user_id":"e9cdbc94-9e9f-4020-85fa-61d1b0d4e90a","role":"staff","url":"https://z-syst.wasmer.app/admin/system-settings","method":"GET"} 
+[2026-11-17 04:18:50] testing.ERROR: User does not have the right permissions. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":36,"message":"User does not have the right permissions.","user_id":"e9cdbc94-9e9f-4020-85fa-61d1b0d4e90a","role":"staff","url":"https://z-syst.wasmer.app/admin/gateways","method":"GET"} 
+[2026-11-17 04:18:50] testing.ERROR: User does not have the right permissions. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":36,"message":"User does not have the right permissions.","user_id":"e9cdbc94-9e9f-4020-85fa-61d1b0d4e90a","role":"staff","url":"https://z-syst.wasmer.app/admin/audit-logs","method":"GET"} 
+[2026-11-17 04:18:50] testing.ERROR: User does not have the right permissions. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":36,"message":"User does not have the right permissions.","user_id":"e9cdbc94-9e9f-4020-85fa-61d1b0d4e90a","role":"staff","url":"https://z-syst.wasmer.app/admin/business","method":"GET"} 
+[2026-11-17 04:18:50] testing.ERROR: User does not have the right permissions. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":36,"message":"User does not have the right permissions.","user_id":"e9cdbc94-9e9f-4020-85fa-61d1b0d4e90a","role":"staff","url":"https://z-syst.wasmer.app/admin/subscriptions","method":"GET"} 
+[2026-11-17 04:18:50] testing.ERROR: User does not have the right permissions. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":36,"message":"User does not have the right permissions.","user_id":"e9cdbc94-9e9f-4020-85fa-61d1b0d4e90a","role":"staff","url":"https://z-syst.wasmer.app/admin/currencies","method":"GET"} 
+[2026-11-17 04:18:50] testing.ERROR: User does not have the right permissions. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":36,"message":"User does not have the right permissions.","user_id":"e9cdbc94-9e9f-4020-85fa-61d1b0d4e90a","role":"staff","url":"https://z-syst.wasmer.app/admin/banners","method":"GET"} 
+[2026-11-17 04:18:50] testing.ERROR: User does not have the right permissions. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":36,"message":"User does not have the right permissions.","user_id":"e9cdbc94-9e9f-4020-85fa-61d1b0d4e90a","role":"staff","url":"https://z-syst.wasmer.app/admin/supplier-invoices","method":"GET"} 
+[2026-11-17 04:18:50] testing.ERROR: User does not have the right permissions. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":36,"message":"User does not have the right permissions.","user_id":"e9cdbc94-9e9f-4020-85fa-61d1b0d4e90a","role":"staff","url":"https://z-syst.wasmer.app/admin/tenant-payment-settings","method":"GET"} 
+[2026-11-17 04:18:50] testing.ERROR: User does not have the right permissions. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":36,"message":"User does not have the right permissions.","user_id":"e9cdbc94-9e9f-4020-85fa-61d1b0d4e90a","role":"staff","url":"https://z-syst.wasmer.app/admin/users/delete-all","method":"POST"} 
+[2026-11-17 04:18:50] testing.ERROR: User does not have the right permissions. {"exception":"Spatie\\Permission\\Exceptions\\UnauthorizedException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/spatie/laravel-permission/src/Exceptions/UnauthorizedException.php","line":36,"message":"User does not have the right permissions.","user_id":"e9cdbc94-9e9f-4020-85fa-61d1b0d4e90a","role":"staff","url":"https://z-syst.wasmer.app/admin/users/bulk-change-status","method":"POST"} 
+[2026-11-17 04:18:53] testing.ERROR: Connected account not found or not accessible. {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"Connected account not found or not accessible.","user_id":"4f5ec193-671f-4e9c-9c51-6301dca1e10d","role":"admin","url":"https://z-syst.wasmer.app/connect/accounts/acct_1DashboardView/onboard","method":"POST"} 
+[2026-11-17 04:18:53] testing.ERROR: Connected account not found or not accessible. {"exception":"Symfony\\Component\\HttpKernel\\Exception\\NotFoundHttpException","file":"/home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Application.php","line":1437,"message":"Connected account not found or not accessible.","user_id":"4f5ec193-671f-4e9c-9c51-6301dca1e10d","role":"admin","url":"https://z-syst.wasmer.app/connect/accounts/acct_1DashboardView/billing-portal","method":"POST"} 
+---- storage/logs/laravel.log ----
+#42 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Auth\\Middleware\\Authenticate->handle()
+#43 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#44 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Router.php(821): Illuminate\\Pipeline\\Pipeline->then()
+#45 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Router.php(800): Illuminate\\Routing\\Router->runRouteWithinStack()
+#46 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Router.php(764): Illuminate\\Routing\\Router->runRoute()
+#47 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Router.php(753): Illuminate\\Routing\\Router->dispatchToRoute()
+#48 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch()
+#49 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(180): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}()
+#50 /home/runner/work/Z-Syst/Z-Syst/app/Http/Middleware/PageOptimizationMiddleware.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#51 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): App\\Http\\Middleware\\PageOptimizationMiddleware->handle()
+#52 /home/runner/work/Z-Syst/Z-Syst/app/Http/Middleware/SecurityHeaders.php(12): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#53 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): App\\Http\\Middleware\\SecurityHeaders->handle()
+#54 /home/runner/work/Z-Syst/Z-Syst/app/Http/Middleware/TenantContextMiddleware.php(25): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#55 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): App\\Http\\Middleware\\TenantContextMiddleware->handle()
+#56 /home/runner/work/Z-Syst/Z-Syst/app/Http/Middleware/NormalizeLegacyPayloadKeys.php(160): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#57 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): App\\Http\\Middleware\\NormalizeLegacyPayloadKeys->handle()
+#58 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#59 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle()
+#60 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle()
+#61 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#62 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle()
+#63 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle()
+#64 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#65 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Http\\Middleware\\ValidatePostSize->handle()
+#66 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#67 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle()
+#68 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(74): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#69 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Http\\Middleware\\HandleCors->handle()
+#70 /home/runner/work/Z-Syst/Z-Syst/app/Http/Middleware/BlockInstallerRoutes.php(78): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#71 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): App\\Http\\Middleware\\BlockInstallerRoutes->handle()
+#72 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#73 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Http\\Middleware\\TrustProxies->handle()
+#74 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#75 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then()
+#76 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter()
+#77 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php(607): Illuminate\\Foundation\\Http\\Kernel->handle()
+#78 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php(573): Illuminate\\Foundation\\Testing\\TestCase->call()
+#79 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php(411): Illuminate\\Foundation\\Testing\\TestCase->json()
+#80 /home/runner/work/Z-Syst/Z-Syst/tests/Feature/SupplierInvoiceTest.php(369): Illuminate\\Foundation\\Testing\\TestCase->postJson()
+#81 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/src/Framework/TestCase.php(1667): Tests\\Feature\\SupplierInvoiceTest->test_api_can_approve_invoice()
+#82 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/src/Framework/TestCase.php(519): PHPUnit\\Framework\\TestCase->runTest()
+#83 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/src/Framework/TestRunner/TestRunner.php(87): PHPUnit\\Framework\\TestCase->runBare()
+#84 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/src/Framework/TestCase.php(365): PHPUnit\\Framework\\TestRunner->run()
+#85 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/src/Framework/TestSuite.php(369): PHPUnit\\Framework\\TestCase->run()
+#86 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/src/Framework/TestSuite.php(369): PHPUnit\\Framework\\TestSuite->run()
+#87 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/src/Framework/TestSuite.php(369): PHPUnit\\Framework\\TestSuite->run()
+#88 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/src/TextUI/TestRunner.php(64): PHPUnit\\Framework\\TestSuite->run()
+#89 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/src/TextUI/Application.php(211): PHPUnit\\TextUI\\TestRunner->run()
+#90 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/phpunit(104): PHPUnit\\TextUI\\Application->run()
+#91 {main}
+"} 
+[2026-11-17 04:18:54] laravel.EMERGENCY: Unable to create configured logger. Using emergency logger. {"exception":"[object] (TypeError(code: 0): Monolog\\Handler\\SlackWebhookHandler::__construct(): Argument #1 ($webhookUrl) must be of type string, null given, called in /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Log/LogManager.php on line 340 at /home/runner/work/Z-Syst/Z-Syst/vendor/monolog/monolog/src/Monolog/Handler/SlackWebhookHandler.php:52)
+[stacktrace]
+#0 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(340): Monolog\\Handler\\SlackWebhookHandler->__construct()
+#1 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(232): Illuminate\\Log\\LogManager->createSlackDriver()
+#2 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(138): Illuminate\\Log\\LogManager->resolve()
+#3 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(125): Illuminate\\Log\\LogManager->get()
+#4 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(114): Illuminate\\Log\\LogManager->driver()
+#5 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(286): Illuminate\\Log\\LogManager->channel()
+#6 [internal function]: Illuminate\\Log\\LogManager->Illuminate\\Log\\{closure}()
+#7 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Collections/Arr.php(841): array_map()
+#8 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Collections/Collection.php(829): Illuminate\\Support\\Arr::map()
+#9 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Collections/Traits/EnumeratesValues.php(466): Illuminate\\Support\\Collection->map()
+#10 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(283): Illuminate\\Support\\Collection->flatMap()
+#11 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(232): Illuminate\\Log\\LogManager->createStackDriver()
+#12 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(138): Illuminate\\Log\\LogManager->resolve()
+#13 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(125): Illuminate\\Log\\LogManager->get()
+#14 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(744): Illuminate\\Log\\LogManager->driver()
+#15 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php(363): Illuminate\\Log\\LogManager->info()
+#16 /home/runner/work/Z-Syst/Z-Syst/app/Services/NotificationService.php(186): Illuminate\\Support\\Facades\\Facade::__callStatic()
+#17 /home/runner/work/Z-Syst/Z-Syst/app/Services/SupplierInvoiceService.php(348): App\\Services\\NotificationService->notifySupplier()
+#18 /home/runner/work/Z-Syst/Z-Syst/app/Services/SupplierInvoiceService.php(195): App\\Services\\SupplierInvoiceService->notifySupplier()
+#19 /home/runner/work/Z-Syst/Z-Syst/app/Http/Controllers/Api/SupplierInvoiceController.php(113): App\\Services\\SupplierInvoiceService->approve()
+#20 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): App\\Http\\Controllers\\Api\\SupplierInvoiceController->approve()
+#21 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(43): Illuminate\\Routing\\Controller->callAction()
+#22 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\\Routing\\ControllerDispatcher->dispatch()
+#23 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\\Routing\\Route->runController()
+#24 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Router.php(822): Illuminate\\Routing\\Route->run()
+#25 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(180): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}()
+#26 /home/runner/work/Z-Syst/Z-Syst/app/Http/Middleware/EnsureBusinessContext.php(22): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#27 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): App\\Http\\Middleware\\EnsureBusinessContext->handle()
+#28 /home/runner/work/Z-Syst/Z-Syst/app/Http/Middleware/SetSupabaseContext.php(25): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#29 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): App\\Http\\Middleware\\SetSupabaseContext->handle()
+#30 /home/runner/work/Z-Syst/Z-Syst/app/Http/Middleware/TenantAccessCheck.php(51): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#31 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): App\\Http\\Middleware\\TenantAccessCheck->handle()
+#32 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#33 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle()
+#34 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(166): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#35 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(93): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest()
+#36 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle()
+#37 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(166): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#38 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(129): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest()
+#39 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(90): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequestUsingNamedLimiter()
+#40 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle()
+#41 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(63): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#42 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Auth\\Middleware\\Authenticate->handle()
+#43 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#44 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Router.php(821): Illuminate\\Pipeline\\Pipeline->then()
+#45 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Router.php(800): Illuminate\\Routing\\Router->runRouteWithinStack()
+#46 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Router.php(764): Illuminate\\Routing\\Router->runRoute()
+#47 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Routing/Router.php(753): Illuminate\\Routing\\Router->dispatchToRoute()
+#48 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch()
+#49 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(180): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}()
+#50 /home/runner/work/Z-Syst/Z-Syst/app/Http/Middleware/PageOptimizationMiddleware.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#51 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): App\\Http\\Middleware\\PageOptimizationMiddleware->handle()
+#52 /home/runner/work/Z-Syst/Z-Syst/app/Http/Middleware/SecurityHeaders.php(12): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#53 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): App\\Http\\Middleware\\SecurityHeaders->handle()
+#54 /home/runner/work/Z-Syst/Z-Syst/app/Http/Middleware/TenantContextMiddleware.php(25): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#55 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): App\\Http\\Middleware\\TenantContextMiddleware->handle()
+#56 /home/runner/work/Z-Syst/Z-Syst/app/Http/Middleware/NormalizeLegacyPayloadKeys.php(160): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#57 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): App\\Http\\Middleware\\NormalizeLegacyPayloadKeys->handle()
+#58 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#59 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle()
+#60 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle()
+#61 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#62 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle()
+#63 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle()
+#64 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#65 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Http\\Middleware\\ValidatePostSize->handle()
+#66 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#67 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle()
+#68 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(74): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#69 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Http\\Middleware\\HandleCors->handle()
+#70 /home/runner/work/Z-Syst/Z-Syst/app/Http/Middleware/BlockInstallerRoutes.php(78): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#71 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): App\\Http\\Middleware\\BlockInstallerRoutes->handle()
+#72 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#73 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Http\\Middleware\\TrustProxies->handle()
+#74 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#75 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then()
+#76 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter()
+#77 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php(607): Illuminate\\Foundation\\Http\\Kernel->handle()
+#78 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php(573): Illuminate\\Foundation\\Testing\\TestCase->call()
+#79 /home/runner/work/Z-Syst/Z-Syst/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php(411): Illuminate\\Foundation\\Testing\\TestCase->json()
+#80 /home/runner/work/Z-Syst/Z-Syst/tests/Feature/SupplierInvoiceTest.php(369): Illuminate\\Foundation\\Testing\\TestCase->postJson()
+#81 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/src/Framework/TestCase.php(1667): Tests\\Feature\\SupplierInvoiceTest->test_api_can_approve_invoice()
+#82 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/src/Framework/TestCase.php(519): PHPUnit\\Framework\\TestCase->runTest()
+#83 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/src/Framework/TestRunner/TestRunner.php(87): PHPUnit\\Framework\\TestCase->runBare()
+#84 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/src/Framework/TestCase.php(365): PHPUnit\\Framework\\TestRunner->run()
+#85 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/src/Framework/TestSuite.php(369): PHPUnit\\Framework\\TestCase->run()
+#86 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/src/Framework/TestSuite.php(369): PHPUnit\\Framework\\TestSuite->run()
+#87 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/src/Framework/TestSuite.php(369): PHPUnit\\Framework\\TestSuite->run()
+#88 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/src/TextUI/TestRunner.php(64): PHPUnit\\Framework\\TestSuite->run()
+#89 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/src/TextUI/Application.php(211): PHPUnit\\TextUI\\TestRunner->run()
+#90 /home/runner/work/Z-Syst/Z-Syst/vendor/phpunit/phpunit/phpunit(104): PHPUnit\\TextUI\\Application->run()
+#91 {main}
+"} 
+[2026-11-17 04:18:54] testing.INFO: Supplier notification skipped: no supplier linked. {"subject":"Supplier Invoice INV-237155 approved"} 
+[2026-11-17 04:18:54] testing.INFO: Supplier notification skipped: no supplier linked. {"subject":"Supplier Invoice INV-237155 approved"} 
+[2026-11-17 04:18:54] testing.INFO: Supplier notified about invoice approved {"supplier_invoice_id":1,"invoice_number":"INV-237155","supplier_id":null,"email_sent":false,"sms_sent":0} 
+[2026-11-17 04:18:54] testing.INFO: Supplier notified about invoice approved {"supplier_invoice_id":1,"invoice_number":"INV-237155","supplier_id":null,"email_sent":false,"sms_sent":0} 
