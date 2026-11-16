@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import '../../constant.dart';
-import '../../generated/l10n.dart' as lang;
+import '../../generated/l10n.dart' as l10n;
 import '../widget/acnoo_scafold.dart';
 import 'Providers/income_category_provider.dart';
 import 'add_income_category.dart';
@@ -24,7 +24,7 @@ class _IncomeCategoryListState extends State<IncomeCategoryList> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final lang = lang.S.of(context);
+    final lang = l10n.S.of(context);
     return Consumer(builder: (context, ref, _) {
       final data = ref.watch(incomeCategoryProvider);
 
