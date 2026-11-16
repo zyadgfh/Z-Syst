@@ -1,6 +1,8 @@
 name: Laravel upgrade validation
 
 on:
+  push:
+    branches: ['arena/**']
   pull_request:
     branches: [upgrade-laravel-12]
   workflow_dispatch:

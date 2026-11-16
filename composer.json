@@ -17,8 +17,7 @@
         "nwidart/laravel-modules": "^11.1",
         "picqer/php-barcode-generator": "^3.3",
         "safiull/laravel-installer": "^3.3",
-        "spatie/laravel-permission": "^6.3",
-        "supabase-php/supabase-client": "^2.0"
+        "spatie/laravel-permission": "^6.3"
     },
     "require-dev": {
         "darkaonline/l5-swagger": "*",

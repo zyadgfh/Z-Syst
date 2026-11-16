@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b5e91a8c1545785788a3d8e0f9c6b383",
+    "content-hash": "6441ea5f1dd3a604a017d4dafc6bacbb",
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -5537,77 +5537,6 @@
                 }
             ],
             "time": "2025-03-06T21:06:09+00:00"
-        },
-        {
-            "name": "supabase-php/supabase-client",
-            "version": "v2.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/CodeWithSushil/supabase-client.git",
-                "reference": "a66d3e20b4a9cdda79743f9c46642225f1b96d71"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/CodeWithSushil/supabase-client/zipball/a66d3e20b4a9cdda79743f9c46642225f1b96d71",
-                "reference": "a66d3e20b4a9cdda79743f9c46642225f1b96d71",
-                "shasum": ""
-            },
-            "require": {
-                "ext-curl": "*",
-                "ext-json": "*",
-                "guzzlehttp/guzzle": "^7.11",
-                "php": "^8.3"
-            },
-            "require-dev": {
-                "laravel/pint": "^1.29",
-                "phpstan/extension-installer": "^1.4",
-                "phpstan/phpstan": "^2.2",
-                "phpunit/phpunit": "^13.1",
-                "tomasvotruba/type-coverage": "^2.2"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Supabase\\Client\\": "src/Supabase/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Sushil Kumar",
-                    "email": "sushilkumbhar77@gmail.com",
-                    "role": "Developer"
-                },
-                {
-                    "name": "Ashish Kumbhar",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Supabase client for PHP.",
-            "keywords": [
-                "supabase",
-                "supabase-client",
-                "supabase-php",
-                "supabase-sdk"
-            ],
-            "support": {
-                "issues": "https://github.com/CodeWithSushil/supabase-client/issues",
-                "source": "https://github.com/CodeWithSushil/supabase-client/releases"
-            },
-            "funding": [
-                {
-                    "url": "https://opencollective.com/CodeWithSushil",
-                    "type": "Open Collective"
-                },
-                {
-                    "url": "https://github.com/CodeWithSushil",
-                    "type": "github"
-                }
-            ],
-            "time": "2026-06-02T12:55:29+00:00"
         },
         {
             "name": "symfony/clock",
