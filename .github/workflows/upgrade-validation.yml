@@ -67,15 +67,28 @@ jobs:
       - name: Summarize boot probe
         if: always()
         run: python3 scripts/ci/summarize-junit.py smoke.xml
+      - name: Run last-unit concurrency test
+        id: concurrency
+        continue-on-error: true
+        run: vendor/bin/phpunit --colors=never --filter StockAllocationConcurrencyTest --stop-on-error --log-junit concurrency.xml
+      - name: Summarize concurrency test
+        if: always()
+        run: python3 scripts/ci/summarize-junit.py concurrency.xml
       - name: Run test suite
         run: vendor/bin/phpunit --colors=never --log-junit junit.xml
       - name: Summarize test failures
         if: always()
         run: python3 scripts/ci/summarize-junit.py junit.xml
+      - name: Enforce concurrency test result
+        if: always() && steps.concurrency.outcome == 'failure'
+        run: exit 1
       - name: Upload test report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: phpunit-${{ matrix.database }}
-          path: junit.xml
+          path: |
+            junit.xml
+            smoke.xml
+            concurrency.xml
           if-no-files-found: warn

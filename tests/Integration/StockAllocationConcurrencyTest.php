@@ -19,7 +19,7 @@ class StockAllocationConcurrencyTest extends TestCase
     protected function setUp(): void
     {
         // DatabaseMigrations runs during parent setup, so guard before it can drop tables.
-        if (getenv('APP_ENV') !== 'testing' || getenv('DB_DATABASE') !== 'zsyst_test'
+        if (getenv('APP_ENV') !== 'testing' || getenv('DATABASE_URL') || getenv('DB_DATABASE') !== 'zsyst_test'
             || ! in_array(getenv('DB_CONNECTION'), ['pgsql', 'mysql'], true)) {
             $this->markTestSkipped('Requires an explicitly configured disposable zsyst_test database.');
         }
