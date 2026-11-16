@@ -14,10 +14,16 @@ return new class extends Migration
         });
 
         // Backfill: set expires_at for all existing earned points (12 months from created_at)
+        $expiresAt = match (DB::getDriverName()) {
+            'sqlite' => "datetime(created_at, '+12 months')",
+            'pgsql' => "created_at + INTERVAL '12 months'",
+            'mysql', 'mariadb' => 'DATE_ADD(created_at, INTERVAL 12 MONTH)',
+            default => throw new \RuntimeException('Unsupported database driver for loyalty expiry backfill'),
+        };
         DB::table('loyalty_points')
             ->where('type', 'earned')
             ->whereNull('expires_at')
-            ->update(['expires_at' => DB::raw("DATE_ADD(created_at, INTERVAL 12 MONTH)")]);
+            ->update(['expires_at' => DB::raw($expiresAt)]);
     }
 
     public function down(): void
