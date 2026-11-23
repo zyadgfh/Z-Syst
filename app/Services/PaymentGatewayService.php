@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\BusinessSetting;
 use App\Models\GatewayTransaction;
-use Illuminate\Support\Facades\Http;
+use App\Services\Integrations\FawryService;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -52,8 +52,13 @@ class PaymentGatewayService
      * in the signed material, and the scheme cannot be changed unilaterally
      * because the gateway computes it. So for these gateways the callback's
      * `success` flag is not believed. handleCallback() leaves the transaction
-     * pending instead of granting the entitlement; see the note there for what a
-     * real integration has to add.
+     * pending instead of granting the entitlement — unless it can corroborate
+     * the outcome some other way: Fawry's native Server Notification V2 carries
+     * a `messageSignature` computed over `orderStatus` (verified separately in
+     * handleCallback(), because that scheme DOES cover the outcome), and the
+     * `outcome_not_bound_to_signature` branch queries Fawry's server-to-server
+     * status API before giving up. This constant is about the generic scheme
+     * described above, which neither of those changes.
      *
      * @var array<int, string>
      */
@@ -88,7 +93,23 @@ class PaymentGatewayService
         'source_data.type', 'success',
     ];
 
-    public function initiate(int $businessId, string $gateway, string $purpose, ?int $payableId, float $amount): GatewayTransaction
+    public function __construct(protected FawryService $fawry)
+    {
+    }
+
+    /**
+     * Open a transaction for a gateway-hosted checkout.
+     *
+     * For fawry in live mode with credentials configured this also CREATES the
+     * order server-side (FawryService::charge()) and stores our merchantRefNum
+     * as the transaction reference — that reference is what the notification,
+     * the status query and the callback all bind to. On an upstream failure the
+     * transaction is recorded failed (reason `fawry_charge_failed`) instead of
+     * being left as an orphan pending row.
+     *
+     * @param  array<string, mixed>  $customer  name/email/phone/profile_id for Fawry's charge body
+     */
+    public function initiate(int $businessId, string $gateway, string $purpose, ?int $payableId, float $amount, array $customer = []): GatewayTransaction
     {
         abort_unless(self::isSupported($gateway), 404, 'Unknown payment gateway.');
 
@@ -106,6 +127,8 @@ class PaymentGatewayService
             'Automatic gateway payments are disabled. Submit a manual payment request instead.'
         );
 
+        $mode = $this->mode($businessId, $gateway);
+
         $tx = GatewayTransaction::create([
             'business_id' => $businessId,
             'gateway' => $gateway,
@@ -116,11 +139,49 @@ class PaymentGatewayService
             'status' => 'pending',
         ]);
 
-        $tx->update(['payload' => [
-            'mode' => $this->mode($businessId, $gateway),
+        $payload = [
+            'mode' => $mode,
             'redirect_url' => route('web.gateway.callback', [$gateway, $tx->id]),
             'initiated_at' => now()->toIso8601String(),
-        ]]);
+        ];
+
+        // Live fawry with credentials: create the order at Fawry now so a
+        // reference exists for everything downstream to bind to. Simulation and
+        // disabled stay HTTP-free — that is what keeps the old behaviour (and
+        // the existing tests) intact when no credentials are configured.
+        if ($gateway === 'fawry' && $mode === 'live' && $this->fawry->enabled()) {
+            $reference = 'ZS'.$tx->id.now()->format('ymdHis');
+            $items = [[
+                'itemId' => (string) ($payableId ?? $tx->id),
+                'description' => (string) $purpose,
+                'price' => FawryService::amount2($amount),
+                'quantity' => '1',
+            ]];
+
+            try {
+                $charge = $this->fawry->charge($amount, $reference, $customer, $items, $payload['redirect_url']);
+            } catch (\RuntimeException $e) {
+                // Record the upstream failure on the transaction so it can
+                // never settle later, and let the caller see the reason
+                // instead of a redirect that would go nowhere.
+                $tx->update([
+                    'status' => 'failed',
+                    'payload' => array_merge($payload, [
+                        'reason' => 'fawry_charge_failed',
+                        'error' => $e->getMessage(),
+                    ]),
+                ]);
+
+                return $tx;
+            }
+
+            $payload['fawry'] = $charge;
+            $tx->update(['reference' => $reference, 'payload' => $payload]);
+
+            return $tx;
+        }
+
+        $tx->update(['payload' => $payload]);
 
         return $tx;
     }
@@ -153,13 +214,27 @@ class PaymentGatewayService
      * transaction and the amount but NOT whether it was paid — every input to
      * that hash is a value this application already holds. So a valid fawry
      * signature proves authenticity and nothing about success, and the callback's
-     * `success` flag is not believed for those gateways: the transaction is left
-     * pending with reason `outcome_not_bound_to_signature` rather than being
-     * marked paid. See signatureCoversOutcome().
+     * `success` flag is not believed for those gateways.
+     *
+     * Fawry gets two corroborations instead, both tried before anything is
+     * granted:
+     *
+     *   1. Its native Server Notification V2 POSTs `messageSignature`, computed
+     *      over `orderStatus` among other fields — for that scheme the outcome
+     *      IS in the signed material, so it is verified and settled directly
+     *      (see handleFawryNotification()). A tampered outcome breaks the
+     *      signature.
+     *   2. Any other live fawry callback falls into the
+     *      `outcome_not_bound_to_signature` branch, which queries Fawry's
+     *      server-to-server status API (payments/status/v2, signed with the
+     *      secure key we hold) and settles from the response — see
+     *      corroborateFawry(). Without credentials the query cannot run and the
+     *      transaction stays pending, exactly as before.
      *
      * Resulting states:
      *   pending  authenticated callback, outcome not provable (reconcile later)
-     *   paid     outcome proven — bound signature, or simulation
+     *   paid     outcome proven — bound signature, fawry notification/status
+     *            query, or simulation
      *   failed   gateway disabled, signature invalid, or reference mismatch
      */
     public function handleCallback(string $gateway, int $txId, array $params): GatewayTransaction
@@ -175,6 +250,14 @@ class PaymentGatewayService
             $tx->update(['status' => 'failed', 'payload' => array_merge($tx->payload ?? [], ['callback' => $params, 'verified' => false, 'reason' => 'gateway_disabled'])]);
             return $tx;
         }
+
+        // Fawry's Server Notification V2 carries `messageSignature`, which
+        // covers orderStatus — verify it here and settle from the signed
+        // outcome; the generic scheme below never sees this payload shape.
+        if ($gateway === 'fawry' && $mode !== 'simulation' && isset($params['messageSignature'])) {
+            return $this->handleFawryNotification($tx, $params);
+        }
+
         $verified = $mode === 'simulation'
             || $this->verifySignature($gateway, $businessId, $tx, $params);
 
@@ -187,8 +270,10 @@ class PaymentGatewayService
         // different one is describing another transaction. Never overwrite the
         // stored reference from an unauthenticated field either: doing so lets
         // the callback redefine the very value every later verification is keyed
-        // on.
-        $claimed = isset($params['reference']) ? trim((string) $params['reference']) : '';
+        // on. Fawry's notification names the field `merchantRefNumber`.
+        $claimed = isset($params['reference'])
+            ? trim((string) $params['reference'])
+            : ($gateway === 'fawry' ? trim((string) ($params['merchantRefNumber'] ?? '')) : '');
         if ($claimed !== '' && (string) $tx->reference !== $claimed) {
             $tx->update(['status' => 'failed', 'payload' => array_merge($tx->payload ?? [], [
                 'callback' => $params, 'verified' => true, 'reason' => 'reference_mismatch',
@@ -201,6 +286,19 @@ class PaymentGatewayService
         // in production — so it may state its own outcome; that is what a
         // simulation is for. Anything live has to be bound or corroborated.
         if ($mode !== 'simulation' && ! self::signatureCoversOutcome($gateway)) {
+            // RUNBOOK §10.4: this gateway's signature does not cover the
+            // outcome, so corroborate with a server-to-server status query when
+            // the gateway offers one (Fawry payments/status/v2). Without
+            // credentials the query cannot run and this falls through to the
+            // pending state below — the intended loud-at-integration-time
+            // behaviour for an uncorroborated integration.
+            if ($gateway === 'fawry') {
+                $settled = $this->corroborateFawry($tx, $params);
+                if ($settled !== null) {
+                    return $settled;
+                }
+            }
+
             Log::warning('Payment callback verified, but this gateway signs the transaction and not the outcome; entitlement not granted.', [
                 'gateway' => $gateway,
                 'transaction' => $tx->id,
@@ -214,7 +312,7 @@ class PaymentGatewayService
                 // Pending, not failed: the money may genuinely have been taken,
                 // and recording a decline invites a second charge. Pending
                 // grants no entitlement and stays open for reconciliation —
-                // either against a gateway status query, once one exists, or by
+                // either against the gateway status query, once one exists, or by
                 // an operator. See signatureCoversOutcome().
                 'reason' => 'outcome_not_bound_to_signature',
             ])]);
@@ -232,21 +330,14 @@ class PaymentGatewayService
             'paid_at' => $success ? now() : null,
             'payload' => array_merge($tx->payload ?? [], ['callback' => $params, 'verified' => true]),
         ]);
-
-        if ($tx->status === 'paid' && $tx->purpose === 'subscription') {
-            // Mark the subscription as paid via the existing plan manager.
-            \App\Models\Subscription::where('id', $tx->payable_id)->first()?->update(['status' => 'active']);
-        }
+        $this->grantIfSubscription($tx);
 
         return $tx;
     }
 
     protected function verifySignature(string $gateway, int $businessId, GatewayTransaction $tx, array $params): bool
     {
-        // In production, HMAC secret comes from platform config, not tenant settings
-        $secret = app()->environment('production')
-            ? (config("services.{$gateway}.hmac_secret") ?? config("integrations.{$gateway}.hmac_secret") ?? BusinessSetting::get($businessId, "{$gateway}_hmac_secret"))
-            : BusinessSetting::get($businessId, "{$gateway}_hmac_secret");
+        $secret = $this->secretFor($businessId, $gateway);
         if (!$secret) {
             return false;
         }
@@ -263,5 +354,193 @@ class PaymentGatewayService
         $merchantCode = BusinessSetting::get($businessId, $gateway.'_merchant_code', '');
         $concat = $merchantCode.($tx->reference ?? '').(float) $tx->amount.$secret;
         return hash_equals(hash('sha256', $concat), (string) ($params['signature'] ?? ''));
+    }
+
+    /**
+     * The HMAC/secure key for a gateway: platform config in production (so a
+     * tenant setting cannot weaken verification), the business's setting
+     * otherwise. Shared by verifySignature() and the native Fawry notification
+     * path so both read the same secret.
+     */
+    protected function secretFor(int $businessId, string $gateway): ?string
+    {
+        return app()->environment('production')
+            ? (config("services.{$gateway}.hmac_secret") ?? config("integrations.{$gateway}.hmac_secret") ?? BusinessSetting::get($businessId, "{$gateway}_hmac_secret"))
+            : BusinessSetting::get($businessId, "{$gateway}_hmac_secret");
+    }
+
+    /**
+     * Settle from Fawry's Server Notification V2.
+     *
+     * messageSignature = SHA256(fawryRefNumber + merchantRefNumber +
+     * paymentAmount + orderAmount + orderStatus + paymentMethod +
+     * paymentRefrenceNumber + secureKey) — orderStatus is INSIDE the signed
+     * material, so unlike the generic scheme a valid signature proves the
+     * outcome. Verification fails closed when no secret is configured.
+     *
+     * @param  array<string, mixed>  $params
+     */
+    private function handleFawryNotification(GatewayTransaction $tx, array $params): GatewayTransaction
+    {
+        $businessId = (int) $tx->business_id;
+        $secret = $this->secretFor($businessId, 'fawry');
+        $expected = $secret !== null && $secret !== ''
+            ? FawryService::notificationSignature($params, $secret)
+            : '';
+        $given = strtolower((string) ($params['messageSignature'] ?? ''));
+
+        if ($expected === '' || ! hash_equals($expected, $given)) {
+            $tx->update(['status' => 'failed', 'payload' => array_merge($tx->payload ?? [], [
+                'callback' => $params, 'verified' => false, 'reason' => 'invalid_notification_signature',
+            ])]);
+
+            return $tx;
+        }
+
+        // The signature proves this is a genuine Fawry notification; merchantRef
+        // Number proves it is about THIS row. Both are required — a valid
+        // notification for another order of ours must not settle this one.
+        $claimed = trim((string) ($params['merchantRefNumber'] ?? ''));
+        if ($claimed === '' || (string) $tx->reference !== $claimed) {
+            $tx->update(['status' => 'failed', 'payload' => array_merge($tx->payload ?? [], [
+                'callback' => $params, 'verified' => true, 'reason' => 'reference_mismatch',
+            ])]);
+
+            return $tx;
+        }
+
+        // The signed orderAmount must match what we charged. A mismatch means
+        // the notification is not describing this transaction's money — do not
+        // grant, do not fail (the money may exist somewhere): leave it for
+        // reconciliation with a loud reason.
+        if (isset($params['orderAmount']) && abs((float) $params['orderAmount'] - (float) $tx->amount) > 0.01) {
+            Log::warning('Fawry notification amount does not match the transaction; not settling.', [
+                'gateway' => 'fawry',
+                'transaction' => $tx->id,
+                'order_amount' => $params['orderAmount'],
+                'transaction_amount' => $tx->amount,
+            ]);
+            $tx->update(['status' => 'pending', 'payload' => array_merge($tx->payload ?? [], [
+                'callback' => $params, 'verified' => true, 'reason' => 'fawry_amount_mismatch',
+            ])]);
+
+            return $tx;
+        }
+
+        $orderStatus = strtoupper((string) ($params['orderStatus'] ?? ''));
+
+        if ($orderStatus === 'PAID') {
+            $tx->update([
+                'status' => 'paid',
+                'paid_at' => now(),
+                'payload' => array_merge($tx->payload ?? [], [
+                    'callback' => $params, 'verified' => true, 'settled_via' => 'fawry_notification',
+                ]),
+            ]);
+            $this->grantIfSubscription($tx);
+
+            return $tx;
+        }
+
+        if (in_array($orderStatus, ['FAILED', 'EXPIRED', 'CANCELED'], true)) {
+            // Signed by Fawry and covering the outcome: an authoritative
+            // negative. Nothing was granted, so recording it cannot invite a
+            // double charge the way an unsigned decline would.
+            $tx->update(['status' => 'failed', 'payload' => array_merge($tx->payload ?? [], [
+                'callback' => $params, 'verified' => true, 'reason' => 'fawry_notification_'.$orderStatus,
+            ])]);
+
+            return $tx;
+        }
+
+        // NEW / REFUNDED / PARTIAL_REFUNDED / unknown: not settled — pending,
+        // not failed, for the same "money may have moved" reason as the generic
+        // branch.
+        $tx->update(['status' => 'pending', 'payload' => array_merge($tx->payload ?? [], [
+            'callback' => $params, 'verified' => true, 'reason' => 'fawry_notification_'.$orderStatus,
+        ])]);
+
+        return $tx;
+    }
+
+    /**
+     * Corroborate an outcome-not-bound fawry callback with Fawry's own
+     * server-to-server status query (payments/status/v2). The request is
+     * signed with the secure key we hold, so the response is authoritative —
+     * unlike the callback's unsigned `success` flag.
+     *
+     * Returns the settled transaction, or null when the query was unavailable
+     * (no credentials, no reference, HTTP failure) or inconclusive — the caller
+     * then keeps the transaction pending.
+     *
+     * @param  array<string, mixed>  $params
+     */
+    private function corroborateFawry(GatewayTransaction $tx, array $params): ?GatewayTransaction
+    {
+        if (! $this->fawry->enabled() || $tx->reference === null || $tx->reference === '') {
+            return null;
+        }
+
+        $status = $this->fawry->paymentStatus((string) $tx->reference);
+        if ($status === null) {
+            return null;
+        }
+
+        // An error payload (order not found, bad signature) carries no
+        // trustworthy orderStatus.
+        if (isset($status['statusCode']) && (int) $status['statusCode'] !== 200) {
+            return null;
+        }
+
+        $orderStatus = FawryService::extractOrderStatus($status);
+        $orderAmount = isset($status['orderAmount']) ? (float) $status['orderAmount'] : null;
+
+        if ($orderStatus === 'PAID') {
+            if ($orderAmount !== null && abs($orderAmount - (float) $tx->amount) > 0.01) {
+                Log::warning('Fawry status query reports PAID for a different amount; not settling.', [
+                    'gateway' => 'fawry',
+                    'transaction' => $tx->id,
+                    'order_amount' => $orderAmount,
+                    'transaction_amount' => $tx->amount,
+                ]);
+
+                return null;
+            }
+
+            $tx->update([
+                'status' => 'paid',
+                'paid_at' => now(),
+                'payload' => array_merge($tx->payload ?? [], [
+                    'callback' => $params, 'verified' => true, 'settled_via' => 'fawry_status_query',
+                ]),
+            ]);
+            $this->grantIfSubscription($tx);
+
+            return $tx;
+        }
+
+        if (in_array($orderStatus, ['FAILED', 'EXPIRED', 'CANCELED'], true)) {
+            // The query is authenticated by the signature WE put on the
+            // request, so this negative is authoritative: the order is dead
+            // and never completed.
+            $tx->update(['status' => 'failed', 'payload' => array_merge($tx->payload ?? [], [
+                'callback' => $params, 'verified' => true, 'reason' => 'fawry_status_'.$orderStatus,
+            ])]);
+
+            return $tx;
+        }
+
+        // NEW / WAITING / unknown: inconclusive, caller leaves it pending.
+        return null;
+    }
+
+    /**
+     * A paid subscription transaction activates the subscription.
+     */
+    private function grantIfSubscription(GatewayTransaction $tx): void
+    {
+        if ($tx->status === 'paid' && $tx->purpose === 'subscription') {
+            \App\Models\Subscription::where('id', $tx->payable_id)->first()?->update(['status' => 'active']);
+        }
     }
 }

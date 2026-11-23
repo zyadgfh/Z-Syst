@@ -61,6 +61,20 @@
 
 إن فضّلت أن تكون في `.env` بدل قاعدة البيانات، سأضيف: `PAYMOB_API_KEY`, `PAYMOB_HMAC_SECRET`, `PAYMOB_INTEGRATION_CARD`, `PAYMOB_INTEGRATION_WALLET`, `PAYMOB_IFRAME_ID`.
 
+### ٢ب. الدفع — Fawry
+بوابة دفع عند فوري (نقدي عند الفرع / بطاقة / محفظة). الإعداد في `.env` عبر `config/integrations.php` — لا في جدول `gateways` (ذلك لـ Paymob فقط).
+
+| المتغيّر | الحالة |
+|---|---|
+| `FAWRY_ENABLED` | افتراضي `false` — بلاه لا تعمل أي مكالمة HTTP |
+| `FAWRY_SANDBOX` | افتراضي `true` (staging). اضبطه `false` للإنتاج |
+| `FAWRY_MERCHANT_CODE` | 🔒 كود التاجر — وحده يفعّل وضع live في الإنتاج |
+| `FAWRY_SECURE_KEY` | 🔒 المفتاح السري — توقيع charge / status/v2 / إشعار V2 |
+| `FAWRY_CUSTOMER_PROFILE_ID` | افتراضي `0` |
+| `FAWRY_BASE_URL` | اختياري — يتجاوز الافتراضي (staging/production) |
+
+**شرط التشغيل الفعلي:** `PAYMENTS_AUTOMATIC_ENABLED=true` + `FAWRY_ENABLED=true` + `FAWRY_MERCHANT_CODE` + `FAWRY_SECURE_KEY`. بدون هذه الأربع تبقى المعاملات `pending` بلا منح — سلوك مقصود، راجع RUNBOOK §10.4 قبل التفعيل.
+
 ### ٣. التخزين والنسخ الاحتياطي
 | المتغيّر | الحالة |
 |---|---|

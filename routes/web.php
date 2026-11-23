@@ -60,8 +60,11 @@ Route::prefix('store/{slug}')->name('store.')->group(function () {
 });
 // {gateway} is constrained at the route level so an unknown name never reaches
 // the controller, and {transaction} must be numeric so the int type hint cannot
-// be used to probe. 60/min leaves room for a gateway's own retry burst.
-Route::get('/gateway/{gateway}/callback/{transaction}', \App\Http\Controllers\Web\GatewayWebhookController::class)
+// be used to probe. 60/min leaves room for a gateway's own retry burst. POST as
+// well as GET: Fawry's Server Notification V2 delivers its signed
+// messageSignature payload by POST, and a server-to-server notification cannot
+// present a browser CSRF token (see VerifyCsrfToken::$except).
+Route::match(['get', 'post'], '/gateway/{gateway}/callback/{transaction}', \App\Http\Controllers\Web\GatewayWebhookController::class)
     ->where(['gateway' => 'paymob|fawry|instapay', 'transaction' => '[0-9]+'])
     ->middleware('throttle:60,1')
     ->name('web.gateway.callback');
