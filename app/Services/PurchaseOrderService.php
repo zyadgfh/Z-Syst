@@ -58,7 +58,9 @@ class PurchaseOrderService
      */
     public function addItem(PurchaseOrder $po, array $itemData): PurchaseOrderItem
     {
-        $product = Product::withoutGlobalScopes()->findOrFail($itemData['product_id']);
+        // Scoped lookup: cross-tenant product ids 404 for tenant users
+        // (TenantScoped); unscoped only when there is no request principal.
+        $product = Product::findOrFail($itemData['product_id']);
 
         $poItem = PurchaseOrderItem::create([
             'purchase_order_id' => $po->id,

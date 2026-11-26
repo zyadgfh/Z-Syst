@@ -45,9 +45,13 @@ class GRNService
      */
     public function addItem(GoodsReceivedNote $grn, array $itemData): GRNItem
     {
-        // GRN lines may reference catalog items from any business (the GRN
-        // itself carries the tenant); existence is enforced by the FormRequest.
-        $product = Product::withoutGlobalScopes()->findOrFail($itemData['product_id']);
+        // Scoped lookup: for an authenticated tenant user the TenantScoped
+        // global scope applies, so a cross-tenant product id yields 404 here
+        // instead of silently linking another tenant's catalogue row (the old
+        // withoutGlobalScopes() + unscoped exists:products validation accepted
+        // any tenant's product and leaked purchase_without_tax as the default
+        // price). Console/no-principal contexts run unscoped as before.
+        $product = Product::findOrFail($itemData['product_id']);
 
         $grnItem = GRNItem::create([
             'grn_id' => $grn->id,

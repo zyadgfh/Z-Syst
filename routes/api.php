@@ -33,7 +33,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/password-reset', [Api\Auth\ZSystForgotPasswordController::class, 'resetPassword']);
     });
 
-    Route::group(['middleware' => ['auth:sanctum', 'tenant.check', 'supabase.context']], function () {
+    Route::group(['middleware' => ['auth:sanctum', 'tenant.context', 'tenant.check', 'supabase.context']], function () {
 
         Route::get('summary', [Api\StatisticsController::class, 'summary']);
         Route::get('dashboard', [Api\StatisticsController::class, 'dashboard']);
@@ -389,7 +389,7 @@ Route::prefix('v1')->group(function () {
 });
 
 // Backward-compatible admin barcode endpoints (without the /v1 prefix).
-Route::middleware(['auth:sanctum', 'tenant.check', 'supabase.context', 'business.context', 'permission:barcodes-read'])
+Route::middleware(['auth:sanctum', 'tenant.context', 'tenant.check', 'supabase.context', 'business.context', 'permission:barcodes-read'])
     ->prefix('admin')
     ->group(function () {
         Route::get('barcodes/search', [Api\BarcodeController::class, 'search'])->name('admin.barcodes.search');
@@ -397,7 +397,7 @@ Route::middleware(['auth:sanctum', 'tenant.check', 'supabase.context', 'business
     });
 
 // Device stock take + POS offline sync + API docs
-Route::middleware(['auth:sanctum', 'tenant.check', 'supabase.context', 'business.context'])->prefix('v1')->group(function () {
+Route::middleware(['auth:sanctum', 'tenant.context', 'tenant.check', 'supabase.context', 'business.context'])->prefix('v1')->group(function () {
     Route::post('stock-takes', [Api\DeviceStockTakeController::class, 'store'])->middleware('permission:stocktake-create');
     Route::get('stock-takes/current', [Api\DeviceStockTakeController::class, 'current'])->middleware('permission:stocktake-read');
     Route::post('stock-takes/scan', [Api\DeviceStockTakeController::class, 'scan'])->middleware('permission:stocktake-read');
@@ -408,7 +408,7 @@ Route::get('v1/docs', [Api\ApiDocController::class, 'spec'])->name('api.docs.spe
 // Legacy version-less aliases — POS terminals and integrations registered
 // against /api/purchase-orders. Concrete GET paths are listed before the
 // {purchaseOrder} bind so they are not swallowed by it.
-Route::middleware(['auth:sanctum', 'tenant.check', 'supabase.context', 'business.context'])->group(function () {
+Route::middleware(['auth:sanctum', 'tenant.context', 'tenant.check', 'supabase.context', 'business.context'])->group(function () {
     Route::get('purchase-orders/pending', [Api\PurchaseOrderController::class, 'pending']);
     Route::get('purchase-orders/overdue', [Api\PurchaseOrderController::class, 'overdue']);
     Route::get('purchase-orders/statistics', [Api\PurchaseOrderController::class, 'statistics']);

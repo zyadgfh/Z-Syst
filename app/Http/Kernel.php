@@ -66,7 +66,13 @@ class Kernel extends HttpKernel
         TrimStrings::class,
         ConvertEmptyStringsToNull::class,
         NormalizeLegacyPayloadKeys::class,
-        TenantContextMiddleware::class,
+        // TenantContextMiddleware is NOT global: at global-middleware time no
+        // session/guard has run yet, so $request->user() is always null and the
+        // only branch that could ever fire was the client-supplied business_id
+        // one — i.e. the global registration existed solely to poison
+        // app('tenant_id')/config('app.current_business_id') with attacker
+        // input. It now runs post-identity: in the `web` group (after
+        // StartSession) and as `tenant.context` on authenticated API routes.
         SecurityHeaders::class,
         PageOptimizationMiddleware::class,
     ];
@@ -82,6 +88,9 @@ class Kernel extends HttpKernel
             AddQueuedCookiesToResponse::class,
             StartSession::class,
             ShareErrorsFromSession::class,
+            // Session identity is available here, so the tenant context is
+            // derived from the verified principal (never from client input).
+            TenantContextMiddleware::class,
             VerifyCsrfToken::class,
             // SecurityCheck used to sit here. It filtered every request input
             // through a regex blacklist and then wrote the result back with
@@ -130,6 +139,7 @@ class Kernel extends HttpKernel
         'admin' => AdminMiddleware::class,
         'business.context' => EnsureBusinessContext::class,
         'tenant.check' => \App\Http\Middleware\TenantAccessCheck::class,
+        'tenant.context' => \App\Http\Middleware\TenantContextMiddleware::class,
         'supabase.context' => SetSupabaseContext::class,
         'supabase.jwt' => VerifySupabaseJwt::class,
         'subscription.limit' => CheckSubscriptionLimits::class,

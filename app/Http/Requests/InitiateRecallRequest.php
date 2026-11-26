@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\TenantRules;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -16,7 +17,7 @@ class InitiateRecallRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_id' => 'nullable|exists:products,id',
+            'product_id' => ['nullable', TenantRules::exists('products')],
             'batch_lot_number' => 'required|string|max:255',
             'reason' => 'required|string|max:255',
             'description' => 'nullable|string',

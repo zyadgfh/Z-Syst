@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\TenantRules;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BarcodeRequest;
 use App\Http\Resources\BarcodeResource;
@@ -277,7 +278,7 @@ class BarcodeController extends Controller
     public function generateMultiple(Request $request): JsonResponse
     {
         $request->validate([
-            'product_id' => 'required|exists:products,id',
+            'product_id' => ['required', TenantRules::exists('products')],
             'quantity' => 'required|integer|min:1|max:100',
             'type' => 'nullable|in:CODE128,EAN13,UPC,QR',
             'size' => 'nullable|in:small,standard,large',
@@ -371,7 +372,7 @@ class BarcodeController extends Controller
     public function printForProduct(Request $request): JsonResponse
     {
         $request->validate([
-            'product_id' => 'required|exists:products,id',
+            'product_id' => ['required', TenantRules::exists('products')],
             'quantity' => 'required|integer|min:1|max:100',
         ]);
 

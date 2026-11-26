@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\TenantRules;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -21,14 +22,17 @@ class GRNRequest extends FormRequest
      */
     public function rules(): array
     {
+        // References are pinned to the caller's tenant: `exists:` bypasses
+        // Eloquent global scopes, so a plain rule would accept another
+        // tenant's product/supplier/PO (see TenantRules).
         return [
-            'purchase_order_id' => 'nullable|exists:purchase_orders,id',
-            'supplier_id' => 'nullable|exists:parties,id',
+            'purchase_order_id' => ['nullable', TenantRules::exists('purchase_orders')],
+            'supplier_id' => ['nullable', TenantRules::exists('parties')],
             'location' => 'nullable|string|max:255',
             'received_date' => 'nullable|date',
             'notes' => 'nullable|string|max:1000',
             'items' => 'nullable|array',
-            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.product_id' => ['required', TenantRules::exists('products')],
             'items.*.ordered_quantity' => 'required|integer|min:0',
             'items.*.received_quantity' => 'required|integer|min:0',
             'items.*.accepted_quantity' => 'nullable|integer|min:0',

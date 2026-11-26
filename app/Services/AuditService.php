@@ -113,9 +113,13 @@ class AuditService
     /**
      * Get audit logs for business
      */
-    public function getLogsForBusiness(int $businessId, array $filters = []): \Illuminate\Database\Eloquent\Collection
+    public function getLogsForBusiness(?int $businessId, array $filters = []): \Illuminate\Database\Eloquent\Collection
     {
-        $query = AuditLog::forBusiness($businessId)
+        // null businessId = superadmin platform view (TenantScoped already
+        // skips superadmins; tenant users always pass their own id via
+        // TenantResolver::trustedBusinessId).
+        $query = AuditLog::query()
+            ->when($businessId !== null, fn ($q) => $q->forBusiness($businessId))
             ->with(['user:id,name,email'])
             ->orderBy('created_at', 'desc');
 
@@ -164,9 +168,10 @@ class AuditService
     /**
      * Get audit statistics
      */
-    public function getStatistics(int $businessId, array $filters = []): array
+    public function getStatistics(?int $businessId, array $filters = []): array
     {
-        $query = AuditLog::forBusiness($businessId);
+        $query = AuditLog::query()
+            ->when($businessId !== null, fn ($q) => $q->forBusiness($businessId));
 
         if (isset($filters['date_from']) && isset($filters['date_to'])) {
             $query->dateRange($filters['date_from'], $filters['date_to']);

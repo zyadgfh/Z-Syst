@@ -350,8 +350,10 @@ class GRNTest extends TestCase
     public function test_api_can_create_grn(): void
     {
         $user = User::factory()->create();
-        $supplier = Party::factory()->create(['type' => 'supplier']);
-        $product = Product::factory()->create();
+        // Fixtures must share the caller's tenant: validation now pins
+        // product/supplier references to the authenticated business.
+        $supplier = Party::factory()->create(['type' => 'supplier', 'business_id' => $user->business_id]);
+        $product = Product::factory()->create(['business_id' => $user->business_id]);
 
         $data = [
             'supplier_id' => $supplier->id,
@@ -415,7 +417,7 @@ class GRNTest extends TestCase
     {
         $user = User::factory()->create();
         $grn = GoodsReceivedNote::factory()->create(['business_id' => $user->business_id]);
-        $newSupplier = Party::factory()->create(['type' => 'supplier']);
+        $newSupplier = Party::factory()->create(['type' => 'supplier', 'business_id' => $user->business_id]);
 
         $data = [
             'supplier_id' => $newSupplier->id,

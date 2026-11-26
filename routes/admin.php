@@ -3,7 +3,7 @@
 use App\Http\Controllers\Admin as ADMIN;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'admin']], function () {
+Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'admin', 'tenant.check']], function () {
     Route::get('/', [ADMIN\DashboardController::class, 'index'])->name('dashboard.index');
     Route::get('/get-dashboard', [ADMIN\DashboardController::class, 'getDashboardData'])->name('dashboard.data');
     Route::get('/yearly-subscriptions', [ADMIN\DashboardController::class, 'yearlySubscriptions'])->name('dashboard.subscriptions');
@@ -43,12 +43,15 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
 
     // Business
     Route::resource('business', ADMIN\ZSystBusinessController::class);
-    Route::put('business/upgrade-plan/{id}', [ADMIN\ZSystBusinessController::class, 'upgradePlan'])->name('business.upgrade.plan');
-    Route::post('business/filter', [ADMIN\ZSystBusinessController::class, 'zsystFilter'])->name('business.filter');
+    // business.* is platform-level (superadmin-only in config/supabase.php):
+    // upgradePlan writes a payment_status=paid subscription (self-approval
+    // otherwise), and filter/exports dump the unscoped businesses table.
+    Route::put('business/upgrade-plan/{id}', [ADMIN\ZSystBusinessController::class, 'upgradePlan'])->name('business.upgrade.plan')->middleware('permission:business-update');
+    Route::post('business/filter', [ADMIN\ZSystBusinessController::class, 'zsystFilter'])->name('business.filter')->middleware('permission:business-read');
     Route::post('business/status/{id}', [ADMIN\ZSystBusinessController::class, 'status'])->name('business.status');
     Route::post('business/delete-all', [ADMIN\ZSystBusinessController::class, 'deleteAll'])->name('business.delete-all');
-    Route::get('business-excel', [ADMIN\ZSystBusinessController::class, 'exportExcel'])->name('business.excel');
-    Route::get('business-csv', [ADMIN\ZSystBusinessController::class, 'exportCsv'])->name('business.csv');
+    Route::get('business-excel', [ADMIN\ZSystBusinessController::class, 'exportExcel'])->name('business.excel')->middleware('permission:business-read');
+    Route::get('business-csv', [ADMIN\ZSystBusinessController::class, 'exportCsv'])->name('business.csv')->middleware('permission:business-read');
 
     // Business Categories
     Route::resource('business-categories', ADMIN\ZSystBusinessCategoryController::class)->except('show');
@@ -267,16 +270,20 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('supplier-payments/{supplierPayment}', [ADMIN\SupplierPaymentController::class, 'show'])->name('supplier-payments.show');
     Route::post('supplier-payments/{supplierPayment}/approve', [ADMIN\SupplierPaymentController::class, 'approve'])->name('supplier-payments.approve');
 
-    // Subscription Management
-    Route::resource('subscriptions', ADMIN\SubscriptionController::class)->except('show');
+    // Subscription Management — platform-level: createSubscription() writes
+    // status=active/trialing directly (no payment), so allowing a tenant
+    // admin to reach store/upgrade/… is a self-grant of paid limits. Reads
+    // were already superadmin-only via permission:subscriptions-read (only
+    // superadmin's '*' satisfies it in config/supabase.php).
+    Route::resource('subscriptions', ADMIN\SubscriptionController::class)->except('show')->middleware('role:superadmin');
     Route::get('subscriptions/expiring', [ADMIN\SubscriptionController::class, 'expiring'])->name('subscriptions.expiring');
     Route::get('subscriptions/trial-ending', [ADMIN\SubscriptionController::class, 'trialEnding'])->name('subscriptions.trial-ending');
     Route::get('subscriptions/{subscription}', [ADMIN\SubscriptionController::class, 'show'])->name('subscriptions.show');
-    Route::post('subscriptions/{subscription}/upgrade', [ADMIN\SubscriptionController::class, 'upgrade'])->name('subscriptions.upgrade');
-    Route::post('subscriptions/{subscription}/downgrade', [ADMIN\SubscriptionController::class, 'downgrade'])->name('subscriptions.downgrade');
-    Route::post('subscriptions/{subscription}/cancel', [ADMIN\SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
-    Route::post('subscriptions/{subscription}/renew', [ADMIN\SubscriptionController::class, 'renew'])->name('subscriptions.renew');
-    Route::post('subscriptions/{subscription}/generate-invoice', [ADMIN\SubscriptionController::class, 'generateInvoice'])->name('subscriptions.generate-invoice');
+    Route::post('subscriptions/{subscription}/upgrade', [ADMIN\SubscriptionController::class, 'upgrade'])->name('subscriptions.upgrade')->middleware('role:superadmin');
+    Route::post('subscriptions/{subscription}/downgrade', [ADMIN\SubscriptionController::class, 'downgrade'])->name('subscriptions.downgrade')->middleware('role:superadmin');
+    Route::post('subscriptions/{subscription}/cancel', [ADMIN\SubscriptionController::class, 'cancel'])->name('subscriptions.cancel')->middleware('role:superadmin');
+    Route::post('subscriptions/{subscription}/renew', [ADMIN\SubscriptionController::class, 'renew'])->name('subscriptions.renew')->middleware('role:superadmin');
+    Route::post('subscriptions/{subscription}/generate-invoice', [ADMIN\SubscriptionController::class, 'generateInvoice'])->name('subscriptions.generate-invoice')->middleware('role:superadmin');
 
     // Dashboard Reports
     Route::get('dashboard-reports', [ADMIN\DashboardReportController::class, 'index'])->name('dashboard-reports.index');
@@ -437,4 +444,4 @@ Route::post('business/upgrade-plan', [ADMIN\SubscriptionController::class, 'upgr
 // Bare-name alias used by the dashboard cache-invalidation flow.
 Route::get('dashboard-reports/overall', [ADMIN\DashboardReportController::class, 'overall'])
     ->name('dashboard-reports.overall')
-    ->middleware(['auth', 'permission:reports-read']);
+    ->middleware(['auth', 'tenant.check', 'permission:reports-read']);

@@ -43,7 +43,7 @@ class DashboardReportService
                 'purchases' => $this->getPurchaseStatistics($businessId, $dateFrom, $dateTo),
                 'inventory' => $this->getInventoryStatistics($businessId),
                 'customers' => $this->getCustomerStatistics($businessId),
-                'subscriptions' => $this->getSubscriptionStatistics($dateFrom, $dateTo),
+                'subscriptions' => $this->getSubscriptionStatistics($businessId, $dateFrom, $dateTo),
             ];
         });
     }
@@ -157,15 +157,24 @@ class DashboardReportService
     /**
      * Get subscription statistics
      */
-    protected function getSubscriptionStatistics(Carbon $dateFrom, Carbon $dateTo): array
+    protected function getSubscriptionStatistics(?int $businessId, Carbon $dateFrom, Carbon $dateTo): array
     {
-        $subscriptions = PlanSubscribe::whereBetween('created_at', [$dateFrom, $dateTo])->get();
+        $subscriptions = PlanSubscribe::whereBetween('created_at', [$dateFrom, $dateTo])
+            ->when($businessId, fn ($q) => $q->where('business_id', $businessId))
+            ->get();
 
         return [
             'total_subscriptions' => $subscriptions->count(),
             'total_revenue' => $subscriptions->sum('price'),
-            'active_subscriptions' => Business::where('will_expire', '>', now())->count(),
-            'expired_subscriptions' => Business::where('will_expire', '<', now())->count(),
+            // Business is NOT TenantScoped: unfiltered counts here leaked every
+            // tenant's subscription status into each tenant's dashboard.
+            // $businessId is null only for the superadmin's platform view.
+            'active_subscriptions' => Business::where('will_expire', '>', now())
+                ->when($businessId, fn ($q) => $q->where('id', $businessId))
+                ->count(),
+            'expired_subscriptions' => Business::where('will_expire', '<', now())
+                ->when($businessId, fn ($q) => $q->where('id', $businessId))
+                ->count(),
         ];
     }
 

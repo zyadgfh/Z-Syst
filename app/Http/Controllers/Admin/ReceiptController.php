@@ -220,7 +220,7 @@ class ReceiptController extends Controller
             'type' => $request->type,
         ];
 
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         $statistics = $this->receiptService->getStatistics($businessId, $filters);
 
         return response()->json($statistics);

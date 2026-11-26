@@ -209,7 +209,7 @@ class WarehouseController extends Controller
      */
     public function statistics(Request $request)
     {
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         $warehouseId = $request->warehouse_id ?? null;
 
         $statistics = $this->warehouseService->getWarehouseStatistics($businessId, $warehouseId);

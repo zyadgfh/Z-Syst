@@ -43,14 +43,25 @@ class SubscriptionController extends Controller
     public function create(Request $request)
     {
         $plans = SubscriptionPlan::active()->get();
-        $businesses = \App\Models\Business::all();
+        // Business is not TenantScoped: never dump the full tenant list into a
+        // tenant admin's form — only superadmin manages other businesses.
+        $businessQuery = \App\Models\Business::query();
+        if (($request->user()->role ?? null) !== 'superadmin') {
+            $businessQuery->where('id', (int) $request->user()->business_id);
+        }
+        $businesses = $businessQuery->get();
         return view('admin.subscriptions.create', compact('plans', 'businesses'));
     }
 
     public function store(SubscriptionRequest $request): JsonResponse
     {
+        // Identity-first: foreign business_id never reaches the service
+        // (tenant.check 403s it earlier; this guards the int contract too).
+        $businessId = $this->trustedBusinessId($request);
+        abort_unless($businessId !== null, 403, 'Business context is required.');
+
         $subscription = $this->subscriptionService->createSubscription(
-            $request->business_id,
+            $businessId,
             $request->plan_id,
             $request->validated()
         );

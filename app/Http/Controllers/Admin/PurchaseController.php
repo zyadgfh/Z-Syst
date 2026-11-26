@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\TenantRules;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Purchase;
@@ -31,7 +32,7 @@ class PurchaseController extends Controller
             'due_amount' => 'nullable|numeric',
             'payment_type' => 'nullable|string|max:60',
             'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|integer|exists:products,id',
+            'items.*.product_id' => ['required', 'integer', TenantRules::exists('products')],
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.price' => 'required|numeric',
         ]);
