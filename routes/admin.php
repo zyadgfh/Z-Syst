@@ -41,8 +41,9 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'a
     Route::get('plans/{plan}/usage', [ADMIN\ZSystPlanController::class, 'planUsage'])->name('plans.usage');
     Route::post('plans/calculate-proration', [ADMIN\ZSystPlanController::class, 'calculateProration'])->name('plans.calculate-proration');
 
-    // Business
-    Route::resource('business', ADMIN\ZSystBusinessController::class);
+    // Business (no `show` action exists on the controller — a registered
+    // show route only produced a 500; F-05)
+    Route::resource('business', ADMIN\ZSystBusinessController::class)->except('show');
     // business.* is platform-level (superadmin-only in config/supabase.php):
     // upgradePlan writes a payment_status=paid subscription (self-approval
     // otherwise), and filter/exports dump the unscoped businesses table.

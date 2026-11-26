@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\TenantRules;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SupplierInvoiceRequest extends FormRequest
@@ -33,7 +34,10 @@ class SupplierInvoiceRequest extends FormRequest
             'internal_notes' => 'nullable|string|max:2000',
             'file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
             'items' => 'required|array|min:1',
-            'items.*.product_id' => 'nullable|exists:products,id',
+            // F-04: a plain exists:products,id accepts any tenant's row —
+            // Eloquent's TenantScoped global scope does not apply to the
+            // exists rule (same class as the PR #34 FormRequest fixes).
+            'items.*.product_id' => ['nullable', TenantRules::exists('products')],
             'items.*.purchase_detail_id' => 'nullable|exists:purchase_details,id',
             'items.*.description' => 'required|string|max:500',
             'items.*.quantity' => 'required|integer|min:1',

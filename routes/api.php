@@ -150,11 +150,13 @@ Route::prefix('v1')->group(function () {
             // Subscription API endpoints
             Route::apiResource('subscriptions', Api\SubscriptionController::class)->except('show');
             Route::get('subscriptions/{subscription}', [Api\SubscriptionController::class, 'show'])->name('subscriptions.show');
-            Route::post('subscriptions/{subscription}/upgrade', [Api\SubscriptionController::class, 'upgrade'])->name('subscriptions.upgrade');
-            Route::post('subscriptions/{subscription}/downgrade', [Api\SubscriptionController::class, 'downgrade'])->name('subscriptions.downgrade');
-            Route::post('subscriptions/{subscription}/cancel', [Api\SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
-            Route::post('subscriptions/{subscription}/renew', [Api\SubscriptionController::class, 'renew'])->name('subscriptions.renew');
-            Route::post('subscriptions/{subscription}/generate-invoice', [Api\SubscriptionController::class, 'generateInvoice'])->name('subscriptions.generate-invoice');
+            // Owner-tier roles only: any authenticated staff member could
+            // otherwise cancel/renew/upgrade the tenant's subscription (F-03).
+            Route::post('subscriptions/{subscription}/upgrade', [Api\SubscriptionController::class, 'upgrade'])->name('subscriptions.upgrade')->middleware('role:shop-owner|admin|superadmin');
+            Route::post('subscriptions/{subscription}/downgrade', [Api\SubscriptionController::class, 'downgrade'])->name('subscriptions.downgrade')->middleware('role:shop-owner|admin|superadmin');
+            Route::post('subscriptions/{subscription}/cancel', [Api\SubscriptionController::class, 'cancel'])->name('subscriptions.cancel')->middleware('role:shop-owner|admin|superadmin');
+            Route::post('subscriptions/{subscription}/renew', [Api\SubscriptionController::class, 'renew'])->name('subscriptions.renew')->middleware('role:shop-owner|admin|superadmin');
+            Route::post('subscriptions/{subscription}/generate-invoice', [Api\SubscriptionController::class, 'generateInvoice'])->name('subscriptions.generate-invoice')->middleware('role:shop-owner|admin|superadmin');
             Route::get('subscriptions/usage', [Api\SubscriptionController::class, 'usage'])->name('subscriptions.usage');
             Route::get('subscriptions/check-limits', [Api\SubscriptionController::class, 'checkLimits'])->name('subscriptions.check-limits');
         });

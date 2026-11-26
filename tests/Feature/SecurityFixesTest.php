@@ -7,6 +7,7 @@ use App\Models\Plan;
 use App\Models\Product;
 use App\Models\Stock;
 use App\Models\Subscription;
+use App\Models\SubscriptionPlan;
 use App\Models\User;
 use App\Support\SqlDate;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -66,7 +67,13 @@ class SecurityFixesTest extends TestCase
 
     private function subscriptionForBusiness(): Subscription
     {
-        $plan = Plan::factory()->create();
+        // subscriptions.plan_id is a foreign key to subscription_plans
+        // (SubscriptionPlan), NOT to the landing/payments `plans` table.
+        $plan = SubscriptionPlan::create([
+            'name' => 'Test Plan '.uniqid(),
+            'slug' => 'test-plan-'.uniqid(),
+            'price' => 49.99,
+        ]);
 
         return Subscription::create([
             'business_id' => $this->business->id,
@@ -188,7 +195,7 @@ class SecurityFixesTest extends TestCase
         $admin = $this->userWithRole('admin');
 
         $this->actingAs($admin)
-            ->postJson('/admin/business-categories/filter', [])
+            ->postJson('/admin/business-category/filter', [])
             ->assertForbidden();
     }
 
