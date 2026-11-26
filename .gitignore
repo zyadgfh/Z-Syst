@@ -63,3 +63,6 @@ __pycache__/
 
 # agent scratch space (never committed)
 /.scratch/
+
+# code-vulnscan local scan state (SQLite, regenerated per run)
+.github/skills/code-vulnscan/workspace/
