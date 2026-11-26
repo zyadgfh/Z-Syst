@@ -589,12 +589,25 @@ What `handleCallback()` does now:
    `simulation` in production, and a simulation that could not state its own
    outcome would be useless.
 
-**Consequence for anyone integrating fawry or instapay for real:** as of this
-review neither has an API client, credentials, or a `config/services.php` entry,
-so both are `disabled` in production and this path is latent rather than live.
-Turning one on is not enough — `mode()` will report `live` as soon as a platform
-`api_key` exists, and every callback will then sit in `pending` until the
-integration adds a **server-to-server status query** (or the gateway offers a
+**Consequence for anyone integrating fawry or instapay for real:** fawry is
+wired now — `FawryService` (`config/integrations.php`, `FAWRY_*` envs) creates
+the order at `initiate()` (charge), the `outcome_not_bound_to_signature` branch
+corroborates through a **server-to-server status query** (`payments/status/v2`,
+signed with the secure key we hold) before settling, and Fawry's native Server
+Notification V2 is verified separately: its `messageSignature` covers
+`orderStatus`, so a valid one settles from the signed outcome and a tampered one
+fails the transaction. The generic `sha256(merchantCode + reference + amount +
+secret)` scheme still does not cover the outcome —
+`signatureCoversOutcome('fawry')` stays false on purpose; the corroboration
+comes from the query and the native notification, not from that hash. Without
+credentials (`FAWRY_ENABLED` + merchant code + secure key) the query cannot run
+and callbacks sit in `pending` as before.
+
+**instapay** still has no API client, credentials, or a `config/services.php`
+entry, so it is `disabled` in production and this path is latent rather than
+live. Turning it on is not enough — `mode()` will report `live` as soon as a
+platform `api_key` exists, and every callback will then sit in `pending` until
+the integration adds a **server-to-server status query** (or the gateway offers a
 signature that covers the outcome). That is the intended behaviour: it makes the
 missing corroboration loud at integration time instead of quiet at attack time.
 Wire the query into the `outcome_not_bound_to_signature` branch.
@@ -603,8 +616,11 @@ Guards: `OperationsTest::test_replaying_a_declined_fawry_callback_with_success_t
 (the replay), `::test_paymob_live_callback_is_paid_because_its_hmac_covers_the_outcome`
 (the counter-example, so fail-closed is per gateway and not a blanket refusal),
 `::test_gateway_rejects_unsigned_callback_in_live_mode` (forged signature, and
-the reference rules), and
-`SecurityHardeningTest::test_only_outcome_bound_gateways_are_trusted_with_the_result`
+the reference rules),
+`SecurityHardeningTest::test_only_outcome_bound_gateways_are_trusted_with_the_result`,
+and `FawryIntegrationTest` (a signed native notification settles; a tampered
+orderStatus fails it; the status query corroborates an outcome-not-bound
+callback; an inconclusive answer or a missing reference leaves it pending)
 
 #### The deployment runs on manual payment
 

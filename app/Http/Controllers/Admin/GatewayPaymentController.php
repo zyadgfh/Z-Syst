@@ -64,7 +64,27 @@ class GatewayPaymentController extends Controller
             return response()->json(['success' => false, 'message' => __('لا يوجد مبلغ مستحق')], 422);
         }
 
-        $tx = $this->gateways->initiate($businessId, $data['gateway'], 'subscription', $subscription?->id, $amount);
+        // Customer details for Fawry's charge body (phone falls back to a
+        // placeholder inside FawryService when the account has none).
+        $user = $request->user();
+        $tx = $this->gateways->initiate($businessId, $data['gateway'], 'subscription', $subscription?->id, $amount, [
+            'name' => $user->name ?? '',
+            'email' => $user->email ?? '',
+            'phone' => $user->phone ?? '',
+            'profile_id' => (string) $user->id,
+        ]);
+
+        // initiate() can record a failed transaction when the upstream charge
+        // itself fails (bad credentials, Fawry unreachable). It is failed on
+        // purpose so it can never settle later — report the reason instead of
+        // a redirect that would go nowhere.
+        if ($tx->status === 'failed') {
+            return response()->json([
+                'success' => false,
+                'message' => $tx->payload['error'] ?? __('تعذر إنشاء طلب الدفع'),
+                'transaction_id' => $tx->id,
+            ], 502);
+        }
 
         return response()->json([
             'success' => true,
@@ -72,6 +92,9 @@ class GatewayPaymentController extends Controller
                 'transaction_id' => $tx->id,
                 'mode' => $tx->payload['mode'] ?? 'simulation',
                 'redirect_url' => $tx->payload['redirect_url'] ?? null,
+                // Fawry: the merchantRefNum the customer pays against at the
+                // Fawry branch; also what the notification/status query binds to.
+                'reference' => $tx->reference,
                 'amount' => $tx->amount,
             ],
         ]);

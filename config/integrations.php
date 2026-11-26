@@ -29,6 +29,30 @@ return [
         ],
     ],
 
+    'fawry' => [
+        'enabled' => env('FAWRY_ENABLED', false),
+        // Staging by default: pointing a half-configured install at the
+        // production host would create real orders with bad signatures.
+        'sandbox' => env('FAWRY_SANDBOX', true),
+        'base_url' => env('FAWRY_BASE_URL')
+            ?: (env('FAWRY_SANDBOX', true)
+                ? 'https://atfawry.fawrystaging.com'
+                : 'https://www.atfawry.com'),
+        'merchant_code' => env('FAWRY_MERCHANT_CODE'),
+        'secure_key' => env('FAWRY_SECURE_KEY'),
+        // Aliases read by PaymentGatewayService::mode() / verifySignature()
+        // (they probe services.{gateway}.* then integrations.{gateway}.*);
+        // Fawry's merchant code / secure key ARE its platform credentials.
+        'api_key' => env('FAWRY_MERCHANT_CODE'),
+        'hmac_secret' => env('FAWRY_SECURE_KEY'),
+        'customer_profile_id' => env('FAWRY_CUSTOMER_PROFILE_ID', '0'),
+        // Request-side token per Fawry's charge docs (their response echoes
+        // it uppercased as PAYATFAWRY).
+        'payment_method' => env('FAWRY_PAYMENT_METHOD', 'PayAtFawry'),
+        'currency' => env('FAWRY_CURRENCY', 'EGP'),
+        'language' => env('FAWRY_LANGUAGE', 'en-gb'),
+    ],
+
     'whatsapp' => [
         'enabled' => env('WHATSAPP_ENABLED', false),
         'version' => env('WHATSAPP_VERSION', 'v21.0'),
