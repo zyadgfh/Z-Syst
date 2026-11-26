@@ -302,7 +302,9 @@ class SupplierInvoiceTest extends TestCase
     public function test_api_can_create_invoice()
     {
         $user = User::factory()->create();
-        $product = Product::factory()->create();
+        // F-04: product_id is tenant-pinned (TenantRules::exists) — the
+        // product must belong to the same business as the acting user.
+        $product = Product::factory()->create(['business_id' => $user->business_id]);
 
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/v1/supplier-invoices', [
