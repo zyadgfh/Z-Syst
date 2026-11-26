@@ -10,8 +10,9 @@ Route::get('/dashboard', fn () => redirect()->route('admin.dashboard.index'))
     ->name('dashboard.redirect');
 
 // Manual Payment Routes (kept for supplier payments)
-Route::get('/payments-gateways/{plan_id}/{business_id}', [Web\PaymentController::class, 'index'])->name('payments-gateways.index');
-Route::post('/payments/{plan_id}/{gateway_id}', [Web\PaymentController::class, 'payment'])->name('payments-gateways.payment');
+// Unauthenticated + unthrottled → free gateway-transaction spam (F-06).
+Route::get('/payments-gateways/{plan_id}/{business_id}', [Web\PaymentController::class, 'index'])->middleware('throttle:20,1')->name('payments-gateways.index');
+Route::post('/payments/{plan_id}/{gateway_id}', [Web\PaymentController::class, 'payment'])->middleware('throttle:20,1')->name('payments-gateways.payment');
 Route::get('/order-status', [Web\PaymentController::class, 'orderStatus'])->name('order.status');
 
 // Egyptian Payment Gateway Routes

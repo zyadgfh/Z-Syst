@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Exceptions\BusinessRuleException;
 use App\Exceptions\Errors\ErrorCode;
+use App\Helpers\TenantRules;
 use App\Helpers\TransactionHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Business;
@@ -90,19 +91,21 @@ class ZSystSaleController extends Controller
     {
         $request->validate([
             'products' => 'required|array',
-            'sale_date' => 'required|string',
+            'sale_date' => 'required|string|date',
             'client_uuid' => 'nullable|uuid',
-            'party_id' => 'nullable|exists:parties,id',
-            'tax_id' => 'nullable|exists:taxes,id',
-            'discount_amount' => 'nullable|numeric',
-            'tax_amount' => 'nullable|numeric',
+            'party_id' => ['nullable', TenantRules::exists('parties')],
+            'tax_id' => ['nullable', TenantRules::exists('taxes')],
+            'discount_amount' => 'nullable|numeric|min:0',
+            'tax_amount' => 'nullable|numeric|min:0',
+            // Accepted for backward compatibility but never trusted: the
+            // header total is recomputed server-side below (F-01).
             'total_amount' => 'nullable|numeric',
-            'due_amount' => 'nullable|numeric',
-            'paid_amount' => 'nullable|numeric',
+            'due_amount' => 'nullable|numeric|min:0',
+            'paid_amount' => 'nullable|numeric|min:0',
             'is_paid' => 'nullable|boolean',
             'payment_type' => 'nullable|string',
-            'products.*.product_id' => 'required|exists:products,id',
-            'products.*.price' => 'required|numeric',
+            'products.*.product_id' => ['required', TenantRules::exists('products')],
+            'products.*.price' => 'required|numeric|min:0',
             'products.*.loss_profit' => 'required|numeric',
             'products.*.batch_no' => 'nullable|string',
             'products.*.quantities' => 'required|integer',
@@ -239,28 +242,43 @@ class ZSystSaleController extends Controller
                 'remaining_shop_balance' => $business->remaining_shop_balance + $request->paid_amount,
             ]);
 
-            $loss_profit = collect($request->products)->pluck('loss_profit')->toArray();
+            // F-01: aggregates are server-derived. Line prices were pinned to
+            // the catalog above, so the header math cannot be influenced by
+            // client-sent total_amount / discount / tax / loss_profit. These
+            // keys are absent from only(), so the `+` operator fills them from
+            // the right-hand side — the computed values always win.
+            $subtotal = 0.0;
+            $totalProfit = 0.0;
+            $costs = Product::whereIn('id', $productIds)->pluck('purchase_with_tax', 'id');
+            foreach ($request->products as $line) {
+                $qty = (int) $line['quantities'];
+                $linePrice = (float) $line['price'];
+                $lineCost = (float) ($costs[$line['product_id']] ?? 0);
+                $subtotal += $linePrice * $qty;
+                $totalProfit += ($linePrice - $lineCost) * $qty;
+            }
+            $discount = min(max(0.0, (float) ($request->discount_amount ?? 0)), $subtotal);
+            $taxAmount = max(0.0, (float) ($request->tax_amount ?? 0));
+            $totalAmount = round($subtotal - $discount + $taxAmount, 2);
 
             $sale = Sale::create($request->only([
-        'party_id',
-        'user_id',
-        'tax_id',
-        'discount_amount',
-        'due_amount',
-        'is_paid',
-        'tax_amount',
-        'paid_amount',
-        'total_amount',
-        'loss_profit',
-        'payment_type',
-        'invoice_number',
-        'sale_date',
-        'sale_data',
-        'meta',
-        'client_uuid',
-    ]) + [
+                'party_id',
+                'user_id',
+                'tax_id',
+                'due_amount',
+                'is_paid',
+                'paid_amount',
+                'payment_type',
+                'invoice_number',
+                'sale_date',
+                'sale_data',
+                'client_uuid',
+            ]) + [
                 'business_id' => $business_id,
-                'loss_profit' => array_sum($loss_profit) - ($request->discount_amount ?? 0),
+                'discount_amount' => $discount,
+                'tax_amount' => $taxAmount,
+                'total_amount' => $totalAmount,
+                'loss_profit' => round($totalProfit - $discount, 2),
                 'meta' => [
                     'notes' => $request->notes,
                     'customer_phone' => $request->customer_phone,
@@ -303,12 +321,14 @@ class ZSystSaleController extends Controller
                             'price' => $productData['price'],
                             'batch_no' => $batch->batch_no,
                             'product_id' => $productId,
-                            'loss_profit' => $productData['loss_profit'] / count($request->products) ?? 0,
+                            // F-01: cost/profit come from the catalog, never
+                            // from the client (price already pinned above).
+                            'loss_profit' => round(((float) $productData['price'] - (float) ($costs[$productId] ?? 0)) * $deductQty, 2),
                             'quantities' => $deductQty,
                             'dose' => $productData['dose'] ?? null,
                             'dose_code' => $productData['dose_code'] ?? null,
                             'expire_date' => $batch->expire_date,
-                            'purchase_price' => $productData['purchase_price'] ?? 0,
+                            'purchase_price' => (float) ($costs[$productId] ?? 0),
                         ];
 
                         $batch->decrement('product_stock', $deductQty);
@@ -336,12 +356,14 @@ class ZSystSaleController extends Controller
                         'price' => $productData['price'],
                         'batch_no' => $productData['batch_no'],
                         'product_id' => $productId,
-                        'loss_profit' => $productData['loss_profit'],
+                        // F-01: cost/profit come from the catalog, never from
+                        // the client (price already pinned to list price).
+                        'loss_profit' => round(((float) $productData['price'] - (float) ($costs[$productId] ?? 0)) * $quantity, 2),
                         'quantities' => $quantity,
                         'dose' => $productData['dose'] ?? null,
                         'dose_code' => $productData['dose_code'] ?? null,
                         'expire_date' => $productData['expire_date'] ?? null,
-                        'purchase_price' => $productData['purchase_price'] ?? 0,
+                        'purchase_price' => (float) ($costs[$productId] ?? 0),
                     ];
 
                     $stock = $this->resolveStockForProduct($businessStocks, $productId, $productData['batch_no'] ?? null);
@@ -420,24 +442,26 @@ class ZSystSaleController extends Controller
 
         $request->validate([
             'products' => 'required|array',
-            'sale_date' => 'required|string',
+            'sale_date' => 'required|string|date',
             'client_uuid' => 'nullable|uuid',
-            'party_id' => 'nullable|exists:parties,id',
-            'tax_id' => 'nullable|exists:taxes,id',
-            'discount_amount' => 'nullable|numeric',
-            'tax_amount' => 'nullable|numeric',
+            'party_id' => ['nullable', TenantRules::exists('parties')],
+            'tax_id' => ['nullable', TenantRules::exists('taxes')],
+            'discount_amount' => 'nullable|numeric|min:0',
+            'tax_amount' => 'nullable|numeric|min:0',
+            // Accepted for backward compatibility but never trusted: the
+            // header total is recomputed server-side below (F-01).
             'total_amount' => 'nullable|numeric',
-            'due_amount' => 'nullable|numeric',
-            'paid_amount' => 'nullable|numeric',
+            'due_amount' => 'nullable|numeric|min:0',
+            'paid_amount' => 'nullable|numeric|min:0',
             'is_paid' => 'nullable|boolean',
             'payment_type' => 'nullable|string',
-            'products.*.price' => 'required|numeric',
+            'products.*.price' => 'required|numeric|min:0',
             'products.*.loss_profit' => 'required|numeric',
             'products.*.batch_no' => 'nullable|string',
             'products.*.quantities' => 'required|integer',
             'products.*.dose' => 'nullable|string|max:160',
             'products.*.dose_code' => 'nullable|string|max:24',
-            'products.*.product_id' => 'required|exists:products,id',
+            'products.*.product_id' => ['required', TenantRules::exists('products')],
         ]);
 
         TransactionHelper::run(function () use ($request, $sale) {
@@ -445,6 +469,24 @@ class ZSystSaleController extends Controller
 
             $prevDetails = SaleDetails::where('sale_id', $sale->id)->get();
             $productIds = collect($request->products)->pluck('product_id')->filter()->unique()->values()->all();
+            // H-01/F-01: update() pins line prices to the catalog exactly like
+            // store() — otherwise an edit could rewrite a sale's prices and
+            // the server-derived totals below would still be attacker-chosen.
+            $canOverridePrice = auth()->user()?->can('sale.price-override');
+            $catalogPrices = Product::whereIn('id', $productIds)->pluck('sales_price', 'id');
+            foreach ($request->products as $line) {
+                $listPrice = (float) ($catalogPrices[$line['product_id']] ?? 0);
+                if (! $canOverridePrice && $listPrice > 0) {
+                    $delta = abs((float) $line['price'] - $listPrice);
+                    if ($delta > max(0.02, $listPrice * 0.02)) {
+                        throw new BusinessRuleException(
+                            ErrorCode::BUSINESS_INSUFFICIENT_STOCK,
+                            __('Price mismatch for product :id — sell at the listed price.', ['id' => $line['product_id']])
+                        );
+                    }
+                }
+            }
+
             $allProductIds = collect([...$productIds, $prevDetails->pluck('product_id')->all()])->filter()->unique()->values()->all();
             $businessStocks = $this->loadBusinessStocks($business_id, $allProductIds);
             $products = Product::select('id', 'product_name')->whereIn('id', $productIds)->get();
@@ -495,17 +537,21 @@ class ZSystSaleController extends Controller
 
             // Save new sale details and adjust stock
             $saleDetails = [];
+            $costs = Product::whereIn('id', $productIds)->pluck('purchase_with_tax', 'id');
             foreach ($request->products as $key => $productData) {
+                $lineCost = (float) ($costs[$productData['product_id']] ?? 0);
+                $lineQty = (int) ($productData['quantities'] ?? 0);
                 $saleDetails[$key] = [
                     'business_id' => $sale->business_id,
                     'sale_id' => $sale->id,
                     'price' => $productData['price'],
                     'batch_no' => $productData['batch_no'],
                     'product_id' => $productData['product_id'],
-                    'loss_profit' => $productData['loss_profit'],
+                    // F-01: cost/profit derived server-side (price pinned above).
+                    'loss_profit' => round(((float) $productData['price'] - $lineCost) * $lineQty, 2),
                     'quantities' => $productData['quantities'] ?? 0,
                     'expire_date' => $productData['expire_date'] ?? null,
-                    'purchase_price' => $productData['purchase_price'] ?? 0,
+                    'purchase_price' => $lineCost,
                 ];
 
                 $stock = $this->resolveStockForProduct($businessStocks, $productData['product_id'], $productData['batch_no'] ?? null);
@@ -537,28 +583,38 @@ class ZSystSaleController extends Controller
                 'shop_opening_balance' => ($business->shop_opening_balance - $sale->paid_amount) + $request->paid_amount,
             ]);
 
-            $loss_profit = collect($request->products)->pluck('loss_profit')->toArray();
+            // F-01 (update path): same server-side derivation as store().
+            $subtotal = 0.0;
+            $totalProfit = 0.0;
+            foreach ($request->products as $line) {
+                $qty = (int) ($line['quantities'] ?? 0);
+                $linePrice = (float) $line['price'];
+                $lineCost = (float) ($costs[$line['product_id']] ?? 0);
+                $subtotal += $linePrice * $qty;
+                $totalProfit += ($linePrice - $lineCost) * $qty;
+            }
+            $discount = min(max(0.0, (float) ($request->discount_amount ?? 0)), $subtotal);
+            $taxAmount = max(0.0, (float) ($request->tax_amount ?? 0));
+            $totalAmount = round($subtotal - $discount + $taxAmount, 2);
 
             $sale->update($request->only([
-        'party_id',
-        'user_id',
-        'tax_id',
-        'discount_amount',
-        'due_amount',
-        'is_paid',
-        'tax_amount',
-        'paid_amount',
-        'total_amount',
-        'loss_profit',
-        'payment_type',
-        'invoice_number',
-        'sale_date',
-        'sale_data',
-        'meta',
-        'client_uuid',
-    ]) + [
+                'party_id',
+                'user_id',
+                'tax_id',
+                'due_amount',
+                'is_paid',
+                'paid_amount',
+                'payment_type',
+                'invoice_number',
+                'sale_date',
+                'sale_data',
+                'client_uuid',
+            ]) + [
                 'business_id' => $business_id,
-                'loss_profit' => array_sum($loss_profit) - ($request->discount_amount ?? 0),
+                'discount_amount' => $discount,
+                'tax_amount' => $taxAmount,
+                'total_amount' => $totalAmount,
+                'loss_profit' => round($totalProfit - $discount, 2),
                 'meta' => [
                     'notes' => $request->notes,
                     'customer_phone' => $request->customer_phone,

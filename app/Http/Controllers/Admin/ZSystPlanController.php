@@ -18,7 +18,7 @@ class ZSystPlanController extends Controller
     {
         $this->subscriptionService = $subscriptionService;
         $this->middleware('permission:plans-create')->only('create', 'store');
-        $this->middleware('permission:plans-read')->only('index', 'statistics', 'popularPlans');
+        $this->middleware('permission:plans-read')->only('index', 'statistics', 'popularPlans', 'planUsage', 'calculateProration');
         $this->middleware('permission:plans-update')->only('edit', 'update', 'status');
         $this->middleware('permission:plans-delete')->only('destroy', 'deleteAll');
     }

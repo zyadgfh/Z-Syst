@@ -12,7 +12,13 @@ class ZSystBusinessCategoryController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:business-categories-read')->only(['index','show']);
+        // Platform taxonomy: only superadmin holds business-categories-*
+        // abilities (config/supabase.php) — mutations were previously gated
+        // by AdminMiddleware alone, letting any tenant owner edit them (F-02).
+        $this->middleware('permission:business-categories-read')->only(['index', 'show', 'zsystFilter', 'exportExcel', 'exportCsv']);
+        $this->middleware('permission:business-categories-create')->only(['create', 'store']);
+        $this->middleware('permission:business-categories-update')->only(['edit', 'update', 'status']);
+        $this->middleware('permission:business-categories-delete')->only(['destroy', 'deleteAll']);
     }
 
     public function index()
