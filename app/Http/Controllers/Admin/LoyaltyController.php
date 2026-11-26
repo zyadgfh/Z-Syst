@@ -195,7 +195,7 @@ class LoyaltyController extends Controller
      */
     public function statistics(Request $request)
     {
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         $programId = $request->program_id ?? null;
 
         $statistics = $this->loyaltyService->getProgramStatistics($businessId, $programId);
@@ -213,7 +213,7 @@ class LoyaltyController extends Controller
             'date_to' => $request->date_to,
         ];
 
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         $statistics = $this->loyaltyService->getCrmStatistics($businessId, $filters);
 
         return response()->json($statistics);
@@ -246,7 +246,7 @@ class LoyaltyController extends Controller
             'party_id' => 'required|exists:parties,id',
         ]);
 
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         $interactions = $this->loyaltyService->getCustomerInteractions(
             $request->party_id,
             $businessId
@@ -264,7 +264,7 @@ class LoyaltyController extends Controller
             'program_id' => 'required|exists:loyalty_programs,id',
         ]);
 
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         $limit = $request->limit ?? 10;
 
         $topCustomers = $this->loyaltyService->getTopLoyalCustomers($businessId, $request->program_id, $limit);

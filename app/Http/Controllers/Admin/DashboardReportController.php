@@ -22,7 +22,7 @@ class DashboardReportController extends Controller
     public function overall(Request $request)
     {
         $filters = [
-            'business_id' => $request->business_id,
+            'business_id' => $this->trustedBusinessId($request),
             'date_from' => $request->date_from,
             'date_to' => $request->date_to,
         ];
@@ -38,7 +38,7 @@ class DashboardReportController extends Controller
     public function salesByDate(Request $request)
     {
         $filters = [
-            'business_id' => $request->business_id,
+            'business_id' => $this->trustedBusinessId($request),
             'date_from' => $request->date_from,
             'date_to' => $request->date_to,
             'group_by' => $request->group_by ?? 'day',
@@ -55,7 +55,7 @@ class DashboardReportController extends Controller
     public function topProducts(Request $request)
     {
         $filters = [
-            'business_id' => $request->business_id,
+            'business_id' => $this->trustedBusinessId($request),
             'date_from' => $request->date_from,
             'date_to' => $request->date_to,
             'limit' => $request->limit ?? 10,
@@ -72,7 +72,7 @@ class DashboardReportController extends Controller
     public function topCustomers(Request $request)
     {
         $filters = [
-            'business_id' => $request->business_id,
+            'business_id' => $this->trustedBusinessId($request),
             'date_from' => $request->date_from,
             'date_to' => $request->date_to,
             'limit' => $request->limit ?? 10,
@@ -89,7 +89,7 @@ class DashboardReportController extends Controller
     public function profitLoss(Request $request)
     {
         $filters = [
-            'business_id' => $request->business_id,
+            'business_id' => $this->trustedBusinessId($request),
             'date_from' => $request->date_from,
             'date_to' => $request->date_to,
         ];
@@ -104,7 +104,7 @@ class DashboardReportController extends Controller
      */
     public function warehouse(Request $request)
     {
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         $statistics = $this->dashboardReportService->getWarehouseStatistics($businessId);
 
         return response()->json($statistics);
@@ -116,7 +116,7 @@ class DashboardReportController extends Controller
     public function transfers(Request $request)
     {
         $filters = [
-            'business_id' => $request->business_id,
+            'business_id' => $this->trustedBusinessId($request),
             'date_from' => $request->date_from,
             'date_to' => $request->date_to,
         ];
@@ -132,7 +132,7 @@ class DashboardReportController extends Controller
     public function recalls(Request $request)
     {
         $filters = [
-            'business_id' => $request->business_id,
+            'business_id' => $this->trustedBusinessId($request),
             'date_from' => $request->date_from,
             'date_to' => $request->date_to,
         ];
@@ -148,7 +148,7 @@ class DashboardReportController extends Controller
     public function loyalty(Request $request)
     {
         $filters = [
-            'business_id' => $request->business_id,
+            'business_id' => $this->trustedBusinessId($request),
             'date_from' => $request->date_from,
             'date_to' => $request->date_to,
         ];
@@ -164,7 +164,7 @@ class DashboardReportController extends Controller
     public function receipts(Request $request)
     {
         $filters = [
-            'business_id' => $request->business_id,
+            'business_id' => $this->trustedBusinessId($request),
             'date_from' => $request->date_from,
             'date_to' => $request->date_to,
         ];
@@ -180,7 +180,7 @@ class DashboardReportController extends Controller
     public function comprehensive(Request $request)
     {
         $filters = [
-            'business_id' => $request->business_id,
+            'business_id' => $this->trustedBusinessId($request),
             'date_from' => $request->date_from,
             'date_to' => $request->date_to,
             'group_by' => $request->group_by ?? 'day',

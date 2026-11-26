@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\TenantRules;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -21,7 +22,7 @@ class BarcodeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_id' => 'nullable|exists:products,id',
+            'product_id' => ['nullable', TenantRules::exists('products')],
             'batch_id' => 'nullable|exists:stock_batches,id',
             'barcode_number' => 'nullable|string|max:50|unique:barcodes,barcode_number,' . $this->route('barcode'),
             'barcode_type' => 'required|in:CODE128,EAN13,UPC,QR',

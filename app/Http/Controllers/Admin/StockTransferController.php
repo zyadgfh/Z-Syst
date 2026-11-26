@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\TenantRules;
 use App\Http\Controllers\Controller;
 use App\Models\StockTransfer;
 use App\Services\WarehouseService;
@@ -63,7 +64,7 @@ class StockTransferController extends Controller
             'business_id' => 'required|exists:businesses,id',
             'from_warehouse_id' => 'required|exists:warehouses,id',
             'to_warehouse_id' => 'required|exists:warehouses,id|different:from_warehouse_id',
-            'product_id' => 'required|exists:products,id',
+            'product_id' => ['required', TenantRules::exists('products')],
             'quantity' => 'required|integer|min:1',
             'notes' => 'nullable|string',
         ]);
@@ -178,7 +179,7 @@ class StockTransferController extends Controller
             'warehouse_id' => $request->warehouse_id,
         ];
 
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         $statistics = $this->warehouseService->getTransferStatistics($businessId, $filters);
 
         return response()->json($statistics);
@@ -190,10 +191,10 @@ class StockTransferController extends Controller
     public function stockDistribution(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|exists:products,id',
+            'product_id' => ['required', TenantRules::exists('products')],
         ]);
 
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         $distribution = $this->warehouseService->getStockDistribution($businessId, $request->product_id);
 
         return response()->json($distribution);

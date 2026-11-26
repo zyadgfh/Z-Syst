@@ -55,9 +55,11 @@ class TenantContextTest extends TestCase
     }
 
     /**
-     * Test tenant resolver accepts business_id parameter
+     * Tenant identity must NEVER come from client input: a business_id
+     * parameter without an authenticated principal resolves to no context.
+     * (This test previously asserted the opposite — it blessed the hole.)
      */
-    public function test_tenant_resolver_accepts_business_id_parameter()
+    public function test_tenant_resolver_rejects_client_supplied_business_id()
     {
         $business = Business::factory()->create();
 
@@ -66,7 +68,51 @@ class TenantContextTest extends TestCase
         $resolver = new TenantResolver();
         $tenantId = $resolver->resolve($request);
 
-        $this->assertEquals($business->id, $tenantId);
+        $this->assertNull($tenantId);
+    }
+
+    /**
+     * trustedBusinessId(): a tenant user's client-supplied business_id is
+     * ignored — the verified identity wins.
+     */
+    public function test_trusted_business_id_ignores_client_input_for_tenant_users()
+    {
+        $own = Business::factory()->create();
+        $foreign = Business::factory()->create();
+        $user = User::factory()->create(['business_id' => $own->id, 'role' => 'admin']);
+
+        $request = Request::create('/admin/audit-logs?business_id=' . $foreign->id, 'GET');
+        $request->setUserResolver(fn () => $user);
+
+        $resolver = new TenantResolver();
+        $this->assertSame($own->id, $resolver->trustedBusinessId($request));
+    }
+
+    /**
+     * trustedBusinessId(): superadmin keeps the reviewed exception of scoping
+     * explicitly via business_id (and falls back to their own context).
+     */
+    public function test_trusted_business_id_honors_explicit_superadmin_scope()
+    {
+        $target = Business::factory()->create();
+        $superAdmin = User::factory()->create(['role' => 'superadmin', 'business_id' => null]);
+
+        $request = Request::create('/admin/audit-logs?business_id=' . $target->id, 'GET');
+        $request->setUserResolver(fn () => $superAdmin);
+
+        $resolver = new TenantResolver();
+        $this->assertSame($target->id, $resolver->trustedBusinessId($request));
+    }
+
+    /**
+     * No authenticated principal → no tenant access (deny by default).
+     */
+    public function test_tenant_access_check_denies_without_authenticated_user()
+    {
+        $business = Business::factory()->create();
+
+        $resolver = new TenantResolver();
+        $this->assertFalse($resolver->canAccessTenant($business->id));
     }
 
     /**
@@ -77,6 +123,7 @@ class TenantContextTest extends TestCase
         $business1 = Business::factory()->create();
         $business2 = Business::factory()->create();
         $user = User::factory()->create(['business_id' => $business1->id]);
+        \Illuminate\Support\Facades\Auth::login($user);
 
         $resolver = new TenantResolver();
         $canAccess = $resolver->canAccessTenant($business2->id);
@@ -91,6 +138,7 @@ class TenantContextTest extends TestCase
     {
         $business = Business::factory()->create();
         $user = User::factory()->create(['business_id' => $business->id]);
+        \Illuminate\Support\Facades\Auth::login($user);
 
         $resolver = new TenantResolver();
         $canAccess = $resolver->canAccessTenant($business->id);
@@ -105,6 +153,7 @@ class TenantContextTest extends TestCase
     {
         $business = Business::factory()->create();
         $superAdmin = User::factory()->create(['role' => 'superadmin']);
+        \Illuminate\Support\Facades\Auth::login($superAdmin);
 
         $resolver = new TenantResolver();
         $canAccess = $resolver->canAccessTenant($business->id);

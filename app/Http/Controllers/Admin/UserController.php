@@ -222,7 +222,7 @@ class UserController extends Controller
         $filters = [
             'role' => $request->role,
             'status' => $request->status,
-            'business_id' => $request->business_id,
+            'business_id' => $this->trustedBusinessId($request),
         ];
 
         $statistics = $this->userManagementService->getUserStatistics($filters);

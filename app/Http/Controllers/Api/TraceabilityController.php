@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\TenantRules;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\InitiateRecallRequest;
 use App\Http\Resources\BatchLotResource;
@@ -26,7 +27,7 @@ class TraceabilityController extends Controller
     public function batchLots(Request $request)
     {
         $validated = $request->validate([
-            'product_id' => 'nullable|exists:products,id',
+            'product_id' => ['nullable', TenantRules::exists('products')],
             'days' => 'nullable|integer|min:1|max:365',
         ]);
 
@@ -126,7 +127,7 @@ class TraceabilityController extends Controller
     public function traceability(Request $request)
     {
         $validated = $request->validate([
-            'product_id' => 'required|exists:products,id',
+            'product_id' => ['required', TenantRules::exists('products')],
             'batch_lot_number' => 'nullable|string|max:255',
             'from_date' => 'nullable|date',
             'to_date' => 'nullable|date|after_or_equal:from_date',

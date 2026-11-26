@@ -2,13 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\TenantResolver;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 
 class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
+
+    /**
+     * Tenant-safe business id for this request: the caller's own business_id
+     * derived from their verified identity — never from client input.
+     * (Superadmin keeps the reviewed ability to scope explicitly via
+     * business_id; see TenantResolver::trustedBusinessId.)
+     */
+    protected function trustedBusinessId(Request $request): ?int
+    {
+        return app(TenantResolver::class)->trustedBusinessId($request);
+    }
 
     protected $message = [
         // response success ..0

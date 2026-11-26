@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\TenantRules;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -20,15 +21,17 @@ class PurchaseOrderRequest extends FormRequest
      */
     public function rules(): array
     {
+        // Tenant-pinned references: `exists:` bypasses Eloquent global scopes
+        // (see TenantRules) — cross-tenant products/suppliers must not validate.
         return [
-            'supplier_id' => 'nullable|exists:parties,id',
+            'supplier_id' => ['nullable', TenantRules::exists('parties')],
             'priority' => 'required|in:low,normal,high,urgent',
             'expected_delivery_date' => 'nullable|date|after:today',
             'terms' => 'nullable|string|max:5000',
             'internal_notes' => 'nullable|string|max:2000',
             'notes' => 'nullable|string|max:2000',
             'items' => 'sometimes|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.product_id' => ['required', TenantRules::exists('products')],
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unit_price' => 'required|numeric|min:0',
             'items.*.discount' => 'nullable|numeric|min:0',

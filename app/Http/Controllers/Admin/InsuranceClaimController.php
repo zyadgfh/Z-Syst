@@ -295,7 +295,7 @@ class InsuranceClaimController extends Controller
             'company_id' => $request->company_id,
         ];
 
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         $statistics = $this->insuranceService->getClaimStatistics($businessId, $filters);
 
         return response()->json($statistics);

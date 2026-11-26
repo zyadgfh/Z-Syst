@@ -23,7 +23,7 @@ class AuditLogController extends Controller
      */
     public function index(Request $request)
     {
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         
         $filters = [
             'action' => $request->action,
@@ -54,7 +54,7 @@ class AuditLogController extends Controller
      */
     public function statistics(Request $request)
     {
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         
         $filters = [
             'date_from' => $request->date_from,

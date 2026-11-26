@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\TenantRules;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
@@ -68,8 +69,8 @@ class PromotionController extends Controller
             'min_qty' => 'nullable|integer|min:1',
             'bonus_qty' => 'nullable|integer|min:0',
             'applies_to' => 'required|in:all,product,category',
-            'product_id' => 'nullable|exists:products,id',
-            'category_id' => 'nullable|exists:categories,id',
+            'product_id' => ['nullable', TenantRules::exists('products')],
+            'category_id' => ['nullable', TenantRules::exists('categories')],
             'coupon_code' => 'nullable|string|max:40|unique:promotions,coupon_code',
             'starts_at' => 'nullable|date',
             'ends_at' => 'nullable|date|after_or_equal:starts_at',

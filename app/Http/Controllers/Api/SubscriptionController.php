@@ -37,8 +37,13 @@ class SubscriptionController extends Controller
 
     public function store(SubscriptionRequest $request): JsonResponse
     {
+        // Identity-first: client-supplied business_id is never the source of
+        // tenant identity (tenant.check rejects foreign ids before this).
+        $businessId = $this->trustedBusinessId($request);
+        abort_unless($businessId !== null, 403, 'Business context is required.');
+
         $subscription = $this->subscriptionService->createSubscription(
-            $request->business_id,
+            $businessId,
             $request->plan_id,
             $request->validated()
         );

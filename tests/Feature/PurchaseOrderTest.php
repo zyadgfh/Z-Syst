@@ -454,8 +454,10 @@ class PurchaseOrderTest extends TestCase
     public function test_api_can_create_purchase_order(): void
     {
         $user = User::factory()->create();
-        $supplier = Party::factory()->create(['type' => 'supplier']);
-        $product = Product::factory()->create();
+        // Fixtures must share the caller's tenant: validation now pins
+        // product/supplier references to the authenticated business.
+        $supplier = Party::factory()->create(['type' => 'supplier', 'business_id' => $user->business_id]);
+        $product = Product::factory()->create(['business_id' => $user->business_id]);
 
         $data = [
             'supplier_id' => $supplier->id,
@@ -519,7 +521,7 @@ class PurchaseOrderTest extends TestCase
     {
         $user = User::factory()->create();
         $po = PurchaseOrder::factory()->create(['business_id' => $user->business_id]);
-        $newSupplier = Party::factory()->create(['type' => 'supplier']);
+        $newSupplier = Party::factory()->create(['type' => 'supplier', 'business_id' => $user->business_id]);
 
         $data = [
             'supplier_id' => $newSupplier->id,

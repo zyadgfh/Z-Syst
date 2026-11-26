@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\TenantRules;
 use App\Http\Controllers\Controller;
 use App\Models\BatchLot;
 use App\Models\RecallEvent;
@@ -31,7 +32,7 @@ class TraceabilityController extends Controller
      */
     public function batchLots(Request $request)
     {
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         
         $batchLots = BatchLot::forBusiness($businessId)
             ->with('product:id,product_name')
@@ -61,7 +62,7 @@ class TraceabilityController extends Controller
      */
     public function recalls(Request $request)
     {
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         
         $recalls = RecallEvent::forBusiness($businessId)
             ->with(['product:id,product_name', 'user:id,name'])
@@ -87,7 +88,7 @@ class TraceabilityController extends Controller
     {
         $request->validate([
             'business_id' => 'required|exists:businesses,id',
-            'product_id' => 'required|exists:products,id',
+            'product_id' => ['required', TenantRules::exists('products')],
             'batch_number' => 'nullable|string|max:255',
             'lot_number' => 'nullable|string|max:255',
             'manufacture_date' => 'nullable|date',
@@ -125,7 +126,7 @@ class TraceabilityController extends Controller
     public function updateBatchLot(Request $request, BatchLot $batchLot)
     {
         $request->validate([
-            'product_id' => 'required|exists:products,id',
+            'product_id' => ['required', TenantRules::exists('products')],
             'batch_number' => 'nullable|string|max:255',
             'lot_number' => 'nullable|string|max:255',
             'manufacture_date' => 'nullable|date',
@@ -183,7 +184,7 @@ class TraceabilityController extends Controller
     {
         $request->validate([
             'business_id' => 'required|exists:businesses,id',
-            'product_id' => 'nullable|exists:products,id',
+            'product_id' => ['nullable', TenantRules::exists('products')],
             'batch_lot_number' => 'nullable|string|max:255',
             'reason' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -256,11 +257,11 @@ class TraceabilityController extends Controller
     public function getProductTraceability(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|exists:products,id',
+            'product_id' => ['required', TenantRules::exists('products')],
             'batch_lot_number' => 'nullable|string',
         ]);
 
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         $traceability = $this->traceabilityService->getProductTraceability(
             $businessId,
             $request->product_id,
@@ -281,7 +282,7 @@ class TraceabilityController extends Controller
             'product_id' => $request->product_id,
         ];
 
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         $statistics = $this->traceabilityService->getTraceabilityStatistics($businessId, $filters);
 
         return response()->json($statistics);
@@ -297,7 +298,7 @@ class TraceabilityController extends Controller
             'date_to' => $request->date_to,
         ];
 
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         $statistics = $this->traceabilityService->getRecallStatistics($businessId, $filters);
 
         return response()->json($statistics);
@@ -309,7 +310,7 @@ class TraceabilityController extends Controller
     public function expiringBatches(Request $request)
     {
         $days = $request->days ?? 30;
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         
         $expiring = $this->traceabilityService->getExpiringBatches($businessId, $days);
 
@@ -321,7 +322,7 @@ class TraceabilityController extends Controller
      */
     public function expiredBatches(Request $request)
     {
-        $businessId = $request->business_id ?? auth()->user()->business_id;
+        $businessId = $this->trustedBusinessId($request);
         
         $expired = $this->traceabilityService->getExpiredBatches($businessId);
 
